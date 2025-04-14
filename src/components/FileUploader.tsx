@@ -43,7 +43,6 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
             variant: "destructive",
             title: "Error parsing file",
             description: "The file format could not be recognized",
-            icon: <AlertCircle className="h-5 w-5" />
           });
         }
       }
@@ -54,7 +53,6 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
         variant: "destructive",
         title: "Error reading file",
         description: "Unable to read the file",
-        icon: <AlertCircle className="h-5 w-5" />
       });
     };
     
