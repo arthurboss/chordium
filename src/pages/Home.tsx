@@ -166,29 +166,29 @@ const Home = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-1 container px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">ChordFlow</h1>
-          <p className="text-xl text-muted-foreground">
+      <main className="flex-1 container px-3 py-4 sm:px-4 sm:py-6">
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">ChordFlow</h1>
+          <p className="text-sm sm:text-lg text-muted-foreground">
             Find and display guitar chords for your favorite songs
           </p>
         </div>
         
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3">
-            <TabsTrigger value="search">Search</TabsTrigger>
-            <TabsTrigger value="upload">Upload File</TabsTrigger>
-            <TabsTrigger value="demo">Demo Songs</TabsTrigger>
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+            <TabsTrigger value="search" className="text-xs sm:text-sm">Search</TabsTrigger>
+            <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload File</TabsTrigger>
+            <TabsTrigger value="demo" className="text-xs sm:text-sm">Demo Songs</TabsTrigger>
           </TabsList>
           
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <TabsContent value="search" className="focus-visible:outline-none focus-visible:ring-0">
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <SearchBar />
                 
                 <Alert>
                   <Info className="h-4 w-4" />
-                  <AlertDescription>
+                  <AlertDescription className="text-sm">
                     This is a demo application. In a real implementation, this would search online sources for chord sheets.
                   </AlertDescription>
                 </Alert>
@@ -196,12 +196,12 @@ const Home = () => {
             </TabsContent>
             
             <TabsContent value="upload" className="focus-visible:outline-none focus-visible:ring-0">
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <FileUploader onFileContent={setUploadedContent} />
                 
                 {uploadedContent && (
-                  <div className="mt-8 animate-fade-in">
-                    <h2 className="text-2xl font-semibold mb-4 text-center">Uploaded Chord Sheet</h2>
+                  <div className="mt-6 animate-fade-in">
+                    <h2 className="text-xl font-semibold mb-3 text-center">Uploaded Chord Sheet</h2>
                     <ChordDisplay content={uploadedContent} />
                   </div>
                 )}
@@ -218,21 +218,21 @@ const Home = () => {
                   />
                 </div>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                   {sampleSongs.map(song => (
                     <Card key={song.id} className="overflow-hidden">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-3">
-                          <Music className="h-8 w-8 text-chord mt-1" />
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-2">
+                          <Music className="h-6 w-6 text-chord mt-1" />
                           <div>
-                            <h3 className="font-semibold text-lg">{song.title}</h3>
-                            <p className="text-muted-foreground">{song.artist}</p>
+                            <h3 className="font-semibold text-base">{song.title}</h3>
+                            <p className="text-muted-foreground text-sm">{song.artist}</p>
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter className="bg-muted/50 px-6 py-3">
+                      <CardFooter className="bg-muted/50 px-4 py-2">
                         <button 
-                          className="text-chord hover:underline font-medium"
+                          className="text-chord hover:underline font-medium text-sm"
                           onClick={() => {
                             setDemoSong(song);
                             navigate(`/?song=${song.id}`);

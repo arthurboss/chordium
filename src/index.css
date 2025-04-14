@@ -85,7 +85,7 @@
   }
   
   .chord-line {
-    @apply font-mono whitespace-pre mb-1;
+    @apply font-mono whitespace-pre mb-1 overflow-x-auto;
   }
   
   .lyrics-line {
@@ -93,6 +93,37 @@
   }
   
   .section-header {
-    @apply font-bold text-lg mb-2 mt-6 border-l-4 border-chord pl-2;
+    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2;
   }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .chord-line {
+    @apply text-sm mb-0.5 scrollbar-thin scrollbar-thumb-gray-300;
+  }
+  
+  .lyrics-line {
+    @apply mb-2;
+  }
+  
+  .section-header {
+    @apply text-base mt-3 mb-1;
+  }
+  
+  pre {
+    @apply scrollbar-thin scrollbar-thumb-gray-300;
+  }
+}
+
+/* Custom scrollbar for chord lines and tabs */
+.chord-line::-webkit-scrollbar,
+pre::-webkit-scrollbar {
+  height: 4px;
+}
+
+.chord-line::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
