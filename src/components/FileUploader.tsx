@@ -1,133 +1,139 @@
 
-import { useState } from 'react';
-import { Upload, File, AlertCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { FileUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { parseChordFile } from '@/utils/chordUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface FileUploaderProps {
-  onFileContent: (content: string) => void;
+  onFileContent: (content: string, fileName: string) => void;
 }
 
 const FileUploader = ({ onFileContent }: FileUploaderProps) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+    setIsDragOver(true);
   };
 
   const handleDragLeave = () => {
-    setIsDragging(false);
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    if (e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFile(e.target.files[0]);
+    }
   };
 
   const processFile = (file: File) => {
-    setFileName(file.name);
-    
+    if (!file.name.endsWith('.txt') && !file.name.endsWith('.text') && !file.name.endsWith('.chord')) {
+      toast({
+        title: "Invalid file format",
+        description: "Please upload a text file (.txt, .text, or .chord)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
     const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        try {
-          const content = e.target.result as string;
-          onFileContent(content);
-          
-          toast({
-            title: "File uploaded successfully",
-            description: `"${file.name}" has been loaded`,
-          });
-        } catch (error) {
-          console.error("Error parsing file:", error);
-          toast({
-            variant: "destructive",
-            title: "Error parsing file",
-            description: "The file format could not be recognized",
-          });
-        }
+    
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        onFileContent(event.target.result as string, file.name);
       }
     };
     
     reader.onerror = () => {
       toast({
-        variant: "destructive",
         title: "Error reading file",
-        description: "Unable to read the file",
+        description: "There was a problem reading the file content",
+        variant: "destructive",
       });
     };
     
     reader.readAsText(file);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      processFile(file);
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    onFileContent('', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      processFile(file);
-    }
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
   };
 
   return (
-    <div
-      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-        isDragging ? 'border-primary bg-primary/5' : 'border-border bg-background'
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className="flex flex-col items-center justify-center gap-4">
-        {fileName ? (
-          <>
-            <File className="h-12 w-12 text-chord" />
-            <div>
-              <p className="text-lg font-medium">{fileName}</p>
-              <p className="text-sm text-muted-foreground">File uploaded successfully</p>
+    <div>
+      <div 
+        className={`border-2 border-dashed rounded-lg p-6 text-center ${
+          isDragOver ? 'border-primary bg-primary/5' : 'border-border'
+        } transition-colors`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {selectedFile ? (
+          <div className="flex flex-col items-center">
+            <div className="bg-primary/10 text-primary rounded-full p-3 mb-3">
+              <FileUp size={24} />
             </div>
-            <Button
-              variant="outline"
+            <p className="font-medium mb-1">{selectedFile.name}</p>
+            <p className="text-sm text-muted-foreground mb-3">
+              {(selectedFile.size / 1024).toFixed(1)} KB
+            </p>
+            <Button 
+              variant="outline" 
               size="sm"
-              onClick={() => {
-                setFileName(null);
-                onFileContent("");
-              }}
+              onClick={handleClearFile}
+              className="gap-1"
             >
-              Upload a different file
+              <X size={16} />
+              <span>Remove</span>
             </Button>
-          </>
+          </div>
         ) : (
           <>
-            <Upload className="h-12 w-12 text-muted-foreground" />
-            <div>
-              <p className="text-lg font-medium">Drag and drop your chord file</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Supports .txt, .crd, and .cho files
-              </p>
+            <div className="bg-muted rounded-full p-3 inline-block mb-3">
+              <FileUp className="h-6 w-6 text-muted-foreground" />
             </div>
-            <div className="flex gap-4 mt-2">
-              <Button asChild>
-                <label>
-                  Browse files
-                  <input
-                    type="file"
-                    accept=".txt,.crd,.cho"
-                    className="sr-only"
-                    onChange={handleFileInput}
-                  />
-                </label>
-              </Button>
-            </div>
+            <h3 className="font-medium mb-1">Upload a chord sheet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Drag and drop a text file here, or click to browse
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={handleBrowseClick}
+              className="mx-auto"
+            >
+              Browse Files
+            </Button>
           </>
         )}
+        <input 
+          type="file" 
+          ref={fileInputRef}
+          className="hidden" 
+          accept=".txt,.text,.chord"
+          onChange={handleFileInputChange}
+        />
       </div>
     </div>
   );

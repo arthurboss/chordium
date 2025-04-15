@@ -20,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<ChordViewer />} />
           <Route path="/upload" element={<Home />} />
+          <Route path="/my-songs" element={<Home />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { ChevronUp, ChevronDown, Music, Eye, EyeOff, AlignLeft, TabletSmartphone } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronUp, ChevronDown, Music, Download, Edit, Save, Play, Pause, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Select,
@@ -20,28 +20,71 @@ import {
 } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import ChordDiagram from '@/components/ChordDiagram';
-import { 
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
+import { toast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChordDisplayProps {
   title?: string;
   artist?: string;
   content: string;
+  onSave?: (content: string) => void;
 }
 
-const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
+// Enhanced chord regex pattern for better recognition
+const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
+
+const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
-  const [showChords, setShowChords] = useState(true);
+  const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
-  const [lyricsMode, setLyricsMode] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(content);
+  const [autoScroll, setAutoScroll] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState(3);
   const isMobile = useIsMobile();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const scrollTimerRef = useRef<number | null>(null);
+  
+  // Update edit content when content prop changes
+  useEffect(() => {
+    setEditContent(content);
+  }, [content]);
+  
+  // Handle auto-scrolling
+  useEffect(() => {
+    if (autoScroll && contentRef.current) {
+      const scrollAmount = scrollSpeed * 0.5; // Adjust this multiplier as needed
+      
+      const doScroll = () => {
+        if (contentRef.current) {
+          contentRef.current.scrollTop += scrollAmount;
+          scrollTimerRef.current = window.setTimeout(doScroll, 100);
+        }
+      };
+      
+      scrollTimerRef.current = window.setTimeout(doScroll, 100);
+      
+      return () => {
+        if (scrollTimerRef.current) {
+          clearTimeout(scrollTimerRef.current);
+        }
+      };
+    }
+  }, [autoScroll, scrollSpeed]);
   
   // Process the chord content into sections and lines with chords highlighted
   const processContent = (rawContent: string) => {
-    if (!rawContent) return [{ type: 'section', title: 'No content', lines: [] }];
+    if (!rawContent) return [{ type: 'section', title: '', lines: [] }];
     
     const lines = rawContent.split('\n');
     const sections = [];
@@ -75,18 +118,18 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
                              ['-', '|', '/', '\\', '.', 'h', 'p', 'b', 'r', 's', 't', '(', ')', 
                               '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '\t'].includes(c));
   
-          // Chord line detection - has sparse content and contains chord patterns
+          // Chord line detection - has chord patterns
+          const hasChordPattern = line.match(CHORD_REGEX);
           const nonSpaceRatio = line.replace(/\s/g, '').length / line.length;
-          const hasChordPattern = line.match(/\b[A-G][#b]?(?:m|maj|min|aug|dim|sus|add)?[0-9]?(?:\/[A-G][#b]?)?\b/);
           
           if (isTabLine) {
             currentSection.lines.push({ type: 'tab', content: line });
-          } else if (nonSpaceRatio < 0.3 && line.trim().length > 0 && hasChordPattern) {
+          } else if ((nonSpaceRatio < 0.5 && hasChordPattern) || 
+                    (line.length < 30 && hasChordPattern && line.split(CHORD_REGEX).filter(Boolean).every(s => s.trim() === ''))) {
             // Replace chords with transposed versions if needed
             if (transpose !== 0) {
               // Find chord patterns and transpose them
-              line = line.replace(/\b[A-G][#b]?(?:m|maj|min|aug|dim|sus|add)?[0-9]?(?:\/[A-G][#b]?)?\b/g, 
-                match => transposeChord(match, transpose));
+              line = line.replace(CHORD_REGEX, match => transposeChord(match, transpose));
             }
             
             currentSection.lines.push({ type: 'chord', content: line });
@@ -108,6 +151,34 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
   
   // Generate options for the transpose selector
   const transposeOptions = Array.from({ length: 25 }, (_, i) => i - 12);
+  
+  // Handle saving edits
+  const handleSaveEdits = () => {
+    if (onSave) {
+      onSave(editContent);
+    }
+    setIsEditing(false);
+    toast({
+      title: "Changes saved",
+      description: "Your chord sheet has been updated"
+    });
+  };
+  
+  // Handle download of chord sheet
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `${title || "chord-sheet"}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    toast({
+      title: "Download started",
+      description: "Your chord sheet is being downloaded"
+    });
+  };
   
   // Render a chord with tooltip or popover based on device type
   const renderChord = (chord: string) => {
@@ -144,6 +215,43 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
     }
   };
   
+  if (isEditing) {
+    return (
+      <div className="w-full max-w-3xl mx-auto">
+        <Card className="mb-4">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Edit Chord Sheet</h2>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={handleSaveEdits}
+                >
+                  <Save className="mr-1 h-4 w-4" />
+                  Save
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Textarea 
+          value={editContent} 
+          onChange={(e) => setEditContent(e.target.value)}
+          className="min-h-[500px] font-mono text-sm"
+        />
+      </div>
+    );
+  }
+  
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* Song header */}
@@ -158,11 +266,11 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
       <Card className="mb-4">
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col space-y-3">
-            {/* Top row - transpose and font size */}
-            <div className="flex items-center justify-between gap-2">
+            {/* Top row - transpose, font size, view mode and actions */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Music size={18} className="text-chord" />
-                <span className="font-medium text-sm sm:text-base">Transpose:</span>
+                <span className="font-medium text-sm sm:text-base hidden sm:inline">Transpose:</span>
                 <Select 
                   value={transpose.toString()} 
                   onValueChange={(value) => setTranspose(parseInt(value))}
@@ -201,52 +309,100 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
                   <ChevronUp size={14} />
                 </Button>
               </div>
+              
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 sm:h-10 gap-1">
+                      <Menu size={16} />
+                      <span className="hidden sm:inline">View Mode</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Display Options</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => setViewMode("normal")}
+                      className={viewMode === "normal" ? "bg-accent text-accent-foreground" : ""}
+                    >
+                      Normal
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setViewMode("chords-only")}
+                      className={viewMode === "chords-only" ? "bg-accent text-accent-foreground" : ""}
+                    >
+                      Chords Only
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setViewMode("lyrics-only")}
+                      className={viewMode === "lyrics-only" ? "bg-accent text-accent-foreground" : ""}
+                    >
+                      Lyrics Only
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
+                      className={hideGuitarTabs ? "bg-accent text-accent-foreground" : ""}
+                    >
+                      {hideGuitarTabs ? "Show Guitar Tabs" : "Hide Guitar Tabs"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setAutoScroll(!autoScroll)}
+                  title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
+                >
+                  {autoScroll ? <Pause size={16} /> : <Play size={16} />}
+                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 sm:h-10">
+                      <span className="mr-1">•••</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
             
-            {/* Bottom row - display toggles */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <ToggleGroup type="multiple" className="justify-center">
-                <ToggleGroupItem 
-                  value="showChords" 
-                  aria-label={showChords ? "Hide chords" : "Show chords"}
-                  className={`text-xs sm:text-sm flex items-center gap-1 ${!showChords ? 'bg-muted-foreground/20' : ''}`}
-                  pressed={showChords}
-                  onClick={() => setShowChords(!showChords)}
-                >
-                  <Music size={14} />
-                  <span className="hidden sm:inline">Chords</span>
-                </ToggleGroupItem>
-                
-                <ToggleGroupItem 
-                  value="hideGuitarTabs" 
-                  aria-label={hideGuitarTabs ? "Show tabs" : "Hide tabs"}
-                  className={`text-xs sm:text-sm flex items-center gap-1 ${hideGuitarTabs ? 'bg-muted-foreground/20' : ''}`}
-                  pressed={hideGuitarTabs}
-                  onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
-                >
-                  <TabletSmartphone size={14} />
-                  <span className="hidden sm:inline">Guitar Tabs</span>
-                </ToggleGroupItem>
-                
-                <ToggleGroupItem 
-                  value="lyricsMode" 
-                  aria-label={lyricsMode ? "Normal mode" : "Lyrics mode"}
-                  className={`text-xs sm:text-sm flex items-center gap-1 ${lyricsMode ? 'bg-muted-foreground/20' : ''}`}
-                  pressed={lyricsMode}
-                  onClick={() => setLyricsMode(!lyricsMode)}
-                >
-                  <AlignLeft size={14} />
-                  <span className="hidden sm:inline">Lyrics Mode</span>
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
+            {/* Auto-scroll speed control */}
+            {autoScroll && (
+              <div className="flex items-center gap-3 pt-2">
+                <span className="text-sm font-medium w-20">Speed: {scrollSpeed}</span>
+                <Slider
+                  value={[scrollSpeed]}
+                  min={1}
+                  max={10}
+                  step={1}
+                  onValueChange={(value) => setScrollSpeed(value[0])}
+                  className="flex-1"
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
       
       {/* Chord content */}
       <div 
-        className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border"
+        ref={contentRef}
+        className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border max-h-[70vh] overflow-y-auto"
         style={{ fontSize: `${fontSize}px` }}
       >
         {processedContent.map((section, sectionIndex) => (
@@ -262,13 +418,12 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
                   return null;
                 }
                 
-                // Hide chords if lyricsMode is true
-                if ((line.type === 'chord' || line.type === 'tab') && lyricsMode) {
+                // Apply view mode filters
+                if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) {
                   return null;
                 }
                 
-                // Hide chords if showChords is false but not in lyrics mode
-                if (line.type === 'chord' && !showChords && !lyricsMode) {
+                if (viewMode === "chords-only" && line.type === 'lyrics') {
                   return null;
                 }
                 
@@ -278,15 +433,17 @@ const ChordDisplay = ({ title, artist, content }: ChordDisplayProps) => {
                       {line.content}
                     </pre>
                   );
-                } else if (line.type === 'chord' && showChords && !lyricsMode) {
+                } else if (line.type === 'chord') {
                   // Replace chord patterns with interactive chord elements
-                  const chordRegex = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add)?[0-9]?(?:\/[A-G][#b]?)?)\b/g;
                   let lastIndex = 0;
                   const parts = [];
                   let match;
                   
+                  // Create a new RegExp object each time to reset lastIndex
+                  const chordRegexGlobal = new RegExp(CHORD_REGEX);
+                  
                   // Find all chord matches and split the line into chord and non-chord parts
-                  while ((match = chordRegex.exec(line.content)) !== null) {
+                  while ((match = chordRegexGlobal.exec(line.content)) !== null) {
                     // Add the text before the chord
                     if (match.index > lastIndex) {
                       parts.push(line.content.substring(lastIndex, match.index));

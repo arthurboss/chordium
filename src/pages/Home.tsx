@@ -1,25 +1,26 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Music, Info } from "lucide-react";
+import { Music, Info, Save } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import ChordDisplay from "@/components/ChordDisplay";
 import FileUploader from "@/components/FileUploader";
 import Footer from "@/components/Footer";
 
-interface SampleSong {
+interface SongData {
   id: string;
   title: string;
-  artist: string;
+  artist?: string;
   content: string;
+  dateAdded: string;
 }
 
-// Sample songs for demo purposes
-const sampleSongs: SampleSong[] = [
+const sampleSongs = [
   {
     id: "wonderwall",
     title: "Wonderwall",
@@ -127,38 +128,145 @@ const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [uploadedContent, setUploadedContent] = useState("");
+  const [uploadedTitle, setUploadedTitle] = useState("");
   const [activeTab, setActiveTab] = useState("search");
-  const [demoSong, setDemoSong] = useState<SampleSong | null>(null);
+  const [demoSong, setDemoSong] = useState<SongData | null>(null);
+  const [mySongs, setMySongs] = useState<SongData[]>([]);
+  const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  
+  useEffect(() => {
+    const savedSongs = localStorage.getItem("mySongs");
+    if (savedSongs) {
+      try {
+        setMySongs(JSON.parse(savedSongs));
+      } catch (e) {
+        console.error("Error loading saved songs:", e);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem("mySongs", JSON.stringify(mySongs));
+  }, [mySongs]);
 
-  // Check for query parameters on mount
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const songId = query.get("song");
     
     if (songId) {
-      const found = sampleSongs.find(song => song.id === songId);
-      if (found) {
-        setDemoSong(found);
+      const foundDemo = sampleSongs.find(song => song.id === songId);
+      if (foundDemo) {
+        setDemoSong({
+          ...foundDemo,
+          dateAdded: new Date().toISOString()
+        });
         setActiveTab("demo");
+        return;
       }
-    } else if (query.get("q")) {
+      
+      const foundMySong = mySongs.find(song => song.id === songId);
+      if (foundMySong) {
+        setSelectedSong(foundMySong);
+        setActiveTab("my-songs");
+        return;
+      }
+    } 
+    
+    if (query.get("q")) {
       setActiveTab("search");
     } else if (location.pathname === "/upload") {
       setActiveTab("upload");
     }
-  }, [location]);
+  }, [location, mySongs]);
 
-  // Handle tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    setSelectedSong(null);
     
-    // Update URL when changing tabs
     if (value === "upload") {
       navigate("/upload");
     } else if (value === "demo" && demoSong) {
       navigate(`/?song=${demoSong.id}`);
+    } else if (value === "my-songs") {
+      navigate("/my-songs");
     } else {
       navigate("/");
+    }
+  };
+  
+  const handleSaveUploadedSong = () => {
+    if (!uploadedContent.trim()) {
+      toast({
+        title: "Error",
+        description: "No content to save",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const songTitle = uploadedTitle || "Untitled Song";
+    const newSong: SongData = {
+      id: `song-${Date.now()}`,
+      title: songTitle,
+      content: uploadedContent,
+      dateAdded: new Date().toISOString()
+    };
+    
+    setMySongs(prev => [newSong, ...prev]);
+    setUploadedContent("");
+    setUploadedTitle("");
+    
+    toast({
+      title: "Song saved",
+      description: `"${songTitle}" has been added to My Songs`
+    });
+    
+    setActiveTab("my-songs");
+    navigate("/my-songs");
+  };
+  
+  const handleUpdateSong = (content: string) => {
+    if (!selectedSong) return;
+    
+    const updatedSongs = mySongs.map(song => {
+      if (song.id === selectedSong.id) {
+        return { ...song, content };
+      }
+      return song;
+    });
+    
+    setMySongs(updatedSongs);
+    setSelectedSong({ ...selectedSong, content });
+    
+    toast({
+      title: "Song updated",
+      description: `"${selectedSong.title}" has been updated`
+    });
+  };
+  
+  const handleDeleteSong = (songId: string) => {
+    const songToDelete = mySongs.find(song => song.id === songId);
+    if (!songToDelete) return;
+    
+    const updatedSongs = mySongs.filter(song => song.id !== songId);
+    setMySongs(updatedSongs);
+    
+    if (selectedSong?.id === songId) {
+      setSelectedSong(null);
+    }
+    
+    toast({
+      title: "Song deleted",
+      description: `"${songToDelete.title}" has been removed from My Songs`
+    });
+  };
+  
+  const handleFileUpload = (content: string, fileName: string) => {
+    setUploadedContent(content);
+    
+    if (fileName) {
+      const title = fileName.replace(/\.[^/.]+$/, "");
+      setUploadedTitle(title);
     }
   };
 
@@ -175,10 +283,11 @@ const Home = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
             <TabsTrigger value="search" className="text-xs sm:text-sm">Search</TabsTrigger>
-            <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload File</TabsTrigger>
-            <TabsTrigger value="demo" className="text-xs sm:text-sm">Demo Songs</TabsTrigger>
+            <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
+            <TabsTrigger value="my-songs" className="text-xs sm:text-sm">My Songs</TabsTrigger>
+            <TabsTrigger value="demo" className="text-xs sm:text-sm">Demo</TabsTrigger>
           </TabsList>
           
           <div className="mt-4 sm:mt-6">
@@ -197,20 +306,127 @@ const Home = () => {
             
             <TabsContent value="upload" className="focus-visible:outline-none focus-visible:ring-0">
               <div className="space-y-4">
-                <FileUploader onFileContent={setUploadedContent} />
+                <FileUploader onFileContent={(content, fileName) => handleFileUpload(content, fileName)} />
                 
                 {uploadedContent && (
                   <div className="mt-6 animate-fade-in">
-                    <h2 className="text-xl font-semibold mb-3 text-center">Uploaded Chord Sheet</h2>
-                    <ChordDisplay content={uploadedContent} />
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-xl font-semibold">Uploaded Chord Sheet</h2>
+                      <Button 
+                        onClick={handleSaveUploadedSong}
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <Save className="h-4 w-4" />
+                        <span>Save to My Songs</span>
+                      </Button>
+                    </div>
+                    <ChordDisplay 
+                      title={uploadedTitle || undefined}
+                      content={uploadedContent} 
+                    />
                   </div>
                 )}
               </div>
             </TabsContent>
             
+            <TabsContent value="my-songs" className="focus-visible:outline-none focus-visible:ring-0">
+              {selectedSong ? (
+                <div className="animate-fade-in">
+                  <div className="flex items-center mb-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setSelectedSong(null)}
+                      className="mr-2"
+                    >
+                      Back to My Songs
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDeleteSong(selectedSong.id)}
+                    >
+                      Delete Song
+                    </Button>
+                  </div>
+                  <ChordDisplay 
+                    title={selectedSong.title} 
+                    artist={selectedSong.artist} 
+                    content={selectedSong.content}
+                    onSave={handleUpdateSong}
+                  />
+                </div>
+              ) : (
+                <div>
+                  {mySongs.length > 0 ? (
+                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                      {mySongs.map(song => (
+                        <Card key={song.id} className="overflow-hidden">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-2">
+                              <Music className="h-6 w-6 text-chord mt-1" />
+                              <div>
+                                <h3 className="font-semibold text-base">{song.title}</h3>
+                                {song.artist && (
+                                  <p className="text-muted-foreground text-sm">{song.artist}</p>
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {new Date(song.dateAdded).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                          <CardFooter className="bg-muted/50 px-4 py-2 flex justify-between">
+                            <button 
+                              className="text-chord hover:underline font-medium text-sm"
+                              onClick={() => {
+                                setSelectedSong(song);
+                                navigate(`/my-songs?song=${song.id}`);
+                              }}
+                            >
+                              View Chords
+                            </button>
+                            <button 
+                              className="text-destructive hover:underline text-sm"
+                              onClick={() => handleDeleteSong(song.id)}
+                            >
+                              Delete
+                            </button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-3">You haven't saved any songs yet.</p>
+                      <Button 
+                        onClick={() => handleTabChange("upload")}
+                        variant="outline"
+                      >
+                        Upload a chord sheet
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+            
             <TabsContent value="demo" className="focus-visible:outline-none focus-visible:ring-0">
               {demoSong ? (
                 <div className="animate-fade-in">
+                  <div className="flex items-center mb-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setDemoSong(null);
+                        navigate("/");
+                      }}
+                    >
+                      Back to Demo Songs
+                    </Button>
+                  </div>
                   <ChordDisplay 
                     title={demoSong.title} 
                     artist={demoSong.artist} 
@@ -230,15 +446,35 @@ const Home = () => {
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter className="bg-muted/50 px-4 py-2">
+                      <CardFooter className="bg-muted/50 px-4 py-2 flex justify-between">
                         <button 
                           className="text-chord hover:underline font-medium text-sm"
                           onClick={() => {
-                            setDemoSong(song);
+                            setDemoSong({
+                              ...song,
+                              dateAdded: new Date().toISOString()
+                            });
                             navigate(`/?song=${song.id}`);
                           }}
                         >
                           View Chords
+                        </button>
+                        <button 
+                          className="text-primary hover:underline text-sm"
+                          onClick={() => {
+                            const newSong = {
+                              ...song,
+                              id: `mysong-${Date.now()}`,
+                              dateAdded: new Date().toISOString()
+                            };
+                            setMySongs(prev => [newSong, ...prev]);
+                            toast({
+                              title: "Song saved",
+                              description: `"${song.title}" has been added to My Songs`
+                            });
+                          }}
+                        >
+                          Save
                         </button>
                       </CardFooter>
                     </Card>
