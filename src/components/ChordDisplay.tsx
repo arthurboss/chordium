@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Music, Download, Edit, Save, Play, Pause, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
