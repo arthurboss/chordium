@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <Guitar size={18} className="text-chord" />
-          <span className="font-medium">ChordFlow</span>
+          <span className="font-medium">Chordium</span>
         </div>
         
         <div className="text-sm text-muted-foreground">

@@ -276,7 +276,7 @@ const Home = () => {
       
       <main className="flex-1 container px-3 py-4 sm:px-4 sm:py-6">
         <div className="text-center mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-4xl font-bold mb-2">ChordFlow</h1>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Chordium</h1>
           <p className="text-sm sm:text-lg text-muted-foreground">
             Find and display guitar chords for your favorite songs
           </p>
