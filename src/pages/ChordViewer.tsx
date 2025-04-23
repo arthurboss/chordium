@@ -56,7 +56,7 @@ const ChordViewer = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-1 container py-8 px-4">
+      <main className="flex-1 container py-8 px-4 overflow-x-hidden">
         <div className="mb-8">
           <Button 
             variant="ghost" 
@@ -84,6 +84,7 @@ const ChordViewer = () => {
                 key={index}
                 className="p-4 border rounded-lg hover:border-chord transition-colors cursor-pointer bg-white"
                 onClick={() => navigate(`/?song=${result.songId}`)}
+                data-testid={`search-result-${index}`}
               >
                 <div className="flex items-center gap-3">
                   <Search className="h-5 w-5 text-chord" />

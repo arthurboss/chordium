@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown, Music, Download, Edit, Save, Play, Pause, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -52,7 +52,6 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
   const [autoScroll, setAutoScroll] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(3);
   const isMobile = useIsMobile();
-  const contentRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<number | null>(null);
   
   // Update edit content when content prop changes
@@ -60,16 +59,14 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
     setEditContent(content);
   }, [content]);
   
-  // Handle auto-scrolling
+  // Handle auto-scrolling for the whole page
   useEffect(() => {
-    if (autoScroll && contentRef.current) {
+    if (autoScroll) {
       const scrollAmount = scrollSpeed * 0.5; // Adjust this multiplier as needed
       
       const doScroll = () => {
-        if (contentRef.current) {
-          contentRef.current.scrollTop += scrollAmount;
-          scrollTimerRef.current = window.setTimeout(doScroll, 100);
-        }
+        window.scrollBy(0, scrollAmount);
+        scrollTimerRef.current = window.setTimeout(doScroll, 100);
       };
       
       scrollTimerRef.current = window.setTimeout(doScroll, 100);
@@ -355,6 +352,7 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
                   className="h-8 w-8"
                   onClick={() => setAutoScroll(!autoScroll)}
                   title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
+                  data-testid="auto-scroll-toggle"
                 >
                   {autoScroll ? <Pause size={16} /> : <Play size={16} />}
                 </Button>
@@ -383,7 +381,7 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
             
             {/* Auto-scroll speed control */}
             {autoScroll && (
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-2" data-testid="scroll-speed-control">
                 <span className="text-sm font-medium w-20">Speed: {scrollSpeed}</span>
                 <Slider
                   value={[scrollSpeed]}
@@ -399,11 +397,11 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
         </CardContent>
       </Card>
       
-      {/* Chord content */}
+      {/* Chord content - Now directly in the main container with improved mobile handling */}
       <div 
-        ref={contentRef}
-        className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border max-h-[70vh] overflow-y-auto"
+        className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border"
         style={{ fontSize: `${fontSize}px` }}
+        data-testid="chord-content"
       >
         {processedContent.map((section, sectionIndex) => (
           <div key={sectionIndex}>
@@ -429,7 +427,7 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
                 
                 if (line.type === 'tab') {
                   return (
-                    <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1">
+                    <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                       {line.content}
                     </pre>
                   );
@@ -461,13 +459,13 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
                   }
                   
                   return (
-                    <div key={lineIndex} className="chord-line">
+                    <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                       {parts.length > 0 ? parts : line.content}
                     </div>
                   );
                 } else if (line.type === 'lyrics') {
                   return (
-                    <div key={lineIndex} className="lyrics-line">
+                    <div key={lineIndex} className="lyrics-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                       {line.content}
                     </div>
                   );
@@ -491,3 +489,4 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
 };
 
 export default ChordDisplay;
+

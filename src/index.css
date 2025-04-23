@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
@@ -84,11 +85,11 @@
   }
   
   .chord-line {
-    @apply font-mono whitespace-pre mb-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100;
+    @apply font-mono whitespace-normal mb-1 break-words;
   }
   
   .lyrics-line {
-    @apply mb-3;
+    @apply mb-3 break-words;
   }
   
   .section-header {
@@ -99,11 +100,20 @@
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .chord-line {
-    @apply text-sm mb-0.5;
+    @apply text-sm mb-0.5 break-all;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  .chord {
+    @apply text-xs px-1 py-0.5;
+    word-break: keep-all;
   }
   
   .lyrics-line {
-    @apply mb-2;
+    @apply mb-2 break-words;
+    max-width: 100%;
   }
   
   .section-header {
@@ -111,18 +121,21 @@
   }
   
   pre {
-    @apply scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100;
+    @apply whitespace-pre-wrap break-all text-[10px];
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
-/* Custom scrollbar for chord lines and tabs */
-.chord-line::-webkit-scrollbar,
-pre::-webkit-scrollbar {
-  height: 4px;
+/* Ensure no horizontal overflow */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
-.chord-line::-webkit-scrollbar-thumb,
-pre::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+pre, code, .chord-line, .lyrics-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+
