@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Music, Download, Edit, Save, Play, Pause, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -250,239 +249,240 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
   }
   
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      {/* Song header */}
-      {(title || artist) && (
-        <div className="mb-4 text-center">
-          {title && <h1 className="text-2xl font-bold">{title}</h1>}
-          {artist && <p className="text-muted-foreground">{artist}</p>}
-        </div>
-      )}
-      
-      {/* Chord sheet controls - Mobile optimized */}
-      <Card className="mb-4">
-        <CardContent className="p-3 sm:p-4">
-          <div className="flex flex-col space-y-3">
-            {/* Top row - transpose, font size, view mode and actions */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Music size={18} className="text-chord" />
-                <span className="font-medium text-sm sm:text-base hidden sm:inline">Transpose:</span>
-                <Select 
-                  value={transpose.toString()} 
-                  onValueChange={(value) => setTranspose(parseInt(value))}
-                >
-                  <SelectTrigger className="w-[70px] sm:w-[100px] h-8 sm:h-10">
-                    <SelectValue placeholder="0" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transposeOptions.map(value => (
-                      <SelectItem key={value} value={value.toString()}>
-                        {value > 0 ? `+${value}` : value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8"
-                  onClick={() => setFontSize(Math.max(12, fontSize - 1))}
-                  disabled={fontSize <= 12}
-                >
-                  <ChevronDown size={14} />
-                </Button>
-                <span className="w-10 text-center text-sm">{fontSize}px</span>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-8 w-8"
-                  onClick={() => setFontSize(Math.min(24, fontSize + 1))}
-                  disabled={fontSize >= 24}
-                >
-                  <ChevronUp size={14} />
-                </Button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 sm:h-10 gap-1">
-                      <Menu size={16} />
-                      <span className="hidden sm:inline">View Mode</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Display Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => setViewMode("normal")}
-                      className={viewMode === "normal" ? "bg-accent text-accent-foreground" : ""}
-                    >
-                      Normal
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setViewMode("chords-only")}
-                      className={viewMode === "chords-only" ? "bg-accent text-accent-foreground" : ""}
-                    >
-                      Chords Only
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setViewMode("lyrics-only")}
-                      className={viewMode === "lyrics-only" ? "bg-accent text-accent-foreground" : ""}
-                    >
-                      Lyrics Only
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
-                      className={hideGuitarTabs ? "bg-accent text-accent-foreground" : ""}
-                    >
-                      {hideGuitarTabs ? "Show Guitar Tabs" : "Hide Guitar Tabs"}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setAutoScroll(!autoScroll)}
-                  title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
-                  data-testid="auto-scroll-toggle"
-                >
-                  {autoScroll ? <Pause size={16} /> : <Play size={16} />}
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 sm:h-10">
-                      <span className="mr-1">•••</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleDownload}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-            
-            {/* Auto-scroll speed control */}
-            {autoScroll && (
-              <div className="flex items-center gap-3 pt-2" data-testid="scroll-speed-control">
-                <span className="text-sm font-medium w-20">Speed: {scrollSpeed}</span>
-                <Slider
-                  value={[scrollSpeed]}
-                  min={1}
-                  max={10}
-                  step={1}
-                  onValueChange={(value) => setScrollSpeed(value[0])}
-                  className="flex-1"
-                />
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Chord content - Now directly in the main container with improved mobile handling */}
-      <div 
-        className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border"
-        style={{ fontSize: `${fontSize}px` }}
-        data-testid="chord-content"
-      >
-        {processedContent.map((section, sectionIndex) => (
-          <div key={sectionIndex}>
-            {section.title && (
-              <h2 className="section-header">{section.title}</h2>
-            )}
-            
-            <div className="mb-5">
-              {section.lines.map((line, lineIndex) => {
-                // Hide tabs if hideGuitarTabs is true
-                if (line.type === 'tab' && hideGuitarTabs) {
-                  return null;
-                }
-                
-                // Apply view mode filters
-                if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) {
-                  return null;
-                }
-                
-                if (viewMode === "chords-only" && line.type === 'lyrics') {
-                  return null;
-                }
-                
-                if (line.type === 'tab') {
-                  return (
-                    <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
-                      {line.content}
-                    </pre>
-                  );
-                } else if (line.type === 'chord') {
-                  // Replace chord patterns with interactive chord elements
-                  let lastIndex = 0;
-                  const parts = [];
-                  let match;
-                  
-                  // Create a new RegExp object each time to reset lastIndex
-                  const chordRegexGlobal = new RegExp(CHORD_REGEX);
-                  
-                  // Find all chord matches and split the line into chord and non-chord parts
-                  while ((match = chordRegexGlobal.exec(line.content)) !== null) {
-                    // Add the text before the chord
-                    if (match.index > lastIndex) {
-                      parts.push(line.content.substring(lastIndex, match.index));
-                    }
-                    
-                    // Add the chord with tooltip/popover
-                    parts.push(renderChord(match[0]));
-                    
-                    lastIndex = match.index + match[0].length;
-                  }
-                  
-                  // Add any remaining text after the last chord
-                  if (lastIndex < line.content.length) {
-                    parts.push(line.content.substring(lastIndex));
-                  }
-                  
-                  return (
-                    <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
-                      {parts.length > 0 ? parts : line.content}
-                    </div>
-                  );
-                } else if (line.type === 'lyrics') {
-                  return (
-                    <div key={lineIndex} className="lyrics-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
-                      {line.content}
-                    </div>
-                  );
-                } else {
-                  // Empty line
-                  return <div key={lineIndex} className="h-4" />;
-                }
-              })}
-            </div>
-          </div>
-        ))}
-        
-        {processedContent.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No chord content to display
+    <div>
+      <div className="w-full max-w-3xl mx-auto">
+        {/* Song header */}
+        {(title || artist) && (
+          <div className="mb-4 text-center">
+            {title && <h1 className="text-2xl font-bold">{title}</h1>}
+            {artist && <p className="text-muted-foreground">{artist}</p>}
           </div>
         )}
+        
+        {/* Chord content - Now directly in the main container with improved mobile handling */}
+        <div 
+          className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
+          style={{ fontSize: `${fontSize}px` }}
+          data-testid="chord-content"
+        >
+          {processedContent.map((section, sectionIndex) => (
+            <div key={sectionIndex}>
+              {section.title && (
+                <h2 className="section-header">{section.title}</h2>
+              )}
+              
+              <div className="mb-5">
+                {section.lines.map((line, lineIndex) => {
+                  // Hide tabs if hideGuitarTabs is true
+                  if (line.type === 'tab' && hideGuitarTabs) {
+                    return null;
+                  }
+                  
+                  // Apply view mode filters
+                  if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) {
+                    return null;
+                  }
+                  
+                  if (viewMode === "chords-only" && line.type === 'lyrics') {
+                    return null;
+                  }
+                  
+                  if (line.type === 'tab') {
+                    return (
+                      <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                        {line.content}
+                      </pre>
+                    );
+                  } else if (line.type === 'chord') {
+                    // Replace chord patterns with interactive chord elements
+                    let lastIndex = 0;
+                    const parts = [];
+                    let match;
+                    
+                    // Create a new RegExp object each time to reset lastIndex
+                    const chordRegexGlobal = new RegExp(CHORD_REGEX);
+                    
+                    // Find all chord matches and split the line into chord and non-chord parts
+                    while ((match = chordRegexGlobal.exec(line.content)) !== null) {
+                      // Add the text before the chord
+                      if (match.index > lastIndex) {
+                        parts.push(line.content.substring(lastIndex, match.index));
+                      }
+                      
+                      // Add the chord with tooltip/popover
+                      parts.push(renderChord(match[0]));
+                      
+                      lastIndex = match.index + match[0].length;
+                    }
+                    
+                    // Add any remaining text after the last chord
+                    if (lastIndex < line.content.length) {
+                      parts.push(line.content.substring(lastIndex));
+                    }
+                    
+                    return (
+                      <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                        {parts.length > 0 ? parts : line.content}
+                      </div>
+                    );
+                  } else if (line.type === 'lyrics') {
+                    return (
+                      <div key={lineIndex} className="lyrics-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                        {line.content}
+                      </div>
+                    );
+                  } else {
+                    // Empty line
+                    return <div key={lineIndex} className="h-4" />;
+                  }
+                })}
+              </div>
+            </div>
+          ))}
+          
+          {processedContent.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No chord content to display
+            </div>
+          )}
+        </div>
+        {/* Chord sheet controls - Mobile optimized */}
+        <Card className="sticky bottom-0 mb-4">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col space-y-3">
+              {/* Top row - transpose, font size, view mode and actions */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Music size={18} className="text-chord" />
+                  <span className="font-medium text-sm sm:text-base hidden sm:inline">Transpose:</span>
+                  <Select 
+                    value={transpose.toString()} 
+                    onValueChange={(value) => setTranspose(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-[70px] sm:w-[100px] h-8 sm:h-10">
+                      <SelectValue placeholder="0" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {transposeOptions.map(value => (
+                        <SelectItem key={value} value={value.toString()}>
+                          {value > 0 ? `+${value}` : value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setFontSize(Math.max(12, fontSize - 1))}
+                    disabled={fontSize <= 12}
+                  >
+                    <ChevronDown size={14} />
+                  </Button>
+                  <span className="w-10 text-center text-sm">{fontSize}px</span>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setFontSize(Math.min(24, fontSize + 1))}
+                    disabled={fontSize >= 24}
+                  >
+                    <ChevronUp size={14} />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 sm:h-10 gap-1">
+                        <Menu size={16} />
+                        <span className="hidden sm:inline">View Mode</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Display Options</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setViewMode("normal")}
+                        className={viewMode === "normal" ? "bg-accent text-accent-foreground" : ""}
+                      >
+                        Normal
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => setViewMode("chords-only")}
+                        className={viewMode === "chords-only" ? "bg-accent text-accent-foreground" : ""}
+                      >
+                        Chords Only
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => setViewMode("lyrics-only")}
+                        className={viewMode === "lyrics-only" ? "bg-accent text-accent-foreground" : ""}
+                      >
+                        Lyrics Only
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
+                        className={hideGuitarTabs ? "bg-accent text-accent-foreground" : ""}
+                      >
+                        {hideGuitarTabs ? "Show Guitar Tabs" : "Hide Guitar Tabs"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setAutoScroll(!autoScroll)}
+                    title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
+                    data-testid="auto-scroll-toggle"
+                  >
+                    {autoScroll ? <Pause size={16} /> : <Play size={16} />}
+                  </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 sm:h-10">
+                        <span className="mr-1">•••</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleDownload}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+              
+              {/* Auto-scroll speed control */}
+              {autoScroll && (
+                <div className="flex items-center gap-3 pt-2" data-testid="scroll-speed-control">
+                  <span className="text-sm font-medium w-20">Speed: {scrollSpeed}</span>
+                  <Slider
+                    value={[scrollSpeed]}
+                    min={1}
+                    max={10}
+                    step={1}
+                    onValueChange={(value) => setScrollSpeed(value[0])}
+                    className="flex-1"
+                  />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
