@@ -49,6 +49,8 @@ const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13
 const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
+  const [fontSpacing, setFontSpacing] = useState(0);
+  const [fontStyle, setFontStyle] = useState('');
   const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -288,8 +290,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
               {chordName}
             </span>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <ChordDiagram chordName={chordName} />
+          <PopoverContent className="w-auto p-4 bg-background border-2 border-chord shadow-lg">
+            <div className="font-comic">
+              <ChordDiagram chordName={chordName} />
+            </div>
           </PopoverContent>
         </Popover>
       );
@@ -302,8 +306,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
                 {chordName}
               </span>
             </TooltipTrigger>
-            <TooltipContent side="top" className="p-0 bg-background border">
-              <ChordDiagram chordName={chordName} />
+            <TooltipContent side="top" className="p-4 bg-background border-2 border-chord shadow-lg">
+              <div className="font-comic">
+                <ChordDiagram chordName={chordName} />
+              </div>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -335,6 +341,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         <ChordContent
           processedContent={processedContent}
           fontSize={fontSize}
+          fontSpacing={fontSpacing}
+          fontStyle={fontStyle}
           viewMode={viewMode}
           hideGuitarTabs={hideGuitarTabs}
           renderChord={renderChord}
@@ -345,6 +353,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           transposeOptions={transposeOptions}
           fontSize={fontSize}
           setFontSize={setFontSize}
+          fontSpacing={fontSpacing}
+          setFontSpacing={setFontSpacing}
+          fontStyle={fontStyle}
+          setFontStyle={setFontStyle}
           viewMode={viewMode}
           setViewMode={setViewMode}
           hideGuitarTabs={hideGuitarTabs}

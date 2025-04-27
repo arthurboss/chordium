@@ -12,6 +12,8 @@ export interface ChordSection {
 export interface ChordContentProps {
   processedContent: ChordSection[];
   fontSize: number;
+  fontSpacing: number;
+  fontStyle: string;
   viewMode: string;
   hideGuitarTabs: boolean;
   renderChord: (chord: string) => JSX.Element;
@@ -23,6 +25,10 @@ export interface ChordSheetControlsProps {
   transposeOptions: number[];
   fontSize: number;
   setFontSize: (v: number) => void;
+  fontSpacing: number;
+  setFontSpacing: (v: number) => void;
+  fontStyle: string;
+  setFontStyle: (v: string) => void;
   viewMode: string;
   setViewMode: (v: string) => void;
   hideGuitarTabs: boolean;
@@ -40,4 +46,4 @@ export interface ChordEditProps {
   setEditContent: (v: string) => void;
   handleSaveEdits: () => void;
   setIsEditing: (v: boolean) => void;
-} 
+}
