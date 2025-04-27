@@ -46,6 +46,8 @@ interface ChordDisplayProps {
 // Enhanced chord regex pattern for better recognition
 const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
 
+const DEFAULT_SCROLL_SPEED = 3;
+
 const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
@@ -56,7 +58,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
   const [autoScroll, setAutoScroll] = useState(false);
-  const [scrollSpeed, setScrollSpeed] = useState(3);
+  const [scrollSpeed, setScrollSpeed] = useState(DEFAULT_SCROLL_SPEED);
   const isMobile = useIsMobile();
   const scrollTimerRef = useRef<number | null>(null);
   const lastScrollTimeRef = useRef<number>(0);
@@ -126,6 +128,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
               const limit = document.body.offsetHeight - FOOTER_HEIGHT;
               if (scrollBottom >= limit - 1) {
                 setAutoScroll(false);
+                setScrollSpeed(DEFAULT_SCROLL_SPEED);
                 return;
               }
               scrollTimerRef.current = requestAnimationFrame(doScroll);
@@ -165,6 +168,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         const limit = document.body.offsetHeight - FOOTER_HEIGHT;
         if (scrollBottom >= limit - 1) {
           setAutoScroll(false);
+          setScrollSpeed(DEFAULT_SCROLL_SPEED);
           return;
         }
         scrollTimerRef.current = requestAnimationFrame(doScroll);
