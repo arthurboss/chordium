@@ -25,7 +25,7 @@ function TextPreferences({
           <Settings size={22} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" className="mr-4">
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
           <div className="flex items-center gap-2">
