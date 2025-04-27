@@ -11,7 +11,6 @@ interface SpeedControlProps {
 const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, setScrollSpeed, className }) => {
   return (
     <div className={"flex items-center " + (className || "") + ""} data-testid="scroll-speed-control">
-      <span className="text-sm font-medium mr-2">Speed: {scrollSpeed}</span>
       <Slider
         value={[scrollSpeed]}
         min={1}
@@ -20,6 +19,7 @@ const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, se
         onValueChange={(value) => setScrollSpeed(value[0])}
         className="w-32"
       />
+      <span className="text-sm font-medium ml-2">x{scrollSpeed}</span>
     </div>
   );
 };

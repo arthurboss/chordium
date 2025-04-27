@@ -95,20 +95,35 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   <Card className="sticky bottom-0 mb-4 hidden sm:block">
     <CardContent className="p-3 sm:p-4">
       <div className="flex flex-col space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Play/Pause, Speed Control, and Transpose grouped together */}
-          <div className="flex items-center gap-2">
-            <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={16} className="h-8 w-8" variant="outline" />
-            <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} className="ml-1" />
-            {/* Transpose button as a dropdown menu */}
+        <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
+          {/* Left: Play/Pause (Auto Scroll) button */}
+          <div className="flex items-center justify-start">
+            <PlayButton 
+              autoScroll={autoScroll} 
+              setAutoScroll={setAutoScroll} 
+              size={16} 
+              className="h-8 w-auto px-3" 
+              variant="outline"
+            />
+            {/* Speed controls only show when playing, always between PlayButton and Transpose */}
+            {autoScroll && (
+              <div className="ml-2">
+                <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
+              </div>
+            )}
+          </div>
+          {/* Center: Transpose always centered and fixed */}
+          <div className="flex items-center justify-center">
             <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
           </div>
-          {/* Text Preferences button and dropdown */}
-          <TextPreferencesMenu 
-            fontSize={fontSize} setFontSize={setFontSize}
-            viewMode={viewMode} setViewMode={setViewMode}
-            hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
-          />
+          {/* Right: Text Preferences */}
+          <div className="flex items-center justify-end">
+            <TextPreferencesMenu 
+              fontSize={fontSize} setFontSize={setFontSize}
+              viewMode={viewMode} setViewMode={setViewMode}
+              hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
+            />
+          </div>
         </div>
       </div>
     </CardContent>
