@@ -47,6 +47,34 @@ function TextPreferencesMenu({
   );
 }
 
+function TransposeMenu({ transpose, setTranspose, transposeOptions }: any) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="h-8 px-3 flex items-center gap-2">
+          <Music size={18} className="text-chord" />
+          <span className="font-medium text-sm">Transpose: {transpose > 0 ? `+${transpose}` : transpose}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="p-2">
+        <div className="grid grid-cols-5 gap-2">
+          {transposeOptions.map((value: number) => (
+            <Button
+              key={value}
+              variant={value === transpose ? "default" : "outline"}
+              size="sm"
+              className="min-w-[36px] h-8 px-0 text-sm"
+              onClick={() => setTranspose(value)}
+            >
+              {value > 0 ? `+${value}` : value}
+            </Button>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   transpose,
   setTranspose,
@@ -72,26 +100,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
           <div className="flex items-center gap-2">
             <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={16} className="h-8 w-8" variant="outline" />
             <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} className="ml-1" />
-            {/* Transpose button moved next to SpeedControl */}
-            <div className="flex items-center gap-2 ml-2">
-              <Music size={18} className="text-chord" />
-              <span className="font-medium text-sm sm:text-base hidden sm:inline">Transpose:</span>
-              <Select 
-                value={transpose.toString()} 
-                onValueChange={(value) => setTranspose(parseInt(value))}
-              >
-                <SelectTrigger className="w-[70px] sm:w-[100px] h-8 sm:h-10">
-                  <SelectValue placeholder="0" />
-                </SelectTrigger>
-                <SelectContent>
-                  {transposeOptions.map((value: number) => (
-                    <SelectItem key={value} value={value.toString()}>
-                      {value > 0 ? `+${value}` : value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Transpose button as a dropdown menu */}
+            <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
           </div>
           {/* Text Preferences button and dropdown */}
           <TextPreferencesMenu 
