@@ -57,6 +57,8 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
   const [scrollSpeed, setScrollSpeed] = useState(3);
   const isMobile = useIsMobile();
   const scrollTimerRef = useRef<number | null>(null);
+  const lastScrollTimeRef = useRef<number>(0);
+  const accumulatedScrollRef = useRef<number>(0);
   
   // Update edit content when content prop changes
   useEffect(() => {
@@ -66,19 +68,52 @@ const ChordDisplay = ({ title, artist, content, onSave }: ChordDisplayProps) => 
   // Handle auto-scrolling for the whole page
   useEffect(() => {
     if (autoScroll) {
-      const scrollAmount = scrollSpeed * 0.5; // Adjust this multiplier as needed
+      const baseScrollAmount = scrollSpeed * 0.32; // Reduced from 0.4 to 0.32 (another 20% slower)
+      const targetFPS = 60; // Target frames per second
+      const frameTime = 1000 / targetFPS; // Target time per frame in ms
       
-      const doScroll = () => {
-        window.scrollBy(0, scrollAmount);
-        scrollTimerRef.current = window.setTimeout(doScroll, 100);
+      const doScroll = (timestamp: number) => {
+        if (!lastScrollTimeRef.current) {
+          lastScrollTimeRef.current = timestamp;
+        }
+        
+        const elapsed = timestamp - lastScrollTimeRef.current;
+        
+        // Calculate how many frames worth of scrolling we need to do
+        const framesToProcess = Math.floor(elapsed / frameTime);
+        
+        if (framesToProcess > 0) {
+          // Calculate the total scroll amount for this update
+          const totalScroll = baseScrollAmount * framesToProcess;
+          
+          // Add to accumulated scroll
+          accumulatedScrollRef.current += totalScroll;
+          
+          // Get the integer part of accumulated scroll
+          const scrollPixels = Math.floor(accumulatedScrollRef.current);
+          
+          // Subtract the integer part from accumulated scroll
+          accumulatedScrollRef.current -= scrollPixels;
+          
+          // Only scroll if we have at least 1 pixel to scroll
+          if (scrollPixels > 0) {
+            window.scrollBy(0, scrollPixels);
+          }
+          
+          lastScrollTimeRef.current = timestamp;
+        }
+        
+        scrollTimerRef.current = requestAnimationFrame(doScroll);
       };
       
-      scrollTimerRef.current = window.setTimeout(doScroll, 100);
+      scrollTimerRef.current = requestAnimationFrame(doScroll);
       
       return () => {
         if (scrollTimerRef.current) {
-          clearTimeout(scrollTimerRef.current);
+          cancelAnimationFrame(scrollTimerRef.current);
         }
+        lastScrollTimeRef.current = 0;
+        accumulatedScrollRef.current = 0;
       };
     }
   }, [autoScroll, scrollSpeed]);
