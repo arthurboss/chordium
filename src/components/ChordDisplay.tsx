@@ -75,33 +75,21 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         if (!lastScrollTimeRef.current) {
           lastScrollTimeRef.current = timestamp;
         }
-        
         const elapsed = timestamp - lastScrollTimeRef.current;
-        
         // Calculate how many frames worth of scrolling we need to do
-        const framesToProcess = Math.floor(elapsed / frameTime);
-        
-        if (framesToProcess > 0) {
-          // Calculate the total scroll amount for this update
-          const totalScroll = baseScrollAmount * framesToProcess;
-          
-          // Add to accumulated scroll
-          accumulatedScrollRef.current += totalScroll;
-          
-          // Get the integer part of accumulated scroll
-          const scrollPixels = Math.floor(accumulatedScrollRef.current);
-          
-          // Subtract the integer part from accumulated scroll
-          accumulatedScrollRef.current -= scrollPixels;
-          
-          // Only scroll if we have at least 1 pixel to scroll
-          if (scrollPixels > 0) {
-            window.scrollBy(0, scrollPixels);
-          }
-          
-          lastScrollTimeRef.current = timestamp;
+        accumulatedScrollRef.current += (elapsed / frameTime) * baseScrollAmount;
+        const scrollAmount = Math.floor(accumulatedScrollRef.current);
+        accumulatedScrollRef.current -= scrollAmount;
+        if (scrollAmount > 0) {
+          window.scrollBy({ top: scrollAmount, behavior: 'auto' });
         }
-        
+        lastScrollTimeRef.current = timestamp;
+        // PAUSE auto-scroll if at bottom
+        const atBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 1);
+        if (atBottom) {
+          setAutoScroll(false);
+          return;
+        }
         scrollTimerRef.current = requestAnimationFrame(doScroll);
       };
       
@@ -303,4 +291,3 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
 ChordDisplay.displayName = 'ChordDisplay';
 
 export default ChordDisplay;
-
