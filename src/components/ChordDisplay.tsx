@@ -34,6 +34,7 @@ import { ChordSection } from './ChordDisplay/types';
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
+import { FOOTER_HEIGHT, updateLayoutHeights } from '@/utils/layout';
 
 interface ChordDisplayProps {
   title?: string;
@@ -67,6 +68,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   // Handle auto-scrolling for the whole page
   useEffect(() => {
     if (autoScroll) {
+      // Ensure FOOTER_HEIGHT is up to date
+      updateLayoutHeights();
       const baseScrollAmount = scrollSpeed * 0.32; // Reduced from 0.4 to 0.32 (another 20% slower)
       const targetFPS = 60; // Target frames per second
       const frameTime = 1000 / targetFPS; // Target time per frame in ms
@@ -84,9 +87,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           window.scrollBy({ top: scrollAmount, behavior: 'auto' });
         }
         lastScrollTimeRef.current = timestamp;
-        // PAUSE auto-scroll if at bottom
-        const atBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 1);
-        if (atBottom) {
+        // PAUSE auto-scroll if within FOOTER_HEIGHT of page bottom
+        const scrollBottom = window.innerHeight + window.scrollY;
+        const limit = document.body.offsetHeight - FOOTER_HEIGHT;
+        if (scrollBottom >= limit - 1) {
           setAutoScroll(false);
           return;
         }
