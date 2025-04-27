@@ -278,6 +278,43 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
     });
   };
   
+  // Helper to get the title/artist element
+  const getTitleArtistElement = () => {
+    return document.querySelector('#chord-display .mb-4');
+  };
+
+  // Enhanced auto-scroll toggle logic
+  const handleAutoScrollToggle = (enable?: boolean) => {
+    const shouldEnable = enable !== undefined ? enable : !autoScroll;
+    if (!shouldEnable) {
+      setAutoScroll(false);
+      return;
+    }
+    const headerEl = getTitleArtistElement();
+    if (headerEl) {
+      const navbar = document.querySelector('header');
+      let navbarOffset = 0;
+      if (navbar) navbarOffset = navbar.getBoundingClientRect().height;
+      const targetTop = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer
+      // If viewport is above the title/artist
+      if (window.scrollY + 10 < targetTop) {
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+        // Wait for scroll to finish before enabling auto-scroll
+        let rafId;
+        const waitForScroll = () => {
+          if (Math.abs(window.scrollY - targetTop) < 2) {
+            setAutoScroll(true);
+          } else {
+            rafId = requestAnimationFrame(waitForScroll);
+          }
+        };
+        waitForScroll();
+        return;
+      }
+    }
+    setAutoScroll(true);
+  };
+  
   // Render a chord with tooltip or popover based on device type
   const renderChord = (chord: string) => {
     const chordName = chord.trim();
@@ -362,7 +399,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           hideGuitarTabs={hideGuitarTabs}
           setHideGuitarTabs={setHideGuitarTabs}
           autoScroll={autoScroll}
-          setAutoScroll={setAutoScroll}
+          setAutoScroll={handleAutoScrollToggle}
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
           setIsEditing={setIsEditing}
