@@ -34,7 +34,7 @@ import { ChordSection } from './ChordDisplay/types';
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
-import { FOOTER_HEIGHT, updateLayoutHeights } from '@/utils/layout';
+import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from '@/utils/layout';
 
 interface ChordDisplayProps {
   title?: string;
@@ -68,18 +68,90 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   // Handle auto-scrolling for the whole page
   useEffect(() => {
     if (autoScroll) {
-      // Ensure FOOTER_HEIGHT is up to date
+      const mainEl = document.getElementById('chord-display');
+      if (mainEl) {
+        const mainBottom = mainEl.offsetTop + mainEl.offsetHeight;
+        const viewportBottom = window.scrollY + window.innerHeight;
+        // If we're at or past the bottom, scroll to the top of the header/title (if present), else main element
+        if (viewportBottom >= mainBottom - 2) {
+          let scrollTarget = mainEl.offsetTop;
+          const headerEl = document.querySelector('#chord-display .mb-4');
+          if (headerEl) {
+            // Scroll to the header/title if it exists
+            let navbarOffset = 0;
+            try {
+              // Use NAVBAR_HEIGHT from utils/layout
+              // (updateLayoutHeights should have run just before this)
+              // If not available, fallback to measuring the header
+              if (typeof NAVBAR_HEIGHT === 'number' && NAVBAR_HEIGHT > 0) {
+                navbarOffset = NAVBAR_HEIGHT;
+              } else {
+                const nav = document.querySelector('header');
+                if (nav) navbarOffset = nav.getBoundingClientRect().height;
+              }
+            } catch {}
+            scrollTarget = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer for aesthetics
+          }
+          window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+          // Wait for scroll to reach the top, then start auto-scroll
+          let rafId: number;
+          const waitForTop = () => {
+            // Allow a small margin for floating point errors
+            if (Math.abs(window.scrollY - scrollTarget) < 2) {
+              startAutoScroll();
+            } else {
+              rafId = requestAnimationFrame(waitForTop);
+            }
+          };
+          const startAutoScroll = () => {
+            updateLayoutHeights();
+            const baseScrollAmount = scrollSpeed * 0.32;
+            const targetFPS = 60;
+            const frameTime = 1000 / targetFPS;
+            const doScroll = (timestamp: number) => {
+              if (!lastScrollTimeRef.current) {
+                lastScrollTimeRef.current = timestamp;
+              }
+              const elapsed = timestamp - lastScrollTimeRef.current;
+              accumulatedScrollRef.current += (elapsed / frameTime) * baseScrollAmount;
+              const scrollAmount = Math.floor(accumulatedScrollRef.current);
+              accumulatedScrollRef.current -= scrollAmount;
+              if (scrollAmount > 0) {
+                window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+              }
+              lastScrollTimeRef.current = timestamp;
+              const scrollBottom = window.innerHeight + window.scrollY;
+              const limit = document.body.offsetHeight - FOOTER_HEIGHT;
+              if (scrollBottom >= limit - 1) {
+                setAutoScroll(false);
+                return;
+              }
+              scrollTimerRef.current = requestAnimationFrame(doScroll);
+            };
+            scrollTimerRef.current = requestAnimationFrame(doScroll);
+          };
+          rafId = requestAnimationFrame(waitForTop);
+          // Cleanup for this special case
+          return () => {
+            cancelAnimationFrame(rafId);
+            if (scrollTimerRef.current) {
+              cancelAnimationFrame(scrollTimerRef.current);
+            }
+            lastScrollTimeRef.current = 0;
+            accumulatedScrollRef.current = 0;
+          };
+        }
+      }
+      // If not at the bottom, start auto-scroll immediately
       updateLayoutHeights();
-      const baseScrollAmount = scrollSpeed * 0.32; // Reduced from 0.4 to 0.32 (another 20% slower)
-      const targetFPS = 60; // Target frames per second
-      const frameTime = 1000 / targetFPS; // Target time per frame in ms
-      
+      const baseScrollAmount = scrollSpeed * 0.32;
+      const targetFPS = 60;
+      const frameTime = 1000 / targetFPS;
       const doScroll = (timestamp: number) => {
         if (!lastScrollTimeRef.current) {
           lastScrollTimeRef.current = timestamp;
         }
         const elapsed = timestamp - lastScrollTimeRef.current;
-        // Calculate how many frames worth of scrolling we need to do
         accumulatedScrollRef.current += (elapsed / frameTime) * baseScrollAmount;
         const scrollAmount = Math.floor(accumulatedScrollRef.current);
         accumulatedScrollRef.current -= scrollAmount;
@@ -87,7 +159,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           window.scrollBy({ top: scrollAmount, behavior: 'auto' });
         }
         lastScrollTimeRef.current = timestamp;
-        // PAUSE auto-scroll if within FOOTER_HEIGHT of page bottom
         const scrollBottom = window.innerHeight + window.scrollY;
         const limit = document.body.offsetHeight - FOOTER_HEIGHT;
         if (scrollBottom >= limit - 1) {
@@ -96,9 +167,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         }
         scrollTimerRef.current = requestAnimationFrame(doScroll);
       };
-      
       scrollTimerRef.current = requestAnimationFrame(doScroll);
-      
       return () => {
         if (scrollTimerRef.current) {
           cancelAnimationFrame(scrollTimerRef.current);
