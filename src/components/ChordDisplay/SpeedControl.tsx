@@ -9,7 +9,6 @@ interface SpeedControlProps {
 }
 
 const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, setScrollSpeed, className }) => {
-  if (!autoScroll) return null;
   return (
     <div className={"flex items-center " + (className || "") + ""} data-testid="scroll-speed-control">
       <span className="text-sm font-medium mr-2">Speed: {scrollSpeed}</span>
