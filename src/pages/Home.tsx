@@ -370,14 +370,15 @@ const Home = () => {
                       Delete Song
                     </Button>
                   </div>
-                  <ChordDisplay 
-                    ref={chordDisplayRef}
-                    title={selectedSong.title} 
-                    artist={selectedSong.artist} 
-                    content={selectedSong.content}
-                    onSave={handleUpdateSong}
-                    className="mt-6"
-                  />
+                  <div className="mt-6">
+                    <ChordDisplay 
+                      ref={chordDisplayRef}
+                      title={selectedSong.title} 
+                      artist={selectedSong.artist} 
+                      content={selectedSong.content}
+                      onSave={handleUpdateSong}
+                    />
+                  </div>
                 </div>
               ) : (
                 <div>
