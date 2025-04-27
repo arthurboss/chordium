@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Music, Info, Save } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -133,6 +133,7 @@ const Home = () => {
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [mySongs, setMySongs] = useState<SongData[]>([]);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  const chordDisplayRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const savedSongs = localStorage.getItem("mySongs");
@@ -178,6 +179,24 @@ const Home = () => {
       setActiveTab("upload");
     }
   }, [location, mySongs]);
+
+  useEffect(() => {
+    if (selectedSong || demoSong || uploadedContent) {
+      // Wait for the next frame to ensure the DOM is updated
+      requestAnimationFrame(() => {
+        if (chordDisplayRef.current) {
+          const headerHeight = 80; // Increased from 48 to 80 to account for full header + title/artist section
+          const elementPosition = chordDisplayRef.current.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    }
+  }, [selectedSong, demoSong, uploadedContent]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -322,6 +341,7 @@ const Home = () => {
                       </Button>
                     </div>
                     <ChordDisplay 
+                      ref={chordDisplayRef}
                       title={uploadedTitle || undefined}
                       content={uploadedContent} 
                     />
@@ -333,7 +353,7 @@ const Home = () => {
             <TabsContent value="my-songs" className="focus-visible:outline-none focus-visible:ring-0">
               {selectedSong ? (
                 <div className="animate-fade-in">
-                  <div className="flex items-center mb-4">
+                  <div className="flex items-center mb-6">
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -351,10 +371,12 @@ const Home = () => {
                     </Button>
                   </div>
                   <ChordDisplay 
+                    ref={chordDisplayRef}
                     title={selectedSong.title} 
                     artist={selectedSong.artist} 
                     content={selectedSong.content}
                     onSave={handleUpdateSong}
+                    className="mt-6"
                   />
                 </div>
               ) : (
@@ -428,6 +450,7 @@ const Home = () => {
                     </Button>
                   </div>
                   <ChordDisplay 
+                    ref={chordDisplayRef}
                     title={demoSong.title} 
                     artist={demoSong.artist} 
                     content={demoSong.content} 
