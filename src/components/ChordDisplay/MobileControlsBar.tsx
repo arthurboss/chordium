@@ -104,7 +104,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   // Only TextPreferences button remains
   const MenuButtons = (
     <>
-      <TextPreferences 
+      <TextPreferences
         fontSize={fontSize} setFontSize={setFontSize}
         fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
         fontStyle={fontStyle} setFontStyle={setFontStyle}
@@ -120,7 +120,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
       {!autoScroll && (
         <div className="flex items-center ml-auto">
           {MenuButtons}
-          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className="h-12 w-12 bg-primary text-primary-foreground ml-2" />
+          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className={`h-12 w-12 ml-2 ${autoScroll ? 'bg-secondary/20 text-primary hover:bg-primary/20' : ''}`} />
         </div>
       )}
       {/* When playing, TextPreferences on far left, SpeedControl, Play on far right */}
@@ -128,7 +128,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
         <>
           <div className="flex items-center mr-auto" style={{ marginLeft: 0, paddingLeft: 0 }}>{MenuButtons}</div>
           <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} className="flex-1 flex items-center justify-center px-2" />
-          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className="h-12 w-12 bg-primary text-primary-foreground ml-2" />
+          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className={`h-12 w-12 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
         </>
       )}
     </div>

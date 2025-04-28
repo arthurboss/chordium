@@ -13,7 +13,7 @@ interface PlayButtonProps {
 
 const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className, variant = 'outline', style }) => (
   <Button 
-    variant={variant as any} 
+    variant="outline"
     size="icon" 
     className={(className || '') + ' flex items-center gap-2 px-3'}
     onClick={() => setAutoScroll(!autoScroll)}
@@ -21,7 +21,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size
     data-testid="auto-scroll-toggle"
     style={style}
   >
-    {autoScroll ? <Pause size={size} /> : <Play size={size} />}
+    {autoScroll ? <Pause size={size} className="text-chord" /> : <Play size={size} className="text-chord" />}
     {!autoScroll && <span className="font-medium text-sm hidden sm:inline">Auto Scroll</span>}
   </Button>
 );

@@ -24,7 +24,7 @@ function TextPreferencesMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-8 px-3 flex items-center gap-2">
-          <Settings size={16} />
+          <Settings size={16} className="text-chord" />
           <span className="font-medium text-sm">Text Preferences</span>
         </Button>
       </DropdownMenuTrigger>
@@ -143,7 +143,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
               autoScroll={autoScroll} 
               setAutoScroll={setAutoScroll} 
               size={16} 
-              className="h-8 w-auto px-3" 
+              className={`h-8 w-auto px-3 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`} 
               variant="outline"
             />
             {/* Speed controls only show when playing, always between PlayButton and Transpose */}
