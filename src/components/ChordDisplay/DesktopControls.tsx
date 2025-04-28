@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
-import { Music, ChevronDown, ChevronUp, Settings, Text, AlignLeft } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { Music, Settings, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { ChordSheetControlsProps } from './types';
@@ -17,8 +16,6 @@ function TextPreferencesMenu({
   setFontStyle,
   viewMode,
   setViewMode,
-  hideGuitarTabs,
-  setHideGuitarTabs,
 }: any) {
   return (
     <DropdownMenu>
@@ -132,45 +129,64 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setScrollSpeed,
   setIsEditing,
   handleDownload,
-}) => (
-  <Card className="sticky bottom-0 mb-4 hidden sm:block">
-    <CardContent className="p-3 sm:p-4">
-      <div className="flex flex-col space-y-3">
-        <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
-          {/* Left: Play/Pause (Auto Scroll) button */}
-          <div className="flex items-center justify-start">
-            <PlayButton 
-              autoScroll={autoScroll} 
-              setAutoScroll={setAutoScroll} 
-              size={16} 
-              className={`h-8 w-auto px-3 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`} 
-              variant="outline"
-            />
-            {/* Speed controls only show when playing, always between PlayButton and Transpose */}
-            {autoScroll && (
-              <div className="ml-2">
-                <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
-              </div>
-            )}
-          </div>
-          {/* Center: Transpose always centered and fixed */}
-          <div className="flex items-center justify-center">
-            <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
-          </div>
-          {/* Right: Text Preferences */}
-          <div className="flex items-center justify-end">
-            <TextPreferencesMenu 
-              fontSize={fontSize} setFontSize={setFontSize}
-              fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-              fontStyle={fontStyle} setFontStyle={setFontStyle}
-              viewMode={viewMode} setViewMode={setViewMode}
-              hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
-            />
+}) => {
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const threshold = 100; // pixels from bottom to trigger the change
+
+      setIsAtBottom(scrollPosition >= documentHeight - threshold);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-4'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col space-y-3">
+          <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
+            {/* Left: Play/Pause (Auto Scroll) button */}
+            <div className="flex items-center justify-start">
+              <PlayButton
+                autoScroll={autoScroll}
+                setAutoScroll={setAutoScroll}
+                size={16}
+                className={`h-8 w-auto px-3 transition-all duration-300 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`}
+                variant="outline"
+              />
+              {/* Speed controls only show when playing, always between PlayButton and Transpose */}
+              {autoScroll && (
+                <div className="ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
+                  <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
+                </div>
+              )}
+            </div>
+            {/* Center: Transpose always centered and fixed */}
+            <div className="flex items-center justify-center">
+              <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
+            </div>
+            {/* Right: Text Preferences */}
+            <div className="flex items-center justify-end">
+              <TextPreferencesMenu
+                fontSize={fontSize} setFontSize={setFontSize}
+                fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+                fontStyle={fontStyle} setFontStyle={setFontStyle}
+                viewMode={viewMode} setViewMode={setViewMode}
+                hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </CardContent>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};
 
 export default DesktopControls;

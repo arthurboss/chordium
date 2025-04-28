@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Settings, ChevronDown, ChevronUp, Music, Text, AlignLeft } from 'lucide-react';
@@ -17,12 +17,14 @@ function TextPreferences({
   setViewMode,
   hideGuitarTabs,
   setHideGuitarTabs,
+  buttonClassName,
+  iconSize,
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="h-12 w-12" title="Text Preferences">
-          <Settings size={22} />
+        <Button variant="outline" size="icon" className={buttonClassName} title="Text Preferences">
+          <Settings size={iconSize} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="mr-4">
@@ -101,6 +103,23 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   fontStyle,
   setFontStyle,
 }) => {
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const threshold = 100; // pixels from bottom to trigger the change
+
+      setIsAtBottom(scrollPosition >= documentHeight - threshold);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Only TextPreferences button remains
   const MenuButtons = (
     <>
@@ -110,25 +129,33 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
         fontStyle={fontStyle} setFontStyle={setFontStyle}
         viewMode={viewMode} setViewMode={setViewMode}
         hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
+        buttonClassName="h-10 w-10"
+        iconSize={20}
       />
     </>
   );
 
   return (
-    <div className="sm:hidden sticky bottom-0 left-0 right-0 z-40 bg-background border-t border-border flex items-center" style={{ padding: '0.5rem 0' }}>
+    <div
+      className={
+        `sm:hidden sticky bottom-2 m-2 mt-0 z-40 bg-background/70 backdrop-blur-sm flex items-center p-2 border rounded-lg transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-4'} ${!autoScroll && 'w-fit ml-auto'}`
+      }
+    >
       {/* When not playing, TextPreferences and Play on the right */}
       {!autoScroll && (
         <div className="flex items-center ml-auto">
           {MenuButtons}
-          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className={`h-12 w-12 ml-2 ${autoScroll ? 'bg-secondary/20 text-primary hover:bg-primary/20' : ''}`} />
+          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-secondary/20 text-primary hover:bg-primary/20' : ''}`} />
         </div>
       )}
       {/* When playing, TextPreferences on far left, SpeedControl, Play on far right */}
       {autoScroll && (
         <>
           <div className="flex items-center mr-auto" style={{ marginLeft: 0, paddingLeft: 0 }}>{MenuButtons}</div>
-          <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} className="flex-1 flex items-center justify-center px-2" />
-          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={22} className={`h-12 w-12 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
+          <div className="transition-all duration-200 animate-in slide-in-from-right-16 flex-1 flex items-center justify-center px-2">
+            <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
+          </div>
+          <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
         </>
       )}
     </div>

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { FileMusic, Guitar, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,10 @@ const Header = () => {
 
   return (
     <header className="border-b shadow-sm bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container flex justify-between items-center py-3 px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2 text-chord hover:opacity-90 transition-opacity">
-          <Guitar size={24} />
-          <span className="font-semibold text-xl hidden sm:inline">Chordium</span>
+      <div className="container flex justify-between items-center py-2 px-3 md:px-4">
+        <Link to="/" className="flex items-center gap-1.5 text-chord hover:opacity-90 transition-opacity">
+          <Guitar size={20} />
+          <span className="font-semibold text-lg hidden sm:inline">Chordium</span>
         </Link>
 
         {/* Mobile menu button */}

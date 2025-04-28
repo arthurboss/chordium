@@ -4,7 +4,7 @@ import { Guitar, Github } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="mt-auto border-t py-6">
+    <footer className="mt-auto border-t py-4">
       <div className="container flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <Guitar size={18} className="text-chord" />
