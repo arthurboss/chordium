@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChordContentProps, ChordLine, ChordSection } from './types';
+import { ChordContentProps, ChordLine } from './types';
 
 const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
 

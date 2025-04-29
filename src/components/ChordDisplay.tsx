@@ -1,14 +1,4 @@
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { ChevronUp, ChevronDown, Music, Download, Edit, Save, Play, Pause, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
 import { transposeChord } from '@/utils/chordUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -19,18 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import ChordDiagram from '@/components/ChordDiagram';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Slider } from "@/components/ui/slider";
 import { toast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
-import { ChordSection } from './ChordDisplay/types';
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';

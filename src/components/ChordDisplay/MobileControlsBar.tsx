@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
-import { Settings, ChevronDown, ChevronUp, Music, Text, AlignLeft } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
+import { Settings, Music, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';

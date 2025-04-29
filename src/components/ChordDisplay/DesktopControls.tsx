@@ -17,7 +17,16 @@ function TextPreferencesMenu({
   setFontStyle,
   viewMode,
   setViewMode,
-}: any) {
+}: {
+  fontSize: number;
+  setFontSize: (value: number) => void;
+  fontSpacing: number;
+  setFontSpacing: (value: number) => void;
+  fontStyle: string;
+  setFontStyle: (value: string) => void;
+  viewMode: string;
+  setViewMode: (value: string) => void;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -80,7 +89,11 @@ function TextPreferencesMenu({
   );
 }
 
-function TransposeMenu({ transpose, setTranspose, transposeOptions }: any) {
+function TransposeMenu({ transpose, setTranspose, transposeOptions }: {
+  transpose: number;
+  setTranspose: (value: number) => void;
+  transposeOptions: number[];
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -179,7 +192,6 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
                 fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
                 fontStyle={fontStyle} setFontStyle={setFontStyle}
                 viewMode={viewMode} setViewMode={setViewMode}
-                hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
               />
             </div>
           </div>
