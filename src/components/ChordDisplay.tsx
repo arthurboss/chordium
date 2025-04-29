@@ -347,7 +347,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
       />
     );
   }
-  
+
   return (
     <div ref={ref} id="chord-display">
       <div className="w-full max-w-3xl mx-auto">

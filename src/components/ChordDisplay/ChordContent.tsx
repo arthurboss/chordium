@@ -22,7 +22,6 @@ const ChordContent: React.FC<ChordContentProps> = ({
     <div 
       className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
-      data-testid="chord-content"
     >
       {processedContent.map((section, sectionIndex) => (
         <div key={sectionIndex}>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Loader2, Search } from "lucide-react";
@@ -83,7 +82,6 @@ const ChordViewer = () => {
                 key={index}
                 className="p-4 border rounded-lg hover:border-chord transition-colors cursor-pointer bg-white"
                 onClick={() => navigate(`/?song=${result.songId}`)}
-                data-testid={`search-result-${index}`}
               >
                 <div className="flex items-center gap-3">
                   <Search className="h-5 w-5 text-chord" />
