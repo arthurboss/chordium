@@ -135,19 +135,55 @@ const Home = () => {
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   
+  // Load songs from localStorage on mount
   useEffect(() => {
-    const savedSongs = localStorage.getItem("mySongs");
-    if (savedSongs) {
-      try {
-        setMySongs(JSON.parse(savedSongs));
-      } catch (e) {
-        console.error("Error loading saved songs:", e);
+    try {
+      const savedSongs = localStorage.getItem("mySongs");
+      const savedVersion = localStorage.getItem("mySongsVersion");
+      
+      if (savedSongs) {
+        // Version 1 is the current storage format
+        if (savedVersion === "1") {
+          setMySongs(JSON.parse(savedSongs));
+        } else {
+          // Handle older versions or initialize new storage
+          setMySongs([]);
+          localStorage.setItem("mySongsVersion", "1");
+        }
       }
+    } catch (e) {
+      console.error("Error loading saved songs:", e);
+      toast({
+        title: "Error loading songs",
+        description: "There was a problem loading your saved songs.",
+        variant: "destructive"
+      });
     }
   }, []);
   
+  // Save songs to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("mySongs", JSON.stringify(mySongs));
+    try {
+      const songsJson = JSON.stringify(mySongs);
+      localStorage.setItem("mySongs", songsJson);
+      localStorage.setItem("mySongsVersion", "1");
+    } catch (e) {
+      // Handle storage quota exceeded or other errors
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        toast({
+          title: "Storage limit reached",
+          description: "Unable to save more songs. Please delete some songs to free up space.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error saving songs",
+          description: "There was a problem saving your changes.",
+          variant: "destructive"
+        });
+      }
+      console.error("Error saving songs:", e);
+    }
   }, [mySongs]);
 
   useEffect(() => {
@@ -202,6 +238,12 @@ const Home = () => {
     setActiveTab(value);
     setSelectedSong(null);
     
+    // Clear upload states when switching to a different tab
+    if (value !== "upload") {
+      setUploadedContent("");
+      setUploadedTitle("");
+    }
+    
     if (value === "upload") {
       navigate("/upload");
     } else if (value === "demo" && demoSong) {
@@ -231,17 +273,20 @@ const Home = () => {
       dateAdded: new Date().toISOString()
     };
     
+    // Update all states synchronously
     setMySongs(prev => [newSong, ...prev]);
+    setSelectedSong(newSong);
+    setActiveTab("my-songs");
     setUploadedContent("");
     setUploadedTitle("");
+    
+    // Navigate after state updates
+    navigate(`/my-songs?song=${newSong.id}`);
     
     toast({
       title: "Song saved",
       description: `"${songTitle}" has been added to My Songs`
     });
-    
-    setActiveTab("my-songs");
-    navigate("/my-songs");
   };
   
   const handleUpdateSong = (content: string) => {
@@ -334,6 +379,7 @@ const Home = () => {
                       title={uploadedTitle || undefined}
                       content={uploadedContent} 
                       enableEdit={true}
+                      onSave={handleSaveUploadedSong}
                     />
                   </div>
                 )}

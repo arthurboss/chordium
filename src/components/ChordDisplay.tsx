@@ -247,8 +247,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
     }
     setIsEditing(false);
     toast({
-      title: "Changes saved",
-      description: "Your chord sheet has been updated"
+      title: "Song saved",
+      description: onSave ? "Your song has been saved to My Songs" : "Your chord sheet has been updated"
     });
   };
   
