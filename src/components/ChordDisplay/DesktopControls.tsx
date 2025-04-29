@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSep
 import { Music, Settings, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
+import { Slider } from '../ui/slider';
 import { ChordSheetControlsProps } from './types';
 
 function TextPreferencesMenu({
@@ -20,7 +21,7 @@ function TextPreferencesMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2">
+        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
           <Settings size={16} className="text-chord" />
           <span className="font-medium text-sm">Text Preferences</span>
         </Button>
@@ -46,14 +47,13 @@ function TextPreferencesMenu({
         <div className="px-2 py-3">
           <div className="font-semibold text-xs mb-1">Font Size</div>
           <div className="flex items-center gap-3">
-            <input
-              type="range"
+            <Slider
+              value={[fontSize]}
               min={12}
               max={24}
               step={1}
-              value={fontSize}
-              onChange={e => setFontSize(Number(e.target.value))}
-              className="w-32 accent-blue-500"
+              onValueChange={(value) => setFontSize(value[0])}
+              className="w-32"
             />
             <span className="w-10 text-center text-sm">{fontSize}px</span>
           </div>
@@ -62,14 +62,13 @@ function TextPreferencesMenu({
         <div className="px-2 py-3">
           <div className="font-semibold text-xs mb-1">Font Spacing</div>
           <div className="flex items-center gap-3">
-            <input
-              type="range"
+            <Slider
+              value={[fontSpacing]}
               min={0}
               max={0.2}
               step={0.1}
-              value={fontSpacing}
-              onChange={e => setFontSpacing(Number(e.target.value))}
-              className="w-32 accent-blue-500"
+              onValueChange={(value) => setFontSpacing(value[0])}
+              className="w-32"
             />
             <span className="w-10 text-center text-sm">
               {fontSpacing === 0 ? 'x1' : fontSpacing === 0.1 ? 'x2' : 'x3'}
@@ -85,7 +84,7 @@ function TransposeMenu({ transpose, setTranspose, transposeOptions }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2">
+        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
           <Music size={18} className="text-chord" />
           <span className="font-medium text-sm">Transpose: {transpose > 0 ? `+${transpose}` : transpose}</span>
         </Button>
@@ -136,7 +135,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      const threshold = 100; // pixels from bottom to trigger the change
+      const isMdScreen = window.innerWidth >= 768 && window.innerWidth < 1024;
+      const threshold = isMdScreen ? 100 : 140; // pixels from bottom to trigger the change
 
       setIsAtBottom(scrollPosition >= documentHeight - threshold);
     };
@@ -158,7 +158,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
                 autoScroll={autoScroll}
                 setAutoScroll={setAutoScroll}
                 size={16}
-                className={`h-8 w-auto px-3 transition-all duration-300 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`}
+                className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`}
                 variant="outline"
               />
               {/* Speed controls only show when playing, always between PlayButton and Transpose */}
