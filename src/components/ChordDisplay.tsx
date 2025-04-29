@@ -20,6 +20,7 @@ interface ChordDisplayProps {
   artist?: string;
   content: string;
   onSave?: (content: string) => void;
+  enableEdit?: boolean;
 }
 
 // Enhanced chord regex pattern for better recognition
@@ -27,14 +28,20 @@ const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13
 
 const DEFAULT_SCROLL_SPEED = 3;
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
+  title,
+  artist,
+  content,
+  onSave,
+  enableEdit = false
+}, ref) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
   const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(enableEdit);
   const [editContent, setEditContent] = useState(content);
   const [autoScroll, setAutoScroll] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(DEFAULT_SCROLL_SPEED);

@@ -329,21 +329,11 @@ const Home = () => {
                 
                 {uploadedContent && (
                   <div className="mt-6 animate-fade-in">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-xl font-semibold">Uploaded Chord Sheet</h2>
-                      <Button 
-                        onClick={handleSaveUploadedSong}
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <Save className="h-4 w-4" />
-                        <span>Save to My Songs</span>
-                      </Button>
-                    </div>
                     <ChordDisplay 
                       ref={chordDisplayRef}
                       title={uploadedTitle || undefined}
                       content={uploadedContent} 
+                      enableEdit={true}
                     />
                   </div>
                 )}

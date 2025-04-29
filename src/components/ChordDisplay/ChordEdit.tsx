@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 
 const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, handleSaveEdits, setIsEditing }) => {
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto h-[calc(100vh-12rem)] flex flex-col">
       <Card className="mb-4">
         <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
@@ -27,10 +27,10 @@ const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, hand
       <Textarea 
         value={editContent} 
         onChange={(e) => setEditContent(e.target.value)}
-        className="min-h-[500px] font-mono text-sm"
+        className="flex-1 font-mono text-sm resize-none"
       />
     </div>
   );
 };
 
-export default ChordEdit; 
+export default ChordEdit;
