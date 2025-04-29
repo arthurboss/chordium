@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Music, Info, Save } from "lucide-react";
+import { Music, Info, Save, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
@@ -129,10 +131,12 @@ const Home = () => {
   const navigate = useNavigate();
   const [uploadedContent, setUploadedContent] = useState("");
   const [uploadedTitle, setUploadedTitle] = useState("");
+  const [uploadedArtist, setUploadedArtist] = useState("");
   const [activeTab, setActiveTab] = useState("search");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [mySongs, setMySongs] = useState<SongData[]>([]);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   
   // Load songs from localStorage on mount
@@ -242,6 +246,8 @@ const Home = () => {
     if (value !== "upload") {
       setUploadedContent("");
       setUploadedTitle("");
+      setUploadedArtist("");
+      setIsEditingMetadata(false);
     }
     
     if (value === "upload") {
@@ -255,8 +261,80 @@ const Home = () => {
     }
   };
   
-  const handleSaveUploadedSong = () => {
-    if (!uploadedContent.trim()) {
+  const handleFileUpload = (content: string, fileName: string) => {
+    setUploadedContent(content);
+    
+    let extractedTitle = "";
+    let extractedArtist = "";
+    
+    // Try to extract from filename first (Artist - Title format)
+    if (fileName) {
+      const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      const parts = fileNameWithoutExt.split(" - ");
+      
+      if (parts.length >= 2) {
+        // Filename has Artist - Title format
+        extractedArtist = parts[0].trim();
+        extractedTitle = parts[1].trim();
+      } else {
+        // Just use filename as title
+        extractedTitle = fileNameWithoutExt;
+      }
+    }
+    
+    // If no artist found, try to extract from content
+    if (!extractedArtist && content) {
+      // Look for patterns like "Artist: Name" or "By: Name" in the first few lines
+      const lines = content.split('\n').slice(0, 10); // Check first 10 lines
+      
+      for (const line of lines) {
+        const artistMatch = line.match(/(?:artist|by|performed by)\s*[:-]\s*(.+)/i);
+        if (artistMatch && artistMatch[1]) {
+          extractedArtist = artistMatch[1].trim();
+          break;
+        }
+      }
+    }
+    
+    // If no title found in filename, try to extract from content
+    if (!extractedTitle && content) {
+      // Look for patterns like "Title: Name" or a standalone first line
+      const lines = content.split('\n').slice(0, 10); // Check first 10 lines
+      
+      for (const line of lines) {
+        const titleMatch = line.match(/(?:title|song)\s*[:-]\s*(.+)/i);
+        if (titleMatch && titleMatch[1]) {
+          extractedTitle = titleMatch[1].trim();
+          break;
+        }
+      }
+      
+      // If still no title, use the first non-empty line that's not in brackets
+      if (!extractedTitle) {
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine && !trimmedLine.match(/^\[.*\]$/)) {
+            extractedTitle = trimmedLine;
+            break;
+          }
+        }
+      }
+    }
+    
+    setUploadedTitle(extractedTitle || "Untitled Song");
+    // Only set artist if we found one
+    if (extractedArtist) {
+      setUploadedArtist(extractedArtist);
+    } else {
+      setUploadedArtist("");
+    }
+  };
+  
+  const handleSaveUploadedSong = (content?: string, title?: string, artist?: string) => {
+    // Use the provided content or fall back to the state value
+    const songContent = content || uploadedContent;
+    
+    if (!songContent.trim()) {
       toast({
         title: "Error",
         description: "No content to save",
@@ -265,11 +343,15 @@ const Home = () => {
       return;
     }
     
-    const songTitle = uploadedTitle || "Untitled Song";
+    // Use the provided title/artist or fall back to the state values
+    const songTitle = title || uploadedTitle || "Untitled Song";
+    const songArtist = artist || uploadedArtist || "";
+    
     const newSong: SongData = {
       id: `song-${Date.now()}`,
       title: songTitle,
-      content: uploadedContent,
+      artist: songArtist,
+      content: songContent,
       dateAdded: new Date().toISOString()
     };
     
@@ -279,6 +361,8 @@ const Home = () => {
     setActiveTab("my-songs");
     setUploadedContent("");
     setUploadedTitle("");
+    setUploadedArtist("");
+    setIsEditingMetadata(false);
     
     // Navigate after state updates
     navigate(`/my-songs?song=${newSong.id}`);
@@ -325,15 +409,6 @@ const Home = () => {
     });
   };
   
-  const handleFileUpload = (content: string, fileName: string) => {
-    setUploadedContent(content);
-    
-    if (fileName) {
-      const title = fileName.replace(/\.[^/.]+$/, "");
-      setUploadedTitle(title);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -374,13 +449,59 @@ const Home = () => {
                 
                 {uploadedContent && (
                   <div className="mt-6 animate-fade-in">
-                    <ChordDisplay 
-                      ref={chordDisplayRef}
-                      title={uploadedTitle || undefined}
-                      content={uploadedContent} 
-                      enableEdit={true}
-                      onSave={handleSaveUploadedSong}
-                    />
+                    {!isEditingMetadata ? (
+                      <div className="w-full max-w-3xl mx-auto">
+                        <Card className="mb-6">
+                          <CardContent className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                              <div className="flex-1">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="song-title-input">Song Title</Label>
+                                    <Input 
+                                      id="song-title-input" 
+                                      value={uploadedTitle} 
+                                      onChange={(e) => setUploadedTitle(e.target.value)} 
+                                      placeholder="Enter song title"
+                                      className="w-full h-10"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="song-artist-input">Artist</Label>
+                                    <Input 
+                                      id="song-artist-input" 
+                                      value={uploadedArtist} 
+                                      onChange={(e) => setUploadedArtist(e.target.value)} 
+                                      placeholder="Enter artist name"
+                                      className="w-full h-10"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex justify-end items-end">
+                                <Button 
+                                  onClick={() => setIsEditingMetadata(true)}
+                                  className="w-12 h-10 shrink-0"
+                                  aria-label="Continue to edit"
+                                >
+                                  <ArrowRight className="h-5 w-5" />
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    ) : (
+                      <ChordDisplay 
+                        ref={chordDisplayRef}
+                        title={uploadedTitle} 
+                        artist={uploadedArtist} 
+                        content={uploadedContent} 
+                        enableEdit={true}
+                        onSave={handleSaveUploadedSong}
+                        onReturn={() => setIsEditingMetadata(false)}
+                      />
+                    )}
                   </div>
                 )}
               </div>

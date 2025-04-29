@@ -46,4 +46,5 @@ export interface ChordEditProps {
   setEditContent: (v: string) => void;
   handleSaveEdits: () => void;
   setIsEditing: (v: boolean) => void;
+  onReturn: () => void;
 }

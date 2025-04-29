@@ -19,8 +19,9 @@ interface ChordDisplayProps {
   title?: string;
   artist?: string;
   content: string;
-  onSave?: (content: string) => void;
+  onSave?: (content: string, title: string, artist: string) => void;
   enableEdit?: boolean;
+  onReturn?: () => void;
 }
 
 // Enhanced chord regex pattern for better recognition
@@ -33,7 +34,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   artist,
   content,
   onSave,
-  enableEdit = false
+  enableEdit = false,
+  onReturn,
 }, ref) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
@@ -43,6 +45,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
   const [isEditing, setIsEditing] = useState(enableEdit);
   const [editContent, setEditContent] = useState(content);
+  const [songTitle, setSongTitle] = useState(title || '');
+  const [songArtist, setSongArtist] = useState(artist || '');
   const [autoScroll, setAutoScroll] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(DEFAULT_SCROLL_SPEED);
   const isMobile = useIsMobile();
@@ -243,7 +247,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   // Handle saving edits
   const handleSaveEdits = () => {
     if (onSave) {
-      onSave(editContent);
+      onSave(editContent, songTitle, songArtist);
     }
     setIsEditing(false);
     toast({
@@ -351,6 +355,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
         setEditContent={setEditContent}
         handleSaveEdits={handleSaveEdits}
         setIsEditing={setIsEditing}
+        onReturn={onReturn || (() => setIsEditing(false))}
       />
     );
   }
@@ -359,10 +364,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
     <div ref={ref} id="chord-display">
       <div className="w-full max-w-3xl mx-auto">
         {/* Song header */}
-        {(title || artist) && (
+        {(songTitle || songArtist) && (
           <div className="mb-4 text-center">
-            {title && <h1 className="text-2xl font-bold">{title}</h1>}
-            {artist && <p className="text-muted-foreground">{artist}</p>}
+            {songTitle && <h1 className="text-2xl font-bold">{songTitle}</h1>}
+            {songArtist && <p className="text-muted-foreground">{songArtist}</p>}
           </div>
         )}
         <ChordContent
