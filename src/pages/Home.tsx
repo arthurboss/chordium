@@ -267,67 +267,115 @@ const Home = () => {
     let extractedTitle = "";
     let extractedArtist = "";
     
-    // Try to extract from filename first (Artist - Title format)
-    if (fileName) {
+    // Check for metadata in the content first (our PDF extractor adds these)
+    const lines = content.split('\n');
+    const titleLine = lines.find(line => line.match(/^Title:\s*(.+)/i));
+    const artistLine = lines.find(line => line.match(/^Artist:\s*(.+)/i));
+    
+    if (titleLine) {
+      const titleMatch = titleLine.match(/^Title:\s*(.+)/i);
+      if (titleMatch && titleMatch[1]) {
+        extractedTitle = titleMatch[1].trim();
+        console.log('Found title in content metadata:', extractedTitle);
+      }
+    }
+    
+    if (artistLine) {
+      const artistMatch = artistLine.match(/^Artist:\s*(.+)/i);
+      if (artistMatch && artistMatch[1]) {
+        extractedArtist = artistMatch[1].trim();
+        console.log('Found artist in content metadata:', extractedArtist);
+      }
+    }
+    
+    // If metadata wasn't found, try to extract from filename (Artist - Title format)
+    if ((!extractedTitle || !extractedArtist) && fileName) {
       const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
       const parts = fileNameWithoutExt.split(" - ");
       
       if (parts.length >= 2) {
         // Filename has Artist - Title format
-        extractedArtist = parts[0].trim();
-        extractedTitle = parts[1].trim();
-      } else {
-        // Just use filename as title
+        if (!extractedArtist) {
+          extractedArtist = parts[0].trim();
+          console.log('Extracted artist from filename:', extractedArtist);
+        }
+        if (!extractedTitle) {
+          extractedTitle = parts[1].trim();
+          console.log('Extracted title from filename:', extractedTitle);
+        }
+      } else if (!extractedTitle) {
+        // Just use filename as title if we don't have one yet
         extractedTitle = fileNameWithoutExt;
+        console.log('Using filename as title:', extractedTitle);
       }
     }
     
-    // If no artist found, try to extract from content
+    // If still no artist found, try to extract from content
     if (!extractedArtist && content) {
-      // Look for patterns like "Artist: Name" or "By: Name" in the first few lines
-      const lines = content.split('\n').slice(0, 10); // Check first 10 lines
+      // Look for patterns like "Artist: Name" or "By: Name" in the content
+      const contentLines = content.split('\n').slice(0, 20); // Check first 20 lines
       
-      for (const line of lines) {
+      for (const line of contentLines) {
         const artistMatch = line.match(/(?:artist|by|performed by)\s*[:-]\s*(.+)/i);
         if (artistMatch && artistMatch[1]) {
           extractedArtist = artistMatch[1].trim();
+          console.log('Extracted artist from content:', extractedArtist);
           break;
         }
       }
     }
     
-    // If no title found in filename, try to extract from content
+    // If still no title found, try to extract from content
     if (!extractedTitle && content) {
       // Look for patterns like "Title: Name" or a standalone first line
-      const lines = content.split('\n').slice(0, 10); // Check first 10 lines
+      const contentLines = content.split('\n').slice(0, 20); // Check first 20 lines
       
-      for (const line of lines) {
+      for (const line of contentLines) {
+        if (line === titleLine || line === artistLine) continue; // Skip metadata lines we already processed
+        
         const titleMatch = line.match(/(?:title|song)\s*[:-]\s*(.+)/i);
         if (titleMatch && titleMatch[1]) {
           extractedTitle = titleMatch[1].trim();
+          console.log('Extracted title from content:', extractedTitle);
           break;
         }
       }
       
       // If still no title, use the first non-empty line that's not in brackets
       if (!extractedTitle) {
-        for (const line of lines) {
+        for (const line of contentLines) {
+          if (line === titleLine || line === artistLine) continue; // Skip metadata lines we already processed
+          
           const trimmedLine = line.trim();
-          if (trimmedLine && !trimmedLine.match(/^\[.*\]$/)) {
+          if (trimmedLine && !trimmedLine.match(/^\[.*\]$/) && 
+              !trimmedLine.startsWith('Title:') && 
+              !trimmedLine.startsWith('Artist:')) {
             extractedTitle = trimmedLine;
+            console.log('Using first content line as title:', extractedTitle);
             break;
           }
         }
       }
     }
     
-    setUploadedTitle(extractedTitle || "Untitled Song");
-    // Only set artist if we found one
-    if (extractedArtist) {
-      setUploadedArtist(extractedArtist);
-    } else {
-      setUploadedArtist("");
+    // Remove the metadata lines from the content if they were added by our PDF extractor
+    if (titleLine || artistLine) {
+      const filteredLines = lines.filter(line => 
+        !line.match(/^Title:\s*(.+)/i) && 
+        !line.match(/^Artist:\s*(.+)/i));
+      
+      // Remove any empty lines at the beginning
+      while (filteredLines.length > 0 && filteredLines[0].trim() === '') {
+        filteredLines.shift();
+      }
+      
+      // Update the content without the metadata lines
+      const filteredContent = filteredLines.join('\n');
+      setUploadedContent(filteredContent);
     }
+    
+    setUploadedTitle(extractedTitle || "Untitled Song");
+    setUploadedArtist(extractedArtist || "");
   };
   
   const handleSaveUploadedSong = (content?: string, title?: string, artist?: string) => {
