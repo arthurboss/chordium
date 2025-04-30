@@ -14,6 +14,8 @@ function TextPreferences({
   setFontSpacing,
   fontStyle,
   setFontStyle,
+  lineHeight,
+  setLineHeight,
   viewMode,
   setViewMode,
   hideGuitarTabs,
@@ -64,6 +66,21 @@ function TextPreferences({
         </div>
         <DropdownMenuSeparator />
         <div className="px-2 py-3">
+          <div className="font-semibold text-xs mb-1">Line Height</div>
+          <div className="flex items-center gap-3">
+            <Slider
+              value={[lineHeight]}
+              min={0.8}
+              max={1.6}
+              step={0.1}
+              onValueChange={(value) => setLineHeight(value[0])}
+              className="w-32"
+            />
+            <span className="w-10 text-center text-sm">{Math.round((lineHeight - 0.6) * 5)}x</span>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <div className="px-2 py-3">
           <div className="font-semibold text-xs mb-1">Font Spacing</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -75,7 +92,7 @@ function TextPreferences({
               className="w-32"
             />
             <span className="w-10 text-center text-sm">
-              {fontSpacing === 0 ? 'x1' : fontSpacing === 0.1 ? 'x2' : 'x3'}
+              {fontSpacing === 0 ? '1x' : fontSpacing === 0.1 ? '2x' : '3x'}
             </span>
           </div>
         </div>
@@ -101,6 +118,8 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   setFontSpacing,
   fontStyle,
   setFontStyle,
+  lineHeight,
+  setLineHeight,
 }) => {
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -126,6 +145,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
         fontSize={fontSize} setFontSize={setFontSize}
         fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
         fontStyle={fontStyle} setFontStyle={setFontStyle}
+        lineHeight={lineHeight} setLineHeight={setLineHeight}
         viewMode={viewMode} setViewMode={setViewMode}
         hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
         buttonClassName="h-10 w-10"
@@ -161,4 +181,4 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   );
 };
 
-export default MobileControlsBar; 
+export default MobileControlsBar;

@@ -8,6 +8,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   fontSize,
   fontSpacing,
   fontStyle,
+  lineHeight,
   viewMode,
   hideGuitarTabs,
   renderChord,
@@ -21,7 +22,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   return (
     <div 
       className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
-      style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
+      style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily, lineHeight }}
     >
       {processedContent.map((section, sectionIndex) => (
         <div key={sectionIndex}>
@@ -81,4 +82,4 @@ const ChordContent: React.FC<ChordContentProps> = ({
   );
 };
 
-export default ChordContent; 
+export default ChordContent;

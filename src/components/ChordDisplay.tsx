@@ -41,6 +41,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
+  const [lineHeight, setLineHeight] = useState(1.0); // Default line height set to 1.0 (displays as 2x)
   const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
   const [isEditing, setIsEditing] = useState(enableEdit);
@@ -83,7 +84,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
                 const nav = document.querySelector('header');
                 if (nav) navbarOffset = nav.getBoundingClientRect().height;
               }
-            } catch {}
+            } catch (error) {
+              // Ignore measurement errors and use default offset
+              console.debug('Error measuring navbar height:', error);
+            }
             scrollTarget = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer for aesthetics
           }
           window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
@@ -190,7 +194,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
         }
         currentSection = { 
           type: 'section', 
-          title: line.replace(/[\[\]]/g, ''), 
+          title: line.replace(/[[\]]/g, ''), // Fixed unnecessary escape
           lines: [] 
         };
       } else {
@@ -375,6 +379,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
           fontSize={fontSize}
           fontSpacing={fontSpacing}
           fontStyle={fontStyle}
+          lineHeight={lineHeight}
           viewMode={viewMode}
           hideGuitarTabs={hideGuitarTabs}
           renderChord={renderChord}
@@ -389,6 +394,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
           setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
+          lineHeight={lineHeight}
+          setLineHeight={setLineHeight}
           viewMode={viewMode}
           setViewMode={setViewMode}
           hideGuitarTabs={hideGuitarTabs}
