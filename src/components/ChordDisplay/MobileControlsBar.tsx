@@ -5,6 +5,7 @@ import { Settings, Music, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';
+import { Switch } from '../ui/switch';
 import { ChordSheetControlsProps } from './types';
 
 function TextPreferences({
@@ -22,6 +23,7 @@ function TextPreferences({
   setHideGuitarTabs,
   buttonClassName,
   iconSize,
+  isAtBottom,
 }) {
   return (
     <DropdownMenu>
@@ -30,7 +32,7 @@ function TextPreferences({
           <Settings size={iconSize} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="mr-4">
+      <DropdownMenuContent align="start" className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3`}>
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
           <div className="flex items-center gap-2">
@@ -43,14 +45,19 @@ function TextPreferences({
         <DropdownMenuItem onClick={() => setHideGuitarTabs(!hideGuitarTabs)} className={hideGuitarTabs ? 'bg-accent text-accent-foreground' : ''}>{hideGuitarTabs ? 'Show Guitar Tabs' : 'Hide Guitar Tabs'}</DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Font Style</div>
-          <div className="flex items-center gap-2">
-            <Button variant={fontStyle === 'serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('serif')}>Serif</Button>
-            <Button variant={fontStyle === 'sans-serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('sans-serif')}>Sans</Button>
+          <div className="font-semibold text-xs mb-2">Font Style</div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm">Sans</span>
+            <Switch
+              checked={fontStyle === 'serif'}
+              onCheckedChange={(checked) => setFontStyle(checked ? 'serif' : 'sans-serif')}
+              className="w-[64px] h-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:data-[state=checked]:translate-x-[40px]"
+            />
+            <span className="text-sm">Serif</span>
           </div>
         </div>
         <DropdownMenuSeparator />
-        <div className="px-2 py-3">
+        <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">Font Size</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -65,7 +72,7 @@ function TextPreferences({
           </div>
         </div>
         <DropdownMenuSeparator />
-        <div className="px-2 py-3">
+        <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">Line Height</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -80,7 +87,7 @@ function TextPreferences({
           </div>
         </div>
         <DropdownMenuSeparator />
-        <div className="px-2 py-3">
+        <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">Font Spacing</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -150,6 +157,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
         hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
         buttonClassName="h-10 w-10"
         iconSize={20}
+        isAtBottom={isAtBottom}
       />
     </>
   );
