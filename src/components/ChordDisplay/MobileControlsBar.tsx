@@ -26,13 +26,20 @@ function TextPreferences({
   isAtBottom,
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" className={buttonClassName} title="Text Preferences">
           <Settings size={iconSize} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3`}>
+      <DropdownMenuContent
+        align="start"
+        className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3`}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onFocusOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.stopPropagation()}
+      >
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
           <div className="flex items-center gap-2">

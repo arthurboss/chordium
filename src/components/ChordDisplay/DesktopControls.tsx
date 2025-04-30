@@ -33,14 +33,21 @@ function TextPreferencesMenu({
   setViewMode: (value: string) => void;
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
           <Settings size={16} className="text-chord" />
           <span className="font-medium text-sm">Text Preferences</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className='px-1 py-3'>
+      <DropdownMenuContent 
+          align="end" 
+          className='px-1 py-3'
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onFocusOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.stopPropagation()}
+        >
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
           <div className="flex items-center gap-2">
