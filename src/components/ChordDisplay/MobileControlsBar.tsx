@@ -191,7 +191,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      const threshold = 100; // pixels from bottom to trigger the change
+      const threshold = 185; // pixels from bottom to trigger the change
 
       setIsAtBottom(scrollPosition >= documentHeight - threshold);
     };

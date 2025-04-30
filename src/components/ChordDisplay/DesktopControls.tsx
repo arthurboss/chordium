@@ -295,7 +295,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
 
   return (
     <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-3'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
-      <CardContent className="p-3 sm:p-2">
+      <CardContent className="p-3 sm:p-3">
         <div className="flex flex-col space-y-3">
           <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
             {/* Left: Play/Pause (Auto Scroll) button */}
