@@ -225,7 +225,7 @@ const Home = () => {
       // Wait for the next frame to ensure the DOM is updated
       requestAnimationFrame(() => {
         if (chordDisplayRef.current) {
-          const headerHeight = 80; // Increased from 48 to 80 to account for full header + title/artist section
+          const headerHeight = 72;
           const elementPosition = chordDisplayRef.current.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
 
