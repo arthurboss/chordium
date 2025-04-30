@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Settings, Music, Text, AlignLeft } from 'lucide-react';
@@ -25,20 +25,70 @@ function TextPreferences({
   iconSize,
   isAtBottom,
 }) {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [open, setOpen] = useState(false);
+
+  const startCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 3000);
+  }, []);
+
+  const clearCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  // Start timer when menu opens
+  useEffect(() => {
+    if (open) {
+      startCloseTimer();
+    }
+  }, [open, startCloseTimer]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className={buttonClassName} title="Text Preferences">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className={buttonClassName} 
+          title="Text Preferences"
+        >
           <Settings size={iconSize} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3`}
+        className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out`}
         onCloseAutoFocus={(e) => e.preventDefault()}
         onFocusOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          startCloseTimer();
+        }}
         onPointerDownOutside={(e) => e.stopPropagation()}
+        onTouchStart={clearCloseTimer}
+        onTouchEnd={startCloseTimer}
+        onMouseEnter={clearCloseTimer}
+        onMouseLeave={startCloseTimer}
+        style={{
+          transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
+          opacity: '1'
+        }}
       >
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>

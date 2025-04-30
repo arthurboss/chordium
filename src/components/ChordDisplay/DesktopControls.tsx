@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
@@ -32,21 +32,67 @@ function TextPreferencesMenu({
   viewMode: string;
   setViewMode: (value: string) => void;
 }) {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [open, setOpen] = useState(false);
+
+  const startCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 3000);
+  }, []);
+
+  const clearCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      startCloseTimer();
+    }
+  }, [open, startCloseTimer]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
+        <Button 
+          variant="outline" 
+          className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0"
+        >
           <Settings size={16} className="text-chord" />
           <span className="font-medium text-sm">Text Preferences</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
           align="end" 
-          className='px-1 py-3'
+          className='px-1 py-3 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out'
           onCloseAutoFocus={(e) => e.preventDefault()}
           onFocusOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => {
+            e.preventDefault();
+            startCloseTimer();
+          }}
           onPointerDownOutside={(e) => e.stopPropagation()}
+          onTouchStart={clearCloseTimer}
+          onTouchEnd={startCloseTimer}
+          onMouseEnter={clearCloseTimer}
+          onMouseLeave={startCloseTimer}
+          style={{
+            transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
+            opacity: '1'
+          }}
         >
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
@@ -126,15 +172,68 @@ function TransposeMenu({ transpose, setTranspose, transposeOptions }: {
   setTranspose: (value: number) => void;
   transposeOptions: number[];
 }) {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [open, setOpen] = useState(false);
+
+  const startCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 3000);
+  }, []);
+
+  const clearCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      startCloseTimer();
+    }
+  }, [open, startCloseTimer]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
+        <Button 
+          variant="outline" 
+          className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0"
+        >
           <Music size={18} className="text-chord" />
           <span className="font-medium text-sm">Transpose: {transpose > 0 ? `+${transpose}` : transpose}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="p-2">
+      <DropdownMenuContent 
+        align="end" 
+        className="p-2 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onFocusOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          startCloseTimer();
+        }}
+        onPointerDownOutside={(e) => e.stopPropagation()}
+        onTouchStart={clearCloseTimer}
+        onTouchEnd={startCloseTimer}
+        onMouseEnter={clearCloseTimer}
+        onMouseLeave={startCloseTimer}
+        style={{
+          transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
+          opacity: '1'
+        }}
+      >
         <div className="grid grid-cols-5 gap-2">
           {transposeOptions.map((value: number) => (
             <Button
@@ -195,8 +294,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   }, []);
 
   return (
-    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-4'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
-      <CardContent className="p-3 sm:p-4">
+    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-3'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
+      <CardContent className="p-3 sm:p-2">
         <div className="flex flex-col space-y-3">
           <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
             {/* Left: Play/Pause (Auto Scroll) button */}
