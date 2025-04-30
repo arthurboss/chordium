@@ -38,10 +38,10 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
   };
 
   const processFile = (file: File) => {
-    if (!file.name.endsWith('.txt') && !file.name.endsWith('.text') && !file.name.endsWith('.chord')) {
+    if (!file.name.endsWith('.txt')) {
       toast({
         title: "Invalid file format",
-        description: "Please upload a text file (.txt, .text, or .chord)",
+        description: "Please upload a text file (.txt)",
         variant: "destructive",
       });
       return;
@@ -129,7 +129,7 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
           type="file" 
           ref={fileInputRef}
           className="hidden" 
-          accept=".txt,.text,.chord"
+          accept=".txt"
           onChange={handleFileInputChange}
         />
       </div>
