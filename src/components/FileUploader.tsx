@@ -3,9 +3,20 @@ import { FileUp, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist';
+import type { TextItem } from 'pdfjs-dist/types/src/display/api';
 
 interface FileUploaderProps {
   onFileContent: (content: string, fileName: string) => void;
+}
+
+interface PdfMetadata {
+  info: {
+    Producer?: string;
+    Creator?: string;
+    Title?: string;
+    [key: string]: unknown;
+  };
+  metadata: unknown;
 }
 
 const FileUploader = ({ onFileContent }: FileUploaderProps) => {
@@ -66,41 +77,140 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
     
     try {
       const fileData = await readFileAsArrayBuffer(file);
-      
       const pdf = await getDocument(fileData).promise;
       console.log('PDF loaded successfully, pages:', pdf.numPages);
       
       let fullText = '';
+      let songTitle = '';
+      let artistName = '';
+      let isCifraClub = false;
       
+      // Check if it's a Cifra Club PDF
+      isCifraClub = file.name.toLowerCase().includes('cifra club');
+      
+      // Regex to filter out Cifra Club related text
+      const cifraClubRegex = /cifra\s*club/i;
+      
+      // For Cifra Club PDFs, try to extract metadata from filename first
+      if (isCifraClub) {
+        // Extract from filename pattern: "Cifra Club - Artist - Title.pdf" or "Cifra Club - Artist - Title (1).pdf"
+        let cleanFileName = file.name;
+        
+        // First remove the file extension and any duplicate number pattern
+        cleanFileName = cleanFileName.replace(/\.(pdf|PDF)$/, '')  // Remove file extension
+                                   .replace(/\s*\(\d+\)$/, '');    // Remove duplicate number pattern
+        
+        const filenameParts = cleanFileName.split(' - ');
+        if (filenameParts.length >= 3) {
+          const potentialArtist = filenameParts[1].trim();
+          const potentialTitle = filenameParts[2].trim();
+          
+          // Only use if they don't contain Cifra Club
+          if (!cifraClubRegex.test(potentialTitle)) {
+            songTitle = potentialTitle;
+          }
+          if (!cifraClubRegex.test(potentialArtist)) {
+            artistName = potentialArtist;
+          }
+          
+          console.log('Extracted metadata from filename:');
+          console.log('Title:', songTitle);
+          console.log('Artist:', artistName);
+        }
+      }
+      
+      // If metadata not found in filename, try to extract from first page
+      if (isCifraClub && (!songTitle || !artistName)) {
+        const firstPage = await pdf.getPage(1);
+        const textContent = await firstPage.getTextContent({
+          includeMarkedContent: true
+        });
+        
+        // Extract text items and their positions
+        const textItems = textContent.items.map((item: TextItem) => {
+          // Ensure the item has the required properties
+          if (!item || typeof item !== 'object' || !('transform' in item)) {
+            return {
+              text: '',
+              y: 0,
+              x: 0
+            };
+          }
+          
+          return {
+            text: item.str || '',
+            y: item.transform?.[5] || 0, // Y position of the text
+            x: item.transform?.[4] || 0  // X position of the text
+          };
+        }).filter(item => {
+          // Filter out empty items and Cifra Club text
+          const text = item.text.trim();
+          return text.length > 0 && !cifraClubRegex.test(text);
+        });
+        
+        // Sort text items by Y position (top to bottom)
+        textItems.sort((a, b) => b.y - a.y);
+        
+        // Find the first two non-empty lines at the top
+        const topLines = textItems.slice(0, 2);
+        
+        if (topLines.length >= 2) {
+          if (!songTitle) {
+            songTitle = topLines[0].text;
+          }
+          if (!artistName) {
+            artistName = topLines[1].text;
+          }
+          
+          console.log('Extracted metadata from first page:');
+          console.log('Title:', songTitle);
+          console.log('Artist:', artistName);
+        }
+      }
+      
+      // Process all pages
       for (let i = 1; i <= pdf.numPages; i++) {
         console.log(`Processing page ${i} of ${pdf.numPages}`);
         const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
+        const textContent = await page.getTextContent({
+          includeMarkedContent: true
+        });
         
         const textItems = textContent.items;
         console.log(`Page ${i} has ${textItems.length} text items`);
         
         let lastY = null;
         let text = '';
+        let currentLine = '';
         
         for (const item of textItems) {
           if ('str' in item) {
-            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
-              text += '\n';
-            } else if (text.length > 0 && !text.endsWith('\n') && text[text.length - 1] !== ' ') {
-              text += ' ';
+            const itemY = item.transform[5];
+            
+            // Check if we're on a new line
+            if (lastY !== null && Math.abs(itemY - lastY) > 5) {
+              if (currentLine.trim()) {
+                text += currentLine + '\n';
+              }
+              currentLine = '';
             }
             
-            text += item.str;
-            lastY = item.transform[5];
+            // Add the text to the current line
+            currentLine += item.str;
+            lastY = itemY;
           }
+        }
+        
+        // Add the last line if it exists
+        if (currentLine.trim()) {
+          text += currentLine + '\n';
         }
         
         fullText += text + '\n\n';
       }
       
       console.log('Text extraction complete, formatting chord sheet...');
-      const formattedText = formatPdfChordSheet(fullText, file.name);
+      const formattedText = formatPdfChordSheet(fullText, songTitle, artistName, isCifraClub);
       console.log('PDF processing complete');
       return formattedText;
     } catch (error) {
@@ -130,156 +240,124 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
     });
   };
   
-  const formatPdfChordSheet = (text: string, fileName: string): string => {
-    const isCifraClub = fileName.toLowerCase().includes('cifra club');
-    console.log('Processing as Cifra Club PDF:', isCifraClub);
-    
-    // Extract metadata and format content
-    let extractedTitle = '';
-    let extractedArtist = '';
+  const formatPdfChordSheet = (text: string, songTitle: string, artistName: string, isCifraClub: boolean): string => {
+    console.log('Formatting chord sheet with metadata:');
+    console.log('Title:', songTitle);
+    console.log('Artist:', artistName);
+    console.log('Is Cifra Club:', isCifraClub);
     
     // Split by lines and remove excessive whitespace
-    let lines = text.split('\n').map(line => line.trim());
+    const lines = text.split('\n').map(line => line.trim());
     
     // Remove empty lines
-    lines = lines.filter(line => line.length > 0);
-    
-    // Look for common chord patterns
-    const chordRegex = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
-    
-    // Identify section headers (like [Verse], [Chorus], etc.)
-    const sectionHeaderRegex = /(?:verse|chorus|bridge|intro|outro|solo|pre-chorus|interlude)/i;
+    const nonEmptyLines = lines.filter(line => line.length > 0);
     
     // Process the lines to better format chord sheets
-    let formattedLines: string[] = [];
+    const formattedLines: string[] = [];
+    
+    // Add song metadata if available
+    if (songTitle && artistName) {
+      formattedLines.push(`[title]${songTitle}[/title]`);
+      formattedLines.push(`[artist]${artistName}[/artist]`);
+      formattedLines.push(''); // Add empty line after metadata
+    }
+    
     let currentSection = '';
     
-    if (isCifraClub) {
-      // For Cifra Club PDFs, we need to extract title and artist from the beginning
-      let startIndex = 0;
-      let titleFound = false;
-      let artistFound = false;
+    // Enhanced chord regex that includes common chord variations
+    const chordRegex = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
+    
+    // Section header regex
+    const sectionHeaderRegex = /(?:verse|chorus|bridge|intro|outro|solo|pre-chorus|interlude)/i;
+    
+    // Tab line detection
+    const isTabLine = (line: string): boolean => {
+      // Check for common tab patterns
+      const tabPatterns = [
+        /^[-=]{3,}$/, // Lines of hyphens or equals
+        /^[0-9hpsl/\\~]{3,}$/, // Numbers and tab symbols
+        /^[x0-9]{6,}$/, // Multiple numbers or x's (muted strings)
+        /^[A-G][#b]?\s*\|/ // Chord followed by bar
+      ];
+      return tabPatterns.some(pattern => pattern.test(line));
+    };
+    
+    // Chord line detection
+    const isChordLine = (line: string): boolean => {
+      // Skip if it's a tab line
+      if (isTabLine(line)) return false;
       
-      // Find the Cifra Club header to get our starting point
-      for (let i = 0; i < Math.min(15, lines.length); i++) {
-        if (lines[i].toLowerCase().includes('cifra club')) {
-          startIndex = i;
-          break;
+      // Count chord matches
+      const chordMatches = line.match(chordRegex) || [];
+      
+      // Calculate chord density (chords per character)
+      const chordDensity = chordMatches.length / line.length;
+      
+      // Check for common chord line characteristics
+      const hasEnoughChords = chordMatches.length >= 2;
+      const hasHighChordDensity = chordDensity > 0.1; // At least 10% of the line is chords
+      const hasSpacedChords = line.match(/\s{2,}/) !== null; // Multiple spaces between chords
+      
+      return hasEnoughChords || (hasHighChordDensity && hasSpacedChords);
+    };
+    
+    // Lyrics line detection
+    const isLyricsLine = (line: string): boolean => {
+      // Skip if it's a tab line or chord line
+      if (isTabLine(line) || isChordLine(line)) return false;
+      
+      // Check for common lyrics characteristics
+      const hasWords = line.match(/\b\w{2,}\b/g)?.length || 0;
+      const wordDensity = hasWords / line.length;
+      
+      return hasWords >= 2 && wordDensity > 0.2; // At least 2 words and 20% word density
+    };
+    
+    // Process lines with improved detection
+    for (let i = 0; i < nonEmptyLines.length; i++) {
+      const line = nonEmptyLines[i];
+      
+      // Skip page numbers
+      if (/^\d+$/.test(line)) {
+        continue;
+      }
+      
+      // Check for section headers
+      if (sectionHeaderRegex.test(line)) {
+        const sectionName = line.trim().replace(/:/g, '');
+        currentSection = `[${sectionName}]`;
+        formattedLines.push(currentSection);
+        continue;
+      }
+      
+      // For Cifra Club PDFs, handle special cases
+      if (isCifraClub) {
+        // Skip metadata lines that we've already extracted
+        if (i < 5 && (line === songTitle || line === artistName)) {
+          continue;
         }
       }
       
-      // Extract title and artist from the first few lines after the Cifra Club header
-      // Cifra Club format typically has the title on one line and artist on the next
-      for (let i = startIndex; i < Math.min(startIndex + 10, lines.length); i++) {
-        const line = lines[i].trim();
-        
-        // Skip the Cifra Club line itself
-        if (line.toLowerCase().includes('cifra club')) {
-          continue;
-        }
-        
-        // Skip empty lines
-        if (line.length === 0) {
-          continue;
-        }
-        
-        // First non-empty line after Cifra Club is typically the song title
-        if (!titleFound) {
-          extractedTitle = line;
-          titleFound = true;
-          console.log('Extracted title:', extractedTitle);
-          continue;
-        }
-        
-        // Second non-empty line is typically the artist
-        if (titleFound && !artistFound) {
-          // Check if this line doesn't look like a chord line or section header
-          if (!line.match(chordRegex) && !sectionHeaderRegex.test(line)) {
-            extractedArtist = line;
-            artistFound = true;
-            console.log('Extracted artist:', extractedArtist);
-            break;
-          }
-        }
-      }
-      
-      // Add the extracted title and artist as metadata at the top of the chord sheet
-      if (titleFound) {
-        formattedLines.push(`Title: ${extractedTitle}`);
-      }
-      
-      if (artistFound) {
-        formattedLines.push(`Artist: ${extractedArtist}`);
-      }
-      
-      formattedLines.push(''); // Add an empty line after metadata
-      
-      // Find the actual content start (after the header and metadata)
-      let contentStartIndex = startIndex;
-      for (let i = startIndex; i < lines.length; i++) {
-        const line = lines[i].trim().toLowerCase();
-        // Look for indicators that we're past the header section
-        if (sectionHeaderRegex.test(line) || 
-            line.includes('tom:') || 
-            line.includes('capo:') || 
-            line.includes('afinação:') || 
-            line.match(chordRegex)) {
-          contentStartIndex = i;
-          break;
-        }
-      }
-      
-      // Process the actual chord content
-      for (let i = contentStartIndex; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        // Skip empty lines and page numbers
-        if (line.length === 0 || /^\d+$/.test(line)) {
-          continue;
-        }
-        
-        // Check if this line might be a section header
-        if (sectionHeaderRegex.test(line)) {
-          const sectionName = line.trim().replace(/:/g, '');
-          currentSection = `[${sectionName}]`;
-          formattedLines.push(currentSection);
-          continue;
-        }
-        
-        // Check if line contains multiple chords (likely a chord line)
-        const chordMatches = line.match(chordRegex);
-        if (chordMatches && chordMatches.length >= 2) {
-          formattedLines.push(line);
-          continue;
-        }
-        
-        // Regular line (lyrics or other content)
+      // Check for tab lines
+      if (isTabLine(line)) {
         formattedLines.push(line);
+        continue;
       }
-    } else {
-      // Generic PDF processing
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        if (line.length === 0) {
-          continue;
-        }
-        
-        if (sectionHeaderRegex.test(line)) {
-          const sectionName = line.trim().replace(/:/g, '');
-          currentSection = `[${sectionName}]`;
-          formattedLines.push(currentSection);
-          continue;
-        }
-        
-        const chordMatches = line.match(chordRegex);
-        if (chordMatches && chordMatches.length >= 2) {
-          formattedLines.push(line);
-          continue;
-        }
-        
+      
+      // Check for chord lines
+      if (isChordLine(line)) {
         formattedLines.push(line);
+        continue;
       }
+      
+      // Check for lyrics lines
+      if (isLyricsLine(line)) {
+        formattedLines.push(line);
+        continue;
+      }
+      
+      // If we can't determine the line type, include it anyway
+      formattedLines.push(line);
     }
     
     return formattedLines.join('\n');
