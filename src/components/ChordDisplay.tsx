@@ -18,8 +18,10 @@ import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from '@/utils/layou
 interface ChordDisplayProps {
   title?: string;
   artist?: string;
+  songTuning?: string;
+  guitarTuning?: string;
   content: string;
-  onSave?: (content: string, title: string, artist: string) => void;
+  onSave?: (content: string, title: string, artist: string, songTuning?: string, guitarTuning?: string) => void;
   enableEdit?: boolean;
   onReturn?: () => void;
 }
@@ -32,6 +34,8 @@ const DEFAULT_SCROLL_SPEED = 3;
 const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   title,
   artist,
+  songTuning,
+  guitarTuning,
   content,
   onSave,
   enableEdit = false,
@@ -251,7 +255,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
   // Handle saving edits
   const handleSaveEdits = () => {
     if (onSave) {
-      onSave(editContent, songTitle, songArtist);
+      onSave(editContent, songTitle, songArtist, songTuning, guitarTuning);
     }
     setIsEditing(false);
     toast({
@@ -368,10 +372,24 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
     <div ref={ref} id="chord-display">
       <div className="w-full max-w-3xl mx-auto">
         {/* Song header */}
-        {(songTitle || songArtist) && (
+        {(songTitle || songArtist || songTuning || guitarTuning) && (
           <div className="mb-4 text-center">
             {songTitle && <h1 className="text-2xl font-bold">{songTitle}</h1>}
             {songArtist && <p className="text-muted-foreground">{songArtist}</p>}
+            {(songTuning || guitarTuning) && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                {songTuning && (
+                  <span className="mr-4">
+                    <span className="font-medium">Song Key:</span> {songTuning}
+                  </span>
+                )}
+                {guitarTuning && (
+                  <span>
+                    <span className="font-medium">Guitar Tuning:</span> {guitarTuning}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
         <ChordContent

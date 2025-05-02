@@ -18,6 +18,8 @@ interface SongData {
   id: string;
   title: string;
   artist?: string;
+  songTuning?: string;
+  guitarTuning?: string;
   content: string;
   dateAdded: string;
 }
@@ -132,6 +134,8 @@ const Home = () => {
   const [uploadedContent, setUploadedContent] = useState("");
   const [uploadedTitle, setUploadedTitle] = useState("");
   const [uploadedArtist, setUploadedArtist] = useState("");
+  const [uploadedSongTuning, setUploadedSongTuning] = useState("");
+  const [uploadedGuitarTuning, setUploadedGuitarTuning] = useState("");
   const [activeTab, setActiveTab] = useState("search");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [mySongs, setMySongs] = useState<SongData[]>([]);
@@ -247,6 +251,8 @@ const Home = () => {
       setUploadedContent("");
       setUploadedTitle("");
       setUploadedArtist("");
+      setUploadedSongTuning("");
+      setUploadedGuitarTuning("");
       setIsEditingMetadata(false);
     }
     
@@ -266,11 +272,15 @@ const Home = () => {
     
     let extractedTitle = "";
     let extractedArtist = "";
+    let extractedSongTuning = "";
+    let extractedGuitarTuning = "";
     
     // Check for metadata in the content first (our PDF extractor adds these)
     const lines = content.split('\n');
     const titleLine = lines.find(line => line.match(/^\[title\](.+)\[\/title\]$/i));
     const artistLine = lines.find(line => line.match(/^\[artist\](.+)\[\/artist\]$/i));
+    const songTuningLine = lines.find(line => line.match(/^\[songtuning\](.+)\[\/songtuning\]$/i));
+    const guitarTuningLine = lines.find(line => line.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i));
     
     if (titleLine) {
       const titleMatch = titleLine.match(/^\[title\](.+)\[\/title\]$/i);
@@ -287,10 +297,27 @@ const Home = () => {
         console.log('Found artist in content metadata:', extractedArtist);
       }
     }
+
+    if (songTuningLine) {
+      const songTuningMatch = songTuningLine.match(/^\[songtuning\](.+)\[\/songtuning\]$/i);
+      if (songTuningMatch && songTuningMatch[1]) {
+        extractedSongTuning = songTuningMatch[1].trim();
+        console.log('Found song tuning in content metadata:', extractedSongTuning);
+      }
+    }
+
+    if (guitarTuningLine) {
+      const guitarTuningMatch = guitarTuningLine.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i);
+      if (guitarTuningMatch && guitarTuningMatch[1]) {
+        extractedGuitarTuning = guitarTuningMatch[1].trim();
+        console.log('Found guitar tuning in content metadata:', extractedGuitarTuning);
+      }
+    }
     
     // If metadata wasn't found, try to extract from filename (Cifra Club - Artist - Title format)
     if ((!extractedTitle || !extractedArtist) && fileName) {
-      const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      const fileNameWithoutExt = fileName.replace(/\.(pdf|PDF)$/, '')
+                                       .replace(/\s*\(\d+\)$/, '');
       const parts = fileNameWithoutExt.split(" - ");
       
       if (parts.length >= 3 && parts[0].toLowerCase().includes('cifra club')) {
@@ -319,28 +346,76 @@ const Home = () => {
         console.log('Using filename as title:', extractedTitle);
       }
     }
+
+    // Try to extract tuning information from content before [intro]
+    if (!extractedSongTuning || !extractedGuitarTuning) {
+      // Find the first line containing "intro" in any case
+      const introIndex = lines.findIndex(line => line.toLowerCase().includes('intro'));
+      if (introIndex > 0) {
+        const preIntroLines = lines.slice(0, introIndex);
+        
+        // Look for tuning patterns in a more generic way
+        for (const line of preIntroLines) {
+          // Check for song tuning (Tom)
+          if (!extractedSongTuning) {
+            // Look for the first line containing "Tom" and extract everything after the colon/equals
+            if (line.toLowerCase().includes('tom')) {
+              const afterColon = line.split(/[:=]/)[1]?.trim();
+              if (afterColon) {
+                extractedSongTuning = afterColon;
+                console.log('Found song tuning in content:', extractedSongTuning);
+              }
+            }
+          }
+          
+          // Check for guitar tuning
+          if (!extractedGuitarTuning) {
+            // Look for lines containing 6 notes separated by spaces
+            const tuningMatch = line.match(/((?:[A-G][#b]?\s+){5}[A-G][#b]?)/i);
+            if (tuningMatch) {
+              extractedGuitarTuning = tuningMatch[1].trim();
+              console.log('Found guitar tuning in content:', extractedGuitarTuning);
+            }
+          }
+        }
+      }
+    }
     
-    // Remove the metadata lines from the content if they were added by our PDF extractor
-    if (titleLine || artistLine) {
+    // Remove the metadata lines and pre-intro content from the content if they were added by our PDF extractor
+    if (titleLine || artistLine || songTuningLine || guitarTuningLine) {
       const filteredLines = lines.filter(line => 
         !line.match(/^\[title\](.+)\[\/title\]$/i) && 
-        !line.match(/^\[artist\](.+)\[\/artist\]$/i));
+        !line.match(/^\[artist\](.+)\[\/artist\]$/i) &&
+        !line.match(/^\[songtuning\](.+)\[\/songtuning\]$/i) &&
+        !line.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i));
       
       // Remove any empty lines at the beginning
       while (filteredLines.length > 0 && filteredLines[0].trim() === '') {
         filteredLines.shift();
       }
       
-      // Update the content without the metadata lines
+      // Find the first line containing "intro" in any case
+      const introIndex = filteredLines.findIndex(line => line.toLowerCase().includes('intro'));
+      if (introIndex > 0) {
+        // Keep the intro line itself
+        const introLine = filteredLines[introIndex];
+        filteredLines.splice(0, introIndex);
+        // Add back the intro line with proper formatting
+        filteredLines.unshift('[intro]');
+      }
+      
+      // Update the content without the metadata lines and pre-intro content
       const filteredContent = filteredLines.join('\n');
       setUploadedContent(filteredContent);
     }
     
     setUploadedTitle(extractedTitle || "Untitled Song");
     setUploadedArtist(extractedArtist || "");
+    setUploadedSongTuning(extractedSongTuning);
+    setUploadedGuitarTuning(extractedGuitarTuning);
   };
   
-  const handleSaveUploadedSong = (content?: string, title?: string, artist?: string) => {
+  const handleSaveUploadedSong = (content?: string, title?: string, artist?: string, songTuning?: string, guitarTuning?: string) => {
     // Use the provided content or fall back to the state value
     const songContent = content || uploadedContent;
     
@@ -356,11 +431,15 @@ const Home = () => {
     // Use the provided title/artist or fall back to the state values
     const songTitle = title || uploadedTitle || "Untitled Song";
     const songArtist = artist || uploadedArtist || "";
+    const songTuningValue = songTuning || uploadedSongTuning || "";
+    const guitarTuningValue = guitarTuning || uploadedGuitarTuning || "";
     
     const newSong: SongData = {
       id: `song-${Date.now()}`,
       title: songTitle,
       artist: songArtist,
+      songTuning: songTuningValue,
+      guitarTuning: guitarTuningValue,
       content: songContent,
       dateAdded: new Date().toISOString()
     };
@@ -372,6 +451,8 @@ const Home = () => {
     setUploadedContent("");
     setUploadedTitle("");
     setUploadedArtist("");
+    setUploadedSongTuning("");
+    setUploadedGuitarTuning("");
     setIsEditingMetadata(false);
     
     // Navigate after state updates
@@ -467,22 +548,44 @@ const Home = () => {
                               <div className="flex-1">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div className="space-y-2">
-                                    <Label htmlFor="song-title-input">Song Title</Label>
+                                    <Label htmlFor="song-title-input">Song Title *</Label>
                                     <Input 
                                       id="song-title-input" 
                                       value={uploadedTitle} 
                                       onChange={(e) => setUploadedTitle(e.target.value)} 
                                       placeholder="Enter song title"
                                       className="w-full h-10"
+                                      required
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="song-artist-input">Artist</Label>
+                                    <Label htmlFor="song-artist-input">Artist *</Label>
                                     <Input 
                                       id="song-artist-input" 
                                       value={uploadedArtist} 
                                       onChange={(e) => setUploadedArtist(e.target.value)} 
                                       placeholder="Enter artist name"
+                                      className="w-full h-10"
+                                      required
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="song-tuning-input">Song Tuning</Label>
+                                    <Input 
+                                      id="song-tuning-input" 
+                                      value={uploadedSongTuning} 
+                                      onChange={(e) => setUploadedSongTuning(e.target.value)} 
+                                      placeholder="e.g. C# minor"
+                                      className="w-full h-10"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="guitar-tuning-input">Guitar Tuning</Label>
+                                    <Input 
+                                      id="guitar-tuning-input" 
+                                      value={uploadedGuitarTuning} 
+                                      onChange={(e) => setUploadedGuitarTuning(e.target.value)} 
+                                      placeholder="e.g. Standard tuning"
                                       className="w-full h-10"
                                     />
                                   </div>
@@ -493,6 +596,7 @@ const Home = () => {
                                   onClick={() => setIsEditingMetadata(true)}
                                   className="w-12 h-10 shrink-0"
                                   aria-label="Continue to edit"
+                                  disabled={!uploadedTitle || !uploadedArtist}
                                 >
                                   <ArrowRight className="h-5 w-5" />
                                 </Button>
@@ -506,6 +610,8 @@ const Home = () => {
                         ref={chordDisplayRef}
                         title={uploadedTitle} 
                         artist={uploadedArtist} 
+                        songTuning={uploadedSongTuning}
+                        guitarTuning={uploadedGuitarTuning}
                         content={uploadedContent} 
                         enableEdit={true}
                         onSave={handleSaveUploadedSong}
@@ -542,6 +648,8 @@ const Home = () => {
                       ref={chordDisplayRef}
                       title={selectedSong.title} 
                       artist={selectedSong.artist} 
+                      songTuning={selectedSong.songTuning}
+                      guitarTuning={selectedSong.guitarTuning}
                       content={selectedSong.content}
                       onSave={handleUpdateSong}
                     />
@@ -621,6 +729,8 @@ const Home = () => {
                     ref={chordDisplayRef}
                     title={demoSong.title} 
                     artist={demoSong.artist} 
+                    songTuning={demoSong.songTuning}
+                    guitarTuning={demoSong.guitarTuning}
                     content={demoSong.content} 
                   />
                 </div>
