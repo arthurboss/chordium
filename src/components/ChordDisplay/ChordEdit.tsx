@@ -108,12 +108,12 @@ const ChordEdit: React.FC<ChordEditProps> = ({
     } else { // reset
       newIndex = 0;
     }
-    
+
     setCurrentSectionIndex(newIndex);
-    
+
     if (contentRef.current) {
       const nextSectionEl = contentRef.current.querySelector(sections[newIndex]) as HTMLElement | null;
-      
+
       if (nextSectionEl) {
         nextSectionEl.scrollIntoView({ behavior: 'smooth' });
       }
@@ -144,7 +144,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                   >
                     <div id="basic-format" className="snap-center h-full w-full flex flex-col p-4 border-b">
                       <div className="flex-grow">
-                        <h3 className="font-medium text-lg">Basic Format</h3>
+                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Basic Format</h3>
                         <p className="text-sm text-muted-foreground">
                           Each line should contain either lyrics or chords. Chords should be placed above the corresponding lyrics.
                         </p>
@@ -156,7 +156,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                     </div>
                     <div id="sections" className="snap-center h-full w-full flex flex-col p-4 border-b">
                       <div className="flex-grow">
-                        <h3 className="font-medium text-lg">Sections</h3>
+                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Sections</h3>
                         <p className="text-sm text-muted-foreground">
                           To separate different sections of the song (Intro, Verse, Chorus, etc.), use a blank line followed by the section name in square brackets.
                         </p>
@@ -177,7 +177,7 @@ When I find myself in times of trouble`}
                     </div>
                     <div id="example" className="snap-center h-full w-full flex flex-col p-4 border-b">
                       <div className="flex-grow">
-                        <h3 className="font-medium text-lg">Example</h3>
+                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Example</h3>
                         <pre className="text-sm bg-muted p-2 rounded">
                           {`[C]      [G]      [Am]
 Let it be, let it be, let it be`}
@@ -190,7 +190,7 @@ Let it be, let it be, let it be`}
                     </div>
                     <div id="tips" className="snap-center h-full w-full flex flex-col p-4">
                       <div className="flex-grow">
-                        <h3 className="font-medium text-lg">Tips</h3>
+                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Tips</h3>
                         <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
                           <li>Use square brackets [ ] around chords</li>
                           <li>Align chords with the corresponding lyrics</li>
@@ -207,14 +207,18 @@ Let it be, let it be, let it be`}
                     </div>
                   </div>
                   <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      onClick={() => navigateSection('prev')}
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
+                    {currentSectionIndex > 0 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        onClick={() => navigateSection('prev')}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <div className="w-8 h-8"></div> // Placeholder to maintain layout
+                    )}
                     {currentSectionIndex === sections.length - 1 ? (
                       <Button
                         variant="outline"
