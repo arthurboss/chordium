@@ -316,7 +316,7 @@ const Home = () => {
     
     // If metadata wasn't found, try to extract from filename (Cifra Club - Artist - Title format)
     if ((!extractedTitle || !extractedArtist) && fileName) {
-      const fileNameWithoutExt = fileName.replace(/\.(pdf|PDF)$/, '')
+      const fileNameWithoutExt = fileName.replace(/\.(pdf|PDF|txt|TXT|text|TEXT)$/, '')
                                        .replace(/\s*\(\d+\)$/, '');
       const parts = fileNameWithoutExt.split(" - ");
       
