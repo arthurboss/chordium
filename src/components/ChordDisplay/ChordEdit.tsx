@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChordEditProps } from './types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
-import { Save, ArrowLeft, ArrowRight, Maximize2, Minimize2, ChevronDown, ArrowUp } from 'lucide-react';
+import { Save, ArrowLeft, ArrowRight, Maximize2, Minimize2, ChevronDown, ArrowUp, RotateCw } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import {
   Dialog,
@@ -99,10 +99,15 @@ const ChordEdit: React.FC<ChordEditProps> = ({
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const sections = ['#basic-format', '#sections', '#example', '#tips'];
 
-  const navigateSection = (direction: 'next' | 'prev') => {
-    const newIndex = direction === 'next' 
-      ? (currentSectionIndex < sections.length - 1 ? currentSectionIndex + 1 : 0)
-      : (currentSectionIndex > 0 ? currentSectionIndex - 1 : sections.length - 1);
+  const navigateSection = (direction: 'next' | 'prev' | 'reset') => {
+    let newIndex;
+    if (direction === 'next') {
+      newIndex = currentSectionIndex < sections.length - 1 ? currentSectionIndex + 1 : 0;
+    } else if (direction === 'prev') {
+      newIndex = currentSectionIndex > 0 ? currentSectionIndex - 1 : sections.length - 1;
+    } else { // reset
+      newIndex = 0;
+    }
     
     setCurrentSectionIndex(newIndex);
     
@@ -210,14 +215,25 @@ Let it be, let it be, let it be`}
                     >
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      onClick={() => navigateSection('next')}
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    {currentSectionIndex === sections.length - 1 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        onClick={() => navigateSection('reset')}
+                      >
+                        <RotateCw className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        onClick={() => navigateSection('next')}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </DialogContent>
               </Dialog>
