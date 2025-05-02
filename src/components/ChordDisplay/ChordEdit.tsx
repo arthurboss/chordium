@@ -133,7 +133,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                     ?
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-[425px] w-[90vw] max-h-[80vh] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden pb-8">
+                <DialogContent className="max-w-[425px] w-[90vw] max-h-[80vh] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden pb-12">
                   <DialogHeader className="text-left">
                     <DialogTitle>Chord Sheet Formatting Guide</DialogTitle>
                   </DialogHeader>
@@ -149,10 +149,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                           Each line should contain either lyrics or chords. Chords should be placed above the corresponding lyrics.
                         </p>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-muted-foreground">Next: Sections</span>
-                        <span className="text-sm text-muted-foreground">Part 1 of 4</span>
-                      </div>
+
                     </div>
                     <div id="sections" className="snap-center h-full w-full flex flex-col p-4 border-b">
                       <div className="flex-grow">
@@ -160,7 +157,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                         <p className="text-sm text-muted-foreground">
                           To separate different sections of the song (Intro, Verse, Chorus, etc.), use a blank line followed by the section name in square brackets.
                         </p>
-                        <pre className="text-sm bg-muted p-2 rounded">
+                        <pre className="text-xs bg-muted mt-2 p-2 rounded border">
                           {`[Intro]
 [C]      [G]      [Am]
 Let it be, let it be, let it be
@@ -170,22 +167,15 @@ Let it be, let it be, let it be
 When I find myself in times of trouble`}
                         </pre>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-muted-foreground">Next: Example</span>
-                        <span className="text-sm text-muted-foreground">Part 2 of 4</span>
-                      </div>
+
                     </div>
                     <div id="example" className="snap-center h-full w-full flex flex-col p-4 border-b">
                       <div className="flex-grow">
                         <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Example</h3>
-                        <pre className="text-sm bg-muted p-2 rounded">
+                        <pre className="text-xs bg-muted mt-2 p-2 rounded border">
                           {`[C]      [G]      [Am]
 Let it be, let it be, let it be`}
                         </pre>
-                      </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-muted-foreground">Next: Tips</span>
-                        <span className="text-sm text-muted-foreground">Part 3 of 4</span>
                       </div>
                     </div>
                     <div id="tips" className="snap-center h-full w-full flex flex-col p-4">
@@ -200,44 +190,54 @@ Let it be, let it be, let it be`}
                           <li>Common section names: [Intro], [Verse 1], [Chorus], [Bridge], [Outro]</li>
                         </ul>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-sm text-muted-foreground">Next: Basic Format</span>
-                        <span className="text-sm text-muted-foreground">Part 4 of 4</span>
-                      </div>
+
                     </div>
                   </div>
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4">
-                    {currentSectionIndex > 0 ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        onClick={() => navigateSection('prev')}
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <div className="w-8 h-8"></div> // Placeholder to maintain layout
-                    )}
-                    {currentSectionIndex === sections.length - 1 ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        onClick={() => navigateSection('reset')}
-                      >
-                        <RotateCw className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        onClick={() => navigateSection('next')}
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    )}
+                  <div className="absolute bottom-2 left-0 right-0 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-4 items-center">
+                    <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
+                      {currentSectionIndex > 0 ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 rounded-full flex items-center justify-center"
+                          onClick={() => navigateSection('prev')}
+                        >
+                          <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <div className="w-8 h-8"></div>
+                      )}
+                      <span className="text-sm text-muted-foreground">
+                        {`${currentSectionIndex + 1} / ${sections.length}`}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
+                      <span className="text-sm text-muted-foreground truncate">
+                        {sections[currentSectionIndex] === '#basic-format' && 'Next: Sections'}
+                        {sections[currentSectionIndex] === '#sections' && 'Next: Example'}
+                        {sections[currentSectionIndex] === '#example' && 'Next: Tips'}
+                        {sections[currentSectionIndex] === '#tips' && 'Next: Basic Format'}
+                      </span>
+                      {currentSectionIndex !== sections.length - 1 ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          onClick={() => navigateSection('next')}
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          onClick={() => navigateSection('reset')}
+                        >
+                          <RotateCw className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>
