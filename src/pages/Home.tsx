@@ -268,6 +268,15 @@ const Home = () => {
   };
   
   const handleFileUpload = (content: string, fileName: string) => {
+    // Reset all upload states first
+    setUploadedContent("");
+    setUploadedTitle("");
+    setUploadedArtist("");
+    setUploadedSongTuning("");
+    setUploadedGuitarTuning("");
+    setIsEditingMetadata(false);
+    
+    // Now process the new file
     setUploadedContent(content);
     
     let extractedTitle = "";
