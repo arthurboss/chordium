@@ -2,17 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChordEditProps } from './types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
-import { Save, ArrowLeft, ArrowRight, Maximize2, Minimize2, ChevronDown, ArrowUp, RotateCw } from 'lucide-react';
+import { Save, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '../ui/dialog';
+
 import { MarkdownDialog } from '../ui/markdown-dialog';
+
+// Import the MDX files directly as components
+import Sections from '../../assets/guides/sections.mdx';
+import ChordNotation from '../../assets/guides/chord-notation.mdx';
+import Example from '../../assets/guides/example.mdx';
+import Tips from '../../assets/guides/tips.mdx';
 
 const ChordEdit: React.FC<ChordEditProps> = ({
   editContent,
@@ -113,11 +112,11 @@ const ChordEdit: React.FC<ChordEditProps> = ({
                     ?
                   </Button>
                 }
-                markdownFiles={[
-                  'src/guides/chord-sheet-formatting/basic-format.md',
-                  'src/guides/chord-sheet-formatting/sections.md',
-                  'src/guides/chord-sheet-formatting/example.md',
-                  'src/guides/chord-sheet-formatting/tips.md'
+                mdxComponents={[
+                  { title: 'Sections', component: Sections },
+                  { title: 'Chords', component: ChordNotation },
+                  { title: 'Example', component: Example },
+                  { title: 'Tips', component: Tips }
                 ]}
               />
             </div>
