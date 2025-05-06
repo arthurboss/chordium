@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import { MarkdownDialog } from '../ui/markdown-dialog';
 
 const ChordEdit: React.FC<ChordEditProps> = ({
   editContent,
@@ -96,29 +97,6 @@ const ChordEdit: React.FC<ChordEditProps> = ({
     };
   }, []);
 
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const sections = ['#basic-format', '#sections', '#example', '#tips'];
-
-  const navigateSection = (direction: 'next' | 'prev' | 'reset') => {
-    let newIndex;
-    if (direction === 'next') {
-      newIndex = currentSectionIndex < sections.length - 1 ? currentSectionIndex + 1 : 0;
-    } else if (direction === 'prev') {
-      newIndex = currentSectionIndex > 0 ? currentSectionIndex - 1 : sections.length - 1;
-    } else { // reset
-      newIndex = 0;
-    }
-
-    setCurrentSectionIndex(newIndex);
-
-    if (contentRef.current) {
-      const nextSectionEl = contentRef.current.querySelector(sections[newIndex]) as HTMLElement | null;
-
-      if (nextSectionEl) {
-        nextSectionEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
 
   return (
     <div className={`w-full mx-auto flex flex-col transition-all duration-200 ${isFullScreen ? 'fixed inset-0 bg-background z-50' : 'max-w-3xl h-[calc(100vh-12rem)]'}`}>
@@ -127,120 +105,21 @@ const ChordEdit: React.FC<ChordEditProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">Edit Sheet</h2>
-              <Dialog>
-                <DialogTrigger asChild>
+
+              <MarkdownDialog
+                title='Chord Sheet Formatting Guide'
+                trigger={
                   <Button variant="outline" size="sm" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center border">
                     ?
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-[425px] w-[90vw] max-h-[80vh] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden pb-12">
-                  <DialogHeader className="text-left">
-                    <DialogTitle>Chord Sheet Formatting Guide</DialogTitle>
-                  </DialogHeader>
-                  <div
-                    ref={contentRef}
-                    onScroll={() => checkScroll()}
-                    className="snap-y snap-mandatory overflow-y-scroll max-h-[calc(80vh-8rem)] relative scroll-smooth"
-                  >
-                    <div id="basic-format" className="snap-center h-full w-full flex flex-col p-4 border-b">
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Basic Format</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Each line should contain either lyrics or chords. Chords should be placed above the corresponding lyrics.
-                        </p>
-                      </div>
-
-                    </div>
-                    <div id="sections" className="snap-center h-full w-full flex flex-col p-4 border-b">
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Sections</h3>
-                        <p className="text-sm text-muted-foreground">
-                          To separate different sections of the song (Intro, Verse, Chorus, etc.), use a blank line followed by the section name in square brackets.
-                        </p>
-                        <pre className="text-xs bg-muted mt-2 p-2 rounded border">
-                          {`[Intro]
-[C]      [G]      [Am]
-Let it be, let it be, let it be
-
-[Verse 1]
-[C]      [G]      [Am]
-When I find myself in times of trouble`}
-                        </pre>
-                      </div>
-
-                    </div>
-                    <div id="example" className="snap-center h-full w-full flex flex-col p-4 border-b">
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Example</h3>
-                        <pre className="text-xs bg-muted mt-2 p-2 rounded border">
-                          {`[C]      [G]      [Am]
-Let it be, let it be, let it be`}
-                        </pre>
-                      </div>
-                    </div>
-                    <div id="tips" className="snap-center h-full w-full flex flex-col p-4">
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-lg mb-2 pb-2 border-b border-muted text-center">Tips</h3>
-                        <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
-                          <li>Use square brackets [ ] around chords</li>
-                          <li>Align chords with the corresponding lyrics</li>
-                          <li>Use spaces to position chords correctly</li>
-                          <li>Each line should be either chords or lyrics, not both</li>
-                          <li>Separate sections with a blank line and section name in brackets</li>
-                          <li>Common section names: [Intro], [Verse 1], [Chorus], [Bridge], [Outro]</li>
-                        </ul>
-                      </div>
-
-                    </div>
-                  </div>
-                  <div className="absolute bottom-2 left-0 right-0 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-4 items-center">
-                    <div className="grid grid-cols-[auto_1fr] gap-2 items-center">
-                      {currentSectionIndex > 0 ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-8 h-8 rounded-full flex items-center justify-center"
-                          onClick={() => navigateSection('prev')}
-                        >
-                          <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <div className="w-8 h-8"></div>
-                      )}
-                      <span className="text-sm text-muted-foreground">
-                        {`${currentSectionIndex + 1} / ${sections.length}`}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
-                      <span className="text-sm text-muted-foreground truncate">
-                        {sections[currentSectionIndex] === '#basic-format' && 'Next: Sections'}
-                        {sections[currentSectionIndex] === '#sections' && 'Next: Example'}
-                        {sections[currentSectionIndex] === '#example' && 'Next: Tips'}
-                        {sections[currentSectionIndex] === '#tips' && 'Next: Basic Format'}
-                      </span>
-                      {currentSectionIndex !== sections.length - 1 ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                          onClick={() => navigateSection('next')}
-                        >
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                          onClick={() => navigateSection('reset')}
-                        >
-                          <RotateCw className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                }
+                markdownFiles={[
+                  'src/guides/chord-sheet-formatting/basic-format.md',
+                  'src/guides/chord-sheet-formatting/sections.md',
+                  'src/guides/chord-sheet-formatting/example.md',
+                  'src/guides/chord-sheet-formatting/tips.md'
+                ]}
+              />
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={onReturn}>
