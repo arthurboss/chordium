@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from './dialog';
 import { Button } from './button';
-import { ArrowLeft, ArrowRight, RotateCw, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ArrowRight, RotateCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MarkdownDialogProps {
   trigger: React.ReactNode;
@@ -28,7 +28,8 @@ interface DialogMainProps {
   markdownContents: MarkdownContent[];
   currentSectionIndex: number;
   shouldScroll: boolean;
-  scrollToBottom: () => void;
+  isAtBottom: boolean;
+  scrollToToggle: () => void;
 }
 
 const DialogMain: React.FC<DialogMainProps> = ({
@@ -36,47 +37,50 @@ const DialogMain: React.FC<DialogMainProps> = ({
   markdownContents,
   currentSectionIndex,
   shouldScroll,
-  scrollToBottom,
+  isAtBottom,
+  scrollToToggle,
 }) => {
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   return (
-      <div
-        ref={contentRef}
-        className="flex overflow-x-hidden"
-      >
-        {markdownContents.length > 0 && markdownContents.map((section, index) => (
-          <div 
-            key={section.id} 
-            id={section.id.substring(1)} 
-            className="snap-center pt-4 w-full flex-shrink-0 overflow-y-auto no-scrollbar"
-            ref={el => sectionRefs.current[index] = el}
-          >
-            <h3 className="font-medium text-lg mb-2 pb-2 text-left">
-                {section.title}
-            </h3>
-            <div className="text-sm text-muted-foreground prose prose-sm">
-              <ReactMarkdown>
-                {section.content.replace(/^# .+$/m, '')}
-              </ReactMarkdown>
-            </div>
+    <div
+      ref={contentRef}
+      className="flex overflow-x-hidden"
+    >
+      {markdownContents.length > 0 && markdownContents.map((section, index) => (
+        <div
+          key={section.id}
+          id={section.id.substring(1)}
+          className={`snap-center pt-4 w-full flex-shrink-0 overflow-y-auto no-scrollbar ${shouldScroll ? 'pb-8' : ''}`}
+          ref={el => sectionRefs.current[index] = el}
+        >
+          <h3 className="font-medium text-lg mb-2 pb-2 text-left">
+            {section.title}
+          </h3>
+          <div className="text-sm text-muted-foreground prose prose-sm">
+            <ReactMarkdown>
+              {section.content.replace(/^# .+$/m, '')}
+            </ReactMarkdown>
           </div>
-        ))}
-      
+        </div>
+      ))}
+
+      {/* Scroll button - changes between down and up based on scroll position */}
       {shouldScroll && (
         <>
-        {/* Scroll indicator gradient */}
-        <div className="absolute bottom-[3.5rem] left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-        {/* Scroll button */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-[calc(100%-3.5rem)] left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-8 h-8 shadow-md bg-background"
-          onClick={scrollToBottom}
-          aria-label="Scroll to bottom"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </Button>
+          {/* Scroll indicator gradient */}
+          {!isAtBottom && (
+            <div className="absolute bottom-[3.5rem] left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-[calc(100%-3.5rem)] left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full w-8 h-8 shadow-md bg-background"
+            onClick={scrollToToggle}
+            aria-label={isAtBottom ? "Scroll to top" : "Scroll to bottom"}
+          >
+            {isAtBottom ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
         </>
       )}
     </div>
@@ -152,6 +156,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
   const [markdownContents, setMarkdownContents] = useState<MarkdownContent[]>([]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [shouldScroll, setShouldScroll] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -161,14 +166,14 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
         markdownFiles.map(async (filePath) => {
           const response = await fetch(filePath);
           const text = await response.text();
-          
+
           // Extract title (first heading)
           const titleMatch = text.match(/^# (.+)$/m);
           const title = titleMatch ? titleMatch[1] : 'Untitled';
-          
+
           // Generate ID from title
           const id = `#${title.toLowerCase().replace(/\s+/g, '-')}`;
-          
+
           return {
             title,
             content: text,
@@ -176,22 +181,23 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
           };
         })
       );
-      
+
       setMarkdownContents(contents);
     };
-    
+
     loadMarkdownFiles();
   }, [markdownFiles]);
 
   // Reset section index when dialog is closed
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    
+
     // Reset the index when dialog is closed
     if (!open) {
       setCurrentSectionIndex(0);
       setShouldScroll(false);
-      
+      setIsAtBottom(false);
+
       // Reset any scroll positions for next open
       if (contentRef.current) {
         contentRef.current.scrollLeft = 0;
@@ -206,7 +212,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
     }
   };
 
-  const checkShouldScroll = () => {    
+  const checkScrollStatus = () => {
     if (contentRef.current) {
       const sections = contentRef.current.children;
       if (sections.length > 0) {
@@ -214,34 +220,50 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
         if (currentSection) {
           // Check if the current section has more content than visible
           const hasScrollableContent = currentSection.scrollHeight > currentSection.clientHeight + 5;
-          
-          // Check if we're already at the bottom
-          const atBottom = currentSection.scrollHeight - currentSection.scrollTop <= currentSection.clientHeight + 10;
-          
-          // Only show scroll indicators if there's content to scroll and we're not at the bottom
-          const shouldShowScroll = hasScrollableContent && !atBottom;
-          setShouldScroll(shouldShowScroll);
-          return shouldShowScroll;
+
+          // Check if we're at the bottom
+          const scrollTop = currentSection.scrollTop;
+          const clientHeight = currentSection.clientHeight;
+          const scrollHeight = currentSection.scrollHeight;
+
+          // Consider "at bottom" when within 10px of the bottom
+          const atBottom = scrollHeight - scrollTop <= clientHeight + 10;
+
+          // Update states
+          setShouldScroll(hasScrollableContent);
+          setIsAtBottom(hasScrollableContent && atBottom);
+
+          return hasScrollableContent;
         }
       }
     }
     setShouldScroll(false);
+    setIsAtBottom(false);
     return false;
   };
 
-  // Scroll to bottom of current section
-  const scrollToBottom = () => {
+  // Toggle between scroll to bottom and scroll to top
+  const scrollToToggle = () => {
     if (contentRef.current) {
       const sections = contentRef.current.children;
       if (sections.length > 0) {
         const currentSection = sections[currentSectionIndex] as HTMLElement;
         if (currentSection) {
-          currentSection.scrollTo({
-            top: currentSection.scrollHeight,
-            behavior: 'smooth'
-          });
-          // Check scroll state immediately after scrolling starts
-          checkShouldScroll();
+          if (isAtBottom) {
+            // Scroll to top
+            currentSection.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            // Scroll to bottom
+            currentSection.scrollTo({
+              top: currentSection.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+          // Update scroll status after a short delay to allow smooth scrolling
+          setTimeout(checkScrollStatus, 100);
         }
       }
     }
@@ -250,7 +272,8 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
   useEffect(() => {
     // Immediately hide scroll indicators when changing pages
     setShouldScroll(false);
-    
+    setIsAtBottom(false);
+
     // When page changes, reset vertical scroll for all sections
     if (contentRef.current) {
       const sections = contentRef.current.children;
@@ -261,20 +284,19 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
         }
       }
     }
-    
-    // Check scroll status immediately after changing pages
-    // Use a minimal delay to ensure the DOM has updated
-    setTimeout(checkShouldScroll, 50);
-    
+
+    // Check scroll status with minimal delay to ensure the DOM has updated
+    setTimeout(checkScrollStatus, 50);
+
   }, [currentSectionIndex]);
 
   useEffect(() => {
     // Add scroll event listener for the current section
     const handleScroll = () => {
-      // Check scroll state immediately on each scroll event
-      checkShouldScroll();
+      // Check scroll state on each scroll event
+      checkScrollStatus();
     };
-    
+
     // Attach scroll listener to current section only
     const currentSection = contentRef.current?.children[currentSectionIndex] as HTMLElement;
     if (currentSection) {
@@ -282,13 +304,13 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
     }
 
     // Initial check once content is loaded
-    checkShouldScroll();
-    
+    checkScrollStatus();
+
     // Resize observer for dynamic content
     const resizeObserver = new ResizeObserver(() => {
-      checkShouldScroll();
+      checkScrollStatus();
     });
-    
+
     if (contentRef.current) {
       resizeObserver.observe(contentRef.current);
     }
@@ -303,10 +325,11 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
 
   const navigateSection = (direction: 'next' | 'prev' | 'reset') => {
     if (markdownContents.length === 0) return;
-    
+
     // Immediately hide the scroll indicator during navigation
     setShouldScroll(false);
-    
+    setIsAtBottom(false);
+
     let newIndex;
     if (direction === 'next') {
       newIndex = currentSectionIndex < markdownContents.length - 1 ? currentSectionIndex + 1 : 0;
@@ -338,7 +361,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
 
   const getNextSectionTitle = () => {
     if (markdownContents.length === 0) return '';
-    
+
     const nextIndex = currentSectionIndex < markdownContents.length - 1 ? currentSectionIndex + 1 : 0;
     return `Next: ${markdownContents[nextIndex]?.title || ''}`;
   };
@@ -358,9 +381,10 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
           markdownContents={markdownContents}
           currentSectionIndex={currentSectionIndex}
           shouldScroll={shouldScroll}
-          scrollToBottom={scrollToBottom}
+          isAtBottom={isAtBottom}
+          scrollToToggle={scrollToToggle}
         />
-        
+
         <DialogFooter
           navigateSection={navigateSection}
           currentSectionIndex={currentSectionIndex}
