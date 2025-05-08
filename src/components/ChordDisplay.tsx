@@ -1,6 +1,5 @@
-
 import { useEffect, forwardRef } from 'react';
-import { updateLayoutHeights } from '@/utils/layout';
+import { updateLayoutHeights, NAVBAR_HEIGHT, FOOTER_HEIGHT } from '@/utils/layout';
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
