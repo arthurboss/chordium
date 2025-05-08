@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChordContentProps, ChordLine } from './types';
 
@@ -18,9 +19,10 @@ const ChordContent: React.FC<ChordContentProps> = ({
   else if (fontStyle === 'sans-serif') fontFamily = 'system-ui, sans-serif';
   else if (fontStyle === 'monospace') fontFamily = 'monospace';
   // Default: do not override
+  
   return (
     <div 
-      className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
+      className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border overflow-hidden"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
       {processedContent.map((section, sectionIndex) => (
@@ -30,12 +32,31 @@ const ChordContent: React.FC<ChordContentProps> = ({
           )}
           <div className="mb-5">
             {section.lines.map((line: ChordLine, lineIndex: number) => {
-              if (line.type === 'tab' && hideGuitarTabs) return null;
-              if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) return null;
-              if (viewMode === "chords-only" && line.type === 'lyrics') return null;
+              // Skip tab lines when hideGuitarTabs is true
+              if (line.type === 'tab' && hideGuitarTabs) {
+                return null;
+              }
+              
+              // Hide chords and tabs in lyrics-only mode
+              if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) {
+                return null;
+              }
+              
+              // Hide lyrics in chords-only mode
+              if (viewMode === "chords-only" && line.type === 'lyrics') {
+                return null;
+              }
+              
               if (line.type === 'tab') {
                 return (
-                  <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <pre 
+                    key={lineIndex} 
+                    className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" 
+                    style={{
+                      overflowWrap: 'break-word', 
+                      maxWidth: '100%'
+                    }}
+                  >
                     {line.content}
                   </pre>
                 );
@@ -55,17 +76,32 @@ const ChordContent: React.FC<ChordContentProps> = ({
                   parts.push(line.content.substring(lastIndex));
                 }
                 return (
-                  <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <div 
+                    key={lineIndex} 
+                    className="chord-line break-words" 
+                    style={{
+                      overflowWrap: 'break-word', 
+                      maxWidth: '100%'
+                    }}
+                  >
                     {parts.length > 0 ? parts : line.content}
                   </div>
                 );
               } else if (line.type === 'lyrics') {
                 return (
-                  <div key={lineIndex} className="lyrics-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <div 
+                    key={lineIndex} 
+                    className="lyrics-line break-words" 
+                    style={{
+                      overflowWrap: 'break-word', 
+                      maxWidth: '100%'
+                    }}
+                  >
                     {line.content}
                   </div>
                 );
               } else {
+                // Empty lines
                 return <div key={lineIndex} className="h-4" />;
               }
             })}
@@ -81,4 +117,4 @@ const ChordContent: React.FC<ChordContentProps> = ({
   );
 };
 
-export default ChordContent; 
+export default ChordContent;
