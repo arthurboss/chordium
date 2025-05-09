@@ -63,7 +63,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       
+      - name: Check if cypress-screenshots artifact exists
+        id: check-artifact
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+            return artifacts.data.artifacts.some(artifact => artifact.name === 'cypress-screenshots');
+
       - name: Download test artifacts
+        if: steps.check-artifact.outputs.result == 'true'
         uses: actions/download-artifact@v4.3.0
         with:
           name: cypress-screenshots
