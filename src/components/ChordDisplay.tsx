@@ -18,8 +18,12 @@ import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from '@/utils/layou
 interface ChordDisplayProps {
   title?: string;
   artist?: string;
+  songTuning?: string;
+  guitarTuning?: string;
   content: string;
-  onSave?: (content: string) => void;
+  onSave?: (content: string, title: string, artist: string, songTuning?: string, guitarTuning?: string) => void;
+  enableEdit?: boolean;
+  onReturn?: () => void;
 }
 
 // Enhanced chord regex pattern for better recognition
@@ -27,15 +31,27 @@ const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13
 
 const DEFAULT_SCROLL_SPEED = 3;
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({
+  title,
+  artist,
+  songTuning,
+  guitarTuning,
+  content,
+  onSave,
+  enableEdit = false,
+  onReturn,
+}, ref) => {
   const [transpose, setTranspose] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
+  const [lineHeight, setLineHeight] = useState(1.0); // Default line height set to 1.0 (displays as 2x)
   const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(enableEdit);
   const [editContent, setEditContent] = useState(content);
+  const [songTitle, setSongTitle] = useState(title || '');
+  const [songArtist, setSongArtist] = useState(artist || '');
   const [autoScroll, setAutoScroll] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(DEFAULT_SCROLL_SPEED);
   const isMobile = useIsMobile();
@@ -72,7 +88,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
                 const nav = document.querySelector('header');
                 if (nav) navbarOffset = nav.getBoundingClientRect().height;
               }
-            } catch {}
+            } catch (error) {
+              // Ignore measurement errors and use default offset
+              console.debug('Error measuring navbar height:', error);
+            }
             scrollTarget = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer for aesthetics
           }
           window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
@@ -179,7 +198,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         }
         currentSection = { 
           type: 'section', 
-          title: line.replace(/[\[\]]/g, ''), 
+          title: line.replace(/[[\]]/g, ''), // Fixed unnecessary escape
           lines: [] 
         };
       } else {
@@ -236,12 +255,12 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   // Handle saving edits
   const handleSaveEdits = () => {
     if (onSave) {
-      onSave(editContent);
+      onSave(editContent, songTitle, songArtist, songTuning, guitarTuning);
     }
     setIsEditing(false);
     toast({
-      title: "Changes saved",
-      description: "Your chord sheet has been updated"
+      title: "Song saved",
+      description: onSave ? "Your song has been saved to My Songs" : "Your chord sheet has been updated"
     });
   };
   
@@ -344,6 +363,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         setEditContent={setEditContent}
         handleSaveEdits={handleSaveEdits}
         setIsEditing={setIsEditing}
+        onReturn={onReturn || (() => setIsEditing(false))}
       />
     );
   }
@@ -352,10 +372,24 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
     <div ref={ref} id="chord-display">
       <div className="w-full max-w-3xl mx-auto">
         {/* Song header */}
-        {(title || artist) && (
+        {(songTitle || songArtist || songTuning || guitarTuning) && (
           <div className="mb-4 text-center">
-            {title && <h1 className="text-2xl font-bold">{title}</h1>}
-            {artist && <p className="text-muted-foreground">{artist}</p>}
+            {songTitle && <h1 className="text-2xl font-bold">{songTitle}</h1>}
+            {songArtist && <p className="text-muted-foreground">{songArtist}</p>}
+            {(songTuning || guitarTuning) && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                {songTuning && (
+                  <span className="mr-4">
+                    <span className="font-medium">Song Key:</span> {songTuning}
+                  </span>
+                )}
+                {guitarTuning && (
+                  <span>
+                    <span className="font-medium">Guitar Tuning:</span> {guitarTuning}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
         <ChordContent
@@ -363,6 +397,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           fontSize={fontSize}
           fontSpacing={fontSpacing}
           fontStyle={fontStyle}
+          lineHeight={lineHeight}
           viewMode={viewMode}
           hideGuitarTabs={hideGuitarTabs}
           renderChord={renderChord}
@@ -377,6 +412,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
+          lineHeight={lineHeight}
+          setLineHeight={setLineHeight}
           viewMode={viewMode}
           setViewMode={setViewMode}
           hideGuitarTabs={hideGuitarTabs}

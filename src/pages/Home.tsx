@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Music, Info, Save } from "lucide-react";
+import { Music, Info, Save, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,12 +10,15 @@ import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import ChordDisplay from "@/components/ChordDisplay";
 import FileUploader from "@/components/FileUploader";
+import SongMetadataForm from "@/components/SongMetadataForm";
 import Footer from "@/components/Footer";
 
 interface SongData {
   id: string;
   title: string;
   artist?: string;
+  songTuning?: string;
+  guitarTuning?: string;
   content: string;
   dateAdded: string;
 }
@@ -129,25 +132,65 @@ const Home = () => {
   const navigate = useNavigate();
   const [uploadedContent, setUploadedContent] = useState("");
   const [uploadedTitle, setUploadedTitle] = useState("");
+  const [uploadedArtist, setUploadedArtist] = useState("");
+  const [uploadedSongTuning, setUploadedSongTuning] = useState("");
+  const [uploadedGuitarTuning, setUploadedGuitarTuning] = useState("");
   const [activeTab, setActiveTab] = useState("search");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [mySongs, setMySongs] = useState<SongData[]>([]);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   
+  // Load songs from localStorage on mount
   useEffect(() => {
-    const savedSongs = localStorage.getItem("mySongs");
-    if (savedSongs) {
-      try {
-        setMySongs(JSON.parse(savedSongs));
-      } catch (e) {
-        console.error("Error loading saved songs:", e);
+    try {
+      const savedSongs = localStorage.getItem("mySongs");
+      const savedVersion = localStorage.getItem("mySongsVersion");
+      
+      if (savedSongs) {
+        // Version 1 is the current storage format
+        if (savedVersion === "1") {
+          setMySongs(JSON.parse(savedSongs));
+        } else {
+          // Handle older versions or initialize new storage
+          setMySongs([]);
+          localStorage.setItem("mySongsVersion", "1");
+        }
       }
+    } catch (e) {
+      console.error("Error loading saved songs:", e);
+      toast({
+        title: "Error loading songs",
+        description: "There was a problem loading your saved songs.",
+        variant: "destructive"
+      });
     }
   }, []);
   
+  // Save songs to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem("mySongs", JSON.stringify(mySongs));
+    try {
+      const songsJson = JSON.stringify(mySongs);
+      localStorage.setItem("mySongs", songsJson);
+      localStorage.setItem("mySongsVersion", "1");
+    } catch (e) {
+      // Handle storage quota exceeded or other errors
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        toast({
+          title: "Storage limit reached",
+          description: "Unable to save more songs. Please delete some songs to free up space.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error saving songs",
+          description: "There was a problem saving your changes.",
+          variant: "destructive"
+        });
+      }
+      console.error("Error saving songs:", e);
+    }
   }, [mySongs]);
 
   useEffect(() => {
@@ -185,7 +228,7 @@ const Home = () => {
       // Wait for the next frame to ensure the DOM is updated
       requestAnimationFrame(() => {
         if (chordDisplayRef.current) {
-          const headerHeight = 80; // Increased from 48 to 80 to account for full header + title/artist section
+          const headerHeight = 72;
           const elementPosition = chordDisplayRef.current.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
 
@@ -202,6 +245,16 @@ const Home = () => {
     setActiveTab(value);
     setSelectedSong(null);
     
+    // Clear upload states when switching to a different tab
+    if (value !== "upload") {
+      setUploadedContent("");
+      setUploadedTitle("");
+      setUploadedArtist("");
+      setUploadedSongTuning("");
+      setUploadedGuitarTuning("");
+      setIsEditingMetadata(false);
+    }
+    
     if (value === "upload") {
       navigate("/upload");
     } else if (value === "demo" && demoSong) {
@@ -213,8 +266,168 @@ const Home = () => {
     }
   };
   
-  const handleSaveUploadedSong = () => {
-    if (!uploadedContent.trim()) {
+  const handleFileUpload = (content: string, fileName: string) => {
+    // Reset all upload states first
+    setUploadedContent("");
+    setUploadedTitle("");
+    setUploadedArtist("");
+    setUploadedSongTuning("");
+    setUploadedGuitarTuning("");
+    setIsEditingMetadata(false);
+    
+    // Now process the new file
+    setUploadedContent(content);
+    
+    let extractedTitle = "";
+    let extractedArtist = "";
+    let extractedSongTuning = "";
+    let extractedGuitarTuning = "";
+    
+    // Check for metadata in the content first (our PDF extractor adds these)
+    const lines = content.split('\n');
+    const titleLine = lines.find(line => line.match(/^\[title\](.+)\[\/title\]$/i));
+    const artistLine = lines.find(line => line.match(/^\[artist\](.+)\[\/artist\]$/i));
+    const songTuningLine = lines.find(line => line.match(/^\[songtuning\](.+)\[\/songtuning\]$/i));
+    const guitarTuningLine = lines.find(line => line.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i));
+    
+    if (titleLine) {
+      const titleMatch = titleLine.match(/^\[title\](.+)\[\/title\]$/i);
+      if (titleMatch && titleMatch[1]) {
+        extractedTitle = titleMatch[1].trim();
+        console.log('Found title in content metadata:', extractedTitle);
+      }
+    }
+    
+    if (artistLine) {
+      const artistMatch = artistLine.match(/^\[artist\](.+)\[\/artist\]$/i);
+      if (artistMatch && artistMatch[1]) {
+        extractedArtist = artistMatch[1].trim();
+        console.log('Found artist in content metadata:', extractedArtist);
+      }
+    }
+
+    if (songTuningLine) {
+      const songTuningMatch = songTuningLine.match(/^\[songtuning\](.+)\[\/songtuning\]$/i);
+      if (songTuningMatch && songTuningMatch[1]) {
+        extractedSongTuning = songTuningMatch[1].trim();
+        console.log('Found song tuning in content metadata:', extractedSongTuning);
+      }
+    }
+
+    if (guitarTuningLine) {
+      const guitarTuningMatch = guitarTuningLine.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i);
+      if (guitarTuningMatch && guitarTuningMatch[1]) {
+        extractedGuitarTuning = guitarTuningMatch[1].trim();
+        console.log('Found guitar tuning in content metadata:', extractedGuitarTuning);
+      }
+    }
+    
+    // If metadata wasn't found, try to extract from filename (Cifra Club - Artist - Title format)
+    if ((!extractedTitle || !extractedArtist) && fileName) {
+      const fileNameWithoutExt = fileName.replace(/\.(pdf|PDF|txt|TXT|text|TEXT)$/, '')
+                                       .replace(/\s*\(\d+\)$/, '');
+      const parts = fileNameWithoutExt.split(" - ");
+      
+      if (parts.length >= 3 && parts[0].toLowerCase().includes('cifra club')) {
+        // Filename has Cifra Club - Artist - Title format
+        if (!extractedArtist) {
+          extractedArtist = parts[1].trim();
+          console.log('Extracted artist from filename:', extractedArtist);
+        }
+        if (!extractedTitle) {
+          extractedTitle = parts[2].trim();
+          console.log('Extracted title from filename:', extractedTitle);
+        }
+      } else if (parts.length >= 2) {
+        // Filename has Artist - Title format
+        if (!extractedArtist) {
+          extractedArtist = parts[0].trim();
+          console.log('Extracted artist from filename:', extractedArtist);
+        }
+        if (!extractedTitle) {
+          extractedTitle = parts[1].trim();
+          console.log('Extracted title from filename:', extractedTitle);
+        }
+      } else if (!extractedTitle) {
+        // Just use filename as title if we don't have one yet
+        extractedTitle = fileNameWithoutExt;
+        console.log('Using filename as title:', extractedTitle);
+      }
+    }
+
+    // Try to extract tuning information from content before [intro]
+    if (!extractedSongTuning || !extractedGuitarTuning) {
+      // Find the first line containing "intro" in any case
+      const introIndex = lines.findIndex(line => line.toLowerCase().includes('intro'));
+      if (introIndex > 0) {
+        const preIntroLines = lines.slice(0, introIndex);
+        
+        // Look for tuning patterns in a more generic way
+        for (const line of preIntroLines) {
+          // Check for song tuning (Tom)
+          if (!extractedSongTuning) {
+            // Look for the first line containing "Tom" and extract everything after the colon/equals
+            if (line.toLowerCase().includes('tom')) {
+              const afterColon = line.split(/[:=]/)[1]?.trim();
+              if (afterColon) {
+                extractedSongTuning = afterColon;
+                console.log('Found song tuning in content:', extractedSongTuning);
+              }
+            }
+          }
+          
+          // Check for guitar tuning
+          if (!extractedGuitarTuning) {
+            // Look for lines containing 6 notes separated by spaces
+            const tuningMatch = line.match(/((?:[A-G][#b]?\s+){5}[A-G][#b]?)/i);
+            if (tuningMatch) {
+              extractedGuitarTuning = tuningMatch[1].trim();
+              console.log('Found guitar tuning in content:', extractedGuitarTuning);
+            }
+          }
+        }
+      }
+    }
+    
+    // Remove the metadata lines and pre-intro content from the content if they were added by our PDF extractor
+    if (titleLine || artistLine || songTuningLine || guitarTuningLine) {
+      const filteredLines = lines.filter(line => 
+        !line.match(/^\[title\](.+)\[\/title\]$/i) && 
+        !line.match(/^\[artist\](.+)\[\/artist\]$/i) &&
+        !line.match(/^\[songtuning\](.+)\[\/songtuning\]$/i) &&
+        !line.match(/^\[guitartuning\](.+)\[\/guitartuning\]$/i));
+      
+      // Remove any empty lines at the beginning
+      while (filteredLines.length > 0 && filteredLines[0].trim() === '') {
+        filteredLines.shift();
+      }
+      
+      // Find the first line containing "intro" in any case
+      const introIndex = filteredLines.findIndex(line => line.toLowerCase().includes('intro'));
+      if (introIndex > 0) {
+        // Keep the intro line itself
+        const introLine = filteredLines[introIndex];
+        filteredLines.splice(0, introIndex);
+        // Add back the intro line with proper formatting
+        filteredLines.unshift('[intro]');
+      }
+      
+      // Update the content without the metadata lines and pre-intro content
+      const filteredContent = filteredLines.join('\n');
+      setUploadedContent(filteredContent);
+    }
+    
+    setUploadedTitle(extractedTitle || "Untitled Song");
+    setUploadedArtist(extractedArtist || "");
+    setUploadedSongTuning(extractedSongTuning);
+    setUploadedGuitarTuning(extractedGuitarTuning);
+  };
+  
+  const handleSaveUploadedSong = (content?: string, title?: string, artist?: string, songTuning?: string, guitarTuning?: string) => {
+    // Use the provided content or fall back to the state value
+    const songContent = content || uploadedContent;
+    
+    if (!songContent.trim()) {
       toast({
         title: "Error",
         description: "No content to save",
@@ -223,25 +436,40 @@ const Home = () => {
       return;
     }
     
-    const songTitle = uploadedTitle || "Untitled Song";
+    // Use the provided title/artist or fall back to the state values
+    const songTitle = title || uploadedTitle || "Untitled Song";
+    const songArtist = artist || uploadedArtist || "";
+    const songTuningValue = songTuning || uploadedSongTuning || "";
+    const guitarTuningValue = guitarTuning || uploadedGuitarTuning || "";
+    
     const newSong: SongData = {
       id: `song-${Date.now()}`,
       title: songTitle,
-      content: uploadedContent,
+      artist: songArtist,
+      songTuning: songTuningValue,
+      guitarTuning: guitarTuningValue,
+      content: songContent,
       dateAdded: new Date().toISOString()
     };
     
+    // Update all states synchronously
     setMySongs(prev => [newSong, ...prev]);
+    setSelectedSong(newSong);
+    setActiveTab("my-songs");
     setUploadedContent("");
     setUploadedTitle("");
+    setUploadedArtist("");
+    setUploadedSongTuning("");
+    setUploadedGuitarTuning("");
+    setIsEditingMetadata(false);
+    
+    // Navigate after state updates
+    navigate(`/my-songs?song=${newSong.id}`);
     
     toast({
       title: "Song saved",
       description: `"${songTitle}" has been added to My Songs`
     });
-    
-    setActiveTab("my-songs");
-    navigate("/my-songs");
   };
   
   const handleUpdateSong = (content: string) => {
@@ -280,15 +508,6 @@ const Home = () => {
     });
   };
   
-  const handleFileUpload = (content: string, fileName: string) => {
-    setUploadedContent(content);
-    
-    if (fileName) {
-      const title = fileName.replace(/\.[^/.]+$/, "");
-      setUploadedTitle(title);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -329,22 +548,31 @@ const Home = () => {
                 
                 {uploadedContent && (
                   <div className="mt-6 animate-fade-in">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-xl font-semibold">Uploaded Chord Sheet</h2>
-                      <Button 
-                        onClick={handleSaveUploadedSong}
-                        size="sm"
-                        className="flex items-center gap-1"
-                      >
-                        <Save className="h-4 w-4" />
-                        <span>Save to My Songs</span>
-                      </Button>
-                    </div>
-                    <ChordDisplay 
-                      ref={chordDisplayRef}
-                      title={uploadedTitle || undefined}
-                      content={uploadedContent} 
-                    />
+                    {!isEditingMetadata ? (
+                      <SongMetadataForm
+                        title={uploadedTitle}
+                        artist={uploadedArtist}
+                        songTuning={uploadedSongTuning}
+                        guitarTuning={uploadedGuitarTuning}
+                        onTitleChange={setUploadedTitle}
+                        onArtistChange={setUploadedArtist}
+                        onSongTuningChange={setUploadedSongTuning}
+                        onGuitarTuningChange={setUploadedGuitarTuning}
+                        onContinue={() => setIsEditingMetadata(true)}
+                      />
+                    ) : (
+                      <ChordDisplay 
+                        ref={chordDisplayRef}
+                        title={uploadedTitle} 
+                        artist={uploadedArtist} 
+                        songTuning={uploadedSongTuning}
+                        guitarTuning={uploadedGuitarTuning}
+                        content={uploadedContent} 
+                        enableEdit={true}
+                        onSave={handleSaveUploadedSong}
+                        onReturn={() => setIsEditingMetadata(false)}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -375,6 +603,8 @@ const Home = () => {
                       ref={chordDisplayRef}
                       title={selectedSong.title} 
                       artist={selectedSong.artist} 
+                      songTuning={selectedSong.songTuning}
+                      guitarTuning={selectedSong.guitarTuning}
                       content={selectedSong.content}
                       onSave={handleUpdateSong}
                     />
@@ -454,6 +684,8 @@ const Home = () => {
                     ref={chordDisplayRef}
                     title={demoSong.title} 
                     artist={demoSong.artist} 
+                    songTuning={demoSong.songTuning}
+                    guitarTuning={demoSong.guitarTuning}
                     content={demoSong.content} 
                   />
                 </div>

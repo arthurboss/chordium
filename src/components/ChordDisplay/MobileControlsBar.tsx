@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Settings, Music, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';
+import { Switch } from '../ui/switch';
 import { ChordSheetControlsProps } from './types';
 
 function TextPreferences({
@@ -14,21 +15,81 @@ function TextPreferences({
   setFontSpacing,
   fontStyle,
   setFontStyle,
+  lineHeight,
+  setLineHeight,
   viewMode,
   setViewMode,
   hideGuitarTabs,
   setHideGuitarTabs,
   buttonClassName,
   iconSize,
+  isAtBottom,
 }) {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [open, setOpen] = useState(false);
+
+  const startCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 3000);
+  }, []);
+
+  const clearCloseTimer = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  // Start timer when menu opens
+  useEffect(() => {
+    if (open) {
+      startCloseTimer();
+    }
+  }, [open, startCloseTimer]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className={buttonClassName} title="Text Preferences">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className={buttonClassName} 
+          title="Text Preferences"
+        >
           <Settings size={iconSize} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="mr-4">
+      <DropdownMenuContent
+        align="start"
+        className={`${isAtBottom ? 'mr-3' : 'mr-7'} mb-2 py-3 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out`}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onFocusOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+          startCloseTimer();
+        }}
+        onPointerDownOutside={(e) => e.stopPropagation()}
+        onTouchStart={clearCloseTimer}
+        onTouchEnd={startCloseTimer}
+        onMouseEnter={clearCloseTimer}
+        onMouseLeave={startCloseTimer}
+        style={{
+          transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
+          opacity: '1'
+        }}
+      >
         <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">View Mode</div>
           <div className="flex items-center gap-2">
@@ -41,14 +102,19 @@ function TextPreferences({
         <DropdownMenuItem onClick={() => setHideGuitarTabs(!hideGuitarTabs)} className={hideGuitarTabs ? 'bg-accent text-accent-foreground' : ''}>{hideGuitarTabs ? 'Show Guitar Tabs' : 'Hide Guitar Tabs'}</DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Font Style</div>
-          <div className="flex items-center gap-2">
-            <Button variant={fontStyle === 'serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('serif')}>Serif</Button>
-            <Button variant={fontStyle === 'sans-serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('sans-serif')}>Sans</Button>
+          <div className="font-semibold text-xs mb-2">Font Style</div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm">Sans</span>
+            <Switch
+              checked={fontStyle === 'serif'}
+              onCheckedChange={(checked) => setFontStyle(checked ? 'serif' : 'sans-serif')}
+              className="w-[64px] h-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:data-[state=checked]:translate-x-[40px]"
+            />
+            <span className="text-sm">Serif</span>
           </div>
         </div>
         <DropdownMenuSeparator />
-        <div className="px-2 py-3">
+        <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">Font Size</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -63,7 +129,22 @@ function TextPreferences({
           </div>
         </div>
         <DropdownMenuSeparator />
-        <div className="px-2 py-3">
+        <div className="px-2 py-1">
+          <div className="font-semibold text-xs mb-1">Line Height</div>
+          <div className="flex items-center gap-3">
+            <Slider
+              value={[lineHeight]}
+              min={0.8}
+              max={1.6}
+              step={0.1}
+              onValueChange={(value) => setLineHeight(value[0])}
+              className="w-32"
+            />
+            <span className="w-10 text-center text-sm">{Math.round((lineHeight - 0.6) * 5)}x</span>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <div className="px-2 py-1">
           <div className="font-semibold text-xs mb-1">Font Spacing</div>
           <div className="flex items-center gap-3">
             <Slider
@@ -75,7 +156,7 @@ function TextPreferences({
               className="w-32"
             />
             <span className="w-10 text-center text-sm">
-              {fontSpacing === 0 ? 'x1' : fontSpacing === 0.1 ? 'x2' : 'x3'}
+              {fontSpacing === 0 ? '1x' : fontSpacing === 0.1 ? '2x' : '3x'}
             </span>
           </div>
         </div>
@@ -101,6 +182,8 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   setFontSpacing,
   fontStyle,
   setFontStyle,
+  lineHeight,
+  setLineHeight,
 }) => {
   const [isAtBottom, setIsAtBottom] = useState(false);
 
@@ -108,7 +191,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
     const handleScroll = () => {
       const scrollPosition = window.scrollY + window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      const threshold = 100; // pixels from bottom to trigger the change
+      const threshold = 185; // pixels from bottom to trigger the change
 
       setIsAtBottom(scrollPosition >= documentHeight - threshold);
     };
@@ -126,10 +209,12 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
         fontSize={fontSize} setFontSize={setFontSize}
         fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
         fontStyle={fontStyle} setFontStyle={setFontStyle}
+        lineHeight={lineHeight} setLineHeight={setLineHeight}
         viewMode={viewMode} setViewMode={setViewMode}
         hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
         buttonClassName="h-10 w-10"
         iconSize={20}
+        isAtBottom={isAtBottom}
       />
     </>
   );
@@ -161,4 +246,4 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   );
 };
 
-export default MobileControlsBar; 
+export default MobileControlsBar;

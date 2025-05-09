@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
+import scrollbar from "tailwind-scrollbar";
 
 export default {
 	darkMode: ["class"],
@@ -92,17 +94,35 @@ export default {
 				},
 				'fade-in': {
 					from: {
-						opacity: 0
+						opacity: '0'
 					},
 					to: {
-						opacity: 1
+						opacity: '1'
+					}
+				},
+				'merge-in': {
+					from: {
+						transform: 'translateY(-10px)'
+					},
+					to: {
+						transform: 'translateY(0)'
+					}
+				},
+				'merge-out': {
+					from: {
+						transform: 'translateY(0)'
+					},
+					to: {
+						transform: 'translateY(-10px)'
 					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.3s ease-out'
+				'fade-in': 'fade-in 0.3s ease-out',
+				'merge-in': 'merge-in 0.2s ease-out',
+				'merge-out': 'merge-out 0.2s ease-in'
 			},
 			fontFamily: {
 				mono: ['Roboto Mono', 'monospace']
@@ -110,8 +130,8 @@ export default {
 		}
 	},
 	plugins: [
-		require("tailwindcss-animate"),
-		require('tailwind-scrollbar')({ nocompatible: true }) // Add this line
+		animate,
+		scrollbar({ nocompatible: true })
 	],
 } satisfies Config;
 
