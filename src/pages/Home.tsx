@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { Music, Info, Save } from "lucide-react";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,117 +14,34 @@ import ChordDisplay from "@/components/ChordDisplay";
 import FileUploader from "@/components/FileUploader";
 import Footer from "@/components/Footer";
 
+
+
 interface SongData {
   id: string;
   title: string;
   artist?: string;
-  content: string;
+  path: string;
   dateAdded: string;
 }
 
-const sampleSongs = [
+const sampleSong1Content = await fetch("/src/data/songs/wonderwall.txt").then(res =>
+  res.text()
+);
+const sampleSong2Content = await fetch(
+  "/src/data/songs/hotel-california.txt"
+).then((res) => res.text());
+
+const sampleSongs: Omit<SongData, "dateAdded">[] = [
   {
     id: "wonderwall",
     title: "Wonderwall",
     artist: "Oasis",
-    content: `[Intro]
-Em7  G  Dsus4  A7sus4
-Em7  G  Dsus4  A7sus4
-Em7  G  Dsus4  A7sus4
-Em7  G  Dsus4  A7sus4
-
-[Verse 1]
-Em7             G
-Today is gonna be the day
-              Dsus4                  A7sus4
-That they're gonna throw it back to you
-Em7               G
-By now you should've somehow
-              Dsus4            A7sus4
-Realized what you gotta do
-Em7                   G
-I don't believe that anybody
-       Dsus4       A7sus4          Em7  G  Dsus4  A7sus4
-Feels the way I do about you now
-
-[Verse 2]
-Em7            G
-Backbeat, the word is on the street
-              Dsus4                 A7sus4
-That the fire in your heart is out
-Em7              G
-I'm sure you've heard it all before
-                 Dsus4             A7sus4
-But you never really had a doubt
-Em7                   G
-I don't believe that anybody
-       Dsus4       A7sus4          Em7
-Feels the way I do about you now
-
-[Pre-Chorus]
-    C                D                Em
-And all the roads we have to walk are winding
-    C                   D                 Em
-And all the lights that lead us there are blinding
-C              D
-There are many things that I would
-G       D/F#  Em7
-Like to say to you
-      G        D
-But I don't know how
-
-[Chorus]
-          C    Em7  G
-Because maybe
-                Em7        C        Em7  G
-You're gonna be the one that saves me
-    Em7  C  Em7  G
-And after all
-                Em7  C  Em7  G  Em7  G  Dsus4  A7sus4
-You're my wonderwall`
+    path: sampleSong1Content,
   },
-  {
-    id: "hotel-california",
-    title: "Hotel California",
-    artist: "Eagles",
-    content: `[Intro]
-Bm  F#  A  E  G  D  Em  F#
-
-[Verse 1]
-Bm                        F#
-On a dark desert highway, cool wind in my hair
-A                               E
-Warm smell of colitas, rising up through the air
-G                         D
-Up ahead in the distance, I saw a shimmering light
-Em                                         F#
-My head grew heavy and my sight grew dim, I had to stop for the night
-
-[Verse 2]
-Bm                            F#
-There she stood in the doorway, I heard the mission bell
-A                                           E
-And I was thinking to myself, "This could be Heaven or this could be Hell"
-G                              D
-Then she lit up a candle and she showed me the way
-Em                                       F#
-There were voices down the corridor, I thought I heard them say
-
-[Chorus]
-G                         D
-Welcome to the Hotel California
-      F#                         Bm
-Such a lovely place (Such a lovely place)
-              G                   D
-Such a lovely face  (such a lovely face)
-G                               D
-Plenty of room at the Hotel California
-    Em                          F#
-Any time of year (Any time of year)
-              Bm      F#  A  E  G  D  Em  F#
-You can find it here`
-  },
+  { id: "hotel-california", title: "Hotel California", artist: "Eagles", path: sampleSong2Content },
 ];
+
+
 
 const Home = () => {
   const location = useLocation();
@@ -131,17 +50,31 @@ const Home = () => {
   const [uploadedTitle, setUploadedTitle] = useState("");
   const [activeTab, setActiveTab] = useState("search");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
-  const [mySongs, setMySongs] = useState<SongData[]>([]);
+  const [mySongs, setMySongs] = useState<SongData[]>([...sampleSongs.map(song => ({...song, dateAdded: new Date().toISOString()}))]);
+
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const savedSongs = localStorage.getItem("mySongs");
-    if (savedSongs) {
+    const initialSongs = [...sampleSongs.map(song => ({...song, dateAdded: new Date().toISOString()}))]
+
+    if (savedSongs) { 
       try {
-        setMySongs(JSON.parse(savedSongs));
+        const parsedSongs = JSON.parse(savedSongs);
+        const hasDemoSongs = initialSongs.every(initialSong => parsedSongs.some((parsedSong:SongData) => parsedSong.id === initialSong.id))
+        if (!hasDemoSongs) {
+          localStorage.setItem("mySongs", JSON.stringify([...initialSongs,...parsedSongs]));
+          setMySongs([...initialSongs, ...parsedSongs]);
+        } else {
+          setMySongs(parsedSongs);
+        }
+        
       } catch (e) {
         console.error("Error loading saved songs:", e);
+        setMySongs(initialSongs);
+        localStorage.setItem("mySongs", JSON.stringify(initialSongs))
+
       }
     }
   }, []);
@@ -155,13 +88,15 @@ const Home = () => {
     const songId = query.get("song");
     
     if (songId) {
-      const foundDemo = sampleSongs.find(song => song.id === songId);
-      if (foundDemo) {
-        setDemoSong({
+        const foundDemo = sampleSongs.find((song) => song.id === songId);
+        if (foundDemo) {
+            setDemoSong({
           ...foundDemo,
-          dateAdded: new Date().toISOString()
-        });
-        setActiveTab("demo");
+          dateAdded: new Date().toISOString(),
+          
+        } as SongData); 
+            
+        setActiveTab("my-songs");
         return;
       }
       
@@ -204,9 +139,7 @@ const Home = () => {
     
     if (value === "upload") {
       navigate("/upload");
-    } else if (value === "demo" && demoSong) {
-      navigate(`/?song=${demoSong.id}`);
-    } else if (value === "my-songs") {
+    } else if (demoSong) {
       navigate("/my-songs");
     } else {
       navigate("/");
@@ -227,7 +160,7 @@ const Home = () => {
     const newSong: SongData = {
       id: `song-${Date.now()}`,
       title: songTitle,
-      content: uploadedContent,
+      path: uploadedContent,
       dateAdded: new Date().toISOString()
     };
     
@@ -249,7 +182,7 @@ const Home = () => {
     
     const updatedSongs = mySongs.map(song => {
       if (song.id === selectedSong.id) {
-        return { ...song, content };
+        return { ...song, path: content };
       }
       return song;
     });
@@ -302,11 +235,11 @@ const Home = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
+          <TabsList className={`grid w-full max-w-lg mx-auto grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`}>
             <TabsTrigger value="search" className="text-xs sm:text-sm">Search</TabsTrigger>
             <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
             <TabsTrigger value="my-songs" className="text-xs sm:text-sm">My Songs</TabsTrigger>
-            <TabsTrigger value="demo" className="text-xs sm:text-sm">Demo</TabsTrigger>
+           
           </TabsList>
           
           <div className="mt-4 sm:mt-6">
@@ -375,7 +308,7 @@ const Home = () => {
                       ref={chordDisplayRef}
                       title={selectedSong.title} 
                       artist={selectedSong.artist} 
-                      content={selectedSong.content}
+                      content={selectedSong.path}
                       onSave={handleUpdateSong}
                     />
                   </div>
@@ -384,7 +317,7 @@ const Home = () => {
                 <div>
                   {mySongs.length > 0 ? (
                     <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                      {mySongs.map(song => (
+                      {[...mySongs].reverse().map(song => (
                         <Card key={song.id} className="overflow-hidden">
                           <CardContent className="p-4">
                             <div className="flex items-start gap-2">
@@ -431,78 +364,6 @@ const Home = () => {
                       </Button>
                     </div>
                   )}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="demo" className="focus-visible:outline-none focus-visible:ring-0">
-              {demoSong ? (
-                <div className="animate-fade-in">
-                  <div className="flex items-center mb-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        setDemoSong(null);
-                        navigate("/");
-                      }}
-                    >
-                      Back to Demo Songs
-                    </Button>
-                  </div>
-                  <ChordDisplay 
-                    ref={chordDisplayRef}
-                    title={demoSong.title} 
-                    artist={demoSong.artist} 
-                    content={demoSong.content} 
-                  />
-                </div>
-              ) : (
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  {sampleSongs.map(song => (
-                    <Card key={song.id} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-2">
-                          <Music className="h-6 w-6 text-chord mt-1" />
-                          <div>
-                            <h3 className="font-semibold text-base">{song.title}</h3>
-                            <p className="text-muted-foreground text-sm">{song.artist}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="bg-muted/50 px-4 py-2 flex justify-between">
-                        <button 
-                          className="text-chord hover:underline font-medium text-sm"
-                          onClick={() => {
-                            setDemoSong({
-                              ...song,
-                              dateAdded: new Date().toISOString()
-                            });
-                            navigate(`/?song=${song.id}`);
-                          }}
-                        >
-                          View Chords
-                        </button>
-                        <button 
-                          className="text-primary hover:underline text-sm"
-                          onClick={() => {
-                            const newSong = {
-                              ...song,
-                              id: `mysong-${Date.now()}`,
-                              dateAdded: new Date().toISOString()
-                            };
-                            setMySongs(prev => [newSong, ...prev]);
-                            toast({
-                              title: "Song saved",
-                              description: `"${song.title}" has been added to My Songs`
-                            });
-                          }}
-                        >
-                          Save
-                        </button>
-                      </CardFooter>
-                    </Card>
-                  ))}
                 </div>
               )}
             </TabsContent>
