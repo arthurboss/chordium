@@ -24,11 +24,11 @@ interface SongData {
   dateAdded: string;
 }
 
-const wonderwallContent = await fetch("/src/utils/wonderwall.txt").then(res =>
+const sampleSong1Content = await fetch("/src/data/songs/wonderwall.txt").then(res =>
   res.text()
 );
-const hotelCaliforniaContent = await fetch(
-  "/src/utils/hotelCalifornia.txt"
+const sampleSong2Content = await fetch(
+  "/src/data/songs/hotel-california.txt"
 ).then((res) => res.text());
 
 const sampleSongs: Omit<SongData, "dateAdded">[] = [
@@ -36,9 +36,9 @@ const sampleSongs: Omit<SongData, "dateAdded">[] = [
     id: "wonderwall",
     title: "Wonderwall",
     artist: "Oasis",
-    path: wonderwallContent,
+    path: sampleSong1Content,
   },
-  { id: "hotel-california", title: "Hotel California", artist: "Eagles", path: hotelCaliforniaContent },
+  { id: "hotel-california", title: "Hotel California", artist: "Eagles", path: sampleSong2Content },
 ];
 
 
