@@ -1,0 +1,53 @@
+name: PR Approval Check
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  check-approval:
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request && contains(github.event.comment.body, 'Approve visual changes')
+    steps:
+      - name: Mark visual changes as approved
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const prNumber = context.issue.number;
+            
+            // Get the PR details to get the head SHA
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            // Update check run
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Visual UI Testing Approval',
+              head_sha: pullRequest.head.sha,
+              status: 'completed',
+              conclusion: 'success',
+              output: {
+                title: 'Visual changes approved',
+                summary: 'The visual changes in this PR have been approved.'
+              }
+            });
+            
+            // Add label to PR
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: ['visual-changes-approved']
+            });
+            
+            // Comment to confirm approval
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: '✅ Visual changes have been approved. This PR can now be merged.'
+            });

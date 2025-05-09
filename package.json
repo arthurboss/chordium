@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
+    "cy:run": "./run-cypress.sh",
+    "test:e2e": "start-server-and-test dev http://localhost:8080 cy:run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -64,6 +67,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@cypress/github-action": "6.9.0",
     "@eslint/js": "^9.25.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.14.1",
@@ -71,12 +75,14 @@
     "@types/react-dom": "^18.3.6",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "autoprefixer": "^10.4.21",
+    "cypress": "14.3.3",
     "eslint": "^9.25.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "lovable-tagger": "^1.1.8",
     "postcss": "^8.5.3",
+    "start-server-and-test": "2.0.11",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0",

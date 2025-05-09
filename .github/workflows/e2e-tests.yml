@@ -1,0 +1,116 @@
+name: E2E Tests
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: ['*']
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run dev
+          wait-on: 'http://localhost:8080'
+          wait-on-timeout: 180
+          browser: chrome
+          config-file: cypress.config.cjs
+          record: false
+          command-prefix: 'NODE_OPTIONS="--experimental-vm-modules"'
+      
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
+  visual-testing:
+    runs-on: ubuntu-latest
+    needs: e2e
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Download test artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          
+      - name: Create Visual Test Approval Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const prNumber = context.issue.number;
+            const workflow_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            
+            // Check for approval comments
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            
+            const hasApproval = comments.some(comment => 
+              comment.body.toLowerCase().includes('approve visual changes')
+            );
+            
+            // Create or update check run
+            const { data: check } = await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Visual UI Testing Approval',
+              head_sha: context.payload.pull_request.head.sha,
+              status: 'completed',
+              conclusion: hasApproval ? 'success' : 'pending',
+              output: {
+                title: hasApproval ? 'Visual changes approved' : 'Visual changes require approval',
+                summary: hasApproval 
+                  ? 'The visual changes in this PR have been approved.'
+                  : 'This PR contains visual changes that need to be approved. Please comment "Approve visual changes" to approve.'
+              }
+            });
+            
+            // Post comment with screenshots and instructions
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Visual UI Testing Results
+              
+              E2E tests have completed. [View detailed results](${workflow_url})
+              
+              ### Approval Required
+              This PR contains visual changes that need to be approved before merging.
+              
+              - To approve: Add a comment with the text "Approve visual changes"
+              - Status: ${hasApproval ? '✅ Approved' : '⏳ Pending approval'}
+              
+              If approval is not given, this PR will require manual review and cannot be merged automatically.`
+            });
