@@ -7,6 +7,9 @@ jobs:
   trigger-approval:
     runs-on: ubuntu-latest
     if: contains(github.event.comment.body, 'Approve visual changes')
+    permissions:
+        contents: write
+        actions: write
     steps:
       - name: Trigger PR Approval Workflow
         uses: actions/github-script@v6
