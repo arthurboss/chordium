@@ -5,13 +5,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import ChordDisplay from "@/components/ChordDisplay";
 import FileUploader from "@/components/FileUploader";
+import SongMetadataForm from "@/components/SongMetadataForm";
 import Footer from "@/components/Footer";
 
 interface SongData {
@@ -550,70 +549,17 @@ const Home = () => {
                 {uploadedContent && (
                   <div className="mt-6 animate-fade-in">
                     {!isEditingMetadata ? (
-                      <div className="w-full max-w-3xl mx-auto">
-                        <Card className="mb-6">
-                          <CardContent className="p-4 sm:p-6">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                              <div className="flex-1">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="song-title-input">Song Title *</Label>
-                                    <Input 
-                                      id="song-title-input" 
-                                      value={uploadedTitle} 
-                                      onChange={(e) => setUploadedTitle(e.target.value)} 
-                                      placeholder="Enter song title"
-                                      className="w-full h-10"
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="song-artist-input">Artist *</Label>
-                                    <Input 
-                                      id="song-artist-input" 
-                                      value={uploadedArtist} 
-                                      onChange={(e) => setUploadedArtist(e.target.value)} 
-                                      placeholder="Enter artist name"
-                                      className="w-full h-10"
-                                      required
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="song-tuning-input">Song Tuning</Label>
-                                    <Input 
-                                      id="song-tuning-input" 
-                                      value={uploadedSongTuning} 
-                                      onChange={(e) => setUploadedSongTuning(e.target.value)} 
-                                      placeholder="e.g. C# minor"
-                                      className="w-full h-10"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="guitar-tuning-input">Guitar Tuning</Label>
-                                    <Input 
-                                      id="guitar-tuning-input" 
-                                      value={uploadedGuitarTuning} 
-                                      onChange={(e) => setUploadedGuitarTuning(e.target.value)} 
-                                      placeholder="e.g. Standard tuning"
-                                      className="w-full h-10"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex justify-end items-end">
-                                <Button 
-                                  onClick={() => setIsEditingMetadata(true)}
-                                  className="w-12 h-10 shrink-0"
-                                  aria-label="Continue to edit"
-                                  disabled={!uploadedTitle || !uploadedArtist}
-                                >
-                                  <ArrowRight className="h-5 w-5" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
+                      <SongMetadataForm
+                        title={uploadedTitle}
+                        artist={uploadedArtist}
+                        songTuning={uploadedSongTuning}
+                        guitarTuning={uploadedGuitarTuning}
+                        onTitleChange={setUploadedTitle}
+                        onArtistChange={setUploadedArtist}
+                        onSongTuningChange={setUploadedSongTuning}
+                        onGuitarTuningChange={setUploadedGuitarTuning}
+                        onContinue={() => setIsEditingMetadata(true)}
+                      />
                     ) : (
                       <ChordDisplay 
                         ref={chordDisplayRef}
