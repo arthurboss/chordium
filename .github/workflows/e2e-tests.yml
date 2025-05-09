@@ -64,6 +64,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Check if cypress-screenshots artifact exists
         id: check-artifact
