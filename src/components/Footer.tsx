@@ -2,7 +2,7 @@ import GitHubIcon from "./icons/GitHubIcon";
 
 const Footer = () => {
   return (
-    <footer className="grid md:grid-cols-3 grid-cols-[1fr_auto] items-center mt-auto border-t py-3 px-6">
+    <footer className="grid md:grid-cols-3 grid-cols-[1fr_auto] dark:bg-[--card] items-center mt-auto border-t py-3 px-6">
       <div className="hidden md:block" />
       
       <div className="text-sm text-muted-foreground text-left md:text-center">

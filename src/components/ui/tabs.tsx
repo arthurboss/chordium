@@ -85,14 +85,14 @@ const TabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={combinedRef}
       className={cn(
-        "relative inline-flex h-12 items-center justify-center content-center rounded-md p-1.5 text-muted-foreground border dark:border-muted-foreground bg-card dark:bg-muted",
+        "relative inline-flex h-12 items-center justify-center content-center rounded-md p-1.5 text-muted-foreground border bg-card dark:bg-[var(--card)]",
         className
       )}
       {...props}
     >
       <span
         aria-hidden="true"
-        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background border dark:border-muted-foreground transition-all duration-300 ease-in-out"
+        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background border transition-all duration-300 ease-in-out"
         style={indicatorStyle}
       />
       {children}

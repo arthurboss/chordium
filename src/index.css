@@ -44,7 +44,7 @@
     --card: rgb(30,30,33);
     --card-foreground: 0 0% 98%;
 
-    --chord-content-bg-dark: hsl(240, 3.7%, 12%); /* ChordContent bg is now the OLD border color */
+    --chord-content-bg-dark: hsl(240, 3.7%, 12%);
 
     --popover: 240 3.7% 10%;
     --popover-foreground: 0 0% 98%;
@@ -64,8 +64,8 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 25%; /* NEW light border color (value of current muted) */
-    --input: 240 3.7% 25%; /* Input matches new border color */
+    --border: 240 3.7% 25%;
+    --input: 240 3.7% 25%;
     --ring: 270 84% 75%;
   }
 }
