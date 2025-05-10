@@ -6,6 +6,10 @@ on:
     branches: ['*']
     types: [opened, synchronize, reopened, edited]
 
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -18,12 +22,17 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          
-      - name: Clean up node_modules and package-lock.json
-        run: rm -rf node_modules package-lock.json
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm i
+        run: npm ci
 
       - name: Check for @rollup/rollup-linux-x64-gnu
         run: |
@@ -34,10 +43,11 @@ jobs:
         with:
           start: npm run dev
           wait-on: 'http://localhost:8080'
-          wait-on-timeout: 180
+          wait-on-timeout: 120
           browser: chrome
           config-file: cypress.config.cjs
           record: false
+          install: false
         env:
           NODE_OPTIONS: "--experimental-vm-modules"
       
@@ -58,7 +68,7 @@ jobs:
   visual-testing:
     runs-on: ubuntu-latest
     needs: e2e
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && failure()
     permissions:
       contents: write
       pull-requests: write
