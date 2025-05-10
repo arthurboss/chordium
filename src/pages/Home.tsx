@@ -233,9 +233,9 @@ const Home = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-1 container px-3 py-4 sm:px-4 sm:py-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className={`grid w-full max-w-lg mx-auto grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`} role="tablist">
+      <main className="w-full max-w-3xl mx-auto flex-1 container px-3 py-4 sm:px-4 sm:py-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className={`grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`} role="tablist">
             <TabsTrigger 
               value="my-songs" 
               className="text-xs sm:text-sm" 

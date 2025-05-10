@@ -19,7 +19,7 @@ const SearchBar = () => {
   return (
     <form 
       onSubmit={handleSearch} 
-      className="flex flex-col sm:flex-row gap-2 w-full max-w-xl mx-auto"
+      className="flex flex-col sm:flex-row gap-2 w-full mx-auto"
     >
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -28,7 +28,7 @@ const SearchBar = () => {
           placeholder="Search for a song or artist..." 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-9 w-full"
+          className="pl-9 w-full bg-card dark:bg-[var(--card)] "
         />
       </div>
       <Button type="submit" className="sm:w-auto">Search</Button>

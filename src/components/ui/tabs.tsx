@@ -92,7 +92,7 @@ const TabsList = React.forwardRef<
     >
       <span
         aria-hidden="true"
-        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background border transition-all duration-300 ease-in-out"
+        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background border transition-all duration-200 ease-in-out"
         style={indicatorStyle}
       />
       {children}

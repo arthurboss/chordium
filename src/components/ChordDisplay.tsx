@@ -350,45 +350,43 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
 
   return (
     <div ref={ref} id="chord-display">
-      <div className="w-full max-w-3xl mx-auto">
-        {/* Song header */}
-        {(title || artist) && (
-          <div className="mb-4 text-center">
-            {title && <h1 className="text-2xl font-bold">{title}</h1>}
-            {artist && <p className="text-muted-foreground">{artist}</p>}
-          </div>
-        )}
-        <ChordContent
-          processedContent={processedContent}
-          fontSize={fontSize}
-          fontSpacing={fontSpacing}
-          fontStyle={fontStyle}
-          viewMode={viewMode}
-          hideGuitarTabs={hideGuitarTabs}
-          renderChord={renderChord}
-        />
-        <ChordSheetControls
-          transpose={transpose}
-          setTranspose={setTranspose}
-          transposeOptions={transposeOptions}
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          fontSpacing={fontSpacing}
-          setFontSpacing={setFontSpacing}
-          fontStyle={fontStyle}
-          setFontStyle={setFontStyle}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          hideGuitarTabs={hideGuitarTabs}
-          setHideGuitarTabs={setHideGuitarTabs}
-          autoScroll={autoScroll}
-          setAutoScroll={handleAutoScrollToggle}
-          scrollSpeed={scrollSpeed}
-          setScrollSpeed={setScrollSpeed}
-          setIsEditing={setIsEditing}
-          handleDownload={handleDownload}
-        />
-      </div>
+      {/* Song header */}
+      {(title || artist) && (
+        <div className="mb-4 text-center">
+          {title && <h1 className="text-2xl font-bold">{title}</h1>}
+          {artist && <p className="text-muted-foreground">{artist}</p>}
+        </div>
+      )}
+      <ChordContent
+        processedContent={processedContent}
+        fontSize={fontSize}
+        fontSpacing={fontSpacing}
+        fontStyle={fontStyle}
+        viewMode={viewMode}
+        hideGuitarTabs={hideGuitarTabs}
+        renderChord={renderChord}
+      />
+      <ChordSheetControls
+        transpose={transpose}
+        setTranspose={setTranspose}
+        transposeOptions={transposeOptions}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontSpacing={fontSpacing}
+        setFontSpacing={setFontSpacing}
+        fontStyle={fontStyle}
+        setFontStyle={setFontStyle}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        hideGuitarTabs={hideGuitarTabs}
+        setHideGuitarTabs={setHideGuitarTabs}
+        autoScroll={autoScroll}
+        setAutoScroll={handleAutoScrollToggle}
+        scrollSpeed={scrollSpeed}
+        setScrollSpeed={setScrollSpeed}
+        setIsEditing={setIsEditing}
+        handleDownload={handleDownload}
+      />
     </div>
   );
 });

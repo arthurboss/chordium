@@ -7,7 +7,7 @@ import { Textarea } from '../ui/textarea';
 
 const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, handleSaveEdits, setIsEditing }) => {
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div>
       <Card className="mb-4">
         <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between">
