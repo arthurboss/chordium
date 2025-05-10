@@ -44,7 +44,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [uploadedContent, setUploadedContent] = useState("");
   const [uploadedTitle, setUploadedTitle] = useState("");
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState("my-songs");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [mySongs, setMySongs] = useState<SongData[]>([...sampleSongs.map(song => ({...song, dateAdded: new Date().toISOString()}))]);
 
@@ -102,12 +102,21 @@ const Home = () => {
         setActiveTab("my-songs");
         return;
       }
-    } 
+    }
     
+    // Set active tab based on URL path
+    const path = location.pathname;
+    if (path === "/search") {
+      setActiveTab("search");
+    } else if (path === "/upload") {
+      setActiveTab("upload");
+    } else if (path === "/my-songs" || path === "/") {
+      setActiveTab("my-songs");
+    }
+    
+    // Additional handling for query parameters
     if (query.get("q")) {
       setActiveTab("search");
-    } else if (location.pathname === "/upload") {
-      setActiveTab("upload");
     }
   }, [location, mySongs]);
 
@@ -135,10 +144,12 @@ const Home = () => {
     
     if (value === "upload") {
       navigate("/upload");
-    } else if (demoSong) {
+    } else if (value === "search") {
+      navigate("/search");
+    } else if (value === "my-songs") {
       navigate("/my-songs");
     } else {
-      navigate("/");
+      navigate("/my-songs");
     }
   };
   
@@ -225,9 +236,9 @@ const Home = () => {
       <main className="flex-1 container px-3 py-4 sm:px-4 sm:py-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className={`grid w-full max-w-lg mx-auto grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`}>
+            <TabsTrigger value="my-songs" className="text-xs sm:text-sm">My Songs</TabsTrigger>
             <TabsTrigger value="search" className="text-xs sm:text-sm">Search</TabsTrigger>
             <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
-            <TabsTrigger value="my-songs" className="text-xs sm:text-sm">My Songs</TabsTrigger>
            
           </TabsList>
           
