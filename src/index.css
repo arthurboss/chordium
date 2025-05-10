@@ -128,10 +128,8 @@
   }
 }
 
-/* Ensure no horizontal overflow */
 html, body {
   max-width: 100%;
-  /* overflow-x: hidden; */
 }
 
 pre, code, .chord-line, .lyrics-line {
@@ -157,5 +155,3 @@ html {
 .theme-toggle-icon:hover {
   transform: rotate(15deg);
 }
-
-

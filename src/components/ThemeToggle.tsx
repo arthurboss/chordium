@@ -109,7 +109,6 @@ export const ThemeToggle = () => {
           variant="ghost" 
           size="icon" 
           aria-label="Toggle theme"
-          className="ml-2"
           title="Theme settings"
         >
           <span className="theme-toggle-icon">
