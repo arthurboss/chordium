@@ -14,5 +14,24 @@ declare namespace Cypress {
      * Set the scroll speed to a specific value (1-10)
      */
     setScrollSpeed(speed: number): Chainable<void>;
+
+    /**
+     * Set the theme to dark, light, or system
+     * @param theme - The theme to set: 'dark', 'light', or 'system'
+     * @example
+     * // Set theme to dark mode
+     * cy.setTheme('dark')
+     * // Set theme to system preference
+     * cy.setTheme('system')
+     */
+    setTheme(theme: 'dark' | 'light' | 'system'): Chainable<void>;
+
+    /**
+     * Get the current active theme, either 'dark' or 'light'
+     * @example
+     * // Assert that the current theme is dark
+     * cy.getCurrentTheme().should('eq', 'dark')
+     */
+    getCurrentTheme(): Chainable<'dark' | 'light'>;
   }
 }

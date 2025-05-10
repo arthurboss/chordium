@@ -16,6 +16,16 @@ declare module 'cypress' {
      * Set the scroll speed to a specific value (1-10)
      */
     setScrollSpeed(speed: number): Chainable;
+
+    /**
+     * Set the theme to dark, light, or system
+     */
+    setTheme(theme: 'dark' | 'light' | 'system'): Chainable;
+
+    /**
+     * Get the current active theme
+     */
+    getCurrentTheme(): Chainable;
   }
 }
 
@@ -58,4 +68,37 @@ Cypress.Commands.add('setScrollSpeed', (speed) => {
         }
       }
     });
+});
+
+// Theme-related commands
+Cypress.Commands.add('setTheme', (theme) => {
+  // Make sure the dropdown isn't already open
+  cy.get('body').then($body => {
+    if ($body.find('[role="menu"]').length > 0) {
+      // If dropdown is open, close it first
+      cy.get('body').click('top');
+    }
+  });
+
+  // Open the theme dropdown
+  cy.get('button[aria-label="Toggle theme"]').click();
+  cy.get('[role="menu"]').should('be.visible');
+  
+  // Click on the selected theme option
+  if (theme === 'dark') {
+    cy.contains('Dark').click();
+  } else if (theme === 'light') {
+    cy.contains('Light').click();
+  } else {
+    cy.contains('System').click();
+  }
+  
+  // Wait for theme change to take effect
+  cy.wait(100);
+});
+
+Cypress.Commands.add('getCurrentTheme', () => {
+  return cy.get('html').invoke('hasClass', 'dark').then((hasDarkClass) => {
+    return hasDarkClass ? 'dark' : 'light';
+  });
 });
