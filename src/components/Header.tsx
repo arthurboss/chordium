@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { FileMusic, Guitar, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,6 +37,7 @@ const Header = () => {
           <Button size="sm" asChild>
             <Link to="/">Search Chords</Link>
           </Button>
+          <ThemeToggle />
         </nav>
 
         {/* Mobile menu dropdown */}
@@ -52,6 +54,10 @@ const Header = () => {
             <Button size="sm" asChild onClick={() => setMenuOpen(false)}>
               <Link to="/">Search Chords</Link>
             </Button>
+            <div className="flex justify-between items-center mt-2 pt-2 border-t">
+              <span className="text-sm text-muted-foreground">Theme Settings</span>
+              <ThemeToggle />
+            </div>
           </div>
         )}
       </div>

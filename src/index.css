@@ -80,7 +80,7 @@
 
 @layer components {
   .chord {
-    @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold;
+    @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
   }
   
   .chord-line {
@@ -92,7 +92,7 @@
   }
   
   .section-header {
-    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2;
+    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
   }
 }
 
@@ -136,5 +136,19 @@ pre, code, .chord-line, .lyrics-line {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+
+/* Theme transition animation */
+html {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Theme toggle animation */
+.theme-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle-icon:hover {
+  transform: rotate(15deg);
 }
 
