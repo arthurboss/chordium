@@ -6,6 +6,48 @@
     <title>chordium</title>
     <meta name="description" content="Lovable Generated Project" />
     <meta name="author" content="Lovable" />
+    <script>
+      // Helper function to apply theme based on system preference
+      function getSystemThemePreference() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      
+      // Apply theme on page load
+      (function() {
+        // Clear theme from localStorage on first load to start fresh
+        // Use a flag to ensure we only do this once
+        const hasRunInitialThemeSetup = localStorage.getItem('hasRunInitialThemeSetup');
+        if (!hasRunInitialThemeSetup) {
+          localStorage.removeItem('theme');
+          localStorage.setItem('hasRunInitialThemeSetup', 'true');
+        }
+        
+        // Get current theme from localStorage or system preference
+        const savedTheme = localStorage.theme;
+        const systemPreference = getSystemThemePreference();
+        const theme = savedTheme || systemPreference;
+        
+        // Apply theme
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        
+        // Setup listener for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+          // Only apply system theme if user hasn't manually set a preference
+          if (!localStorage.theme) {
+            if (e.matches) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          }
+        });
+      })();
+    </script>
 
     <meta property="og:title" content="chordium" />
     <meta property="og:description" content="Lovable Generated Project" />

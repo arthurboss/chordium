@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { Music, Info, Save } from "lucide-react";
+import { Music, Info, Save, Trash2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -13,8 +13,6 @@ import SearchBar from "@/components/SearchBar";
 import ChordDisplay from "@/components/ChordDisplay";
 import FileUploader from "@/components/FileUploader";
 import Footer from "@/components/Footer";
-
-
 
 interface SongData {
   id: string;
@@ -40,8 +38,6 @@ const sampleSongs: Omit<SongData, "dateAdded">[] = [
   },
   { id: "hotel-california", title: "Hotel California", artist: "Eagles", path: sampleSong2Content },
 ];
-
-
 
 const Home = () => {
   const location = useLocation();
@@ -188,7 +184,7 @@ const Home = () => {
     });
     
     setMySongs(updatedSongs);
-    setSelectedSong({ ...selectedSong, content });
+    setSelectedSong({ ...selectedSong, path: content });
     
     toast({
       title: "Song updated",
@@ -344,10 +340,10 @@ const Home = () => {
                               View Chords
                             </button>
                             <button 
-                              className="text-destructive hover:underline text-sm"
+                              className="text-destructive dark:text-red-500 hover:underline text-sm"
                               onClick={() => handleDeleteSong(song.id)}
                             >
-                              Delete
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </CardFooter>
                         </Card>
