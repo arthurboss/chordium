@@ -34,7 +34,7 @@ This project is built with modern web technologies:
 
 ```sh
 # Clone the repository
-git clone https://github.com/[yourusername]/chordium.git
+git clone https://github.com/arthurboss/chordium.git
 
 # Navigate to the project directory
 cd chordium
