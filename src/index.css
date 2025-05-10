@@ -145,6 +145,10 @@ html {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
+[role="menuitem"] {
+  cursor: pointer;
+}
+
 /* Theme toggle animation */
 .theme-toggle-icon {
   transition: transform 0.2s ease;
@@ -153,4 +157,5 @@ html {
 .theme-toggle-icon:hover {
   transform: rotate(15deg);
 }
+
 
