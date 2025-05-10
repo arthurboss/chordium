@@ -2,7 +2,7 @@ import GitHubIcon from "./icons/GitHubIcon";
 
 const Footer = () => {
   return (
-    <footer className="grid md:grid-cols-3 grid-cols-[1fr_auto] dark:bg-[--card] items-center mt-auto border-t py-3 px-6">
+    <footer className="grid md:grid-cols-3 grid-cols-[1fr_auto] dark:bg-[--card] items-center mt-auto border-t py-1 px-6">
       <div className="hidden md:block" />
       
       <div className="text-sm text-muted-foreground text-left md:text-center">
@@ -12,7 +12,7 @@ const Footer = () => {
       <div className="md:justify-self-end">
         <a 
           href="https://github.com/arthurboss/chordium" 
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          className="p-[4px] text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           target="_blank"
           rel="noopener noreferrer"
         >

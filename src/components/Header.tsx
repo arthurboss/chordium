@@ -6,7 +6,7 @@ const Header = () => (
     <header className="flex justify-between py-1.5 px-5 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
       <Link 
         to="/" 
-        className="flex items-center ml-2 md:ml-3 gap-1.5 hover:opacity-90 transition-opacity"
+        className="flex items-center ml-2 md:ml-3 p-[4px] gap-1.5 hover:opacity-90 transition-opacity rounded-md"
         tabIndex={0}
         aria-label="Chordium home"
       >
