@@ -110,6 +110,7 @@ export const ThemeToggle = () => {
           size="icon" 
           aria-label="Toggle theme"
           title="Theme settings"
+          className="border"
           tabIndex={0}
         >
           <span className="theme-toggle-icon">
