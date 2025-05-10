@@ -113,9 +113,7 @@ export const ThemeToggle = () => {
           title="Theme settings"
         >
           <span className="theme-toggle-icon">
-            {isSystemTheme ? (
-              <Laptop size={20} />
-            ) : isDark ? (
+            {isDark ? (
               <Sun size={20} />
             ) : (
               <Moon size={20} />
