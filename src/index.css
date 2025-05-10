@@ -38,32 +38,34 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 3.7% 15.9%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: rgb(30,30,33);
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --chord-content-bg-dark: hsl(240, 3.7%, 12%); /* ChordContent bg is now the OLD border color */
+
+    --popover: 240 3.7% 10%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 270 84% 75%;
     --primary-foreground: 240 5.9% 10%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 240 3.7% 20%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
+    --muted: 240 3.7% 25%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 240 3.7% 20%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 240 3.7% 25%; /* NEW light border color (value of current muted) */
+    --input: 240 3.7% 25%; /* Input matches new border color */
     --ring: 270 84% 75%;
   }
 }

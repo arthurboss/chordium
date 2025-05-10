@@ -20,7 +20,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   // Default: do not override
   return (
     <div 
-      className="bg-white mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
+      className="bg-white dark:bg-[--card] mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
       {processedContent.map((section, sectionIndex) => (
