@@ -18,9 +18,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4.4.0
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Cache Cypress binary
@@ -34,9 +34,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check for @rollup/rollup-linux-x64-gnu
+      - name: Rebuild native modules & install required platform-specific packages
         run: |
+          npm rebuild
           npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
+          npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
       
       - name: Cypress run
         uses: cypress-io/github-action@v6
