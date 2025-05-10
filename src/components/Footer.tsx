@@ -1,4 +1,4 @@
-import { Guitar, Github } from "lucide-react";
+import GitHubIcon from "./icons/GitHubIcon";
 
 const Footer = () => {
   return (
@@ -16,7 +16,7 @@ const Footer = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Github size={14} />
+          <GitHubIcon size={24} />
           <span className="hidden sm:inline">Source</span>
         </a>
       </div>
