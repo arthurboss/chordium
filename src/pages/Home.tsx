@@ -235,11 +235,31 @@ const Home = () => {
       
       <main className="flex-1 container px-3 py-4 sm:px-4 sm:py-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className={`grid w-full max-w-lg mx-auto grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`}>
-            <TabsTrigger value="my-songs" className="text-xs sm:text-sm">My Songs</TabsTrigger>
-            <TabsTrigger value="search" className="text-xs sm:text-sm">Search</TabsTrigger>
-            <TabsTrigger value="upload" className="text-xs sm:text-sm">Upload</TabsTrigger>
-           
+          <TabsList className={`grid w-full max-w-lg mx-auto grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]`} role="tablist">
+            <TabsTrigger 
+              value="my-songs" 
+              className="text-xs sm:text-sm" 
+              tabIndex={0} 
+              aria-selected={activeTab === "my-songs"}
+            >
+              My Songs
+            </TabsTrigger>
+            <TabsTrigger 
+              value="search" 
+              className="text-xs sm:text-sm" 
+              tabIndex={0} 
+              aria-selected={activeTab === "search"}
+            >
+              Search
+            </TabsTrigger>
+            <TabsTrigger 
+              value="upload" 
+              className="text-xs sm:text-sm" 
+              tabIndex={0} 
+              aria-selected={activeTab === "upload"}
+            >
+              Upload
+            </TabsTrigger>
           </TabsList>
           
           <div className="mt-4 sm:mt-6">
@@ -268,6 +288,8 @@ const Home = () => {
                         onClick={handleSaveUploadedSong}
                         size="sm"
                         className="flex items-center gap-1"
+                        tabIndex={0}
+                        aria-label="Save to My Songs"
                       >
                         <Save className="h-4 w-4" />
                         <span>Save to My Songs</span>
@@ -292,6 +314,8 @@ const Home = () => {
                       size="sm"
                       onClick={() => setSelectedSong(null)}
                       className="mr-2"
+                      tabIndex={0}
+                      aria-label="Back to My Songs"
                     >
                       Back to My Songs
                     </Button>
@@ -299,6 +323,8 @@ const Home = () => {
                       variant="destructive" 
                       size="sm"
                       onClick={() => handleDeleteSong(selectedSong.id)}
+                      tabIndex={0}
+                      aria-label={`Delete ${selectedSong?.title || 'song'}`}
                     >
                       Delete Song
                     </Button>
@@ -340,12 +366,16 @@ const Home = () => {
                                 setSelectedSong(song);
                                 navigate(`/my-songs?song=${song.id}`);
                               }}
+                              tabIndex={0}
+                              aria-label={`View chords for ${song.title}`}
                             >
                               View Chords
                             </button>
                             <button 
                               className="text-destructive dark:text-red-500 hover:underline text-sm"
                               onClick={() => handleDeleteSong(song.id)}
+                              tabIndex={0}
+                              aria-label={`Delete ${song.title}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -359,6 +389,8 @@ const Home = () => {
                       <Button 
                         onClick={() => handleTabChange("upload")}
                         variant="outline"
+                        tabIndex={0}
+                        aria-label="Upload a chord sheet"
                       >
                         Upload a chord sheet
                       </Button>
