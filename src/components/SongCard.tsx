@@ -10,7 +10,7 @@ interface SongCardProps {
 
 const SongCard = ({ song, onView, onDelete }: SongCardProps) => {
   return (
-    <Card key={song.id} className="overflow-hidden">
+    <Card className="overflow-hidden">
       <CardContent className="p-4">
         <div className="flex items-start gap-2">
           <Music className="h-6 w-6 text-chord mt-1" />

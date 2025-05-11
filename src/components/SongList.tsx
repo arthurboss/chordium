@@ -14,9 +14,9 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
     <div>
       {songs.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {[...songs].reverse().map(song => (
+          {[...songs].reverse().map((song, index) => (
             <SongCard 
-              key={song.id} 
+              key={`${song.id}-${index}`} 
               song={song} 
               onView={onSongSelect} 
               onDelete={onDeleteSong} 

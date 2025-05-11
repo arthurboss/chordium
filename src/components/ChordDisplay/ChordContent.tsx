@@ -43,16 +43,32 @@ const ChordContent: React.FC<ChordContentProps> = ({
                 let lastIndex = 0;
                 const parts = [];
                 let match;
+                let partIndex = 0;
                 const chordRegexGlobal = new RegExp(CHORD_REGEX);
                 while ((match = chordRegexGlobal.exec(line.content)) !== null) {
                   if (match.index > lastIndex) {
-                    parts.push(line.content.substring(lastIndex, match.index));
+                    parts.push(
+                      <React.Fragment key={`text-${lineIndex}-${partIndex}`}>
+                        {line.content.substring(lastIndex, match.index)}
+                      </React.Fragment>
+                    );
+                    partIndex++;
                   }
-                  parts.push(renderChord(match[0]));
+                  const chordElement = renderChord(match[0]);
+                  parts.push(
+                    <React.Fragment key={`chord-${lineIndex}-${partIndex}`}>
+                      {chordElement}
+                    </React.Fragment>
+                  );
+                  partIndex++;
                   lastIndex = match.index + match[0].length;
                 }
                 if (lastIndex < line.content.length) {
-                  parts.push(line.content.substring(lastIndex));
+                  parts.push(
+                    <React.Fragment key={`text-${lineIndex}-${partIndex}`}>
+                      {line.content.substring(lastIndex)}
+                    </React.Fragment>
+                  );
                 }
                 return (
                   <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
