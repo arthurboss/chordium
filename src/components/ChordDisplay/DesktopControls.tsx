@@ -171,7 +171,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
                 autoScroll={autoScroll}
                 setAutoScroll={setAutoScroll}
                 size={16}
-                className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`}
+                className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'bg-primary/10 text-primary hover:bg-primary/20'}`}
                 variant="outline"
               />
               {/* Speed controls only show when playing, always between PlayButton and Transpose */}
