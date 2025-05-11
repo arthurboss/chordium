@@ -4,11 +4,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import Home from "./pages/Home";
-import ChordViewer from "./pages/ChordViewer";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from 'react';
+
+// Lazy load pages instead of direct imports
+const Home = lazy(() => import("./pages/Home"));
+const ChordViewer = lazy(() => import("./pages/ChordViewer"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+// Loading component for Suspense
+const Loading = () => <div className="flex justify-center items-center h-screen">Loading...</div>;
 
 const router = createBrowserRouter([
   {
@@ -17,24 +23,24 @@ const router = createBrowserRouter([
   },
   {
     path: "/search",
-    element: <Home />
+    element: <Suspense fallback={<Loading />}><Home /></Suspense>
   },
   {
     path: "/upload",
-    element: <Home />
+    element: <Suspense fallback={<Loading />}><Home /></Suspense>
   },
   {
     path: "/my-songs",
-    element: <Home />
+    element: <Suspense fallback={<Loading />}><Home /></Suspense>
   },
   {
     path: "/chord/:id",
-    element: <ChordViewer />
+    element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
   },
   {
     // Catch-all route for 404
     path: "*",
-    element: <NotFound />
+    element: <Suspense fallback={<Loading />}><NotFound /></Suspense>
   }
 ]);
 
