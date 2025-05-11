@@ -34,8 +34,9 @@ Cypress.Commands.add('openSong', (songTitle) => {
   cy.get('button[role="tab"]').contains('My Songs').click();
   
   // Find the song card by title
-  cy.contains('.p-4', songTitle)
+  cy.contains('.font-semibold', songTitle)
     .should('exist')
+    .closest('.overflow-hidden')  // Navigate up to the Card component
     .within(() => {
       cy.contains('View Chords').click();
     });
