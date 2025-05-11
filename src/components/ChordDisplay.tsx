@@ -88,7 +88,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
           };
           const startAutoScroll = () => {
             updateLayoutHeights();
-            const baseScrollAmount = scrollSpeed * 0.32;
+            const baseScrollAmount = scrollSpeed * 0.06;
             const targetFPS = 60;
             const frameTime = 1000 / targetFPS;
             const doScroll = (timestamp: number) => {
@@ -128,7 +128,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
       }
       // If not at the bottom, start auto-scroll immediately
       updateLayoutHeights();
-      const baseScrollAmount = scrollSpeed * 0.32;
+      const baseScrollAmount = scrollSpeed * 0.06;
       const targetFPS = 60;
       const frameTime = 1000 / targetFPS;
       const doScroll = (timestamp: number) => {
