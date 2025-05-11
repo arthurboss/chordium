@@ -9,9 +9,9 @@ describe('Chordium E2E Tests', () => {
     cy.get('button[role="tab"]').should('have.length.at.least', 3);
   });
 
-  it('should show search tab by default', () => {
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
-    cy.get('form').should('be.visible');
+  it('should show My Songs tab by default', () => {
+    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.contains('Hotel California').should('be.visible');
   });
 
   it('should have a working file uploader tab', () => {

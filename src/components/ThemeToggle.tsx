@@ -109,8 +109,9 @@ export const ThemeToggle = () => {
           variant="ghost" 
           size="icon" 
           aria-label="Toggle theme"
-          className="ml-2"
           title="Theme settings"
+          className="border"
+          tabIndex={0}
         >
           <span className="theme-toggle-icon">
             {isDark ? (
@@ -123,15 +124,27 @@ export const ThemeToggle = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={setLightTheme} className={!isDark && !isSystemTheme ? "bg-accent" : ""}>
+        <DropdownMenuItem 
+          onClick={setLightTheme} 
+          className={!isDark && !isSystemTheme ? "bg-accent" : ""}
+          tabIndex={0}
+        >
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={setDarkTheme} className={isDark && !isSystemTheme ? "bg-accent" : ""}>
+        <DropdownMenuItem 
+          onClick={setDarkTheme} 
+          className={isDark && !isSystemTheme ? "bg-accent" : ""}
+          tabIndex={0}
+        >
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={setSystemTheme} className={isSystemTheme ? "bg-accent" : ""}>
+        <DropdownMenuItem 
+          onClick={setSystemTheme} 
+          className={isSystemTheme ? "bg-accent" : ""}
+          tabIndex={0}
+        >
           <Laptop className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>
