@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef, forwardRef } from 'react';
+import { forwardRef, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
+import ChordHeader from './ChordDisplay/ChordHeader';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
-import { 
-  DEFAULT_SCROLL_SPEED, 
-  handleAutoScrollToggle as toggleAutoScroll,
-  performAutoScroll,
-  AutoScrollRefs
-} from '@/utils/auto-scroll-utils';
-import { 
-  processContent, 
-  getTransposeOptions,
-  ChordSection
-} from '@/utils/chord-sheet-utils';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
+import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
+import { useChordEditor } from '@/hooks/use-chord-editor';
+import { downloadTextFile } from '@/utils/download-utils';
 
 interface ChordDisplayProps {
   title?: string;
@@ -24,83 +18,54 @@ interface ChordDisplayProps {
 }
 
 const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
-
-  const [transpose, setTranspose] = useState(0);
-  const [fontSize, setFontSize] = useState(16);
-  const [fontSpacing, setFontSpacing] = useState(0);
-  const [fontStyle, setFontStyle] = useState('');
-  const [viewMode, setViewMode] = useState("normal"); // "normal", "chords-only", "lyrics-only"
-  const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState<string>(content);
-  const [autoScroll, setAutoScroll] = useState<boolean>(false);
-  const [scrollSpeed, setScrollSpeed] = useState<number>(DEFAULT_SCROLL_SPEED);
-  const scrollTimerRef = useRef<number | null>(null);
-  const lastScrollTimeRef = useRef<number>(0);
-  const accumulatedScrollRef = useRef<number>(0);
+  // Use custom hooks for different concerns
+  const { 
+    autoScroll, 
+    scrollSpeed, 
+    setScrollSpeed, 
+    toggleAutoScroll 
+  } = useAutoScroll();
+  
+  const { 
+    transpose, 
+    setTranspose,
+    fontSize, 
+    setFontSize,
+    fontSpacing,
+    setFontSpacing,
+    fontStyle,
+    setFontStyle,
+    viewMode,
+    setViewMode,
+    hideGuitarTabs,
+    setHideGuitarTabs,
+    processedContent,
+    transposeOptions
+  } = useChordDisplaySettings(content);
+  
+  const {
+    isEditing,
+    setIsEditing,
+    editContent,
+    setEditContent,
+    updateEditContent,
+    handleSaveEdits: saveEdits
+  } = useChordEditor(content, onSave);
   
   // Update edit content when content prop changes
   useEffect(() => {
-    setEditContent(content);
-  }, [content]);
+    updateEditContent(content);
+  }, [content, updateEditContent]);
   
-  // Handle auto-scrolling for the whole page
-  useEffect(() => {
-    if (autoScroll) {
-      // Create refs object to pass to utility function
-      const refs: AutoScrollRefs = {
-        scrollTimerRef,
-        lastScrollTimeRef,
-        accumulatedScrollRef
-      };
-      
-      // Use the utility function to perform auto-scroll
-      return performAutoScroll(
-        scrollSpeed,
-        refs,
-        setAutoScroll,
-        setScrollSpeed
-      );
-    }
-  }, [autoScroll, scrollSpeed]);
-  
-  // Process the content with imported utility function
-  const processedContent = processContent(content, transpose);
-  
-  // Generate options for the transpose selector
-  const transposeOptions = getTransposeOptions();
-  
-  // Handle saving edits
+  // Handle saving edits (with toast notification)
   const handleSaveEdits = () => {
-    if (onSave) {
-      onSave(editContent);
-    }
-    setIsEditing(false);
-    toast({
-      title: "Changes saved",
-      description: "Your chord sheet has been updated"
-    });
+    saveEdits();
   };
   
   // Handle download of chord sheet
   const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([content], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `${title || "chord-sheet"}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    
-    toast({
-      title: "Download started",
-      description: "Your chord sheet is being downloaded"
-    });
-  };
-  
-  // Enhanced auto-scroll toggle logic
-  const handleAutoScrollToggle = (enable?: boolean) => {
-    toggleAutoScroll(enable, autoScroll, setAutoScroll);
+    const result = downloadTextFile(content, title || "chord-sheet");
+    toast(result);
   };
   
   if (isEditing) {
@@ -116,13 +81,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
 
   return (
     <div ref={ref} id="chord-display">
-      {/* Song header */}
-      {(title || artist) && (
-        <div className="mb-4 text-center">
-          {title && <h1 className="text-2xl font-bold">{title}</h1>}
-          {artist && <p className="text-muted-foreground">{artist}</p>}
-        </div>
-      )}
+      <ChordHeader title={title} artist={artist} />
       <ChordContent
         processedContent={processedContent}
         fontSize={fontSize}
@@ -147,7 +106,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
         hideGuitarTabs={hideGuitarTabs}
         setHideGuitarTabs={setHideGuitarTabs}
         autoScroll={autoScroll}
-        setAutoScroll={handleAutoScrollToggle}
+        setAutoScroll={toggleAutoScroll}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
         setIsEditing={setIsEditing}
