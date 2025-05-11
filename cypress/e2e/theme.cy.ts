@@ -23,11 +23,12 @@ describe('Theme Functionality Tests', () => {
     });
 
     // Theme toggle button should be visible
-    cy.get('button[aria-label="Toggle theme"]').should('be.visible');
+    cy.get('[data-testid="theme-toggle-button"]').should('be.visible');
 
     // Check if the System option is highlighted in the dropdown
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('System').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
   });
 
   it('should switch to light mode when selected', () => {
@@ -46,8 +47,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'light');
     
     // Re-open dropdown and verify Light is highlighted
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('Light').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-light-item"]').should('have.class', 'bg-accent');
   });
 
   it('should switch to dark mode when selected', () => {
@@ -55,28 +57,28 @@ describe('Theme Functionality Tests', () => {
     cy.get('body').click('top');
     
     // Explicitly click on the theme button and then Dark option
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('Dark').click().then(() => {
-      // Wait for theme to be applied
-      cy.wait(200);
-      
-      // Verify localStorage has the right theme directly using window.localStorage
-      cy.window().then(win => {
-        expect(win.localStorage.getItem('theme')).to.equal('dark');
-      });
-      
-      // Verify the HTML element has the 'dark' class
-      cy.get('html').should('have.class', 'dark');
-      
-      // Get theme and verify it's dark
-      cy.getCurrentTheme().should('eq', 'dark');
-      
-      // Re-open dropdown and verify Dark is highlighted
-      cy.get('button[aria-label="Toggle theme"]').click();
-      
-      // More robust way to verify the Dark option is highlighted
-      cy.contains('span', 'Dark').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-dark-item"]').click();
+    
+    // Wait for theme to be applied
+    cy.wait(200);
+    
+    // Verify localStorage has the right theme directly using window.localStorage
+    cy.window().then(win => {
+      expect(win.localStorage.getItem('theme')).to.equal('dark');
     });
+    
+    // Verify the HTML element has the 'dark' class
+    cy.get('html').should('have.class', 'dark');
+    
+    // Get theme and verify it's dark
+    cy.getCurrentTheme().should('eq', 'dark');
+    
+    // Re-open dropdown and verify Dark is highlighted
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-dark-item"]').should('have.class', 'bg-accent');
   });
 
   it('should return to system theme when selected', () => {
@@ -88,12 +90,14 @@ describe('Theme Functionality Tests', () => {
     
     // Verify localStorage has no theme (system theme) directly using window.localStorage
     cy.window().then(win => {
-      expect(win.localStorage.getItem('theme')).to.be.null;
+      const theme = win.localStorage.getItem('theme');
+      expect(theme).to.equal(null);
     });
     
     // Re-open dropdown and verify System is highlighted
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('System').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
   });
   
   it('should persist theme preference after page reload', () => {
@@ -107,8 +111,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'dark');
     
     // Re-open dropdown and verify Dark is still highlighted
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('Dark').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-dark-item"]').should('have.class', 'bg-accent');
   });
   
   // This test mocks the system preference to ensure our app properly responds to it
@@ -143,8 +148,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'dark');
     
     // Open dropdown and verify System is highlighted
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('System').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
   });
   
   it('should respect system light mode preference', () => {
@@ -178,7 +184,8 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'light');
     
     // Open dropdown and verify System is highlighted
-    cy.get('button[aria-label="Toggle theme"]').click();
-    cy.contains('System').parent().should('have.class', 'bg-accent');
+    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.wait(200);
+    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
   });
 });

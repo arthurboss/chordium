@@ -4,8 +4,10 @@ import { cn, dropdownStyleClasses, dropdownAnimationClasses } from "./utils";
 
 const DropdownMenuContent = forwardRef<
   ComponentRef<typeof Content>,
-  ComponentProps<typeof Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+  ComponentProps<typeof Content> & {
+    role?: string; 
+  }
+>(({ className, sideOffset = 4, role = "menu", ...props }, ref) => (
   <Portal>
     <Content
       ref={ref}
@@ -17,6 +19,7 @@ const DropdownMenuContent = forwardRef<
         dropdownAnimationClasses.sides,
         className
       )}
+      role={role}
       {...props}
     />
   </Portal>

@@ -6,8 +6,9 @@ const DropdownMenuItem = forwardRef<
   ComponentRef<typeof Item>,
   ComponentProps<typeof Item> & {
     inset?: boolean;
+    role?: string;
   }
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, role = "menuitem", ...props }, ref) => (
   <Item
     ref={ref}
     className={cn(
@@ -15,6 +16,7 @@ const DropdownMenuItem = forwardRef<
       inset && dropdownStyleClasses.insetItem,
       className
     )}
+    role={role}
     {...props}
   />
 ));
