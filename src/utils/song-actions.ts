@@ -22,7 +22,6 @@ export const handleSaveNewSong = (
     id: `song-${Date.now()}`,
     title: title || "Untitled Song",
     path: content,
-    dateAdded: new Date().toISOString()
   };
   
   setMySongs(prev => [newSong, ...prev]);

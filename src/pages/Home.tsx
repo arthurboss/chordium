@@ -11,7 +11,7 @@ import TestComponent from "@/components/TestComponent";
 const Home = () => {
   const [activeTab, setActiveTab] = useState("my-songs");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
-  const [sampleSongs, setSampleSongs] = useState<Omit<SongData, "dateAdded">[]>([]);
+  const [sampleSongs, setSampleSongs] = useState<SongData[]>([]);
   const [mySongs, setMySongs] = useState<SongData[]>([]);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
   
@@ -22,8 +22,7 @@ const Home = () => {
       setSampleSongs(samples);
       
       const initialSongs = samples.map(song => ({
-        ...song, 
-        dateAdded: new Date().toISOString()
+        ...song,
       }));
       
       setMySongs(loadSongs(initialSongs));

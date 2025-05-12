@@ -1,6 +1,6 @@
 import { SongData } from '../types/song';
 
-export const loadSampleSongs = async (): Promise<Omit<SongData, "dateAdded">[]> => {
+export const loadSampleSongs = async (): Promise<SongData[]> => {
   const sampleSong1Content = await fetch("/src/data/songs/wonderwall.txt").then(res =>
     res.text()
   );

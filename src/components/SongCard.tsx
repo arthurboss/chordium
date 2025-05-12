@@ -19,9 +19,6 @@ const SongCard = ({ song, onView, onDelete }: SongCardProps) => {
             {song.artist && (
               <p className="text-muted-foreground text-sm">{song.artist}</p>
             )}
-            <p className="text-xs text-muted-foreground mt-1">
-              {new Date(song.dateAdded).toLocaleDateString()}
-            </p>
           </div>
         </div>
       </CardContent>
