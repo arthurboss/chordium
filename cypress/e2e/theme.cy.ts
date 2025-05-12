@@ -23,12 +23,12 @@ describe('Theme Functionality Tests', () => {
     });
 
     // Theme toggle button should be visible
-    cy.get('[data-testid="theme-toggle-button"]').should('be.visible');
+    cy.get('[data-cy="theme-toggle-button"]').should('be.visible');
 
     // Check if the System option is highlighted in the dropdown
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-system-item"]').should('have.class', 'bg-accent');
   });
 
   it('should switch to light mode when selected', () => {
@@ -47,9 +47,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'light');
     
     // Re-open dropdown and verify Light is highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-light-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-light-item"]').should('have.class', 'bg-accent');
   });
 
   it('should switch to dark mode when selected', () => {
@@ -57,9 +57,9 @@ describe('Theme Functionality Tests', () => {
     cy.get('body').click('top');
     
     // Explicitly click on the theme button and then Dark option
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-dark-item"]').click();
+    cy.get('[data-cy="theme-dark-item"]').click();
     
     // Wait for theme to be applied
     cy.wait(200);
@@ -76,9 +76,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'dark');
     
     // Re-open dropdown and verify Dark is highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-dark-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-dark-item"]').should('have.class', 'bg-accent');
   });
 
   it('should return to system theme when selected', () => {
@@ -95,9 +95,9 @@ describe('Theme Functionality Tests', () => {
     });
     
     // Re-open dropdown and verify System is highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-system-item"]').should('have.class', 'bg-accent');
   });
   
   it('should persist theme preference after page reload', () => {
@@ -111,9 +111,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'dark');
     
     // Re-open dropdown and verify Dark is still highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-dark-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-dark-item"]').should('have.class', 'bg-accent');
   });
   
   // This test mocks the system preference to ensure our app properly responds to it
@@ -148,9 +148,9 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'dark');
     
     // Open dropdown and verify System is highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-system-item"]').should('have.class', 'bg-accent');
   });
   
   it('should respect system light mode preference', () => {
@@ -184,8 +184,8 @@ describe('Theme Functionality Tests', () => {
     cy.getCurrentTheme().should('eq', 'light');
     
     // Open dropdown and verify System is highlighted
-    cy.get('[data-testid="theme-toggle-button"]').click();
+    cy.get('[data-cy="theme-toggle-button"]').click();
     cy.wait(200);
-    cy.get('[data-testid="theme-system-item"]').should('have.class', 'bg-accent');
+    cy.get('[data-cy="theme-system-item"]').should('have.class', 'bg-accent');
   });
 });

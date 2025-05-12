@@ -75,24 +75,24 @@ Cypress.Commands.add('setScrollSpeed', (speed) => {
 Cypress.Commands.add('setTheme', (theme) => {
   // Make sure the dropdown isn't already open
   cy.get('body').then($body => {
-    if ($body.find('[data-testid="theme-dropdown-menu"]').length > 0) {
+    if ($body.find('[data-cy="theme-dropdown-menu"]').length > 0) {
       // If dropdown is open, close it first
       cy.get('body').click('top');
     }
   });
 
-  // Open the theme dropdown using the data-testid
-  cy.get('[data-testid="theme-toggle-button"]').click();
+  // Open the theme dropdown using the data-cy
+  cy.get('[data-cy="theme-toggle-button"]').click();
   cy.wait(100); // Wait for animation
-  cy.get('[data-testid="theme-dropdown-menu"]').should('exist');
+  cy.get('[data-cy="theme-dropdown-menu"]').should('exist');
   
-  // Click on the selected theme option using data-testid
+  // Click on the selected theme option using data-cy
   if (theme === 'dark') {
-    cy.get('[data-testid="theme-dark-item"]').click();
+    cy.get('[data-cy="theme-dark-item"]').click();
   } else if (theme === 'light') {
-    cy.get('[data-testid="theme-light-item"]').click();
+    cy.get('[data-cy="theme-light-item"]').click();
   } else {
-    cy.get('[data-testid="theme-system-item"]').click();
+    cy.get('[data-cy="theme-system-item"]').click();
   }
   
   // Wait for theme change to take effect

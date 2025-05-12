@@ -1,6 +1,7 @@
 import React, { memo, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { getThemeToggleIcon } from "@/utils/theme-icons";
+import { cyAttr } from "@/utils/test-utils";
 
 interface ThemeTriggerButtonProps {
   isDark: boolean;
@@ -19,7 +20,7 @@ export const ThemeTriggerButton = memo(forwardRef<HTMLButtonElement, ThemeTrigge
         className="border"
         tabIndex={0}
         onClick={onClick}
-        data-testid="theme-toggle-button"
+        {...cyAttr("theme-toggle-button")}
       >
         <span className="theme-toggle-icon">
           {getThemeToggleIcon(isDark)}

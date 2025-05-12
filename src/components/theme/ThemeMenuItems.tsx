@@ -3,6 +3,7 @@ import { ThemeMenuItem } from "./ThemeMenuItem";
 import { themeIcons } from "@/utils/theme-icons";
 import { Theme } from "@/utils/theme-utils";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { cyAttr } from "@/utils/test-utils";
 
 interface ThemeMenuItemsProps {
   activeTheme: Theme;
@@ -23,8 +24,7 @@ export const ThemeMenuItems: React.FC<ThemeMenuItemsProps> = memo(({
       {themeIcons.map((item) => {
         const { theme, icon, label } = item;
         const isActive = activeTheme === theme;
-        
-        // Direct usage of DropdownMenuItem for Cypress testing compatibility
+
         return (
           <DropdownMenuItem 
             key={theme}
@@ -32,7 +32,7 @@ export const ThemeMenuItems: React.FC<ThemeMenuItemsProps> = memo(({
             className={isActive ? "bg-accent" : ""}
             tabIndex={0}
             role="menuitem" // Explicitly set the role for Cypress tests
-            data-testid={`theme-${theme}-item`} // Add test ID for easier selection
+            {...cyAttr(`theme-${theme}-item`)}
           >
             {icon}
             <span>{label}</span>
