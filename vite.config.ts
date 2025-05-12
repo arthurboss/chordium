@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-// @ts-expect-error - Import visualizer with type declaration in root d.ts file
 import { visualizer } from 'rollup-plugin-visualizer';
+import stripTestAttributes from "./src/utils/vite-strip-test-attributes";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    // Only strip data-testid attributes in production mode
+    mode === 'production' && stripTestAttributes(),
     visualizer({
       open: true,
       gzipSize: true,
@@ -23,8 +25,25 @@ export default defineConfig(({ mode }) => ({
     }),
   ].filter(Boolean),
   build: {
+    // Enable tree shaking
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        // Enable tree shaking optimizations
+        passes: 2,
+        pure_getters: true,
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+        unused: true,
+        dead_code: true
+      },
+      mangle: {
+        toplevel: true
+      }
+    },
     rollupOptions: {
       output: {
+        // Remove empty chunks
         manualChunks: {
           // Group major libraries together
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
@@ -33,13 +52,32 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-dialog',
             '@radix-ui/react-popover',
             '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-tabs'
           ],
           // Add more chunk definitions as needed
-        }
-      }
+        },
+        // Ensure no empty chunks are generated
+        compact: true,
+        // Improve code splitting
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js'
+      },
+      treeshake: {
+        // Advanced tree shaking options
+        moduleSideEffects: 'no-external', // More aggressive - assume no side effects except for external modules
+        propertyReadSideEffects: false,  // Properties don't have side effects when read
+        tryCatchDeoptimization: false,   // Don't preserve values inside try/catch blocks
+        preset: 'recommended'            // Use recommended preset for best tree shaking
+      },
+      // Optimize dependencies too
+      preserveEntrySignatures: 'strict',
     },
     // Increase warning threshold to 750KB (adjust as needed)
     chunkSizeWarningLimit: 750,
+    sourcemap: mode !== 'production',
+    // Don't emit assets that exceed the intended limit
+    emptyOutDir: true
   },
   resolve: {
     alias: {

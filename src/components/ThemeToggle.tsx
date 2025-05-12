@@ -7,6 +7,7 @@ import {
 import { useTheme } from "@/utils/theme-utils";
 import ThemeTriggerButton from "@/components/theme/ThemeTriggerButton";
 import ThemeMenuItems from "@/components/theme/ThemeMenuItems";
+import { testAttr } from "../utils/test-utils";
 
 export const ThemeToggle: React.FC = () => {
   const { isDark, activeTheme, setTheme } = useTheme();
@@ -23,7 +24,7 @@ export const ThemeToggle: React.FC = () => {
       <DropdownMenuContent 
         align="end" 
         className="theme-dropdown-menu"
-        data-testid="theme-dropdown-menu"
+        {...testAttr("theme-dropdown-menu")}
       >
         <ThemeMenuItems 
           activeTheme={activeTheme} 

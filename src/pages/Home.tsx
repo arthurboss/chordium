@@ -6,6 +6,7 @@ import { SongData } from "@/types/song";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { loadSongs, saveSongs } from "@/utils/song-storage";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
+import TestComponent from "@/components/TestComponent";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("my-songs");
@@ -62,6 +63,13 @@ const Home = () => {
           demoSong={demoSong}
         />
       </main>
+      
+      {/* Include test component for build optimization testing */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="hidden">
+          <TestComponent />
+        </div>
+      )}
       
       <Footer />
     </div>

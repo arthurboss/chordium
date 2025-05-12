@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "analyze-bundle": "vite build --mode production && open dist/stats.html",
+    "validate-optimizations": "./scripts/validate-build-optimizations.sh",
     "lint": "eslint .",
     "preview": "vite preview",
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
@@ -83,6 +85,7 @@
     "rollup-plugin-visualizer": "5.14.0",
     "start-server-and-test": "2.0.11",
     "tailwindcss": "^3.4.17",
+    "terser": "5.39.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0",
     "vite": "^6.3.5"
