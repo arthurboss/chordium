@@ -3,5 +3,4 @@ export interface SongData {
   title: string;
   artist?: string;
   path: string;
-  dateAdded: string;
 }

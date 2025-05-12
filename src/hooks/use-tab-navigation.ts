@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 interface TabNavigationProps {
-  sampleSongs: Omit<SongData, "dateAdded">[];
+  sampleSongs: SongData[];
   mySongs: SongData[];
   setActiveTab: (tab: string) => void;
   setDemoSong: React.Dispatch<React.SetStateAction<SongData | null>>;
@@ -31,7 +31,6 @@ export const useTabNavigation = ({
       if (foundDemo) {
         setDemoSong({
           ...foundDemo,
-          dateAdded: new Date().toISOString(),
         } as SongData);
         setActiveTab("my-songs");
         return;
