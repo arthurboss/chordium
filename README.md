@@ -23,6 +23,17 @@ This project is built with modern web technologies:
 - **shadcn/ui** - Accessible UI components
 - **React Router** - Client-side routing
 
+## 🔧 Build Optimizations
+
+Chordium includes several optimizations for production builds:
+
+- **Tree Shaking** - Eliminates unused code from the bundle
+- **Code Splitting** - Loads JavaScript only when needed
+- **Test Attribute Stripping** - Removes testing attributes in production
+- **Bundle Analysis** - Visualizes bundle size with rollup-plugin-visualizer
+
+For more details, see the [build optimization docs](./docs/build-optimizations.md).
+
 ## 🚀 Getting Started
 
 ### Prerequisites

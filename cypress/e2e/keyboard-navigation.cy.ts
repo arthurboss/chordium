@@ -83,12 +83,21 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
   });
   
   it('should make theme dropdown menu items keyboard accessible', () => {
-    // Open the theme menu
-    cy.get('button[aria-label="Toggle theme"]').click();
+    // Open the theme menu using the data-cy we added
+    cy.get('[data-cy="theme-toggle-button"]').click();
     
-    // Check dropdown items have tabindex
-    cy.get('[role="menuitem"]').each(($item) => {
-      cy.wrap($item).should('have.attr', 'tabindex', '0');
+    // Wait for the dropdown to open
+    cy.wait(200);
+    
+    // Look for the dropdown menu with the test ID
+    cy.get('[data-cy="theme-dropdown-menu"]').should('exist');
+    
+    // Check that all theme menu items are present and have the correct attributes
+    // Use a more specific selector to target only the menu items
+    cy.get('[data-cy^="theme-"][data-cy$="-item"]').each(($item) => {
+      cy.wrap($item)
+        .should('have.attr', 'tabindex', '0')
+        .should('have.attr', 'role', 'menuitem');
     });
   });
 
