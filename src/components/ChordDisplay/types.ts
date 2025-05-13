@@ -9,6 +9,10 @@ export interface ChordSection {
   lines: ChordLine[];
 }
 
+// Type aliases for consistency with utils
+export type ChordLineType = ChordLine;
+export type ChordSectionType = ChordSection;
+
 export interface ChordContentProps {
   processedContent: ChordSection[];
   fontSize: number;
@@ -46,6 +50,19 @@ export interface ChordEditProps {
   editContent: string;
   setEditContent: (v: string) => void;
   handleSaveEdits: () => void;
-  setIsEditing: (v: boolean) => void;
-  onReturn: () => void;
+  onReturn?: () => void;
+}
+
+export interface ChordEditToolbarProps {
+  isPreviewMode: boolean;
+  isFullScreen: boolean;
+  onTogglePreview: () => void;
+  onToggleFullScreen: () => void;
+  onSave: () => void;
+  onReturn?: () => void;
+}
+
+export interface ChordRendererProps {
+  chordName: string;
+  isMobile: boolean;
 }

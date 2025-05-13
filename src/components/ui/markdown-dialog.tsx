@@ -4,6 +4,7 @@ import { MDXProvider } from '@mdx-js/react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -246,7 +247,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
     }
   };
 
-  const checkScrollStatus = () => {
+  const checkScrollStatus = React.useCallback(() => {
     if (contentRef.current) {
       const sections = contentRef.current.children;
       if (sections.length > 0) {
@@ -270,7 +271,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
     setShouldScroll(false);
     setIsAtBottom(false);
     return false;
-  };
+  }, [contentRef, currentSectionIndex]);
 
   const scrollToToggle = () => {
     if (contentRef.current) {
@@ -311,7 +312,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
 
     setTimeout(checkScrollStatus, 50);
 
-  }, [currentSectionIndex]);
+  }, [currentSectionIndex, checkScrollStatus]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -339,7 +340,7 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
       }
       resizeObserver.disconnect();
     };
-  }, [currentSectionIndex, markdownContents]);
+  }, [currentSectionIndex, markdownContents, checkScrollStatus]);
 
   const navigateSection = (direction: 'next' | 'prev' | 'reset') => {
     if (markdownContents.length === 0) return;
@@ -392,6 +393,9 @@ const MarkdownDialog: React.FC<MarkdownDialogProps> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Chord sheet formatting documentation and guidelines
+          </DialogDescription>
         </DialogHeader>
 
         <DialogMain
