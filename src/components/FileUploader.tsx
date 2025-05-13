@@ -7,9 +7,10 @@ import FileInfo from '@/components/ui/file-info';
 
 interface FileUploaderProps {
   onFileContent: (content: string, fileName: string) => void;
+  forceShowMetadata?: boolean;
 }
 
-const FileUploader = ({ onFileContent }: FileUploaderProps) => {
+const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploaderProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showMetadataForm, setShowMetadataForm] = useState(false);
@@ -148,7 +149,7 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
         />
       </div>
 
-      {selectedFile && showMetadataForm && (
+      {selectedFile && (showMetadataForm || forceShowMetadata) && (
         <div className="mt-6">
           <SongMetadataForm
             title={title}

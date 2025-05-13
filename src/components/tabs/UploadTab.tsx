@@ -1,8 +1,8 @@
 import { useState, RefObject } from "react";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import FileUploader from "@/components/FileUploader";
 import ChordDisplay from "@/components/ChordDisplay";
+import ChordEditToolbar from "@/components/ChordDisplay/ChordEditToolbar";
 
 interface UploadTabProps {
   chordDisplayRef: RefObject<HTMLDivElement>;
@@ -12,6 +12,7 @@ interface UploadTabProps {
 const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
   const [uploadedContent, setUploadedContent] = useState("");
   const [uploadedTitle, setUploadedTitle] = useState("");
+  const [showMetadata, setShowMetadata] = useState(false);
   
   const handleFileUpload = (content: string, fileName: string) => {
     setUploadedContent(content);
@@ -20,6 +21,9 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
       const title = fileName.replace(/\.[^/.]+$/, "");
       setUploadedTitle(title);
     }
+    
+    // When we receive content from FileUploader, we're now showing content, not metadata form
+    setShowMetadata(false);
   };
 
   const handleSave = () => {
@@ -32,23 +36,24 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
 
   return (
     <div className="space-y-4">
-      <FileUploader onFileContent={handleFileUpload} />
+      <FileUploader 
+        onFileContent={handleFileUpload}
+        forceShowMetadata={showMetadata}
+      />
       
-      {uploadedContent && (
+      {uploadedContent && !showMetadata && (
         <div className="mt-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold">Uploaded Chord Sheet</h2>
-            <Button 
-              onClick={handleSave}
-              size="sm"
-              className="flex items-center gap-1"
-              tabIndex={0}
-              aria-label="Save to My Songs"
-            >
-              <Save className="h-4 w-4" />
-              <span>Save to My Songs</span>
-            </Button>
-          </div>
+          <Card className="mb-4">
+            <CardContent className="p-3 sm:p-4">
+              <ChordEditToolbar 
+                onSave={handleSave}
+                onReturn={() => {
+                  // Don't clear the content yet, just show the metadata form
+                  setShowMetadata(true);
+                }}
+              />
+            </CardContent>
+          </Card>
           <ChordDisplay 
             ref={chordDisplayRef}
             title={uploadedTitle || undefined}
