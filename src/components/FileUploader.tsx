@@ -1,6 +1,5 @@
-
 import { useState, useRef } from 'react';
-import { FileUp, X } from 'lucide-react';
+import { FileUp, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -81,9 +80,8 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
   };
 
   return (
-    <div>
       <div 
-        className={`border-2 border-dashed rounded-lg p-6 text-center ${
+        className={`border-2 border-dashed rounded-lg py-5 px-6 text-center ${
           isDragOver ? 'border-primary bg-primary/5' : 'border-border'
         } transition-colors`}
         onDragOver={handleDragOver}
@@ -91,22 +89,19 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
         onDrop={handleDrop}
       >
         {selectedFile ? (
-          <div className="flex flex-col items-center">
-            <div className="bg-primary/10 text-primary rounded-full p-3 mb-3">
-              <FileUp size={24} />
+          <div className="flex items-center justify-between gap-3 px-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <FileUp className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-medium truncate">{selectedFile.name}</span>
             </div>
-            <p className="font-medium mb-1">{selectedFile.name}</p>
-            <p className="text-sm text-muted-foreground mb-3">
-              {(selectedFile.size / 1024).toFixed(1)} KB
-            </p>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm"
               onClick={handleClearFile}
-              className="gap-1"
+              className="h-8 w-8 p-0"
             >
-              <X size={16} />
-              <span>Remove</span>
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Remove</span>
             </Button>
           </div>
         ) : (
@@ -135,7 +130,6 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
           onChange={handleFileInputChange}
         />
       </div>
-    </div>
   );
 };
 
