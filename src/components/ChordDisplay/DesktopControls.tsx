@@ -1,258 +1,25 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Card, CardContent } from '../ui/card';
-import { Button } from '../ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import { Music, Settings, Text, AlignLeft } from 'lucide-react';
+import { useScrollPosition, TransposeMenu, TextPreferencesMenu } from './shared';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
-import { Slider } from '../ui/slider';
-import { Switch } from '../ui/switch';
 import { ChordSheetControlsProps } from './types';
 
-function TextPreferencesMenu({
-  fontSize,
-  setFontSize,
-  fontSpacing,
-  setFontSpacing,
-  fontStyle,
-  setFontStyle,
-  lineHeight,
-  setLineHeight,
-  viewMode,
-  setViewMode,
-}: {
-  fontSize: number;
-  setFontSize: (value: number) => void;
-  fontSpacing: number;
-  setFontSpacing: (value: number) => void;
-  fontStyle: string;
-  setFontStyle: (value: string) => void;
-  lineHeight: number;
-  setLineHeight: (value: number) => void;
-  viewMode: string;
-  setViewMode: (value: string) => void;
-}) {
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const [open, setOpen] = useState(false);
-
-  const startCloseTimer = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 3000);
-  }, []);
-
-  const clearCloseTimer = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (open) {
-      startCloseTimer();
-    }
-  }, [open, startCloseTimer]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0"
-        >
-          <Settings size={16} className="text-chord" />
-          <span className="font-medium text-sm">Text Preferences</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-          align="end" 
-          className='px-1 py-3 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out'
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          onFocusOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => {
-            e.preventDefault();
-            startCloseTimer();
-          }}
-          onPointerDownOutside={(e) => e.stopPropagation()}
-          onTouchStart={clearCloseTimer}
-          onTouchEnd={startCloseTimer}
-          onMouseEnter={clearCloseTimer}
-          onMouseLeave={startCloseTimer}
-          style={{
-            transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
-            opacity: '1'
-          }}
-        >
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">View Mode</div>
-          <div className="flex items-center gap-2">
-            <Button variant={viewMode === 'normal' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('normal')} title="Normal"><Text size={18} /></Button>
-            <Button variant={viewMode === 'chords-only' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('chords-only')} title="Chords"><Music size={18} /></Button>
-            <Button variant={viewMode === 'lyrics-only' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('lyrics-only')} title="Lyrics"><AlignLeft size={18} /></Button>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-2">Font Style</div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm">Sans</span>
-            <Switch
-              checked={fontStyle === 'serif'}
-              onCheckedChange={(checked) => setFontStyle(checked ? 'serif' : 'sans-serif')}
-              className="w-[64px] h-6 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:data-[state=checked]:translate-x-[40px]"
-            />
-            <span className="text-sm">Serif</span>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Font Size</div>
-          <div className="flex items-center gap-3">
-            <Slider
-              value={[fontSize]}
-              min={12}
-              max={24}
-              step={1}
-              onValueChange={(value) => setFontSize(value[0])}
-              className="w-32"
-            />
-            <span className="w-10 text-center text-sm">{fontSize}px</span>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Line Height</div>
-          <div className="flex items-center gap-3">
-            <Slider
-              value={[lineHeight]}
-              min={0.8}
-              max={1.6}
-              step={0.1}
-              onValueChange={(value) => setLineHeight(value[0])}
-              className="w-32"
-            />
-            <span className="w-10 text-center text-sm">{Math.round((lineHeight - 0.6) * 5)}x</span>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Font Spacing</div>
-          <div className="flex items-center gap-3">
-            <Slider
-              value={[fontSpacing]}
-              min={0}
-              max={0.2}
-              step={0.1}
-              onValueChange={(value) => setFontSpacing(value[0])}
-              className="w-32"
-            />
-            <span className="w-10 text-center text-sm">
-              {fontSpacing === 0 ? '1x' : fontSpacing === 0.1 ? '2x' : '3x'}
-            </span>
-          </div>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function TransposeMenu({ transpose, setTranspose, transposeOptions }: {
-  transpose: number;
-  setTranspose: (value: number) => void;
-  transposeOptions: number[];
-}) {
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const [open, setOpen] = useState(false);
-
-  const startCloseTimer = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 3000);
-  }, []);
-
-  const clearCloseTimer = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (open) {
-      startCloseTimer();
-    }
-  }, [open, startCloseTimer]);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0"
-        >
-          <Music size={18} className="text-chord" />
-          <span className="font-medium text-sm">Transpose: {transpose > 0 ? `+${transpose}` : transpose}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="p-2 data-[state=open]:animate-merge-in data-[state=closed]:animate-merge-out"
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onFocusOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => {
-          e.preventDefault();
-          startCloseTimer();
-        }}
-        onPointerDownOutside={(e) => e.stopPropagation()}
-        onTouchStart={clearCloseTimer}
-        onTouchEnd={startCloseTimer}
-        onMouseEnter={clearCloseTimer}
-        onMouseLeave={startCloseTimer}
-        style={{
-          transformOrigin: 'var(--radix-dropdown-menu-content-transform-origin)',
-          opacity: '1'
-        }}
-      >
-        <div className="grid grid-cols-5 gap-2">
-          {transposeOptions.map((value: number) => (
-            <Button
-              key={value}
-              variant={value === transpose ? "default" : "outline"}
-              size="sm"
-              className="min-w-[36px] h-8 px-0 text-sm"
-              onClick={() => setTranspose(value)}
-            >
-              {value > 0 ? `+${value}` : value}
-            </Button>
-          ))}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-const DesktopControls: React.FC<ChordSheetControlsProps> = ({
+/**
+ * Desktop controls for chord sheet display
+ * Shows a fixed bar at bottom of screen with controls for playback and display
+ * Implements performance optimizations with useMemo
+ */
+const DesktopControls: React.FC<Pick<ChordSheetControlsProps, 
+  'transpose' | 'setTranspose' | 'transposeOptions' |
+  'fontSize' | 'setFontSize' |
+  'fontSpacing' | 'setFontSpacing' |
+  'fontStyle' | 'setFontStyle' |
+  'lineHeight' | 'setLineHeight' |
+  'viewMode' | 'setViewMode' |
+  'autoScroll' | 'setAutoScroll' |
+  'scrollSpeed' | 'setScrollSpeed'
+>> = ({
   transpose,
   setTranspose,
   transposeOptions,
@@ -266,36 +33,31 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setLineHeight,
   viewMode,
   setViewMode,
-  hideGuitarTabs,
-  setHideGuitarTabs,
   autoScroll,
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
-  setIsEditing,
-  handleDownload,
 }) => {
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const isMdScreen = window.innerWidth >= 768 && window.innerWidth < 1024;
-      const threshold = isMdScreen ? 100 : 140; // pixels from bottom to trigger the change
-
-      setIsAtBottom(scrollPosition >= documentHeight - threshold);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check initial position
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Track scroll position to adjust UI
+  const isAtBottom = useScrollPosition({
+    responsiveThresholds: [
+      { mediaQuery: '(min-width: 768px) and (max-width: 1023px)', threshold: 100 }
+    ]
+  });
+  
+  // Only memoize the transpose menu component which is likely to benefit most from memoization
+  // Since it's in the center of the layout and less likely to change frequently
+  const transposeMenuComponent = useMemo(() => (
+    <TransposeMenu 
+      transpose={transpose} 
+      setTranspose={setTranspose} 
+      transposeOptions={transposeOptions} 
+    />
+  ), [transpose, setTranspose, transposeOptions]);
 
   return (
-    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-3'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
-      <CardContent className="p-3 sm:p-3">
+    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-3'} bg-background/70 backdrop-blur-sm`}>
+      <CardContent className="p-3">
         <div className="flex flex-col space-y-3">
           <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
             {/* Left: Play/Pause (Auto Scroll) button */}
@@ -305,27 +67,33 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
                 setAutoScroll={setAutoScroll}
                 size={16}
                 className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20 border-secondary/30' : ''}`}
-                variant="outline"
               />
-              {/* Speed controls only show when playing, always between PlayButton and Transpose */}
+              {/* Speed controls only show when playing */}
               {autoScroll && (
                 <div className="ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
                   <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
                 </div>
               )}
             </div>
-            {/* Center: Transpose always centered and fixed */}
+            
+            {/* Center: Transpose always centered and fixed - keep memoized */}
             <div className="flex items-center justify-center">
-              <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
+              {transposeMenuComponent}
             </div>
+            
             {/* Right: Text Preferences */}
             <div className="flex items-center justify-end">
               <TextPreferencesMenu
-                fontSize={fontSize} setFontSize={setFontSize}
-                fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-                fontStyle={fontStyle} setFontStyle={setFontStyle}
-                lineHeight={lineHeight} setLineHeight={setLineHeight}
-                viewMode={viewMode} setViewMode={setViewMode}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                fontSpacing={fontSpacing}
+                setFontSpacing={setFontSpacing}
+                fontStyle={fontStyle}
+                setFontStyle={setFontStyle}
+                lineHeight={lineHeight}
+                setLineHeight={setLineHeight}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
               />
             </div>
           </div>
@@ -335,4 +103,5 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   );
 };
 
-export default DesktopControls;
+// Memoize component to prevent unnecessary re-renders
+export default memo(DesktopControls);

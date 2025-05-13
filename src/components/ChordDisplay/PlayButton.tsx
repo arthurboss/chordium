@@ -7,11 +7,10 @@ interface PlayButtonProps {
   setAutoScroll: (v: boolean) => void;
   size?: number;
   className?: string;
-  variant?: string;
   style?: React.CSSProperties;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className, variant = 'outline', style }) => (
+const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className, style }) => (
   <Button 
     variant="outline"
     size="icon" 
