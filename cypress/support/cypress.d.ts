@@ -29,9 +29,15 @@ declare namespace Cypress {
     /**
      * Get the current active theme, either 'dark' or 'light'
      * @example
-     * // Assert that the current theme is dark
-     * cy.getCurrentTheme().should('eq', 'dark')
+     * cy.getActiveTheme().should('eq', 'dark')
      */
-    getCurrentTheme(): Chainable<'dark' | 'light'>;
+    getActiveTheme(): Chainable<string>;
+    
+    /**
+     * Simulate pressing the Tab key from the current focused element
+     * @example
+     * cy.get('button').focus().pressTab()
+     */
+    pressTab(): Chainable<Element>;
   }
 }

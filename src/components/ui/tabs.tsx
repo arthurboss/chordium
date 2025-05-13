@@ -48,7 +48,7 @@ const TabsList = React.forwardRef<
     };
 
     updateIndicator();
-
+    
     const mutationObserver = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (
@@ -104,17 +104,33 @@ TabsList.displayName = TabsPrimitive.List.displayName
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
-      className
-    )}
-    tabIndex={0}
-    {...props}
-  />
-))
+>(({ className, onKeyDown, ...props }, ref) => {
+  // Create a new keydown handler that conditionally invokes the provided onKeyDown
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    // Don't block the Tab key navigation
+    if (e.key === 'Tab') {
+      // Let default tab behavior happen
+      return;
+    }
+    
+    // For other keys (Enter, Space), invoke the original handler if provided
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+  };
+
+  return (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
+        className
+      )}
+      onKeyDown={handleKeyDown}
+      {...props}
+    />
+  );
+});
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = React.forwardRef<
@@ -127,7 +143,6 @@ const TabsContent = React.forwardRef<
       "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ",
       className
     )}
-    tabIndex={0}
     {...props}
   />
 ))
