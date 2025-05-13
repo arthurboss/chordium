@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Tooltip,
@@ -16,39 +16,43 @@ import ChordDiagram from '@/components/ChordDiagram';
  */
 export const ChordWithTooltip: React.FC<{ chord: string }> = ({ chord }) => {
   const chordName = chord.trim();
+  // Use the optimized useIsMobile hook
   const isMobile = useIsMobile();
   
-  if (isMobile) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <span className="chord cursor-pointer">
-            {chordName}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-4 bg-background border-2 border-chord shadow-lg">
-          <div className="font-comic">
-            <ChordDiagram chordName={chordName} />
-          </div>
-        </PopoverContent>
-      </Popover>
-    );
-  } else {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
+  // Use useMemo to prevent unnecessary re-rendering of components
+  return useMemo(() => {
+    if (isMobile) {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
             <span className="chord cursor-pointer">
               {chordName}
             </span>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="p-4 bg-background border-2 border-chord shadow-lg">
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-4 bg-background border-2 border-chord shadow-lg">
             <div className="font-comic">
               <ChordDiagram chordName={chordName} />
             </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
+          </PopoverContent>
+        </Popover>
+      );
+    } else {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="chord cursor-pointer">
+                {chordName}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="p-4 bg-background border-2 border-chord shadow-lg">
+              <div className="font-comic">
+                <ChordDiagram chordName={chordName} />
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+  }, [isMobile, chordName]); // Only re-render when these values change
 };
