@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react';
-import { FileUp, Trash2 } from 'lucide-react';
+import { FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import SongMetadataForm from '@/components/SongMetadataForm';
+import FileInfo from '@/components/ui/file-info';
 
 interface FileUploaderProps {
   onFileContent: (content: string, fileName: string) => void;
@@ -10,6 +12,12 @@ interface FileUploaderProps {
 const FileUploader = ({ onFileContent }: FileUploaderProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showMetadataForm, setShowMetadataForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
+  const [songTuning, setSongTuning] = useState("");
+  const [guitarTuning, setGuitarTuning] = useState("");
+  const [fileContent, setFileContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -25,7 +33,7 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     if (e.dataTransfer.files.length > 0) {
       processFile(e.dataTransfer.files[0]);
     }
@@ -49,13 +57,21 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
 
     setSelectedFile(file);
     const reader = new FileReader();
-    
+
     reader.onload = (event) => {
       if (event.target?.result) {
-        onFileContent(event.target.result as string, file.name);
+        const content = event.target.result as string;
+        setFileContent(content);
+
+        // Try to extract a title from the file name (remove extension)
+        const fileName = file.name.replace(/\.(txt|text|chord)$/i, '');
+        setTitle(fileName);
+
+        // Show metadata form instead of immediately passing content to parent
+        setShowMetadataForm(true);
       }
     };
-    
+
     reader.onerror = () => {
       toast({
         title: "Error reading file",
@@ -63,12 +79,18 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
         variant: "destructive",
       });
     };
-    
+
     reader.readAsText(file);
   };
 
   const handleClearFile = () => {
     setSelectedFile(null);
+    setShowMetadataForm(false);
+    setFileContent("");
+    setTitle("");
+    setArtist("");
+    setSongTuning("");
+    setGuitarTuning("");
     onFileContent('', '');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -79,31 +101,26 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
     fileInputRef.current?.click();
   };
 
+  const handleContinue = () => {
+    // Pass the content and metadata to the parent component
+    onFileContent(fileContent, `${title}${artist ? ' - ' + artist : ''}`);
+    setShowMetadataForm(false);
+  };
+
   return (
-      <div 
-        className={`border-2 border-dashed rounded-lg py-5 px-6 text-center ${
-          isDragOver ? 'border-primary bg-primary/5' : 'border-border'
-        } transition-colors`}
+    <>
+      <div
+        className={`border-2 border-dashed rounded-lg py-5 px-6 text-center ${isDragOver ? 'border-primary bg-primary/5' : 'border-border'
+          } transition-colors`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         {selectedFile ? (
-          <div className="flex items-center justify-between gap-3 px-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <FileUp className="h-4 w-4 text-primary shrink-0" />
-              <span className="font-medium truncate">{selectedFile.name}</span>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleClearFile}
-              className="h-8 w-8 p-0"
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="sr-only">Remove</span>
-            </Button>
-          </div>
+          <FileInfo 
+            fileName={selectedFile.name} 
+            onRemoveFile={handleClearFile}
+          />
         ) : (
           <>
             <div className="bg-muted rounded-full p-3 inline-block mb-3">
@@ -113,8 +130,8 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
             <p className="text-sm text-muted-foreground mb-4">
               Drag and drop a text file here, or click to browse
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleBrowseClick}
               className="mx-auto"
             >
@@ -122,14 +139,31 @@ const FileUploader = ({ onFileContent }: FileUploaderProps) => {
             </Button>
           </>
         )}
-        <input 
-          type="file" 
+        <input
+          type="file"
           ref={fileInputRef}
-          className="hidden" 
+          className="hidden"
           accept=".txt,.text,.chord"
           onChange={handleFileInputChange}
         />
       </div>
+
+      {selectedFile && showMetadataForm && (
+        <div className="mt-6">
+          <SongMetadataForm
+            title={title}
+            artist={artist}
+            songTuning={songTuning}
+            guitarTuning={guitarTuning}
+            onTitleChange={setTitle}
+            onArtistChange={setArtist}
+            onSongTuningChange={setSongTuning}
+            onGuitarTuningChange={setGuitarTuning}
+            onContinue={handleContinue}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
