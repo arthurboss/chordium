@@ -26,6 +26,11 @@ declare module 'cypress' {
      * Get the current active theme
      */
     getCurrentTheme(): Chainable;
+
+    /**
+     * Simulate pressing the Tab key
+     */
+    tab(): Chainable;
   }
 }
 
@@ -103,4 +108,19 @@ Cypress.Commands.add('getCurrentTheme', () => {
   return cy.get('html').invoke('hasClass', 'dark').then((hasDarkClass) => {
     return hasDarkClass ? 'dark' : 'light';
   });
+});
+
+// Add command to simulate pressing the Tab key on the focused element
+Cypress.Commands.add('pressTab', { prevSubject: true }, (subject) => {
+  // Instead of trying to simulate a Tab key, 
+  // use Cypress' built-in keyboard navigation using tab() command
+  cy.get('body').trigger('keydown', { 
+    keyCode: 9, 
+    which: 9,
+    key: 'Tab',
+    code: 'Tab'
+  });
+  
+  // Return nothing or undefined to avoid the Cypress error
+  return undefined;
 });

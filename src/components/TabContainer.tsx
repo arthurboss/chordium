@@ -9,6 +9,7 @@ import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
 import { handleSaveNewSong, handleUpdateSong, handleDeleteSong } from "../utils/song-actions";
+import { cyAttr } from "@/utils/test-utils";
 
 interface TabContainerProps {
   activeTab: string;
@@ -31,7 +32,7 @@ const TabContainer = ({
 }: TabContainerProps) => {
   const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-
+  
   // Scroll to chord display when needed
   useEffect(() => {
     if (selectedSong || demoSong) {
@@ -69,30 +70,45 @@ const TabContainer = ({
     handleDeleteSong(songId, mySongs, setMySongs, selectedSong, setSelectedSong);
   };
 
+  // Handle keyboard navigation for the tabs
+  const handleKeyDown = (event: React.KeyboardEvent, value: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleTabChange(value);
+    }
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]" role="tablist">
+      <TabsList 
+        className="grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]" 
+        role="tablist"
+        {...cyAttr("tabs-list")}
+      >
         <TabsTrigger 
           value="my-songs" 
           className="text-xs sm:text-sm" 
-          tabIndex={0} 
           aria-selected={activeTab === "my-songs"}
+          onKeyDown={(e) => handleKeyDown(e, "my-songs")}
+          {...cyAttr("tab-my-songs")}
         >
           My Songs
         </TabsTrigger>
         <TabsTrigger 
           value="search" 
           className="text-xs sm:text-sm" 
-          tabIndex={0} 
           aria-selected={activeTab === "search"}
+          onKeyDown={(e) => handleKeyDown(e, "search")}
+          {...cyAttr("tab-search")}
         >
           Search
         </TabsTrigger>
         <TabsTrigger 
           value="upload" 
           className="text-xs sm:text-sm" 
-          tabIndex={0} 
           aria-selected={activeTab === "upload"}
+          onKeyDown={(e) => handleKeyDown(e, "upload")}
+          {...cyAttr("tab-upload")}
         >
           Upload
         </TabsTrigger>
