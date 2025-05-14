@@ -4,11 +4,11 @@ interface MetadataFormSectionProps {
   show: boolean;
   title: string;
   artist: string;
-  songTuning: string;
+  songKey: string;
   guitarTuning: string;
   onTitleChange: (title: string) => void;
   onArtistChange: (artist: string) => void;
-  onSongTuningChange: (tuning: string) => void;
+  onSongKeyChange: (key: string) => void;
   onGuitarTuningChange: (tuning: string) => void;
   onContinue: () => void;
 }
@@ -20,11 +20,11 @@ const MetadataFormSection = ({
   show,
   title,
   artist,
-  songTuning,
+  songKey,
   guitarTuning,
   onTitleChange,
   onArtistChange,
-  onSongTuningChange,
+  onSongKeyChange,
   onGuitarTuningChange,
   onContinue
 }: MetadataFormSectionProps) => {
@@ -35,11 +35,11 @@ const MetadataFormSection = ({
       <SongMetadataForm
         title={title}
         artist={artist}
-        songTuning={songTuning}
+        songKey={songKey}
         guitarTuning={guitarTuning}
         onTitleChange={onTitleChange}
         onArtistChange={onArtistChange}
-        onSongTuningChange={onSongTuningChange}
+        onSongKeyChange={onSongKeyChange}
         onGuitarTuningChange={onGuitarTuningChange}
         onContinue={onContinue}
       />

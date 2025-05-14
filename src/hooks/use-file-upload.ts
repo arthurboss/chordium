@@ -4,6 +4,7 @@ import { isValidFileType } from '@/utils/file-validation';
 import { showInvalidFileFormatError, showFileReadError } from '@/utils/file-toast';
 import { extractTitleFromFileName } from '@/utils/file-naming';
 import { readFileAsText } from '@/utils/file-reading';
+import { extractSongMetadata } from '@/utils/metadata-extraction';
 
 interface UseFileUploadProps {
   onFileContent: (content: string, fileName: string) => void;
@@ -15,7 +16,7 @@ interface UseFileUploadReturn {
   showMetadataForm: boolean;
   title: string;
   artist: string;
-  songTuning: string;
+  songKey: string;
   guitarTuning: string;
   processFile: (file: File) => void;
   handleFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -23,7 +24,7 @@ interface UseFileUploadReturn {
   handleContinue: () => void;
   setTitle: (title: string) => void;
   setArtist: (artist: string) => void;
-  setSongTuning: (tuning: string) => void;
+  setSongKey: (key: string) => void;
   setGuitarTuning: (tuning: string) => void;
 }
 
@@ -36,7 +37,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
   const [fileContent, setFileContent] = useState("");
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
-  const [songTuning, setSongTuning] = useState("");
+  const [songKey, setSongKey] = useState("");
   const [guitarTuning, setGuitarTuning] = useState("");
   const { toast } = useToast();
 
@@ -53,9 +54,23 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
       (content) => {
         setFileContent(content);
         
-        // Extract title from filename
-        const extractedTitle = extractTitleFromFileName(file.name);
+        // Reset metadata fields first to avoid stale data
+        setTitle("");
+        setArtist("");
+        setSongKey("");
+        setGuitarTuning("");
+        
+        // Extract metadata from content and filename
+        const metadata = extractSongMetadata(content, file.name);
+        
+        // Use extracted title or fall back to filename
+        const extractedTitle = metadata.title || extractTitleFromFileName(file.name);
         setTitle(extractedTitle);
+        
+        // Set additional metadata if available
+        if (metadata.artist) setArtist(metadata.artist);
+        if (metadata.songKey) setSongKey(metadata.songKey);
+        if (metadata.guitarTuning) setGuitarTuning(metadata.guitarTuning);
         
         // Show metadata form
         setShowMetadataForm(true);
@@ -76,7 +91,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     setFileContent("");
     setTitle("");
     setArtist("");
-    setSongTuning("");
+    setSongKey("");
     setGuitarTuning("");
     onFileContent('', '');
   };
@@ -94,7 +109,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     showMetadataForm,
     title,
     artist,
-    songTuning,
+    songKey,
     guitarTuning,
     processFile,
     handleFileInputChange,
@@ -102,7 +117,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     handleContinue,
     setTitle,
     setArtist,
-    setSongTuning,
+    setSongKey,
     setGuitarTuning
   };
 };

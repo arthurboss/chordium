@@ -7,11 +7,11 @@ import FormField from "@/components/ui/form-field";
 interface SongMetadataFormProps {
   title: string;
   artist: string;
-  songTuning: string;
+  songKey: string;
   guitarTuning: string;
   onTitleChange: (title: string) => void;
   onArtistChange: (artist: string) => void;
-  onSongTuningChange: (tuning: string) => void;
+  onSongKeyChange: (key: string) => void;
   onGuitarTuningChange: (tuning: string) => void;
   onContinue: () => void;
 }
@@ -19,11 +19,11 @@ interface SongMetadataFormProps {
 const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
   title,
   artist,
-  songTuning,
+  songKey,
   guitarTuning,
   onTitleChange,
   onArtistChange,
-  onSongTuningChange,
+  onSongKeyChange,
   onGuitarTuningChange,
   onContinue,
 }) => {
@@ -51,10 +51,10 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
                   required
                 />
                 <FormField
-                  id="song-tuning-input"
-                  label="Song Tuning"
-                  value={songTuning}
-                  onChange={onSongTuningChange}
+                  id="song-key-input"
+                  label="Song Key"
+                  value={songKey}
+                  onChange={onSongKeyChange}
                   placeholder="e.g. C# minor"
                 />
                 <FormField
