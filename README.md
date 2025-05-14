@@ -11,6 +11,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - Song chord sheet display with auto-scrolling
 - Speed control for practice at your own pace
 - Mobile-friendly design for on-the-go learning
+- Smart metadata extraction from uploaded chord sheets
 
 ## 💻 Tech Stack
 
