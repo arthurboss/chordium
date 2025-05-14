@@ -14,7 +14,7 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     showMetadataForm,
     title,
     artist,
-    songTuning,
+    songKey,
     guitarTuning,
     processFile,
     handleFileInputChange,
@@ -22,7 +22,7 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     handleContinue,
     setTitle,
     setArtist,
-    setSongTuning,
+    setSongKey,
     setGuitarTuning
   } = useFileUpload({ onFileContent });
   
@@ -50,11 +50,11 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
           show={true}
           title={title}
           artist={artist}
-          songTuning={songTuning}
+          songKey={songKey}
           guitarTuning={guitarTuning}
           onTitleChange={setTitle}
           onArtistChange={setArtist}
-          onSongTuningChange={setSongTuning}
+          onSongKeyChange={setSongKey}
           onGuitarTuningChange={setGuitarTuning}
           onContinue={handleContinue}
         />
