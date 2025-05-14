@@ -30,3 +30,7 @@ cypress/downloads/
 
 # Test results
 test-results/
+
+# Environment variables
+.env
+.env.*
