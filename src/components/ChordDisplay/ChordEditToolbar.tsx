@@ -3,10 +3,6 @@ import NavigationButtons from './components/NavigationButtons';
 import SaveButton from './components/SaveButton';
 
 interface ChordEditToolbarProps {
-  isPreviewMode?: boolean;
-  isFullScreen?: boolean;
-  onTogglePreview?: () => void;
-  onToggleFullScreen?: () => void;
   onSave: () => void;
   onReturn: () => void;
 }
@@ -16,10 +12,6 @@ interface ChordEditToolbarProps {
  * Contains title, navigation buttons, and save functionality
  */
 const ChordEditToolbar: React.FC<ChordEditToolbarProps> = ({
-  isPreviewMode = false,
-  isFullScreen = false,
-  onTogglePreview,
-  onToggleFullScreen,
   onSave,
   onReturn
 }) => {
