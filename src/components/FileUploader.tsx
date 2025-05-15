@@ -1,7 +1,9 @@
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useFileUpload } from '@/hooks/use-file-upload';
+import { useState } from 'react';
 import DropZone from '@/components/DropZone';
 import MetadataFormSection from '@/components/MetadataFormSection';
+import ChordEdit from './ChordDisplay/ChordEdit';
 
 interface FileUploaderProps {
   onFileContent: (content: string, fileName: string) => void;
@@ -9,6 +11,8 @@ interface FileUploaderProps {
 }
 
 const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploaderProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
+
   const {
     selectedFile,
     showMetadataForm,
@@ -16,14 +20,15 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     artist,
     songKey,
     guitarTuning,
+    fileContent,
     processFile,
     handleFileInputChange,
     handleClearFile,
-    handleContinue,
     setTitle,
     setArtist,
     setSongKey,
-    setGuitarTuning
+    setGuitarTuning,
+    setFileContent
   } = useFileUpload({ onFileContent });
   
   const { 
@@ -33,19 +38,31 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     handleDrop 
   } = useDragAndDrop({ onFileDrop: processFile });
 
+  const handleMetadataFormContinue = () => {
+    setIsEditMode(true); // Switch to edit mode instead of continuing
+  };
+
+  const handleSaveEdits = () => {
+    // When editing is done, call onFileContent with the updated content
+    onFileContent(fileContent, `${title}${artist ? ' - ' + artist : ''}`);
+    setIsEditMode(false);
+  };
+
   return (
     <>
-      <DropZone 
-        isDragOver={isDragOver}
-        handleDragOver={handleDragOver}
-        handleDragLeave={handleDragLeave}
-        handleDrop={handleDrop}
-        selectedFile={selectedFile}
-        onFileInputChange={handleFileInputChange}
-        onClearFile={handleClearFile}
-      />
+      {!isEditMode && (
+        <DropZone 
+          isDragOver={isDragOver}
+          handleDragOver={handleDragOver}
+          handleDragLeave={handleDragLeave}
+          handleDrop={handleDrop}
+          selectedFile={selectedFile}
+          onFileInputChange={handleFileInputChange}
+          onClearFile={handleClearFile}
+        />
+      )}
 
-      {selectedFile && (showMetadataForm || forceShowMetadata) && (
+      {selectedFile && !isEditMode && (showMetadataForm || forceShowMetadata) && (
         <MetadataFormSection 
           show={true}
           title={title}
@@ -56,7 +73,16 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
           onArtistChange={setArtist}
           onSongKeyChange={setSongKey}
           onGuitarTuningChange={setGuitarTuning}
-          onContinue={handleContinue}
+          onContinue={handleMetadataFormContinue}
+        />
+      )}
+
+      {isEditMode && (
+        <ChordEdit 
+          editContent={fileContent}
+          setEditContent={(content) => setFileContent(content)}
+          handleSaveEdits={handleSaveEdits}
+          setIsEditing={() => setIsEditMode(false)}
         />
       )}
     </>

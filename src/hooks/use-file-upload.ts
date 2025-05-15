@@ -26,6 +26,7 @@ interface UseFileUploadReturn {
   setArtist: (artist: string) => void;
   setSongKey: (key: string) => void;
   setGuitarTuning: (tuning: string) => void;
+  setFileContent: (content: string) => void;
 }
 
 /**
@@ -118,6 +119,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     setTitle,
     setArtist,
     setSongKey,
-    setGuitarTuning
+    setGuitarTuning,
+    setFileContent
   };
 };

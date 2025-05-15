@@ -1,27 +1,30 @@
 import React from 'react';
 import { ChordEditProps } from './types';
-import { Card, CardContent } from '../ui/card';
+import { CardContent } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import ChordEditToolbar from './ChordEditToolbar';
+import StickyBottomContainer from '../StickyBottomContainer';
+import { useStickyAtBottom } from '@/hooks/use-sticky-at-bottom';
 
 const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, handleSaveEdits, setIsEditing }) => {
+  const isAtBottom = useStickyAtBottom();
   return (
     <div className="w-full mx-auto flex flex-col">
-      <Card className="mb-4">
-        <CardContent className="p-3 sm:p-4">
-          <ChordEditToolbar
-            onSave={handleSaveEdits}
-            onReturn={() => setIsEditing(false)}
-          />
-        </CardContent>
-      </Card>
       <Textarea 
         value={editContent} 
         onChange={(e) => setEditContent(e.target.value)}
-        className="min-h-[500px] font-mono text-sm resize-none"
+        className="min-h-[500px] font-mono text-sm resize-none mb-4"
       />
+      <StickyBottomContainer isAtBottom={isAtBottom}>
+          <CardContent className="p-3 sm:p-4">
+            <ChordEditToolbar
+              onSave={handleSaveEdits}
+              onReturn={() => setIsEditing(false)}
+            />
+          </CardContent>
+      </StickyBottomContainer>
     </div>
   );
 };
 
-export default ChordEdit; 
+export default ChordEdit;

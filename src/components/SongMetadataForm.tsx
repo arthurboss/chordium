@@ -1,7 +1,5 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
 import FormField from "@/components/ui/form-field";
 
 interface SongMetadataFormProps {
@@ -13,7 +11,7 @@ interface SongMetadataFormProps {
   onArtistChange: (artist: string) => void;
   onSongKeyChange: (key: string) => void;
   onGuitarTuningChange: (tuning: string) => void;
-  onContinue: () => void;
+  onContinue?: () => void;
 }
 
 const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
@@ -25,7 +23,6 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
   onArtistChange,
   onSongKeyChange,
   onGuitarTuningChange,
-  onContinue,
 }) => {
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -65,16 +62,6 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
                   placeholder="e.g. Standard tuning"
                 />
               </div>
-            </div>
-            <div className="flex justify-end items-end">
-              <Button 
-                onClick={onContinue}
-                className="w-12 h-10 shrink-0"
-                aria-label="Continue to edit"
-                disabled={!title || !artist}
-              >
-                <ArrowRight className="h-5 w-5" />
-              </Button>
             </div>
           </div>
         </CardContent>

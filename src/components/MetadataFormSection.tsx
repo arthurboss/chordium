@@ -1,4 +1,8 @@
 import SongMetadataForm from '@/components/SongMetadataForm';
+import StickyBottomContainer from './StickyBottomContainer';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import { useStickyAtBottom } from '@/hooks/use-sticky-at-bottom';
 
 interface MetadataFormSectionProps {
   show: boolean;
@@ -28,8 +32,11 @@ const MetadataFormSection = ({
   onGuitarTuningChange,
   onContinue
 }: MetadataFormSectionProps) => {
+  const isAtBottom = useStickyAtBottom(30);
   if (!show) return null;
-  
+
+  const isNextDisabled = !title || !artist;
+
   return (
     <div className="mt-6">
       <SongMetadataForm
@@ -41,8 +48,20 @@ const MetadataFormSection = ({
         onArtistChange={onArtistChange}
         onSongKeyChange={onSongKeyChange}
         onGuitarTuningChange={onGuitarTuningChange}
-        onContinue={onContinue}
       />
+      <StickyBottomContainer isAtBottom={isAtBottom} className="flex justify-end items-end p-3 sm:p-4">
+        <Button
+          onClick={onContinue}
+          variant="outline"
+          size="sm"
+          className=""
+          aria-label="Continue to edit"
+          disabled={isNextDisabled}
+        >
+          <ArrowRight className="h-4 w-4 mr-1" />
+          Next
+        </Button>
+      </StickyBottomContainer>
     </div>
   );
 };
