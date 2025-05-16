@@ -6,7 +6,13 @@ const app = express();
 app.use(cors());
 
 app.get('/api/cifraclub-search', async (req, res) => {
-    const { q, searchType } = req.query;
+    // Get artist and song parameters
+    const { artist, song } = req.query;
+    
+    // Convert to the format Cifra Club expects
+    const q = artist || song;
+    const searchType = artist && !song ? 'artist' : song && !artist ? 'song' : 'combined';
+    
     if (!q) return res.status(400).json({ error: 'Missing query' });
 
     const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(q)}`;
@@ -16,19 +22,32 @@ app.get('/api/cifraclub-search', async (req, res) => {
     try {
         // ✅ Launch Puppeteer with proper session management
         browser = await puppeteer.launch({
-            headless: true, // ✅ Run in headless mode for production efficiency
+            headless: true, // ✅ Run in headless mode for efficiency
             defaultViewport: null,
             args: ['--disable-gpu', '--disable-dev-shm-usage', '--no-sandbox'],
         });
 
         const page = await browser.newPage();
+
+        // ✅ **Block Ads & Trackers to speed up scraping**
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            const blockedDomains = ['googleads.g.doubleclick.net', 'ads.pubmatic.com', 'adservice.google.com'];
+            if (blockedDomains.some(domain => request.url().includes(domain))) {
+                console.log(`❌ Blocking ad request: ${request.url()}`);
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+
         await page.goto(searchUrl, { waitUntil: 'networkidle2' });
 
         console.log("Page loaded, extracting links...");
 
         // ✅ Extract real search results (Google injected links)
         const results = await page.evaluate(() => {
-            // Get all links from the search results
+                        // Get all links from the search results
             const links = Array.from(document.querySelectorAll('.gsc-result a'));
             
             return links
@@ -40,15 +59,15 @@ app.get('/api/cifraclub-search', async (req, res) => {
                 // Check if parent has exactly the gs-title class
                 return parent.className === 'gs-title';
             })
-            .map(link => ({
-                title: link.textContent.trim(),
-                url: link.href.startsWith('http') ? link.href : `https://www.cifraclub.com.br${link.href}`
-            }))
-            .filter(r => r.title && r.url);
+                .map(link => ({
+                    title: link.textContent.trim(),
+                    url: link.href.startsWith('http') ? link.href : `https://www.cifraclub.com.br${link.href}`
+                }))
+                .filter(r => r.title && r.url);
         });
 
         console.log(`Found ${results.length} total results`);
-        
+
         // Process results based on search type
         let filteredResults;
         

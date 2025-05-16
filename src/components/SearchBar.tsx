@@ -1,16 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Music, Loader } from "lucide-react";
+import { Search, User, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import FormField from "@/components/ui/form-field";
-import axios from "axios";
 import { formatSearchUrl } from "@/utils/search-utils";
-
-interface SearchResult {
-  title: string;
-  url: string;
-}
 
 interface SearchBarProps {
   searchType?: 'dual' | 'combined';
@@ -21,36 +15,33 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const [songName, setSongName] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
-    let backendUrl = "";
     let navArtist = "";
     let navSong = "";
 
     switch (searchType) {
       case "combined": {
         if (!query.trim()) return;
-        backendUrl = `http://localhost:3001/api/cifraclub-search?q=${encodeURIComponent(query.trim())}`;
+        const formattedQuery = query.trim().toLowerCase().replace(/\s+/g, "-");
+        navArtist = formattedQuery;
+        navSong = formattedQuery;
         break;
       }
       case "dual": {
         const hasArtist = artist.trim();
         const hasSong = songName.trim();
         if (!hasArtist && !hasSong) return;
+        const formattedArtist = hasArtist ? artist.trim().toLowerCase().replace(/\s+/g, "-") : "";
+        const formattedSong = hasSong ? songName.trim().toLowerCase().replace(/\s+/g, "-") : "";
         if (hasArtist && !hasSong) {
-          backendUrl = `http://localhost:3001/api/cifraclub-search?searchType=artist&q=${encodeURIComponent(artist.trim())}`;
-          navArtist = artist.trim().toLowerCase().replace(/\s+/g, "-");
+          navArtist = formattedArtist;
         } else if (!hasArtist && hasSong) {
-          backendUrl = `http://localhost:3001/api/cifraclub-search?searchType=song&q=${encodeURIComponent(songName.trim())}`;
-          navSong = songName.trim().toLowerCase().replace(/\s+/g, "-");
+          navSong = formattedSong;
         } else if (hasArtist && hasSong) {
-          const formattedArtist = artist.trim().toLowerCase().replace(/\s+/g, "-");
-          const formattedSong = songName.trim().toLowerCase().replace(/\s+/g, "-");
-          backendUrl = `http://localhost:3001/api/cifraclub-search?searchType=song&q=${encodeURIComponent(`${formattedArtist}/${formattedSong}`)}`;
           navArtist = formattedArtist;
           navSong = formattedSong;
         }
@@ -60,26 +51,8 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
         return;
     }
 
-    setLoading(true);
-    // Immediately update the URL
-    navigate(formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? query.trim().toLowerCase().replace(/\s+/g, "-") : "")));
-
-    try {
-      const res = await axios.get<SearchResult[]>(backendUrl);
-      console.log(`CifraClub search results: Found ${res.data.length} items`);
-      console.log('Response data:', res.data);
-
-      if (res.data.length === 0) {
-        console.log('No results found. Check backend console for more details.');
-      }
-      // No need to navigate again, already done above
-    } catch (err) {
-      console.error('SearchBar: backend search failed', err);
-      console.error('Error details:', err.response?.data || err.message);
-      // Optionally show an error toast or message
-    } finally {
-      setLoading(false);
-    }
+    // Only update the URL; fetching is handled by useSearchResults
+    navigate(formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? navArtist : "")));
   };
 
   if (searchType === 'dual') {
@@ -115,14 +88,10 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           <Button 
             type="submit" 
             className="px-6"
-            disabled={loading || (!artist.trim() && !songName.trim())}
+            disabled={!artist.trim() && !songName.trim()}
           >
-            {loading ? (
-              <Loader className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="mr-2 h-4 w-4" />
-            )}
-            {loading ? "Loading..." : "Search"}
+            <Search className="mr-2 h-4 w-4" />
+            Search
           </Button>
         </div>
       </form>
@@ -144,13 +113,9 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           className="pl-9 w-full bg-card dark:bg-[var(--card)]"
         />
       </div>
-      <Button type="submit" className="sm:w-auto" disabled={loading || !query.trim()}>
-        {loading ? (
-          <Loader className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Search className="mr-2 h-4 w-4" />
-        )}
-        {loading ? "Loading..." : "Search"}
+      <Button type="submit" className="sm:w-auto" disabled={!query.trim()}>
+        <Search className="mr-2 h-4 w-4" />
+        Search
       </Button>
     </form>
   );

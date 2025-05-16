@@ -30,6 +30,7 @@ export function formatSearchQuery(params: URLSearchParams): { query: string | nu
   }
 }
 
+// This function assumes parameters are already formatted correctly
 export function formatSearchUrl(artist?: string, song?: string): string {
   const parts: string[] = [];
   if (artist) parts.push(`artist=${encodeURIComponent(artist)}`);

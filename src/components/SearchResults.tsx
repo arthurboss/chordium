@@ -68,7 +68,7 @@ For the actual song chords
         </div>
       ) : error ? (
         <Card className="p-6 text-center text-destructive">{error}</Card>
-      ) : results.length === 0 ? (
+      ) : (!loading && results.length === 0) ? (
         <Card className="p-6 text-center">
           <p className="text-lg font-medium mb-2">No results found for {getQueryDisplayText(searchParams)}</p>
           <p className="text-muted-foreground">Try a different search term or check your spelling.</p>
