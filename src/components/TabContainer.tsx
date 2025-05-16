@@ -116,7 +116,10 @@ const TabContainer = ({
       
       <div className="mt-4 sm:mt-6">
         <TabsContent value="search" className="focus-visible:outline-none focus-visible:ring-0">
-          <SearchTab />
+          <SearchTab 
+            setMySongs={setMySongs}
+            setActiveTab={setActiveTab}
+          />
         </TabsContent>
         
         <TabsContent value="upload" className="focus-visible:outline-none focus-visible:ring-0">
