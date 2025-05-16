@@ -32,7 +32,10 @@ app.get('/api/cifraclub-search', async (req, res) => {
         // ✅ **Block Ads & Trackers to speed up scraping**
         await page.setRequestInterception(true);
         page.on('request', (request) => {
-            const blockedDomains = ['googleads.g.doubleclick.net', 'ads.pubmatic.com', 'adservice.google.com'];
+            const blockedDomains = [
+                'googleads.g.doubleclick.net', 'ads.pubmatic.com', 'adservice.google.com',
+                'www.google-analytics.com', 'pixel.facebook.com'
+            ];
             if (blockedDomains.some(domain => request.url().includes(domain))) {
                 console.log(`❌ Blocking ad request: ${request.url()}`);
                 request.abort();
