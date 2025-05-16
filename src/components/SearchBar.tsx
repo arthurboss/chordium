@@ -89,23 +89,31 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
   if (searchType === 'dual') {
     return (
       <form onSubmit={handleSearch} className={`w-full ${className}`}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <FormField
-            id="artist-search-input" 
-            label="Artist"
-            value={artist}
-            onChange={setArtist}
-            placeholder="Search for an artist..."
-            leftIcon={<User className="h-4 w-4" />}
-          />
-          <FormField
-            id="song-search-input"
-            label="Song"
-            value={songName}
-            onChange={setSongName}
-            placeholder="Search for a song..."
-            leftIcon={<Music className="h-4 w-4" />}
-          />
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="flex-1">
+            <FormField
+              id="artist-search-input" 
+              value={artist}
+              onChange={setArtist}
+              placeholder="Search for an artist"
+              leftIcon={<User className="h-4 w-4" />}
+            />
+          </div>
+          
+          {/* Middle column for connection words - minimal width */}
+          <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">
+            and | or
+          </div>
+          
+          <div className="flex-1">
+            <FormField
+              id="song-search-input"
+              value={songName}
+              onChange={setSongName}
+              placeholder="Search for a song"
+              leftIcon={<Music className="h-4 w-4" />}
+            />
+          </div>
         </div>
         <div className="flex justify-end">
           <Button 
