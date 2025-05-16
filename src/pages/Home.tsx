@@ -1,42 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TabContainer from "@/components/TabContainer";
 import { SongData } from "@/types/song";
-import { loadSampleSongs } from "@/utils/sample-songs";
-import { loadSongs, saveSongs } from "@/utils/song-storage";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
+import { useSampleSongs } from "@/hooks/use-sample-songs";
+import { useSaveSongs } from "@/hooks/use-save-songs";
+import { useSearchRedirect } from "@/hooks/use-search-redirect";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("my-songs");
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
-  const [sampleSongs, setSampleSongs] = useState<SongData[]>([]);
-  const [mySongs, setMySongs] = useState<SongData[]>([]);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
-  
-  // Load sample songs
-  useEffect(() => {
-    const initializeSongs = async () => {
-      const samples = await loadSampleSongs();
-      setSampleSongs(samples);
-      
-      const initialSongs = samples.map(song => ({
-        ...song,
-      }));
-      
-      setMySongs(loadSongs(initialSongs));
-    };
-    
-    initializeSongs();
-  }, []);
-  
-  // Save songs to localStorage when they change
-  useEffect(() => {
-    if (mySongs.length > 0) {
-      saveSongs(mySongs);
-    }
-  }, [mySongs]);
+  const { sampleSongs, mySongs, setMySongs } = useSampleSongs();
+  useSaveSongs(mySongs);
+  useSearchRedirect();
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
