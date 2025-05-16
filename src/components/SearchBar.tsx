@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import FormField from "@/components/ui/form-field";
 import { formatSearchUrl } from "@/utils/search-utils";
+import { useSearchLoading } from "@/hooks/useSearchLoading";
 
 interface SearchBarProps {
   searchType?: 'dual' | 'combined';
@@ -16,9 +17,13 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
   const [artist, setArtist] = useState("");
   const [songName, setSongName] = useState("");
   const navigate = useNavigate();
+  const { isSearching, setSearchLoading } = useSearchLoading();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Don't proceed if search is already in progress
+    if (isSearching) return;
 
     let navArtist = "";
     let navSong = "";
@@ -51,6 +56,9 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
         return;
     }
 
+    // Set search loading state
+    setSearchLoading(true);
+    
     // Only update the URL; fetching is handled by useSearchResults
     navigate(formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? navArtist : "")));
   };
@@ -64,6 +72,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
               id="artist-search-input" 
               value={artist}
               onChange={setArtist}
+              disabled={isSearching}
               placeholder="Search for an artist"
               leftIcon={<User className="h-4 w-4" />}
             />
@@ -79,6 +88,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
               id="song-search-input"
               value={songName}
               onChange={setSongName}
+              disabled={isSearching}
               placeholder="Search for a song"
               leftIcon={<Music className="h-4 w-4" />}
             />
@@ -88,7 +98,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           <Button 
             type="submit" 
             className="px-6"
-            disabled={!artist.trim() && !songName.trim()}
+            disabled={isSearching || (!artist.trim() && !songName.trim())}
           >
             <Search className="mr-2 h-4 w-4" />
             Search
@@ -108,12 +118,13 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
         <Input 
           type="text" 
           placeholder="Search for a song or artist..." 
+          disabled={isSearching}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-9 w-full bg-card dark:bg-[var(--card)]"
         />
       </div>
-      <Button type="submit" className="sm:w-auto" disabled={!query.trim()}>
+      <Button type="submit" className="sm:w-auto" disabled={isSearching || !query.trim()}>
         <Search className="mr-2 h-4 w-4" />
         Search
       </Button>

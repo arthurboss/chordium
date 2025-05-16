@@ -9,11 +9,13 @@ app.get('/api/cifraclub-search', async (req, res) => {
     // Get artist and song parameters
     const { artist, song } = req.query;
     
-    // Convert to the format Cifra Club expects
-    const q = artist || song;
-    const searchType = artist && !song ? 'artist' : song && !artist ? 'song' : 'combined';
+    // Combine artist and song if both are present
+    const q = artist && song ? `${artist} ${song}` : artist || song;
+    const searchType = artist && !song ? 'artist' : song && !artist ? 'song' : artist && song ? 'combined' : '';
     
     if (!q) return res.status(400).json({ error: 'Missing query' });
+
+    console.log(`Received search query: ${q}`);
 
     const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(q)}`;
     console.log(`Searching Cifra Club for: ${q} (Type: ${searchType || 'combined'})`);

@@ -10,6 +10,7 @@ interface FormFieldProps {
   placeholder?: string;
   required?: boolean;
   leftIcon?: ReactNode;
+  disabled?: boolean;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -20,6 +21,7 @@ const FormField: React.FC<FormFieldProps> = ({
   placeholder,
   required = false,
   leftIcon,
+  disabled = false,
 }) => {
   return (
     <div className="space-y-2">
@@ -38,6 +40,7 @@ const FormField: React.FC<FormFieldProps> = ({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           placeholder={placeholder}
           className={`w-full ${leftIcon ? 'pl-9' : ''}`}
           required={required}
