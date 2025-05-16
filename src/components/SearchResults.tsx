@@ -1,18 +1,11 @@
-import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import SongCard from "./SongCard";
 import { SongData } from "@/types/song";
 import { handleSaveNewSong } from "@/utils/song-actions";
-import { getSearchParamsType, formatSearchQuery } from "@/utils/search-utils";
+import { useSearchResults } from "@/hooks/useSearchResults";
+import { formatSearchResult, getQueryDisplayText } from "@/utils/search-results-utils";
 import "@/components/ui/loading-spinner.css";
-
-interface SearchResultItem {
-  title: string;
-  url: string;
-}
 
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
@@ -20,78 +13,8 @@ interface SearchResultsProps {
 }
 
 const SearchResults = ({ setMySongs, setActiveTab }: SearchResultsProps) => {
-  const [searchParams] = useSearchParams();
+  const { results, loading, error, searchParams } = useSearchResults();
   const navigate = useNavigate();
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
-      setError(null);
-      const params = searchParams;
-      const { query: actualQuery, searchType: actualSearchType } = formatSearchQuery(params);
-      if (!actualQuery) {
-        setResults([]);
-        setLoading(false);
-        return;
-      }
-      try {
-        let backendUrl = `http://localhost:3001/api/cifraclub-search?q=${encodeURIComponent(actualQuery)}`;
-        if (actualSearchType) backendUrl += `&searchType=${actualSearchType}`;
-        const res = await axios.get<SearchResultItem[]>(backendUrl);
-        setResults(res.data);
-      } catch (err) {
-        setError("Failed to fetch search results. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchResults();
-  }, [searchParams]);
-
-  // Convert search result to SongData format for SongCard component
-  const formatSearchResult = (item: SearchResultItem): SongData => {
-    let artist = "";
-    let title = item.title;
-
-    if (item.title.includes(" - ")) {
-      const parts = item.title.split(" - ");
-      title = parts[0].trim();
-      artist = parts[1].trim();
-    } else {
-      try {
-        const url = new URL(item.url);
-        const path = url.pathname.replace(/^\/|\/$/g, '');
-        const segments = path.split('/');
-
-        if (segments.length === 2) {
-          const formattedArtist = segments[0]
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
-          const formattedTitle = segments[1]
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-
-          if (!artist) artist = formattedArtist;
-          if (title === item.title) title = formattedTitle;
-        }
-      } catch (e) {
-        console.error("Error parsing URL:", e);
-      }
-    }
-
-    return {
-      id: uuidv4(),
-      title: title,
-      artist: artist,
-      path: item.url,
-    };
-  };
 
   // Handle viewing a song, which will navigate to view chords externally
   const handleViewSong = (song: SongData) => {
@@ -102,11 +25,10 @@ const SearchResults = ({ setMySongs, setActiveTab }: SearchResultsProps) => {
   const handleAddToMySongs = async (song: SongData) => {
     if (setMySongs && setActiveTab) {
       try {
-        const savingIndex = results.findIndex(
-          r => formatSearchResult(r).id === song.id
-        );
-
-        if (savingIndex !== -1) {
+        // We just want to save the song we have
+        // No need for conditional check since we're always proceeding
+        
+        {
           const content = `# ${song.title || 'Untitled Song'}
 ## ${song.artist || 'Unknown Artist'}
 
@@ -135,21 +57,6 @@ For the actual song chords
     }
   };
 
-  // Format query for display
-  const getQueryDisplayText = () => {
-    const params = searchParams;
-    switch (getSearchParamsType(params)) {
-      case 'artist-song':
-        return `"${params.get('artist')?.replace(/-/g, ' ')}" by "${params.get('song')?.replace(/-/g, ' ')}"`;
-      case 'artist':
-        return `"${params.get('artist')?.replace(/-/g, ' ')}" in Artists`;
-      case 'song':
-        return `"${params.get('song')?.replace(/-/g, ' ')}" in Songs`;
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="space-y-4">
       {loading ? (
@@ -161,13 +68,13 @@ For the actual song chords
         <Card className="p-6 text-center text-destructive">{error}</Card>
       ) : results.length === 0 ? (
         <Card className="p-6 text-center">
-          <p className="text-lg font-medium mb-2">No results found for {getQueryDisplayText()}</p>
+          <p className="text-lg font-medium mb-2">No results found for {getQueryDisplayText(searchParams)}</p>
           <p className="text-muted-foreground">Try a different search term or check your spelling.</p>
         </Card>
       ) : (
         <>
           <h2 className="text-lg font-medium mb-4">
-            {results.length} results found for {getQueryDisplayText()}
+            {results.length} results found for {getQueryDisplayText(searchParams)}
             <span className="block text-sm text-muted-foreground mt-1">
               Results from Cifra Club. Click "+" to add to your songs.
             </span>
