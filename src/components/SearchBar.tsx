@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Music } from "lucide-react";
+import { Search, User, Music, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import FormField from "@/components/ui/form-field";
@@ -21,6 +21,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const [songName, setSongName] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -59,6 +60,10 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
         return;
     }
 
+    setLoading(true);
+    // Immediately update the URL
+    navigate(formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? query.trim().toLowerCase().replace(/\s+/g, "-") : "")));
+
     try {
       const res = await axios.get<SearchResult[]>(backendUrl);
       console.log(`CifraClub search results: Found ${res.data.length} items`);
@@ -67,13 +72,13 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
       if (res.data.length === 0) {
         console.log('No results found. Check backend console for more details.');
       }
-
-      // Navigate to results page with parameters in the desired order
-      navigate(formatSearchUrl(navArtist, navSong));
+      // No need to navigate again, already done above
     } catch (err) {
       console.error('SearchBar: backend search failed', err);
       console.error('Error details:', err.response?.data || err.message);
       // Optionally show an error toast or message
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,10 +115,14 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           <Button 
             type="submit" 
             className="px-6"
-            disabled={!artist.trim() && !songName.trim()}
+            disabled={loading || (!artist.trim() && !songName.trim())}
           >
-            <Search className="mr-2 h-4 w-4" />
-            Search
+            {loading ? (
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Search className="mr-2 h-4 w-4" />
+            )}
+            {loading ? "Loading..." : "Search"}
           </Button>
         </div>
       </form>
@@ -135,7 +144,14 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           className="pl-9 w-full bg-card dark:bg-[var(--card)]"
         />
       </div>
-      <Button type="submit" className="sm:w-auto" disabled={!query.trim()}>Search</Button>
+      <Button type="submit" className="sm:w-auto" disabled={loading || !query.trim()}>
+        {loading ? (
+          <Loader className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Search className="mr-2 h-4 w-4" />
+        )}
+        {loading ? "Loading..." : "Search"}
+      </Button>
     </form>
   );
 };
