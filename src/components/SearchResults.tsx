@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import SongCard from "./SongCard";
+import ArtistCard from "./ArtistCard";
 import { SongData } from "@/types/song";
 import { handleSaveNewSong } from "@/utils/song-actions";
 import { useSearchResults } from "@/hooks/useSearchResults";
-import { formatSearchResult, getQueryDisplayText } from "@/utils/search-results-utils";
+import { formatSearchResult, formatArtistResult, getQueryDisplayText } from "@/utils/search-results-utils";
+import { getSearchParamsType } from "@/utils/search-utils";
 import "@/components/ui/loading-spinner.css";
 
 interface SearchResultsProps {
@@ -81,19 +83,37 @@ For the actual song chords
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {results.map((item) => {
-              const songData = formatSearchResult(item);
-              return (
-                <SongCard
-                  key={songData.id}
-                  song={songData}
-                  onView={handleViewSong}
-                  onDelete={() => handleAddToMySongs(songData)}
-                  deleteButtonIcon="plus"
-                  deleteButtonLabel={`Add ${songData.title} to My Songs`}
-                  viewButtonIcon="external"
-                  viewButtonLabel="Open in Cifra Club"
-                />
-              );
+              // Check if we're searching for an artist
+              const searchType = getSearchParamsType(searchParams);
+              
+              if (searchType === 'artist') {
+                const artistData = formatArtistResult(item);
+                return (
+                  <ArtistCard
+                    key={artistData.url}
+                    artistName={artistData.name}
+                    artistUrl={artistData.url}
+                    onView={(url) => window.open(url, "_blank", "noopener,noreferrer")}
+                    viewButtonIcon="external"
+                    viewButtonLabel="See Artist Songs"
+                  />
+                );
+              } else {
+                // Default song search behavior
+                const songData = formatSearchResult(item);
+                return (
+                  <SongCard
+                    key={songData.id}
+                    song={songData}
+                    onView={handleViewSong}
+                    onDelete={() => handleAddToMySongs(songData)}
+                    deleteButtonIcon="plus"
+                    deleteButtonLabel={`Add ${songData.title} to My Songs`}
+                    viewButtonIcon="external"
+                    viewButtonLabel="Open in Cifra Club"
+                  />
+                );
+              }
             })}
           </div>
         </>
