@@ -1,18 +1,19 @@
-import { Info } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import SearchBar from "@/components/SearchBar";
+import FormContainer from "@/components/ui/FormContainer";
 
 const SearchTab = () => {
   return (
-    <div className="space-y-4">
-      <SearchBar />
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold mb-4">Search Songs and Artists</h2>
+      <FormContainer>
+        <SearchBar searchType="dual" />
+      </FormContainer>
       
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription className="text-sm">
-          This is a demo application. In a real implementation, this would search online sources for chord sheets.
-        </AlertDescription>
-      </Alert>
+      <div className="text-sm text-muted-foreground">
+        <p>• To search for artists, fill in just the artist field</p>
+        <p>• To search for songs, fill in just the song field</p>
+        <p>• Fill in both fields to search for a specific song by an artist</p>
+      </div>
     </div>
   );
 };

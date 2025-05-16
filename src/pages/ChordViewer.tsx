@@ -4,56 +4,42 @@ import { ArrowLeft, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-// Sample search results for demo purposes
-const searchResults = [
-  { 
-    title: "Wonderwall", 
-    artist: "Oasis", 
-    songId: "wonderwall" 
-  },
-  { 
-    title: "Hotel California", 
-    artist: "Eagles", 
-    songId: "hotel-california" 
-  },
-  { 
-    title: "Hey Jude", 
-    artist: "The Beatles", 
-    songId: "hey-jude" 
-  },
-  { 
-    title: "Sweet Child O' Mine", 
-    artist: "Guns N' Roses", 
-    songId: "sweet-child" 
-  },
-];
+import axios from "axios";
 
 const ChordViewer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [results, setResults] = useState<{ title: string; url: string }[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const q = query.get("q");
-    
+
     if (q) {
       setSearchTerm(q);
-      // Simulate loading search results
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 800);
+      setIsLoading(true);
+      setError(null);
+      axios
+        .get(`/api/cifraclub-search?q=${encodeURIComponent(q)}`)
+        .then((res) => {
+          setResults(res.data);
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to fetch results. Please try again later.");
+          setIsLoading(false);
+        });
     } else {
       navigate("/");
     }
   }, [location.search, navigate]);
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
       <main className="flex-1 container py-8 px-4 overflow-x-hidden">
         <div className="mb-8">
           <Button 
@@ -64,33 +50,40 @@ const ChordViewer = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Button>
-          
           <h1 className="text-2xl font-bold">
             Search Results for "{searchTerm}"
           </h1>
         </div>
-        
         {isLoading ? (
           <div className="py-12 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-chord" />
             <p className="mt-4 text-muted-foreground">Searching for chord sheets...</p>
           </div>
-        ) : searchResults.length > 0 ? (
+        ) : error ? (
+          <div className="py-12 text-center">
+            <p className="text-red-500">{error}</p>
+            <Button onClick={() => navigate("/")} className="mt-4">
+              Try Another Search
+            </Button>
+          </div>
+        ) : results.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {searchResults.map((result, index) => (
-              <div 
+            {results.map((result, index) => (
+              <a
                 key={index}
-                className="p-4 border rounded-lg hover:border-chord transition-colors cursor-pointer bg-white"
-                onClick={() => navigate(`/?song=${result.songId}`)}
+                href={result.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 border rounded-lg hover:border-chord transition-colors cursor-pointer bg-white block"
               >
                 <div className="flex items-center gap-3">
                   <Search className="h-5 w-5 text-chord" />
                   <div>
                     <h3 className="font-medium">{result.title}</h3>
-                    <p className="text-sm text-muted-foreground">{result.artist}</p>
+                    <p className="text-sm text-muted-foreground">Cifra Club</p>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         ) : (
@@ -102,7 +95,6 @@ const ChordViewer = () => {
           </div>
         )}
       </main>
-      
       <Footer />
     </div>
   );

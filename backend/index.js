@@ -6,11 +6,11 @@ const app = express();
 app.use(cors());
 
 app.get('/api/cifraclub-search', async (req, res) => {
-    const query = req.query.q;
-    if (!query) return res.status(400).json({ error: 'Missing query' });
+    const { q, searchType } = req.query;
+    if (!q) return res.status(400).json({ error: 'Missing query' });
 
-    const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(query)}`;
-    console.log(`Searching Cifra Club for: ${query}`);
+    const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(q)}`;
+    console.log(`Searching Cifra Club for: ${q} (Type: ${searchType || 'combined'})`);
 
     let browser;
     try {
@@ -24,7 +24,7 @@ app.get('/api/cifraclub-search', async (req, res) => {
         const page = await browser.newPage();
         await page.goto(searchUrl, { waitUntil: 'networkidle2' });
 
-        console.log("Page loaded, extracting song links...");
+        console.log("Page loaded, extracting links...");
 
         // ✅ Extract real search results (Google injected links)
         const results = await page.evaluate(() => {
@@ -48,27 +48,72 @@ app.get('/api/cifraclub-search', async (req, res) => {
         });
 
         console.log(`Found ${results.length} total results`);
-
-        // Filter to get only URLs with both artist and song segments and clean up titles
-        const filteredResults = results.filter(result => {
-            try {
-                const url = new URL(result.url);
-                // Remove the leading slash and trailing slash if exists, then split by slash
-                const path = url.pathname.replace(/^\/|\/$/g, '');
-                const segments = path.split('/');
-                
-                // We want exactly 2 non-empty path segments (artist/song-title)
-                return segments.length === 2 && segments[0] && segments[1];
-            } catch (e) {
-                // If URL parsing fails for any reason, exclude this result
-                return false;
-            }
-        }).map(result => ({
-            ...result,
-            title: result.title.replace(/ - Cifra Club$/, '')
-        }));
         
-        console.log(`Filtered to ${filteredResults.length} results with artist/song structure`);
+        // Process results based on search type
+        let filteredResults;
+        
+        if (searchType === 'artist') {
+            // Filter to get only URLs with exactly one segment (artist)
+            filteredResults = results.filter(result => {
+                try {
+                    const url = new URL(result.url);
+                    const path = url.pathname.replace(/^\/|\/$/g, '');
+                    const segments = path.split('/');
+                    
+                    // We want exactly 1 non-empty path segment (artist)
+                    return segments.length === 1 && segments[0];
+                } catch (e) {
+                    return false;
+                }
+            }).map(result => ({
+                ...result,
+                title: result.title.replace(/ - Cifra Club$/, '')
+            }));
+            
+            console.log(`Filtered to ${filteredResults.length} results with artist structure`);
+        } 
+        else if (searchType === 'song') {
+            // Filter to get only URLs with both artist and song segments
+            filteredResults = results.filter(result => {
+                try {
+                    const url = new URL(result.url);
+                    const path = url.pathname.replace(/^\/|\/$/g, '');
+                    const segments = path.split('/');
+                    
+                    // We want exactly 2 non-empty path segments (artist/song-title)
+                    return segments.length === 2 && segments[0] && segments[1];
+                } catch (e) {
+                    return false;
+                }
+            }).map(result => ({
+                ...result,
+                title: result.title.replace(/ - Cifra Club$/, '')
+            }));
+            
+            console.log(`Filtered to ${filteredResults.length} results with artist/song structure`);
+        } 
+        else {
+            // Combined search - filter out URLs with more than 2 segments
+            filteredResults = results.filter(result => {
+                try {
+                    const url = new URL(result.url);
+                    const path = url.pathname.replace(/^\/|\/$/g, '');
+                    const segments = path.split('/');
+                    
+                    // For combined search, allow paths with either 1 segment (artist) or 2 segments (artist/song)
+                    // Exclude paths with more segments like artist/song/letra, artist/song/video, etc.
+                    return (segments.length === 1 && segments[0]) || 
+                           (segments.length === 2 && segments[0] && segments[1]);
+                } catch (e) {
+                    return false;
+                }
+            }).map(result => ({
+                ...result,
+                title: result.title.replace(/ - Cifra Club$/, '')
+            }));
+            
+            console.log(`Filtered to ${filteredResults.length} results (combined search)`);
+        }
 
         // ✅ Properly close Puppeteer session
         await browser.close();
