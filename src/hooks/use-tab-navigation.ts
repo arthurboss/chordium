@@ -1,6 +1,7 @@
 import { SongData } from "../types/song";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { getSearchParamsType } from "@/utils/search-utils";
 
 interface TabNavigationProps {
   sampleSongs: SongData[];
@@ -46,16 +47,21 @@ export const useTabNavigation = ({
     
     // Set active tab based on URL path
     const path = location.pathname;
-    if (path === "/search") {
-      setActiveTab("search");
-    } else if (path === "/upload") {
-      setActiveTab("upload");
-    } else if (path === "/my-songs" || path === "/") {
-      setActiveTab("my-songs");
+    switch (path) {
+      case "/search":
+        setActiveTab("search");
+        break;
+      case "/upload":
+        setActiveTab("upload");
+        break;
+      case "/my-songs":
+      case "/":
+        setActiveTab("my-songs");
+        break;
     }
-    
-    // Additional handling for query parameters
-    if (query.get("q")) {
+
+    // Use search-utils to check for search params
+    if (getSearchParamsType(query)) {
       setActiveTab("search");
     }
   }, [location, mySongs, sampleSongs, setActiveTab, setDemoSong, setSelectedSong]);

@@ -11,7 +11,8 @@ interface SearchTabProps {
 
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [searchParams] = useSearchParams();
-  const hasSearchQuery = searchParams.has("q");
+  // Check for artist or song parameters in the URL
+  const hasSearchQuery = searchParams.has("artist") || searchParams.has("song");
 
   return (
     <div className="space-y-6">
