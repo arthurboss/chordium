@@ -58,7 +58,7 @@ const ChordViewer = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 container py-8 px-4">
+        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
           <LoadingState message="Loading chord sheet..." />
         </main>
         <Footer />
@@ -70,7 +70,7 @@ const ChordViewer = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 container py-8 px-4">
+        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
           <ErrorState error={`Failed to load chord sheet: ${chordData.error}`} />
         </main>
         <Footer />
@@ -83,7 +83,7 @@ const ChordViewer = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 container py-8 px-4 overflow-x-hidden">
+      <main className="flex-1 container py-8 px-4 overflow-x-hidden max-w-3xl mx-auto">
         <SongChordDetails 
           songKey={chordData.key}
           tuning={chordData.tuning}
