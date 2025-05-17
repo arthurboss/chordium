@@ -153,6 +153,65 @@ app.get('/api/cifraclub-search', async (req, res) => {
     }
 });
 
+app.get('/api/cifraclub-artist-songs', async (req, res) => {
+    const { artistUrl } = req.query;
+    if (!artistUrl) return res.status(400).json({ error: 'Missing artistUrl' });
+
+    let browser;
+    try {
+        // Extract artist slug from the URL
+        let artistSlug = null;
+        try {
+            const url = new URL(artistUrl);
+            const path = url.pathname.replace(/^\/+|\/+$/g, '');
+            const segments = path.split('/');
+            artistSlug = segments[0];
+        } catch (e) {
+            return res.status(400).json({ error: 'Invalid artistUrl' });
+        }
+        if (!artistSlug) return res.status(400).json({ error: 'Invalid artist slug' });
+
+        const pageUrl = `https://www.cifraclub.com.br/${artistSlug}/`;
+        console.log(`Scraping artist songs from: ${pageUrl}`);
+
+        browser = await puppeteer.launch({
+            headless: true,
+            defaultViewport: null,
+            args: ['--disable-gpu', '--disable-dev-shm-usage', '--no-sandbox'],
+        });
+        const page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            const blockedDomains = [
+                'googleads.g.doubleclick.net', 'ads.pubmatic.com', 'adservice.google.com',
+                'www.google-analytics.com', 'pixel.facebook.com'
+            ];
+            if (blockedDomains.some(domain => request.url().includes(domain))) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+        await page.goto(pageUrl, { waitUntil: 'networkidle2' });
+        console.log('Artist page loaded, extracting songs...');
+        const songs = await page.evaluate(() => {
+            return Array.from(document.querySelectorAll('a.art_music-link')).map(link => ({
+                title: link.textContent.trim(),
+                url: link.href.startsWith('http') ? link.href : `https://www.cifraclub.com.br${link.getAttribute('href')}`
+            })).filter(song => song.title && song.url);
+        });
+        console.log(`Found ${songs.length} songs for artist.`);
+        await browser.close();
+        res.json(songs);
+    } catch (err) {
+        console.error('Artist songs scraping failed:', err.message);
+        if (browser) {
+            await browser.close();
+        }
+        res.status(500).json({ error: 'Artist songs scraping failed' });
+    }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`✅ Cifra Club scraper backend running on port ${PORT}`);

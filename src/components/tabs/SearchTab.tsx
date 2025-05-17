@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
+import { SearchLoadingProvider } from "@/context/SearchLoadingProvider";
 import { SongData } from "@/types/song";
 
 interface SearchTabProps {
@@ -16,16 +17,18 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
 
   return (
     <div className="space-y-6">
-      <FormContainer>
-        <SearchBar searchType="dual" />
-      </FormContainer>
-      
-      {hasSearchQuery && (
-        <SearchResults 
-          setMySongs={setMySongs}
-          setActiveTab={setActiveTab}
-        />
-      )}
+      <SearchLoadingProvider>
+        <FormContainer>
+          <SearchBar searchType="dual" />
+        </FormContainer>
+        
+        {hasSearchQuery && (
+          <SearchResults 
+            setMySongs={setMySongs}
+            setActiveTab={setActiveTab}
+          />
+        )}
+      </SearchLoadingProvider>
     </div>
   );
 };

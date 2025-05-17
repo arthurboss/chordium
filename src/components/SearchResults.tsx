@@ -8,6 +8,7 @@ import { useSearchResults } from "@/hooks/useSearchResults";
 import { formatSearchResult, formatArtistResult, getQueryDisplayText } from "@/utils/search-results-utils";
 import { getSearchParamsType } from "@/utils/search-utils";
 import "@/components/ui/loading-spinner.css";
+import { useState } from "react";
 
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
@@ -17,6 +18,7 @@ interface SearchResultsProps {
 const SearchResults = ({ setMySongs, setActiveTab }: SearchResultsProps) => {
   const { results, loading, error, searchParams } = useSearchResults();
   const navigate = useNavigate();
+  const [artistSongs, setArtistSongs] = useState<SongData[] | null>(null);
 
   // Handle viewing a song, which will navigate to view chords externally
   const handleViewSong = (song: SongData) => {
@@ -59,9 +61,73 @@ For the actual song chords
     }
   };
 
+  // Handle clicking on an artist card to search for their songs
+  const handleArtistClick = async (artistUrl: string) => {
+    console.log('[ArtistCard] Clicked artistUrl:', artistUrl);
+    try {
+      // Extract artist segment from URL
+      const url = new URL(artistUrl);
+      const path = url.pathname.replace(/^\/+|\/+$/g, '');
+      const segments = path.split('/');
+      const artistSlug = segments[0];
+      if (!artistSlug) {
+        console.warn('[ArtistCard] Could not extract artist from URL:', artistUrl);
+        return;
+      }
+      // Fetch artist's songs from backend
+      console.log('[SearchResults] Fetching songs for artist:', artistSlug);
+      const response = await fetch(`http://localhost:3001/api/cifraclub-artist-songs?artistUrl=${encodeURIComponent(artistUrl)}`);
+      if (!response.ok) {
+        console.error('[SearchResults] Failed to fetch artist songs:', response.statusText);
+        return;
+      }
+      const songs = await response.json();
+      console.log(`[SearchResults] Songs for artist ${artistSlug}:`, songs);
+      // Convert to SongData[]
+      const formattedSongs: SongData[] = songs.map((song: { title: string; url: string }) => ({
+        id: song.url, // Use URL as id for now
+        title: song.title,
+        artist: artistSlug,
+        path: song.url,
+      }));
+      setArtistSongs(formattedSongs);
+    } catch (e) {
+      console.error('[ArtistCard] Invalid artistUrl or fetch error:', artistUrl, e);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {loading ? (
+      {artistSongs ? (
+        <>
+          <h2 className="text-lg font-medium mb-4">
+            {artistSongs.length} songs found for artist
+            <span className="block text-sm text-muted-foreground mt-1">
+              Songs from Cifra Club. Click "+" to add to your songs.
+            </span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {artistSongs.map((song) => (
+              <SongCard
+                key={song.id}
+                song={song}
+                onView={handleViewSong}
+                onDelete={() => handleAddToMySongs(song)}
+                deleteButtonIcon="plus"
+                deleteButtonLabel={`Add ${song.title} to My Songs`}
+                viewButtonIcon="external"
+                viewButtonLabel="Open in Cifra Club"
+              />
+            ))}
+          </div>
+          <button
+            className="mt-4 underline text-sm text-chord"
+            onClick={() => setArtistSongs(null)}
+          >
+            ← Back to search results
+          </button>
+        </>
+      ) : loading ? (
         <div className="text-center p-6">
           <div className="loading-spinner"></div>
           <p className="mt-2 text-muted-foreground">Searching chord sheets...</p>
@@ -93,7 +159,7 @@ For the actual song chords
                     key={artistData.url}
                     artistName={artistData.name}
                     artistUrl={artistData.url}
-                    onView={(url) => window.open(url, "_blank", "noopener,noreferrer")}
+                    onView={handleArtistClick}
                     viewButtonIcon="external"
                     viewButtonLabel="See Artist Songs"
                   />

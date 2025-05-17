@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import { SearchLoadingProvider } from "@/context/SearchLoadingProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
@@ -9,11 +8,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
  */
 const RootLayout = () => {
   return (
-    <SearchLoadingProvider>
+    <>
       <Toaster />
       <Sonner />
       <Outlet />
-    </SearchLoadingProvider>
+    </>
   );
 };
 
