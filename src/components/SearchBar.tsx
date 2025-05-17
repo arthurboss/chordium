@@ -10,9 +10,10 @@ import { useSearchResults } from "@/hooks/useSearchResults";
 interface SearchBarProps {
   searchType?: 'dual' | 'combined';
   className?: string;
+  artistLoading?: boolean;
 }
 
-const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) => {
+const SearchBar = ({ searchType = 'combined', className = "", artistLoading = false }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const [songName, setSongName] = useState("");
@@ -67,7 +68,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
               id="artist-search-input" 
               value={artist}
               onChange={setArtist}
-              disabled={loading}
+              disabled={loading || artistLoading}
               placeholder="Search for an artist"
               leftIcon={<User className="h-4 w-4" />}
             />
@@ -83,7 +84,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
               id="song-search-input"
               value={songName}
               onChange={setSongName}
-              disabled={loading}
+              disabled={loading || artistLoading}
               placeholder="Search for a song"
               leftIcon={<Music className="h-4 w-4" />}
             />
@@ -93,7 +94,7 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
           <Button 
             type="submit" 
             className="px-6"
-            disabled={loading || (!artist.trim() && !songName.trim())}
+            disabled={loading || artistLoading || (!artist.trim() && !songName.trim())}
           >
             <Search className="mr-2 h-4 w-4" />
             Search
@@ -113,13 +114,13 @@ const SearchBar = ({ searchType = 'combined', className = "" }: SearchBarProps) 
         <Input 
           type="text" 
           placeholder="Search for a song or artist..." 
-          disabled={loading}
+          disabled={loading || artistLoading}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-9 w-full bg-card dark:bg-[var(--card)]"
         />
       </div>
-      <Button type="submit" className="sm:w-auto" disabled={loading || !query.trim()}>
+      <Button type="submit" className="sm:w-auto" disabled={loading || artistLoading || !query.trim()}>
         <Search className="mr-2 h-4 w-4" />
         Search
       </Button>

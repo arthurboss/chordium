@@ -13,13 +13,14 @@ import { useState, useEffect } from "react";
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
   setActiveTab?: (tab: string) => void;
+  artistLoading: boolean;
+  setArtistLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SearchResults = ({ setMySongs, setActiveTab }: SearchResultsProps) => {
+const SearchResults = ({ setMySongs, setActiveTab, artistLoading, setArtistLoading }: SearchResultsProps) => {
   const { results, loading, error, searchParams } = useSearchResults();
   const navigate = useNavigate();
   const [artistSongs, setArtistSongs] = useState<SongData[] | null>(null);
-  const [artistLoading, setArtistLoading] = useState(false);
 
   // Reset artist songs when parameters change
   useEffect(() => {

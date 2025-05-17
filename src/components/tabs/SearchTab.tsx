@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
@@ -12,16 +13,19 @@ interface SearchTabProps {
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [searchParams] = useSearchParams();
   const hasSearchQuery = searchParams.has("artist") || searchParams.has("song");
+  const [artistLoading, setArtistLoading] = useState(false);
 
   return (
     <div className="space-y-6">
       <FormContainer>
-        <SearchBar searchType="dual" />
+        <SearchBar searchType="dual" artistLoading={artistLoading} />
       </FormContainer>
       {hasSearchQuery && (
         <SearchResults
           setMySongs={setMySongs}
           setActiveTab={setActiveTab}
+          artistLoading={artistLoading}
+          setArtistLoading={setArtistLoading}
         />
       )}
     </div>
