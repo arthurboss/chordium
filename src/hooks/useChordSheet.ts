@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getChordUrl, storeChordUrl } from '@/utils/session-storage-utils';
+import { getCachedChordSheet, cacheChordSheet, clearExpiredChordSheetCache } from '@/utils/chord-sheet-cache-utils';
 
-interface ChordSheetData {
+export interface ChordSheetData {
   content: string;
   capo: string;
   tuning: string;
@@ -30,6 +31,11 @@ export function useChordSheet(url?: string) {
   const params = useParams<{ artist?: string; song?: string; id?: string }>();
   const navigate = useNavigate();
   
+  // Clear expired cache entries when hook is first used
+  useEffect(() => {
+    clearExpiredChordSheetCache();
+  }, []);
+  
   useEffect(() => {
     const fetchChordSheet = async () => {
       // If no URL is provided, first check sessionStorage, then try to construct a URL
@@ -38,7 +44,19 @@ export function useChordSheet(url?: string) {
       let isReconstructedUrl = false;
       
       if (!fetchUrl && params.artist && params.song) {
-        // First check if we have a stored URL using our utility function
+        // Check if we have cached data for this artist/song
+        const cachedData = getCachedChordSheet(params.artist, params.song);
+        if (cachedData) {
+          console.log('Using cached chord sheet data');
+          setChordData({
+            ...cachedData,
+            loading: false,
+            error: null
+          });
+          return;
+        }
+        
+        // If no cache, check if we have a stored URL
         const storedUrl = getChordUrl(params.artist, params.song);
         
         if (storedUrl) {
@@ -119,17 +137,27 @@ export function useChordSheet(url?: string) {
             storeChordUrl(artistSlug, songSlug, fetchUrl);
             navigate(`/chord/${artistSlug}/${songSlug}`, { replace: true });
           }
-          
-          setChordData({
+
+          // Prepare the chord data
+          const chordSheetData = {
             content: data.content || '',
             capo: data.capo || '',
             tuning: data.tuning || '',
             key: data.key || '',
             artist: data.artist || '',
             song: data.song || '',
-            loading: false,
-            error: null,
             originalUrl: fetchUrl
+          };
+
+          // Cache the chord sheet data
+          if (data.artist && data.song) {
+            cacheChordSheet(data.artist, data.song, chordSheetData);
+          }
+          
+          setChordData({
+            ...chordSheetData,
+            loading: false,
+            error: null
           });
         } catch (fetchErr) {
           clearTimeout(timeoutId);
