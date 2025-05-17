@@ -3,4 +3,8 @@ export interface SongData {
   title: string;
   artist?: string;
   path: string;
+  content?: string;
+  key?: string;
+  tuning?: string;
+  capo?: string;
 }

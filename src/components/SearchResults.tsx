@@ -11,6 +11,7 @@ import ArtistSongsResult from "./ArtistSongsResult";
 import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
 import EmptyState from "./EmptyState";
+import { storeChordUrl } from "@/utils/session-storage-utils";
 
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
@@ -27,7 +28,26 @@ const SearchResults = ({ setMySongs, setActiveTab, artistLoading: artistLoadingP
   const isLoading = loading || artistLoading || artistLoadingExternal;
 
   const handleViewSong = (song: SongData) => {
-    window.open(song.path, "_blank", "noopener,noreferrer");
+    // Extract artist and song from URL
+    try {
+      const url = new URL(song.path);
+      const path = url.pathname.replace(/^\/|\/$/g, '');
+      const segments = path.split('/');
+      
+      if (segments.length >= 2) {
+        const artistSlug = segments[0];
+        const songSlug = segments[1];
+        // Store the cifra club URL in sessionStorage using our utility
+        storeChordUrl(artistSlug, songSlug, song.path);
+        window.location.href = `/chord/${artistSlug}/${songSlug}`;
+      } else {
+        // Fallback to original behavior if URL structure is unexpected
+        window.open(song.path, "_blank", "noopener,noreferrer");
+      }
+    } catch (e) {
+      // Fallback to original behavior if URL parsing fails
+      window.open(song.path, "_blank", "noopener,noreferrer");
+    }
   };
 
   // Declarative, prioritized render conditions for performance and maintainability
@@ -96,8 +116,8 @@ const SearchResults = ({ setMySongs, setActiveTab, artistLoading: artistLoadingP
               onDelete={() => addToMySongs(songData)}
               deleteButtonIcon="plus"
               deleteButtonLabel={`Add ${songData.title}`}
-              viewButtonIcon="external"
-              viewButtonLabel="Open in Cifra Club"
+              viewButtonIcon="view"
+              viewButtonLabel="View Chords"
             />
           );
         })}

@@ -212,6 +212,115 @@ app.get('/api/cifraclub-artist-songs', async (req, res) => {
     }
 });
 
+app.get('/api/cifraclub-chord-sheet', async (req, res) => {
+    const { url } = req.query;
+    
+    if (!url) return res.status(400).json({ error: 'Missing song URL' });
+    
+    console.log(`Fetching chord sheet from: ${url}`);
+    
+    // Log the requesting IP for debugging
+    console.log(`Request from: ${req.ip || 'Unknown'} - User-Agent: ${req.get('User-Agent') || 'Unknown'}`);
+    
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: true,
+            defaultViewport: null,
+            args: ['--disable-gpu', '--disable-dev-shm-usage', '--no-sandbox'],
+        });
+        
+        const page = await browser.newPage();
+        
+        // Block ads & trackers to speed up scraping
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            const blockedDomains = [
+                'googleads.g.doubleclick.net', 'ads.pubmatic.com', 'adservice.google.com',
+                'www.google-analytics.com', 'pixel.facebook.com'
+            ];
+            if (blockedDomains.some(domain => request.url().includes(domain))) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+        
+        await page.goto(url, { waitUntil: 'networkidle2' });
+        console.log('Chord sheet page loaded, extracting content...');
+        
+        const chordData = await page.evaluate(() => {
+            // For debugging - log what we found
+            const log = (element, name) => {
+                console.log(`Element ${name}: ${element ? 'Found' : 'Not found'}`);
+                return element;
+            };
+            
+            // Extract the chord sheet content
+            const preElement = log(document.querySelector('pre'), 'pre');
+            const content = preElement ? preElement.textContent : '';
+            
+            // Extract capo position
+            const capoElement = log(document.querySelector('span#cifra_capo'), 'cifra_capo');
+            const capo = capoElement ? capoElement.textContent.trim() : '';
+            
+            // Extract tuning
+            const tuningElement = log(document.querySelector('[data-cy="song-tuningValue"]'), 'tuningValue');
+            const tuning = tuningElement ? tuningElement.value : '';
+            
+            // Extract key
+            const keyElement = log(document.querySelector('span#cifra_tom'), 'cifra_tom');
+            const key = keyElement ? keyElement.textContent.trim() : '';
+            
+            // Get title and artist from meta tags for backup
+            const metaTitle = document.querySelector('meta[property="og:title"]')?.content || '';
+            const metaDescription = document.querySelector('meta[property="og:description"]')?.content || '';
+            
+            return {
+                content,
+                capo,
+                tuning,
+                key,
+                metaTitle,
+                metaDescription,
+                html: document.documentElement.outerHTML.slice(0, 500) // First 500 chars for debugging
+            };
+        });
+        
+        await browser.close();
+        console.log('✅ Chord sheet successfully scraped');
+        
+        // Extract artist and song from URL path
+        let artist = '';
+        let song = '';
+        
+        try {
+            const urlObj = new URL(url);
+            const path = urlObj.pathname.replace(/^\/|\/$/g, '');
+            const segments = path.split('/');
+            
+            if (segments.length >= 2) {
+                artist = segments[0].replace(/-/g, ' ');
+                song = segments[1].replace(/-/g, ' ');
+            }
+        } catch (e) {
+            console.error('Failed to extract artist/song from URL:', e);
+        }
+        
+        res.json({
+            ...chordData,
+            artist,
+            song
+        });
+    } catch (err) {
+        console.error('Chord sheet scraping failed:', err.message);
+        if (browser) {
+            await browser.close();
+        }
+        res.status(500).json({ error: 'Chord sheet scraping failed' });
+    }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`✅ Cifra Club scraper backend running on port ${PORT}`);
