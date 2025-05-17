@@ -1,27 +1,60 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SongData } from "@/types/song";
 import { fetchArtistSongs } from "@/utils/artist-utils";
+import { cacheArtistSongs, getCachedArtistSongs, clearExpiredArtistCache } from "@/utils/artist-cache-utils";
 
 export function useArtistSongs() {
   const [artistSongs, setArtistSongs] = useState<SongData[] | null>(null);
   const [artistLoading, setArtistLoading] = useState(false);
   const [artistError, setArtistError] = useState<string | null>(null);
+  const [currentArtistUrl, setCurrentArtistUrl] = useState<string | null>(null);
+  
+  // Clear expired cache entries when component mounts
+  useEffect(() => {
+    clearExpiredArtistCache();
+  }, []);
 
   const handleArtistClick = useCallback(async (artistUrl: string) => {
     if (artistLoading) return;
+    
+    // Save the current artist URL for potential back navigation
+    setCurrentArtistUrl(artistUrl);
+    
+    // Check if we have cached results first
+    const cachedSongs = getCachedArtistSongs(artistUrl);
+    if (cachedSongs) {
+      console.log('Using cached artist songs');
+      setArtistSongs(cachedSongs);
+      return;
+    }
+    
     setArtistLoading(true);
     setArtistError(null);
+    
     try {
       const songs = await fetchArtistSongs(artistUrl);
       setArtistSongs(songs);
-    } catch (e: any) {
-      setArtistError(e.message || 'Failed to fetch artist songs');
+      
+      // Cache the songs
+      cacheArtistSongs(artistUrl, songs);
+    } catch (e) {
+      setArtistError(e instanceof Error ? e.message : 'Failed to fetch artist songs');
     } finally {
       setArtistLoading(false);
     }
   }, [artistLoading]);
 
-  const resetArtistSongs = () => setArtistSongs(null);
+  const resetArtistSongs = () => {
+    setArtistSongs(null);
+    setCurrentArtistUrl(null);
+  };
 
-  return { artistSongs, artistLoading, artistError, handleArtistClick, resetArtistSongs };
+  return { 
+    artistSongs, 
+    artistLoading, 
+    artistError, 
+    handleArtistClick, 
+    resetArtistSongs,
+    currentArtistUrl
+  };
 }

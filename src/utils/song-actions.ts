@@ -7,7 +7,11 @@ export const handleSaveNewSong = (
   title: string,
   setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>,
   navigate: NavigateFunction,
-  setActiveTab: (tab: string) => void
+  setActiveTab: (tab: string) => void,
+  artist?: string,
+  key?: string,
+  tuning?: string, 
+  capo?: string
 ): void => {
   if (!content.trim()) {
     toast({
@@ -22,6 +26,10 @@ export const handleSaveNewSong = (
     id: `song-${Date.now()}`,
     title: title || "Untitled Song",
     path: content,
+    artist,
+    key,
+    tuning,
+    capo
   };
   
   setMySongs(prev => [newSong, ...prev]);

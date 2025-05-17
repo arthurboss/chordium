@@ -9,9 +9,23 @@ interface SongViewerProps {
   onBack: () => void;
   onDelete: (songId: string) => void;
   onUpdate: (content: string) => void;
+  backButtonLabel?: string;
+  deleteButtonLabel?: string;
+  deleteButtonVariant?: "outline" | "destructive" | "default";
+  hideDeleteButton?: boolean;
 }
 
-const SongViewer = ({ song, chordDisplayRef, onBack, onDelete, onUpdate }: SongViewerProps) => {
+const SongViewer = ({ 
+  song, 
+  chordDisplayRef, 
+  onBack, 
+  onDelete, 
+  onUpdate,
+  backButtonLabel = "Back to My Songs",
+  deleteButtonLabel = "Delete Song",
+  deleteButtonVariant = "destructive",
+  hideDeleteButton = false
+}: SongViewerProps) => {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center mb-6">
@@ -21,19 +35,21 @@ const SongViewer = ({ song, chordDisplayRef, onBack, onDelete, onUpdate }: SongV
           onClick={onBack}
           className="mr-2"
           tabIndex={0}
-          aria-label="Back to My Songs"
+          aria-label={backButtonLabel}
         >
-          Back to My Songs
+          {backButtonLabel}
         </Button>
-        <Button 
-          variant="destructive" 
-          size="sm"
-          onClick={() => onDelete(song.id)}
-          tabIndex={0}
-          aria-label={`Delete ${song?.title || 'song'}`}
-        >
-          Delete Song
-        </Button>
+        {!hideDeleteButton && (
+          <Button 
+            variant={deleteButtonVariant}
+            size="sm"
+            onClick={() => onDelete(song.id)}
+            tabIndex={0}
+            aria-label={deleteButtonLabel}
+          >
+            {deleteButtonLabel}
+          </Button>
+        )}
       </div>
       <div className="mt-6">
         <ChordDisplay 
