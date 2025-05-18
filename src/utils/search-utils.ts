@@ -18,7 +18,7 @@ export function getSearchParamsType(params: URLSearchParams): SearchParamType {
 // This function assumes parameters are already formatted correctly
 export function formatSearchUrl(artist?: string, song?: string): string {
   const parts: string[] = [];
-  if (artist) parts.push(`artist=${encodeURIComponent(artist)}`);
-  if (song) parts.push(`song=${encodeURIComponent(song)}`);
+  if (artist) parts.push(`artist=${encodeURIComponent(artist.trim().replace(/\s+/g, '-'))}`);
+  if (song) parts.push(`song=${encodeURIComponent(song.trim().replace(/\s+/g, '-'))}`);
   return `/search${parts.length ? '?' + parts.join('&') : ''}`;
 }

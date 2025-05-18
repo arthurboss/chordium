@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom"; // Import useLocation
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TabContainer from "@/components/TabContainer";
@@ -9,8 +10,16 @@ import { useSampleSongs } from "@/hooks/use-sample-songs";
 import { useSaveSongs } from "@/hooks/use-save-songs";
 import { useSearchRedirect } from "@/hooks/use-search-redirect";
 
+// Function to determine initial tab based on path
+const getInitialTab = (pathname: string): string => {
+  if (pathname.startsWith("/search")) return "search";
+  if (pathname.startsWith("/upload")) return "upload";
+  return "my-songs"; // Default
+};
+
 const Home = () => {
-  const [activeTab, setActiveTab] = useState("my-songs");
+  const location = useLocation(); // Get location
+  const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [demoSong, setDemoSong] = useState<SongData | null>(null);
   const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
   const { sampleSongs, mySongs, setMySongs } = useSampleSongs();
@@ -22,6 +31,7 @@ const Home = () => {
     sampleSongs,
     mySongs,
     setActiveTab,
+    activeTab, // Pass current activeTab state to the hook
     setDemoSong,
     setSelectedSong
   });
@@ -32,7 +42,7 @@ const Home = () => {
       
       <main className="w-full max-w-3xl mx-auto flex-1 container px-3 py-4 sm:px-4 sm:py-6">
         <TabContainer 
-          activeTab={activeTab}
+          activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
           mySongs={mySongs}
           setMySongs={setMySongs}

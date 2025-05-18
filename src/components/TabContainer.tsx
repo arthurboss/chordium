@@ -88,7 +88,6 @@ const TabContainer = ({
         <TabsTrigger 
           value="my-songs" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "my-songs"}
           onKeyDown={(e) => handleKeyDown(e, "my-songs")}
           {...cyAttr("tab-my-songs")}
         >
@@ -97,7 +96,6 @@ const TabContainer = ({
         <TabsTrigger 
           value="search" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "search"}
           onKeyDown={(e) => handleKeyDown(e, "search")}
           {...cyAttr("tab-search")}
         >
@@ -106,7 +104,6 @@ const TabContainer = ({
         <TabsTrigger 
           value="upload" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "upload"}
           onKeyDown={(e) => handleKeyDown(e, "upload")}
           {...cyAttr("tab-upload")}
         >

@@ -1,18 +1,23 @@
 import { ChordSheetData } from "@/hooks/useChordSheet";
 
-// Key for storing chord sheet cache in sessionStorage
+// Key for storing chord sheet cache in localStorage
 const CHORD_SHEET_CACHE_KEY = 'chordium-chord-sheet-cache';
 
 // Maximum number of cache entries to keep
-const MAX_CACHE_ITEMS = 20;
+const MAX_CACHE_ITEMS = 30;
 
-// Cache expiration time in milliseconds (30 minutes)
-const CACHE_EXPIRATION_TIME = 30 * 60 * 1000;
+// Cache expiration time in milliseconds (24 hours)
+const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
+
+// Type for our cached chord sheet data
+export type CachedChordSheetData = Omit<ChordSheetData, 'loading' | 'error'> & {
+  timestamp?: number;
+};
 
 // Interface for cache items
 interface CacheItem {
   key: string;
-  data: Omit<ChordSheetData, 'loading' | 'error'>;
+  data: CachedChordSheetData;
   timestamp: number;
   accessCount: number;
 }
@@ -26,7 +31,15 @@ interface ChordSheetCache {
  * Generate a cache key based on artist and song
  */
 export const generateCacheKey = (artist: string | null, song: string | null): string => {
-  return `${artist || ''}:${song || ''}`;
+  // Clean and normalize inputs
+  const cleanArtist = artist ? artist.trim().toLowerCase() : null;
+  const cleanSong = song ? song.trim().toLowerCase() : null;
+  
+  // Use null or empty string representation to ensure consistent keys
+  const artistKey = cleanArtist === null ? 'null' : (cleanArtist || '');
+  const songKey = cleanSong === null ? 'null' : (cleanSong || '');
+  
+  return `chord:${artistKey}:${songKey}`;
 };
 
 /**
@@ -34,20 +47,39 @@ export const generateCacheKey = (artist: string | null, song: string | null): st
  */
 const initializeCache = (): ChordSheetCache => {
   try {
-    const cache = sessionStorage.getItem(CHORD_SHEET_CACHE_KEY);
-    return cache ? JSON.parse(cache) : { items: [] };
+    const cacheData = localStorage.getItem(CHORD_SHEET_CACHE_KEY);
+    if (!cacheData) return { items: [] };
+    
+    const cache = JSON.parse(cacheData);
+    
+    // Clean up any problematic cache entries
+    if (cache.items && Array.isArray(cache.items)) {
+      cache.items = cache.items.filter(item => 
+        item && item.key && item.data && typeof item.data === 'object'
+      );
+    } else {
+      return { items: [] };
+    }
+    
+    return cache;
   } catch (e) {
     console.error('Failed to parse chord sheet cache:', e);
+    // If there was an error, clear the cache to avoid future issues
+    try {
+      localStorage.removeItem(CHORD_SHEET_CACHE_KEY);
+    } catch (clearError) {
+      console.error('Failed to clear problematic cache:', clearError);
+    }
     return { items: [] };
   }
 };
 
 /**
- * Save the chord sheet cache to sessionStorage
+ * Save the chord sheet cache to localStorage
  */
 const saveCache = (cache: ChordSheetCache): void => {
   try {
-    sessionStorage.setItem(CHORD_SHEET_CACHE_KEY, JSON.stringify(cache));
+    localStorage.setItem(CHORD_SHEET_CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
     console.error('Failed to save chord sheet cache:', e);
   }
@@ -59,7 +91,7 @@ const saveCache = (cache: ChordSheetCache): void => {
 export const cacheChordSheet = (
   artist: string | null, 
   song: string | null, 
-  data: Omit<ChordSheetData, 'loading' | 'error'>
+  data: CachedChordSheetData
 ): void => {
   const cache = initializeCache();
   const key = generateCacheKey(artist, song);
@@ -67,6 +99,9 @@ export const cacheChordSheet = (
   // Look for existing entry to preserve access count
   const existingItem = cache.items.find(item => item.key === key);
   const accessCount = existingItem ? existingItem.accessCount + 1 : 1;
+  
+  // Make sure we strip any timestamp from the data itself
+  const { timestamp, ...cleanData } = data;
   
   // Remove any existing entry with the same key
   const filteredItems = cache.items.filter(item => item.key !== key);
@@ -76,7 +111,7 @@ export const cacheChordSheet = (
     ...filteredItems,
     {
       key,
-      data,
+      data: cleanData,
       timestamp: Date.now(),
       accessCount,
     }
@@ -108,7 +143,7 @@ export const cacheChordSheet = (
  * Get cached chord sheet if it exists
  * @returns The cached data or null if not found or expired
  */
-export const getCachedChordSheet = (artist: string | null, song: string | null): Omit<ChordSheetData, 'loading' | 'error'> | null => {
+export const getCachedChordSheet = (artist: string | null, song: string | null): CachedChordSheetData | null => {
   const cache = initializeCache();
   const key = generateCacheKey(artist, song);
   const cacheItem = cache.items.find(item => item.key === key);
@@ -134,7 +169,13 @@ export const getCachedChordSheet = (artist: string | null, song: string | null):
   cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
   saveCache(cache);
   
-  return cacheItem.data;
+  // Add timestamp to the returned data
+  const cachedData = {
+    ...cacheItem.data,
+    timestamp: cacheItem.timestamp
+  };
+  
+  return cachedData;
 };
 
 /**
@@ -162,8 +203,139 @@ export const clearExpiredChordSheetCache = (): number => {
  */
 export const clearChordSheetCache = (): void => {
   try {
-    sessionStorage.removeItem(CHORD_SHEET_CACHE_KEY);
+    localStorage.removeItem(CHORD_SHEET_CACHE_KEY);
   } catch (e) {
     console.error('Failed to clear chord sheet cache:', e);
   }
+};
+
+/**
+ * Get cached chord sheet with conditional background refresh
+ * If sheet is stale (24-hour threshold), display cache but refresh in background
+ * @returns An object containing the cached data and a promise for potentially refreshed data
+ */
+export const getChordSheetWithRefresh = async (
+  artist: string | null, 
+  song: string | null,
+  fetchUrl: string,
+  refreshCallback?: (newData: CachedChordSheetData) => void
+): Promise<{
+  immediate: CachedChordSheetData | null;
+  refreshPromise: Promise<CachedChordSheetData | null>;
+}> => {
+  const cachedData = getCachedChordSheet(artist, song);
+  
+  // Threshold for "stale" data that needs a background refresh (24 hours)
+  const REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;
+  
+  let needsRefresh = false;
+  
+  if (cachedData) {
+    // We have cached data to use
+    const now = Date.now();
+    const cacheTime = cachedData.timestamp || 0; // Default to 0 if somehow missing
+    
+    // Check if the data is stale and needs background refresh
+    if (now - cacheTime > REFRESH_THRESHOLD) {
+      console.log('Chord sheet is stale, showing cached version but refreshing in background');
+      needsRefresh = true;
+    } else {
+      console.log('Using fresh cached chord sheet');
+    }
+  } else {
+    // No cached data
+    console.log('No cached chord sheet available, must fetch');
+    needsRefresh = true;
+  }
+  
+  // Create a promise for refreshed data if needed
+  const refreshPromise = new Promise<CachedChordSheetData | null>((resolve) => {
+    if (!needsRefresh) {
+      resolve(cachedData);
+      return;
+    }
+    
+    // Use a separate async function for the fetch logic
+    const fetchData = async () => {
+      try {
+        console.log('Fetching chord sheet from backend');
+        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
+        
+        // Use AbortController to implement timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          signal: controller.signal
+        });
+        
+        // Clear the timeout since we got a response
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch chord sheet: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(`Backend error: ${data.error}`);
+        }
+        
+        if (!data.content) {
+          throw new Error('No chord sheet content found');
+        }
+        
+        const freshData = {
+          content: data.content || '',
+          capo: data.capo || '',
+          tuning: data.tuning || '',
+          key: data.key || '',
+          artist: data.artist || '',
+          song: data.song || '',
+          originalUrl: fetchUrl,
+          timestamp: Date.now() // Add a timestamp for future staleness checks
+        };
+        
+        // Cache the new data
+        cacheChordSheet(artist, song, freshData);
+        
+        // If a callback was provided, call it with the new data
+        if (refreshCallback) {
+          refreshCallback(freshData);
+        }
+        
+        resolve(freshData);
+      } catch (error) {
+        console.error("Error in chord sheet background refresh:", error);
+        
+        // For timeout errors, explicitly log that
+        if (error.name === 'AbortError') {
+          console.warn('Chord sheet fetch timed out after 15 seconds');
+        }
+        
+        // If we have cached data, return it on error; otherwise return null
+        if (cachedData) {
+          console.log('Error occurred, using cached chord sheet data');
+          resolve(cachedData);
+        } else {
+          console.log('Error occurred and no cached data available');
+          resolve(null);
+        }
+      }
+    };
+    
+    // Execute the fetch
+    fetchData();
+  });
+  
+  return {
+    immediate: cachedData,
+    refreshPromise
+  };
 };

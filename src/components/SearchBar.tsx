@@ -23,6 +23,7 @@ const SearchBar = ({ searchType = 'combined', className = "", artistLoading = fa
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('Search form submitted');
 
     let navArtist = "";
     let navSong = "";
@@ -30,7 +31,8 @@ const SearchBar = ({ searchType = 'combined', className = "", artistLoading = fa
     switch (searchType) {
       case "combined": {
         if (!query.trim()) return;
-        const formattedQuery = query.trim().toLowerCase().replace(/\s+/g, "-");
+        const formattedQuery = query.trim().toLowerCase();
+        // Don't replace spaces with dashes for the parameters
         navArtist = formattedQuery;
         navSong = formattedQuery;
         break;
@@ -39,8 +41,8 @@ const SearchBar = ({ searchType = 'combined', className = "", artistLoading = fa
         const hasArtist = artist.trim();
         const hasSong = songName.trim();
         if (!hasArtist && !hasSong) return;
-        const formattedArtist = hasArtist ? artist.trim().toLowerCase().replace(/\s+/g, "-") : "";
-        const formattedSong = hasSong ? songName.trim().toLowerCase().replace(/\s+/g, "-") : "";
+        const formattedArtist = hasArtist ? artist.trim() : "";
+        const formattedSong = hasSong ? songName.trim() : "";
         if (hasArtist && !hasSong) {
           navArtist = formattedArtist;
         } else if (!hasArtist && hasSong) {
@@ -55,8 +57,38 @@ const SearchBar = ({ searchType = 'combined', className = "", artistLoading = fa
         return;
     }
 
-    // Only update the URL; fetching is handled by useSearchResults
-    navigate(formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? navArtist : "")));
+    // Format the search URL
+    const searchUrl = formatSearchUrl(navArtist, navSong || (searchType === 'combined' ? navArtist : ""));
+    
+    console.log('Navigating to search URL:', searchUrl);
+    
+    // Check if we're already on the same search terms (even if URL is different due to timestamp)
+    const currentPath = window.location.pathname;
+    const currentParams = new URLSearchParams(window.location.search);
+    const currentArtist = currentParams.get('artist') || '';
+    const currentSong = currentParams.get('song') || '';
+    
+    const isSameSearch = (
+      currentPath === '/search' && 
+      currentArtist.toLowerCase() === navArtist.toLowerCase() && 
+      currentSong.toLowerCase() === navSong.toLowerCase()
+    );
+    
+    if (isSameSearch) {
+      console.log('Same search detected, attempting to trigger refresh via hook');
+      navigate(searchUrl, { replace: true }); // Navigate to the same URL, relying on component lifecycle
+    } else {
+      // Normal navigation for different search terms
+      navigate(searchUrl);
+    }
+    
+    // Clean up form field values
+    if (searchType === 'combined') {
+      setQuery(query.trim());
+    } else {
+      setArtist(artist.trim());
+      setSongName(songName.trim());
+    }
   };
 
   if (searchType === 'dual') {

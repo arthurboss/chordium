@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getChordUrl, storeChordUrl } from '@/utils/session-storage-utils';
-import { getCachedChordSheet, cacheChordSheet, clearExpiredChordSheetCache } from '@/utils/chord-sheet-cache-utils';
+import { 
+  getCachedChordSheet, 
+  cacheChordSheet, 
+  clearExpiredChordSheetCache, 
+  getChordSheetWithRefresh,
+  CachedChordSheetData
+} from '@/utils/chord-sheet-cache-utils';
 
 export interface ChordSheetData {
   content: string;
@@ -44,25 +50,13 @@ export function useChordSheet(url?: string) {
       let isReconstructedUrl = false;
       
       if (!fetchUrl && params.artist && params.song) {
-        // Check if we have cached data for this artist/song
-        const cachedData = getCachedChordSheet(params.artist, params.song);
-        if (cachedData) {
-          console.log('Using cached chord sheet data');
-          setChordData({
-            ...cachedData,
-            loading: false,
-            error: null
-          });
-          return;
-        }
-        
-        // If no cache, check if we have a stored URL
+        // First get a URL to use for fetching, either from storage or reconstructed
         const storedUrl = getChordUrl(params.artist, params.song);
         
         if (storedUrl) {
           fetchUrl = storedUrl;
           isStoredUrl = true;
-          console.log('Using stored URL from session storage:', fetchUrl);
+          console.log('Found URL in session storage:', fetchUrl);
         } else {
           // Reconstruct the URL from artist and song params
           const artistSlug = params.artist.toLowerCase();
@@ -85,82 +79,93 @@ export function useChordSheet(url?: string) {
       setChordData(prev => ({ ...prev, loading: true, originalUrl: fetchUrl }));
       
       try {
-        // Validate URL format before sending to backend
+        // Validate URL format
         try {
           new URL(fetchUrl);
         } catch (e) {
           throw new Error('Invalid URL format. Please ensure the URL includes http:// or https://');
         }
-        
-        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
-        console.log('Fetching chord sheet from backend:', apiUrl);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
-        try {
-          const response = await fetch(apiUrl, { 
-            signal: controller.signal
+
+        // Use the conditional refresh functionality
+        const { immediate, refreshPromise } = await getChordSheetWithRefresh(
+          params.artist || null,
+          params.song || null,
+          fetchUrl,
+          // This callback will run if/when background refresh completes
+          (updatedData) => {
+            console.log('Background refresh completed, updating UI');
+            
+            // Update URL to artist/song format if needed
+            if (updatedData.artist && updatedData.song && 
+                (params.artist !== updatedData.artist.toLowerCase().replace(/\s+/g, '-') || 
+                params.song !== updatedData.song.toLowerCase().replace(/\s+/g, '-'))) {
+              
+              const artistSlug = updatedData.artist.toLowerCase().replace(/\s+/g, '-');
+              const songSlug = updatedData.song.toLowerCase().replace(/\s+/g, '-');
+              
+              // Store the original URL in sessionStorage and navigate without URL query parameter
+              storeChordUrl(artistSlug, songSlug, fetchUrl);
+              navigate(`/chord/${artistSlug}/${songSlug}`, { replace: true });
+            }
+            
+            setChordData({
+              ...updatedData,
+              loading: false,
+              error: null
+            });
+          }
+        );
+
+        if (immediate) {
+          // We have cached data, show it immediately
+          console.log('Showing cached chord sheet data');
+          setChordData({
+            ...immediate,
+            loading: false,
+            error: null
           });
           
-          clearTimeout(timeoutId);
+          // The background refresh promise will handle itself via the callback
+          refreshPromise.catch(error => {
+            console.error('Background refresh error (silent):', error);
+            // We don't show errors from background refresh since user already sees data
+          });
           
-          if (!response.ok) {
-            if (response.status === 404) {
-              throw new Error('Song not found. Please check the artist and song name and try again.');
-            } else if (response.status === 429) {
-              throw new Error('Too many requests. Please try again later.');
-            } else {
-              throw new Error(`Failed to fetch chord sheet (${response.status}): ${response.statusText}`);
-            }
+          // Skip the rest of the processing
+          return;
+        }
+        
+        // If we got here, we have no cached data and need to wait for the promise
+        try {
+          const freshData = await refreshPromise;
+          
+          if (!freshData) {
+            throw new Error('Failed to fetch chord sheet data');
           }
           
-          const data = await response.json();
-          
-          if (data.error) {
-            throw new Error(`Backend error: ${data.error}`);
-          }
-          
-          if (!data.content) {
+          if (!freshData.content) {
             throw new Error('No chord sheet content found. This song may not be available.');
           }
           
           // Update URL to artist/song format if needed
-          if (data.artist && data.song && 
-              (params.artist !== data.artist.toLowerCase().replace(/\s+/g, '-') || 
-               params.song !== data.song.toLowerCase().replace(/\s+/g, '-'))) {
+          if (freshData.artist && freshData.song && 
+              (params.artist !== freshData.artist.toLowerCase().replace(/\s+/g, '-') || 
+               params.song !== freshData.song.toLowerCase().replace(/\s+/g, '-'))) {
             
-            const artistSlug = data.artist.toLowerCase().replace(/\s+/g, '-');
-            const songSlug = data.song.toLowerCase().replace(/\s+/g, '-');
+            const artistSlug = freshData.artist.toLowerCase().replace(/\s+/g, '-');
+            const songSlug = freshData.song.toLowerCase().replace(/\s+/g, '-');
             
             // Store the original URL in sessionStorage and navigate without URL query parameter
             storeChordUrl(artistSlug, songSlug, fetchUrl);
             navigate(`/chord/${artistSlug}/${songSlug}`, { replace: true });
           }
-
-          // Prepare the chord data
-          const chordSheetData = {
-            content: data.content || '',
-            capo: data.capo || '',
-            tuning: data.tuning || '',
-            key: data.key || '',
-            artist: data.artist || '',
-            song: data.song || '',
-            originalUrl: fetchUrl
-          };
-
-          // Cache the chord sheet data
-          if (data.artist && data.song) {
-            cacheChordSheet(data.artist, data.song, chordSheetData);
-          }
           
           setChordData({
-            ...chordSheetData,
+            ...freshData,
             loading: false,
             error: null
           });
         } catch (fetchErr) {
-          clearTimeout(timeoutId);
           // Re-throw fetch errors for the outer catch block
           throw fetchErr;
         }

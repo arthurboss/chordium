@@ -1,4 +1,3 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from "react-router-dom";
@@ -24,11 +23,15 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/my-songs" replace />
+        element: <Suspense fallback={<Loading />}><Home /></Suspense> // Default to Home, which can handle /search
       },
       {
         path: "search",
         element: <Suspense fallback={<Loading />}><Home /></Suspense>
+      },
+      {
+        path: "search-refresh",
+        element: <Navigate to="/search" replace /> // Redirect to /search
       },
       {
         path: "upload",
