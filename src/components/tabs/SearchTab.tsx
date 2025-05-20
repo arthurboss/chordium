@@ -1,4 +1,3 @@
-import { useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
@@ -11,25 +10,26 @@ interface SearchTabProps {
 }
 
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
-  const [searchParams] = useSearchParams();
-  const hasSearchQuery = searchParams.has("artist") || searchParams.has("song");
-  const [artistLoading, setArtistLoading] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [artist, setArtist] = useState("");
+  const [song, setSong] = useState("");
+
+  // Handler for instant search filtering
+  const handleSearchChange = (artistValue: string, songValue: string) => {
+    setArtist(artistValue);
+    setSong(songValue);
+  };
 
   return (
     <div className="space-y-6">
       <FormContainer>
-        <SearchBar artistLoading={artistLoading} loading={searchLoading} />
+        <SearchBar onSearchChange={handleSearchChange} />
       </FormContainer>
-      {hasSearchQuery && (
-        <SearchResults
-          setMySongs={setMySongs}
-          setActiveTab={setActiveTab}
-          artistLoading={artistLoading}
-          setArtistLoading={setArtistLoading}
-          onLoadingChange={setSearchLoading}
-        />
-      )}
+      <SearchResults
+        setMySongs={setMySongs}
+        setActiveTab={setActiveTab}
+        artist={artist}
+        song={song}
+      />
     </div>
   );
 };

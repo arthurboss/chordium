@@ -1,3 +1,4 @@
+import React from "react";
 import { Music, Trash2, Plus, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { SongData } from "../types/song";
@@ -13,7 +14,7 @@ interface SongCardProps {
   viewButtonLabel?: string;
 }
 
-const SongCard = ({ 
+const SongCard = React.memo(({ 
   song, 
   onView, 
   onDelete,
@@ -69,6 +70,6 @@ const SongCard = ({
       </CardFooter>
     </Card>
   );
-};
+});
 
 export default SongCard;
