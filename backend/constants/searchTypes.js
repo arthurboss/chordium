@@ -1,7 +1,6 @@
 const SEARCH_TYPES = {
   ARTIST: 'artist',
-  SONG: 'song',
-  COMBINED: 'combined'
+  SONG: 'song'
 };
 
 export default SEARCH_TYPES;

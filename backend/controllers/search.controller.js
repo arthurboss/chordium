@@ -11,7 +11,8 @@ function buildSearchQuery(artist, song) {
 function determineSearchType(artist, song) {
   if (artist && !song) return SEARCH_TYPES.ARTIST;
   if (song && !artist) return SEARCH_TYPES.SONG;
-  return SEARCH_TYPES.COMBINED;
+  if (artist && song) return SEARCH_TYPES.SONG;
+  return null;
 }
 
 class SearchController {
@@ -21,8 +22,8 @@ class SearchController {
       const query = buildSearchQuery(artist, song);
       const searchType = determineSearchType(artist, song);
 
-      if (!query) {
-        return res.status(400).json({ error: 'Missing search query' });
+      if (!query || !searchType) {
+        return res.status(400).json({ error: 'Missing or invalid search query' });
       }
 
       logger.info(`Search request - query: "${query}", type: ${searchType}`);

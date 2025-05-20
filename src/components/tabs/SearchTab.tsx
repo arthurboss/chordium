@@ -19,7 +19,7 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   return (
     <div className="space-y-6">
       <FormContainer>
-        <SearchBar searchType="dual" artistLoading={artistLoading} loading={searchLoading} />
+        <SearchBar artistLoading={artistLoading} loading={searchLoading} />
       </FormContainer>
       {hasSearchQuery && (
         <SearchResults

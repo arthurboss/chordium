@@ -64,8 +64,6 @@ class CifraClubService {
           return segments.length === 1;
         case SEARCH_TYPES.SONG:
           return segments.length === 2;
-        case SEARCH_TYPES.COMBINED:
-          return segments.length <= 2;
         default:
           return false;
       }
