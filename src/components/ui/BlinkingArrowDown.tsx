@@ -15,17 +15,27 @@ const BlinkingArrowDown: React.FC<BlinkingArrowDownProps> = ({
   className = "",
   label = "Loading more results",
 }) => (
-  <span
-    className={`animate-pulse font-bold select-none leading-none ${className}`}
-    style={{
-      fontSize: size,
-      color,
-      ...style,
-    }}
-    aria-label={label}
-  >
-    &#8595;
-  </span>
+  <>
+    <span
+      className={`animate-pulse font-bold select-none leading-none ${className}`}
+      style={{
+        fontSize: size,
+        color,
+        animation: 'pulse 1s infinite, moveDown 1s infinite',
+        ...style,
+      }}
+      aria-label={label}
+    >
+      &#8595;
+    </span>
+    <style>{`
+      @keyframes moveDown {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(12px); }
+        100% { transform: translateY(0); }
+      }
+    `}</style>
+  </>
 );
 
 export default BlinkingArrowDown;

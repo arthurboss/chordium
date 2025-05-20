@@ -113,7 +113,7 @@ const SongList = React.memo(({ songs, onView, onDelete }: SongListProps) => {
       </AutoSizer>
       {!isAtBottom && (
         <div
-          className="absolute left-0 bottom-2 w-full flex justify-center pointer-events-none z-10"
+          className="absolute left-0 bottom-5 w-full flex justify-center pointer-events-none z-10"
         >
           <BlinkingArrowDown />
         </div>
