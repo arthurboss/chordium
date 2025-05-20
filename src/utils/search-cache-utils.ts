@@ -13,6 +13,9 @@ const CACHE_EXPIRATION_TIME = 30 * 24 * 60 * 60 * 1000;
 // Max cache size in bytes (4MB)
 const MAX_CACHE_SIZE_BYTES = 4 * 1024 * 1024;
 
+// In-memory LRU cache for fast access (optional, fallback to localStorage)
+const inMemoryCache = new Map<string, CacheItem>();
+
 // Interface for cache items
 interface CacheItem {
   key: string;
@@ -22,6 +25,7 @@ interface CacheItem {
   query: {
     artist: string | null;
     song: string | null;
+    [key: string]: string | null;
   };
 }
 
@@ -35,31 +39,18 @@ interface SearchCache {
 }
 
 /**
- * Generate a cache key based on search params
+ * Generate a cache key based on search params (artist, song, and future filters)
  */
-export const generateCacheKey = (artist: string | null, song: string | null): string => {
-  // Clean and normalize inputs
-  const cleanArtist = artist ? artist.trim().toLowerCase() : null;
-  const cleanSong = song ? song.trim().toLowerCase() : null;
-  
-  // Use null or empty string representation to ensure consistent keys
-  const artistKey = cleanArtist === null ? 'null' : (cleanArtist || '');
-  const songKey = cleanSong === null ? 'null' : (cleanSong || '');
-  
-  // Hash the search key to ensure it's URL-safe and consistent length
-  const hashKey = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0; // Convert to 32bit integer
-    }
-    return Math.abs(hash).toString(36); // Base36 encoding for shorter strings
-  };
-  
-  const baseKey = `${artistKey}:${songKey}`;
-  const hash = hashKey(baseKey);
-  
-  return `search:${artistKey}:${songKey}:${hash}`;
+export const generateCacheKey = (artist: string | null, song: string | null, extra?: Record<string, string | null>): string => {
+  // Normalize inputs
+  const clean = (v: string | null | undefined) => (v ? v.trim().toLowerCase() : '');
+  let key = `artist:${clean(artist)}|song:${clean(song)}`;
+  if (extra) {
+    Object.entries(extra).forEach(([k, v]) => {
+      key += `|${k}:${clean(v)}`;
+    });
+  }
+  return key;
 };
 
 /**
@@ -141,10 +132,11 @@ const saveCache = (cache: SearchCache): void => {
 export const cacheSearchResults = (
   artist: string | null, 
   song: string | null, 
-  results: SearchResultItem[]
+  results: SearchResultItem[],
+  extra?: Record<string, string | null>
 ): void => {
   const cache = initializeCache();
-  const key = generateCacheKey(artist, song);
+  const key = generateCacheKey(artist, song, extra);
   
   // Look for existing entry to preserve access count
   const existingItem = cache.items.find(item => item.key === key);
@@ -161,7 +153,7 @@ export const cacheSearchResults = (
       results,
       timestamp: Date.now(),
       accessCount,
-      query: { artist, song }
+      query: { artist, song, ...extra }
     }
   ];
   
@@ -187,15 +179,39 @@ export const cacheSearchResults = (
   };
   
   saveCache(newCache);
+
+  // Add to in-memory cache
+  inMemoryCache.set(key, {
+    key,
+    results,
+    timestamp: Date.now(),
+    accessCount,
+    query: { artist, song, ...extra }
+  });
 };
 
 /**
  * Get cached search results if they exist
  * @returns The cached results or null if not found or expired
  */
-export const getCachedSearchResults = (artist: string | null, song: string | null): SearchResultItem[] | null => {
+export const getCachedSearchResults = (artist: string | null, song: string | null, extra?: Record<string, string | null>): SearchResultItem[] | null => {
+  const key = generateCacheKey(artist, song, extra);
+
+  // Try in-memory cache first
+  if (inMemoryCache.has(key)) {
+    const item = inMemoryCache.get(key)!;
+    // Check expiry
+    if (Date.now() - item.timestamp > CACHE_EXPIRATION_TIME) {
+      inMemoryCache.delete(key);
+      return null;
+    }
+    item.timestamp = Date.now();
+    item.accessCount++;
+    return item.results;
+  }
+
+  // Fallback to persistent cache
   const cache = initializeCache();
-  const key = generateCacheKey(artist, song);
   const cacheItem = cache.items.find(item => item.key === key);
   
   if (!cacheItem) return null;
@@ -280,6 +296,7 @@ export const clearExpiredSearchCache = (): number => {
 export const clearSearchCache = (): void => {
   try {
     localStorage.removeItem(SEARCH_CACHE_KEY);
+    inMemoryCache.clear();
   } catch (e) {
     console.error('Failed to clear search cache:', e);
   }
@@ -460,4 +477,19 @@ export const getSearchResultsWithRefresh = async (
     immediate: immediateResults,
     refreshPromise
   };
+};
+
+/**
+ * Utility for debugging: inspect cache
+ */
+export const inspectSearchCache = () => {
+  const cache = initializeCache();
+  return cache.items.map(item => ({
+    key: item.key,
+    artist: item.query.artist,
+    song: item.query.song,
+    timestamp: item.timestamp,
+    accessCount: item.accessCount,
+    resultsCount: item.results.length
+  }));
 };
