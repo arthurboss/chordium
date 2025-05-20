@@ -17,9 +17,9 @@ const ArtistSongsResult = ({ artistSongs, onView, onAdd, onBack }: ArtistSongsRe
       </span>
     </h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {artistSongs.map(song => (
+      {artistSongs.map((song, index) => (
         <SongCard
-          key={song.id}
+          key={`${song.path || 'path'}-${song.title || 'title'}-${index}`}
           song={song}
           onView={onView}
           onDelete={() => onAdd(song)}

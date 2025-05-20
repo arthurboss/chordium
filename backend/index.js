@@ -195,10 +195,36 @@ app.get('/api/cifraclub-artist-songs', async (req, res) => {
         await page.goto(pageUrl, { waitUntil: 'networkidle2' });
         console.log('Artist page loaded, extracting songs...');
         const songs = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('a.art_music-link')).map(link => ({
-                title: link.textContent.trim(),
-                url: link.href.startsWith('http') ? link.href : `https://www.cifraclub.com.br${link.getAttribute('href')}`
-            })).filter(song => song.title && song.url);
+            const songMap = new Map();
+            
+            document.querySelectorAll('a.art_music-link').forEach(link => {
+                try {
+                    const href = link.getAttribute('href');
+                    if (!href) return;
+                    
+                    const url = new URL(href.startsWith('http') ? href : `https://www.cifraclub.com.br${href}`);
+                    const path = url.pathname.replace(/^\/+|\/+$/g, '');
+                    const segments = path.split('/');
+                    
+                    // Only include if we have exactly 2 segments (artist/song)
+                    if (segments.length === 2 && segments[0] && segments[1]) {
+                        const songUrl = `https://www.cifraclub.com.br/${segments[0]}/${segments[1]}/`;
+                        const title = link.textContent.trim();
+                        
+                        // Use the URL as the key to prevent duplicates
+                        if (title) {
+                            songMap.set(songUrl, {
+                                title: title,
+                                url: songUrl
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error processing song URL:', e);
+                }
+            });
+            
+            return Array.from(songMap.values());
         });
         console.log(`Found ${songs.length} songs for artist.`);
         await browser.close();

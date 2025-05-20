@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { SearchResultItem } from "@/utils/search-result-item";
@@ -9,6 +9,7 @@ import {
   clearExpiredSearchCache,
   getSearchResultsWithRefresh
 } from "@/utils/search-cache-utils";
+import { useArtistSongs } from "./useArtistSongs";
 
 export function useSearchResults() {
   const [searchParams] = useSearchParams();
@@ -17,10 +18,38 @@ export function useSearchResults() {
   const [error, setError] = useState<string | null>(null);
   const lastRequestParams = useRef<string | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const { artistSongs, currentArtistUrl } = useArtistSongs();
 
   // Extract artist and song strings for the dependency array
   const artistParam = searchParams.get('artist');
   const songParam = searchParams.get('song');
+  
+  // Check if we should filter locally
+  const shouldFilterLocally = useCallback((artist: string | null, song: string | null) => {
+    // Only filter locally if we have artist songs loaded and only the song parameter is changing
+    return artistSongs && 
+           artistSongs.length > 0 && 
+           currentArtistUrl && 
+           artist === null && 
+           song !== null && 
+           song.length > 0;
+  }, [artistSongs, currentArtistUrl]);
+  
+  // Filter artist songs locally based on song name
+  const filterArtistSongs = useCallback((songQuery: string): SearchResultItem[] => {
+    if (!artistSongs) return [];
+    
+    const query = songQuery.toLowerCase();
+    return artistSongs
+      .filter(song => 
+        song.title.toLowerCase().includes(query) ||
+        (song.artist && song.artist.toLowerCase().includes(query))
+      )
+      .map(song => ({
+        title: song.title,
+        url: song.path || ''
+      }));
+  }, [artistSongs]);
   
   // Log search params for debugging
   useEffect(() => {
@@ -42,6 +71,17 @@ export function useSearchResults() {
     // Skip if params haven't changed to avoid unnecessary API calls
     if (lastRequestParams.current === paramsString) {
       console.log(`[${searchId}] Skipping search - params haven't changed`);
+      return;
+    }
+    
+    // Check if we should filter locally
+    if (shouldFilterLocally(artistParam, songParam) && songParam) {
+      console.log(`[${searchId}] Filtering artist songs locally for:`, songParam);
+      const filteredSongs = filterArtistSongs(songParam);
+      console.log(`[${searchId}] Filtered ${filteredSongs.length} songs`);
+      setResults(filteredSongs);
+      setLoading(false);
+      setError(null);
       return;
     }
 
