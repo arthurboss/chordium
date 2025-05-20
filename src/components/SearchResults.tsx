@@ -8,6 +8,7 @@ import { SearchResultItem } from "@/utils/search-result-item";
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import BlinkingArrowDown from "./ui/BlinkingArrowDown";
+import './custom-scrollbar.css';
 
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
@@ -96,8 +97,8 @@ const SongList = React.memo(({ songs, onView, onDelete }: SongListProps) => {
                 clientHeight
               });
             }}
-            style={{ overflow: 'auto', scrollbarWidth: 'none' }}
-            className="[&::-webkit-scrollbar]:hidden"
+            style={{ overflowY: 'scroll', overflowX: 'hidden' }}
+            className="custom-scrollbar scrollbar-always"
           >
             {Row}
           </List>
