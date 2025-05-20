@@ -51,6 +51,12 @@ class CifraClubService {
     try {
       const url = new URL(result.url);
       const path = url.pathname.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
+      
+      // Filter out URLs ending with .html
+      if (path.endsWith('.html')) {
+        return false;
+      }
+      
       const segments = path.split('/').filter(Boolean);
 
       switch (searchType) {
