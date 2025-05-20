@@ -1,5 +1,5 @@
 import { SongData } from "../types/song";
-import SongCard from "./SongCard";
+import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 
 interface SongListProps {
@@ -15,11 +15,15 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
       {songs.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {[...songs].reverse().map((song, index) => (
-            <SongCard 
-              key={`${song.id}-${index}`} 
-              song={song} 
-              onView={onSongSelect} 
-              onDelete={onDeleteSong} 
+            <ResultCard
+              key={`${song.id}-${index}`}
+              icon="music"
+              title={song.title}
+              subtitle={song.artist}
+              onView={() => onSongSelect(song)}
+              onDelete={onDeleteSong}
+              idOrUrl={song.id}
+              isDeletable={true}
             />
           ))}
         </div>

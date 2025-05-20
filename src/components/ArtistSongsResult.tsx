@@ -1,5 +1,5 @@
 import { SongData } from "@/types/song";
-import SongCard from "@/components/SongCard";
+import ResultCard from "@/components/ResultCard";
 
 interface ArtistSongsResultProps {
   artistSongs: SongData[];
@@ -18,15 +18,19 @@ const ArtistSongsResult = ({ artistSongs, onView, onAdd, onBack }: ArtistSongsRe
     </h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {artistSongs.map((song, index) => (
-        <SongCard
+        <ResultCard
           key={`${song.path || 'path'}-${song.title || 'title'}-${index}`}
-          song={song}
-          onView={onView}
+          icon="music"
+          title={song.title}
+          subtitle={song.artist}
+          onView={() => onView(song)}
           onDelete={() => onAdd(song)}
+          idOrUrl={song.id}
           deleteButtonIcon="plus"
           deleteButtonLabel={`Add ${song.title}`}
           viewButtonIcon="external"
           viewButtonLabel="Open"
+          isDeletable={true}
         />
       ))}
     </div>
