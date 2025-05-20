@@ -5,20 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import FormField from "@/components/ui/form-field";
 import { formatSearchUrl } from "@/utils/search-utils";
-import { useSearchResults } from "@/hooks/useSearchResults";
 
 interface SearchBarProps {
   searchType?: 'dual' | 'combined';
   className?: string;
   artistLoading?: boolean;
+  loading?: boolean;
 }
 
-const SearchBar = ({ searchType = 'combined', className = "", artistLoading = false }: SearchBarProps) => {
+const SearchBar = ({ searchType = 'combined', className = "", artistLoading = false, loading = false }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const [songName, setSongName] = useState("");
   const navigate = useNavigate();
-  const { loading } = useSearchResults();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

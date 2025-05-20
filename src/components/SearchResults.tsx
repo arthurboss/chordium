@@ -22,7 +22,7 @@ interface SearchResultsProps {
   setArtistLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SearchResults = ({ setMySongs, setActiveTab, artistLoading: artistLoadingProp, setArtistLoading }: SearchResultsProps) => {
+const SearchResults = ({ setMySongs, setActiveTab, artistLoading: artistLoadingProp, setArtistLoading, onLoadingChange }: SearchResultsProps & { onLoadingChange?: (loading: boolean) => void }) => {
   const { results, loading, error, searchParams } = useSearchResults();
   const artistLoadingExternal = artistLoadingProp;
   const addToMySongs = useAddToMySongs(setMySongs, setActiveTab); // Correctly initialize addToMySongs
@@ -68,6 +68,10 @@ const SearchResults = ({ setMySongs, setActiveTab, artistLoading: artistLoadingP
       );
     }
   }, [artist, song, timestamp, searchKey, results, loading, error]);
+
+  React.useEffect(() => {
+    if (onLoadingChange) onLoadingChange(loading);
+  }, [loading, onLoadingChange]);
 
   const isLoading = loading || artistLoading || artistLoadingExternal;
 

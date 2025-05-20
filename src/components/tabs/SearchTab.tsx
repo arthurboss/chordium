@@ -14,11 +14,12 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [searchParams] = useSearchParams();
   const hasSearchQuery = searchParams.has("artist") || searchParams.has("song");
   const [artistLoading, setArtistLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   return (
     <div className="space-y-6">
       <FormContainer>
-        <SearchBar searchType="dual" artistLoading={artistLoading} />
+        <SearchBar searchType="dual" artistLoading={artistLoading} loading={searchLoading} />
       </FormContainer>
       {hasSearchQuery && (
         <SearchResults
@@ -26,6 +27,7 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
           setActiveTab={setActiveTab}
           artistLoading={artistLoading}
           setArtistLoading={setArtistLoading}
+          onLoadingChange={setSearchLoading}
         />
       )}
     </div>
