@@ -15,7 +15,11 @@
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
     "test:e2e": "start-server-and-test dev http://localhost:8080 cy:run",
-    "test:unit": "vitest"
+    "test:unit": "vitest",
+
+    "backend": "node backend/server.js",
+    "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
+    "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "5.0.1",
