@@ -1,8 +1,15 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
+import { createClient } from '@supabase/supabase-js';
 
-// Helper functions outside the class
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 function buildSearchQuery(artist, song) {
   if (artist && song) return `${artist} ${song}`;
   return artist || song || '';
@@ -75,9 +82,23 @@ class SearchController {
     }
   }
 
+  async getArtists(req, res) {
+    try {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('path, displayName, songCount');
+      if (error) {
+        logger.error('Supabase error fetching artists:', error);
+        return res.status(500).json({ error: 'Failed to fetch artists', details: error.message });
+      }
+      logger.info('API response to frontend:', data);
+      res.json(data);
+    } catch (error) {
+      logger.error('Error fetching artists:', error);
+      res.status(500).json({ error: 'Failed to fetch artists', details: error.message });
+    }
+  }
 }
-
-// The helper functions are now defined at the top of the file
 
 const searchController = new SearchController();
 

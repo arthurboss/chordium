@@ -26,7 +26,7 @@ Backend will have the `BASE_URL = "https://www.cifraclub.com.br/" as a constant,
 
 ### Display Name
 
-Due to edge cases, like AC/DC or names with different characters, it's best to scrape the displayName and store it as well, instead of extracting it from the URL path.
+Due to edge cases, like AC/DC, Guns N' Roses and other names with different characters, it's best to scrape the displayName and store it as well, instead of extracting it from the URL path.
 
 ### Song Count
 
@@ -35,11 +35,29 @@ The song count will be useful for when running the cronjob that will check for n
 ### API response
 
 ```json
-{
-  "url": "https://www.cifraclub.com.br/hillsong-united/",
-  "displayName": "Hillsong United",
-  "songCount": 127
-}
+[
+  {
+    "path": "hillsong-united/",
+    "displayName": "Hillsong United",
+    "songCount": 127
+  },
+  {
+    "path": "ac-dc/",
+    "displayName": "AC/DC",
+    "songCount": 95
+  },
+  {
+    "path": "guns-n-roses/",
+    "displayName": "Guns N' Roses",
+    "songCount": 150
+  },
+  {
+    "path": "rosa-de-saron/",
+    "displayName": "Rosa de Saron",
+    "songCount": 93
+  }
+]
+
 ```
 ---
 ## Songs
