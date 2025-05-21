@@ -13,7 +13,14 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
       // Add historyApiFallback for SPA routing
-      cors: true
+      cors: true,
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     plugins: [
       react(),

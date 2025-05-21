@@ -1,14 +1,11 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
+
+import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
 
 function buildSearchQuery(artist, song) {
   if (artist && song) return `${artist} ${song}`;
