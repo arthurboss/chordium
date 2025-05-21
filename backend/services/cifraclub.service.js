@@ -37,14 +37,31 @@ class CifraClubService {
   }
 
   filterResults(results, searchType) {
-    const processResult = (result) => ({
-      ...result,
-      title: result.title.replace(/ - Cifra Club$/, '')
-    });
-
+    if (searchType === SEARCH_TYPES.ARTIST) {
+      const filtered = results
+        .filter(result => this.isValidResult(result, searchType))
+        .map(result => {
+          try {
+            const urlObj = new URL(result.url);
+            const slug = urlObj.pathname.replace(/^\/+|\/+$/g, '').split('/')[0];
+            return {
+              displayName: result.title.replace(/ - Cifra Club$/, ''),
+              url: `https://www.cifraclub.com.br/${slug}/`,
+              songCount: null
+            };
+          } catch (e) {
+            return null;
+          }
+        })
+        .filter(Boolean);
+      return filtered;
+    }
     return results
       .filter(result => this.isValidResult(result, searchType))
-      .map(processResult);
+      .map(result => ({
+        ...result,
+        title: result.title.replace(/ - Cifra Club$/, '')
+      }));
   }
 
   isValidResult(result, searchType) {
