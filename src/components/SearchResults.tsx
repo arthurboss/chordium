@@ -6,7 +6,7 @@ import { formatSearchResult, formatArtistResult } from "@/utils/search-results-u
 import { SearchResultItem } from "@/utils/search-result-item";
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import BlinkingArrowDown from "./ui/BlinkingArrowDown";
+import BlinkingArrow from "./ui/BlinkingArrow";
 import './custom-scrollbar.css';
 
 interface SearchResultsProps {
@@ -27,14 +27,13 @@ const SongList = React.memo(({ songs, onView, onDelete }: SongListProps) => {
   const isVirtualized = songs.length >= 30;
   const [isAtBottom, setIsAtBottom] = React.useState(false);
 
-  // Handler to check if user is at the bottom of the list
   const handleScroll = React.useCallback(({
     scrollOffset,
     scrollHeight,
     clientHeight
   }) => {
     const maxScroll = scrollHeight - clientHeight;
-    setIsAtBottom(scrollOffset >= maxScroll - 30); // 2px tolerance
+    setIsAtBottom(scrollOffset >= maxScroll - 30);
   }, []);
 
   if (!isVirtualized) {
@@ -63,7 +62,6 @@ const SongList = React.memo(({ songs, onView, onDelete }: SongListProps) => {
     );
   }
 
-  // Virtualized list for large result sets
   const Row = ({ index, style }: ListChildComponentProps) => {
     const item = songs[index];
     const songData = formatSearchResult(item);
@@ -115,43 +113,47 @@ const SongList = React.memo(({ songs, onView, onDelete }: SongListProps) => {
         <div
           className="absolute left-0 bottom-5 w-full flex justify-center pointer-events-none z-10"
         >
-          <BlinkingArrowDown />
+          <BlinkingArrow direction="down" />
         </div>
       )}
     </div>
   );
 });
 
-// Exported columns for artist and song results
-export const ArtistResultsColumn = ({ artists }: { artists: SearchResultItem[] }) => {
+export const ArtistResultsColumn = ({ artists, horizontal = false }: { artists: SearchResultItem[], horizontal?: boolean }) => {
   if (!artists || artists.length === 0) return null;
   const ITEM_HEIGHT = 120;
   const isVirtualized = artists.length >= 30;
   const resultLabel = artists.length === 1 ? 'result' : 'results';
 
-  // Virtualized row renderer
-  const Row = ({ index, style }: ListChildComponentProps) => {
-    const item = artists[index];
-    const artistData = formatArtistResult(item);
+  if (horizontal) {
     return (
-      <div style={style} key={artistData.url}>
-        <ResultCard
-          icon="user"
-          title={artistData.name}
-          onView={() => window.open(artistData.url, '_blank')}
-          idOrUrl={artistData.url}
-          viewButtonIcon="external"
-          viewButtonLabel="See Artist Songs"
-          isDeletable={false}
-        />
+      <div className="flex flex-row gap-4">
+        {artists.map((item) => {
+          const artistData = formatArtistResult(item);
+          return (
+            <div className="w-full max-w-xl">
+              <ResultCard
+                key={artistData.url}
+                icon="user"
+                title={artistData.name}
+                onView={() => window.open(artistData.url, '_blank')}
+                idOrUrl={artistData.url}
+                viewButtonIcon="external"
+                viewButtonLabel="See Artist Songs"
+                isDeletable={false}
+              />
+            </div>
+          );
+        })}
       </div>
     );
-  };
+  }
 
-  return (
-    <div className="artist-results-column w-full md:w-auto">
-      <h2 className="text-lg font-medium mb-4">{artists.length} artist {resultLabel}</h2>
-      {isVirtualized ? (
+  if (isVirtualized) {
+    return (
+      <div className="artist-results-column w-full md:w-auto">
+        <h2 className="text-lg font-medium mb-4">{artists.length} artist {resultLabel}</h2>
         <div className="relative w-full" style={{ height: '70vh', overflow: 'hidden' }}>
           <AutoSizer>
             {({ height, width }) => (
@@ -163,48 +165,95 @@ export const ArtistResultsColumn = ({ artists }: { artists: SearchResultItem[] }
                 style={{ overflowY: 'scroll', overflowX: 'hidden' }}
                 className="custom-scrollbar scrollbar-always"
               >
-                {Row}
+                {({ index, style }: ListChildComponentProps) => {
+                  const item = artists[index];
+                  const artistData = formatArtistResult(item);
+                  return (
+                    <div style={style} key={artistData.url}>
+                      <ResultCard
+                        icon="user"
+                        title={artistData.name}
+                        onView={() => window.open(artistData.url, '_blank')}
+                        idOrUrl={artistData.url}
+                        viewButtonIcon="external"
+                        viewButtonLabel="See Artist Songs"
+                        isDeletable={false}
+                      />
+                    </div>
+                  );
+                }}
               </List>
             )}
           </AutoSizer>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-y-6">
-          {artists.map((item) => {
-            const artistData = formatArtistResult(item);
-            return (
-              <ResultCard
-                key={artistData.url}
-                icon="user"
-                title={artistData.name}
-                onView={() => window.open(artistData.url, '_blank')}
-                idOrUrl={artistData.url}
-                viewButtonIcon="external"
-                viewButtonLabel="See Artist Songs"
-                isDeletable={false}
-              />
-            );
-          })}
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="artist-results-column w-full md:w-auto">
+      <h2 className="text-lg font-medium mb-4">{artists.length} artist {resultLabel}</h2>
+      <div className="grid grid-cols-1 gap-y-6">
+        {artists.map((item) => {
+          const artistData = formatArtistResult(item);
+          return (
+            <ResultCard
+              key={artistData.url}
+              icon="user"
+              title={artistData.name}
+              onView={() => window.open(artistData.url, '_blank')}
+              idOrUrl={artistData.url}
+              viewButtonIcon="external"
+              viewButtonLabel="See Artist Songs"
+              isDeletable={false}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-export const SongResultsColumn = ({ songs, onView, onDelete }: SongListProps) => {
+export const SongResultsColumn = ({ songs, onView, onDelete, horizontal = false, showHeading = true }: SongListProps & { horizontal?: boolean, showHeading?: boolean }) => {
   if (!songs || songs.length === 0) return null;
   const resultLabel = songs.length === 1 ? 'result' : 'results';
 
-  // Use SongList for virtualization and consistent behavior
+  if (horizontal) {
+    return (
+      <div className="flex flex-row gap-4">
+        {songs.map((item) => {
+          const songData = formatSearchResult(item);
+          return (
+            <ResultCard
+              key={songData.id}
+              icon="music"
+              title={songData.title}
+              subtitle={songData.artist}
+              onView={() => onView(songData)}
+              onDelete={() => onDelete(songData.id)}
+              idOrUrl={songData.id}
+              deleteButtonIcon="plus"
+              deleteButtonLabel={`Add ${songData.title}`}
+              viewButtonIcon="view"
+              viewButtonLabel="View Chords"
+              isDeletable={true}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="song-results-column w-full md:w-auto">
-      <h2 className="text-lg font-medium mb-4">{songs.length} song {resultLabel}</h2>
+      {showHeading && (
+        <h2 className="text-lg font-medium mb-4">{songs.length} song {resultLabel}</h2>
+      )}
       <SongList songs={songs} onView={onView} onDelete={onDelete} />
     </div>
   );
 };
 
-// Wrapper for both columns, for use in parent (e.g., SearchBar)
 export const SearchResultsColumns = ({
   artists,
   songs,
@@ -215,26 +264,51 @@ export const SearchResultsColumns = ({
   songs: SearchResultItem[];
   onView: (song: SongData) => void;
   onDelete: (songId: string) => void;
-}) => (
-  <div className="flex flex-row gap-4 w-full">
-    <div className="flex-1">
-      <ArtistResultsColumn artists={artists} />
-    </div>
-    <div className="flex-1">
-      <SongResultsColumn songs={songs} onView={onView} onDelete={onDelete} />
-    </div>
-  </div>
-);
+}) => {
+  // Mobile: artists row is horizontal scroll, songs are vertical below
+  return (
+    <>
+      {/* Mobile layout */}
+      <div className="flex flex-col gap-4 w-full md:hidden">
+        {/* Artists row with heading and horizontal scroll */}
+        <div className="w-full">
+          <h2 className="text-lg font-medium mb-4">{artists.length} artist{artists.length === 1 ? '' : 's'} result{artists.length === 1 ? '' : 's'}</h2>
+          <div className="overflow-x-auto pb-2 relative">
+            <div className="flex flex-row gap-4 min-w-[350px]">
+              <ArtistResultsColumn artists={artists} horizontal />
+            </div>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+              <BlinkingArrow direction="right" />
+            </div>
+          </div>
+        </div>
+        {/* Songs column with heading and vertical list */}
+        <div className="w-full">
+          {/* Only show heading here, not in SongResultsColumn */}
+          <h2 className="text-lg font-medium mb-4">{songs.length} song{songs.length === 1 ? '' : 's'} result{songs.length === 1 ? '' : 's'}</h2>
+          <SongResultsColumn songs={songs} onView={onView} onDelete={onDelete} showHeading={false} />
+        </div>
+      </div>
+      {/* Desktop layout: columns, vertical scroll */}
+      <div className="hidden md:flex flex-row gap-4 w-full">
+        <div className="flex-1">
+          <ArtistResultsColumn artists={artists} />
+        </div>
+        <div className="flex-1">
+          <SongResultsColumn songs={songs} onView={onView} onDelete={onDelete} />
+        </div>
+      </div>
+    </>
+  );
+};
 
 const SearchResults = ({ setMySongs, setActiveTab, artist, song }: SearchResultsProps) => {
   const { artists, songs, loading, error } = useSearchResults(artist, song);
 
-  // Memoize formatted song list for performance
   const memoizedSongs = useMemo(() => songs, [songs]);
   const handleView = useCallback((songData: SongData) => window.open(songData.path, '_blank'), []);
   const handleAdd = useCallback((songId: string) => {
     if (!setMySongs) return;
-    // Find the songData from the memoizedSongs
     const item = memoizedSongs.find(item => formatSearchResult(item).id === songId);
     if (item) {
       const songData = formatSearchResult(item);
@@ -242,16 +316,13 @@ const SearchResults = ({ setMySongs, setActiveTab, artist, song }: SearchResults
     }
   }, [setMySongs, memoizedSongs]);
 
-  // Always show both columns, regardless of search type
   return (
-    <div className="flex flex-row w-full gap-20 px-6">
-      <div className="flex-1">
-        <ArtistResultsColumn artists={artists} />
-      </div>
-      <div className="flex-1">
-        <SongResultsColumn songs={memoizedSongs} onView={handleView} onDelete={handleAdd} />
-      </div>
-    </div>
+    <SearchResultsColumns
+      artists={artists}
+      songs={memoizedSongs}
+      onView={handleView}
+      onDelete={handleAdd}
+    />
   );
 };
 
