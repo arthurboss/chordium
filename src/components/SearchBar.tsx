@@ -75,24 +75,23 @@ const SearchBar = ({
         <Separator className="my-2" />
         
         <div className="flex justify-between items-center">
-          {showBackButton && onBackClick && (
-            <Button 
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onBackClick}
-              className="w-24"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          )}
+          <Button 
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onBackClick}
+            className="w-24"
+            disabled={!!(loading || artistLoading || !showBackButton || !onBackClick)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           
           <Button 
             type="submit"
             className="ml-auto w-24"
             size="sm"
-            disabled={loading || artistLoading || isSearchDisabled}
+            disabled={!!(loading || artistLoading || isSearchDisabled)}
           >
             <Search className="h-4 w-4" />
             Search
