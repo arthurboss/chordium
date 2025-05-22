@@ -1,6 +1,8 @@
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
+import { normalizeForSearch } from '../utils/normalize-for-search.js';
+import { normalizePathForComparison } from '../utils/normalize-path-for-comparison.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -116,9 +118,11 @@ class SearchController {
         // If artist parameter is provided, filter the results
         if (artist && artist.trim()) {
           const searchTerm = artist.trim().toLowerCase();
+          const normalizedSearchTerm = normalizeForSearch(searchTerm);
+          
           artists = artists.filter(a => 
-            a.displayName.toLowerCase().includes(searchTerm) ||
-            a.path.toLowerCase().includes(searchTerm)
+            normalizeForSearch(a.displayName).includes(normalizedSearchTerm) ||
+            normalizePathForComparison(a.path).includes(normalizePathForComparison(searchTerm))
           );
           logger.info(`Found ${artists.length} artists matching "${searchTerm}"`);
         }

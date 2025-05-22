@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
+import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 
 export function useSearchResults(artist: string, song: string, filterArtist: string, filterSong: string) {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -49,33 +50,14 @@ export function useSearchResults(artist: string, song: string, filterArtist: str
     }
   }, [artist, loading]);
 
-  /**
-   * Normalizes text for search by:
-   * 1. Converting to lowercase
-   * 2. Removing special characters (except digits)
-   * 3. Removing extra spaces
-   */
-  const normalizeForSearch = (text: string): string => {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\d\s]/g, '') // Remove special chars but keep digits and letters
-      .replace(/\s+/g, ' ')      // Replace multiple spaces with single space
-      .trim();
-  };
-
   // Only allow local filtering if we have a valid response
   useEffect(() => {
     if (hasFetched && allArtists.length > 0) {
       if (!filterArtist) {
         setArtists(allArtists);
       } else {
-        const normalizedSearchTerm = normalizeForSearch(filterArtist);
-        setArtists(
-          allArtists.filter(a => {
-            const normalizedDisplayName = normalizeForSearch(a.displayName);
-            return normalizedDisplayName.includes(normalizedSearchTerm);
-          })
-        );
+        // Use the dedicated artist filtering utility
+        setArtists(filterArtistsByNameOrPath(allArtists, filterArtist));
       }
     }
   }, [filterArtist, allArtists, hasFetched]);
