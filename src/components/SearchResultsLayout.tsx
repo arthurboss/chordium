@@ -39,7 +39,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       <div className="flex flex-col gap-8 w-full md:hidden">
         {hasArtists && (
           <div className="w-full">
-            <h2 className="text-lg font-medium mb-2">Artist Results</h2>
+            <h2 className="text-lg font-medium mb-2 text-center">Artist Results</h2>
             <div className="relative overflow-x-auto pb-2">
               <ArtistResults artists={artists} horizontal onArtistSelect={onArtistSelect} />
               {artists.length > 1 && (
@@ -53,7 +53,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         
         {hasSongs && (
           <div className="w-full">
-            <h2 className="text-lg font-medium mb-2">Songs by Artist</h2>
+            <h2 className="text-lg font-medium mb-2 text-center">Songs by Artist</h2>
             <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
           </div>
         )}
@@ -70,7 +70,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         
         {hasSongs && (
           <div>
-            <h2 className="text-lg font-medium mb-2">Songs by Artist</h2>
+            <h2 className="text-lg font-medium mb-2 text-center">Songs by Artist</h2>
             <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
           </div>
         )}
