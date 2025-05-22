@@ -8,28 +8,15 @@ import { CARD_HEIGHTS } from "@/constants/ui-constants";
 
 interface ArtistResultsProps {
   artists: Artist[];
-  horizontal?: boolean;
   onArtistSelect?: (artist: Artist) => void;
 }
 
 const VIRTUALIZATION_THRESHOLD = 30;
 
-const ArtistResults: React.FC<ArtistResultsProps> = ({ artists, horizontal = false, onArtistSelect }) => {
+const ArtistResults: React.FC<ArtistResultsProps> = ({ artists, onArtistSelect }) => {
   if (!artists || artists.length === 0) return null;
   
-  const isVirtualized = !horizontal && artists.length >= VIRTUALIZATION_THRESHOLD;
-
-  if (horizontal) {
-    return (
-      <div className="flex flex-row gap-4 overflow-x-auto pb-2">
-        {artists.map((item, index) => (
-          <div className="w-full flex-shrink-0" key={index}>
-            <ArtistItem item={item} onArtistSelect={onArtistSelect} />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  const isVirtualized = artists.length >= VIRTUALIZATION_THRESHOLD;
 
   if (isVirtualized) {
     return (

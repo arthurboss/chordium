@@ -3,7 +3,6 @@ import { SearchResultItem } from "@/utils/search-result-item";
 import { SongData } from "@/types/song";
 import ArtistResults from "@/components/ArtistResults";
 import GroupedSongResults from "@/components/GroupedSongResults";
-import BlinkingArrow from "@/components/ui/BlinkingArrow";
 import { Artist } from '@/types/artist';
 import SearchResultsSection from "@/components/SearchResultsSection";
 
@@ -35,41 +34,19 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   }
 
   return (
-    <>
-      {/* Mobile layout */}
-      <div className="flex flex-col gap-8 w-full md:hidden">
-        {hasArtists && (
-          <SearchResultsSection title="Artist Results">
-            <div className="relative overflow-x-auto pb-2">
-              <ArtistResults artists={artists} horizontal onArtistSelect={onArtistSelect} />
-              {artists.length > 1 && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                  <BlinkingArrow direction="right" />
-                </div>
-              )}
-            </div>
-          </SearchResultsSection>
-        )}
-        {hasSongs && (
-          <SearchResultsSection title="Songs by Artist">
-            <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
-          </SearchResultsSection>
-        )}
-      </div>
-      {/* Desktop layout */}
-      <div className="hidden md:flex flex-col gap-8 w-full">
-        {hasArtists && (
-          <SearchResultsSection title="Artist Results">
-            <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
-          </SearchResultsSection>
-        )}
-        {hasSongs && (
-          <SearchResultsSection title="Songs by Artist">
-            <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
-          </SearchResultsSection>
-        )}
-      </div>
-    </>
+    <div className="flex flex-col gap-8 w-full">
+      {hasArtists && (
+        <SearchResultsSection title="Artist Results">
+          <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
+        </SearchResultsSection>
+      )}
+      
+      {hasSongs && (
+        <SearchResultsSection title="Songs by Artist">
+          <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
+        </SearchResultsSection>
+      )}
+    </div>
   );
 };
 
