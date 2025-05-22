@@ -34,6 +34,8 @@ export const useTabNavigation = ({
       determinedTab = "search";
     } else if (currentPath.startsWith("/upload")) {
       determinedTab = "upload";
+    } else if (currentPath.startsWith("/artist/")) {
+      determinedTab = "search"; // Show artist songs in search tab
     } else if (currentPath.startsWith("/my-songs") || currentPath === "/") {
       determinedTab = "my-songs";
     } else {

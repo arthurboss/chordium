@@ -5,16 +5,23 @@ import { Artist } from '@/types/artist';
 interface ArtistItemProps {
   item: Artist;
   style?: React.CSSProperties;
+  onArtistSelect?: (artist: Artist) => void;
 }
 
-const ArtistItem: React.FC<ArtistItemProps> = ({ item, style }) => {
+const ArtistItem: React.FC<ArtistItemProps> = ({ item, style, onArtistSelect }) => {
+  const handleViewArtist = () => {
+    if (onArtistSelect) {
+      onArtistSelect(item);
+    }
+  };
+
   return (
-    <div style={style} key={item.url}>
+    <div style={style} key={item.path}>
       <ResultCard
         icon="user"
         title={item.displayName}
-        onView={() => window.open(item.url, '_blank')}
-        idOrUrl={item.url}
+        onView={handleViewArtist}
+        idOrUrl={item.path}
         viewButtonIcon="external"
         viewButtonLabel="See Artist Songs"
         isDeletable={false}

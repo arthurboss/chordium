@@ -1,9 +1,16 @@
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
+
+// Get directory path for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
 
@@ -42,15 +49,29 @@ class SearchController {
 
   async getArtistSongs(req, res) {
     try {
-      const { artistUrl } = req.query;
+      const { artistPath } = req.query;
       
-      if (!artistUrl) {
-        return res.status(400).json({ error: 'Missing artist URL' });
+      if (!artistPath) {
+        logger.error('Missing artist path parameter');
+        return res.status(400).json({ error: 'Missing artist path' });
       }
 
-      logger.info(`Fetching songs for artist: ${artistUrl}`);
-      const songs = await cifraClubService.getArtistSongs(artistUrl);
-      res.json(songs);
+      logger.info(`Fetching songs for artist with path: ${artistPath}`);
+      
+      // In development, read from mock files
+      const mockFilePath = path.resolve(__dirname, '../../src/mocks', `${artistPath}.json`);
+      logger.info(`Looking for mock file at: ${mockFilePath}`);
+      
+      if (fs.existsSync(mockFilePath)) {
+        logger.info(`Mock file found for artist: ${artistPath}`);
+        const fileContent = fs.readFileSync(mockFilePath, 'utf8');
+        const songs = JSON.parse(fileContent);
+        logger.info(`Found ${songs.length} songs for artist ${artistPath} in mock data`);
+        return res.json(songs);
+      } else {
+        logger.warn(`Mock file not found for artist: ${artistPath}`);
+        return res.status(404).json({ error: 'Artist songs not found', details: `No mock file found for artist: ${artistPath}` });
+      }
     } catch (error) {
       logger.error('Error fetching artist songs:', error);
       res.status(500).json({ error: 'Failed to fetch artist songs', details: error.message });

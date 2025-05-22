@@ -43,10 +43,10 @@ class CifraClubService {
         .map(result => {
           try {
             const urlObj = new URL(result.url);
-            const slug = urlObj.pathname.replace(/^\/+|\/+$/g, '').split('/')[0];
+            const path = urlObj.pathname.replace(/^\/+|\/+$/g, '').split('/')[0];
             return {
               displayName: result.title.replace(/ - Cifra Club$/, ''),
-              url: `https://www.cifraclub.com.br/${slug}/`,
+              path: path,
               songCount: null
             };
           } catch (e) {

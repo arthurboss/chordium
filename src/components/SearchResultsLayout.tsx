@@ -11,13 +11,15 @@ interface SearchResultsLayoutProps {
   songs: SearchResultItem[];
   onView: (song: SongData) => void;
   onDelete: (songId: string) => void;
+  onArtistSelect?: (artist: Artist) => void;
 }
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   artists,
   songs,
   onView,
-  onDelete
+  onDelete,
+  onArtistSelect
 }) => {
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;
@@ -39,7 +41,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
           <div className="w-full">
             <h2 className="text-lg font-medium mb-2">Artist Results</h2>
             <div className="relative overflow-x-auto pb-2">
-              <ArtistResults artists={artists} horizontal />
+              <ArtistResults artists={artists} horizontal onArtistSelect={onArtistSelect} />
               {artists.length > 1 && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                   <BlinkingArrow direction="right" />
@@ -62,7 +64,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         {hasArtists && (
           <div>
             <h2 className="text-lg font-medium mb-2 text-center">Artist Results</h2>
-            <ArtistResults artists={artists} />
+            <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
           </div>
         )}
         

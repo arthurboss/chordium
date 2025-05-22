@@ -11,21 +11,21 @@ export function useArtistSongs(props?: UseArtistSongsProps) {
   const [artistSongs, setArtistSongs] = useState<SongData[] | null>(null);
   const [artistLoading, setArtistLoading] = useState(false);
   const [artistError, setArtistError] = useState<string | null>(null);
-  const [currentArtistUrl, setCurrentArtistUrl] = useState<string | null>(null);
+  const [currentArtistPath, setCurrentArtistPath] = useState<string | null>(null);
   
   // Clear expired cache entries when component mounts
   useEffect(() => {
     clearExpiredArtistCache();
   }, []);
 
-  const handleArtistClick = useCallback(async (artistUrl: string) => {
+  const handleArtistClick = useCallback(async (artistPath: string) => {
     if (artistLoading) return;
     
-    // Save the current artist URL for potential back navigation
-    setCurrentArtistUrl(artistUrl);
+    // Save the current artist path for potential back navigation
+    setCurrentArtistPath(artistPath);
     
     // Check if we have cached results first
-    const cachedSongs = getCachedArtistSongs(artistUrl);
+    const cachedSongs = getCachedArtistSongs(artistPath);
     if (cachedSongs) {
       console.log('Using cached artist songs');
       setArtistSongs(cachedSongs);
@@ -39,11 +39,11 @@ export function useArtistSongs(props?: UseArtistSongsProps) {
     setArtistError(null);
     
     try {
-      const songs = await fetchArtistSongs(artistUrl);
+      const songs = await fetchArtistSongs(artistPath);
       setArtistSongs(songs);
       
       // Cache the songs
-      cacheArtistSongs(artistUrl, songs);
+      cacheArtistSongs(artistPath, songs);
     } catch (e) {
       setArtistError(e instanceof Error ? e.message : 'Failed to fetch artist songs');
     } finally {
@@ -54,7 +54,7 @@ export function useArtistSongs(props?: UseArtistSongsProps) {
 
   const resetArtistSongs = () => {
     setArtistSongs(null);
-    setCurrentArtistUrl(null);
+    setCurrentArtistPath(null);
   };
 
   return { 
@@ -63,6 +63,6 @@ export function useArtistSongs(props?: UseArtistSongsProps) {
     artistError, 
     handleArtistClick, 
     resetArtistSongs,
-    currentArtistUrl
+    currentArtistPath
   };
 }

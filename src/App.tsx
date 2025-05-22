@@ -10,6 +10,7 @@ const ChordViewer = lazy(() => import("./pages/ChordViewer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TestPage = lazy(() => import("./pages/TestPage"));
 const ScrapeTestPage = lazy(() => import("./pages/ScrapeTestPage"));
+const ArtistSongsPage = lazy(() => import("./pages/ArtistSongsPage"));
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "chord/:id",
         element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+      },
+      {
+        path: "artist/:artistPath",
+        element: <Suspense fallback={<Loading />}><ArtistSongsPage /></Suspense>
       },
       {
         path: "test",

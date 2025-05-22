@@ -11,7 +11,7 @@ const CACHE_EXPIRATION_TIME = 60 * 60 * 1000;
 
 // Interface for cache items
 interface ArtistCacheItem {
-  artistUrl: string;
+  artistPath: string;
   songs: SongData[];
   timestamp: number;
   accessCount: number;
@@ -51,26 +51,26 @@ const saveCache = (cache: ArtistCache): void => {
  * Save artist songs to the cache
  */
 export const cacheArtistSongs = (
-  artistUrl: string,
+  artistPath: string,
   songs: SongData[]
 ): void => {
   const cache = initializeCache();
   
   // Look for existing entry to preserve access count
-  const existingItem = cache.items.find(item => item.artistUrl === artistUrl);
+  const existingItem = cache.items.find(item => item.artistPath === artistPath);
   const accessCount = existingItem ? existingItem.accessCount + 1 : 1;
   
   // Extract artist name from first song if available
   const artistName = songs.length > 0 ? songs[0].artist : undefined;
   
-  // Remove any existing entry with the same artist URL
-  const filteredItems = cache.items.filter(item => item.artistUrl !== artistUrl);
+  // Remove any existing entry with the same artist path
+  const filteredItems = cache.items.filter(item => item.artistPath !== artistPath);
   
   // Add the new entry
   let newItems = [
     ...filteredItems,
     {
-      artistUrl,
+      artistPath,
       songs,
       timestamp: Date.now(),
       accessCount,
@@ -103,9 +103,9 @@ export const cacheArtistSongs = (
  * Get cached artist songs if they exist
  * @returns The cached songs or null if not found or expired
  */
-export const getCachedArtistSongs = (artistUrl: string): SongData[] | null => {
+export const getCachedArtistSongs = (artistPath: string): SongData[] | null => {
   const cache = initializeCache();
-  const cacheItem = cache.items.find(item => item.artistUrl === artistUrl);
+  const cacheItem = cache.items.find(item => item.artistPath === artistPath);
   
   if (!cacheItem) return null;
   
@@ -116,7 +116,7 @@ export const getCachedArtistSongs = (artistUrl: string): SongData[] | null => {
     
     // Remove expired item
     const updatedCache: ArtistCache = {
-      items: cache.items.filter(item => item.artistUrl !== artistUrl)
+      items: cache.items.filter(item => item.artistPath !== artistPath)
     };
     saveCache(updatedCache);
     

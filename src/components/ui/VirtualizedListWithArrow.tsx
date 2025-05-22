@@ -42,7 +42,7 @@ function VirtualizedListWithArrow<T>({
           <List
             height={autoHeight}
             itemCount={items.length}
-            itemSize={itemHeight}
+            itemSize={itemHeight + 8}
             width={width}
             onScroll={({ scrollOffset }) => {
               const scrollHeight = itemHeight * items.length;
