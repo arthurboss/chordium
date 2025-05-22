@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { User, Music, ArrowLeft, Search } from "lucide-react";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
@@ -8,39 +7,47 @@ interface SearchBarProps {
   className?: string;
   artistLoading?: boolean;
   loading?: boolean;
+  // Current value for the artist input field, controlled by parent component
+  artistValue: string;
+  // Current value for the song input field, controlled by parent component
+  songValue: string;
+  // Called whenever either input field changes
   onInputChange: (artist: string, song: string) => void;
+  // Called when the search form is submitted
   onSearchSubmit: (artist: string, song: string) => void;
+  // Whether to show the back button
   showBackButton?: boolean;
+  // Called when the back button is clicked
   onBackClick?: () => void;
+  // Whether the search button should be disabled
   isSearchDisabled?: boolean;
 }
 
 const SearchBar = ({ 
   className = "", 
   artistLoading = false, 
-  loading = false, 
+  loading = false,
+  artistValue,
+  songValue,
   onInputChange, 
   onSearchSubmit,
   showBackButton = false,
   onBackClick,
   isSearchDisabled = false
 }: SearchBarProps) => {
-  const [artist, setArtist] = useState("");
-  const [songName, setSongName] = useState("");
-
-  // Call onInputChange on every input change
+  // Handle input changes and propagate to parent component
+  // No local state is maintained - this component uses the parent's state
   const handleArtistChange = (value: string) => {
-    setArtist(value);
-    onInputChange(value, songName);
+    onInputChange(value, songValue);
   };
+  
   const handleSongChange = (value: string) => {
-    setSongName(value);
-    onInputChange(artist, value);
+    onInputChange(artistValue, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearchSubmit(artist, songName);
+    onSearchSubmit(artistValue, songValue);
   };
 
   return (
@@ -50,7 +57,7 @@ const SearchBar = ({
           <div className="flex-1">
             <FormField
               id="artist-search-input"
-              value={artist}
+              value={artistValue}
               onChange={handleArtistChange}
               disabled={loading || artistLoading}
               placeholder="Search for an artist"
@@ -63,7 +70,7 @@ const SearchBar = ({
           <div className="flex-1">
             <FormField
               id="song-search-input"
-              value={songName}
+              value={songValue}
               onChange={handleSongChange}
               disabled={loading || artistLoading}
               placeholder="Search for a song"
