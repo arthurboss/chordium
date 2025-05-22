@@ -89,6 +89,7 @@
     -webkit-text-fill-color: hsl(var(--foreground));
     border: 1px solid hsl(var(--ring));
     transition: background-color 5000s ease-in-out 0s;
+    caret-color: hsl(var(--foreground));
   }
 
   /* Ensure the clear button inside the input matches the autofill border */
