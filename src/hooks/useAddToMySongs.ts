@@ -1,5 +1,5 @@
 import { SongData } from "@/types/song";
-import { handleSaveNewSong } from "@/utils/song-actions";
+import { handleSaveNewSong } from "@/utils/song-save";
 import { useNavigate } from "react-router-dom";
 
 export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>, setActiveTab?: (tab: string) => void) {

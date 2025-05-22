@@ -8,7 +8,9 @@ import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleSaveNewSong, handleUpdateSong, handleDeleteSong } from "../utils/song-actions";
+import { handleSaveNewSong } from "../utils/song-save";
+import { handleUpdateSong } from "../utils/song-update";
+import { handleDeleteSong } from "../utils/song-delete";
 import { cyAttr } from "@/utils/test-utils";
 
 interface TabContainerProps {
