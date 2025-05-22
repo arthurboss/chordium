@@ -1,8 +1,7 @@
 import { Artist } from "@/types/artist";
-import { SearchResultItem } from "./search-result-item";
 
-export function formatArtistResult(item: SearchResultItem): Artist {
-  let artistName = item.title;
+export function formatArtistResult(item: Artist): Artist {
+  let artistName = item.displayName || "Unknown Artist";
   
   // If the URL contains segments that can be used to extract a better artist name
   try {

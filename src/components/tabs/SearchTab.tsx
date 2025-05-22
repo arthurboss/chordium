@@ -10,25 +10,36 @@ interface SearchTabProps {
 }
 
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
-  const [artist, setArtist] = useState("");
-  const [song, setSong] = useState("");
+  const [inputArtist, setInputArtist] = useState("");
+  const [inputSong, setInputSong] = useState("");
+  const [activeArtist, setActiveArtist] = useState("");
+  const [activeSong, setActiveSong] = useState("");
 
-  // Handler for instant search filtering
-  const handleSearchChange = (artistValue: string, songValue: string) => {
-    setArtist(artistValue);
-    setSong(songValue);
+  const handleInputChange = (artistValue: string, songValue: string) => {
+    setInputArtist(artistValue);
+    setInputSong(songValue);
+  };
+
+  const handleSearchSubmit = (artistValue: string, songValue: string) => {
+    setActiveArtist(artistValue);
+    setActiveSong(songValue);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FormContainer>
-        <SearchBar onSearchChange={handleSearchChange} />
+        <SearchBar
+          onInputChange={handleInputChange}
+          onSearchSubmit={handleSearchSubmit}
+        />
       </FormContainer>
       <SearchResults
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
-        artist={artist}
-        song={song}
+        artist={activeArtist}
+        song={activeSong}
+        filterArtist={inputArtist}
+        filterSong={inputSong}
       />
     </div>
   );

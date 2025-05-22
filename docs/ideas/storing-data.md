@@ -62,8 +62,51 @@ The song count will be useful for when running the cronjob that will check for n
 ---
 ## Songs
 
-Store them as json files in S3, to avoid using up the free-tier of supabase (500mb). Backend fetches songs dynamically when needed and caches frequently searched artists for performance optimization.
+These are the artist songs list, meaning that this is the response for when we start with or include in the search the artist.
 
+The songs list should be stored as json files in S3, to avoid using up the free-tier of supabase (500mb). 
+
+Backend fetches songs dynamically when needed and caches frequently searched artists for performance optimization.
+
+```json
+[
+    {
+        "title": "Acércame a ti",
+        "path": "acercame-a-ti"
+    },
+    {
+        "title": "Across the heart",
+        "path": "across-the-heart"
+    },
+    {
+        "title": "Adonai",
+        "path": "adonai"
+    },
+]
+
+```
+
+### Title
+
+Different than `displayName` in the artist objects, specifically to differentiate and because it just makes sense for songs.
+
+### Path
+
+It's the segment that comes after the artist segment in the URL query.
+
+Backend should construct the url as follows:
+
+```javascript
+const URL = BASE_URL + "/" + [artist-path] + "/" + [song-path] + "/"
+```
+
+### Further Considerations
+
+Should we add entries for `tabs`, `lyrics`, `key` and/or `tuning`? Can we even fetch these data on song scraping and do we need these data beforehand?
+
+## Chord Sheets
+
+Store them as json files in S3.
 
 ## The Final Storage Approach
 1️⃣ Scrape song lists only when searched – Store results only when requested to reduce space usage.

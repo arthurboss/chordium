@@ -14,6 +14,7 @@ interface ResultCardProps {
   deleteButtonIcon?: "trash" | "plus";
   deleteButtonLabel?: string;
   isDeletable?: boolean;
+  compact?: boolean;
 }
 
 const ResultCard = ({
@@ -28,71 +29,105 @@ const ResultCard = ({
   deleteButtonIcon = "trash",
   deleteButtonLabel,
   isDeletable = true,
+  compact = false,
 }: ResultCardProps) => {
+  // Shared icon
+  const Icon = icon === "music" ? Music : User;
+
+  // Shared title/subtitle block
+  const TitleBlock = (
+    <div className="min-w-0 flex-1">
+      <h3
+        className={compact ? "font-semibold text-sm truncate w-full block" : "font-semibold text-base truncate mb-1 w-full block"}
+        {...cyAttr(`${icon}-title${compact && '-compact'}-${idOrUrl}`)}
+        title={title}
+      >
+        {title}
+      </h3>
+      {subtitle && (
+        <p
+          className={compact ? "text-muted-foreground text-[10px] truncate w-full block" : "text-muted-foreground text-sm truncate w-full block"}
+          {...cyAttr(`${icon}-subtitle${compact && '-compact'}-${idOrUrl}`)}
+          title={subtitle}
+        >
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+
+  // Shared view button
+  const ViewButton = (
+    <button
+      className={compact
+        ? "text-chord hover:underline font-medium text-[10px] flex items-center gap-1 px-1"
+        : "text-chord hover:underline font-medium text-sm flex items-center gap-1"
+      }
+      onClick={e => { if (compact) { e.stopPropagation(); } onView(idOrUrl); }}
+      tabIndex={0}
+      aria-label={viewButtonLabel || (icon === 'music' ? `View chords for ${title}` : `See songs by ${title}`)}
+      {...cyAttr(`view-btn${compact ? '-compact' : ''}-${idOrUrl}`)}
+    >
+      {viewButtonIcon === 'external' ? (
+        <ExternalLink className="h-3 w-3" />
+      ) : null}
+      {viewButtonLabel || (icon === 'music' ? (compact ? "View" : "View Chords") : (compact ? "Songs" : "See Songs"))}
+    </button>
+  );
+
+  // Shared delete button
+  const DeleteButton = isDeletable && onDelete && (
+    <button
+      className={
+        (deleteButtonIcon === 'plus' ? 'text-primary' : 'text-destructive dark:text-red-500') +
+        (compact ? ' hover:underline text-[10px] flex items-center gap-1 px-1' : ' hover:underline text-sm flex items-center gap-1')
+      }
+      onClick={e => { if (compact) { e.stopPropagation(); } onDelete(idOrUrl); }}
+      tabIndex={0}
+      aria-label={deleteButtonLabel || `Delete ${title}`}
+      {...cyAttr(`delete-btn${compact ? '-compact' : ''}-${idOrUrl}`)}
+    >
+      {deleteButtonIcon === 'plus' ? (
+        <Plus className={compact ? "h-3 w-3" : "h-4 w-4"} />
+      ) : (
+        <Trash2 className={compact ? "h-3 w-3" : "h-4 w-4"} />
+      )}
+      {deleteButtonLabel ? <span className="sr-only">{deleteButtonLabel}</span> : null}
+    </button>
+  );
+
+  if (compact) {
+    return (
+      <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${icon}-card-compact-${idOrUrl}`)}>
+        <CardContent
+          className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
+          onClick={() => onView(idOrUrl)}
+          {...cyAttr(`${icon}-card-compact-content-${idOrUrl}`)}
+        >
+          <Icon className="h-4 w-4 text-chord" />
+          {TitleBlock}
+          {ViewButton}
+          {DeleteButton}
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="overflow-hidden cursor-pointer max-w-xl w-full h-28" {...cyAttr(`${icon}-card-${idOrUrl}`)}>
+    <Card className="overflow-hidden cursor-pointer w-full h-28" {...cyAttr(`${icon}-card-${idOrUrl}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-col justify-between"
         onClick={() => onView(idOrUrl)}
         {...cyAttr(`${icon}-card-content-${idOrUrl}`)}
       >
         <div className="flex items-start gap-2 w-full">
-          {icon === "music" ? (
-            <Music className="h-6 w-6 text-chord mt-1" />
-          ) : (
-            <User className="h-6 w-6 text-chord mt-1" />
-          )}
-          <div className="min-w-0 flex-1">
-            <h3
-              className="font-semibold text-base truncate mb-1 w-full block"
-              style={{ lineHeight: '1.2' }}
-              {...cyAttr(`${icon}-title-${idOrUrl}`)}
-              title={title}
-            >
-              {title}
-            </h3>
-            {subtitle && (
-              <p
-                className="text-muted-foreground text-sm truncate w-full block"
-                style={{ lineHeight: '1.2' }}
-                {...cyAttr(`${icon}-subtitle-${idOrUrl}`)}
-                title={subtitle}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
+          <Icon className="h-6 w-6 text-chord mt-1" />
+          {TitleBlock}
         </div>
       </CardContent>
       <CardFooter className="bg-muted/50 px-4 py-2 flex justify-between">
-        <button
-          className="text-chord hover:underline font-medium text-sm flex items-center gap-1"
-          onClick={() => onView(idOrUrl)}
-          tabIndex={0}
-          aria-label={viewButtonLabel || (icon === 'music' ? `View chords for ${title}` : `See songs by ${title}`)}
-          {...cyAttr(`view-btn-${idOrUrl}`)}
-        >
-          {viewButtonIcon === 'external' ? (
-            <ExternalLink className="h-3 w-3" />
-          ) : null}
-          {viewButtonLabel || (icon === 'music' ? "View Chords" : "See Songs")}
-        </button>
-        {isDeletable && onDelete && (
-          <button
-            className={`${deleteButtonIcon === 'plus' ? 'text-primary' : 'text-destructive dark:text-red-500'} hover:underline text-sm flex items-center gap-1`}
-            onClick={() => onDelete(idOrUrl)}
-            tabIndex={0}
-            aria-label={deleteButtonLabel || `Delete ${title}`}
-            {...cyAttr(`delete-btn-${idOrUrl}`)}
-          >
-            {deleteButtonIcon === 'plus' ? (
-              <Plus className="h-4 w-4" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-            {deleteButtonLabel ? <span className="sr-only">{deleteButtonLabel}</span> : null}
-          </button>
-        )}
+        {ViewButton}
+        {DeleteButton}
       </CardFooter>
     </Card>
   );
