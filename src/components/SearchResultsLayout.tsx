@@ -5,6 +5,7 @@ import ArtistResults from "@/components/ArtistResults";
 import GroupedSongResults from "@/components/GroupedSongResults";
 import BlinkingArrow from "@/components/ui/BlinkingArrow";
 import { Artist } from '@/types/artist';
+import SearchResultsSection from "@/components/SearchResultsSection";
 
 interface SearchResultsLayoutProps {
   artists: Artist[];
@@ -38,8 +39,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       {/* Mobile layout */}
       <div className="flex flex-col gap-8 w-full md:hidden">
         {hasArtists && (
-          <div className="w-full">
-            <h2 className="text-lg font-medium mb-2 text-center">Artist Results</h2>
+          <SearchResultsSection title="Artist Results">
             <div className="relative overflow-x-auto pb-2">
               <ArtistResults artists={artists} horizontal onArtistSelect={onArtistSelect} />
               {artists.length > 1 && (
@@ -48,31 +48,25 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          </SearchResultsSection>
         )}
-        
         {hasSongs && (
-          <div className="w-full">
-            <h2 className="text-lg font-medium mb-2 text-center">Songs by Artist</h2>
+          <SearchResultsSection title="Songs by Artist">
             <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
-          </div>
+          </SearchResultsSection>
         )}
       </div>
-      
       {/* Desktop layout */}
       <div className="hidden md:flex flex-col gap-8 w-full">
         {hasArtists && (
-          <div>
-            <h2 className="text-lg font-medium mb-2 text-center">Artist Results</h2>
+          <SearchResultsSection title="Artist Results">
             <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
-          </div>
+          </SearchResultsSection>
         )}
-        
         {hasSongs && (
-          <div>
-            <h2 className="text-lg font-medium mb-2 text-center">Songs by Artist</h2>
+          <SearchResultsSection title="Songs by Artist">
             <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
-          </div>
+          </SearchResultsSection>
         )}
       </div>
     </>
