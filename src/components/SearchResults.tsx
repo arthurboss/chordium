@@ -32,7 +32,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   filterSong,
   activeArtist,
   onArtistSelect,
-  onBackToArtistList
 }) => {
   const { artists, songs, loading, error } = useSearchResults(artist, song, filterArtist, filterSong);
 

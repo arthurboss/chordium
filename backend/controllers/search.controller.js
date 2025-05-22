@@ -102,6 +102,32 @@ class SearchController {
 
   async getArtists(req, res) {
     try {
+      // LOCAL DEVELOPMENT: Read from mock file
+      const { artist } = req.query;
+      logger.info(`Searching for artists matching: "${artist}"`);
+      
+      // For development/testing, read from the mock file
+      const mockFilePath = path.resolve(__dirname, '../../src/mocks/artists.json');
+      
+      if (fs.existsSync(mockFilePath)) {
+        const fileContent = fs.readFileSync(mockFilePath, 'utf8');
+        let artists = JSON.parse(fileContent);
+        
+        // If artist parameter is provided, filter the results
+        if (artist && artist.trim()) {
+          const searchTerm = artist.trim().toLowerCase();
+          artists = artists.filter(a => 
+            a.displayName.toLowerCase().includes(searchTerm) ||
+            a.path.toLowerCase().includes(searchTerm)
+          );
+          logger.info(`Found ${artists.length} artists matching "${searchTerm}"`);
+        }
+        
+        return res.json(artists);
+      }
+      // LOCAL DEVELOPMENT: Read from mock file
+
+      // If no mock file, try Supabase (production)
       const { data, error } = await supabase
         .from('artists')
         .select('path, displayName, songCount');
