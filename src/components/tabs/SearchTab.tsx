@@ -3,6 +3,7 @@ import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
 import { SongData } from "@/types/song";
+import { Artist } from "@/types/artist";
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
@@ -12,8 +13,11 @@ interface SearchTabProps {
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [inputArtist, setInputArtist] = useState("");
   const [inputSong, setInputSong] = useState("");
-  const [activeArtist, setActiveArtist] = useState("");
+  const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
+  const [activeArtistName, setActiveArtistName] = useState(""); // For search query
   const [activeSong, setActiveSong] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleInputChange = (artistValue: string, songValue: string) => {
     setInputArtist(artistValue);
@@ -21,8 +25,24 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
-    setActiveArtist(artistValue);
+    setLoading(true);
+    setActiveArtistName(artistValue); // Set the artist name for searching
+    setActiveArtist(null); // Clear any selected artist object
     setActiveSong(songValue);
+    setHasSearched(true); // Set hasSearched to true when a search is performed
+    // Simulate a short loading period
+    setTimeout(() => setLoading(false), 300);
+  };
+
+  const handleArtistSelect = (artist: Artist) => {
+    setActiveArtist(artist);
+  };
+
+  const handleBackToSearch = () => {
+    setActiveArtist(null);
+    setActiveArtistName(""); // Clear the artist name
+    setActiveSong("");
+    setHasSearched(false);
   };
 
   return (
@@ -31,15 +51,22 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
         <SearchBar
           onInputChange={handleInputChange}
           onSearchSubmit={handleSearchSubmit}
+          loading={loading}
+          showBackButton={activeArtist !== null}
+          onBackClick={handleBackToSearch}
+          isSearchDisabled={!inputArtist && !inputSong} // Disable search if both fields are empty
         />
       </FormContainer>
       <SearchResults
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
-        artist={activeArtist}
+        artist={activeArtistName} // Use activeArtistName for search query
         song={activeSong}
         filterArtist={inputArtist}
         filterSong={inputSong}
+        activeArtist={activeArtist}
+        onArtistSelect={handleArtistSelect}
+        onBackToArtistList={handleBackToSearch}
       />
     </div>
   );

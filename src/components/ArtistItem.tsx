@@ -1,6 +1,7 @@
 import React from 'react';
 import ResultCard from "@/components/ResultCard";
 import { Artist } from '@/types/artist';
+import { ChevronRight } from "lucide-react";
 
 interface ArtistItemProps {
   item: Artist;
@@ -22,10 +23,10 @@ const ArtistItem: React.FC<ArtistItemProps> = ({ item, style, onArtistSelect }) 
         title={item.displayName}
         onView={handleViewArtist}
         idOrUrl={item.path}
-        viewButtonIcon="external"
-        viewButtonLabel="See Artist Songs"
+        viewButtonIcon="none" // Use the "none" option to hide the view button
         isDeletable={false}
         compact
+        rightElement={<ChevronRight className="h-4 w-4 text-muted-foreground ml-2" />}
       />
     </div>
   );

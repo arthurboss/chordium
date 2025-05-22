@@ -16,7 +16,7 @@ interface SearchResultsLayoutProps {
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   artists,
-  songs,
+  songs = [],
   onView,
   onDelete,
   onArtistSelect

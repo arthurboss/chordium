@@ -13,7 +13,7 @@ const FormContainer: React.FC<FormContainerProps> = ({
   return (
     <div className={`w-full max-w-3xl mx-auto ${className}`}>
       <Card className="mb-2">
-        <CardContent className="p-4 sm:p-6">
+        <CardContent className="p-4">
           {children}
         </CardContent>
       </Card>
