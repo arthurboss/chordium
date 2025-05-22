@@ -39,7 +39,7 @@
     --background: 240 3.7% 15.9%;
     --foreground: 0 0% 98%;
 
-    --card: rgb(30,30,33);
+    --card: rgb(30, 30, 33);
     --card-foreground: 0 0% 98%;
 
     --chord-content-bg-dark: hsl(240, 3.7%, 12%);
@@ -76,9 +76,25 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   a:focus-visible {
     @apply outline-none ring-1 ring-ring ring-offset-2;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    -webkit-text-fill-color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Ensure the clear button inside the input matches the autofill border */
+  input:-webkit-autofill ~ button[aria-label="Clear input"] {
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
   }
 }
 
@@ -86,15 +102,15 @@
   .chord {
     @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
   }
-  
+
   .chord-line {
     @apply font-mono whitespace-normal mb-1 break-words;
   }
-  
+
   .lyrics-line {
     @apply mb-3 break-words;
   }
-  
+
   .section-header {
     @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
   }
@@ -108,21 +124,21 @@
     overflow-wrap: break-word;
     max-width: 100%;
   }
-  
+
   .chord {
     @apply text-xs px-1 py-0.5;
     word-break: keep-all;
   }
-  
+
   .lyrics-line {
     @apply mb-2 break-words;
     max-width: 100%;
   }
-  
+
   .section-header {
     @apply text-base mt-3 mb-1;
   }
-  
+
   pre {
     @apply whitespace-pre-wrap break-all text-[10px];
     max-width: 100%;
@@ -130,11 +146,15 @@
   }
 }
 
-html, body {
+html,
+body {
   max-width: 100%;
 }
 
-pre, code, .chord-line, .lyrics-line {
+pre,
+code,
+.chord-line,
+.lyrics-line {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
