@@ -91,8 +91,6 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   setViewMode,
   hideGuitarTabs,
   setHideGuitarTabs,
-  setIsEditing,
-  handleDownload,
   autoScroll,
   setAutoScroll,
   scrollSpeed,
@@ -122,7 +120,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   );
 
   return (
-    <StickyBottomContainer isAtBottom={isAtBottom} mobileOnly className={!autoScroll && 'w-fit ml-auto'}>
+    <StickyBottomContainer isAtBottom={isAtBottom} mobileOnly className={!autoScroll ? 'w-fit ml-auto' : ''}>
       {/* When not playing, TextPreferences and Play on the right */}
       {!autoScroll && (
         <div className="flex items-center ml-auto">
@@ -133,7 +131,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
       {/* When playing, TextPreferences on far left, SpeedControl, Play on far right */}
       {autoScroll && (
         <>
-          <div className="flex items-center mr-auto" style={{ marginLeft: 0, paddingLeft: 0 }}>{MenuButtons}</div>
+          <div className="flex items-center mr-auto ml-0 pl-0">{MenuButtons}</div>
           <div className="transition-all duration-200 animate-in slide-in-from-right-16 flex-1 flex items-center justify-center px-2">
             <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
           </div>

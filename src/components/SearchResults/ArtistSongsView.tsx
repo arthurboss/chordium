@@ -26,7 +26,7 @@ export const ArtistSongsView: React.FC<ArtistSongsViewProps> = ({
     return (
       <div style={style}>
         <ResultCard
-          key={`${item.path || 'path'}-${item.title || 'title'}-${index}`}
+          key={`${item.path || 'path'}-${index}`}
           icon="music"
           title={item.title}
           subtitle={item.artist}
