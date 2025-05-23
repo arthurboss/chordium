@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useReducer } from "react";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
@@ -10,69 +10,125 @@ interface SearchTabProps {
   setActiveTab?: (tab: string) => void;
 }
 
+// Define the search form state
+interface SearchFormState {
+  artistQuery: string;         // Current artist input field value
+  songQuery: string;           // Current song input field value
+  selectedArtist: Artist | null; // The selected artist (if any)
+  searchedArtist: string;      // Last submitted artist search term
+  searchedSong: string;        // Last submitted song search term
+  hasSearched: boolean;        // Whether a search has been performed
+  shouldFetch: boolean;        // Whether to trigger API fetch
+}
+
+// Define actions
+type SearchFormAction = 
+  | { type: 'UPDATE_INPUT'; artistValue: string; songValue: string }
+  | { type: 'SUBMIT_SEARCH'; artistValue: string; songValue: string }
+  | { type: 'SELECT_ARTIST'; artist: Artist }
+  | { type: 'BACK_TO_SEARCH' };
+
+// Initial state
+const initialState: SearchFormState = {
+  artistQuery: "",
+  songQuery: "",
+  selectedArtist: null,
+  searchedArtist: "",
+  searchedSong: "",
+  hasSearched: false,
+  shouldFetch: false
+};
+
+// Reducer function
+function searchFormReducer(state: SearchFormState, action: SearchFormAction): SearchFormState {
+  switch (action.type) {
+    case 'UPDATE_INPUT':
+      return {
+        ...state,
+        artistQuery: action.artistValue,
+        songQuery: action.songValue,
+        shouldFetch: false // Reset shouldFetch on input changes
+      };
+    
+    case 'SUBMIT_SEARCH':
+      return {
+        ...state,
+        selectedArtist: null,
+        searchedArtist: action.artistValue,
+        searchedSong: action.songValue,
+        hasSearched: true,
+        shouldFetch: true // Set to true only when submitting search
+      };
+    
+    case 'SELECT_ARTIST':
+      return {
+        ...state,
+        selectedArtist: action.artist
+      };
+    
+    case 'BACK_TO_SEARCH':
+      return {
+        ...state,
+        selectedArtist: null,
+        searchedSong: ""
+      };
+      
+    default:
+      return state;
+  }
+}
+
 const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
-  // Current text in the artist search input field - changes with every keystroke
-  const [artistQuery, setArtistQuery] = useState("");
-  // Current text in the song search input field - changes with every keystroke
-  const [songQuery, setSongQuery] = useState("");
-  // The full Artist object when a user selects a specific artist from search results
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  // The song search term that was submitted for search (not changing with keystrokes)
-  const [searchedSong, setSearchedSong] = useState("");
-  // Loading state while searching or fetching data
+  // Use our form reducer
+  const [state, dispatch] = useReducer(searchFormReducer, initialState);
+  
+  // Local loading state just for the search bar
   const [loading, setLoading] = useState(false);
-  // Track if a search has been performed
-  const [hasSearched, setHasSearched] = useState(false);
 
   const handleInputChange = (artistValue: string, songValue: string) => {
-    setArtistQuery(artistValue);
-    setSongQuery(songValue);
+    dispatch({ type: 'UPDATE_INPUT', artistValue, songValue });
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
-    // Note: artistValue is not used here because artistQuery state is passed directly to SearchResults
     setLoading(true);
-    if (!hasSearched) setHasSearched(true);
-    // Clear the selected artist but keep the input values for searching
-    setSelectedArtist(null);
-    setSearchedSong(songValue);
-    setLoading(false)
+    dispatch({ type: 'SUBMIT_SEARCH', artistValue, songValue });
+    setLoading(false);
   };
 
   const handleArtistSelect = (artist: Artist) => {
-    setSelectedArtist(artist);
+    dispatch({ type: 'SELECT_ARTIST', artist });
   };
 
   const handleBackToSearch = () => {
-    setSelectedArtist(null);
-    setSearchedSong("");
+    dispatch({ type: 'BACK_TO_SEARCH' });
   };
 
   return (
     <div className="space-y-4">
       <FormContainer>
         <SearchBar
-          artistValue={artistQuery}
-          songValue={songQuery}
+          artistValue={state.artistQuery}
+          songValue={state.songQuery}
           onInputChange={handleInputChange}
           onSearchSubmit={handleSearchSubmit}
           loading={loading}
-          showBackButton={selectedArtist !== null}
+          showBackButton={state.selectedArtist !== null}
           onBackClick={handleBackToSearch}
-          isSearchDisabled={!artistQuery && !songQuery} // Disable search if both fields are empty
+          isSearchDisabled={!state.artistQuery && !state.songQuery} // Disable search if both fields are empty
         />
       </FormContainer>
       <SearchResults
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
-        artist={artistQuery}
-        song={searchedSong}
-        filterArtist={artistQuery}
-        filterSong={songQuery}
-        activeArtist={selectedArtist}
+        artist={state.searchedArtist || state.artistQuery}
+        song={state.searchedSong}
+        filterArtist={state.artistQuery}
+        filterSong={state.songQuery}
+        activeArtist={state.selectedArtist}
         onArtistSelect={handleArtistSelect}
         onBackToArtistList={handleBackToSearch}
-        hasSearched={hasSearched}
+        hasSearched={state.hasSearched}
+        shouldFetch={state.shouldFetch}
       />
     </div>
   );

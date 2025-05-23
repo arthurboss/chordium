@@ -10,7 +10,7 @@ import { fetchArtistSongs } from "@/utils/artist-utils";
 export function useArtistSongs(artist: Artist | null) {
   const [songs, setSongs] = useState<SongData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!artist) {
@@ -23,7 +23,7 @@ export function useArtistSongs(artist: Artist | null) {
     setError(null);
     fetchArtistSongs(artist.path)
       .then(setSongs)
-      .catch(err => setError(err instanceof Error ? err.message : 'Failed to fetch artist songs'))
+      .catch(err => setError(err instanceof Error ? err : new Error('Failed to fetch artist songs')))
       .finally(() => setLoading(false));
   }, [artist]);
 

@@ -1,93 +1,43 @@
-# SearchResults Component Refactoring
+# Search Feature
 
-This document describes the refactoring of the `SearchResults` component to follow DRY and Single Responsibility Principles.
+This document explains how the search functionality works in the application.
 
-## Overview
-
-The original `SearchResults` component was monolithic with multiple responsibilities and complex conditional logic. It has been refactored into smaller, focused components and utilities.
+The search feature allows users to find songs and artists, view song details, and add songs to their collection. It's built with React and uses a reducer pattern for state management.
 
 ## Architecture
 
-### Main Component
-- **`SearchResults.tsx`** - Main entry point, now clean and focused solely on orchestrating the search logic
+### Core Components
+- **`SearchResults.tsx`** - Main container that orchestrates the search functionality
+- **`SearchBar.tsx`** - Handles user input for search queries
+- **`SearchTab.tsx`** - Tab component that contains the search interface
+- **`SearchResultsStateHandler.tsx`** - Renders the appropriate UI based on current state
 
 ### State Management
-- **`utils/search-result-states.ts`** - Optimized utility for determining the current state using an ordered array of conditions
-- **`hooks/useSearchResultsLogic.ts`** - Custom hook that encapsulates all search results logic
+- **`useSearchResultsReducer.ts`** - Custom hook that manages all search-related state using React's useReducer
 
-### Sub-Components (Single Responsibility)
-- **`SearchResults/SearchLoadingState.tsx`** - Handles loading state display
-- **`SearchResults/SearchErrorState.tsx`** - Handles error state display  
-- **`SearchResults/ArtistSongsLoadingState.tsx`** - Handles artist songs loading state
-- **`SearchResults/ArtistSongsErrorState.tsx`** - Handles artist songs error state
-- **`SearchResults/ArtistSongsView.tsx`** - Handles display of artist songs list
-- **`SearchResults/SearchResultsStateHandler.tsx`** - Switch-based state handler that renders appropriate component
+### UI States
+- **Loading States**
+  - `SearchLoadingState.tsx` - Displays loading indicator during search
+  - `ArtistSongsLoadingState.tsx` - Shows loading state when fetching artist songs
+- **Error States**
+  - `SearchErrorState.tsx` - Shows error messages when search fails
+  - `ArtistSongsErrorState.tsx` - Displays errors when loading artist songs fails
+- **Content States**
+  - `ArtistSongsView.tsx` - Renders the list of songs for a selected artist
 
-### Utilities
-- **`utils/search-song-actions.ts`** - Extracted search-related song action handlers (view, add) to promote reusability
-- **`utils/song-save.ts`** - Handles saving new songs
-- **`utils/song-update.ts`** - Handles updating existing songs
-- **`utils/song-delete.ts`** - Handles deleting songs
+## How It Works
 
-## Key Improvements
+### Search Flow
+1. User enters search criteria in the search bar
+2. The search query is debounced to reduce API calls
+3. Search results are fetched and displayed
+4. User can select an artist to view their songs
+5. Songs can be viewed or added to the user's collection
 
-### 1. **Eliminated Complex Conditionals**
-Instead of multiple if/else statements in the render method, we now use:
-- A state determination utility that uses an ordered array of conditions for O(1) lookups
-- A switch statement in `SearchResultsStateHandler` for clean state routing
+## Component API
 
-### 2. **Single Responsibility Principle**
-Each component now has a single, clear responsibility:
-- Loading states only handle loading UI
-- Error states only handle error display
-- View components only handle data display
-- State handler only handles state routing
-
-### 3. **DRY Principle**
-- Song actions are extracted to reusable utilities with single responsibilities
-- Each song operation (save, update, delete) is in its own dedicated file
-- Search-related song actions are separated from basic song CRUD operations
-- State logic is centralized in the custom hook
-- Common patterns are abstracted into utilities
-
-### 4. **Performance Improvements**
-- Memoization is centralized in the custom hook
-- State determination is memoized to prevent unnecessary re-calculations
-- Components are split for better tree-shaking and lazy loading potential
-
-### 5. **Maintainability**
-- Clear separation of concerns
-- Easy to add new states or modify existing ones
-- Better testability with isolated components
-- Self-documenting code structure
-
-## File Structure
-
-```
-src/
-├── components/
-│   ├── SearchResults.tsx (main component - 58 lines vs 154 lines)
-│   └── SearchResults/
-│       ├── index.ts
-│       ├── SearchLoadingState.tsx
-│       ├── SearchErrorState.tsx
-│       ├── ArtistSongsLoadingState.tsx
-│       ├── ArtistSongsErrorState.tsx
-│       ├── ArtistSongsView.tsx
-│       └── SearchResultsStateHandler.tsx
-├── hooks/
-│   └── useSearchResultsLogic.ts
-└── utils/
-    ├── search-result-states.ts (simplified with O(1) lookup)
-    ├── search-song-actions.ts
-    ├── song-save.ts
-    ├── song-update.ts
-    └── song-delete.ts
-```
-
-## Usage
-
-The component interface remains the same, ensuring backward compatibility:
+### SearchResults
+Main container component for the search feature.
 
 ```tsx
 <SearchResults
@@ -98,28 +48,74 @@ The component interface remains the same, ensuring backward compatibility:
   filterSong={filterSong}
   activeArtist={activeArtist}
   onArtistSelect={onArtistSelect}
+  hasSearched={hasSearched}
+  onBackToArtistList={onBackToArtistList}
+  setActiveTab={setActiveTab}
 />
 ```
 
-## Benefits
+#### Props
+- **`setMySongs`**: Callback to update the list of user's songs
+- **`artist`**: Current artist search query
+- **`song`**: Current song search query
+- **`filterArtist`**: Filter string for artist names
+- **`filterSong`**: Filter string for song titles
+- **`activeArtist`**: Currently selected artist (if any)
+- **`onArtistSelect`**: Callback when an artist is selected
+- **`hasSearched`**: Boolean indicating if a search has been performed
+- **`onBackToArtistList`**: Callback to navigate back to artist list
+- **`setActiveTab`**: Function to change the active tab
 
-1. **Easier Testing** - Each component and utility can be tested in isolation
-2. **Better Performance** - Smaller component trees, better memoization, and O(1) state resolution
-3. **Improved Developer Experience** - Clear, readable code with obvious responsibilities
-4. **Scalability** - Easy to add new states or modify existing behavior
-5. **Reusability** - Components and utilities can be reused in other contexts
-6. **Maintainable Architecture** - Song actions are logically separated by operation type
+## State Management
 
-## Recent Improvements (May 2025)
+The search functionality uses a reducer pattern to manage state. The following states are handled:
 
-1. **State Resolution Optimization**
-   - Refactored state determination to use a simple array of `[state, condition]` pairs
-   - First matching condition determines the state, eliminating complex cascading conditionals
-   - Priority order is built into the array ordering
+1. **Search States**
+   - `loading`: When search is in progress
+   - `error`: When search encounters an error
+   - `success`: When search completes successfully
 
-2. **Song Action Separation**
-   - Separated song actions into individual files based on operation type:
-     - `song-save.ts` - Add new songs to the collection
-     - `song-update.ts` - Update existing songs
-     - `song-delete.ts` - Remove songs from the collection
-   - Maintained backward compatibility through re-exports in the original file
+2. **Artist Songs States**
+   - `loading`: When loading songs for a specific artist
+   - `error`: When there's an error loading artist songs
+   - `success`: When songs are successfully loaded
+
+## Implementation Details
+
+### State Transitions
+1. **Initial State**: No search performed yet
+2. **Searching**: API request in progress
+3. **Results**: Search results displayed
+4. **Artist View**: Songs for selected artist
+5. **Error**: When something goes wrong
+
+### Error Handling
+- Network errors are caught and displayed
+- Empty states are handled gracefully
+- Users can retry failed requests
+
+### Performance Optimizations
+- Debounced search input to reduce API calls
+- Memoized components to prevent unnecessary re-renders
+- Efficient state updates using useReducer
+- Virtualized lists for large result sets
+
+## File Structure
+
+```
+src/
+├── components/
+│   ├── SearchResults/
+│   │   ├── index.ts
+│   │   ├── SearchLoadingState.tsx
+│   │   ├── SearchErrorState.tsx
+│   │   ├── ArtistSongsLoadingState.tsx
+│   │   ├── ArtistSongsErrorState.tsx
+│   │   ├── ArtistSongsView.tsx
+│   │   └── SearchResultsStateHandler.tsx
+│   ├── SearchResults.tsx
+│   └── tabs/
+│       └── SearchTab.tsx
+└── hooks/
+    └── useSearchResultsReducer.ts
+```

@@ -1,8 +1,12 @@
 import React from 'react';
 import { SongData } from "@/types/song";
 import { Artist } from '@/types/artist';
-import { useSearchResultsLogic } from '@/hooks/useSearchResultsLogic';
+import { useSearchResults } from '@/hooks/useSearchResults';
+import { useArtistSongs } from '@/hooks/useArtistSongs';
 import SearchResultsStateHandler from '@/components/SearchResults/SearchResultsStateHandler';
+import { useSearchResultsReducer } from '@/hooks/useSearchResultsReducer';
+import { useSearchEffects } from '@/hooks/useSearchEffects';
+import { useArtistSelection } from '@/hooks/useArtistSelection';
 import './custom-scrollbar.css';
 
 interface SearchResultsProps {
@@ -16,6 +20,7 @@ interface SearchResultsProps {
   onArtistSelect: (artist: Artist) => void;
   onBackToArtistList?: () => void;
   hasSearched?: boolean;
+  shouldFetch?: boolean;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
@@ -27,32 +32,53 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   activeArtist,
   onArtistSelect,
   hasSearched,
+  shouldFetch,
 }) => {
+  // Initialize our reducer
   const {
+    state,
+    dispatch,
     stateData,
-    memoizedArtists,
-    filteredArtistSongs,
     handleView,
     handleAdd
-  } = useSearchResultsLogic({
-    artist,
-    song,
-    filterArtist,
+  } = useSearchResultsReducer(filterSong, setMySongs);
+
+  // Fetch search results from API - only when shouldFetch is true (form submitted)
+  const { artists, loading, error } = useSearchResults(
+    artist, 
+    song, 
+    filterArtist, 
     filterSong,
+    shouldFetch || false // Only fetch when explicitly requested to do so
+  );
+
+  // Fetch artist songs when activeArtist changes
+  const { songs: artistSongs, error: artistSongsError } = useArtistSongs(state.activeArtist);
+
+  // Use custom hooks for effects and handlers
+  useSearchEffects({
+    loading,
+    error,
+    artists,
+    artistSongs,
+    artistSongsError,
     activeArtist,
-    setMySongs
+    hasSearched,
+    state,
+    dispatch,
   });
+
+  const { handleArtistSelect } = useArtistSelection({ dispatch, onArtistSelect });
 
   return (
     <SearchResultsStateHandler
       stateData={stateData}
-      artists={memoizedArtists}
-      filteredSongs={filteredArtistSongs}
+      artists={state.artists}
+      filteredSongs={state.filteredArtistSongs}
       filterSong={filterSong}
       onView={handleView}
       onAdd={handleAdd}
-      onArtistSelect={onArtistSelect}
-      hasSearched={hasSearched}
+      onArtistSelect={handleArtistSelect}
     />
   );
 };

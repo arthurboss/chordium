@@ -1,7 +1,6 @@
 import React from 'react';
 import { SongData } from '@/types/song';
 import { Artist } from '@/types/artist';
-import { SearchResultStateData } from '@/utils/search-result-states';
 import SearchResultsLayout from '@/components/SearchResultsLayout';
 import SearchLoadingState from './SearchLoadingState';
 import SearchErrorState from './SearchErrorState';
@@ -9,15 +8,24 @@ import ArtistSongsLoadingState from './ArtistSongsLoadingState';
 import ArtistSongsErrorState from './ArtistSongsErrorState';
 import ArtistSongsView from './ArtistSongsView';
 
+// Define our UI state type based on the determineUIState function output
+type UIState = 
+  | { state: 'loading' }
+  | { state: 'error'; error: Error }
+  | { state: 'artist-songs-loading'; activeArtist: Artist | null }
+  | { state: 'artist-songs-error'; artistSongsError: string; activeArtist: Artist | null }
+  | { state: 'artist-songs-view'; activeArtist: Artist; hasSongs: boolean }
+  | { state: 'hasSearched'; hasSongs: boolean }
+  | { state: 'default' };
+
 interface SearchResultsStateHandlerProps {
-  stateData: SearchResultStateData;
+  stateData: UIState;
   artists: Artist[];
   filteredSongs: SongData[];
   filterSong: string;
   onView: (songData: SongData) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
-  hasSearched?: boolean;
 }
 
 export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
@@ -27,8 +35,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
   filterSong,
   onView,
   onAdd,
-  onArtistSelect,
-  hasSearched
+  onArtistSelect
 }) => {
   switch (stateData.state) {
     case 'loading':
@@ -59,9 +66,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
         />
       );
     
-    case 'default':
-    default:
-      if (!hasSearched) return null;
+    case 'hasSearched':
       return (
         <SearchResultsLayout
           artists={artists}
@@ -71,6 +76,10 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
           onArtistSelect={onArtistSelect}
         />
       );
+    
+    case 'default':
+    default:
+      return null;
   }
 };
 
