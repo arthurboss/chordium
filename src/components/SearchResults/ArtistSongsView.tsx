@@ -5,6 +5,7 @@ import ResultCard from '@/components/ResultCard';
 import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
 import { ListChildComponentProps } from 'react-window';
 import { CARD_HEIGHTS } from '@/constants/ui-constants';
+import SearchResultsSection from '../SearchResultsSection';
 
 interface ArtistSongsViewProps {
   activeArtist: Artist;
@@ -45,8 +46,7 @@ export const ArtistSongsView: React.FC<ArtistSongsViewProps> = ({
   }, [onView, onAdd]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <h2 className="text-xl text-center font-semibold mb-4">{activeArtist.displayName}</h2>
+    <SearchResultsSection title={activeArtist.displayName}>
       {filteredSongs.length === 0 && filterSong && (
         <p className="mb-4 text-muted-foreground">No songs matching "{filterSong}"</p>
       )}
@@ -59,7 +59,7 @@ export const ArtistSongsView: React.FC<ArtistSongsViewProps> = ({
           showArrow={filteredSongs.length > 3}
         />
       </div>
-    </div>
+    </SearchResultsSection>
   );
 };
 
