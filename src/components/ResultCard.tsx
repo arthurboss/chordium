@@ -9,12 +9,13 @@ interface ResultCardProps {
   onView: (idOrUrl: string) => void;
   onDelete?: (id: string) => void;
   idOrUrl: string;
-  viewButtonIcon?: "view" | "external";
+  viewButtonIcon?: "view" | "external" | "none"; // Add "none" option to hide view button
   viewButtonLabel?: string;
   deleteButtonIcon?: "trash" | "plus";
   deleteButtonLabel?: string;
   isDeletable?: boolean;
   compact?: boolean;
+  rightElement?: React.ReactNode;
 }
 
 const ResultCard = ({
@@ -30,6 +31,7 @@ const ResultCard = ({
   deleteButtonLabel,
   isDeletable = true,
   compact = false,
+  rightElement,
 }: ResultCardProps) => {
   // Shared icon
   const Icon = icon === "music" ? Music : User;
@@ -44,10 +46,10 @@ const ResultCard = ({
       >
         {title}
       </h3>
-      {subtitle && (
+      {!compact && subtitle && (
         <p
-          className={compact ? "text-muted-foreground text-[10px] truncate w-full block" : "text-muted-foreground text-sm truncate w-full block"}
-          {...cyAttr(`${icon}-subtitle${compact && '-compact'}-${idOrUrl}`)}
+          className={"text-muted-foreground text-sm truncate w-full block"}
+          {...cyAttr(`${icon}-subtitle-${idOrUrl}`)}
           title={subtitle}
         >
           {subtitle}
@@ -56,8 +58,8 @@ const ResultCard = ({
     </div>
   );
 
-  // Shared view button
-  const ViewButton = (
+  // Shared view button - only render if viewButtonIcon is not "none"
+  const ViewButton = viewButtonIcon !== "none" && (
     <button
       className={compact
         ? "text-chord hover:underline font-medium text-[10px] flex items-center gap-1 px-1"
@@ -108,6 +110,7 @@ const ResultCard = ({
           {TitleBlock}
           {ViewButton}
           {DeleteButton}
+          {rightElement}
         </CardContent>
       </Card>
     );

@@ -1,0 +1,80 @@
+import { useEffect } from 'react';
+import { Artist } from '@/types/artist';
+import { SearchResultsState } from '@/hooks/useSearchResultsReducer';
+import { ArtistSong } from '@/types/artistSong';
+
+type SearchEffectsProps = {
+  loading: boolean;
+  error: Error | string | null;
+  artists: Artist[];
+  artistSongs: ArtistSong[];
+  artistSongsError: Error | string | null;
+  activeArtist: Artist | null;
+  hasSearched?: boolean;
+  state: SearchResultsState;
+  dispatch: React.Dispatch<
+    | { type: 'SEARCH_START' }
+    | { type: 'SEARCH_ERROR'; error: Error | string }
+    | { type: 'SEARCH_SUCCESS'; artists: Artist[]; songs: ArtistSong[] }
+    | { type: 'ARTIST_SONGS_ERROR'; error: Error | string }
+    | { type: 'ARTIST_SONGS_SUCCESS'; songs: ArtistSong[] }
+    | { type: 'ARTIST_SONGS_START'; artist: Artist }
+    | { type: 'CLEAR_ARTIST' }
+    | { type: 'SET_HAS_SEARCHED'; value: boolean }
+  >;
+};
+
+export const useSearchEffects = ({
+  loading,
+  error,
+  artists,
+  artistSongs,
+  artistSongsError,
+  activeArtist,
+  hasSearched,
+  state,
+  dispatch,
+}: SearchEffectsProps) => {
+  // Handle search results changes - only dispatch when there's an actual change
+  useEffect(() => {
+    if (loading && !state.loading) {
+      dispatch({ type: 'SEARCH_START' });
+    } else if (error && error !== state.error) {
+      // Ensure error is always an Error object
+      const errorObj = typeof error === 'string' ? new Error(error) : error;
+      dispatch({ type: 'SEARCH_ERROR', error: errorObj });
+    } else if (artists && artists !== state.artists) {
+      dispatch({ type: 'SEARCH_SUCCESS', artists, songs: [] });
+    }
+  }, [loading, error, artists, state.loading, state.error, state.artists, dispatch]);
+
+  // Handle artist songs changes - only dispatch when there's an actual change
+  useEffect(() => {
+    if (artistSongsError && artistSongsError !== state.artistSongsError) {
+      // For ARTIST_SONGS_ERROR, keep as string (reducer expects string)
+      dispatch({ type: 'ARTIST_SONGS_ERROR', error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message });
+    } else if (artistSongs && artistSongs !== state.artistSongs) {
+      if (JSON.stringify(artistSongs) !== JSON.stringify(state.artistSongs)) {
+        dispatch({ type: 'ARTIST_SONGS_SUCCESS', songs: artistSongs });
+      }
+    }
+  }, [artistSongs, artistSongsError, state.artistSongs, state.artistSongsError, dispatch]);
+
+  // Handle artist selection - only dispatch when there's an actual change
+  useEffect(() => {
+    if (activeArtist !== state.activeArtist) {
+      if (activeArtist) {
+        dispatch({ type: 'ARTIST_SONGS_START', artist: activeArtist });
+      } else if (state.activeArtist) {
+        dispatch({ type: 'CLEAR_ARTIST' });
+      }
+    }
+  }, [activeArtist, state.activeArtist, dispatch]);
+  
+  // Handle hasSearched flag - only update when it changes
+  useEffect(() => {
+    if (hasSearched !== undefined && hasSearched !== state.hasSearched) {
+      dispatch({ type: 'SET_HAS_SEARCHED', value: hasSearched });
+    }
+  }, [hasSearched, state.hasSearched, dispatch]);
+};

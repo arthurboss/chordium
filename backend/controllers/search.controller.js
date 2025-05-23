@@ -1,6 +1,8 @@
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
+import { normalizeForSearch } from '../utils/normalize-for-search.js';
+import { normalizePathForComparison } from '../utils/normalize-path-for-comparison.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -102,6 +104,34 @@ class SearchController {
 
   async getArtists(req, res) {
     try {
+      // LOCAL DEVELOPMENT: Read from mock file
+      const { artist } = req.query;
+      logger.info(`Searching for artists matching: "${artist}"`);
+      
+      // For development/testing, read from the mock file
+      const mockFilePath = path.resolve(__dirname, '../../src/mocks/artists.json');
+      
+      if (fs.existsSync(mockFilePath)) {
+        const fileContent = fs.readFileSync(mockFilePath, 'utf8');
+        let artists = JSON.parse(fileContent);
+        
+        // If artist parameter is provided, filter the results
+        if (artist && artist.trim()) {
+          const searchTerm = artist.trim().toLowerCase();
+          const normalizedSearchTerm = normalizeForSearch(searchTerm);
+          
+          artists = artists.filter(a => 
+            normalizeForSearch(a.displayName).includes(normalizedSearchTerm) ||
+            normalizePathForComparison(a.path).includes(normalizePathForComparison(searchTerm))
+          );
+          logger.info(`Found ${artists.length} artists matching "${searchTerm}"`);
+        }
+        
+        return res.json(artists);
+      }
+      // LOCAL DEVELOPMENT: Read from mock file
+
+      // If no mock file, try Supabase (production)
       const { data, error } = await supabase
         .from('artists')
         .select('path, displayName, songCount');
