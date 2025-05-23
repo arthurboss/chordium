@@ -15,6 +15,7 @@ interface SearchResultsProps {
   activeArtist: Artist | null;
   onArtistSelect: (artist: Artist) => void;
   onBackToArtistList?: () => void;
+  hasSearched?: boolean;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
@@ -25,6 +26,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   filterSong,
   activeArtist,
   onArtistSelect,
+  hasSearched,
 }) => {
   const {
     stateData,
@@ -50,6 +52,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       onView={handleView}
       onAdd={handleAdd}
       onArtistSelect={onArtistSelect}
+      hasSearched={hasSearched}
     />
   );
 };

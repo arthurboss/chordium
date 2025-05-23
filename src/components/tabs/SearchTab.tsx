@@ -21,6 +21,8 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [searchedSong, setSearchedSong] = useState("");
   // Loading state while searching or fetching data
   const [loading, setLoading] = useState(false);
+  // Track if a search has been performed
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleInputChange = (artistValue: string, songValue: string) => {
     setArtistQuery(artistValue);
@@ -30,11 +32,11 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
     // Note: artistValue is not used here because artistQuery state is passed directly to SearchResults
     setLoading(true);
+    if (!hasSearched) setHasSearched(true);
     // Clear the selected artist but keep the input values for searching
     setSelectedArtist(null);
     setSearchedSong(songValue);
-    // Simulate a short loading period
-    setTimeout(() => setLoading(false), 300);
+    setLoading(false)
   };
 
   const handleArtistSelect = (artist: Artist) => {
@@ -70,6 +72,7 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
         activeArtist={selectedArtist}
         onArtistSelect={handleArtistSelect}
         onBackToArtistList={handleBackToSearch}
+        hasSearched={hasSearched}
       />
     </div>
   );

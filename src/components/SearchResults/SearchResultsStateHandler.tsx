@@ -17,6 +17,7 @@ interface SearchResultsStateHandlerProps {
   onView: (songData: SongData) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
+  hasSearched?: boolean;
 }
 
 export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
@@ -26,7 +27,8 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
   filterSong,
   onView,
   onAdd,
-  onArtistSelect
+  onArtistSelect,
+  hasSearched
 }) => {
   switch (stateData.state) {
     case 'loading':
@@ -59,6 +61,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     
     case 'default':
     default:
+      if (!hasSearched) return null;
       return (
         <SearchResultsLayout
           artists={artists}
