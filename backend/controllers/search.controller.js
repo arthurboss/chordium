@@ -1,18 +1,9 @@
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
-import { normalizeForSearch } from '../utils/normalize-for-search.js';
-import { normalizePathForComparison } from '../utils/normalize-path-for-comparison.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
-
-// Get directory path for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
 
@@ -94,11 +85,21 @@ class SearchController {
     try {
       const { artist } = req.query;
       logger.info(`Searching for artists matching: "${artist}"`);
-      // Always scrape Cifra Club for artists
-      const searchType = SEARCH_TYPES.ARTIST;
-      const query = artist || '';
-      const artists = await cifraClubService.search(query, searchType);
-      logger.info(`Found ${artists.length} artists from Cifra Club`);
+
+      // Fetch from Supabase instead of scraping Cifra Club
+      let supabaseQuery = supabase.from('artists').select('*');
+      if (artist) {
+        // Case-insensitive search on displayName
+        supabaseQuery = supabaseQuery.ilike('displayName', `%${artist}%`);
+      }
+      const { data: artists, error } = await supabaseQuery;
+
+      if (error) {
+        logger.error('Supabase error fetching artists:', error);
+        return res.status(500).json({ error: 'Failed to fetch artists', details: error.message });
+      }
+
+      logger.info(`Found ${artists.length} artists from Supabase`);
       return res.json(artists);
     } catch (error) {
       logger.error('Error fetching artists:', error);
