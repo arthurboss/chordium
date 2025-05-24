@@ -14,10 +14,10 @@
     "preview": "vite preview",
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
-    "test:e2e": "start-server-and-test dev http://localhost:8080 cy:run",
-    "test:unit": "vitest",
-
-    "backend": "node backend/server.js",
+    "kill-servers": "./scripts/kill-servers.sh",
+    "test:e2e": "npm run kill-servers && start-server-and-test backend http://localhost:3001/health 'start-server-and-test dev http://localhost:8080 cy:run'",
+    "test:unit": "vitest run",
+    "backend": "npm run kill-servers && node backend/server.js",
     "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
     "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e"
   },
