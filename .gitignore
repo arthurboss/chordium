@@ -33,4 +33,3 @@ test-results/
 
 # Ignore environment variable files
 .env
-backend/.env

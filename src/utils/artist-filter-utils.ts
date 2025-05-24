@@ -1,6 +1,6 @@
 // Utility to filter artists by name or path (case-insensitive)
 import { Artist } from '@/types/artist';
-import { normalizeForSearch } from './normalize-for-search';
+import { normalizeForSearchUnicode } from './normalize-for-search';
 import { normalizePathForComparison } from './normalize-path-for-comparison';
 
 /**
@@ -15,11 +15,11 @@ export function filterArtistsByNameOrPath(artists: Artist[], filter: string): Ar
   if (!filter) return artists;
   
   // Normalize the user's filter text (remove special chars, etc.)
-  const normalizedFilter = normalizeForSearch(filter);
+  const normalizedFilter = normalizeForSearchUnicode(filter);
   
   return artists.filter(artist => {
     // Check if normalized displayName includes the normalized filter
-    const displayNameMatch = normalizeForSearch(artist.displayName).includes(normalizedFilter);
+    const displayNameMatch = normalizeForSearchUnicode(artist.displayName).includes(normalizedFilter);
     
     // For path matching, first remove all hyphens from the path then compare
     // This way "acdc" will match a path value of "ac-dc"
