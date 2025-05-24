@@ -1,12 +1,14 @@
 import React from 'react';
-import { SongData } from '@/types/song';
+import { ArtistSong } from '@/types/artistSong';
 import { Artist } from '@/types/artist';
+import { SearchResultItem } from '@/utils/search-result-item';
 import SearchResultsLayout from '@/components/SearchResultsLayout';
 import SearchLoadingState from './SearchLoadingState';
 import SearchErrorState from './SearchErrorState';
 import ArtistSongsLoadingState from './ArtistSongsLoadingState';
 import ArtistSongsErrorState from './ArtistSongsErrorState';
 import ArtistSongsView from './ArtistSongsView';
+import SongsView from './SongsView';
 
 // Define our UI state type based on the determineUIState function output
 type UIState = 
@@ -15,15 +17,17 @@ type UIState =
   | { state: 'artist-songs-loading'; activeArtist: Artist | null }
   | { state: 'artist-songs-error'; artistSongsError: string; activeArtist: Artist | null }
   | { state: 'artist-songs-view'; activeArtist: Artist; hasSongs: boolean }
+  | { state: 'songs-view'; songs: SearchResultItem[]; hasSongs: boolean }
   | { state: 'hasSearched'; hasSongs: boolean }
   | { state: 'default' };
 
 interface SearchResultsStateHandlerProps {
   stateData: UIState;
   artists: Artist[];
-  filteredSongs: SongData[];
+  songs: SearchResultItem[];
+  filteredSongs: ArtistSong[];
   filterSong: string;
-  onView: (songData: SongData) => void;
+  onView: (songData: ArtistSong | SearchResultItem) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
 }
@@ -31,6 +35,7 @@ interface SearchResultsStateHandlerProps {
 export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
   stateData,
   artists,
+  songs,
   filteredSongs,
   filterSong,
   onView,
@@ -66,11 +71,22 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
         />
       );
     
+    case 'songs-view':
+      return (
+        <SongsView
+          songs={stateData.songs}
+          filterSong={filterSong}
+          onView={onView}
+          onAdd={onAdd}
+          searchType="song"
+        />
+      );
+    
     case 'hasSearched':
       return (
         <SearchResultsLayout
           artists={artists}
-          songs={[]}
+          songs={songs}
           onView={onView}
           onDelete={onAdd}
           onArtistSelect={onArtistSelect}

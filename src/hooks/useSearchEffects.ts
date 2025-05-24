@@ -1,33 +1,27 @@
 import { useEffect } from 'react';
 import { Artist } from '@/types/artist';
-import { SearchResultsState } from '@/hooks/useSearchResultsReducer';
+import { SearchResultItem } from '@/utils/search-result-item';
+import { SearchResultsState, SearchResultsAction } from '@/hooks/useSearchResultsReducer';
 import { ArtistSong } from '@/types/artistSong';
 
 type SearchEffectsProps = {
   loading: boolean;
   error: Error | string | null;
   artists: Artist[];
-  artistSongs: ArtistSong[];
+  songs: SearchResultItem[]; // Add songs from search results
+  artistSongs: ArtistSong[]; // Should be ArtistSong[]
   artistSongsError: Error | string | null;
   activeArtist: Artist | null;
   hasSearched?: boolean;
   state: SearchResultsState;
-  dispatch: React.Dispatch<
-    | { type: 'SEARCH_START' }
-    | { type: 'SEARCH_ERROR'; error: Error | string }
-    | { type: 'SEARCH_SUCCESS'; artists: Artist[]; songs: ArtistSong[] }
-    | { type: 'ARTIST_SONGS_ERROR'; error: Error | string }
-    | { type: 'ARTIST_SONGS_SUCCESS'; songs: ArtistSong[] }
-    | { type: 'ARTIST_SONGS_START'; artist: Artist }
-    | { type: 'CLEAR_ARTIST' }
-    | { type: 'SET_HAS_SEARCHED'; value: boolean }
-  >;
+  dispatch: React.Dispatch<SearchResultsAction>;
 };
 
 export const useSearchEffects = ({
   loading,
   error,
   artists,
+  songs, // Add songs parameter
   artistSongs,
   artistSongsError,
   activeArtist,
@@ -43,10 +37,11 @@ export const useSearchEffects = ({
       // Ensure error is always an Error object
       const errorObj = typeof error === 'string' ? new Error(error) : error;
       dispatch({ type: 'SEARCH_ERROR', error: errorObj });
-    } else if (artists && artists !== state.artists) {
-      dispatch({ type: 'SEARCH_SUCCESS', artists, songs: [] });
+    } else if ((artists && artists !== state.artists) || (songs && songs !== state.songs)) {
+      // Dispatch when either artists or songs change
+      dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
     }
-  }, [loading, error, artists, state.loading, state.error, state.artists, dispatch]);
+  }, [loading, error, artists, songs, state.loading, state.error, state.artists, state.songs, dispatch]);
 
   // Handle artist songs changes - only dispatch when there's an actual change
   useEffect(() => {

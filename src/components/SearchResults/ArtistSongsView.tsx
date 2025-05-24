@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { SongData } from '@/types/song';
+import { ArtistSong } from '@/types/artistSong';
 import { Artist } from '@/types/artist';
 import ResultCard from '@/components/ResultCard';
 import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
@@ -9,9 +9,9 @@ import SearchResultsSection from '../SearchResultsSection';
 
 interface ArtistSongsViewProps {
   activeArtist: Artist;
-  filteredSongs: SongData[];
+  filteredSongs: ArtistSong[];
   filterSong: string;
-  onView: (songData: SongData) => void;
+  onView: (songData: ArtistSong) => void;
   onAdd: (songId: string) => void;
 }
 
@@ -23,17 +23,17 @@ export const ArtistSongsView: React.FC<ArtistSongsViewProps> = ({
   onAdd
 }) => {
   // Render a song item for the virtualized list
-  const renderSongItem = useCallback(({ index, style, item }: ListChildComponentProps & { item: SongData }) => {
+  const renderSongItem = useCallback(({ index, style, item }: ListChildComponentProps & { item: ArtistSong }) => {
     return (
       <div style={style}>
         <ResultCard
           key={`${item.path || 'path'}-${index}`}
           icon="music"
           title={item.title}
-          subtitle={item.artist}
+          subtitle={activeArtist.displayName}
           onView={() => onView(item)}
-          onDelete={() => onAdd(item.id)}
-          idOrUrl={item.id}
+          onDelete={() => onAdd(item.path)}
+          idOrUrl={item.path}
           deleteButtonIcon="plus"
           deleteButtonLabel={`Add ${item.title}`}
           viewButtonIcon="external"
@@ -43,7 +43,7 @@ export const ArtistSongsView: React.FC<ArtistSongsViewProps> = ({
         />
       </div>
     );
-  }, [onView, onAdd]);
+  }, [onView, onAdd, activeArtist.displayName]);
 
   return (
     <SearchResultsSection title={activeArtist.displayName}>

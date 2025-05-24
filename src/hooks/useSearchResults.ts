@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
+import { SearchResultItem } from "@/utils/search-result-item";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 
 /**
@@ -21,6 +22,8 @@ export function useSearchResults(
 ) {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [allArtists, setAllArtists] = useState<Artist[]>([]); // Store all fetched artists
+  const [songs, setSongs] = useState<SearchResultItem[]>([]);
+  const [allSongs, setAllSongs] = useState<SearchResultItem[]>([]); // Store all fetched songs
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
@@ -32,55 +35,74 @@ export function useSearchResults(
 
   // Update internal fetch tracking when prop changes
   useEffect(() => {
+    console.log('[useSearchResults] shouldFetch:', shouldFetch, 'artist:', artist, 'song:', song);
     setShouldContinueFetching(shouldFetch);
-  }, [shouldFetch]);
+  }, [shouldFetch, artist, song]);
 
-  // Fetch artists from backend only when shouldFetch is true and it's a new artist
+  // Fetch artists or songs from backend when shouldFetch is true
   useEffect(() => {
-    // Skip fetch if shouldContinueFetching is false
+    console.log('[useSearchResults] Fetch effect triggered. shouldContinueFetching:', shouldContinueFetching, 'artist:', artist, 'song:', song);
     if (!shouldContinueFetching) {
       return;
     }
-    
-    // Only fetch if we have not fetched for this artist before or if it's a new search
+    // Allow fetch if either artist or song is present
     if (
-      artist &&
+      (artist || song) &&
       !loading &&
-      lastFetchedArtist.current !== artist &&
-      artist.trim() !== ""
+      (lastFetchedArtist.current !== artist + '|' + song) &&
+      ((artist && artist.trim() !== '') || (song && song.trim() !== ''))
     ) {
       setLoading(true);
       setError(null);
-      fetch(`/api/artists?artist=${encodeURIComponent(artist)}`)
+      // Choose endpoint based on search type
+      let url;
+      if (!artist && song) {
+        // Song only search
+        url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
+      } else {
+        // Artist only or artist+song search
+        url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
+      }
+      console.log('[useSearchResults] Fetching:', url);
+      fetch(url)
         .then(async res => {
-          if (!res.ok) throw new Error(`Failed to fetch artists: ${res.status}`);
-          
+          if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
           const contentType = res.headers.get('content-type');
-          
           const text = await res.text();
-          
           if (!contentType || !contentType.includes('application/json')) {
             throw new Error('Invalid response from backend (not JSON)');
           }
-          
           const data = JSON.parse(text);
           return data;
         })
-        .then((data: Artist[]) => {
-          setAllArtists(data);
-          setArtists(data);
+        .then((data) => {
+          console.log('[useSearchResults] Response received:', data);
+          if (!artist && song) {
+            // Song-only search - data should be song results
+            console.log('[useSearchResults] Processing song-only search, setting songs:', data);
+            setAllSongs(data);
+            setSongs(data);
+            setAllArtists([]);
+            setArtists([]);
+          } else {
+            // Artist search - data should be artist results
+            console.log('[useSearchResults] Processing artist search, setting artists:', data);
+            setAllArtists(data);
+            setArtists(data);
+            setAllSongs([]);
+            setSongs([]);
+          }
           setLoading(false);
           setHasFetched(true);
-          lastFetchedArtist.current = artist;
-          // Reset shouldContinueFetching after successful fetch
+          lastFetchedArtist.current = artist + '|' + song;
           setShouldContinueFetching(false);
         })
         .catch(err => {
-          setError(err instanceof Error ? err : new Error('Failed to fetch artists'));
+          setError(err instanceof Error ? err : new Error('Failed to fetch search results'));
           setLoading(false);
         });
     }
-  }, [artist, loading, shouldContinueFetching]);
+  }, [artist, song, loading, shouldContinueFetching]);
 
   // Only allow local filtering if we have a valid response
   useEffect(() => {
@@ -95,9 +117,27 @@ export function useSearchResults(
     }
   }, [filterArtist, allArtists, hasFetched]);
 
+  // Filter songs if we have song results
+  useEffect(() => {
+    console.log('[useSearchResults] Song filter effect:', { hasFetched, allSongsLength: allSongs.length, filterSong });
+    if (hasFetched && allSongs.length > 0) {
+      if (!filterSong) {
+        console.log('[useSearchResults] Setting songs (no filter):', allSongs);
+        setSongs(allSongs);
+      } else {
+        // Filter songs by title - SearchResultItem has title property
+        const filtered = allSongs.filter(song => 
+          song.title.toLowerCase().includes(filterSong.toLowerCase())
+        );
+        console.log('[useSearchResults] Setting filtered songs:', filtered);
+        setSongs(filtered);
+      }
+    }
+  }, [filterSong, allSongs, hasFetched]);
+
   return {
     artists,
-    songs: [], // No songs for now
+    songs,
     loading,
     error
   };

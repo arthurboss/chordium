@@ -1,16 +1,24 @@
 import { useReducer, useMemo, useEffect } from 'react';
 import { Artist } from '@/types/artist';
+import { ArtistSong } from '@/types/artistSong';
 import { SongData } from '@/types/song';
 import { SearchResultItem } from '@/utils/search-result-item';
-import { filterSongsByTitle } from '@/utils/song-filter-utils';
 import { useSongActions } from '@/utils/search-song-actions';
 
-// Helper function to convert SongData to SearchResultItem
-function songDataToSearchResultItem(song: SongData): SearchResultItem {
+// Helper function to convert ArtistSong to SearchResultItem
+function artistSongToSearchResultItem(song: ArtistSong): SearchResultItem {
   return {
     title: song.title,
     url: song.path
   };
+}
+
+// Helper function to filter ArtistSong[] by title
+function filterArtistSongsByTitle(songs: ArtistSong[], filter: string): ArtistSong[] {
+  if (!filter) return songs;
+  return songs.filter(song => 
+    song.title.toLowerCase().includes(filter.toLowerCase())
+  );
 }
 
 // Define state types
@@ -21,10 +29,10 @@ export interface SearchResultsState {
   artistSongsLoading: boolean;
   artistSongsError: string | null;
   activeArtist: Artist | null;
-  artistSongs: SongData[];
+  artistSongs: ArtistSong[];
   artists: Artist[];
   songs: SearchResultItem[];
-  filteredArtistSongs: SongData[];
+  filteredArtistSongs: ArtistSong[];
 }
 
 // Define action types
@@ -34,7 +42,7 @@ export type SearchResultsAction =
   | { type: 'SEARCH_ERROR'; error: Error }
   | { type: 'SET_HAS_SEARCHED'; value: boolean }
   | { type: 'ARTIST_SONGS_START'; artist: Artist }
-  | { type: 'ARTIST_SONGS_SUCCESS'; songs: SongData[] }
+  | { type: 'ARTIST_SONGS_SUCCESS'; songs: ArtistSong[] }
   | { type: 'ARTIST_SONGS_ERROR'; error: string }
   | { type: 'CLEAR_ARTIST'; }
   | { type: 'FILTER_ARTIST_SONGS'; filter: string };
@@ -120,7 +128,7 @@ function searchResultsReducer(state: SearchResultsState, action: SearchResultsAc
     case 'FILTER_ARTIST_SONGS':
       return {
         ...state,
-        filteredArtistSongs: filterSongsByTitle(state.artistSongs, action.filter)
+        filteredArtistSongs: filterArtistSongsByTitle(state.artistSongs, action.filter)
       };
 
     default:
@@ -158,6 +166,15 @@ export function determineUIState(state: SearchResultsState) {
     };
   }
   
+  // New state for song-only search results
+  if (state.hasSearched && state.songs.length > 0) {
+    return { 
+      state: 'songs-view' as const, 
+      songs: state.songs,
+      hasSongs: true 
+    };
+  }
+  
   if (state.hasSearched) {
     return { state: 'hasSearched' as const, hasSongs: false };
   }
@@ -181,8 +198,8 @@ export function useSearchResultsReducer(
   // Generate a compatible array of SearchResultItems for the song actions
   const memoizedSongs = useMemo(() => {
     if (state.activeArtist) {
-      // Convert SongData[] to SearchResultItem[]
-      return state.artistSongs.map(songDataToSearchResultItem);
+      // Convert ArtistSong[] to SearchResultItem[]
+      return state.artistSongs.map(artistSongToSearchResultItem);
     } else {
       return state.songs;
     }

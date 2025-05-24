@@ -1,7 +1,8 @@
 import { Artist } from '@/types/artist';
+import { SearchResultsAction } from '@/hooks/useSearchResultsReducer';
 
 type UseArtistSelectionProps = {
-  dispatch: (action: { type: string; artist: Artist }) => void;
+  dispatch: React.Dispatch<SearchResultsAction>;
   onArtistSelect: (artist: Artist) => void;
 };
 

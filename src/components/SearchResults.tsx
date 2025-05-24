@@ -44,7 +44,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   } = useSearchResultsReducer(filterSong, setMySongs);
 
   // Fetch search results from API - only when shouldFetch is true (form submitted)
-  const { artists, loading, error } = useSearchResults(
+  const { artists, songs, loading, error } = useSearchResults(
     artist, 
     song, 
     filterArtist, 
@@ -60,6 +60,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     loading,
     error,
     artists,
+    songs, // Add songs from search results
     artistSongs,
     artistSongsError,
     activeArtist,
@@ -74,6 +75,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     <SearchResultsStateHandler
       stateData={stateData}
       artists={state.artists}
+      songs={state.songs}
       filteredSongs={state.filteredArtistSongs}
       filterSong={filterSong}
       onView={handleView}

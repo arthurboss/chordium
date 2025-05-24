@@ -27,3 +27,8 @@
   box-sizing: border-box;
   padding-right: 12px;
 }
+
+/* Height for virtualized lists in songs view */
+.songs-view-height {
+  height: 60vh;
+}

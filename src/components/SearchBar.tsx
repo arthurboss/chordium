@@ -38,15 +38,18 @@ const SearchBar = ({
   // Handle input changes and propagate to parent component
   // No local state is maintained - this component uses the parent's state
   const handleArtistChange = (value: string) => {
+    console.log('[SearchBar] handleArtistChange', value);
     onInputChange(value, songValue);
   };
   
   const handleSongChange = (value: string) => {
+    console.log('[SearchBar] handleSongChange', value);
     onInputChange(artistValue, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[SearchBar] handleSubmit', { artistValue, songValue });
     onSearchSubmit(artistValue, songValue);
   };
 

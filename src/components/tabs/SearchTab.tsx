@@ -86,10 +86,12 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (artistValue: string, songValue: string) => {
+    console.log('[SearchTab] handleInputChange', { artistValue, songValue });
     dispatch({ type: 'UPDATE_INPUT', artistValue, songValue });
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
+    console.log('[SearchTab] handleSearchSubmit', { artistValue, songValue });
     setLoading(true);
     dispatch({ type: 'SUBMIT_SEARCH', artistValue, songValue });
     setLoading(false);
@@ -120,8 +122,8 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
       <SearchResults
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
-        artist={state.searchedArtist || state.artistQuery}
-        song={state.searchedSong}
+        artist={state.searchedArtist} // Always use searchedArtist
+        song={state.searchedSong}    // Always use searchedSong
         filterArtist={state.artistQuery}
         filterSong={state.songQuery}
         activeArtist={state.selectedArtist}

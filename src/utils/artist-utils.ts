@@ -1,5 +1,5 @@
 // Utility functions for artist-related logic
-import { SongData } from "@/types/song";
+import { ArtistSong } from "@/types/artistSong";
 
 export function extractArtistSlug(artistUrl: string): string | null {
   try {
@@ -11,7 +11,7 @@ export function extractArtistSlug(artistUrl: string): string | null {
   }
 }
 
-export async function fetchArtistSongs(artistPath: string): Promise<SongData[]> {
+export async function fetchArtistSongs(artistPath: string): Promise<ArtistSong[]> {
   if (!artistPath) {
     console.error('Invalid artist path: empty string');
     throw new Error('Invalid artist path');
@@ -30,21 +30,11 @@ export async function fetchArtistSongs(artistPath: string): Promise<SongData[]> 
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
     
-    const data: { title: string; path: string }[] = await resp.json();
+    const data: ArtistSong[] = await resp.json();
     console.log(`Received ${data.length} songs for artist ${artistPath}`);
     
-    // Format artist name from path (e.g., "hillsong-united" -> "Hillsong United")
-    const formattedArtistName = artistPath
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    return data.map(item => ({ 
-      id: `${artistPath}-${item.path}`,
-      title: item.title,
-      artist: formattedArtistName,
-      path: item.path 
-    }));
+    // Return the data as-is (ArtistSong objects with title and path)
+    return data;
   } catch (error) {
     console.error('Error fetching artist songs:', error);
     throw error;
