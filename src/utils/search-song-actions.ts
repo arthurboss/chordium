@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { Song } from '@/types/song';
-import { Song } from '@/types/song';
 import { formatSearchResult, SearchResultItem } from '@/utils/search-results-utils';
 
 export interface UseSongActionsProps {
