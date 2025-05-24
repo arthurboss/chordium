@@ -66,10 +66,13 @@ export abstract class BaseCache<T extends BaseCacheItem> {
       return items;
     }
 
+    // Cache current time for consistent score calculations
+    const now = Date.now();
+
     // Sort by combined score (access count + recency)
     const sortedItems = items.sort((a, b) => {
-      const scoreA = a.accessCount * 0.7 + (a.timestamp / Date.now()) * 0.3;
-      const scoreB = b.accessCount * 0.7 + (b.timestamp / Date.now()) * 0.3;
+      const scoreA = a.accessCount * 0.7 + (a.timestamp / now) * 0.3;
+      const scoreB = b.accessCount * 0.7 + (b.timestamp / now) * 0.3;
       return scoreB - scoreA; // Sort descending, keep highest scores
     });
 
@@ -87,10 +90,13 @@ export abstract class BaseCache<T extends BaseCacheItem> {
     if (cacheSize > this.config.maxSizeBytes) {
       debugLog(`Cache size (${cacheSize} bytes) exceeds limit, cleaning up...`);
       
+      // Cache current time for consistent score calculations
+      const now = Date.now();
+      
       // Sort by score and remove least valuable items
       cache.items.sort((a, b) => {
-        const scoreA = a.accessCount * 0.7 + (a.timestamp / Date.now()) * 0.3;
-        const scoreB = b.accessCount * 0.7 + (b.timestamp / Date.now()) * 0.3;
+        const scoreA = a.accessCount * 0.7 + (a.timestamp / now) * 0.3;
+        const scoreB = b.accessCount * 0.7 + (b.timestamp / now) * 0.3;
         return scoreA - scoreB; // Ascending, remove lowest scores first
       });
       
