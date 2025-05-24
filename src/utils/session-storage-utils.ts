@@ -20,18 +20,19 @@ export function storeChordUrl(artistSlug: string, songSlug: string, url: string)
   try {
     // First, clean up old entries if we've reached the limit
     const sessionKeys = Object.keys(sessionStorage)
-      .filter(k => k.startsWith(CHORD_URL_PREFIX))
+      .filter(k => k.startsWith(CHORD_URL_PREFIX) && !k.endsWith('-timestamp'))
       .sort((a, b) => {
         // Try to get timestamps if they exist
         const timeA = sessionStorage.getItem(`${a}-timestamp`) || '0';
         const timeB = sessionStorage.getItem(`${b}-timestamp`) || '0';
-        return parseInt(timeB) - parseInt(timeA); // Sort by newest first
+        return parseInt(timeA) - parseInt(timeB); // Sort by oldest first
       });
     
-    // If we're at the limit, remove the oldest one
+    // If we're at or over the limit, remove the oldest items
     if (sessionKeys.length >= MAX_CHORD_URLS) {
-      // Remove oldest items beyond our limit
-      sessionKeys.slice(MAX_CHORD_URLS - 1).forEach(oldKey => {
+      // Remove oldest items to make room for the new one
+      const itemsToRemove = sessionKeys.length - MAX_CHORD_URLS + 1;
+      sessionKeys.slice(0, itemsToRemove).forEach(oldKey => {
         sessionStorage.removeItem(oldKey);
         sessionStorage.removeItem(`${oldKey}-timestamp`);
       });

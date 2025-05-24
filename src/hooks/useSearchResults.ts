@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
 import { SearchResultItem } from "@/utils/search-result-item";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
+import { cacheSearchResults, getCachedSearchResults } from "@/utils/search-cache-utils";
 
 /**
  * Custom hook to handle search results fetching and filtering
@@ -54,6 +55,33 @@ export function useSearchResults(
     ) {
       setLoading(true);
       setError(null);
+
+      // Check cache first
+      const cachedResults = getCachedSearchResults(artist || null, song || null);
+      if (cachedResults) {
+        console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
+        // Process cached results
+        if (!artist && song) {
+          // Song-only search
+          setAllSongs(cachedResults);
+          setSongs(cachedResults);
+          setAllArtists([]);
+          setArtists([]);
+        } else {
+          // Artist search - cached results are Artist objects
+          const artistResults = cachedResults as unknown as Artist[];
+          setAllArtists(artistResults);
+          setArtists(artistResults);
+          setAllSongs([]);
+          setSongs([]);
+        }
+        setLoading(false);
+        setHasFetched(true);
+        lastFetchedArtist.current = artist + '|' + song;
+        setShouldContinueFetching(false);
+        return;
+      }
+
       // Choose endpoint based on search type
       let url;
       if (!artist && song) {
@@ -77,6 +105,11 @@ export function useSearchResults(
         })
         .then((data) => {
           console.log('[useSearchResults] Response received:', data);
+          
+          // Cache the results
+          console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
+          cacheSearchResults(artist || null, song || null, data);
+          
           if (!artist && song) {
             // Song-only search - data should be song results
             console.log('[useSearchResults] Processing song-only search, setting songs:', data);

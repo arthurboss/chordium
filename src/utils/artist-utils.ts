@@ -1,5 +1,6 @@
 // Utility functions for artist-related logic
 import { ArtistSong } from "@/types/artistSong";
+import { cacheArtistSongs, getCachedArtistSongs } from "./artist-cache-utils";
 
 export function extractArtistSlug(artistUrl: string): string | null {
   try {
@@ -16,8 +17,15 @@ export async function fetchArtistSongs(artistPath: string): Promise<ArtistSong[]
     console.error('Invalid artist path: empty string');
     throw new Error('Invalid artist path');
   }
-  
-  console.log(`Fetching songs for artist path: ${artistPath}`);
+
+  // Try to get cached results first
+  const cachedSongs = getCachedArtistSongs(artistPath);
+  if (cachedSongs) {
+    console.log(`🎯 CACHE HIT: Using cached songs for artist: ${artistPath} (${cachedSongs.length} songs)`);
+    return cachedSongs;
+  }
+
+  console.log(`🌐 CACHE MISS: Fetching songs for artist path: ${artistPath}`);
   const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
   console.log(`API URL: ${apiUrl}`);
   
@@ -32,6 +40,10 @@ export async function fetchArtistSongs(artistPath: string): Promise<ArtistSong[]
     
     const data: ArtistSong[] = await resp.json();
     console.log(`Received ${data.length} songs for artist ${artistPath}`);
+    
+    // Cache the results for future use
+    console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
+    cacheArtistSongs(artistPath, data);
     
     // Return the data as-is (ArtistSong objects with title and path)
     return data;

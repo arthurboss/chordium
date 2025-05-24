@@ -109,5 +109,27 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/test-setup.ts'],
+      css: true,
+      pool: 'forks',
+      poolOptions: {
+        forks: {
+          singleFork: true,
+        },
+      },
+      // Prevent memory leaks and timeouts
+      testTimeout: 10000,
+      hookTimeout: 10000,
+      teardownTimeout: 5000,
+      // Improve test isolation
+      isolate: true,
+      // Limit memory usage
+      maxConcurrency: 1,
+      // Prevent hanging tests
+      fileParallelism: false,
+    },
   };
 });
