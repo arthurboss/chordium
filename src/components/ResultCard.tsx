@@ -40,15 +40,16 @@ const ResultCard = ({
   const TitleBlock = (
     <div className="min-w-0 flex-1">
       <h3
-        className={compact ? "font-semibold text-sm truncate w-full block" : "font-semibold text-base truncate mb-1 w-full block"}
+        className={`w-full block font-semibold truncate ${compact ? 'text-sm' : 'text-base  mb-1'}`}
+        {...cyAttr(`${icon}-title-${idOrUrl}`)}
         {...cyAttr(`${icon}-title${compact && '-compact'}-${idOrUrl}`)}
         title={title}
       >
         {title}
       </h3>
-      {!compact && subtitle && (
+      {subtitle && (
         <p
-          className={"text-muted-foreground text-sm truncate w-full block"}
+          className={`text-muted-foreground text-${compact ? 'xs' : 'sm'} truncate w-full block`}
           {...cyAttr(`${icon}-subtitle-${idOrUrl}`)}
           title={subtitle}
         >
@@ -106,7 +107,7 @@ const ResultCard = ({
           onClick={() => onView(idOrUrl)}
           {...cyAttr(`${icon}-card-compact-content-${idOrUrl}`)}
         >
-          <Icon className="h-4 w-4 text-chord" />
+          <Icon className="h-6 w-6 text-chord" />
           {TitleBlock}
           {ViewButton}
           {DeleteButton}
