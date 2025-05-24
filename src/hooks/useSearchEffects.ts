@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 import { Artist } from '@/types/artist';
 import { SearchResultItem } from '@/utils/search-result-item';
 import { SearchResultsState, SearchResultsAction } from '@/hooks/useSearchResultsReducer';
-import { ArtistSong } from '@/types/artistSong';
+import { Song } from '@/types/song';
 
 type SearchEffectsProps = {
   loading: boolean;
   error: Error | string | null;
   artists: Artist[];
   songs: SearchResultItem[]; // Add songs from search results
-  artistSongs: ArtistSong[]; // Should be ArtistSong[]
+  artistSongs: Song[]; // Should be Song[]
   artistSongsError: Error | string | null;
   activeArtist: Artist | null;
   hasSearched?: boolean;

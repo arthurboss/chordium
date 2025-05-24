@@ -1,13 +1,13 @@
 import React from 'react';
 import ResultCard from "@/components/ResultCard";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { SearchResultItem } from "@/utils/search-result-item";
 import { formatSearchResult } from "@/utils/search-results-utils";
 import { formatReadableName } from "@/utils/search-grouping";
 
 interface SongItemProps {
   item: SearchResultItem;
-  onView: (song: SongData) => void;
+  onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   style?: React.CSSProperties;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { SearchResultItem } from "@/utils/search-result-item";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import ArtistResults from "@/components/ArtistResults";
 import GroupedSongResults from "@/components/GroupedSongResults";
 import { Artist } from '@/types/artist';
@@ -9,7 +9,7 @@ import SearchResultsSection from "@/components/SearchResultsSection";
 interface SearchResultsLayoutProps {
   artists: Artist[];
   songs: SearchResultItem[];
-  onView: (song: SongData) => void;
+  onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   onArtistSelect?: (artist: Artist) => void;
 }

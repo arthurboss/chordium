@@ -1,4 +1,4 @@
-import { ArtistSong } from "@/types/artistSong";
+import { Song } from "@/types/song";
 
 // Key for storing artist songs cache in localStorage (changed from sessionStorage for persistence)
 const ARTIST_SONGS_CACHE_KEY = 'chordium-artist-songs-cache';
@@ -12,7 +12,7 @@ const CACHE_EXPIRATION_TIME = 4 * 60 * 60 * 1000;
 // Interface for cache items
 interface ArtistCacheItem {
   artistPath: string;
-  songs: ArtistSong[];
+  songs: Song[];
   timestamp: number;
   accessCount: number;
   artistName?: string; // Optional: store artist name for better management
@@ -52,7 +52,7 @@ const saveCache = (cache: ArtistCache): void => {
  */
 export const cacheArtistSongs = (
   artistPath: string,
-  songs: ArtistSong[]
+  songs: Song[]
 ): void => {
   const cache = initializeCache();
   
@@ -103,7 +103,7 @@ export const cacheArtistSongs = (
  * Get cached artist songs if they exist
  * @returns The cached songs or null if not found or expired
  */
-export const getCachedArtistSongs = (artistPath: string): ArtistSong[] | null => {
+export const getCachedArtistSongs = (artistPath: string): Song[] | null => {
   const cache = initializeCache();
   const cacheItem = cache.items.find(item => item.artistPath === artistPath);
   

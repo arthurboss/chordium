@@ -1,4 +1,4 @@
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { SearchResultItem } from "@/utils/search-result-item";
 import { formatSearchResult } from "@/utils/format-search-result";
 import ResultCard from "@/components/ResultCard";
@@ -10,11 +10,11 @@ import '@/components/custom-scrollbar.css';
 
 interface SongsResultProps {
   // For artist-based songs
-  artistSongs?: SongData[];
+  artistSongs?: Song[];
   // For song-only searches
   songs?: SearchResultItem[];
-  onView: (song: SongData | SearchResultItem) => void;
-  onAdd: (song: SongData | SearchResultItem) => void;
+  onView: (song: Song | SearchResultItem) => void;
+  onAdd: (song: Song | SearchResultItem) => void;
   onBack: () => void;
   searchType?: 'artist' | 'song';
 }
@@ -28,23 +28,23 @@ const SongsResult = ({
   searchType = 'artist' 
 }: SongsResultProps) => {
   // Determine which data source to use
-  const displaySongs: (SongData | SearchResultItem)[] = searchType === 'artist' ? artistSongs : songs;
+  const displaySongs: (Song | SearchResultItem)[] = searchType === 'artist' ? artistSongs : songs;
   const isArtistSearch = searchType === 'artist';
 
   // Render a song item for the virtualized list
-  const renderSongItem = useCallback(({ index, style, item }: ListChildComponentProps & { item: SongData | SearchResultItem }) => {
-    // Type guard to check if item is SongData or SearchResultItem
+  const renderSongItem = useCallback(({ index, style, item }: ListChildComponentProps & { item: Song | SearchResultItem }) => {
+    // Type guard to check if item is Song or SearchResultItem
     const isSongData = 'id' in item;
     
     let songTitle: string;
     let songArtist: string;
     
     if (isSongData) {
-      // Handle SongData
+      // Handle Song
       songTitle = item.title;
       songArtist = item.artist;
     } else {
-      // Handle SearchResultItem - convert to SongData for consistent handling
+      // Handle SearchResultItem - convert to Song for consistent handling
       const converted = formatSearchResult(item);
       songTitle = converted.title;
       songArtist = converted.artist;
@@ -88,11 +88,11 @@ const SongsResult = ({
             let songArtist: string;
             
             if (isSongData) {
-              // Handle SongData
+              // Handle Song
               songTitle = song.title;
               songArtist = song.artist;
             } else {
-              // Handle SearchResultItem - convert to SongData for consistent handling
+              // Handle SearchResultItem - convert to Song for consistent handling
               const converted = formatSearchResult(song);
               songTitle = converted.title;
               songArtist = converted.artist;

@@ -1,4 +1,4 @@
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -6,10 +6,10 @@ import { toast } from "@/hooks/use-toast";
  */
 export const handleUpdateSong = (
   content: string,
-  selectedSong: SongData | null,
-  mySongs: SongData[],
-  setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>,
-  setSelectedSong: React.Dispatch<React.SetStateAction<SongData | null>>
+  selectedSong: Song | null,
+  mySongs: Song[],
+  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>,
+  setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   if (!selectedSong) return;
   

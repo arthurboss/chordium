@@ -1,4 +1,4 @@
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -6,10 +6,10 @@ import { toast } from "@/hooks/use-toast";
  */
 export const handleDeleteSong = (
   songId: string,
-  mySongs: SongData[],
-  setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>,
-  selectedSong: SongData | null,
-  setSelectedSong: React.Dispatch<React.SetStateAction<SongData | null>>
+  mySongs: Song[],
+  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>,
+  selectedSong: Song | null,
+  setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   const songToDelete = mySongs.find(song => song.id === songId);
   if (!songToDelete) return;

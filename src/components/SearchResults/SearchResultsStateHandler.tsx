@@ -1,13 +1,10 @@
 import React from 'react';
-import { ArtistSong } from '@/types/artistSong';
+import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
 import { SearchResultItem } from '@/utils/search-result-item';
 import SearchResultsLayout from '@/components/SearchResultsLayout';
 import SearchLoadingState from './SearchLoadingState';
 import SearchErrorState from './SearchErrorState';
-import ArtistSongsLoadingState from './ArtistSongsLoadingState';
-import ArtistSongsErrorState from './ArtistSongsErrorState';
-import ArtistSongsView from './ArtistSongsView';
 import SongsView from './SongsView';
 
 // Define our UI state type based on the determineUIState function output
@@ -16,8 +13,7 @@ type UIState =
   | { state: 'error'; error: Error }
   | { state: 'artist-songs-loading'; activeArtist: Artist | null }
   | { state: 'artist-songs-error'; artistSongsError: string; activeArtist: Artist | null }
-  | { state: 'artist-songs-view'; activeArtist: Artist; hasSongs: boolean }
-  | { state: 'songs-view'; songs: SearchResultItem[]; hasSongs: boolean }
+  | { state: 'songs-view'; activeArtist?: Artist; artistSongs?: Song[]; songs?: SearchResultItem[]; searchType: 'artist' | 'song'; hasSongs: boolean }
   | { state: 'hasSearched'; hasSongs: boolean }
   | { state: 'default' };
 
@@ -25,9 +21,9 @@ interface SearchResultsStateHandlerProps {
   stateData: UIState;
   artists: Artist[];
   songs: SearchResultItem[];
-  filteredSongs: ArtistSong[];
+  filteredSongs: Song[];
   filterSong: string;
-  onView: (songData: ArtistSong | SearchResultItem) => void;
+  onView: (songData: Song | SearchResultItem) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
 }
@@ -50,35 +46,21 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
       return <SearchErrorState error={stateData.error!} />;
     
     case 'artist-songs-loading':
-      return <ArtistSongsLoadingState activeArtist={stateData.activeArtist!} />;
+      return <SearchLoadingState />;
     
     case 'artist-songs-error':
-      return (
-        <ArtistSongsErrorState 
-          activeArtist={stateData.activeArtist!} 
-          error={stateData.artistSongsError!} 
-        />
-      );
-    
-    case 'artist-songs-view':
-      return (
-        <ArtistSongsView
-          activeArtist={stateData.activeArtist!}
-          filteredSongs={filteredSongs}
-          filterSong={filterSong}
-          onView={onView}
-          onAdd={onAdd}
-        />
-      );
+      return <SearchErrorState error={new Error(stateData.artistSongsError!)} />;
     
     case 'songs-view':
       return (
         <SongsView
-          songs={stateData.songs}
+          activeArtist={stateData.activeArtist}
+          filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined}
+          songs={stateData.searchType === 'song' ? stateData.songs : undefined}
           filterSong={filterSong}
           onView={onView}
           onAdd={onAdd}
-          searchType="song"
+          searchType={stateData.searchType}
         />
       );
     

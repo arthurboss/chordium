@@ -1,4 +1,4 @@
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 export const handleSaveNewSong = (
   content: string,
   title: string,
-  setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>,
+  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>,
   navigate: NavigateFunction,
   setActiveTab: (tab: string) => void,
   artist?: string,
@@ -25,7 +25,7 @@ export const handleSaveNewSong = (
     return;
   }
   
-  const newSong: SongData = {
+  const newSong: Song = {
     id: `song-${Date.now()}`,
     title: title || "Untitled Song",
     path: content,

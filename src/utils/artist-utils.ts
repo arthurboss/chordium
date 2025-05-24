@@ -1,5 +1,5 @@
 // Utility functions for artist-related logic
-import { ArtistSong } from "@/types/artistSong";
+import { Song } from "@/types/song";
 import { cacheArtistSongs, getCachedArtistSongs } from "./artist-cache-utils";
 
 export function extractArtistSlug(artistUrl: string): string | null {
@@ -12,7 +12,7 @@ export function extractArtistSlug(artistUrl: string): string | null {
   }
 }
 
-export async function fetchArtistSongs(artistPath: string): Promise<ArtistSong[]> {
+export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   if (!artistPath) {
     console.error('Invalid artist path: empty string');
     throw new Error('Invalid artist path');
@@ -38,14 +38,14 @@ export async function fetchArtistSongs(artistPath: string): Promise<ArtistSong[]
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
     
-    const data: ArtistSong[] = await resp.json();
+    const data: Song[] = await resp.json();
     console.log(`Received ${data.length} songs for artist ${artistPath}`);
     
     // Cache the results for future use
     console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
     cacheArtistSongs(artistPath, data);
     
-    // Return the data as-is (ArtistSong objects with title and path)
+    // Return the data as-is (Song objects with title and path)
     return data;
   } catch (error) {
     console.error('Error fetching artist songs:', error);

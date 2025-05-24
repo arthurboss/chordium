@@ -1,5 +1,5 @@
 import React from 'react';
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { Artist } from '@/types/artist';
 import { useSearchResults } from '@/hooks/useSearchResults';
 import { useArtistSongs } from '@/hooks/useArtistSongs';
@@ -10,7 +10,7 @@ import { useArtistSelection } from '@/hooks/useArtistSelection';
 import './custom-scrollbar.css';
 
 interface SearchResultsProps {
-  setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   artist: string;
   song: string;

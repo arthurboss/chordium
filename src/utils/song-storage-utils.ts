@@ -1,4 +1,4 @@
-import { SongData } from '@/types/song';
+import { Song } from '@/types/song';
 
 // Key for storing songs in localStorage
 const SONGS_STORAGE_KEY = 'chordium-songs';
@@ -6,7 +6,7 @@ const SONGS_STORAGE_KEY = 'chordium-songs';
 /**
  * Get songs from localStorage
  */
-export const getSongs = (): SongData[] => {
+export const getSongs = (): Song[] => {
   try {
     const songs = localStorage.getItem(SONGS_STORAGE_KEY);
     return songs ? JSON.parse(songs) : [];
@@ -19,7 +19,7 @@ export const getSongs = (): SongData[] => {
 /**
  * Save songs to localStorage
  */
-export const saveSongs = (songs: SongData[]): void => {
+export const saveSongs = (songs: Song[]): void => {
   try {
     localStorage.setItem(SONGS_STORAGE_KEY, JSON.stringify(songs));
   } catch (e) {
@@ -30,7 +30,7 @@ export const saveSongs = (songs: SongData[]): void => {
 /**
  * Add a new song to the saved songs
  */
-export const addSong = (song: SongData): void => {
+export const addSong = (song: Song): void => {
   const songs = getSongs();
   saveSongs([song, ...songs]);
 };
@@ -38,7 +38,7 @@ export const addSong = (song: SongData): void => {
 /**
  * Update an existing song
  */
-export const updateSong = (updatedSong: SongData): void => {
+export const updateSong = (updatedSong: Song): void => {
   const songs = getSongs();
   const updatedSongs = songs.map(song => 
     song.id === updatedSong.id ? updatedSong : song
@@ -58,7 +58,7 @@ export const deleteSong = (songId: string): void => {
 /**
  * Get a single song by ID
  */
-export const getSongById = (songId: string): SongData | undefined => {
+export const getSongById = (songId: string): Song | undefined => {
   const songs = getSongs();
   return songs.find(song => song.id === songId);
 };

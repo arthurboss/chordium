@@ -1,9 +1,9 @@
 // Utility to filter songs by title (case-insensitive)
-import { SongData } from '@/types/song';
+import { Song } from '@/types/song';
 import { normalizeForSearchUnicode } from './normalize-for-search';
 import { normalizePathForComparison } from './normalize-path-for-comparison';
 
-export function filterSongsByTitle(songs: SongData[], filter: string): SongData[] {
+export function filterSongsByTitle(songs: Song[], filter: string): Song[] {
   if (!filter) return songs;
   
   // Normalize the user's filter text (remove special chars, etc.)

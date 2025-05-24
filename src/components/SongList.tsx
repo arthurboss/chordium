@@ -1,10 +1,10 @@
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 
 interface SongListProps {
-  songs: SongData[];
-  onSongSelect: (song: SongData) => void;
+  songs: Song[];
+  onSongSelect: (song: Song) => void;
   onDeleteSong: (songId: string) => void;
   onUploadClick: () => void;
 }

@@ -2,11 +2,11 @@ import { useState, useReducer } from "react";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { Artist } from "@/types/artist";
 
 interface SearchTabProps {
-  setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>;
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
 }
 

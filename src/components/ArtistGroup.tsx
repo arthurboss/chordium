@@ -1,6 +1,6 @@
 import React from "react";
 import { SearchResultItem } from "@/utils/search-result-item";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import VirtualizedListWithArrow from "@/components/ui/VirtualizedListWithArrow";
 import SongItem from "@/components/SongItem";
 import { ListChildComponentProps } from "react-window";
@@ -9,7 +9,7 @@ import { CARD_HEIGHTS } from "@/constants/ui-constants";
 interface ArtistGroupProps {
   artist: string;
   songs: SearchResultItem[];
-  onView: (song: SongData) => void;
+  onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   virtualized?: boolean;
 }

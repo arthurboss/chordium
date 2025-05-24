@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArtistSong } from "@/types/artistSong";
+import { Song } from "@/types/song";
 import { Artist } from "@/types/artist";
 import { fetchArtistSongs } from "@/utils/artist-utils";
 
@@ -8,7 +8,7 @@ import { fetchArtistSongs } from "@/utils/artist-utils";
  * Returns: { songs, loading, error }
  */
 export function useArtistSongs(artist: Artist | null) {
-  const [songs, setSongs] = useState<ArtistSong[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

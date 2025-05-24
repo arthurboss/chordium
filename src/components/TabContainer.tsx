@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import SongList from "./SongList";
 import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
@@ -16,11 +16,11 @@ import { cyAttr } from "@/utils/test-utils";
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  mySongs: SongData[];
-  setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>;
-  selectedSong: SongData | null;
-  setSelectedSong: React.Dispatch<React.SetStateAction<SongData | null>>;
-  demoSong: SongData | null;
+  mySongs: Song[];
+  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
+  selectedSong: Song | null;
+  setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
+  demoSong: Song | null;
 }
 
 const TabContainer = ({ 
@@ -55,7 +55,7 @@ const TabContainer = ({
     }
   };
   
-  const handleSongSelect = (song: SongData) => {
+  const handleSongSelect = (song: Song) => {
     setSelectedSong(song);
     navigate(`/my-songs?song=${song.id}`);
   };

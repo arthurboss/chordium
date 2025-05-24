@@ -1,20 +1,19 @@
 import { useReducer, useMemo, useEffect } from 'react';
 import { Artist } from '@/types/artist';
-import { ArtistSong } from '@/types/artistSong';
-import { SongData } from '@/types/song';
+import { Song } from '@/types/song';
 import { SearchResultItem } from '@/utils/search-result-item';
 import { useSongActions } from '@/utils/search-song-actions';
 
-// Helper function to convert ArtistSong to SearchResultItem
-function artistSongToSearchResultItem(song: ArtistSong): SearchResultItem {
+// Helper function to convert Song to SearchResultItem
+function artistSongToSearchResultItem(song: Song): SearchResultItem {
   return {
     title: song.title,
     url: song.path
   };
 }
 
-// Helper function to filter ArtistSong[] by title
-function filterArtistSongsByTitle(songs: ArtistSong[], filter: string): ArtistSong[] {
+// Helper function to filter Song[] by title
+function filterArtistSongsByTitle(songs: Song[], filter: string): Song[] {
   if (!filter) return songs;
   return songs.filter(song => 
     song.title.toLowerCase().includes(filter.toLowerCase())
@@ -29,10 +28,10 @@ export interface SearchResultsState {
   artistSongsLoading: boolean;
   artistSongsError: string | null;
   activeArtist: Artist | null;
-  artistSongs: ArtistSong[];
+  artistSongs: Song[];
   artists: Artist[];
   songs: SearchResultItem[];
-  filteredArtistSongs: ArtistSong[];
+  filteredArtistSongs: Song[];
 }
 
 // Define action types
@@ -42,7 +41,7 @@ export type SearchResultsAction =
   | { type: 'SEARCH_ERROR'; error: Error }
   | { type: 'SET_HAS_SEARCHED'; value: boolean }
   | { type: 'ARTIST_SONGS_START'; artist: Artist }
-  | { type: 'ARTIST_SONGS_SUCCESS'; songs: ArtistSong[] }
+  | { type: 'ARTIST_SONGS_SUCCESS'; songs: Song[] }
   | { type: 'ARTIST_SONGS_ERROR'; error: string }
   | { type: 'CLEAR_ARTIST'; }
   | { type: 'FILTER_ARTIST_SONGS'; filter: string };
@@ -160,8 +159,10 @@ export function determineUIState(state: SearchResultsState) {
   
   if (state.activeArtist && state.artistSongs.length > 0) {
     return { 
-      state: 'artist-songs-view' as const, 
-      activeArtist: state.activeArtist, 
+      state: 'songs-view' as const, 
+      activeArtist: state.activeArtist,
+      artistSongs: state.artistSongs,
+      searchType: 'artist' as const,
       hasSongs: true 
     };
   }
@@ -171,6 +172,7 @@ export function determineUIState(state: SearchResultsState) {
     return { 
       state: 'songs-view' as const, 
       songs: state.songs,
+      searchType: 'song' as const,
       hasSongs: true 
     };
   }
@@ -185,7 +187,7 @@ export function determineUIState(state: SearchResultsState) {
 // Custom hook that encapsulates the reducer and provides actions
 export function useSearchResultsReducer(
   filterSong: string,
-  setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>
 ) {
   const [state, dispatch] = useReducer(searchResultsReducer, initialState);
   
@@ -198,7 +200,7 @@ export function useSearchResultsReducer(
   // Generate a compatible array of SearchResultItems for the song actions
   const memoizedSongs = useMemo(() => {
     if (state.activeArtist) {
-      // Convert ArtistSong[] to SearchResultItem[]
+      // Convert Song[] to SearchResultItem[]
       return state.artistSongs.map(artistSongToSearchResultItem);
     } else {
       return state.songs;

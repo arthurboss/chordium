@@ -32,3 +32,8 @@
 .songs-view-height {
   height: 60vh;
 }
+
+/* Virtualized item wrapper */
+.virtualized-item {
+  /* This allows the style prop from react-window to work correctly */
+}

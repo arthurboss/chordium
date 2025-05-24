@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
 import { ListChildComponentProps } from "react-window";
 import { SearchResultItem } from "@/utils/search-result-item";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { groupSongsByArtist, GroupedSongs } from "@/utils/search-grouping";
 import ArtistGroup from "@/components/ArtistGroup";
 import VirtualizedListWithArrow from "@/components/ui/VirtualizedListWithArrow";
 
 interface GroupedSongResultsProps {
   songs: SearchResultItem[];
-  onView: (song: SongData) => void;
+  onView: (song: Song) => void;
   onDelete: (songId: string) => void;
 }
 
