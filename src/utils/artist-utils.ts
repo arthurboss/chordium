@@ -1,6 +1,6 @@
 // Utility functions for artist-related logic
 import { Song } from "@/types/song";
-import { cacheArtistSongs, getCachedArtistSongs } from "./artist-cache-utils";
+import { cacheArtistSongs, getCachedArtistSongs } from "@/cache/implementations/artist-cache";
 
 export function extractArtistSlug(artistUrl: string): string | null {
   try {

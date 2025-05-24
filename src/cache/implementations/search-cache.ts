@@ -1,4 +1,4 @@
-import { SearchResultItem } from "./search-result-item";
+import { SearchResultItem } from "../../utils/search-result-item";
 
 // Environment-based logging utility to prevent memory leaks in tests
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';

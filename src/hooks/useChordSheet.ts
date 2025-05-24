@@ -7,7 +7,7 @@ import {
   clearExpiredChordSheetCache, 
   getChordSheetWithRefresh,
   CachedChordSheetData
-} from '@/utils/chord-sheet-cache-utils';
+} from '@/cache/implementations/chord-sheet-cache';
 
 export interface ChordSheetData {
   content: string;
