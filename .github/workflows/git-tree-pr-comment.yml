@@ -8,6 +8,7 @@ jobs:
   update-pr-comment:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: Checkout repository
@@ -21,7 +22,6 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
         run: |
-          # Run the external script
           ./.github/scripts/generate-file-tree.sh
 
       - name: Debug file tree output
@@ -33,7 +33,6 @@ jobs:
       - name: Store output
         id: store-output
         run: |
-          # Store in step output using heredoc for proper multi-line handling
           {
             echo "content<<EOF"
             cat comment_content.md
