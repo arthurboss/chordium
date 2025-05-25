@@ -55,6 +55,88 @@ done <<< "$FILES"
 
 echo "🔍 Found ${#file_data[@]} files and ${#folders[@]} directories."
 
+# Function to render a markdown tree recursively
+render_tree() {
+  local current_path="$1"
+  local prefix="$2"
+  local is_last_child="$3"
+  local -a files_in_dir=()
+  local -a subdirs=()
+
+  # Collect files at current level
+  for file in $(printf '%s\n' "${!file_data[@]}" | sort); do
+    if [[ -z "$current_path" ]]; then
+      if [[ "$file" != *"/"* ]]; then
+        files_in_dir+=("$file")
+      fi
+    else
+      if [[ "$file" == "$current_path"/* ]]; then
+        relative_path="${file#$current_path/}"
+        if [[ "$relative_path" != *"/"* ]]; then
+          files_in_dir+=("$file")
+        fi
+      fi
+    fi
+  done
+
+  # Collect subdirectories at current level
+  for folder in $(printf '%s\n' "${!folders[@]}" | sort); do
+    if [[ -z "$current_path" ]]; then
+      if [[ "$folder" != *"/"* ]]; then
+        subdirs+=("$folder")
+      fi
+    else
+      if [[ "$folder" == "$current_path"/* ]]; then
+        relative_folder="${folder#$current_path/}"
+        if [[ "$relative_folder" != *"/"* ]]; then
+          subdirs+=("$folder")
+        fi
+      fi
+    fi
+  done
+
+  local total_items=$((${#subdirs[@]} + ${#files_in_dir[@]}))
+  local idx=0
+
+  # Render subdirectories first
+  for subdir in "${subdirs[@]}"; do
+    idx=$((idx+1))
+    local folder_name=$(basename "$subdir")
+    local folder_icon=$(get_folder_icon "$subdir")
+    local is_last=$([[ $idx -eq $total_items ]] && echo "true" || echo "false")
+    local branch="├── "
+    local next_prefix="$prefix│   "
+    if [[ "$is_last" == "true" && ${#files_in_dir[@]} -eq 0 ]]; then
+      branch="└── "
+      next_prefix="$prefix    "
+    fi
+    echo "${prefix}${branch}${folder_icon} **${folder_name}/**"
+    render_tree "$subdir" "$next_prefix" "false"
+  done
+
+  # Render files in current directory
+  for file in "${files_in_dir[@]}"; do
+    idx=$((idx+1))
+    local filename=$(basename "$file")
+    local status="${file_data[$file]}"
+    local status_icon
+    case "$status" in
+      "added") status_icon="✅" ;;
+      "removed") status_icon="❌" ;;
+      "modified") status_icon="⚠️" ;;
+      "renamed") status_icon="🔄" ;;
+      *) status_icon="📝" ;;
+    esac
+    local file_icon=$(get_file_icon "$file")
+    local hash=$(echo -n "$file" | md5sum | cut -c1-8 2>/dev/null || echo "12345678")
+    local branch="├── "
+    if [[ $idx -eq $total_items ]]; then
+      branch="└── "
+    fi
+    echo "${prefix}${branch}${status_icon} ${file_icon} [\`$filename\`]($GITHUB_SERVER_URL/$REPOSITORY/pull/$PR_NUMBER/files#diff-$hash)"
+  done
+}
+
 # Generate PR comment content
 echo "📝 Generating comment content..."
 {
@@ -62,16 +144,13 @@ echo "📝 Generating comment content..."
   echo ""
   echo "_Automatically generated file tree • Click folders to expand/collapse_"
   echo ""
-
   echo "### File Tree"
-  for file in "${!file_data[@]}"; do
-    STATUS="${file_data[$file]}"
-    echo "- $STATUS $file"
-  done
-
+  echo '\`\`\`'
+  render_tree "" "" "false"
+  echo '\`\`\`'
   echo ""
   echo "---"
-  echo "_Last updated: $(date '+%Y-%m-%d %H:%M:%S UTC')_"
+  echo "_Last updated: $(TZ=Europe/Berlin date '+%Y-%m-%d %H:%M:%S %Z')_"
 } > comment_content.md
 
 # Debug: Verify final output before posting comment
