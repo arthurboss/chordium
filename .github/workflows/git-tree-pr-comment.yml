@@ -10,21 +10,31 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Fetch changed files from PR
+        id: pr-files
+        run: |
+          FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" | \
+          jq -r '.[] | "\(.status) \(.filename)"')
 
-      - name: Get list of changed files with status
+          echo "files=$FILES" >> $GITHUB_ENV
+
+      - name: Format file tree with icons
         run: |
           echo "**Updated File Tree of Changed Files:**" > file_tree.txt
           echo "_(Automatically generated upon new commits)_" >> file_tree.txt
           echo '```' >> file_tree.txt
 
-          git diff --name-status origin/main..HEAD | awk '{ 
-            if ($1 == "A") icon="✅"; 
-            else if ($1 == "D") icon="❌"; 
-            else icon="⚠️"; 
-            print icon, "["$2"](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/files#diff-"substr(sha1($2),1,8)) 
-          }' >> file_tree.txt
+          while read -r line; do
+            STATUS=$(echo "$line" | awk '{print $1}')
+            FILE=$(echo "$line" | awk '{print $2}')
+            
+            if [[ "$STATUS" == "added" ]]; then ICON="✅"; fi
+            if [[ "$STATUS" == "removed" ]]; then ICON="❌"; fi
+            if [[ "$STATUS" == "modified" ]]; then ICON="⚠️"; fi
+            
+            echo "$ICON [$FILE](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/files#diff-$(echo -n $FILE | sha1sum | cut -c1-8))" >> file_tree.txt
+          done <<< "$FILES"
 
           echo '```' >> file_tree.txt
 
