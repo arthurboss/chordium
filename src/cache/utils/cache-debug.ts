@@ -1,6 +1,6 @@
 // Debug utilities for cache testing
-import { inspectSearchCache, clearSearchCache } from "./search-cache-utils";
-import { inspectArtistCache, clearArtistSongsCache } from "./artist-cache-utils";
+import { inspectSearchCache, clearSearchCache } from "../implementations/search-cache";
+import { inspectArtistCache, clearArtistSongsCache } from "../implementations/artist-cache";
 
 export const debugCache = () => {
   console.log('=== CACHE DEBUG ===');

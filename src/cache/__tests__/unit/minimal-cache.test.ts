@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { generateCacheKey } from '../../search-cache-utils';
+import { generateCacheKey } from '../../implementations/search-cache';
 
 // Mock localStorage to prevent any potential memory issues
 const mockStorage = new Map<string, string>();

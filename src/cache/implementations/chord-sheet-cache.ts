@@ -9,10 +9,8 @@ const MAX_CACHE_ITEMS = 30;
 // Cache expiration time in milliseconds (24 hours)
 const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 
-// Type for our cached chord sheet data
-export type CachedChordSheetData = Omit<ChordSheetData, 'loading' | 'error'> & {
-  timestamp?: number;
-};
+// Import type from centralized types file
+import type { CachedChordSheetData } from '../types';
 
 // Interface for cache items
 interface CacheItem {
@@ -30,7 +28,7 @@ interface ChordSheetCache {
 /**
  * Generate a cache key based on artist and song
  */
-export const generateCacheKey = (artist: string | null, song: string | null): string => {
+export const generateChordSheetCacheKey = (artist: string | null, song: string | null): string => {
   // Clean and normalize inputs
   const cleanArtist = artist ? artist.trim().toLowerCase() : null;
   const cleanSong = song ? song.trim().toLowerCase() : null;
@@ -94,7 +92,7 @@ export const cacheChordSheet = (
   data: CachedChordSheetData
 ): void => {
   const cache = initializeCache();
-  const key = generateCacheKey(artist, song);
+  const key = generateChordSheetCacheKey(artist, song);
   
   // Look for existing entry to preserve access count
   const existingItem = cache.items.find(item => item.key === key);
@@ -145,7 +143,7 @@ export const cacheChordSheet = (
  */
 export const getCachedChordSheet = (artist: string | null, song: string | null): CachedChordSheetData | null => {
   const cache = initializeCache();
-  const key = generateCacheKey(artist, song);
+  const key = generateChordSheetCacheKey(artist, song);
   const cacheItem = cache.items.find(item => item.key === key);
   
   if (!cacheItem) return null;

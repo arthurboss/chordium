@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
 import { SearchResultItem } from "@/utils/search-result-item";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
-import { cacheSearchResults, getCachedSearchResults } from "@/utils/search-cache-utils";
+import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
 
 /**
  * Custom hook to handle search results fetching and filtering

@@ -1,4 +1,4 @@
-name: E2E Tests (Non-Cache)
+name: Cache E2E Tests
 on:
   push:
     branches: ['*']
@@ -7,11 +7,11 @@ on:
     types: [opened, synchronize, reopened]
 
 concurrency:
-  group: e2e-non-cache-${{ github.ref }}
+  group: cache-e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  e2e:
+  cache-e2e:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -40,7 +40,7 @@ jobs:
           npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
           npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
       
-      - name: Cypress run (excluding cache tests)
+      - name: Cache E2E Tests
         uses: cypress-io/github-action@v6
         with:
           start: npm run dev
@@ -50,27 +50,27 @@ jobs:
           config-file: cypress.config.cjs
           record: false
           install: false
-          spec: 'cypress/e2e/!(cache)/**/*.cy.ts,cypress/e2e/!(cache-e2e*).cy.ts'
+          spec: 'cypress/e2e/cache/artist-search.cy.ts,cypress/e2e/cache/song-search.cy.ts,cypress/e2e/cache/combined-search.cy.ts,cypress/e2e/cache/cache-management.cy.ts'
         env:
           NODE_OPTIONS: "--experimental-vm-modules"
       
-      - name: Upload screenshots on failure
+      - name: Upload cache test screenshots on failure
         uses: actions/upload-artifact@v4.6.2
         if: failure()
         with:
-          name: non-cache-cypress-screenshots
+          name: cache-cypress-screenshots
           path: cypress/screenshots
           
-      - name: Upload videos
+      - name: Upload cache test videos
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
-          name: non-cache-cypress-videos
+          name: cache-cypress-videos
           path: cypress/videos
 
-  visual-testing:
+  cache-visual-testing:
     runs-on: ubuntu-latest
-    needs: e2e
+    needs: cache-e2e
     if: github.event_name == 'pull_request' && failure()
     permissions:
       contents: write
@@ -82,8 +82,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Check if non-cache-cypress-screenshots artifact exists
-        id: check-artifact
+      - name: Check if cache-cypress-screenshots artifact exists
+        id: check-cache-artifact
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -93,17 +93,17 @@ jobs:
               repo: context.repo.repo,
               run_id: context.runId
             });
-            return artifacts.data.artifacts.some(artifact => artifact.name === 'non-cache-cypress-screenshots');
+            return artifacts.data.artifacts.some(artifact => artifact.name === 'cache-cypress-screenshots');
 
-      - name: Download test artifacts
-        if: steps.check-artifact.outputs.result == 'true'
+      - name: Download cache test artifacts
+        if: steps.check-cache-artifact.outputs.result == 'true'
         uses: actions/download-artifact@v4.3.0
         with:
-          name: non-cache-cypress-screenshots
+          name: cache-cypress-screenshots
           path: cypress/screenshots
           
-      - name: Comment test failures on PR
-        if: steps.check-artifact.outputs.result == 'true'
+      - name: Comment cache test failures on PR
+        if: steps.check-cache-artifact.outputs.result == 'true'
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -112,24 +112,28 @@ jobs:
             const path = require('path');
             
             const screenshotDir = 'cypress/screenshots';
-            let comment = '## 🧪 E2E Test Failures (Non-Cache)\n\n';
+            let comment = '## 🔄 Cache E2E Test Failures\n\n';
             
             if (fs.existsSync(screenshotDir)) {
               const files = fs.readdirSync(screenshotDir);
               if (files.length > 0) {
-                comment += 'Non-cache E2E tests failed. Screenshots have been uploaded as artifacts.\n\n';
-                comment += '**Failed tests:**\n';
+                comment += 'Cache-related E2E tests failed. Screenshots have been uploaded as artifacts.\n\n';
+                comment += '**Failed cache tests:**\n';
                 files.forEach(file => {
-                  if (!file.includes('cache')) {
+                  if (file.includes('cache')) {
                     comment += `- ${file}\n`;
                   }
                 });
-                comment += '\n💡 **Tip:** These tests cover general application functionality excluding cache-specific features.\n';
+                comment += '\n💡 **Tip:** Cache E2E tests verify that search results are properly cached and reused. Check if:\n';
+                comment += '- Cache is being populated after searches\n';
+                comment += '- Cache keys are unique for different search types\n';
+                comment += '- Cache expiration is working correctly\n';
+                comment += '- Corrupted cache data is handled gracefully\n';
               } else {
-                comment += 'E2E tests failed but no screenshots were captured.\n';
+                comment += 'Cache E2E tests failed but no screenshots were captured.\n';
               }
             } else {
-              comment += 'E2E tests failed but no screenshot directory found.\n';
+              comment += 'Cache E2E tests failed but no screenshot directory found.\n';
             }
             
             github.rest.issues.createComment({

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLastSearchQuery } from '@/utils/search-cache-utils';
+import { getLastSearchQuery } from '@/cache/implementations/search-cache';
 
 /**
  * Hook to manage navigation between pages with state preservation
