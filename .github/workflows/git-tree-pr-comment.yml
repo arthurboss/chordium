@@ -10,37 +10,224 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Fetch changed files from PR
-        id: pr-files
+      - name: Generate PR file tree comment
+        id: generate-comment
         run: |
+          # Fetch changed files from PR API
           FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" | \
-          jq -r '.[] | "\(.status) \(.filename)"')
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" | \
+            jq -r '.[] | "\(.status) \(.filename)"')
 
-          echo "files=$FILES" >> $GITHUB_ENV
-
-      - name: Format file tree with icons
-        run: |
-          echo "**Updated File Tree of Changed Files:**" > file_tree.txt
-          echo "_(Automatically generated upon new commits)_" >> file_tree.txt
-          echo '```' >> file_tree.txt
-
-          while read -r line; do
-            STATUS=$(echo "$line" | awk '{print $1}')
-            FILE=$(echo "$line" | awk '{print $2}')
+          # Function to get file type icon based on extension
+          get_file_icon() {
+            local file="$1"
+            local ext="${file##*.}"
+            local basename="${file##*/}"
             
-            if [[ "$STATUS" == "added" ]]; then ICON="✅"; fi
-            if [[ "$STATUS" == "removed" ]]; then ICON="❌"; fi
-            if [[ "$STATUS" == "modified" ]]; then ICON="⚠️"; fi
+            case "$basename" in
+              "package.json"|"package-lock.json"|"yarn.lock") echo "📦" ;;
+              "README.md"|"*.md") echo "📝" ;;
+              "Dockerfile"|"docker-compose.yml") echo "🐳" ;;
+              ".gitignore"|".env"*) echo "⚙️" ;;
+            esac
             
-            echo "$ICON [$FILE](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/files#diff-$(echo -n $FILE | sha1sum | cut -c1-8))" >> file_tree.txt
+            case "$ext" in
+              "js"|"jsx") echo "🟨" ;;
+              "ts"|"tsx") echo "🟦" ;;
+              "py") echo "🐍" ;;
+              "html") echo "🌐" ;;
+              "css"|"scss"|"sass") echo "🎨" ;;
+              "json") echo "📋" ;;
+              "yml"|"yaml") echo "⚙️" ;;
+              "md") echo "📝" ;;
+              "png"|"jpg"|"jpeg"|"gif"|"svg") echo "🖼️" ;;
+              "test.js"|"test.ts"|"spec.js"|"spec.ts") echo "🧪" ;;
+              "cy.ts"|"cy.js") echo "🌐" ;;
+              *) echo "📄" ;;
+            esac
+          }
+
+          # Build tree structure
+          declare -A folders
+          declare -A file_data
+          
+          # Parse files and organize by directory
+          while IFS= read -r line; do
+            if [ -n "$line" ]; then
+              STATUS=$(echo "$line" | awk '{print $1}')
+              FILE=$(echo "$line" | awk '{print $2}')
+              
+              # Store file data
+              file_data["$FILE"]="$STATUS"
+              
+              # Extract directory path
+              if [[ "$FILE" == *"/"* ]]; then
+                DIR=$(dirname "$FILE")
+                folders["$DIR"]=1
+                
+                # Also mark parent directories
+                while [[ "$DIR" == *"/"* ]]; do
+                  DIR=$(dirname "$DIR")
+                  folders["$DIR"]=1
+                done
+              fi
+            fi
           done <<< "$FILES"
+          
+          # Function to get folder icon
+          get_folder_icon() {
+            local folder="$1"
+            case "$folder" in
+              "src"*) echo "📁" ;;
+              "test"*|"tests"*|"__tests__"*) echo "🧪" ;;
+              "docs"*|"doc"*) echo "📚" ;;
+              "public"*|"assets"*|"static"*) echo "🌐" ;;
+              "components"*) echo "🧩" ;;
+              "utils"*|"helpers"*) echo "🔧" ;;
+              "types"*) echo "📝" ;;
+              "styles"*|"css"*) echo "🎨" ;;
+              "config"*) echo "⚙️" ;;
+              "scripts"*) echo "📜" ;;
+              ".github"*) echo "🔧" ;;
+              "node_modules"*) echo "📦" ;;
+              *) echo "📂" ;;
+            esac
+          }
+          
+          # Function to render tree recursively
+          render_tree() {
+            local current_path="$1"
+            local indent="$2"
+            local files_in_dir=()
+            local subdirs=()
+            
+            # Collect files and subdirectories at current level
+            for file in $(printf '%s\n' "${!file_data[@]}" | sort); do
+              if [[ "$file" == "$current_path"/* ]] || [[ -z "$current_path" && "$file" != *"/"* ]]; then
+                if [[ -z "$current_path" ]]; then
+                  relative_path="$file"
+                else
+                  relative_path="${file#$current_path/}"
+                fi
+                
+                if [[ "$relative_path" != *"/"* ]]; then
+                  files_in_dir+=("$file")
+                fi
+              fi
+            done
+            
+            # Collect subdirectories
+            for folder in $(printf '%s\n' "${!folders[@]}" | sort); do
+              if [[ "$folder" == "$current_path"/* ]] || [[ -z "$current_path" && "$folder" != *"/"* ]]; then
+                if [[ -z "$current_path" ]]; then
+                  relative_folder="$folder"
+                else
+                  relative_folder="${folder#$current_path/}"
+                fi
+                
+                if [[ "$relative_folder" != *"/"* ]]; then
+                  subdirs+=("$folder")
+                fi
+              fi
+            done
+            
+            # Render subdirectories first
+            for subdir in "${subdirs[@]}"; do
+              local folder_name
+              if [[ -z "$current_path" ]]; then
+                folder_name="$subdir"
+              else
+                folder_name="${subdir#$current_path/}"
+              fi
+              
+              local folder_icon=$(get_folder_icon "$subdir")
+              local files_count=0
+              
+              # Count files in this directory (recursively)
+              for file in "${!file_data[@]}"; do
+                if [[ "$file" == "$subdir"/* ]]; then
+                  ((files_count++))
+                fi
+              done
+              
+              echo "${indent}<details>"
+              echo "${indent}<summary>$folder_icon <strong>$folder_name/</strong> <em>($files_count files)</em></summary>"
+              echo ""
+              render_tree "$subdir" "$indent  "
+              echo "${indent}</details>"
+              echo ""
+            done
+            
+            # Render files in current directory
+            for file in "${files_in_dir[@]}"; do
+              local filename
+              if [[ -z "$current_path" ]]; then
+                filename="$file"
+              else
+                filename="${file#$current_path/}"
+              fi
+              
+              local status="${file_data[$file]}"
+              local status_icon
+              case "$status" in
+                "added") status_icon="✅" ;;
+                "removed") status_icon="❌" ;;
+                "modified") status_icon="⚠️" ;;
+                "renamed") status_icon="🔄" ;;
+                *) status_icon="📝" ;;
+              esac
+              
+              local file_icon=$(get_file_icon "$file")
+              local hash=$(echo -n "$file" | sha256sum | cut -c1-8)
+              
+              echo "${indent}- $status_icon $file_icon [\`$filename\`](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/files#diff-$hash)"
+            done
+          }
+          
+          # Generate comment content
+          {
+            echo "## 📂 Changed Files Tree"
+            echo ""
+            echo "_Automatically generated file tree • Click folders to expand/collapse_"
+            echo ""
+            
+            # Count files by status
+            added_count=0
+            modified_count=0
+            removed_count=0
+            
+            for file in "${!file_data[@]}"; do
+              case "${file_data[$file]}" in
+                "added") ((added_count++)) ;;
+                "modified") ((modified_count++)) ;;
+                "removed") ((removed_count++)) ;;
+              esac
+            done
+            
+            # Summary
+            echo "### Summary"
+            [ $added_count -gt 0 ] && echo "- ✅ **$added_count** files added"
+            [ $modified_count -gt 0 ] && echo "- ⚠️ **$modified_count** files modified"
+            [ $removed_count -gt 0 ] && echo "- ❌ **$removed_count** files removed"
+            echo ""
+            
+            echo "### File Tree"
+            render_tree "" ""
+            
+            echo ""
+            echo "---"
+            echo "_Last updated: $(date '+%Y-%m-%d %H:%M:%S UTC')_"
+          } > comment_content.md
 
-          echo '```' >> file_tree.txt
+          # Store in step output using heredoc for proper multi-line handling
+          {
+            echo "content<<EOF"
+            cat comment_content.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
 
       - name: Post sticky comment on PR
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          message: |
-            $(cat file_tree.txt)
+          message: ${{ steps.generate-comment.outputs.content }}
