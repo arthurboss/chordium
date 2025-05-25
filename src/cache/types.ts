@@ -6,6 +6,9 @@ import { SearchResultItem } from "@/utils/search-result-item";
 import { Song } from "@/types/song";
 import { ChordSheetData } from "@/hooks/useChordSheet";
 
+// Re-export SearchResultItem for consistency
+export type { SearchResultItem };
+
 // Base cache item interface
 export interface BaseCacheItem {
   key: string;

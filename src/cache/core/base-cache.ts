@@ -42,6 +42,9 @@ export abstract class BaseCache<T extends BaseCacheItem> {
    */
   protected saveCache(cache: { items: T[] }): void {
     try {
+      // Apply LRU eviction to enforce maxItems limit
+      cache.items = this.applyLRUEviction(cache.items);
+      
       // Apply size limits if configured
       if (this.config.maxSizeBytes) {
         this.applySizeLimit(cache);
@@ -85,7 +88,7 @@ export abstract class BaseCache<T extends BaseCacheItem> {
   protected applySizeLimit(cache: { items: T[] }): void {
     if (!this.config.maxSizeBytes) return;
 
-    const cacheSize = new Blob([JSON.stringify(cache)]).size;
+    let cacheSize = new Blob([JSON.stringify(cache)]).size;
     
     if (cacheSize > this.config.maxSizeBytes) {
       debugLog(`Cache size (${cacheSize} bytes) exceeds limit, cleaning up...`);
@@ -101,11 +104,15 @@ export abstract class BaseCache<T extends BaseCacheItem> {
       });
       
       // Remove items until under size limit
-      while (new Blob([JSON.stringify(cache)]).size > this.config.maxSizeBytes * 0.8 && cache.items.length > 0) {
+      // Cache the serialized JSON to avoid repeated serialization
+      const targetSize = this.config.maxSizeBytes * 0.8;
+      while (cacheSize > targetSize && cache.items.length > 0) {
         cache.items.shift();
+        // Only recalculate size after removing items
+        cacheSize = new Blob([JSON.stringify(cache)]).size;
       }
       
-      debugLog(`Cache cleaned up, new size: ${new Blob([JSON.stringify(cache)]).size} bytes with ${cache.items.length} items`);
+      debugLog(`Cache cleaned up, new size: ${cacheSize} bytes with ${cache.items.length} items`);
     }
   }
 
