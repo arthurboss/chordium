@@ -54,7 +54,7 @@ describe('Song Search Caching', () => {
         );
         if (songSearchItem) {
           expect(songSearchItem.query.song).to.include('Wonderful');
-          expect(songSearchItem.query.artist).to.be.undefined;
+          expect(songSearchItem.query.artist).to.be.null;
         }
       }
     });
