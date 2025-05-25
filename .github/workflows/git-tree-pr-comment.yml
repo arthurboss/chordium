@@ -1,0 +1,36 @@
+name: Update PR Comment with File Tree
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  update-pr-comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get list of changed files with status
+        run: |
+          echo "**Updated File Tree of Changed Files:**" > file_tree.txt
+          echo "_(Automatically generated upon new commits)_" >> file_tree.txt
+          echo '```' >> file_tree.txt
+
+          git diff --name-status origin/main..HEAD | awk '{ 
+            if ($1 == "A") icon="✅"; 
+            else if ($1 == "D") icon="❌"; 
+            else icon="⚠️"; 
+            print icon, "["$2"](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }}/files#diff-"substr(sha1($2),1,8)) 
+          }' >> file_tree.txt
+
+          echo '```' >> file_tree.txt
+
+      - name: Post sticky comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            $(cat file_tree.txt)
