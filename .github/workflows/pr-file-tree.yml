@@ -1,0 +1,59 @@
+name: PR File Tree Comment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  generate-file-tree:
+    name: Generate File Tree Comment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate file tree
+        id: generate-tree
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          # Make the external script executable and run it
+          chmod +x .github/scripts/generate-file-tree.sh
+          .github/scripts/generate-file-tree.sh > file_tree_output.md
+          
+          # Set output for next step
+          echo "tree_generated=true" >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        id: find-comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- AUTO-GENERATED FILE TREE -->'
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: file_tree_output.md
+          edit-mode: replace
+
+      - name: Summary
+        run: |
+          echo "## File Tree Generation Complete! 🌳" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The collapsible file tree has been generated and posted as a comment on PR #${{ github.event.pull_request.number }}." >> $GITHUB_STEP_SUMMARY
