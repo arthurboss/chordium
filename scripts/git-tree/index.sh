@@ -6,14 +6,17 @@
 # 
 # Usage: 
 #   ./git-file-tree.sh [--base BASE_BRANCH] [--target TARGET_BRANCH] [--output OUTPUT_FILE]
-#   ./git-file-tree.sh [base_branch] [output_file]  # Legacy support
+#   ./git-file-tree.sh [--BRANCH_NAME]                               # Smart flag usage
+#   ./git-file-tree.sh [base_branch] [output_file]                   # Legacy support
 # 
 # Examples:
 #   ./git-file-tree.sh --base main --target feat/search
+#   ./git-file-tree.sh --feat-search                                 # Smart flag: base branch
+#   ./git-file-tree.sh --target current --base main                  # Use "current" keyword
 #   ./git-file-tree.sh --output my-comparison.md
-#   ./git-file-tree.sh feat--search compare-output.md  # Legacy
+#   ./git-file-tree.sh feat--search compare-output.md              # Legacy
 #
-# Auto-generated filename pattern: tree-<target>-vs-<base>-YYYYMMDD-HHMMSS.md
+# Auto-generated filename pattern: git-tree_<target>-vs-<base>_YYYYMMDD-HHMMSS.md
 
 # Get the directory of this script for relative imports
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,6 +36,11 @@ NC='\033[0m' # No Color
 main() {
     # Parse command line arguments first (this handles --help and exits early if needed)
     parse_arguments "$@"
+    
+    # Use parsed variables from parse_arguments
+    local base_branch="$PARSED_BASE_BRANCH"
+    local target_branch="$PARSED_TARGET_BRANCH"
+    local output_file="$PARSED_OUTPUT_FILE"
     
     # Prompt user to clean up previous results (only after we know it's not a help request)
     prompt_and_cleanup_results

@@ -22,8 +22,18 @@ Generates visual file tree representations of git changes between branches, perf
 # Compare specific branches with modern flags
 ./scripts/git-tree/index.sh --base main --target feat/search
 
+# Smart flags - use any branch name as a flag
+./scripts/git-tree/index.sh --main              # Compare current vs main
+./scripts/git-tree/index.sh --feat--search      # Compare current vs feat--search
+
+# Use "current" keyword for explicit current branch
+./scripts/git-tree/index.sh --target current --base main
+
 # Custom output file (auto-adds .md extension)
 ./scripts/git-tree/index.sh --output my-comparison
+
+# Mixed usage - smart flag with custom output
+./scripts/git-tree/index.sh --main --output comparison.md
 
 # Legacy positional arguments (backward compatible)
 ./scripts/git-tree/index.sh main my-output
@@ -63,6 +73,8 @@ Contains:
 - ✅ **Smart base branch detection** - Analyzes merge history to find the right comparison branch
 - ✅ **Network-free operation** - No risky git checkout operations that could hang
 - ✅ **Modern flag interface** - Clean --base, --target, --output flags
+- ✅ **Smart flag parsing** - Use any branch name as a flag (e.g., `--main`, `--feat--search`)
+- ✅ **"Current" keyword** - Use `current` for explicit current branch reference
 - ✅ **Legacy compatibility** - Supports old positional argument format
 - ✅ **Auto .md extension** - Automatically adds .md when missing
 - ✅ **Timestamp filenames** - Consistent YYYY-MM-DD_HH-MM-SS format
@@ -70,3 +82,43 @@ Contains:
 - ✅ **GitHub integration** - Dynamic branch links when repository detected
 - ✅ **Quoted output format** - File tree rendered as blockquotes for clean documentation
 - ✅ **Professional styling** - Beautiful Unicode trees with status icons
+
+## Advanced Usage
+
+### Smart Flags
+Use any branch name as a flag for intuitive comparisons:
+
+```bash
+# These are equivalent:
+./scripts/git-tree/index.sh --base main
+./scripts/git-tree/index.sh --main
+
+# Works with complex branch names:
+./scripts/git-tree/index.sh --feat--search
+./scripts/git-tree/index.sh --feature/user-login
+
+# Combined with other flags:
+./scripts/git-tree/index.sh --main --output comparison.md
+./scripts/git-tree/index.sh --feat--search --target develop
+```
+
+### "Current" Keyword
+Use `current` to explicitly reference the current branch:
+
+```bash
+# Compare current branch against main
+./scripts/git-tree/index.sh --target current --base main
+
+# Use current as base (reverse comparison)
+./scripts/git-tree/index.sh --base current --target main
+
+# Both branches can use current (though this would show no changes)
+./scripts/git-tree/index.sh --base current --target current
+```
+
+### Flag Priority
+When multiple ways to specify the same value are used:
+1. Explicit flags (`--base`, `--target`, `--output`) take highest priority
+2. Smart flags (`--branch-name`) set the base branch if not already specified
+3. Positional arguments fill in missing values in order
+4. Auto-detection happens for any remaining unspecified values
