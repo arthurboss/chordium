@@ -92,11 +92,11 @@ render_file_tree() {
     local formatted_base_branch=$(format_branch_name "$base_branch")
     echo "$formatted_target_branch vs $formatted_base_branch" >> "$output_file"
     echo "" >> "$output_file"
-    echo "<details open>" >> "$output_file"
-    echo "<summary>" >> "$output_file"
-    echo "<strong>🏠 $project_name</strong>" >> "$output_file"
-    echo "</summary>" >> "$output_file"
-    echo "" >> "$output_file"
+    echo "> <details open>" >> "$output_file"
+    echo "> <summary>" >> "$output_file"
+    echo "> <strong>🏠 $project_name</strong>" >> "$output_file"
+    echo "> </summary>" >> "$output_file"
+    echo ">" >> "$output_file"
 
     # Get list of all folders that have changed files (dynamically)
     local folders_with_files=()
@@ -115,7 +115,7 @@ render_file_tree() {
         fi
     done <<< "$all_changed_folders"
 
-    echo "<div>" >> "$output_file"
+    echo "> <div>" >> "$output_file"
 
     # Process files in root folder first
     if [[ " ${folders_with_files[@]} " =~ " . " ]]; then
@@ -136,15 +136,15 @@ render_file_tree() {
             
             # Check if this is the last root file
             if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then
-                echo "&emsp;&#9493;$icon $filename" >> "$output_file"
+                echo "> &emsp;&#9493;$icon $filename" >> "$output_file"
             else
-                echo "&emsp;&#9501;$icon $filename<br>" >> "$output_file"
+                echo "> &emsp;&#9501;$icon $filename<br>" >> "$output_file"
             fi
         done
     fi
 
-    echo "</div>" >> "$output_file"
-    echo "" >> "$output_file"
+    echo "> </div>" >> "$output_file"
+    echo ">" >> "$output_file"
 
     # Process each folder
     for folder in "${folders_with_files[@]}"; do
@@ -152,13 +152,13 @@ render_file_tree() {
             continue  # Skip root folder as it's already processed
         fi
         
-        echo "<!-- $folder folder -->" >> "$output_file"
-        echo "<details>" >> "$output_file"
-        echo "<summary>" >> "$output_file"
-        echo "&#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
-        echo "</summary>" >> "$output_file"
-        echo "" >> "$output_file"
-        echo "<div>" >> "$output_file"
+        echo "> <!-- $folder folder -->" >> "$output_file"
+        echo "> <details>" >> "$output_file"
+        echo "> <summary>" >> "$output_file"
+        echo "> &#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
+        echo "> </summary>" >> "$output_file"
+        echo ">" >> "$output_file"
+        echo "> <div>" >> "$output_file"
         
         # Get files for this folder, sorted alphabetically by filename
         local folder_files=$(echo "$all_files" | sort -k2 | grep "^[AMD][[:space:]]*$folder/")
@@ -181,18 +181,18 @@ render_file_tree() {
             
             # Check if this is the last file
             if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then
-                echo "&emsp;&emsp;&#9493;$icon $filename" >> "$output_file"
+                echo "> &emsp;&emsp;&#9493;$icon $filename" >> "$output_file"
             else
-                echo "&emsp;&emsp;&#9501;$icon $filename<br>" >> "$output_file"
+                echo "> &emsp;&emsp;&#9501;$icon $filename<br>" >> "$output_file"
             fi
         done
         
-        echo "</div>" >> "$output_file"
-        echo "</details>" >> "$output_file"
-        echo "" >> "$output_file"
+        echo "> </div>" >> "$output_file"
+        echo "> </details>" >> "$output_file"
+        echo ">" >> "$output_file"
     done
 
-    echo "</details>" >> "$output_file"
+    echo "> </details>" >> "$output_file"
     
     # Add file summary sections
     render_file_summary "$base_branch" "$output_file" "$all_files"

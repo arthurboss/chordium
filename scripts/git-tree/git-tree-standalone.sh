@@ -317,11 +317,11 @@ FORMATTED_CURRENT_BRANCH=$(format_branch_name "$CURRENT_BRANCH")
 FORMATTED_BASE_BRANCH=$(format_branch_name "$BASE_BRANCH")
 echo "$FORMATTED_CURRENT_BRANCH vs $FORMATTED_BASE_BRANCH" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
-echo "<details open>" >> "$OUTPUT_FILE"
-echo "<summary>" >> "$OUTPUT_FILE"
-echo "<strong>🏠 $PROJECT_NAME</strong>" >> "$OUTPUT_FILE"
-echo "</summary>" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
+echo "> <details open>" >> "$OUTPUT_FILE"
+echo "> <summary>" >> "$OUTPUT_FILE"
+echo "> <strong>🏠 $PROJECT_NAME</strong>" >> "$OUTPUT_FILE"
+echo "> </summary>" >> "$OUTPUT_FILE"
+echo ">" >> "$OUTPUT_FILE"
 
 # Get list of all folders that have changed files (dynamically)
 folders_with_files=()
@@ -340,7 +340,7 @@ while IFS= read -r folder; do
     fi
 done <<< "$all_changed_folders"
 
-echo "<div>" >> "$OUTPUT_FILE"
+echo "> <div>" >> "$OUTPUT_FILE"
 
 # Process files in root folder first
 if [[ " ${folders_with_files[@]} " =~ " . " ]]; then
@@ -361,15 +361,15 @@ if [[ " ${folders_with_files[@]} " =~ " . " ]]; then
         
         # Check if this is the last root file
         if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then
-            echo "&emsp;&#9493;$icon $filename" >> "$OUTPUT_FILE"
+            echo "> &emsp;&#9493;$icon $filename" >> "$OUTPUT_FILE"
         else
-            echo "&emsp;&#9501;$icon $filename<br>" >> "$OUTPUT_FILE"
+            echo "> &emsp;&#9501;$icon $filename<br>" >> "$OUTPUT_FILE"
         fi
     done
 fi
 
-echo "</div>" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
+echo "> </div>" >> "$OUTPUT_FILE"
+echo ">" >> "$OUTPUT_FILE"
 
 # Process each folder
 for folder in "${folders_with_files[@]}"; do
@@ -377,13 +377,13 @@ for folder in "${folders_with_files[@]}"; do
         continue  # Skip root folder as it's already processed
     fi
     
-    echo "<!-- $folder folder -->" >> "$OUTPUT_FILE"
-    echo "<details>" >> "$OUTPUT_FILE"
-    echo "<summary>" >> "$OUTPUT_FILE"
-    echo "&#9492;<strong>🗂️ $folder</strong>" >> "$OUTPUT_FILE"
-    echo "</summary>" >> "$OUTPUT_FILE"
-    echo "" >> "$OUTPUT_FILE"
-    echo "<div>" >> "$OUTPUT_FILE"
+    echo "> <!-- $folder folder -->" >> "$OUTPUT_FILE"
+    echo "> <details>" >> "$OUTPUT_FILE"
+    echo "> <summary>" >> "$OUTPUT_FILE"
+    echo "> &#9492;<strong>🗂️ $folder</strong>" >> "$OUTPUT_FILE"
+    echo "> </summary>" >> "$OUTPUT_FILE"
+    echo ">" >> "$OUTPUT_FILE"
+    echo "> <div>" >> "$OUTPUT_FILE"
     
     # Get files for this folder, sorted alphabetically by filename
     folder_files=$(echo "$ALL_FILES" | sort -k2 | grep "^[AMD][[:space:]]*$folder/")
@@ -406,18 +406,18 @@ for folder in "${folders_with_files[@]}"; do
         
         # Check if this is the last file
         if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then
-            echo "&emsp;&emsp;&#9493;$icon $filename" >> "$OUTPUT_FILE"
+            echo "> &emsp;&emsp;&#9493;$icon $filename" >> "$OUTPUT_FILE"
         else
-            echo "&emsp;&emsp;&#9501;$icon $filename<br>" >> "$OUTPUT_FILE"
+            echo "> &emsp;&emsp;&#9501;$icon $filename<br>" >> "$OUTPUT_FILE"
         fi
     done
     
-    echo "</div>" >> "$OUTPUT_FILE"
-    echo "</details>" >> "$OUTPUT_FILE"
-    echo "" >> "$OUTPUT_FILE"
+    echo "> </div>" >> "$OUTPUT_FILE"
+    echo "> </details>" >> "$OUTPUT_FILE"
+    echo ">" >> "$OUTPUT_FILE"
 done
 
-echo "</details>" >> "$OUTPUT_FILE"
+echo "> </details>" >> "$OUTPUT_FILE"
 
 # Add file summary sections
 render_file_summary "$BASE_BRANCH" "$OUTPUT_FILE" "$ALL_FILES"

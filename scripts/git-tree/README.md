@@ -36,20 +36,22 @@ Generates visual file tree representations of git changes between branches, perf
 
 ## Output
 
-Generates markdown files with standardized names:
+### File Location
+All generated files are automatically saved to the `results/` directory within the git-tree folder:
 ```
-file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md
+scripts/git-tree/results/file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md
 ```
 
-Example: file-tree_feat--search-vs-main_2025-05-28_14-30-25.md
+Example: `scripts/git-tree/results/file-tree_feat--search-vs-main_2025-05-28_14-30-25.md`
 
+### File Content
 Contains:
-- Visual file tree with thick Unicode characters (├── └── │)
-- GitHub branch links for easy navigation
-- Status icons (✅ Added, ✏️ Modified, ❌ Deleted)
-- Collapsible sections for better organization
-- Only files that actually changed between branches
-- Clean, professional markdown format
+- **Quoted file tree** - Every line of the tree structure is formatted as a blockquote for clean documentation
+- **GitHub branch links** - Direct links to branches when repository detected
+- **Status icons** - ✅ Added, ✏️ Modified, ❌ Deleted files clearly marked
+- **Collapsible sections** - Organized folder structure for better readability
+- **Smart filtering** - Only files that actually changed between branches
+- **Professional format** - Clean markdown ready for PR comments and documentation
 
 ## How It Works
 
@@ -57,8 +59,9 @@ Contains:
 2. **Auto-detects base branch** using intelligent merge history analysis
 3. **Builds tree structure** from changed file paths with proper nesting
 4. **Renders with Unicode** tree characters and status icons
-5. **Adds GitHub links** for branch navigation (when repo detected)
-6. **Outputs clean markdown** ready for documentation or PR comments
+5. **Formats as quotes** - Every line of the file tree is prefixed with "> " for clean blockquote formatting
+6. **Adds GitHub links** for branch navigation (when repo detected)
+7. **Outputs clean markdown** ready for documentation or PR comments
 
 ## Features
 
@@ -68,5 +71,7 @@ Contains:
 - ✅ **Legacy compatibility** - Supports old positional argument format
 - ✅ **Auto .md extension** - Automatically adds .md when missing
 - ✅ **Timestamp filenames** - Consistent YYYY-MM-DD_HH-MM-SS format
+- ✅ **Results directory** - Organized output to `git-tree/results/` folder
 - ✅ **GitHub integration** - Dynamic branch links when repository detected
-- ✅ **Professional output** - Beautiful Unicode trees with status icons
+- ✅ **Quoted output format** - File tree rendered as blockquotes for clean documentation
+- ✅ **Professional styling** - Beautiful Unicode trees with status icons
