@@ -6,62 +6,50 @@ render_file_summary() {
     local output_file="$2"
     local all_files="$3"
     
-    echo "" >> "$output_file"
+    # Source dependencies
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$script_dir/utils/output_writer.sh"
+    source "$script_dir/utils/file_processor.sh"
+    
+    write_empty_lines "$output_file"
     echo "## 📊 File Summary" >> "$output_file"
-    echo "" >> "$output_file"
+    write_empty_lines "$output_file"
     
     # Count files by status
-    local added_count=$(echo "$all_files" | grep "^A" | wc -l | tr -d ' ')
-    local modified_count=$(echo "$all_files" | grep "^M" | wc -l | tr -d ' ')
-    local deleted_count=$(echo "$all_files" | grep "^D" | wc -l | tr -d ' ')
+    local added_count=$(count_files_by_status "$all_files" "A")
+    local modified_count=$(count_files_by_status "$all_files" "M")
+    local deleted_count=$(count_files_by_status "$all_files" "D")
     
     # Added files section
-    echo "<details>" >> "$output_file"
-    echo "<summary>" >> "$output_file"
-    echo "<strong>✅ Added Files ($added_count)</strong>" >> "$output_file"
-    echo "</summary>" >> "$output_file"
-    echo "" >> "$output_file"
+    write_details_section "$output_file" "✅ Added Files ($added_count)"
     
     if [[ "$added_count" -gt 0 ]]; then
-        echo "$all_files" | grep "^A" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        get_files_by_status "$all_files" "A" | awk '{print "- `" $2 "`"}' >> "$output_file"
     else
         echo "No files were added." >> "$output_file"
     fi
     
-    echo "" >> "$output_file"
-    echo "</details>" >> "$output_file"
-    echo "" >> "$output_file"
+    close_details_section "$output_file"
     
     # Modified files section
-    echo "<details>" >> "$output_file"
-    echo "<summary>" >> "$output_file"
-    echo "<strong>✏️ Modified Files ($modified_count)</strong>" >> "$output_file"
-    echo "</summary>" >> "$output_file"
-    echo "" >> "$output_file"
+    write_details_section "$output_file" "✏️ Modified Files ($modified_count)"
     
     if [[ "$modified_count" -gt 0 ]]; then
-        echo "$all_files" | grep "^M" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        get_files_by_status "$all_files" "M" | awk '{print "- `" $2 "`"}' >> "$output_file"
     else
         echo "No files were modified." >> "$output_file"
     fi
     
-    echo "" >> "$output_file"
-    echo "</details>" >> "$output_file"
-    echo "" >> "$output_file"
+    close_details_section "$output_file"
     
     # Deleted files section
-    echo "<details>" >> "$output_file"
-    echo "<summary>" >> "$output_file"
-    echo "<strong>❌ Deleted Files ($deleted_count)</strong>" >> "$output_file"
-    echo "</summary>" >> "$output_file"
-    echo "" >> "$output_file"
+    write_details_section "$output_file" "❌ Deleted Files ($deleted_count)"
     
     if [[ "$deleted_count" -gt 0 ]]; then
-        echo "$all_files" | grep "^D" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        get_files_by_status "$all_files" "D" | awk '{print "- `" $2 "`"}' >> "$output_file"
     else
         echo "No files were deleted." >> "$output_file"
     fi
     
-    echo "" >> "$output_file"
-    echo "</details>" >> "$output_file"
+    close_details_section "$output_file"
 }
