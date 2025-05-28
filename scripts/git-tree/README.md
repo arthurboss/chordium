@@ -1,6 +1,6 @@
-# Git Tree Scripts
+# Git Tree Script
 
-A collection of scripts for generating markdown file trees showing git changes between branches.
+A script for generating markdown file trees showing git changes between branches.
 
 ## What It Does
 
@@ -9,29 +9,24 @@ Generates visual file tree representations of git changes between branches, perf
 - Code review preparation
 - Change summaries and project documentation
 
-## Scripts Overview
+## Script Overview
 
-- **git-tree.sh** - Main script with modern flag support and intelligent branch auto-detection
-- **git-tree-render.sh** - Shared rendering functions with GitHub branch links and Unicode formatting
-- **git-tree-standalone.sh** - Self-contained version requiring no external dependencies
+- **index.sh** - Main script with modern flag support and intelligent branch auto-detection
 
 ## Quick Start
 
 ```bash
 # Auto-detect everything (current branch vs detected base)
-./scripts/git-tree/git-tree.sh
+./scripts/git-tree/index.sh
 
 # Compare specific branches with modern flags
-./scripts/git-tree/git-tree.sh --base main --target feat/search
+./scripts/git-tree/index.sh --base main --target feat/search
 
 # Custom output file (auto-adds .md extension)
-./scripts/git-tree/git-tree.sh --output my-comparison
+./scripts/git-tree/index.sh --output my-comparison
 
 # Legacy positional arguments (backward compatible)
-./scripts/git-tree/git-tree.sh main my-output
-
-# Standalone version (simple usage)
-./scripts/git-tree/git-tree-standalone.sh main output
+./scripts/git-tree/index.sh main my-output
 ```
 
 ## Output
