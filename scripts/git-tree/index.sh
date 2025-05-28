@@ -23,9 +23,6 @@ source "$SCRIPT_DIR/lib/loader.sh"
 
 # Source the prompt_and_cleanup_results utility (ensure it's loaded for all entry scripts)
 source "$SCRIPT_DIR/lib/file/prompt_and_cleanup_results.sh"
-
-# Prompt user to clean up previous results
-prompt_and_cleanup_results
     
 # Colors
 CYAN='\033[0;36m'
@@ -34,14 +31,17 @@ NC='\033[0m' # No Color
 
 # Main script logic
 main() {
+    # Parse command line arguments first (this handles --help and exits early if needed)
+    parse_arguments "$@"
+    
+    # Prompt user to clean up previous results (only after we know it's not a help request)
+    prompt_and_cleanup_results
+    
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         echo -e "${CYAN}Error: Not in a git repository${NC}"
         exit 1
     fi
-    
-    # Parse command line arguments (sets global variables: base_branch, target_branch, output_file)
-    parse_arguments "$@"
     
     # Set defaults for target branch (current branch if not specified)
     if [[ -z "$target_branch" ]]; then
