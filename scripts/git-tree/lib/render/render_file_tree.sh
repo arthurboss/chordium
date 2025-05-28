@@ -30,7 +30,8 @@ render_file_tree() {
     # Format branch names with links if they exist on remote
     local formatted_target_branch=$(format_branch_name "$target_branch")
     local formatted_base_branch=$(format_branch_name "$base_branch")
-    echo "$formatted_target_branch vs $formatted_base_branch" >> "$output_file"
+    # Invert order: base branch first, then target branch
+    echo "$formatted_base_branch &#8592; $formatted_target_branch" >> "$output_file"
     echo "" >> "$output_file"
     echo "> <details open>" >> "$output_file"
     echo "> <summary>" >> "$output_file"
