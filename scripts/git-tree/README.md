@@ -122,3 +122,38 @@ When multiple ways to specify the same value are used:
 2. Smart flags (`--branch-name`) set the base branch if not already specified
 3. Positional arguments fill in missing values in order
 4. Auto-detection happens for any remaining unspecified values
+
+## GitHub Actions Integration
+
+The git-tree script is seamlessly integrated with GitHub Actions to automatically generate PR comments with file trees.
+
+### How It Works
+- **Automatic Triggers** - Runs on PR open, synchronize, and reopen events
+- **Smart Branch Detection** - Uses `GITHUB_HEAD_REF` and `GITHUB_BASE_REF` from the PR context
+- **Comment Management** - Updates existing comments with new changes using sticky comments
+- **Clean Output** - Generates professional file trees ready for PR comments
+
+### Integration Files
+- `.github/workflows/git-tree-pr-comment.yml` - Main GitHub Action workflow
+- `.github/scripts/git-tree-pr-adapter.sh` - Adapter script that bridges GitHub Actions with git-tree
+
+### Usage in PRs
+When you create or update a pull request, the action automatically:
+1. Detects changes between base and head branches
+2. Generates a file tree using the git-tree script
+3. Formats the output for GitHub comments
+4. Posts or updates the PR comment with the file tree
+
+### Manual Testing
+To test the GitHub Action integration locally:
+```bash
+# Set up test environment variables
+export GITHUB_REPOSITORY="owner/repo"
+export PR_NUMBER="123"
+export GITHUB_TOKEN="your-token"
+export GITHUB_HEAD_REF="your-branch"
+export GITHUB_BASE_REF="main"
+
+# Run the adapter script
+./.github/scripts/git-tree-pr-adapter.sh
+```
