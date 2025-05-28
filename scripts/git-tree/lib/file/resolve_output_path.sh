@@ -3,9 +3,9 @@
 # Function to resolve output file path
 resolve_output_path() {
     local output_file="$1"
-    local script_dir="${2:-$GIT_TREE_SCRIPT_DIR}"
+    local script_dir="${GIT_TREE_SCRIPT_DIR:-$(pwd)}"
     
-    # If output file doesn't start with results/, add the results/ prefix
+    # Always use the top-level results/ folder
     if [[ "$output_file" != results/* ]]; then
         output_file="results/${output_file}"
     fi

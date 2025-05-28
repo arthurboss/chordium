@@ -17,6 +17,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source all utility functions via the central loader
 source "$SCRIPT_DIR/lib/loader.sh"
 
+# Colors
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+
 # Main standalone script logic
 main() {
     # Check for help flag first
@@ -39,20 +44,24 @@ main() {
     # Auto-detect base branch if not provided
     if [[ -z "$base_branch" ]]; then
         base_branch=$(detect_base_branch)
-        echo "Auto-detected base branch: $base_branch"
+        echo -e "${CYAN}Auto-detected base branch:${NC} ${MAGENTA}$base_branch${NC}"
+        echo
     else
-        echo "Using specified base branch: $base_branch"
+        echo -e "${CYAN}Using specified base branch:${NC} ${MAGENTA}$base_branch${NC}"
+        echo
     fi
     
     # Auto-generate output file if not provided
     if [[ -z "$output_file" ]]; then
         local current_branch=$(get_current_branch)
         output_file=$(generate_auto_filename "$current_branch" "$base_branch")
-        echo "Auto-generated output file: $output_file"
+        echo -e "${CYAN}Auto-generated output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo
     else
         # Ensure .md extension
         output_file=$(ensure_md_extension "$output_file")
-        echo "Using specified output file: $output_file"
+        echo -e "${CYAN}Using specified output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo
     fi
     
     # Ensure results directory exists and resolve full output path
@@ -62,16 +71,18 @@ main() {
     local current_branch=$(get_current_branch)
     local project_name=$(get_project_name)
     
-    echo "Comparing current branch against: $base_branch"
-    echo "Output file: $output_file"
-    
+    echo -e "${CYAN}Comparing current branch against:${NC} ${MAGENTA}$base_branch${NC}"
+    echo
+    echo -e "${CYAN}Output file:${NC} ${MAGENTA}$output_file${NC}"
+    echo
     # Get all changed files and count them (comparing current against base)
     local all_files=$(git diff --name-status $base_branch...HEAD)
     local total_files=$(echo "$all_files" | wc -l | tr -d ' ')
     
     # Handle empty result
     if [[ -z "$all_files" || "$total_files" -eq 0 ]]; then
-        echo "No files changed between HEAD and $base_branch"
+        echo -e "${CYAN}No files changed between HEAD and ${MAGENTA}$base_branch${NC}"
+        echo
         return 1
     fi
     
@@ -189,10 +200,12 @@ main() {
     # Add file summary sections
     render_file_summary "$base_branch" "$output_file" "$all_files"
     
-    echo "File tree generated successfully in $output_file"
-    echo "Total files: $total_files"
-    echo "Comparison: $current_branch vs $base_branch"
-    
+    echo -e "${CYAN}File tree generated successfully in${NC} ${MAGENTA}$output_file${NC}"
+    echo
+    echo -e "${CYAN}Total files:${NC} ${MAGENTA}$total_files${NC}"
+    echo
+    echo -e "${CYAN}Comparison:${NC} ${MAGENTA}$current_branch${NC} ${CYAN}vs${NC} ${MAGENTA}$base_branch${NC}"
+    echo
     return 0
 }
 

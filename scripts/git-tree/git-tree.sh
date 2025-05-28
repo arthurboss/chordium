@@ -21,11 +21,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Source all utility functions via the central loader
 source "$SCRIPT_DIR/lib/loader.sh"
     
+# Colors
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+
 # Main script logic
 main() {
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "Error: Not in a git repository"
+        echo -e "${CYAN}Error: Not in a git repository${NC}"
         exit 1
     fi
     
@@ -36,7 +41,7 @@ main() {
     if [[ -z "$target_branch" ]]; then
         target_branch=$(get_current_branch)
         if [[ -z "$target_branch" ]]; then
-            echo "Error: Could not determine current branch"
+            echo -e "${CYAN}Error: Could not determine current branch${NC}"
             exit 1
         fi
     fi
@@ -44,19 +49,23 @@ main() {
     # Auto-detect base branch if not provided
     if [[ -z "$base_branch" ]]; then
         base_branch=$(detect_base_branch "$target_branch")
-        echo "Auto-detected base branch: $base_branch"
+        echo -e "${CYAN}Auto-detected base branch:${NC} ${MAGENTA}$base_branch${NC}"
+        echo
     else
-        echo "Using specified base branch: $base_branch"
+        echo -e "${CYAN}Using specified base branch:${NC} ${MAGENTA}$base_branch${NC}"
+        echo
     fi
     
     # Generate auto filename if not provided
     if [[ -z "$output_file" ]]; then
         output_file=$(generate_auto_filename "$target_branch" "$base_branch")
-        echo "Auto-generated output file: $output_file"
+        echo -e "${CYAN}Auto-generated output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo
     else
         # Ensure .md extension
         output_file=$(ensure_md_extension "$output_file")
-        echo "Using specified output file: $output_file"
+        echo -e "${CYAN}Using specified output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo
     fi
     
     # Ensure results directory exists and resolve full output path
@@ -65,41 +74,54 @@ main() {
     
     # Verify base branch exists (unless it's HEAD~1)
     if [[ "$base_branch" != "HEAD~1" ]] && ! branch_exists_locally "$base_branch"; then
-        echo "Error: Base branch '$base_branch' does not exist"
+        echo -e "${CYAN}Error: Base branch '${MAGENTA}$base_branch${CYAN}' does not exist${NC}"
+        echo
         exit 1
     fi
     
     # Verify target branch exists
     if ! branch_exists_locally "$target_branch"; then
-        echo "Error: Target branch '$target_branch' does not exist"
+        echo -e "${CYAN}Error: Target branch '${MAGENTA}$target_branch${CYAN}' does not exist${NC}"
+        echo
         exit 1
     fi
     
     local project_name=$(get_project_name)
     
-    echo ""
-    echo "🔍 Git File Tree Generation"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📁 Project: $project_name"
-    echo "🎯 Target:  $target_branch"
-    echo "📍 Base:    $base_branch"
-    echo "📄 Output:  $output_file"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
+    echo
+    echo -e "${CYAN}🔍 Git File Tree Generation${NC}"
+    echo
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo
+    echo -e "${CYAN}📁 Project:${NC} ${MAGENTA}$project_name${NC}"
+    echo
+    echo -e "${CYAN}🎯 Target:${NC} ${MAGENTA}$target_branch${NC}"
+    echo
+    echo -e "${CYAN}📍 Base:${NC} ${MAGENTA}$base_branch${NC}"
+    echo
+    echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$output_file${NC}"
+    echo
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo
     
     # Render the file tree using target vs base comparison
     if render_file_tree "$base_branch" "$output_file" "$target_branch" "$project_name"; then
-        echo "✅ File tree generated successfully!"
-        echo "📄 Output: $output_file"
-        
+        echo -e "${CYAN}✅ File tree generated successfully!${NC}"
+        echo
+        echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$output_file${NC}"
+        echo
         local total_files=$(git diff --name-status $base_branch...$target_branch | wc -l | tr -d ' ')
-        echo "📊 Total files changed: $total_files"
-        echo "🔄 Comparison: $target_branch vs $base_branch"
-        echo ""
-        echo "🎉 Ready for PR comments or documentation!"
+        echo -e "${CYAN}📊 Total files changed:${NC} ${MAGENTA}$total_files${NC}"
+        echo
+        echo -e "${CYAN}🔄 Comparison:${NC} ${MAGENTA}$target_branch${NC} ${CYAN}vs${NC} ${MAGENTA}$base_branch${NC}"
+        echo
+        echo -e "${CYAN}🎉 Ready for PR comments or documentation!${NC}"
+        echo
     else
-        echo "❌ No changes found between $target_branch and $base_branch"
-        echo "ℹ️  Both branches appear to be identical"
+        echo -e "${CYAN}❌ No changes found between ${MAGENTA}$target_branch${CYAN} and ${MAGENTA}$base_branch${NC}"
+        echo
+        echo -e "${CYAN}ℹ️  Both branches appear to be identical${NC}"
+        echo
         exit 1
     fi
 }

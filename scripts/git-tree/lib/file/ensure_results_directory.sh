@@ -2,7 +2,7 @@
 
 # Function to ensure results directory exists
 ensure_results_directory() {
-    local script_dir="${1:-$GIT_TREE_SCRIPT_DIR}"
+    local script_dir="${GIT_TREE_SCRIPT_DIR:-$(pwd)}"
     local results_dir="${script_dir}/results"
     
     if [[ ! -d "$results_dir" ]]; then
