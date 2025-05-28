@@ -73,8 +73,7 @@ main() {
     
     echo -e "${CYAN}Comparing current branch against:${NC} ${MAGENTA}$base_branch${NC}"
     echo
-    echo -e "${CYAN}Output file:${NC} ${MAGENTA}$output_file${NC}"
-    echo
+
     # Get all changed files and count them (comparing current against base)
     local all_files=$(git diff --name-status $base_branch...HEAD)
     local total_files=$(echo "$all_files" | wc -l | tr -d ' ')
