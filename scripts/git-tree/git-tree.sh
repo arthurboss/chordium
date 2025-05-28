@@ -56,7 +56,32 @@ generate_auto_filename() {
     local safe_target=$(echo "$target_branch" | sed 's/[\/:]/-/g')
     local safe_base=$(echo "$base_branch" | sed 's/[\/:]/-/g')
     
-    echo "file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
+    echo "results/file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
+}
+
+# Function to ensure results directory exists
+ensure_results_directory() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local results_dir="${script_dir}/results"
+    
+    if [[ ! -d "$results_dir" ]]; then
+        mkdir -p "$results_dir"
+        echo "📁 Created results directory: $results_dir"
+    fi
+}
+
+# Function to resolve output file path
+resolve_output_path() {
+    local output_file="$1"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    # If output file doesn't start with results/, add the results/ prefix
+    if [[ "$output_file" != results/* ]]; then
+        output_file="results/${output_file}"
+    fi
+    
+    # Convert to absolute path
+    echo "${script_dir}/${output_file}"
 }
 
 # Function to parse modern command line arguments
@@ -230,6 +255,10 @@ main() {
     else
         echo "Using specified output file: $output_file"
     fi
+    
+    # Ensure results directory exists and resolve full output path
+    ensure_results_directory
+    output_file=$(resolve_output_path "$output_file")
     
     # Verify base branch exists (unless it's HEAD~1)
     if [[ "$base_branch" != "HEAD~1" ]] && ! git show-ref --verify --quiet "refs/heads/$base_branch"; then
