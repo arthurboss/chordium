@@ -56,16 +56,14 @@ main() {
     if [[ -z "$base_branch" ]]; then
         base_branch=$(detect_base_branch "$target_branch")
         echo -e "${CYAN}Auto-detected base branch:${NC} ${MAGENTA}$base_branch${NC}"
-        echo
     else
         echo -e "${CYAN}Using specified base branch:${NC} ${MAGENTA}$base_branch${NC}"
-        echo
     fi
     
     # Auto-generate output file name if not provided as a flag
     if [[ -z "$output_file" ]]; then
         output_file=$(generate_auto_filename "$target_branch" "$base_branch")
-        echo -e "${CYAN}Auto-generated output filename:${NC} ${MAGENTA}$output_file${NC}"
+        echo -e "${CYAN}The file name will be auto-generated!"
         echo
     else
         # Ensure .md extension
@@ -107,12 +105,9 @@ main() {
     if render_file_tree "$base_branch" "$output_file" "$target_branch" "$project_name"; then
         echo -e "${CYAN}✅ File tree generated successfully!${NC}"
         echo
-        echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$output_file${NC}"
-        echo
-        local total_files=$(git diff --name-status $base_branch...$target_branch | wc -l | tr -d ' ')
-        echo -e "${CYAN}📊 Total files changed:${NC} ${MAGENTA}$total_files${NC}"
-        echo
-        echo -e "${CYAN}🔄 Comparison:${NC} ${MAGENTA}$target_branch${NC} ${CYAN}vs${NC} ${MAGENTA}$base_branch${NC}"
+        # Display relative path from current working directory so it's clickable
+        local relative_output_file="${output_file#$PWD/}"
+        echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$relative_output_file${NC}"
         echo
     else
         echo -e "${CYAN}❌ No changes found between ${MAGENTA}$target_branch${CYAN} and ${MAGENTA}$base_branch${NC}"
