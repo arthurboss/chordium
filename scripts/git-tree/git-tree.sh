@@ -59,16 +59,6 @@ generate_auto_filename() {
     echo "file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
 }
 
-# Function to ensure output file has .md extension
-ensure_md_extension() {
-    local filename="$1"
-    if [[ "$filename" != *.md ]]; then
-        echo "${filename}.md"
-    else
-        echo "$filename"
-    fi
-}
-
 # Function to parse modern command line arguments
 parse_arguments() {
     base_branch=""
@@ -86,7 +76,11 @@ parse_arguments() {
                 shift 2
                 ;;
             --output)
-                output_file=$(ensure_md_extension "$2")
+                output_file="$2"
+                # Add .md extension if not present
+                if [[ "$output_file" != *.md ]]; then
+                    output_file="${output_file}.md"
+                fi
                 shift 2
                 ;;
             --help|-h)
@@ -103,14 +97,25 @@ parse_arguments() {
                 if [[ -z "$base_branch" ]]; then
                     base_branch="$1"
                 elif [[ -z "$target_branch" ]]; then
-                    # Check if this looks like a filename (ends in .md)
-                    if [[ "$1" == *.md ]]; then
-                        output_file=$(ensure_md_extension "$1")
+                    # For legacy usage: if only 2 args provided, treat second as output file
+                    # If 3 args provided, treat second as target branch
+                    if [[ $# -eq 1 ]]; then
+                        # Second argument with only 2 total args = output file
+                        output_file="$1"
+                        # Add .md extension if not present
+                        if [[ "$output_file" != *.md ]]; then
+                            output_file="${output_file}.md"
+                        fi
                     else
+                        # More arguments coming, this is target branch
                         target_branch="$1"
                     fi
                 elif [[ -z "$output_file" ]]; then
-                    output_file=$(ensure_md_extension "$1")
+                    output_file="$1"
+                    # Add .md extension if not present
+                    if [[ "$output_file" != *.md ]]; then
+                        output_file="${output_file}.md"
+                    fi
                 else
                     echo "Error: Too many arguments"
                     echo "Use --help for usage information"

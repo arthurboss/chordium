@@ -68,16 +68,6 @@ detect_base_branch() {
     fi
 }
 
-# Function to ensure output file has .md extension
-ensure_md_extension() {
-    local filename="$1"
-    if [[ "$filename" != *.md ]]; then
-        echo "${filename}.md"
-    else
-        echo "$filename"
-    fi
-}
-
 # Function to generate auto filename
 generate_auto_filename() {
     local current_branch=$(git branch --show-current)
@@ -100,7 +90,11 @@ while [[ $# -gt 0 ]]; do
     if [[ -z "$BASE_BRANCH" ]]; then
         BASE_BRANCH="$1"
     elif [[ -z "$OUTPUT_FILE" ]]; then
-        OUTPUT_FILE=$(ensure_md_extension "$1")
+        OUTPUT_FILE="$1"
+        # Add .md extension if not present
+        if [[ "$OUTPUT_FILE" != *.md ]]; then
+            OUTPUT_FILE="${OUTPUT_FILE}.md"
+        fi
     fi
     shift
 done
