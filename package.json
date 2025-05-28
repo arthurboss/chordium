@@ -19,7 +19,8 @@
     "test:unit": "vitest run",
     "backend": "npm run kill-servers && node backend/server.js",
     "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
-    "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e"
+    "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e",
+    "tree": "scripts/git-tree/git-tree.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "5.0.1",
