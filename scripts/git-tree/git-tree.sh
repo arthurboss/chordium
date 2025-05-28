@@ -20,6 +20,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source all utility functions via the central loader
 source "$SCRIPT_DIR/lib/loader.sh"
+
+# Source the prompt_and_cleanup_results utility (ensure it's loaded for all entry scripts)
+source "$SCRIPT_DIR/lib/file/prompt_and_cleanup_results.sh"
+
+# Prompt user to clean up previous results
+prompt_and_cleanup_results
     
 # Colors
 CYAN='\033[0;36m'
@@ -56,15 +62,15 @@ main() {
         echo
     fi
     
-    # Generate auto filename if not provided
+    # Auto-generate output file name if not provided as a flag
     if [[ -z "$output_file" ]]; then
         output_file=$(generate_auto_filename "$target_branch" "$base_branch")
-        echo -e "${CYAN}Auto-generated output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo -e "${CYAN}Auto-generated output filename:${NC} ${MAGENTA}$output_file${NC}"
         echo
     else
         # Ensure .md extension
         output_file=$(ensure_md_extension "$output_file")
-        echo -e "${CYAN}Using specified output file:${NC} ${MAGENTA}$output_file${NC}"
+        echo -e "${CYAN}Using specified output filename:${NC} ${MAGENTA}$output_file${NC}"
         echo
     fi
     
