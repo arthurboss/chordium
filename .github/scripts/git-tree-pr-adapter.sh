@@ -3,11 +3,11 @@
 # GitHub Action Adapter for Git Tree PR Comments
 # 
 # This script adapts our git-tree script for use in GitHub Actions.
-# It handles the GitHub-specific environment setup and generates
-# PR comments using our modern git-tree rendering logic.
+# It uses GitHub API to fetch file changes (compatible with Actions environment)
+# and generates PR comments using our modern git-tree rendering format.
 #
 # Dependencies: 
-# - scripts/git-tree/index.sh (main git-tree script)
+# - curl and jq (for GitHub API calls)
 # - GitHub Action environment variables
 #
 # Environment Variables Required:
@@ -72,44 +72,232 @@ show_environment_info() {
     echo "  Base Branch: $GITHUB_BASE_REF"
 }
 
-# Generate git-tree output using our modern scripts
+# Fetch changed files from GitHub API (GitHub Actions compatible)
+fetch_changed_files_from_api() {
+    log_info "Fetching changed files from GitHub API..."
+    
+    # Fetch changed files from GitHub API
+    local files_response
+    files_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files")
+    
+    # Check curl exit code
+    if [[ $? -ne 0 ]]; then
+        log_error "Failed to fetch files from GitHub API (curl error)"
+        return 1
+    fi
+    
+    # Check if response is empty
+    if [[ -z "$files_response" ]]; then
+        log_error "Empty response from GitHub API"
+        return 1
+    fi
+    
+    # Check if response contains an error
+    if echo "$files_response" | jq -e '.message' > /dev/null 2>&1; then
+        local error_message=$(echo "$files_response" | jq -r '.message')
+        log_error "GitHub API error: $error_message"
+        return 1
+    fi
+    
+    # Parse the response to get file status and names
+    local changed_files
+    changed_files=$(echo "$files_response" | jq -r '.[] | "\(.status) \(.filename)"' 2>/dev/null)
+    
+    # Check jq parsing success
+    if [[ $? -ne 0 ]]; then
+        log_error "Failed to parse GitHub API response with jq"
+        log_info "API Response preview: $(echo "$files_response" | head -c 200)"
+        return 1
+    fi
+    
+    if [[ -z "$changed_files" ]]; then
+        log_warning "No files found in PR"
+        return 1
+    fi
+    
+    log_success "Successfully fetched $(echo "$changed_files" | wc -l | tr -d ' ') changed files"
+    echo "$changed_files"
+    return 0
+}
+
+# Generate git-tree using GitHub API data (GitHub Actions compatible)
 generate_git_tree() {
-    local base_branch="$1"
+    local base_branch="$1" 
     local target_branch="$2"
     local output_file="$3"
     
-    log_info "Generating git-tree for $target_branch vs $base_branch"
+    log_info "Generating git-tree for $target_branch vs $base_branch using GitHub API"
     
-    # Check if git-tree script exists
-    local git_tree_script="./scripts/git-tree/index.sh"
-    if [[ ! -f "$git_tree_script" ]]; then
-        log_error "Git-tree script not found at: $git_tree_script"
-        exit 1
-    fi
-    
-    # Make script executable
-    chmod +x "$git_tree_script"
-    
-    # Generate the tree using our modern script
-    # Use explicit flags to ensure consistent behavior
-    # We'll let it generate to its default location first, then copy to our desired location
-    # Disable interactive prompt by piping "n" to it
-    if echo "n" | "$git_tree_script" --base "$base_branch" --target "$target_branch" --output "$output_file"; then
-        # The script saves to scripts/git-tree/results/ directory
-        local actual_output="./scripts/git-tree/results/$output_file"
-        if [[ -f "$actual_output" ]]; then
-            # Copy to our desired location for the adapter
-            cp "$actual_output" "$output_file"
-            log_success "Git-tree generated successfully and copied to: $output_file"
-            return 0
-        else
-            log_error "Expected output file not found at: $actual_output"
-            return 1
-        fi
-    else
-        log_error "Failed to generate git-tree"
+    # Fetch changed files from GitHub API
+    local changed_files
+    if ! changed_files=$(fetch_changed_files_from_api); then
+        log_error "Failed to fetch changed files"
         return 1
     fi
+    
+    log_info "Found $(echo "$changed_files" | wc -l | tr -d ' ') changed files"
+    
+    # Generate the tree using direct API data (no local git dependencies)
+    generate_tree_from_api_data "$changed_files" "$base_branch" "$target_branch" "$output_file"
+    
+    if [[ -f "$output_file" ]]; then
+        log_success "Git-tree generated successfully from API data"
+        return 0
+    else
+        log_error "Failed to generate git-tree file"
+        return 1
+    fi
+}
+
+# Generate tree from GitHub API file data using modern git-tree rendering logic
+generate_tree_from_api_data() {
+    local changed_files="$1"
+    local base_branch="$2"
+    local target_branch="$3"
+    local output_file="$4"
+    
+    # Get repository name for display
+    local repo_name="${GITHUB_REPOSITORY##*/}"
+    local total_files=$(echo "$changed_files" | wc -l | tr -d ' ')
+    
+    log_info "Generating tree structure for $total_files files using modern git-tree format"
+    
+    # Create file with modern git-tree format but using API data
+    {
+        echo "<!-- filepath: $output_file -->"
+        echo ""
+        echo "# Git Tree: $target_branch vs $base_branch"
+        echo ""
+        echo "**Repository:** [$repo_name](https://github.com/$GITHUB_REPOSITORY)"
+        echo "**Branch:** [$target_branch](https://github.com/$GITHUB_REPOSITORY/tree/$target_branch) vs [$base_branch](https://github.com/$GITHUB_REPOSITORY/tree/$base_branch)"
+        echo "**Files Changed:** $total_files"
+        echo ""
+        echo "---"
+        echo ""
+        
+        # Generate the file tree using blockquote format (modern git-tree style)
+        echo "> ## 📁 File Tree"
+        echo ">"
+        echo "> \`\`\`"
+        echo "> $repo_name/"
+        
+        # Get all unique folders, sorted
+        local folders
+        folders=$(echo "$changed_files" | awk '{print $2}' | grep '/' | sed 's|/[^/]*$||' | sort -u)
+        
+        # First pass: collect all files by folder for proper tree structure
+        declare -A folder_files
+        declare -A root_files_array
+        
+        # Process each file and organize by folder
+        while IFS= read -r line; do
+            [[ -z "$line" ]] && continue
+            local status=$(echo "$line" | awk '{print $1}')
+            local filepath=$(echo "$line" | awk '{print $2}')
+            local filename=$(basename "$filepath")
+            
+            # Get status icon
+            local icon
+            case "$status" in
+                "added") icon="✅" ;;
+                "modified") icon="✏️" ;;
+                "removed") icon="❌" ;;
+                "renamed") icon="🔄" ;;
+                *) icon="📄" ;;
+            esac
+            
+            if [[ "$filepath" == *"/"* ]]; then
+                # File is in a folder
+                local folder_path=$(dirname "$filepath")
+                folder_files["$folder_path"]+="$icon $filename"$'\n'
+            else
+                # Root file
+                root_files_array["$filepath"]="$icon $filepath"
+            fi
+        done <<< "$changed_files"
+        
+        # Generate tree structure for folders
+        if [[ -n "$folders" ]]; then
+            local folder_array=()
+            while IFS= read -r folder; do
+                [[ -n "$folder" ]] && folder_array+=("$folder")
+            done <<< "$folders"
+            
+            # Sort folders for consistent output
+            IFS=$'\n' sorted_folders=($(sort <<<"${folder_array[*]}"))
+            
+            for ((i=0; i<${#sorted_folders[@]}; i++)); do
+                local folder="${sorted_folders[$i]}"
+                local is_last_folder=$((i == ${#sorted_folders[@]} - 1))
+                
+                # Determine tree character for folder
+                local folder_char="├──"
+                if [[ $is_last_folder == 1 && ${#root_files_array[@]} == 0 ]]; then
+                    folder_char="└──"
+                fi
+                
+                echo "> $folder_char 📁 $folder/"
+                
+                # Show files in this folder
+                if [[ -n "${folder_files[$folder]}" ]]; then
+                    local files_in_folder="${folder_files[$folder]}"
+                    local file_lines=()
+                    while IFS= read -r file_line; do
+                        [[ -n "$file_line" ]] && file_lines+=("$file_line")
+                    done <<< "$files_in_folder"
+                    
+                    for ((j=0; j<${#file_lines[@]}; j++)); do
+                        local file_entry="${file_lines[$j]}"
+                        local is_last_file=$((j == ${#file_lines[@]} - 1))
+                        
+                        # Determine tree character for file
+                        local file_char="├──"
+                        if [[ $is_last_file == 1 ]]; then
+                            file_char="└──"
+                        fi
+                        
+                        if [[ $is_last_folder == 1 && ${#root_files_array[@]} == 0 ]]; then
+                            # Last folder and no root files
+                            echo "> │   $file_char $file_entry"
+                        else
+                            # More folders or root files coming
+                            echo "> │   $file_char $file_entry"
+                        fi
+                    done
+                fi
+            done
+        fi
+        
+        # Show root files
+        if [[ ${#root_files_array[@]} -gt 0 ]]; then
+            local root_files_sorted=()
+            for filepath in "${!root_files_array[@]}"; do
+                root_files_sorted+=("$filepath")
+            done
+            IFS=$'\n' root_files_sorted=($(sort <<<"${root_files_sorted[*]}"))
+            
+            for ((i=0; i<${#root_files_sorted[@]}; i++)); do
+                local filepath="${root_files_sorted[$i]}"
+                local file_entry="${root_files_array[$filepath]}"
+                local is_last=$((i == ${#root_files_sorted[@]} - 1))
+                
+                local char="├──"
+                if [[ $is_last == 1 ]]; then
+                    char="└──"
+                fi
+                
+                echo "> $char $file_entry"
+            done
+        fi
+        
+        echo "> \`\`\`"
+        echo ">"
+        echo "> **Legend:** ✅ Added • ✏️ Modified • ❌ Deleted • 🔄 Renamed"
+        
+    } > "$output_file"
+    
+    log_success "Generated modern git-tree structure with $total_files files"
 }
 
 # Convert git-tree markdown to GitHub PR comment format
