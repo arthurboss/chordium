@@ -90,17 +90,10 @@ main() {
     
     echo
     echo -e "${CYAN}🔍 Git File Tree Generation${NC}"
-    echo
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo
     echo -e "${CYAN}📁 Project:${NC} ${MAGENTA}$project_name${NC}"
-    echo
     echo -e "${CYAN}🎯 Target:${NC} ${MAGENTA}$target_branch${NC}"
-    echo
     echo -e "${CYAN}📍 Base:${NC} ${MAGENTA}$base_branch${NC}"
-    echo
-    echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$output_file${NC}"
-    echo
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo
     
@@ -114,8 +107,6 @@ main() {
         echo -e "${CYAN}📊 Total files changed:${NC} ${MAGENTA}$total_files${NC}"
         echo
         echo -e "${CYAN}🔄 Comparison:${NC} ${MAGENTA}$target_branch${NC} ${CYAN}vs${NC} ${MAGENTA}$base_branch${NC}"
-        echo
-        echo -e "${CYAN}🎉 Ready for PR comments or documentation!${NC}"
         echo
     else
         echo -e "${CYAN}❌ No changes found between ${MAGENTA}$target_branch${CYAN} and ${MAGENTA}$base_branch${NC}"
