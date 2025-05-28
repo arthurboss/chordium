@@ -17,6 +17,6 @@ show_standalone_usage() {
     echo "  $0 main compare.md    # Compare current vs main, output to file"
     echo ""
     echo "AUTO-GENERATED FILENAME FORMAT:"
-    echo "  file-tree_<current>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
+    echo "  git-tree_<current>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
     echo ""
 }

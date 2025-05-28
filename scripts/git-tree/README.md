@@ -34,10 +34,10 @@ Generates visual file tree representations of git changes between branches, perf
 ### File Location
 All generated files are automatically saved to the `results/` directory within the git-tree folder:
 ```
-scripts/git-tree/results/file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md
+scripts/git-tree/results/git-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md
 ```
 
-Example: `scripts/git-tree/results/file-tree_feat--search-vs-main_2025-05-28_14-30-25.md`
+Example: `scripts/git-tree/results/git-tree_feat--search-vs-main_2025-05-28_14-30-25.md`
 
 ### File Content
 Contains:

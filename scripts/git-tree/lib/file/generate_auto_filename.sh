@@ -10,5 +10,5 @@ generate_auto_filename() {
     local safe_target=$(echo "$target_branch" | sed 's/[\/:]/-/g')
     local safe_base=$(echo "$base_branch" | sed 's/[\/:]/-/g')
     
-    echo "results/file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
+    echo "results/git-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
 }

@@ -23,6 +23,6 @@ show_usage() {
     echo "  $0 main compare.md                   # Legacy: compare current vs main, output to file"
     echo ""
     echo "AUTO-GENERATED FILENAME FORMAT:"
-    echo "  file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
+    echo "  git-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
     echo ""
 }
