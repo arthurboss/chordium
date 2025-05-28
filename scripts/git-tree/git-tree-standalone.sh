@@ -68,16 +68,39 @@ detect_base_branch() {
     fi
 }
 
+# Function to ensure output file has .md extension
+ensure_md_extension() {
+    local filename="$1"
+    if [[ "$filename" != *.md ]]; then
+        echo "${filename}.md"
+    else
+        echo "$filename"
+    fi
+}
+
+# Function to generate auto filename
+generate_auto_filename() {
+    local current_branch=$(git branch --show-current)
+    local base_branch="$1"
+    local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+    
+    # Sanitize branch names for filename (replace / with -)
+    local safe_current=$(echo "$current_branch" | sed 's/[\/:]/-/g')
+    local safe_base=$(echo "$base_branch" | sed 's/[\/:]/-/g')
+    
+    echo "file-tree_${safe_current}-vs-${safe_base}_${timestamp}.md"
+}
+
 # Parse arguments
 BASE_BRANCH=""
-OUTPUT_FILE="test-output-final-structure.md"
+OUTPUT_FILE=""
 
 # Process arguments
 while [[ $# -gt 0 ]]; do
     if [[ -z "$BASE_BRANCH" ]]; then
         BASE_BRANCH="$1"
-    elif [[ "$OUTPUT_FILE" == "test-output-final-structure.md" ]]; then
-        OUTPUT_FILE="$1"
+    elif [[ -z "$OUTPUT_FILE" ]]; then
+        OUTPUT_FILE=$(ensure_md_extension "$1")
     fi
     shift
 done
@@ -88,6 +111,14 @@ if [[ -z "$BASE_BRANCH" ]]; then
     echo "Auto-detected base branch: $BASE_BRANCH"
 else
     echo "Using specified base branch: $BASE_BRANCH"
+fi
+
+# Auto-generate output file if not provided
+if [[ -z "$OUTPUT_FILE" ]]; then
+    OUTPUT_FILE=$(generate_auto_filename "$BASE_BRANCH")
+    echo "Auto-generated output file: $OUTPUT_FILE"
+else
+    echo "Using specified output file: $OUTPUT_FILE"
 fi
 
 echo "Comparing current branch against: $BASE_BRANCH"

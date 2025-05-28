@@ -17,7 +17,7 @@
 
 # Source the render functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/render-file-tree.sh"
+source "$SCRIPT_DIR/git-tree-render.sh"
 
 # Function to show usage information
 show_usage() {
@@ -42,7 +42,7 @@ show_usage() {
     echo "  $0 main compare.md                   # Legacy: compare current vs main, output to file"
     echo ""
     echo "AUTO-GENERATED FILENAME FORMAT:"
-    echo "  tree-<target>-vs-<base>-YYYYMMDD-HHMMSS.md"
+    echo "  file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
     echo ""
 }
 
@@ -50,13 +50,23 @@ show_usage() {
 generate_auto_filename() {
     local target_branch="$1"
     local base_branch="$2"
-    local timestamp=$(date +"%Y%m%d-%H%M%S")
+    local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
     
     # Sanitize branch names for filename (replace / with -)
     local safe_target=$(echo "$target_branch" | sed 's/[\/:]/-/g')
     local safe_base=$(echo "$base_branch" | sed 's/[\/:]/-/g')
     
-    echo "tree-${safe_target}-vs-${safe_base}-${timestamp}.md"
+    echo "file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
+}
+
+# Function to ensure output file has .md extension
+ensure_md_extension() {
+    local filename="$1"
+    if [[ "$filename" != *.md ]]; then
+        echo "${filename}.md"
+    else
+        echo "$filename"
+    fi
 }
 
 # Function to parse modern command line arguments
@@ -76,7 +86,7 @@ parse_arguments() {
                 shift 2
                 ;;
             --output)
-                output_file="$2"
+                output_file=$(ensure_md_extension "$2")
                 shift 2
                 ;;
             --help|-h)
@@ -95,12 +105,12 @@ parse_arguments() {
                 elif [[ -z "$target_branch" ]]; then
                     # Check if this looks like a filename (ends in .md)
                     if [[ "$1" == *.md ]]; then
-                        output_file="$1"
+                        output_file=$(ensure_md_extension "$1")
                     else
                         target_branch="$1"
                     fi
                 elif [[ -z "$output_file" ]]; then
-                    output_file="$1"
+                    output_file=$(ensure_md_extension "$1")
                 else
                     echo "Error: Too many arguments"
                     echo "Use --help for usage information"
