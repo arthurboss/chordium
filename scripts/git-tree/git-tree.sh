@@ -15,211 +15,12 @@
 #
 # Auto-generated filename pattern: tree-<target>-vs-<base>-YYYYMMDD-HHMMSS.md
 
-# Source the render functions
+# Get the directory of this script for relative imports
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/git-tree-render.sh"
 
-# Function to show usage information
-show_usage() {
-    echo "Git File Tree Generator - Generate markdown file trees for git changes"
-    echo ""
-    echo "USAGE:"
-    echo "  $0 [--base BASE_BRANCH] [--target TARGET_BRANCH] [--output OUTPUT_FILE]"
-    echo "  $0 [base_branch] [target_branch] [output_file]  # Legacy format"
-    echo ""
-    echo "FLAGS:"
-    echo "  --base BRANCH     Base branch to compare against (auto-detected if not specified)"
-    echo "  --target BRANCH   Target branch to compare (defaults to current branch)"
-    echo "  --output FILE     Output markdown file (auto-generated if not specified)"
-    echo "  --help, -h        Show this help message"
-    echo ""
-    echo "EXAMPLES:"
-    echo "  $0                                    # Auto-detect everything"
-    echo "  $0 --base main                       # Compare current branch vs main"
-    echo "  $0 --base main --target feat/search  # Compare specific branches"
-    echo "  $0 --output my-tree.md               # Custom output filename"
-    echo "  $0 main feat/search                  # Legacy: compare main vs feat/search"
-    echo "  $0 main compare.md                   # Legacy: compare current vs main, output to file"
-    echo ""
-    echo "AUTO-GENERATED FILENAME FORMAT:"
-    echo "  file-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md"
-    echo ""
-}
-
-# Function to generate auto filename
-generate_auto_filename() {
-    local target_branch="$1"
-    local base_branch="$2"
-    local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+# Source all utility functions via the central loader
+source "$SCRIPT_DIR/lib/loader.sh"
     
-    # Sanitize branch names for filename (replace / with -)
-    local safe_target=$(echo "$target_branch" | sed 's/[\/:]/-/g')
-    local safe_base=$(echo "$base_branch" | sed 's/[\/:]/-/g')
-    
-    echo "results/file-tree_${safe_target}-vs-${safe_base}_${timestamp}.md"
-}
-
-# Function to ensure results directory exists
-ensure_results_directory() {
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local results_dir="${script_dir}/results"
-    
-    if [[ ! -d "$results_dir" ]]; then
-        mkdir -p "$results_dir"
-        echo "📁 Created results directory: $results_dir"
-    fi
-}
-
-# Function to resolve output file path
-resolve_output_path() {
-    local output_file="$1"
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    
-    # If output file doesn't start with results/, add the results/ prefix
-    if [[ "$output_file" != results/* ]]; then
-        output_file="results/${output_file}"
-    fi
-    
-    # Convert to absolute path
-    echo "${script_dir}/${output_file}"
-}
-
-# Function to parse modern command line arguments
-parse_arguments() {
-    base_branch=""
-    target_branch=""
-    output_file=""
-    
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --base)
-                base_branch="$2"
-                shift 2
-                ;;
-            --target)
-                target_branch="$2"
-                shift 2
-                ;;
-            --output)
-                output_file="$2"
-                # Add .md extension if not present
-                if [[ "$output_file" != *.md ]]; then
-                    output_file="${output_file}.md"
-                fi
-                shift 2
-                ;;
-            --help|-h)
-                show_usage
-                exit 0
-                ;;
-            --*)
-                echo "Error: Unknown flag '$1'"
-                echo "Use --help for usage information"
-                exit 1
-                ;;
-            *)
-                # Legacy positional arguments
-                if [[ -z "$base_branch" ]]; then
-                    base_branch="$1"
-                elif [[ -z "$target_branch" ]]; then
-                    # For legacy usage: if only 2 args provided, treat second as output file
-                    # If 3 args provided, treat second as target branch
-                    if [[ $# -eq 1 ]]; then
-                        # Second argument with only 2 total args = output file
-                        output_file="$1"
-                        # Add .md extension if not present
-                        if [[ "$output_file" != *.md ]]; then
-                            output_file="${output_file}.md"
-                        fi
-                    else
-                        # More arguments coming, this is target branch
-                        target_branch="$1"
-                    fi
-                elif [[ -z "$output_file" ]]; then
-                    output_file="$1"
-                    # Add .md extension if not present
-                    if [[ "$output_file" != *.md ]]; then
-                        output_file="${output_file}.md"
-                    fi
-                else
-                    echo "Error: Too many arguments"
-                    echo "Use --help for usage information"
-                    exit 1
-                fi
-                shift
-                ;;
-        esac
-    done
-}
-# Function to automatically detect the base branch
-detect_base_branch() {
-    local target_branch="${1:-$(git branch --show-current)}"
-    
-    # If target is main/master, there's nothing to compare
-    if [[ "$target_branch" == "main" || "$target_branch" == "master" ]]; then
-        echo "main"
-        return
-    fi
-    
-    # Look for "Merge branch" patterns in recent commits of the target branch
-    local merge_pattern=$(git log --oneline -20 "$target_branch" 2>/dev/null | grep "Merge branch" | head -1)
-    if [[ -n "$merge_pattern" ]]; then
-        # Extract the branch name from merge commit message
-        # Pattern: "Merge branch 'source-branch' into target-branch"
-        local source_branch=$(echo "$merge_pattern" | sed -n "s/.*Merge branch '\([^']*\)'.*/\1/p")
-        if [[ -n "$source_branch" && "$source_branch" != "$target_branch" ]]; then
-            # Check if this branch exists and is different from target
-            if git show-ref --verify --quiet "refs/heads/$source_branch"; then
-                echo "$source_branch"
-                return
-            fi
-        fi
-    fi
-    
-    # Strategy: Find branches that are ancestors of the target branch
-    local best_branch=""
-    local best_distance=999999
-    
-    while IFS= read -r branch; do
-        branch=$(echo "$branch" | sed 's/^[* ] *//' | sed 's/ .*//')
-        
-        # Skip target branch, main, master, remote branches, and cache branches
-        if [[ "$branch" == "$target_branch" || "$branch" == "main" || "$branch" == "master" || "$branch" =~ ^remotes/ || "$branch" =~ cache ]]; then
-            continue
-        fi
-        
-        # Skip if branch doesn't exist
-        if ! git show-ref --verify --quiet "refs/heads/$branch"; then
-            continue
-        fi
-        
-        # Check if this branch is an ancestor of target branch
-        if git merge-base --is-ancestor "$branch" "$target_branch" 2>/dev/null; then
-            # Calculate distance (number of commits) from this branch to target
-            local distance=$(git rev-list --count "$branch".."$target_branch" 2>/dev/null)
-            if [[ -n "$distance" && "$distance" -lt "$best_distance" && "$distance" -gt 0 ]]; then
-                best_distance="$distance"
-                best_branch="$branch"
-            fi
-        fi
-    done <<< "$(git branch 2>/dev/null)"
-    
-    # If we found a good candidate, use it
-    if [[ -n "$best_branch" ]]; then
-        echo "$best_branch"
-        return
-    fi
-    
-    # Fallback to main/master
-    if git show-ref --verify --quiet refs/heads/main; then
-        echo "main"
-    elif git show-ref --verify --quiet refs/heads/master; then
-        echo "master"
-    else
-        echo "HEAD~1"  # Compare with previous commit
-    fi
-}
-
 # Main script logic
 main() {
     # Check if we're in a git repository
@@ -233,7 +34,7 @@ main() {
     
     # Set defaults for target branch (current branch if not specified)
     if [[ -z "$target_branch" ]]; then
-        target_branch=$(git branch --show-current)
+        target_branch=$(get_current_branch)
         if [[ -z "$target_branch" ]]; then
             echo "Error: Could not determine current branch"
             exit 1
@@ -253,6 +54,8 @@ main() {
         output_file=$(generate_auto_filename "$target_branch" "$base_branch")
         echo "Auto-generated output file: $output_file"
     else
+        # Ensure .md extension
+        output_file=$(ensure_md_extension "$output_file")
         echo "Using specified output file: $output_file"
     fi
     
@@ -261,13 +64,13 @@ main() {
     output_file=$(resolve_output_path "$output_file")
     
     # Verify base branch exists (unless it's HEAD~1)
-    if [[ "$base_branch" != "HEAD~1" ]] && ! git show-ref --verify --quiet "refs/heads/$base_branch"; then
+    if [[ "$base_branch" != "HEAD~1" ]] && ! branch_exists_locally "$base_branch"; then
         echo "Error: Base branch '$base_branch' does not exist"
         exit 1
     fi
     
     # Verify target branch exists
-    if ! git show-ref --verify --quiet "refs/heads/$target_branch"; then
+    if ! branch_exists_locally "$target_branch"; then
         echo "Error: Target branch '$target_branch' does not exist"
         exit 1
     fi

@@ -1,77 +1,25 @@
 #!/bin/bash
 
-# Standalone script for generating file tree structure based on real git changes
-# Self-contained version with all required functions included
-# 
-# Usage: 
-#   ./git-tree-standalone.sh [base_branch] [output_file]
-# 
-# Examples:
-#   ./git-tree-standalone.sh
-#   ./git-tree-standalone.sh main
-#   ./git-tree-standalone.sh main compare-output.md
-
-# Get the directory of this script for relative imports
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Source all utility functions via the central loader
-source "$SCRIPT_DIR/lib/loader.sh"
-
-# Main standalone script logic
-main() {
-    # Check for help flag first
-    if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-        show_standalone_usage
-        exit 0
-    fi
+# Function to render the file tree structure
+render_file_tree() {
+    local base_branch="$1"
+    local output_file="$2"
+    local target_branch="$3"
+    local project_name="$4"
     
-    # Check if we're in a git repository
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "Error: Not in a git repository"
-        exit 1
-    fi
+    # Source dependencies
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/../project/get_status_icon.sh"
+    source "$SCRIPT_DIR/../github/format_branch_name.sh"
+    source "$SCRIPT_DIR/render_file_summary.sh"
     
-    # Parse legacy arguments
-    parse_legacy_arguments "$@"
-    local base_branch="$PARSED_BASE_BRANCH"
-    local output_file="$PARSED_OUTPUT_FILE"
-    
-    # Auto-detect base branch if not provided
-    if [[ -z "$base_branch" ]]; then
-        base_branch=$(detect_base_branch)
-        echo "Auto-detected base branch: $base_branch"
-    else
-        echo "Using specified base branch: $base_branch"
-    fi
-    
-    # Auto-generate output file if not provided
-    if [[ -z "$output_file" ]]; then
-        local current_branch=$(get_current_branch)
-        output_file=$(generate_auto_filename "$current_branch" "$base_branch")
-        echo "Auto-generated output file: $output_file"
-    else
-        # Ensure .md extension
-        output_file=$(ensure_md_extension "$output_file")
-        echo "Using specified output file: $output_file"
-    fi
-    
-    # Ensure results directory exists and resolve full output path
-    ensure_results_directory
-    output_file=$(resolve_output_path "$output_file")
-    
-    local current_branch=$(get_current_branch)
-    local project_name=$(get_project_name)
-    
-    echo "Comparing current branch against: $base_branch"
-    echo "Output file: $output_file"
-    
-    # Get all changed files and count them (comparing current against base)
-    local all_files=$(git diff --name-status $base_branch...HEAD)
+    # Get all changed files and count them (comparing target against base)
+    local all_files=$(git diff --name-status $base_branch...$target_branch)
     local total_files=$(echo "$all_files" | wc -l | tr -d ' ')
     
     # Handle empty result
     if [[ -z "$all_files" || "$total_files" -eq 0 ]]; then
-        echo "No files changed between HEAD and $base_branch"
+        echo "No files changed between $target_branch and $base_branch"
         return 1
     fi
     
@@ -80,9 +28,9 @@ main() {
     echo "" >> "$output_file"
     
     # Format branch names with links if they exist on remote
-    local formatted_current_branch=$(format_branch_name "$current_branch")
+    local formatted_target_branch=$(format_branch_name "$target_branch")
     local formatted_base_branch=$(format_branch_name "$base_branch")
-    echo "$formatted_current_branch vs $formatted_base_branch" >> "$output_file"
+    echo "$formatted_target_branch vs $formatted_base_branch" >> "$output_file"
     echo "" >> "$output_file"
     echo "> <details open>" >> "$output_file"
     echo "> <summary>" >> "$output_file"
@@ -189,12 +137,5 @@ main() {
     # Add file summary sections
     render_file_summary "$base_branch" "$output_file" "$all_files"
     
-    echo "File tree generated successfully in $output_file"
-    echo "Total files: $total_files"
-    echo "Comparison: $current_branch vs $base_branch"
-    
     return 0
 }
-
-# Run main function with all arguments
-main "$@"
