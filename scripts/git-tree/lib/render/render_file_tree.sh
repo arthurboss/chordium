@@ -39,6 +39,20 @@ render_file_tree() {
     echo "> </summary>" >> "$output_file"
     echo ">" >> "$output_file"
 
+    # Calculate relative path from output file location to git root dynamically
+    local git_root=$(git rev-parse --show-toplevel)
+    local output_dir=$(dirname "$output_file")
+    
+    # Use Python to calculate the relative path from output directory to git root
+    local relative_prefix=$(python3 -c "import os; print(os.path.relpath('$git_root', '$output_dir'))" 2>/dev/null)
+    
+    # Fallback if Python fails or returns empty
+    if [[ -z "$relative_prefix" || "$relative_prefix" == "." ]]; then
+        relative_prefix=""
+    else
+        relative_prefix="$relative_prefix/"
+    fi
+
     # Get list of all folders that have changed files (dynamically)
     local folders_with_files=()
     local all_changed_folders=$(echo "$all_files" | grep -v "^[AMD][[:space:]]*[^/]*$" | sed 's|^[AMD][[:space:]]*\([^/]*\)/.*|\1|' | sort -u)
@@ -56,8 +70,6 @@ render_file_tree() {
         fi
     done <<< "$all_changed_folders"
 
-    echo "> <div>" >> "$output_file"
-
     # Process files in root folder first
     if [[ " ${folders_with_files[@]} " =~ " . " ]]; then
         # Get root files and convert to array to check last file
@@ -72,20 +84,21 @@ render_file_tree() {
         for i in "${!root_files_array[@]}"; do
             local file_line="${root_files_array[$i]}"
             local status=$(echo "$file_line" | awk '{print $1}')
-            local filename=$(echo "$file_line" | awk '{print $2}')
+            local filepath=$(echo "$file_line" | awk '{print $2}')
+            local filename=$(basename "$filepath")
             local icon=$(get_status_icon "$status")
+            
+            # Create markdown link with relative path from current directory
+            local file_link="[$filename]($relative_prefix$filepath)"
             
             # Check if this is the last root file
             if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then
-                echo "> &emsp;&#9493;$icon $filename" >> "$output_file"
+                echo "> &emsp;&#9493;$icon $file_link" >> "$output_file"
             else
-                echo "> &emsp;&#9501;$icon $filename<br>" >> "$output_file"
+                echo "> &emsp;&#9501;$icon $file_link<br>" >> "$output_file"
             fi
         done
     fi
-
-    echo "> </div>" >> "$output_file"
-    echo ">" >> "$output_file"
 
     # Process each folder
     for folder in "${folders_with_files[@]}"; do
@@ -99,7 +112,6 @@ render_file_tree() {
         echo "> &#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
         echo "> </summary>" >> "$output_file"
         echo ">" >> "$output_file"
-        echo "> <div>" >> "$output_file"
         
         # Get files for this folder, sorted alphabetically by filename
         local folder_files=$(echo "$all_files" | sort -k2 | grep "^[AMD][[:space:]]*$folder/")
@@ -120,15 +132,17 @@ render_file_tree() {
             local filename=$(basename "$filepath")
             local icon=$(get_status_icon "$status")
             
+            # Create markdown link with relative path from current directory
+            local file_link="[$filename]($relative_prefix$filepath)"
+            
             # Check if this is the last file
             if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then
-                echo "> &emsp;&emsp;&#9493;$icon $filename" >> "$output_file"
+                echo "> &emsp;&emsp;&#9493;$icon $file_link" >> "$output_file"
             else
-                echo "> &emsp;&emsp;&#9501;$icon $filename<br>" >> "$output_file"
+                echo "> &emsp;&emsp;&#9501;$icon $file_link<br>" >> "$output_file"
             fi
         done
         
-        echo "> </div>" >> "$output_file"
         echo "> </details>" >> "$output_file"
         echo ">" >> "$output_file"
     done

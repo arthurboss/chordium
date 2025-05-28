@@ -106,7 +106,12 @@ main() {
         echo -e "${CYAN}✅ File tree generated successfully!${NC}"
         echo
         # Display relative path from current working directory so it's clickable
-        local relative_output_file="${output_file#$PWD/}"
+        local current_dir=$(pwd)
+        local relative_output_file=$(python3 -c "import os; print(os.path.relpath('$output_file', '$current_dir'))" 2>/dev/null)
+        if [[ -z "$relative_output_file" ]]; then
+            # Fallback if Python fails
+            relative_output_file="${output_file#$PWD/}"
+        fi
         echo -e "${CYAN}📄 Output:${NC} ${MAGENTA}$relative_output_file${NC}"
         echo
     else
