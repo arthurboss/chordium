@@ -150,154 +150,176 @@ generate_git_tree() {
     fi
 }
 
-# Generate tree from GitHub API file data using modern git-tree rendering logic
+# Generate tree from GitHub API file data using exact git-tree rendering format
 generate_tree_from_api_data() {
     local changed_files="$1"
     local base_branch="$2"
     local target_branch="$3"
     local output_file="$4"
     
-    # Get repository name for display
+    # Source URL generator utility
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$script_dir/lib/url_generator.sh"
+    
+    # Get repository URL and name
+    local repo_url="https://github.com/$GITHUB_REPOSITORY"
     local repo_name="${GITHUB_REPOSITORY##*/}"
     local total_files=$(echo "$changed_files" | wc -l | tr -d ' ')
     
-    log_info "Generating tree structure for $total_files files using modern git-tree format"
+    log_info "Generating tree structure for $total_files files using exact git-tree format"
     
-    # Create file with modern git-tree format but using API data
+    # Create file with exact git-tree format but using GitHub URLs
     {
         echo "<!-- filepath: $output_file -->"
+        echo "## 🔄 Changed Files ($total_files total)"
         echo ""
-        echo "# Git Tree: $target_branch vs $base_branch"
+        echo "**[\`$base_branch\`]($repo_url/tree/$base_branch)** &#8592; **[\`$target_branch\`]($repo_url/tree/$target_branch)**"
         echo ""
-        echo "**Repository:** [$repo_name](https://github.com/$GITHUB_REPOSITORY)"
-        echo "**Branch:** [$target_branch](https://github.com/$GITHUB_REPOSITORY/tree/$target_branch) vs [$base_branch](https://github.com/$GITHUB_REPOSITORY/tree/$base_branch)"
-        echo "**Files Changed:** $total_files"
-        echo ""
-        echo "---"
-        echo ""
-        
-        # Generate the file tree using blockquote format (modern git-tree style)
-        echo "> ## 📁 File Tree"
+        echo "> <details open>"
+        echo "> <summary>"
+        echo "> <strong>🏠 $repo_name</strong>"
+        echo "> </summary>"
         echo ">"
-        echo "> \`\`\`"
-        echo "> $repo_name/"
         
-        # Get all unique folders, sorted
-        local folders
-        folders=$(echo "$changed_files" | awk '{print $2}' | grep '/' | sed 's|/[^/]*$||' | sort -u)
+        # Collect all files by folder for proper tree structure
+        # Use arrays and string processing instead of associative arrays for compatibility
+        local all_folders_list=""
+        local root_files_list=""
         
-        # First pass: collect all files by folder for proper tree structure
-        declare -A folder_files
-        declare -A root_files_array
-        
-        # Process each file and organize by folder
+        # First pass: collect folders and root files
         while IFS= read -r line; do
             [[ -z "$line" ]] && continue
             local status=$(echo "$line" | awk '{print $1}')
             local filepath=$(echo "$line" | awk '{print $2}')
-            local filename=$(basename "$filepath")
-            
-            # Get status icon
-            local icon
-            case "$status" in
-                "added") icon="✅" ;;
-                "modified") icon="✏️" ;;
-                "removed") icon="❌" ;;
-                "renamed") icon="🔄" ;;
-                *) icon="📄" ;;
-            esac
             
             if [[ "$filepath" == *"/"* ]]; then
                 # File is in a folder
                 local folder_path=$(dirname "$filepath")
-                folder_files["$folder_path"]+="$icon $filename"$'\n'
+                # Add folder to list if not already present
+                if [[ ! "$all_folders_list" == *"$folder_path"$'\n'* && ! "$all_folders_list" == "$folder_path" ]]; then
+                    all_folders_list="${all_folders_list}${folder_path}"$'\n'
+                fi
             else
                 # Root file
-                root_files_array["$filepath"]="$icon $filepath"
+                root_files_list="${root_files_list}${status} ${filepath}"$'\n'
             fi
         done <<< "$changed_files"
         
-        # Generate tree structure for folders
-        if [[ -n "$folders" ]]; then
-            local folder_array=()
+        # Function to get status icon
+        get_status_icon() {
+            case "$1" in
+                "added") echo "✅" ;;
+                "modified") echo "✏️" ;;
+                "removed") echo "❌" ;;
+                "renamed") echo "🔄" ;;
+                *) echo "📄" ;;
+            esac
+        }
+        
+        # Function to get files for a specific folder
+        get_folder_files() {
+            local target_folder="$1"
+            local result=""
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                local status=$(echo "$line" | awk '{print $1}')
+                local filepath=$(echo "$line" | awk '{print $2}')
+                
+                if [[ "$filepath" == *"/"* ]]; then
+                    local folder_path=$(dirname "$filepath")
+                    if [[ "$folder_path" == "$target_folder" ]]; then
+                        result="${result}${status} ${filepath}"$'\n'
+                    fi
+                fi
+            done <<< "$changed_files"
+            echo "$result"
+        }
+        
+        # Sort and render root files first
+        if [[ -n "$root_files_list" ]]; then
+            local root_files_sorted
+            root_files_sorted=$(echo "$root_files_list" | grep -v '^$' | sort)
+            
+            local root_files_array=()
+            while IFS= read -r file_line; do
+                [[ -n "$file_line" ]] && root_files_array+=("$file_line")
+            done <<< "$root_files_sorted"
+            
+            local all_folders_count
+            all_folders_count=$(echo "$all_folders_list" | grep -v '^$' | wc -l | tr -d ' ')
+            
+            for ((i=0; i<${#root_files_array[@]}; i++)); do
+                local file_line="${root_files_array[$i]}"
+                local status=$(echo "$file_line" | awk '{print $1}')
+                local filepath=$(echo "$file_line" | awk '{print $2}')
+                local icon=$(get_status_icon "$status")
+                local file_link=$(create_markdown_link "$filepath" "github" "$repo_url" "$target_branch")
+                
+                # Use different connector for last file if no folders follow
+                if [[ $i -eq $((${#root_files_array[@]} - 1)) && $all_folders_count -eq 0 ]]; then
+                    echo "> &emsp;&#9493;$icon $file_link"
+                else
+                    echo "> &emsp;&#9501;$icon $file_link<br>"
+                fi
+            done
+        fi
+        
+        # Sort and render folders
+        if [[ -n "$all_folders_list" ]]; then
+            local sorted_folders
+            sorted_folders=$(echo "$all_folders_list" | grep -v '^$' | sort)
+            
+            local folders_array=()
             while IFS= read -r folder; do
-                [[ -n "$folder" ]] && folder_array+=("$folder")
-            done <<< "$folders"
+                [[ -n "$folder" ]] && folders_array+=("$folder")
+            done <<< "$sorted_folders"
             
-            # Sort folders for consistent output
-            IFS=$'\n' sorted_folders=($(sort <<<"${folder_array[*]}"))
-            
-            for ((i=0; i<${#sorted_folders[@]}; i++)); do
-                local folder="${sorted_folders[$i]}"
-                local is_last_folder=$((i == ${#sorted_folders[@]} - 1))
+            for ((folder_idx=0; folder_idx<${#folders_array[@]}; folder_idx++)); do
+                local folder="${folders_array[$folder_idx]}"
+                local is_last_folder=$((folder_idx == ${#folders_array[@]} - 1))
                 
-                # Determine tree character for folder
-                local folder_char="├──"
-                if [[ $is_last_folder == 1 && ${#root_files_array[@]} == 0 ]]; then
-                    folder_char="└──"
-                fi
+                echo "> <!-- $folder folder -->"
+                echo "> <details>"
+                echo "> <summary>"
+                echo "> &#9492;<strong>🗂️ $folder</strong>"
+                echo "> </summary>"
+                echo ">"
                 
-                echo "> $folder_char 📁 $folder/"
+                # Get files for this folder and sort them
+                local folder_files_raw
+                folder_files_raw=$(get_folder_files "$folder")
                 
-                # Show files in this folder
-                if [[ -n "${folder_files[$folder]}" ]]; then
-                    local files_in_folder="${folder_files[$folder]}"
-                    local file_lines=()
-                    while IFS= read -r file_line; do
-                        [[ -n "$file_line" ]] && file_lines+=("$file_line")
-                    done <<< "$files_in_folder"
+                local folder_files_array=()
+                while IFS= read -r file_line; do
+                    [[ -n "$file_line" ]] && folder_files_array+=("$file_line")
+                done <<< "$(echo "$folder_files_raw" | grep -v '^$' | sort)"
+                
+                # Render files in folder
+                for ((file_idx=0; file_idx<${#folder_files_array[@]}; file_idx++)); do
+                    local file_line="${folder_files_array[$file_idx]}"
+                    local status=$(echo "$file_line" | awk '{print $1}')
+                    local filepath=$(echo "$file_line" | awk '{print $2}')
+                    local icon=$(get_status_icon "$status")
+                    local file_link=$(create_markdown_link "$filepath" "github" "$repo_url" "$target_branch")
                     
-                    for ((j=0; j<${#file_lines[@]}; j++)); do
-                        local file_entry="${file_lines[$j]}"
-                        local is_last_file=$((j == ${#file_lines[@]} - 1))
-                        
-                        # Determine tree character for file
-                        local file_char="├──"
-                        if [[ $is_last_file == 1 ]]; then
-                            file_char="└──"
-                        fi
-                        
-                        if [[ $is_last_folder == 1 && ${#root_files_array[@]} == 0 ]]; then
-                            # Last folder and no root files
-                            echo "> │   $file_char $file_entry"
-                        else
-                            # More folders or root files coming
-                            echo "> │   $file_char $file_entry"
-                        fi
-                    done
-                fi
+                    # Use different connector for last file
+                    if [[ $file_idx -eq $((${#folder_files_array[@]} - 1)) ]]; then
+                        echo "> &emsp;&emsp;&#9493;$icon $file_link"
+                    else
+                        echo "> &emsp;&emsp;&#9501;$icon $file_link<br>"
+                    fi
+                done
+                
+                echo "> </details>"
+                echo ">"
             done
         fi
         
-        # Show root files
-        if [[ ${#root_files_array[@]} -gt 0 ]]; then
-            local root_files_sorted=()
-            for filepath in "${!root_files_array[@]}"; do
-                root_files_sorted+=("$filepath")
-            done
-            IFS=$'\n' root_files_sorted=($(sort <<<"${root_files_sorted[*]}"))
-            
-            for ((i=0; i<${#root_files_sorted[@]}; i++)); do
-                local filepath="${root_files_sorted[$i]}"
-                local file_entry="${root_files_array[$filepath]}"
-                local is_last=$((i == ${#root_files_sorted[@]} - 1))
-                
-                local char="├──"
-                if [[ $is_last == 1 ]]; then
-                    char="└──"
-                fi
-                
-                echo "> $char $file_entry"
-            done
-        fi
-        
-        echo "> \`\`\`"
-        echo ">"
-        echo "> **Legend:** ✅ Added • ✏️ Modified • ❌ Deleted • 🔄 Renamed"
+        echo "> </details>"
         
     } > "$output_file"
     
-    log_success "Generated modern git-tree structure with $total_files files"
+    log_success "Generated exact git-tree structure with $total_files files and GitHub URLs"
 }
 
 # Convert git-tree markdown to GitHub PR comment format
