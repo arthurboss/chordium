@@ -13,7 +13,7 @@ render_root_files() {
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     source "$script_dir/../../project/get_status_icon.sh"
     source "$script_dir/file_processor.sh"
-    source "$script_dir/path_calculator.sh"
+    source "$script_dir/create_markdown_link.sh"
     
     # Get root files
     local root_files=$(get_root_files "$all_files")

@@ -121,13 +121,13 @@ fetch_changed_files_from_api() {
     return 0
 }
 
-# Generate git-tree using GitHub API data (GitHub Actions compatible)
+# Generate git-tree using GitHub API data and existing render functions
 generate_git_tree() {
     local base_branch="$1" 
     local target_branch="$2"
     local output_file="$3"
     
-    log_info "Generating git-tree for $target_branch vs $base_branch using GitHub API"
+    log_info "Generating git-tree for $target_branch vs $base_branch using existing render functions"
     
     # Fetch changed files from GitHub API
     local changed_files
@@ -138,188 +138,48 @@ generate_git_tree() {
     
     log_info "Found $(echo "$changed_files" | wc -l | tr -d ' ') changed files"
     
-    # Generate the tree using direct API data (no local git dependencies)
-    generate_tree_from_api_data "$changed_files" "$base_branch" "$target_branch" "$output_file"
+    # Convert GitHub API data to git diff format
+    source "$(dirname "${BASH_SOURCE[0]}")/lib/api_converter.sh"
+    local git_diff_data
+    git_diff_data=$(convert_github_api_to_git_diff "$changed_files")
+    
+    # Source GitHub adapters to override git-tree functions with GitHub URL support
+    source "$(dirname "${BASH_SOURCE[0]}")/lib/github_link_adapter.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/lib/github_branch_adapter.sh"
+    
+    # Create a temporary function that returns our API data instead of calling git diff
+    mock_git_diff() {
+        echo "$git_diff_data"
+    }
+    
+    # Override git command temporarily
+    git() {
+        if [[ "$1" == "diff" && "$2" == "--name-status" ]]; then
+            mock_git_diff
+        else
+            command git "$@"
+        fi
+    }
+    
+    # Source and use the existing git-tree render function
+    source "$(dirname "${BASH_SOURCE[0]}")/../../scripts/git-tree/lib/render/render_file_tree.sh"
+    
+    # Get repository name for project name
+    local repo_name="${GITHUB_REPOSITORY##*/}"
+    
+    # Call the existing render function
+    render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name"
+    
+    # Restore git command
+    unset -f git
     
     if [[ -f "$output_file" ]]; then
-        log_success "Git-tree generated successfully from API data"
+        log_success "Git-tree generated successfully using existing render functions"
         return 0
     else
         log_error "Failed to generate git-tree file"
         return 1
     fi
-}
-
-# Generate tree from GitHub API file data using exact git-tree rendering format
-generate_tree_from_api_data() {
-    local changed_files="$1"
-    local base_branch="$2"
-    local target_branch="$3"
-    local output_file="$4"
-    
-    # Source URL generator utility
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$script_dir/lib/url_generator.sh"
-    
-    # Get repository URL and name
-    local repo_url="https://github.com/$GITHUB_REPOSITORY"
-    local repo_name="${GITHUB_REPOSITORY##*/}"
-    local total_files=$(echo "$changed_files" | wc -l | tr -d ' ')
-    
-    log_info "Generating tree structure for $total_files files using exact git-tree format"
-    
-    # Create file with exact git-tree format but using GitHub URLs
-    {
-        echo "<!-- filepath: $output_file -->"
-        echo "## 🔄 Changed Files ($total_files total)"
-        echo ""
-        echo "**[\`$base_branch\`]($repo_url/tree/$base_branch)** &#8592; **[\`$target_branch\`]($repo_url/tree/$target_branch)**"
-        echo ""
-        echo "> <details open>"
-        echo "> <summary>"
-        echo "> <strong>🏠 $repo_name</strong>"
-        echo "> </summary>"
-        echo ">"
-        
-        # Collect all files by folder for proper tree structure
-        # Use arrays and string processing instead of associative arrays for compatibility
-        local all_folders_list=""
-        local root_files_list=""
-        
-        # First pass: collect folders and root files
-        while IFS= read -r line; do
-            [[ -z "$line" ]] && continue
-            local status=$(echo "$line" | awk '{print $1}')
-            local filepath=$(echo "$line" | awk '{print $2}')
-            
-            if [[ "$filepath" == *"/"* ]]; then
-                # File is in a folder
-                local folder_path=$(dirname "$filepath")
-                # Add folder to list if not already present
-                if [[ ! "$all_folders_list" == *"$folder_path"$'\n'* && ! "$all_folders_list" == "$folder_path" ]]; then
-                    all_folders_list="${all_folders_list}${folder_path}"$'\n'
-                fi
-            else
-                # Root file
-                root_files_list="${root_files_list}${status} ${filepath}"$'\n'
-            fi
-        done <<< "$changed_files"
-        
-        # Function to get status icon
-        get_status_icon() {
-            case "$1" in
-                "added") echo "✅" ;;
-                "modified") echo "✏️" ;;
-                "removed") echo "❌" ;;
-                "renamed") echo "🔄" ;;
-                *) echo "📄" ;;
-            esac
-        }
-        
-        # Function to get files for a specific folder
-        get_folder_files() {
-            local target_folder="$1"
-            local result=""
-            while IFS= read -r line; do
-                [[ -z "$line" ]] && continue
-                local status=$(echo "$line" | awk '{print $1}')
-                local filepath=$(echo "$line" | awk '{print $2}')
-                
-                if [[ "$filepath" == *"/"* ]]; then
-                    local folder_path=$(dirname "$filepath")
-                    if [[ "$folder_path" == "$target_folder" ]]; then
-                        result="${result}${status} ${filepath}"$'\n'
-                    fi
-                fi
-            done <<< "$changed_files"
-            echo "$result"
-        }
-        
-        # Sort and render root files first
-        if [[ -n "$root_files_list" ]]; then
-            local root_files_sorted
-            root_files_sorted=$(echo "$root_files_list" | grep -v '^$' | sort)
-            
-            local root_files_array=()
-            while IFS= read -r file_line; do
-                [[ -n "$file_line" ]] && root_files_array+=("$file_line")
-            done <<< "$root_files_sorted"
-            
-            local all_folders_count
-            all_folders_count=$(echo "$all_folders_list" | grep -v '^$' | wc -l | tr -d ' ')
-            
-            for ((i=0; i<${#root_files_array[@]}; i++)); do
-                local file_line="${root_files_array[$i]}"
-                local status=$(echo "$file_line" | awk '{print $1}')
-                local filepath=$(echo "$file_line" | awk '{print $2}')
-                local icon=$(get_status_icon "$status")
-                local file_link=$(create_markdown_link "$filepath" "github" "$repo_url" "$target_branch")
-                
-                # Use different connector for last file if no folders follow
-                if [[ $i -eq $((${#root_files_array[@]} - 1)) && $all_folders_count -eq 0 ]]; then
-                    echo "> &emsp;&#9493;$icon $file_link"
-                else
-                    echo "> &emsp;&#9501;$icon $file_link<br>"
-                fi
-            done
-        fi
-        
-        # Sort and render folders
-        if [[ -n "$all_folders_list" ]]; then
-            local sorted_folders
-            sorted_folders=$(echo "$all_folders_list" | grep -v '^$' | sort)
-            
-            local folders_array=()
-            while IFS= read -r folder; do
-                [[ -n "$folder" ]] && folders_array+=("$folder")
-            done <<< "$sorted_folders"
-            
-            for ((folder_idx=0; folder_idx<${#folders_array[@]}; folder_idx++)); do
-                local folder="${folders_array[$folder_idx]}"
-                local is_last_folder=$((folder_idx == ${#folders_array[@]} - 1))
-                
-                echo "> <!-- $folder folder -->"
-                echo "> <details>"
-                echo "> <summary>"
-                echo "> &#9492;<strong>🗂️ $folder</strong>"
-                echo "> </summary>"
-                echo ">"
-                
-                # Get files for this folder and sort them
-                local folder_files_raw
-                folder_files_raw=$(get_folder_files "$folder")
-                
-                local folder_files_array=()
-                while IFS= read -r file_line; do
-                    [[ -n "$file_line" ]] && folder_files_array+=("$file_line")
-                done <<< "$(echo "$folder_files_raw" | grep -v '^$' | sort)"
-                
-                # Render files in folder
-                for ((file_idx=0; file_idx<${#folder_files_array[@]}; file_idx++)); do
-                    local file_line="${folder_files_array[$file_idx]}"
-                    local status=$(echo "$file_line" | awk '{print $1}')
-                    local filepath=$(echo "$file_line" | awk '{print $2}')
-                    local icon=$(get_status_icon "$status")
-                    local file_link=$(create_markdown_link "$filepath" "github" "$repo_url" "$target_branch")
-                    
-                    # Use different connector for last file
-                    if [[ $file_idx -eq $((${#folder_files_array[@]} - 1)) ]]; then
-                        echo "> &emsp;&emsp;&#9493;$icon $file_link"
-                    else
-                        echo "> &emsp;&emsp;&#9501;$icon $file_link<br>"
-                    fi
-                done
-                
-                echo "> </details>"
-                echo ">"
-            done
-        fi
-        
-        echo "> </details>"
-        
-    } > "$output_file"
-    
-    log_success "Generated exact git-tree structure with $total_files files and GitHub URLs"
 }
 
 # Convert git-tree markdown to GitHub PR comment format

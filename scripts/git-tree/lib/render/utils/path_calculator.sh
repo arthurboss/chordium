@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# Utility functions for calculating relative paths
-# Handles path resolution for markdown links
+# Single responsibility: Calculate relative paths for git-tree output
+# Pure function - no GitHub logic, no environment detection
 
-# Calculate relative path from output file location to git root
 calculate_relative_prefix() {
     local output_file="$1"
     
@@ -19,13 +18,4 @@ calculate_relative_prefix() {
     else
         echo "$relative_prefix/"
     fi
-}
-
-# Create a markdown link for a file
-create_markdown_link() {
-    local filepath="$1"
-    local relative_prefix="$2"
-    local filename=$(basename "$filepath")
-    
-    echo "[$filename]($relative_prefix$filepath)"
 }
