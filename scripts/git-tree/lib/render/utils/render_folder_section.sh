@@ -51,7 +51,7 @@ render_folder_section() {
         if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then
             echo "> &emsp;&emsp;&#9493;$icon $file_link" >> "$output_file"
         else
-            echo "> &emsp;&emsp;&#9501;$icon $file_link<br>" >> "$output_file"
+            echo "> &emsp;&emsp;&#9501;$icon $file_link" >> "$output_file"
         fi
     done
     

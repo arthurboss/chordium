@@ -39,7 +39,7 @@ render_root_files() {
         if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then
             echo "> &emsp;&#9493;$icon $file_link" >> "$output_file"
         else
-            echo "> &emsp;&#9501;$icon $file_link<br>" >> "$output_file"
+            echo "> &emsp;&#9501;$icon $file_link" >> "$output_file"
         fi
     done
 }
