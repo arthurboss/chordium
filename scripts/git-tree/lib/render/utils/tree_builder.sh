@@ -54,33 +54,7 @@ build_file_tree() {
     IFS=$'\n' paths_at_level=($(sort <<< "${paths_at_level[*]}")); unset IFS
     IFS=$'\n' files_at_level=($(sort <<< "${files_at_level[*]}")); unset IFS
     
-    # Render directories first
-    for dir in "${paths_at_level[@]}"; do
-        if [[ -z "$dir" ]]; then continue; fi
-        
-        local full_dir_path
-        if [[ "$base_path" == "." ]]; then
-            full_dir_path="$dir"
-        else
-            full_dir_path="$base_path/$dir"
-        fi
-        
-        # Start directory section
-        echo "> <!-- $dir folder -->" >> "$output_file"
-        echo "> <details>" >> "$output_file"
-        echo "> <summary>" >> "$output_file"
-        echo "> ${indent}&#9492;<strong>🗂️ $dir</strong>" >> "$output_file"
-        echo "> </summary>" >> "$output_file"
-        echo ">" >> "$output_file"
-        
-        # Recursively build subtree
-        build_file_tree "$all_files" "$url_generator_func" "$url_generator_param" "$output_file" "$full_dir_path" $((indent_level + 1))
-        
-        echo "> </details>" >> "$output_file"
-        echo ">" >> "$output_file"
-    done
-    
-    # Then render files at this level
+    # First render files at this level
     local file_count=${#files_at_level[@]}
     for i in "${!files_at_level[@]}"; do
         local file_entry="${files_at_level[$i]}"
@@ -99,12 +73,52 @@ build_file_tree() {
         local url=$($url_generator_func "$full_filepath" "$url_generator_param")
         local file_link=$(create_markdown_link "$full_filepath" "$url")
         
-        # Determine connector (last file gets different connector)
+        # Determine connector (last file gets different connector if there are no directories)
         local connector="&#9501;"  # ├
         if [[ $i -eq $((file_count - 1)) ]] && [[ ${#paths_at_level[@]} -eq 0 ]]; then
             connector="&#9493;"  # └
         fi
         
         echo "> ${indent}${connector}${icon} ${file_link}<br>" >> "$output_file"
+    done
+    
+    # Then render directories
+    for i in "${!paths_at_level[@]}"; do
+        local dir="${paths_at_level[$i]}"
+        if [[ -z "$dir" ]]; then continue; fi
+        
+        local full_dir_path
+        if [[ "$base_path" == "." ]]; then
+            full_dir_path="$dir"
+        else
+            full_dir_path="$base_path/$dir"
+        fi
+        
+        # Determine if this is the last item (for proper connector)
+        local is_last_item=0
+        if [[ $i -eq $((${#paths_at_level[@]}-1)) ]]; then
+            is_last_item=1
+        fi
+        
+        # Start directory section
+        echo "> <!-- $dir folder -->" >> "$output_file"
+        echo "> <details>" >> "$output_file"
+        echo "> <summary>" >> "$output_file"
+        
+        # Use appropriate connector based on whether this is the last item
+        if [[ $is_last_item -eq 1 ]]; then
+            echo "> ${indent}&#9493;<strong>🗂️ $dir</strong>" >> "$output_file"
+        else
+            echo "> ${indent}&#9501;<strong>🗂️ $dir</strong>" >> "$output_file"
+        fi
+        
+        echo "> </summary>" >> "$output_file"
+        echo ">" >> "$output_file"
+        
+        # Recursively build subtree
+        build_file_tree "$all_files" "$url_generator_func" "$url_generator_param" "$output_file" "$full_dir_path" $((indent_level + 1))
+        
+        echo "> </details>" >> "$output_file"
+        echo ">" >> "$output_file"
     done
 }
