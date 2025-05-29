@@ -43,10 +43,6 @@ generate_git_tree() {
     local git_diff_data
     git_diff_data=$(convert_github_api_to_git_diff "$changed_files")
     
-    # Source GitHub adapters to override git-tree functions with GitHub URL support
-    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_link_adapter.sh"
-    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_branch_adapter.sh"
-    
     # Create a temporary function that returns our API data instead of calling git diff
     mock_git_diff() {
         echo "$git_diff_data"
@@ -63,6 +59,11 @@ generate_git_tree() {
     
     # Source and use the existing git-tree render function
     source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/render/render_file_tree.sh"
+    
+    # NOW source GitHub adapters to override git-tree functions with GitHub URL support
+    # (This must be done AFTER sourcing render functions to ensure our overrides take precedence)
+    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_link_adapter.sh"
+    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_branch_adapter.sh"
     
     # Get repository name for project name
     local repo_name="${GITHUB_REPOSITORY##*/}"
