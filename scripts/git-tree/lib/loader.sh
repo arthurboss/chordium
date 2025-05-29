@@ -35,6 +35,17 @@ source "$LIB_DIR/argument/show_standalone_usage.sh"
 source "$LIB_DIR/argument/parse_arguments.sh"
 source "$LIB_DIR/argument/parse_legacy_arguments.sh"
 
+# Load wizard utilities
+source "$LIB_DIR/wizard/ui/colors.sh"
+source "$LIB_DIR/wizard/ui/header.sh"
+source "$LIB_DIR/wizard/ui/summary.sh"
+source "$LIB_DIR/wizard/prompts/base_branch.sh"
+source "$LIB_DIR/wizard/prompts/target_branch.sh"
+source "$LIB_DIR/wizard/prompts/output_filename.sh"
+source "$LIB_DIR/wizard/prompts/cleanup.sh"
+source "$LIB_DIR/wizard/utils/wizard_utils.sh"
+source "$LIB_DIR/wizard/interactive_wizard.sh"
+
 # Load render utilities
 source "$LIB_DIR/render/render_file_tree.sh"
 source "$LIB_DIR/render/render_file_summary.sh"

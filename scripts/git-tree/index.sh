@@ -27,10 +27,13 @@ source "$SCRIPT_DIR/lib/loader.sh"
 # Source the prompt_and_cleanup_results utility (ensure it's loaded for all entry scripts)
 source "$SCRIPT_DIR/lib/file/prompt_and_cleanup_results.sh"
     
-# Colors
-CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
-NC='\033[0m' # No Color
+# Colors (only define if not already defined)
+if [[ -z "${MAIN_COLORS_LOADED:-}" ]]; then
+    export MAIN_COLORS_LOADED=1
+    CYAN='\033[0;36m'
+    MAGENTA='\033[0;35m'
+    NC='\033[0m' # No Color
+fi
 
 # Main script logic
 main() {
@@ -42,8 +45,21 @@ main() {
     local target_branch="$PARSED_TARGET_BRANCH"
     local output_file="$PARSED_OUTPUT_FILE"
     
-    # Prompt user to clean up previous results (only after we know it's not a help request)
-    prompt_and_cleanup_results
+    # Handle cleanup - either from wizard or traditional prompt
+    if [[ -n "$WIZARD_SHOULD_CLEANUP" ]]; then
+        # Wizard was used, use its cleanup decision
+        if [[ "$WIZARD_SHOULD_CLEANUP" == "yes" ]]; then
+            local results_dir="$GIT_TREE_SCRIPT_DIR/results"
+            if [ -d "$results_dir" ]; then
+                rm -rf "$results_dir"/*
+                echo -e "${MAGENTA}🗑️  Cleaned up previous results${NC}"
+                echo
+            fi
+        fi
+    else
+        # Traditional mode - prompt user for cleanup
+        prompt_and_cleanup_results
+    fi
     
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
