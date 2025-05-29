@@ -35,11 +35,11 @@ render_root_files() {
         local icon=$(get_status_icon "$status")
         local file_link=$(create_markdown_link "$filepath" "$relative_prefix")
         
-        # Use different connector for last file
+        # Use different connector for last file (no <br> tag for last file)
         if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then
             echo "> &emsp;&#9493;$icon $file_link" >> "$output_file"
         else
-            echo "> &emsp;&#9501;$icon $file_link" >> "$output_file"
+            echo "> &emsp;&#9501;$icon $file_link<br>" >> "$output_file"
         fi
     done
 }

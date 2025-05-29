@@ -195,15 +195,23 @@ format_for_github_comment() {
         exit 1
     fi
     
+    # Source the GitHub markdown cleaner utility
+    source "$(dirname "${BASH_SOURCE[0]}")/lib/github_markdown_cleaner.sh"
+    
+    # Create temporary file for content processing
+    local temp_content="$(mktemp)"
+    
+    # Extract content (skip filepath comment, preserve original git-tree header)
+    tail -n +2 "$git_tree_file" | grep -v "^<!-- filepath:" > "$temp_content"
+    
     # Create GitHub comment with proper markers
     {
         echo "<!-- AUTO-GENERATED FILE TREE -->"
         echo "<!-- This comment will be updated automatically by the GitHub Action -->"
         echo ""
         
-        # Include the git-tree content, but skip the filepath comment
-        # Remove <br> tags and use the original git-tree header
-        tail -n +2 "$git_tree_file" | grep -v "^<!-- filepath:" | sed 's/<br>//g'
+        # Clean the content for GitHub rendering (removes <br> tags)
+        clean_markdown_for_github_stdin < "$temp_content"
         
         echo ""
         echo "---"
@@ -213,6 +221,9 @@ format_for_github_comment() {
         echo "<!-- END AUTO-GENERATED FILE TREE -->"
         
     } > "$output_file"
+    
+    # Clean up temporary file
+    rm -f "$temp_content"
     
     log_success "GitHub comment formatted and saved to: $output_file" >&2
 }
