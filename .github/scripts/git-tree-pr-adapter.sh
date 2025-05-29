@@ -76,49 +76,116 @@ show_environment_info() {
 fetch_changed_files_from_api() {
     # Send log messages to stderr to avoid mixing with output
     log_info "Fetching changed files from GitHub API..." >&2
+    log_info "API Endpoint: https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" >&2
     
-    # Fetch changed files from GitHub API
-    local files_response
-    files_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files")
+    local all_files=""
+    local page=1
+    local per_page=100
+    local total_pages=0
     
-    # Check curl exit code
-    if [[ $? -ne 0 ]]; then
-        log_error "Failed to fetch files from GitHub API (curl error)" >&2
+    while true; do
+        log_info "Fetching page $page (up to $per_page files per page)..." >&2
+        
+        # Fetch changed files from GitHub API with pagination
+        local files_response
+        local api_url="https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files?page=$page&per_page=$per_page"
+        log_info "Calling: $api_url" >&2
+        
+        files_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+        local curl_exit_code=$?
+        
+        # Check curl exit code
+        if [[ $curl_exit_code -ne 0 ]]; then
+            log_error "Failed to fetch files from GitHub API (curl exit code: $curl_exit_code)" >&2
+            return 1
+        fi
+        
+        # Check if response is empty
+        if [[ -z "$files_response" ]]; then
+            log_error "Empty response from GitHub API" >&2
+            return 1
+        fi
+        
+        # Check if response contains an error
+        if echo "$files_response" | jq -e '.message' > /dev/null 2>&1; then
+            local error_message=$(echo "$files_response" | jq -r '.message')
+            log_error "GitHub API error: $error_message" >&2
+            log_info "Full API response: $files_response" >&2
+            return 1
+        fi
+        
+        # Check if this page has any files
+        local files_count=$(echo "$files_response" | jq '. | length' 2>/dev/null)
+        local jq_exit_code=$?
+        
+        if [[ $jq_exit_code -ne 0 ]]; then
+            log_error "Failed to parse JSON response from GitHub API" >&2
+            log_info "Raw response (first 500 chars): $(echo "$files_response" | head -c 500)" >&2
+            return 1
+        fi
+        
+        if [[ "$files_count" == "0" ]] || [[ "$files_count" == "null" ]]; then
+            log_info "No more files on page $page, pagination complete" >&2
+            break
+        fi
+        
+        log_info "Found $files_count files on page $page" >&2
+        
+        # Parse the response to get file status and names for this page
+        local page_files
+        page_files=$(echo "$files_response" | jq -r '.[] | "\(.status) \(.filename)"' 2>/dev/null)
+        
+        # Check jq parsing success
+        if [[ $? -ne 0 ]]; then
+            log_error "Failed to parse GitHub API response with jq" >&2
+            log_info "API Response preview: $(echo "$files_response" | head -c 200)" >&2
+            return 1
+        fi
+        
+        # Add this page's files to our collection
+        if [[ -n "$page_files" ]]; then
+            if [[ -n "$all_files" ]]; then
+                all_files="$all_files"$'\n'"$page_files"
+            else
+                all_files="$page_files"
+            fi
+            log_success "Added $files_count files from page $page to collection" >&2
+        fi
+        
+        # If we got fewer files than per_page, we've reached the end
+        if [[ "$files_count" -lt "$per_page" ]]; then
+            log_info "Reached end of pages (got $files_count < $per_page files)" >&2
+            break
+        fi
+        
+        # Move to next page
+        ((page++))
+        
+        # Safety check to prevent infinite loops
+        if [[ $page -gt 50 ]]; then
+            log_warning "Reached maximum page limit (50), stopping pagination" >&2
+            break
+        fi
+    done
+    
+    if [[ -z "$all_files" ]]; then
+        log_warning "No files found in PR #$PR_NUMBER" >&2
         return 1
     fi
     
-    # Check if response is empty
-    if [[ -z "$files_response" ]]; then
-        log_error "Empty response from GitHub API" >&2
-        return 1
-    fi
+    local total_files=$(echo "$all_files" | wc -l | tr -d ' ')
+    local total_pages_fetched=$((page - 1))
+    log_success "Successfully fetched $total_files changed files across $total_pages_fetched pages" >&2
     
-    # Check if response contains an error
-    if echo "$files_response" | jq -e '.message' > /dev/null 2>&1; then
-        local error_message=$(echo "$files_response" | jq -r '.message')
-        log_error "GitHub API error: $error_message" >&2
-        return 1
-    fi
+    # Additional debugging: show file status breakdown
+    local added_count=$(echo "$all_files" | grep "^added " | wc -l | tr -d ' ')
+    local modified_count=$(echo "$all_files" | grep "^modified " | wc -l | tr -d ' ')
+    local removed_count=$(echo "$all_files" | grep "^removed " | wc -l | tr -d ' ')
+    local renamed_count=$(echo "$all_files" | grep "^renamed " | wc -l | tr -d ' ')
     
-    # Parse the response to get file status and names
-    local changed_files
-    changed_files=$(echo "$files_response" | jq -r '.[] | "\(.status) \(.filename)"' 2>/dev/null)
+    log_info "File status breakdown: Added($added_count) Modified($modified_count) Removed($removed_count) Renamed($renamed_count)" >&2
     
-    # Check jq parsing success
-    if [[ $? -ne 0 ]]; then
-        log_error "Failed to parse GitHub API response with jq" >&2
-        log_info "API Response preview: $(echo "$files_response" | head -c 200)" >&2
-        return 1
-    fi
-    
-    if [[ -z "$changed_files" ]]; then
-        log_warning "No files found in PR" >&2
-        return 1
-    fi
-    
-    log_success "Successfully fetched $(echo "$changed_files" | wc -l | tr -d ' ') changed files" >&2
-    echo "$changed_files"
+    echo "$all_files"
     return 0
 }
 
@@ -130,14 +197,41 @@ generate_git_tree() {
     
     log_info "Generating git-tree for $target_branch vs $base_branch using existing render functions" >&2
     
+    # First, let's check what git diff shows locally for comparison
+    local local_diff_count=0
+    if command -v git >/dev/null 2>&1; then
+        local_diff_count=$(git diff --name-status "origin/$base_branch...HEAD" 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+        log_info "Local git diff shows $local_diff_count changed files for comparison" >&2
+    fi
+    
     # Fetch changed files from GitHub API
     local changed_files
     if ! changed_files=$(fetch_changed_files_from_api); then
-        log_error "Failed to fetch changed files" >&2
-        return 1
+        log_error "Failed to fetch changed files from GitHub API" >&2
+        
+        # Fallback: try to use local git diff if API fails
+        log_warning "Attempting fallback to local git diff..." >&2
+        if command -v git >/dev/null 2>&1; then
+            local local_diff
+            local_diff=$(git diff --name-status "origin/$base_branch...HEAD" 2>/dev/null || echo "")
+            if [[ -n "$local_diff" ]]; then
+                log_success "Using local git diff as fallback ($local_diff_count files)" >&2
+                changed_files="$local_diff"
+            else
+                log_error "Local git diff fallback also failed" >&2
+                return 1
+            fi
+        else
+            log_error "Git command not available for fallback" >&2
+            return 1
+        fi
     fi
     
-    log_info "Found $(echo "$changed_files" | wc -l | tr -d ' ') changed files" >&2
+    local api_file_count=$(echo "$changed_files" | wc -l | tr -d ' ')
+    log_info "Using $api_file_count changed files for git-tree generation" >&2
+    if [[ "$local_diff_count" -gt 0 ]] && [[ "$api_file_count" != "$local_diff_count" ]]; then
+        log_warning "File count mismatch: API($api_file_count) vs Local($local_diff_count)" >&2
+    fi
     
     # Convert GitHub API data to git diff format
     source "$(dirname "${BASH_SOURCE[0]}")/lib/api_converter.sh"
@@ -230,7 +324,7 @@ format_for_github_comment() {
 
 # Main execution function
 main() {
-    log_info "Starting Git-Tree PR Comment Generation" >&2
+    log_info "Starting Git-Tree PR Comment Generation (Enhanced Version with Pagination Fix)" >&2
     
     # Validate environment
     validate_environment
