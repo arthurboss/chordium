@@ -1,11 +1,16 @@
 #!/bin/bash
 
-# Single responsibility: Generate GitHub blob URLs
-# Creates absolute GitHub URLs for PR comments and web viewing
+# Single responsibility: Generate GitHub blob URLs for render functions
+# Uses core URL utilities and blob store for consistent GitHub URL generation
+
+# Source core URL utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../url/get_repo_url.sh"
+source "$SCRIPT_DIR/../../url/generate_github_blob_url.sh"
 
 # Source blob URL store if available (GitHub context)
-if [[ -f "$(dirname "${BASH_SOURCE[0]}")/../../../../../.github/scripts/git-tree/utils/blob_url_store.sh" ]]; then
-    source "$(dirname "${BASH_SOURCE[0]}")/../../../../../.github/scripts/git-tree/utils/blob_url_store.sh"
+if [[ -f "$SCRIPT_DIR/../../../../../.github/scripts/git-tree/utils/blob_url_store.sh" ]]; then
+    source "$SCRIPT_DIR/../../../../../.github/scripts/git-tree/utils/blob_url_store.sh"
 fi
 
 generate_github_url() {
@@ -21,12 +26,12 @@ generate_github_url() {
         fi
     fi
     
-    # Fallback: construct GitHub URL manually
-    local repo_url="${GITHUB_REPOSITORY:+https://github.com/$GITHUB_REPOSITORY}"
+    # Fallback: construct GitHub URL manually using core utilities
+    local repo_url=$(get_repo_url)
     local branch="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
     
     if [[ -n "$repo_url" && -n "$branch" ]]; then
-        echo "$repo_url/blob/$branch/$filepath"
+        generate_github_blob_url "$repo_url" "$branch" "$filepath"
     else
         echo "$filepath"  # Ultimate fallback to relative path
     fi

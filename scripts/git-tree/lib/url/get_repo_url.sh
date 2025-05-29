@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# Single responsibility: Extract repository URL from git remote
+# Single responsibility: Extract repository URL from git remote or environment
+# Pure function that handles both local git and GitHub Actions contexts
+
 get_repo_url() {
-    local remote_name="${1:-origin}"
+    # In GitHub Actions, use environment variable if available
+    if [[ -n "$GITHUB_REPOSITORY" ]]; then
+        echo "https://github.com/$GITHUB_REPOSITORY"
+        return 0
+    fi
     
-    # Try to get remote URL
+    # Local git context - extract from remote
+    local remote_name="${1:-origin}"
     local remote_url=$(git remote get-url "$remote_name" 2>/dev/null)
     
     if [[ -z "$remote_url" ]]; then

@@ -57,20 +57,14 @@ generate_git_tree() {
         fi
     }
     
-    # Source and use the existing git-tree render function
-    source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/render/render_file_tree.sh"
-    
-    # Source GitHub utilities for post-processing
-    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_link_adapter.sh"
-    source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_branch_adapter.sh"
+    # Source the git-tree library (loads all dependencies including render functions and URL generators)
+    source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/loader.sh"
     
     # Get repository name for project name
     local repo_name="${GITHUB_REPOSITORY##*/}"
     
     # Call the existing render function with GitHub URL generator
     render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name" "generate_github_url" ""
-    
-    # No need for post-processing since we're using GitHub URL generator directly
     
     # Restore git command
     unset -f git
@@ -83,3 +77,8 @@ generate_git_tree() {
         return 1
     fi
 }
+
+# Main execution - only run if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    generate_git_tree "$@"
+fi

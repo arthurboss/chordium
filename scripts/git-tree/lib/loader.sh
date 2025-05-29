@@ -20,6 +20,7 @@ source "$LIB_DIR/file/generate_auto_filename.sh"
 source "$LIB_DIR/file/ensure_results_directory.sh"
 source "$LIB_DIR/file/resolve_output_path.sh"
 source "$LIB_DIR/file/ensure_md_extension.sh"
+source "$LIB_DIR/file/prompt_and_cleanup_results.sh"
 
 # Load GitHub utilities
 source "$LIB_DIR/github/get_github_repo_info.sh"
@@ -46,8 +47,22 @@ source "$LIB_DIR/wizard/prompts/cleanup.sh"
 source "$LIB_DIR/wizard/utils/wizard_utils.sh"
 source "$LIB_DIR/wizard/interactive_wizard.sh"
 
-# Load render utilities
+# Load core URL utilities (single responsibility)
+source "$LIB_DIR/url/get_repo_url.sh"
+source "$LIB_DIR/url/generate_github_blob_url.sh"
+source "$LIB_DIR/url/generate_git_relative_url.sh"
+
+# Load render URL generators (compose core utilities)
 source "$LIB_DIR/render/url/git_url_generator.sh"
 source "$LIB_DIR/render/url/github_url_generator.sh"
+
+# Load render utilities
+source "$LIB_DIR/render/utils/output_writer.sh"
+source "$LIB_DIR/render/utils/file_processor.sh"
+source "$LIB_DIR/render/utils/path_calculator.sh"
+source "$LIB_DIR/render/utils/render_header.sh"
+source "$LIB_DIR/render/utils/render_root_files.sh"
+source "$LIB_DIR/render/utils/render_folder_section.sh"
+source "$LIB_DIR/render/utils/create_markdown_link.sh"
 source "$LIB_DIR/render/render_file_tree.sh"
 source "$LIB_DIR/render/render_file_summary.sh"

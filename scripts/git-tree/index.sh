@@ -23,9 +23,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source all utility functions via the central loader
 source "$SCRIPT_DIR/lib/loader.sh"
-
-# Source the prompt_and_cleanup_results utility (ensure it's loaded for all entry scripts)
-source "$SCRIPT_DIR/lib/file/prompt_and_cleanup_results.sh"
     
 # Colors (only define if not already defined)
 if [[ -z "${MAIN_COLORS_LOADED:-}" ]]; then

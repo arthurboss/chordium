@@ -9,17 +9,7 @@ render_file_tree() {
     local url_generator_func="${5:-generate_git_url}"  # Default to git URL generator
     local url_generator_param="$6"
     
-    # Source dependencies
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "$SCRIPT_DIR/render_file_summary.sh"
-    source "$SCRIPT_DIR/utils/output_writer.sh"
-    source "$SCRIPT_DIR/utils/file_processor.sh"
-    source "$SCRIPT_DIR/utils/path_calculator.sh"
-    source "$SCRIPT_DIR/utils/render_header.sh"
-    source "$SCRIPT_DIR/utils/render_root_files.sh"
-    source "$SCRIPT_DIR/utils/render_folder_section.sh"
-    source "$SCRIPT_DIR/url/git_url_generator.sh"
-    source "$SCRIPT_DIR/url/github_url_generator.sh"
+    # Dependencies are loaded via central loader.sh
     
     # Get all changed files and count them (comparing target against base)
     local all_files=$(git diff --name-status $base_branch...$target_branch)
