@@ -19,14 +19,14 @@
 set -e  # Exit on error
 
 # Get the script directory for relative imports
-readonly SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+GITHUB_ADAPTER_SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 # Import modular components
-source "$SCRIPT_DIR/utils/logger.sh"
-source "$SCRIPT_DIR/core/environment.sh"
-source "$SCRIPT_DIR/core/github_api.sh"
-source "$SCRIPT_DIR/core/git_tree_generator.sh"
-source "$SCRIPT_DIR/formatters/github_comment.sh"
+source "$GITHUB_ADAPTER_SCRIPT_DIR/utils/logger.sh"
+source "$GITHUB_ADAPTER_SCRIPT_DIR/core/environment.sh"
+source "$GITHUB_ADAPTER_SCRIPT_DIR/core/github_api.sh"
+source "$GITHUB_ADAPTER_SCRIPT_DIR/core/git_tree_generator.sh"
+source "$GITHUB_ADAPTER_SCRIPT_DIR/formatters/github_comment.sh"
 
 # Main execution function
 main() {

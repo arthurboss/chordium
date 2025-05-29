@@ -4,8 +4,8 @@
 # GitHub Actions specific - creates branch tree links
 
 # Source required dependencies
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/repo_url.sh"
+FORMAT_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$FORMAT_SCRIPT_DIR/repo_url.sh"
 
 format_github_branch_name() {
     local branch="$1"

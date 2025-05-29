@@ -4,9 +4,9 @@
 # Injects GitHub URL generation into the git-tree rendering pipeline
 
 # Source required GitHub utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/github_url.sh"
-source "$SCRIPT_DIR/repo_url.sh"
+ADAPTER_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$ADAPTER_SCRIPT_DIR/github_url.sh"
+source "$ADAPTER_SCRIPT_DIR/repo_url.sh"
 
 # Override the create_markdown_link function to use GitHub URLs
 create_markdown_link() {

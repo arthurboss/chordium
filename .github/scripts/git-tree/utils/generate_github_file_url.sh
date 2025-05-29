@@ -4,9 +4,9 @@
 # Pure function - only GitHub URL logic
 
 # Source required dependencies
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/repo_url.sh"
-source "$SCRIPT_DIR/url_generator.sh"
+GEN_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$GEN_SCRIPT_DIR/repo_url.sh"
+source "$GEN_SCRIPT_DIR/url_generator.sh"
 
 generate_github_file_url() {
     local filepath="$1"
