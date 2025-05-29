@@ -36,33 +36,6 @@ jobs:
           chmod +x ./.github/scripts/git-tree-pr-adapter.sh
           ./.github/scripts/git-tree-pr-adapter.sh
 
-      - name: Debug environment variables
-        run: |
-          echo "=== GitHub Action Debug Information ==="
-          echo "PR_NUMBER: $PR_NUMBER"
-          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-          echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
-          echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"
-          if [ -n "$GITHUB_TOKEN" ]; then
-            echo "GITHUB_TOKEN is set: [true]"
-          else
-            echo "GITHUB_TOKEN is set: [false]"
-          fi
-          echo ""
-          echo "=== Git Repository Information ==="
-          git log --oneline -5
-          echo ""
-          echo "=== Local Git Diff File Count (for comparison) ==="
-          echo "Files changed between $GITHUB_BASE_REF and $GITHUB_HEAD_REF:"
-          git diff --name-status origin/$GITHUB_BASE_REF...HEAD | wc -l || echo "Could not compute local diff"
-          echo ""
-
-      - name: Debug git-tree output
-        run: |
-          echo "=== Generated Comment Content ==="
-          cat pr_comment.md || echo "pr_comment.md not found"
-          echo "=== End of Comment Content ==="
-
       - name: Store output
         id: store-output
         run: |
