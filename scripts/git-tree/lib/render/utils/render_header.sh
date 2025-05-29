@@ -18,7 +18,7 @@ render_header() {
     
     # Write file header and title
     echo "<!-- filepath: $output_file -->" > "$output_file"
-    echo "## 🔄 Changed Files ($total_files total)" >> "$output_file"
+    echo "## 🔄 File Tree of Changed Files" >> "$output_file"
     write_empty_lines "$output_file"
     
     # Format branch names with links if they exist on remote

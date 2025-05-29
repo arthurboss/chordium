@@ -11,14 +11,17 @@ render_file_summary() {
     source "$script_dir/utils/output_writer.sh"
     source "$script_dir/utils/file_processor.sh"
     
-    write_empty_lines "$output_file"
-    echo "## 📊 File Summary" >> "$output_file"
-    write_empty_lines "$output_file"
-    
     # Count files by status
     local added_count=$(count_files_by_status "$all_files" "A")
     local modified_count=$(count_files_by_status "$all_files" "M")
     local deleted_count=$(count_files_by_status "$all_files" "D")
+    
+    # Calculate total changed files
+    local total_changed=$((added_count + modified_count + deleted_count))
+    
+    write_empty_lines "$output_file"
+    echo "## 📊 File Summary ($total_changed total files changed)" >> "$output_file"
+    write_empty_lines "$output_file"
     
     # Added files section
     write_details_section "$output_file" "✅ Added Files ($added_count)"
