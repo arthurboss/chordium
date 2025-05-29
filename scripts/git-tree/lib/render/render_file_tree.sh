@@ -32,30 +32,8 @@ render_file_tree() {
         url_generator_param="$relative_prefix"
     fi
 
-    # Get list of all folders that have changed files (dynamically)
-    local folders_with_files=()
-    local all_changed_folders=$(get_changed_folders "$all_files")
-
-    # Add the root folder if there are any root files
-    local root_files=$(get_root_files "$all_files")
-    if [[ -n "$root_files" ]]; then
-        folders_with_files+=(".")
-    fi
-
-    # Add all folders that have changed files
-    while IFS= read -r folder; do
-        if [[ -n "$folder" ]]; then
-            folders_with_files+=("$folder")
-        fi
-    done <<< "$all_changed_folders"
-
-    # Process files in root folder first
-    render_root_files "$all_files" "$url_generator_func" "$url_generator_param" "$output_file"
-
-    # Process each folder
-    for folder in "${folders_with_files[@]}"; do
-        render_folder_section "$folder" "$all_files" "$url_generator_func" "$url_generator_param" "$output_file"
-    done
+    # Build the hierarchical tree structure
+    build_file_tree "$all_files" "$url_generator_func" "$url_generator_param" "$output_file"
 
     echo "> </details>" >> "$output_file"
     
