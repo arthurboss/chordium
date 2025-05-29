@@ -44,14 +44,18 @@ parse_arguments() {
                 shift 2
                 ;;
             --*)
-                # Smart flag parsing: single flags like --feat-search become base branch
+                # Smart flag parsing: single flags like --feat-search become base/target branch
                 local flag_name="${1#--}"  # Remove -- prefix
                 if [[ -z "$base_branch" ]]; then
                     base_branch="$flag_name"
                     show_wizard=false
                     echo "Smart flag detected: Using '$flag_name' as base branch"
+                elif [[ -z "$target_branch" ]]; then
+                    target_branch="$flag_name"
+                    show_wizard=false
+                    echo "Smart flag detected: Using '$flag_name' as target branch"
                 else
-                    echo "Error: Unknown option $1 (base branch already set to '$base_branch')"
+                    echo "Error: Unknown option $1 (base branch '$base_branch' and target branch '$target_branch' already set)"
                     show_usage
                     exit 1
                 fi
