@@ -3,12 +3,12 @@
 # Single responsibility: Logging utilities for GitHub Actions
 # Provides consistent colored logging functions
 
-# Color codes for logging
-readonly CYAN='\033[0;36m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly RED='\033[0;31m'
-readonly NC='\033[0m' # No Color
+# Color codes for logging (use existing values if already set)
+CYAN="${CYAN:-\033[0;36m}"
+GREEN="${GREEN:-\033[0;32m}"
+YELLOW="${YELLOW:-\033[1;33m}"
+RED="${RED:-\033[0;31m}"
+NC="${NC:-\033[0m}" # No Color
 
 # Logging functions
 log_info() {
