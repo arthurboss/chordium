@@ -47,5 +47,7 @@ source "$LIB_DIR/wizard/utils/wizard_utils.sh"
 source "$LIB_DIR/wizard/interactive_wizard.sh"
 
 # Load render utilities
+source "$LIB_DIR/render/url/git_url_generator.sh"
+source "$LIB_DIR/render/url/github_url_generator.sh"
 source "$LIB_DIR/render/render_file_tree.sh"
 source "$LIB_DIR/render/render_file_summary.sh"

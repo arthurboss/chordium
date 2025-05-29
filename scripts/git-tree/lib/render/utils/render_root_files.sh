@@ -6,8 +6,9 @@
 # Render files in the root directory
 render_root_files() {
     local all_files="$1"
-    local relative_prefix="$2"
-    local output_file="$3"
+    local url_generator_func="$2"
+    local url_generator_param="$3"
+    local output_file="$4"
     
     # Source dependencies
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,7 +34,8 @@ render_root_files() {
         local status=$(extract_status "$file_line")
         local filepath=$(extract_filepath "$file_line")
         local icon=$(get_status_icon "$status")
-        local file_link=$(create_markdown_link "$filepath" "$relative_prefix")
+        local url=$($url_generator_func "$filepath" "$url_generator_param")
+        local file_link=$(create_markdown_link "$filepath" "$url")
         
         # Use different connector for last file (no <br> tag for last file)
         if [[ $i -eq $((${#root_files_array[@]} - 1)) ]]; then

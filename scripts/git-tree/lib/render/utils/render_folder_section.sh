@@ -7,8 +7,9 @@
 render_folder_section() {
     local folder="$1"
     local all_files="$2"
-    local relative_prefix="$3"
-    local output_file="$4"
+    local url_generator_func="$3"
+    local url_generator_param="$4"
+    local output_file="$5"
     
     # Source dependencies
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,7 +46,8 @@ render_folder_section() {
         local status=$(extract_status "$file_line")
         local filepath=$(extract_filepath "$file_line")
         local icon=$(get_status_icon "$status")
-        local file_link=$(create_markdown_link "$filepath" "$relative_prefix")
+        local url=$($url_generator_func "$filepath" "$url_generator_param")
+        local file_link=$(create_markdown_link "$filepath" "$url")
         
         # Use different connector for last file (no <br> tag for last file)
         if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then

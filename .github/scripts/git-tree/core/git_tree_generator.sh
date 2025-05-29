@@ -60,16 +60,17 @@ generate_git_tree() {
     # Source and use the existing git-tree render function
     source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/render/render_file_tree.sh"
     
-    # NOW source GitHub adapters to override git-tree functions with GitHub URL support
-    # (This must be done AFTER sourcing render functions to ensure our overrides take precedence)
+    # Source GitHub utilities for post-processing
     source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_link_adapter.sh"
     source "$(dirname "${BASH_SOURCE[0]}")/../utils/github_branch_adapter.sh"
     
     # Get repository name for project name
     local repo_name="${GITHUB_REPOSITORY##*/}"
     
-    # Call the existing render function
-    render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name"
+    # Call the existing render function with GitHub URL generator
+    render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name" "generate_github_url" ""
+    
+    # No need for post-processing since we're using GitHub URL generator directly
     
     # Restore git command
     unset -f git

@@ -140,8 +140,8 @@ main() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo
     
-    # Render the file tree using target vs base comparison
-    if render_file_tree "$base_branch" "$output_file" "$target_branch" "$project_name"; then
+    # Render the file tree using target vs base comparison with git URL generator
+    if render_file_tree "$base_branch" "$output_file" "$target_branch" "$project_name" "generate_git_url" ""; then
         echo -e "${CYAN}✅ File tree generated successfully!${NC}"
         echo
         # Display relative path from current working directory so it's clickable

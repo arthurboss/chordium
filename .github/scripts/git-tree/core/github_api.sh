@@ -5,6 +5,7 @@
 
 # Source logging utilities
 source "$(dirname "${BASH_SOURCE[0]}")/../utils/logger.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../utils/blob_url_store.sh"
 
 # Fetch changed files from GitHub API with pagination support
 fetch_changed_files_from_api() {
@@ -54,9 +55,18 @@ fetch_changed_files_from_api() {
             break
         fi
         
-        # Parse the response to get file status and names for this page
+        # Parse the response to get file status, names, and blob URLs for this page
         local page_files
         page_files=$(echo "$files_response" | jq -r '.[] | "\(.status) \(.filename)"' 2>/dev/null)
+        
+        # Store blob URLs for each file
+        echo "$files_response" | jq -r '.[] | "\(.filename) \(.blob_url)"' 2>/dev/null | while IFS= read -r line; do
+            if [[ -n "$line" ]]; then
+                local filepath=$(echo "$line" | cut -d' ' -f1)
+                local blob_url=$(echo "$line" | cut -d' ' -f2-)
+                store_blob_url "$filepath" "$blob_url"
+            fi
+        done
         
         # Check jq parsing success
         if [[ $? -ne 0 ]]; then
