@@ -1,6 +1,62 @@
 # Git Tree Script
 
-A script for generating markdown file trees showing git changes between branches.
+A powerful script for generating markdown file trees showing git changes between branches, featuring an interactive wizard and smart flags for effortless usage:
+
+**example output:**
+
+---
+---
+
+## 🔄 File Tree of Changed Files
+
+**`main`** &#8592; **`feat/user-auth`**
+
+> <details open>
+> <summary>
+> <strong>🏠 my-project</strong>
+> </summary>
+>
+> &emsp;&#9493;✏️ [package.json](../../../package.json)
+> <details>
+> <summary>
+> &#9492;<strong>🗂️ src</strong>
+> </summary>
+>
+> &emsp;&emsp;&#9501;✅ [LoginForm.tsx](../../../src/components/LoginForm.tsx)<br>
+> &emsp;&emsp;&#9501;❌ [AuthProvider.tsx](../../../src/components/AuthProvider.tsx)<br>
+> &emsp;&emsp;&#9493;✏️ [App.tsx](../../../src/App.tsx)
+> </details>
+> </details>
+ 
+## 📊 File Summary (4 total files changed)
+<details>
+<summary>
+<strong>✅ Added Files (1)</strong>
+</summary>
+
+- `LoginForm.tsx`
+
+</details>
+
+<details>
+<summary>
+<strong>✏️ Modified Files (1)</strong>
+</summary>
+
+- `package.json`
+</details>
+
+<details>
+<summary>
+<strong>❌ Deleted Files (1)</strong>
+</summary>
+
+- `AuthProvider.tsx`
+
+</details>
+
+---
+---
 
 ## What It Does
 
@@ -11,33 +67,72 @@ Generates visual file tree representations of git changes between branches, perf
 
 ## Script Overview
 
-- **index.sh** - Main script with modern flag support and intelligent branch auto-detection
+- **index.sh** - Main script with interactive wizard, smart flags, and intelligent branch auto-detection
 
-## Quick Start
+## Usage Modes
+
+### 🧙‍♂️ Interactive Wizard (Recommended)
+Simply run without arguments to start the guided wizard:
 
 ```bash
-# Auto-detect everything (current branch vs detected base)
+# Interactive wizard - guides you through all options
 ./scripts/git-tree/index.sh
+```
 
-# Compare specific branches with modern flags
-./scripts/git-tree/index.sh --base main --target feat/search
+### ⚡ Auto Mode (Fastest)
+Use all defaults with no prompts:
 
-# Smart flags - use any branch name as a flag
+```bash
+# Auto mode - all defaults, no prompts, no cleanup
+./scripts/git-tree/index.sh --a
+```
+
+### 🎯 Smart Flags
+Use branch names directly as flags:
+
+```bash
+# Smart flags - intuitive branch comparisons
 ./scripts/git-tree/index.sh --main              # Compare current vs main
 ./scripts/git-tree/index.sh --feat--search      # Compare current vs feat--search
 
-# Use "current" keyword for explicit current branch
-./scripts/git-tree/index.sh --target current --base main
+# Dual smart flags - specify both branches
+./scripts/git-tree/index.sh --main --feat-search    # Compare feat-search vs main
 
-# Custom output file (auto-adds .md extension)
-./scripts/git-tree/index.sh --output my-comparison
-
-# Mixed usage - smart flag with custom output
-./scripts/git-tree/index.sh --main --output comparison.md
-
-# Legacy positional arguments (backward compatible)
-./scripts/git-tree/index.sh main my-output
+# Cleanup control flags
+./scripts/git-tree/index.sh --y --main          # Auto-cleanup + compare vs main
+./scripts/git-tree/index.sh --n --main          # Skip cleanup + compare vs main
 ```
+
+### 🔧 Explicit Flags
+Traditional flag-based approach:
+
+```bash
+# Explicit flags for full control
+./scripts/git-tree/index.sh --base main --target feat/search
+./scripts/git-tree/index.sh --target current --base main
+./scripts/git-tree/index.sh --output my-comparison.md
+
+# Combined approaches
+./scripts/git-tree/index.sh --main --output comparison.md
+./scripts/git-tree/index.sh --y --base main --target feat/search
+```
+
+## All Available Flags
+
+### Core Flags
+- `--wizard` - Force interactive wizard mode
+- `--base BRANCH` - Base branch to compare against (auto-detected if not specified)
+- `--target BRANCH` - Target branch to compare (defaults to current branch)
+- `--output FILE` - Output markdown file (auto-generated if not specified)
+
+### Smart Flags
+- `--a` - Auto mode: use all defaults, skip all prompts
+- `--y` - Auto-confirm cleanup of previous results (yes)
+- `--n` - Auto-decline cleanup of previous results (no)
+- `--BRANCH_NAME` - Use any branch name as a smart flag (e.g., `--main`, `--feat-search`)
+
+### Special Keywords
+- `current` - Use current branch (for `--base` or `--target`)
 
 ## Output
 
@@ -47,7 +142,9 @@ All generated files are automatically saved to the `results/` directory within t
 scripts/git-tree/results/git-tree_<target>-vs-<base>_YYYY-MM-DD_HH-MM-SS.md
 ```
 
-Example: `scripts/git-tree/results/git-tree_feat--search-vs-main_2025-05-28_14-30-25.md`
+Example: 
+
+`scripts/git-tree/results/git-tree_feat--search-vs-main_2025-05-28_14-30-25.md`
 
 ### File Content
 Contains:
@@ -70,12 +167,25 @@ Contains:
 
 ## Features
 
+### 🧙‍♂️ Interactive Experience
+- ✅ **Interactive wizard** - Guided step-by-step setup when no arguments provided
+- ✅ **Smart defaults** - Intelligent auto-detection of branches and settings
+- ✅ **Cleanup management** - Wizard handles previous results cleanup with user choice
+
+### ⚡ Smart Flags & Auto Mode
+- ✅ **Auto mode (`--a`)** - Run with all defaults, skip all prompts
+- ✅ **Smart flag parsing** - Use any branch name as a flag (e.g., `--main`, `--feat-search`)
+- ✅ **Dual smart flags** - Specify both branches with `--main --feat-search` syntax
+- ✅ **Cleanup flags** - `--y` (auto-cleanup) and `--n` (skip cleanup) for automation
+
+### 🎯 Core Functionality
 - ✅ **Smart base branch detection** - Analyzes merge history to find the right comparison branch
 - ✅ **Network-free operation** - No risky git checkout operations that could hang
-- ✅ **Modern flag interface** - Clean --base, --target, --output flags
-- ✅ **Smart flag parsing** - Use any branch name as a flag (e.g., `--main`, `--feat--search`)
+- ✅ **Modern flag interface** - Clean `--base`, `--target`, `--output` flags
 - ✅ **"Current" keyword** - Use `current` for explicit current branch reference
 - ✅ **Legacy compatibility** - Supports old positional argument format
+
+### 📁 Output & Organization
 - ✅ **Auto .md extension** - Automatically adds .md when missing
 - ✅ **Timestamp filenames** - Consistent YYYY-MM-DD_HH-MM-SS format
 - ✅ **Results directory** - Organized output to `git-tree/results/` folder
@@ -83,45 +193,66 @@ Contains:
 - ✅ **Quoted output format** - File tree rendered as blockquotes for clean documentation
 - ✅ **Professional styling** - Beautiful Unicode trees with status icons
 
-## Advanced Usage
+## Advanced Usage Examples
 
-### Smart Flags
-Use any branch name as a flag for intuitive comparisons:
-
+### Wizard Mode Features
 ```bash
-# These are equivalent:
-./scripts/git-tree/index.sh --base main
-./scripts/git-tree/index.sh --main
+# Start interactive wizard
+./scripts/git-tree/index.sh
+# or explicitly
+./scripts/git-tree/index.sh --wizard
 
-# Works with complex branch names:
+# The wizard guides you through:
+# 1. Base branch selection (with auto-detection)
+# 2. Target branch selection (defaults to current)
+# 3. Output filename (with auto-generation option)
+# 4. Cleanup previous results (yes/no choice)
+```
+
+### Smart Flag Combinations
+```bash
+# Single smart flag (base branch)
+./scripts/git-tree/index.sh --main
 ./scripts/git-tree/index.sh --feat--search
 ./scripts/git-tree/index.sh --feature/user-login
 
-# Combined with other flags:
-./scripts/git-tree/index.sh --main --output comparison.md
-./scripts/git-tree/index.sh --feat--search --target develop
+# Dual smart flags (base and target)
+./scripts/git-tree/index.sh --main --feat-search        # feat-search vs main
+./scripts/git-tree/index.sh --develop --feature/login   # feature/login vs develop
+
+# Smart flags with cleanup control
+./scripts/git-tree/index.sh --y --main                  # Auto-cleanup + main comparison
+./scripts/git-tree/index.sh --n --feat-search           # Skip cleanup + feat-search comparison
+
+# Smart flags with output control
+./scripts/git-tree/index.sh --main --output my-tree.md
+./scripts/git-tree/index.sh --y --main --output comparison
 ```
 
-### "Current" Keyword
-Use `current` to explicitly reference the current branch:
-
+### Automation Scenarios
 ```bash
-# Compare current branch against main
-./scripts/git-tree/index.sh --target current --base main
+# Full automation (CI/CD friendly)
+./scripts/git-tree/index.sh --a                         # All defaults, no prompts
 
-# Use current as base (reverse comparison)
+# Automated cleanup with specific branches
+./scripts/git-tree/index.sh --y --base main --target develop
+
+# Quick comparison without cleanup prompts
+./scripts/git-tree/index.sh --n --main
+```
+
+### Special Keywords & Flag Priority
+```bash
+# "current" keyword for explicit current branch reference
+./scripts/git-tree/index.sh --target current --base main
 ./scripts/git-tree/index.sh --base current --target main
 
-# Both branches can use current (though this would show no changes)
-./scripts/git-tree/index.sh --base current --target current
+# Flag priority (when multiple ways specify same value):
+# 1. Explicit flags (--base, --target, --output) - highest priority
+# 2. Smart flags (--branch-name) - if explicit not already specified
+# 3. Positional arguments - fill remaining values in order
+# 4. Auto-detection - for any remaining unspecified values
 ```
-
-### Flag Priority
-When multiple ways to specify the same value are used:
-1. Explicit flags (`--base`, `--target`, `--output`) take highest priority
-2. Smart flags (`--branch-name`) set the base branch if not already specified
-3. Positional arguments fill in missing values in order
-4. Auto-detection happens for any remaining unspecified values
 
 ## GitHub Actions Integration
 
@@ -156,4 +287,28 @@ export GITHUB_BASE_REF="main"
 
 # Run the adapter script
 ./.github/scripts/git-tree-pr-adapter.sh
+```
+
+## Quick Reference
+
+### Most Common Usage Patterns
+```bash
+# 🧙‍♂️ Interactive (recommended for first-time users)
+./scripts/git-tree/index.sh
+
+# ⚡ Auto mode (fastest for regular use)
+./scripts/git-tree/index.sh --a
+
+# 🎯 Quick comparisons
+./scripts/git-tree/index.sh --main              # Compare current vs main
+./scripts/git-tree/index.sh --main --feat-xyz   # Compare feat-xyz vs main
+
+# 🛠️ With cleanup control (automation-friendly)
+./scripts/git-tree/index.sh --y --main          # Auto-cleanup + comparison
+./scripts/git-tree/index.sh --n --main          # Skip cleanup + comparison
+```
+
+### Getting Help
+```bash
+./scripts/git-tree/index.sh --help              # Show detailed usage information
 ```

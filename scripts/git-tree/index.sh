@@ -44,8 +44,10 @@ main() {
     local base_branch="$PARSED_BASE_BRANCH"
     local target_branch="$PARSED_TARGET_BRANCH"
     local output_file="$PARSED_OUTPUT_FILE"
+    local cleanup_flag="$PARSED_CLEANUP_FLAG"
+    local auto_mode="$PARSED_AUTO_MODE"
     
-    # Handle cleanup - either from wizard or traditional prompt
+    # Handle cleanup - from wizard, flags, auto mode, or traditional prompt
     if [[ -n "$WIZARD_SHOULD_CLEANUP" ]]; then
         # Wizard was used, use its cleanup decision
         if [[ "$WIZARD_SHOULD_CLEANUP" == "yes" ]]; then
@@ -56,6 +58,19 @@ main() {
                 echo
             fi
         fi
+    elif [[ -n "$cleanup_flag" ]]; then
+        # Cleanup flag was used (--n or --y)
+        if [[ "$cleanup_flag" == "yes" ]]; then
+            local results_dir="$GIT_TREE_SCRIPT_DIR/results"
+            if [ -d "$results_dir" ]; then
+                rm -rf "$results_dir"/*
+                echo -e "${MAGENTA}🗑️  Cleaned up previous results${NC}"
+                echo
+            fi
+        fi
+    elif [[ "$auto_mode" == "true" ]]; then
+        # Auto mode: skip cleanup prompt (default behavior is no cleanup)
+        :  # Do nothing - no cleanup prompt, no cleanup
     else
         # Traditional mode - prompt user for cleanup
         prompt_and_cleanup_results

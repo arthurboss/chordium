@@ -12,6 +12,8 @@ parse_arguments() {
     target_branch=""
     output_file=""
     show_wizard=false
+    cleanup_flag=""
+    auto_mode=false
     
     # If no arguments provided, show wizard
     if [[ $# -eq 0 ]]; then
@@ -43,9 +45,33 @@ parse_arguments() {
                 show_wizard=false
                 shift 2
                 ;;
+            --n)
+                cleanup_flag="no"
+                show_wizard=false
+                shift
+                ;;
+            --y)
+                cleanup_flag="yes"
+                show_wizard=false
+                shift
+                ;;
+            --a)
+                # Auto mode: use all defaults (no wizard, no cleanup prompt, auto-detect everything)
+                auto_mode=true
+                show_wizard=false
+                shift
+                ;;
             --*)
                 # Smart flag parsing: single flags like --feat-search become base/target branch
                 local flag_name="${1#--}"  # Remove -- prefix
+                
+                # Skip special flags that aren't branch names
+                if [[ "$flag_name" == "n" || "$flag_name" == "y" || "$flag_name" == "a" ]]; then
+                    echo "Error: Unknown option $1"
+                    show_usage
+                    exit 1
+                fi
+                
                 if [[ -z "$base_branch" ]]; then
                     base_branch="$flag_name"
                     show_wizard=false
@@ -119,4 +145,6 @@ parse_arguments() {
     PARSED_BASE_BRANCH="$base_branch"
     PARSED_TARGET_BRANCH="$target_branch"
     PARSED_OUTPUT_FILE="$output_file"
+    PARSED_CLEANUP_FLAG="$cleanup_flag"
+    PARSED_AUTO_MODE="$auto_mode"
 }
