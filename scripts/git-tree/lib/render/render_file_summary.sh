@@ -27,13 +27,24 @@ render_file_summary() {
     write_details_section "$output_file" "✅ Added Files ($added_count)"
     if [[ "$added_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "A" | awk '{
+        get_files_by_status "$all_files" "A" | awk '
+        {
             path=$2;
             n=split(path, parts, "/");
             fname=parts[n];
             dir="";
             for(i=1;i<n;i++){dir=dir parts[i] "/"}
-            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+            group=dir;
+            files_by_group[group]=files_by_group[group] "<li>" dir "<strong>" fname "</strong></li>\n";
+            group_order[group]=1;
+        }
+        END {
+            first=1;
+            for(g in group_order) {
+                if (!first) printf("<br>\n");
+                first=0;
+                printf("%s", files_by_group[g]);
+            }
         }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
@@ -46,13 +57,24 @@ render_file_summary() {
     write_details_section "$output_file" "✏️ Modified Files ($modified_count)"
     if [[ "$modified_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "M" | awk '{
+        get_files_by_status "$all_files" "M" | awk '
+        {
             path=$2;
             n=split(path, parts, "/");
             fname=parts[n];
             dir="";
             for(i=1;i<n;i++){dir=dir parts[i] "/"}
-            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+            group=dir;
+            files_by_group[group]=files_by_group[group] "<li>" dir "<strong>" fname "</strong></li>\n";
+            group_order[group]=1;
+        }
+        END {
+            first=1;
+            for(g in group_order) {
+                if (!first) printf("<br>\n");
+                first=0;
+                printf("%s", files_by_group[g]);
+            }
         }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
@@ -65,13 +87,24 @@ render_file_summary() {
     write_details_section "$output_file" "❌ Deleted Files ($deleted_count)"
     if [[ "$deleted_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "D" | awk '{
+        get_files_by_status "$all_files" "D" | awk '
+        {
             path=$2;
             n=split(path, parts, "/");
             fname=parts[n];
             dir="";
             for(i=1;i<n;i++){dir=dir parts[i] "/"}
-            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+            group=dir;
+            files_by_group[group]=files_by_group[group] "<li>" dir "<strong>" fname "</strong></li>\n";
+            group_order[group]=1;
+        }
+        END {
+            first=1;
+            for(g in group_order) {
+                if (!first) printf("<br>\n");
+                first=0;
+                printf("%s", files_by_group[g]);
+            }
         }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
