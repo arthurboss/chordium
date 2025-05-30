@@ -1,0 +1,12 @@
+# Git Tree Script .gitignore
+
+# Ignore generated result files
+results/
+
+# Ignore archived old scripts
+archive/
+
+# Ignore any temporary test files
+*test*.md
+*debug*.md
+*temp*.md

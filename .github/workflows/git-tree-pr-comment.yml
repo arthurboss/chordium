@@ -1,0 +1,52 @@
+name: Update PR Comment with File Tree
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  update-pr-comment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for git-tree script
+
+      - name: Install dependencies
+        run: |
+          # Ensure jq is available (should be pre-installed but let's be safe)
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+      - name: Generate PR file tree comment
+        id: generate-comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          # Make the adapter script executable and run it
+          chmod +x ./.github/scripts/git-tree-pr-adapter.sh
+          ./.github/scripts/git-tree-pr-adapter.sh
+
+      - name: Store output
+        id: store-output
+        run: |
+          {
+            echo "content<<EOF"
+            cat pr_comment.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Post sticky comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: ${{ steps.store-output.outputs.content }}
