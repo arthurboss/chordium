@@ -34,8 +34,10 @@ render_file_tree() {
 
     # Build the hierarchical tree structure
     build_file_tree "$all_files" "$url_generator_func" "$url_generator_param" "$output_file"
-
-    echo "> </details>" >> "$output_file"
+    
+    # Add spacing before file summary
+    echo "" >> "$output_file"
+    echo "" >> "$output_file"
     
     # Add file summary sections
     render_file_summary "$base_branch" "$output_file" "$all_files"

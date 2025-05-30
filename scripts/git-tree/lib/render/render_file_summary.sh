@@ -33,6 +33,7 @@ render_file_summary() {
     fi
     
     close_details_section "$output_file"
+    echo "" >> "$output_file"  # Add extra blank line after section
     
     # Modified files section
     write_details_section "$output_file" "✏️ Modified Files ($modified_count)"
@@ -44,6 +45,7 @@ render_file_summary() {
     fi
     
     close_details_section "$output_file"
+    echo "" >> "$output_file"  # Add extra blank line after section
     
     # Deleted files section
     write_details_section "$output_file" "❌ Deleted Files ($deleted_count)"
@@ -55,4 +57,5 @@ render_file_summary() {
     fi
     
     close_details_section "$output_file"
+    echo "" >> "$output_file"  # Add extra blank line after section
 }

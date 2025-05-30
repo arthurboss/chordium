@@ -52,6 +52,7 @@ close_blockquote_details() {
     local output_file="$1"
     echo "> </details>" >> "$output_file"
     echo ">" >> "$output_file"
+    echo ">" >> "$output_file"  # Add extra blank line after closing details
 }
 
 # Write empty line(s)
