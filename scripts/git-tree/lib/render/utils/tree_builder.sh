@@ -105,11 +105,20 @@ build_file_tree() {
         echo "> <details>" >> "$output_file"
         echo "> <summary>" >> "$output_file"
         
-        # Use appropriate connector based on whether this is the last item
+        # Calculate indentation based on depth (excluding root level)
+        local dir_indent=""
+        if [[ "$base_path" != "." ]]; then
+            # For nested directories, use one &emsp; per level (starting from 0 for first level)
+            for ((i=0; i<indent_level-1; i++)); do
+                dir_indent+="&emsp;"
+            done
+        fi
+        
+        # Output the directory with proper connector and indentation
         if [[ $is_last_item -eq 1 ]]; then
-            echo "> ${indent}&#9493;<strong>🗂️ $dir</strong>" >> "$output_file"
+            echo "> ${dir_indent}&#9493;<strong>🗂️ $dir</strong>" >> "$output_file"
         else
-            echo "> ${indent}&#9501;<strong>🗂️ $dir</strong>" >> "$output_file"
+            echo "> ${dir_indent}&#9501;<strong>🗂️ $dir</strong>" >> "$output_file"
         fi
         
         echo "> </summary>" >> "$output_file"

@@ -49,7 +49,23 @@ render_folder_section() {
     echo "> <!-- $comment_path/ folder -->" >> "$output_file"
     echo "> <details>" >> "$output_file"
     echo "> <summary>" >> "$output_file"
-    echo "> &#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
+    
+    # Calculate the depth of the current folder (excluding root level)
+    local depth=0
+    if [[ "$comment_path" != "$folder" ]]; then
+        # Count the number of path segments to determine the depth
+        IFS='/' read -ra path_parts <<< "$comment_path"
+        depth=${#path_parts[@]}
+    fi
+    
+    # Create indentation based on depth (one less than depth for root level)
+    local indent=""
+    for ((i=1; i<depth; i++)); do  # Start from 1 to exclude root level
+        indent+="&emsp;"
+    done
+    
+    # Output the folder entry with proper indentation
+    echo "> ${indent}&#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
     echo "> </summary>" >> "$output_file"
     echo ">" >> "$output_file"
     
@@ -75,9 +91,9 @@ render_folder_section() {
         
         # Use different connector for last file (no <br> tag for last file)
         if [[ $i -eq $((${#files_array[@]} - 1)) ]]; then
-            echo "> &emsp;&emsp;&#9493;$icon $file_link" >> "$output_file"
+            echo "> &emsp;&#9493;$icon $file_link" >> "$output_file"
         else
-            echo "> &emsp;&emsp;&#9501;$icon $file_link<br>" >> "$output_file"
+            echo "> &emsp;&#9501;$icon $file_link<br>" >> "$output_file"
         fi
     done
     
