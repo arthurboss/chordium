@@ -25,37 +25,37 @@ render_file_summary() {
     
     # Added files section
     write_details_section "$output_file" "✅ Added Files ($added_count)"
-    
     if [[ "$added_count" -gt 0 ]]; then
-        get_files_by_status "$all_files" "A" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        echo "<ul>" >> "$output_file"
+        get_files_by_status "$all_files" "A" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        echo "</ul>" >> "$output_file"
     else
         echo "No files were added." >> "$output_file"
     fi
-    
     close_details_section "$output_file"
     echo "" >> "$output_file"  # Add extra blank line after section
     
     # Modified files section
     write_details_section "$output_file" "✏️ Modified Files ($modified_count)"
-    
     if [[ "$modified_count" -gt 0 ]]; then
-        get_files_by_status "$all_files" "M" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        echo "<ul>" >> "$output_file"
+        get_files_by_status "$all_files" "M" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        echo "</ul>" >> "$output_file"
     else
         echo "No files were modified." >> "$output_file"
     fi
-    
     close_details_section "$output_file"
     echo "" >> "$output_file"  # Add extra blank line after section
     
     # Deleted files section
     write_details_section "$output_file" "❌ Deleted Files ($deleted_count)"
-    
     if [[ "$deleted_count" -gt 0 ]]; then
-        get_files_by_status "$all_files" "D" | awk '{print "- `" $2 "`"}' >> "$output_file"
+        echo "<ul>" >> "$output_file"
+        get_files_by_status "$all_files" "D" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        echo "</ul>" >> "$output_file"
     else
         echo "No files were deleted." >> "$output_file"
     fi
-    
     close_details_section "$output_file"
     echo "" >> "$output_file"  # Add extra blank line after section
 }
