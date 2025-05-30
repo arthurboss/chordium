@@ -21,16 +21,40 @@ render_folder_section() {
     # Skip root folder (handled separately)
     [[ "$folder" == "." ]] && return
     
-    # Start folder section
-    echo "> <!-- $folder folder -->" >> "$output_file"
+    # Get files for this folder to determine the full path
+    local folder_files=$(get_folder_files "$all_files" "$folder")
+    
+    # Debug output
+    echo "DEBUG: folder=$folder" >> /tmp/git_tree_folder_debug.log
+    echo "DEBUG: folder_files=$folder_files" >> /tmp/git_tree_folder_debug.log
+    
+    # Extract the full folder path from the first file in this folder
+    local full_folder_path=""
+    if [[ -n "$folder_files" ]]; then
+        local first_file=$(echo "$folder_files" | head -n1)
+        local first_filepath=$(extract_filepath "$first_file")
+        # Extract the directory path and remove trailing slash if present
+        full_folder_path=$(dirname "$first_filepath")
+        full_folder_path="${full_folder_path%/}"
+        echo "DEBUG: first_file=$first_file" >> /tmp/git_tree_folder_debug.log
+        echo "DEBUG: first_filepath=$first_filepath" >> /tmp/git_tree_folder_debug.log
+        echo "DEBUG: full_folder_path=$full_folder_path" >> /tmp/git_tree_folder_debug.log
+    fi
+    
+    # Use full path for comment, fallback to folder name if path extraction fails
+    local comment_path="${full_folder_path:-$folder}"
+    echo "DEBUG: comment_path=$comment_path" >> /tmp/git_tree_folder_debug.log
+    
+    # Start folder section with full relative path in comment
+    echo "> <!-- $comment_path/ folder -->" >> "$output_file"
     echo "> <details>" >> "$output_file"
     echo "> <summary>" >> "$output_file"
     echo "> &#9492;<strong>🗂️ $folder</strong>" >> "$output_file"
     echo "> </summary>" >> "$output_file"
     echo ">" >> "$output_file"
     
-    # Get files for this folder
-    local folder_files=$(get_folder_files "$all_files" "$folder")
+    # Use the same folder_files we already retrieved
+    # (don't call get_folder_files again)
     
     # Convert to array to check for last file
     local files_array=()

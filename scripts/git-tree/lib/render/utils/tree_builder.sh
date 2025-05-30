@@ -100,8 +100,8 @@ build_file_tree() {
             is_last_item=1
         fi
         
-        # Start directory section
-        echo "> <!-- $dir folder -->" >> "$output_file"
+        # Start directory section with full relative path in comment
+        echo "> <!-- $full_dir_path/ folder -->" >> "$output_file"
         echo "> <details>" >> "$output_file"
         echo "> <summary>" >> "$output_file"
         
