@@ -43,31 +43,26 @@ generate_git_tree() {
     local git_diff_data
     git_diff_data=$(convert_github_api_to_git_diff "$changed_files")
     
-    # Create a temporary function that returns our API data instead of calling git diff
-    mock_git_diff() {
-        echo "$git_diff_data"
-    }
-    
-    # Override git command temporarily
-    git() {
-        if [[ "$1" == "diff" && "$2" == "--name-status" ]]; then
-            mock_git_diff
-        else
-            command git "$@"
-        fi
-    }
-    
-    # Source the git-tree library (loads all dependencies including render functions and URL generators)
-    source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/loader.sh"
-    
     # Get repository name for project name
     local repo_name="${GITHUB_REPOSITORY##*/}"
     
-    # Call the existing render function with GitHub URL generator
-    render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name" "generate_github_url" ""
-    
-    # Restore git command
-    unset -f git
+    # Use a subshell to safely override git command without affecting the parent environment
+    (
+        # Create a mock git function that returns our API data for diff commands
+        git() {
+            if [[ "$1" == "diff" && "$2" == "--name-status" ]]; then
+                echo "$git_diff_data"
+            else
+                command git "$@"
+            fi
+        }
+        
+        # Source the git-tree library (loads all dependencies including render functions and URL generators)
+        source "$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/git-tree/lib/loader.sh"
+        
+        # Call the existing render function with GitHub URL generator
+        render_file_tree "$base_branch" "$output_file" "$target_branch" "$repo_name" "generate_github_url" ""
+    )
     
     if [[ -f "$output_file" ]]; then
         log_success "Git-tree generated successfully"
