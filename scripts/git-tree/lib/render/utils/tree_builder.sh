@@ -79,7 +79,8 @@ build_file_tree() {
             connector="&#9493;"  # └
         fi
         
-        echo "> ${indent}${connector}${icon} ${file_link}<br>" >> "$output_file"
+        # Use two spaces for markdown line break instead of <br>
+        echo "> ${indent}${connector}${icon} ${file_link}  " >> "$output_file"
     done
     
     # Then render directories
