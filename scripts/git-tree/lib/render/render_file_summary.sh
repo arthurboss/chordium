@@ -27,7 +27,14 @@ render_file_summary() {
     write_details_section "$output_file" "✅ Added Files ($added_count)"
     if [[ "$added_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "A" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        get_files_by_status "$all_files" "A" | awk '{
+            path=$2;
+            n=split(path, parts, "/");
+            fname=parts[n];
+            dir="";
+            for(i=1;i<n;i++){dir=dir parts[i] "/"}
+            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+        }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
         echo "No files were added." >> "$output_file"
@@ -39,7 +46,14 @@ render_file_summary() {
     write_details_section "$output_file" "✏️ Modified Files ($modified_count)"
     if [[ "$modified_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "M" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        get_files_by_status "$all_files" "M" | awk '{
+            path=$2;
+            n=split(path, parts, "/");
+            fname=parts[n];
+            dir="";
+            for(i=1;i<n;i++){dir=dir parts[i] "/"}
+            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+        }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
         echo "No files were modified." >> "$output_file"
@@ -51,7 +65,14 @@ render_file_summary() {
     write_details_section "$output_file" "❌ Deleted Files ($deleted_count)"
     if [[ "$deleted_count" -gt 0 ]]; then
         echo "<ul>" >> "$output_file"
-        get_files_by_status "$all_files" "D" | awk '{print "<li>" $2 "</li>"}' >> "$output_file"
+        get_files_by_status "$all_files" "D" | awk '{
+            path=$2;
+            n=split(path, parts, "/");
+            fname=parts[n];
+            dir="";
+            for(i=1;i<n;i++){dir=dir parts[i] "/"}
+            printf("<li>%s<strong>%s</strong></li>\n", dir, fname)
+        }' >> "$output_file"
         echo "</ul>" >> "$output_file"
     else
         echo "No files were deleted." >> "$output_file"
