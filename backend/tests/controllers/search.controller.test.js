@@ -173,6 +173,55 @@ describe('Search Controller', () => {
       expect(mockCifraClubService.search).toHaveBeenCalledWith('test', 'artist');
     });
 
+    it('should fall back to CifraClub when Supabase returns no results (empty array)', async () => {
+      // Arrange
+      const searchQuery = 'unknown-artist';
+      
+      // Mock Supabase returning empty array (no results) but no error
+      mockSupabaseClient.ilike.mockResolvedValueOnce({ 
+        data: [], 
+        error: null 
+      });
+      
+      // Mock CifraClub response with expected structure
+      const cifraClubResults = [
+        { 
+          displayName: 'Unknown Artist', 
+          path: 'unknown-artist', 
+          songCount: 5,
+          type: 'artist',
+          url: 'https://www.cifraclub.com.br/unknown-artist/'
+        }
+      ];
+      
+      mockCifraClubService.search.mockResolvedValue(cifraClubResults);
+
+      // Act
+      const response = await global.agent
+        .get('/api/artists')
+        .query({ artist: searchQuery });
+
+      // Assert
+      expect(response.status).toBe(200);
+      
+      // Verify Supabase was called correctly
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('artists');
+      expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
+      expect(mockSupabaseClient.ilike).toHaveBeenCalledWith('displayName', `%${searchQuery}%`);
+      
+      // Verify fallback to CifraClub was triggered
+      expect(mockCifraClubService.search).toHaveBeenCalledWith(searchQuery, 'artist');
+      
+      // Verify the response matches CifraClub results
+      expect(response.body).toEqual(cifraClubResults);
+      
+      // Verify the response contains the expected artist data
+      expect(response.body[0]).toMatchObject({
+        displayName: 'Unknown Artist',
+        path: 'unknown-artist'
+      });
+    });
+
     it('should return 400 when artist query is missing', async () => {
       const response = await global.agent
         .get('/api/artists')
