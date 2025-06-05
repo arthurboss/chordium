@@ -10,4 +10,5 @@ export NODE_ENV=test
 export CYPRESS_INCLUDE_PROCESS=1
 
 # Run Cypress with CommonJS config file
-npx cypress run --config-file cypress.config.cjs
+# Forward all command line arguments to cypress
+npx cypress run --config-file cypress.config.cjs "$@"
