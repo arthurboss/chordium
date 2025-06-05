@@ -1,9 +1,9 @@
-import { SongData } from '../types/song';
+import { Song } from '../types/song';
 
 // Cache for sample song content - prevent duplicate fetches
-let cachedSongs: Promise<SongData[]> | null = null;
+let cachedSongs: Promise<Song[]> | null = null;
 
-export const loadSampleSongs = async (): Promise<SongData[]> => {
+export const loadSampleSongs = async (): Promise<Song[]> => {
   // Return cached promise if available
   if (cachedSongs) {
     return cachedSongs;

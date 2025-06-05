@@ -1,4 +1,5 @@
-export interface ArtistData {
-  name: string;
-  url: string;
+export interface Artist {
+  path: string; // Path to use in API requests and URL construction
+  displayName: string;
+  songCount: number | null;
 }

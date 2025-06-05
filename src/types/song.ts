@@ -1,10 +1,4 @@
-export interface SongData {
-  id: string;
-  title: string;
-  artist?: string;
+export interface Song {
   path: string;
-  content?: string;
-  key?: string;
-  tuning?: string;
-  capo?: string;
+  title: string;
 }

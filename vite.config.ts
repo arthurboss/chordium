@@ -13,7 +13,14 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
       // Add historyApiFallback for SPA routing
-      cors: true
+      cors: true,
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     plugins: [
       react(),
@@ -101,6 +108,36 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/test-setup.ts'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/cypress/**',
+        '**/backend/**',
+        '**/.{idea,git,cache,output,temp}/**',
+        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*'
+      ],
+      css: true,
+      pool: 'forks',
+      poolOptions: {
+        forks: {
+          singleFork: true,
+        },
+      },
+      // Prevent memory leaks and timeouts
+      testTimeout: 10000,
+      hookTimeout: 10000,
+      teardownTimeout: 5000,
+      // Improve test isolation
+      isolate: true,
+      // Limit memory usage
+      maxConcurrency: 1,
+      // Prevent hanging tests
+      fileParallelism: false,
     },
   };
 });

@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject } from "react";
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 
 interface SongViewerProps {
-  song: SongData;
+  song: Song;
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
   onDelete: (songId: string) => void;

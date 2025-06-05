@@ -1,4 +1,21 @@
-import { SearchResultItem } from "./search-result-item";
+import { SearchResultItem } from "../types";
+
+// Environment-based logging utility to prevent memory leaks in tests
+const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
+const isVitestRunning = typeof process !== 'undefined' && process.env.VITEST === 'true';
+const shouldLog = !isTestEnvironment && !isVitestRunning;
+
+const debugLog = (message: string, ...args: unknown[]) => {
+  if (shouldLog) {
+    console.log(message, ...args);
+  }
+};
+
+const debugError = (message: string, ...args: unknown[]) => {
+  if (shouldLog) {
+    console.error(message, ...args);
+  }
+};
 
 // Key for storing search cache in localStorage (changed from sessionStorage for persistence)
 const SEARCH_CACHE_KEY = 'chordium-search-cache';
@@ -76,12 +93,12 @@ const initializeCache = (): SearchCache => {
     
     return cache;
   } catch (e) {
-    console.error('Failed to parse search cache:', e);
+    debugError('Failed to parse search cache:', e);
     // If there was an error, clear the cache to avoid future issues
     try {
       localStorage.removeItem(SEARCH_CACHE_KEY);
     } catch (clearError) {
-      console.error('Failed to clear problematic cache:', clearError);
+      debugError('Failed to clear problematic cache:', clearError);
     }
     return { items: [] };
   }
@@ -103,7 +120,7 @@ const saveCache = (cache: SearchCache): void => {
     
     // If cache is too large, remove items until it's under the size limit
     if (cacheSize > MAX_CACHE_SIZE_BYTES) {
-      console.log(`Cache size (${cacheSize} bytes) exceeds limit, cleaning up...`);
+      debugLog(`Cache size (${cacheSize} bytes) exceeds limit, cleaning up...`);
       
       // Sort by combined score (recency and access count)
       cache.items.sort((a, b) => {
@@ -117,12 +134,12 @@ const saveCache = (cache: SearchCache): void => {
         cache.items.shift(); // Remove the least valuable item
       }
       
-      console.log(`Cache cleaned up, new size: ${calculateCacheSize(cache)} bytes with ${cache.items.length} items`);
+      debugLog(`Cache cleaned up, new size: ${calculateCacheSize(cache)} bytes with ${cache.items.length} items`);
     }
     
     localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    console.error('Failed to save search cache:', e);
+    debugError('Failed to save search cache:', e);
   }
 };
 
@@ -226,14 +243,14 @@ export const getCachedSearchResults = (artist: string | null, song: string | nul
   const songMatches = normalizeForCompare(cacheItem.query.song) === normalizeForCompare(song);
   
   if (!artistMatches || !songMatches) {
-    console.log('Cache key matches but search parameters differ, returning null');
+    debugLog('Cache key matches but search parameters differ, returning null');
     return null;
   }
   
   // Check if cache entry is expired
   const now = Date.now();
   if (now - cacheItem.timestamp > CACHE_EXPIRATION_TIME) {
-    console.log('Cache expired, will fetch fresh data');
+    debugLog('Cache expired, will fetch fresh data');
     
     // Remove expired item
     const updatedCache: SearchCache = {
@@ -283,7 +300,7 @@ export const clearExpiredSearchCache = (): number => {
   const removedCount = initialCount - cache.items.length;
   
   if (removedCount > 0) {
-    console.log(`Removed ${removedCount} expired search cache entries`);
+    debugLog(`Removed ${removedCount} expired search cache entries`);
     saveCache(cache);
   }
   
@@ -298,7 +315,7 @@ export const clearSearchCache = (): void => {
     localStorage.removeItem(SEARCH_CACHE_KEY);
     inMemoryCache.clear();
   } catch (e) {
-    console.error('Failed to clear search cache:', e);
+    debugError('Failed to clear search cache:', e);
   }
 };
 
@@ -315,7 +332,7 @@ export const getSearchResultsWithRefresh = async (
   immediate: SearchResultItem[] | null;
   refreshPromise: Promise<SearchResultItem[] | null>;
 }> => {
-  console.log('getSearchResultsWithRefresh called with:', { artist, song });
+  debugLog('getSearchResultsWithRefresh called with:', { artist, song });
   const cache = initializeCache();
   const key = generateCacheKey(artist, song);
   const cacheItem = cache.items.find(item => item.key === key);
@@ -339,12 +356,12 @@ export const getSearchResultsWithRefresh = async (
     const songMatches = normalizeForCompare(cacheItem.query.song) === normalizeForCompare(song);
     
     if (!artistMatches || !songMatches) {
-      console.log('Cache key matches but search parameters differ, fetching fresh data');
+      debugLog('Cache key matches but search parameters differ, fetching fresh data');
       needsRefresh = true;
     }
     // Check if cache entry is expired
     else if (now - cacheItem.timestamp > CACHE_EXPIRATION_TIME) {
-      console.log('Cache expired, will fetch fresh data');
+      debugLog('Cache expired, will fetch fresh data');
       
       // Remove expired item
       const updatedCache: SearchCache = {
@@ -358,7 +375,7 @@ export const getSearchResultsWithRefresh = async (
     } 
     // Check if cache is stale and needs a background refresh
     else if (now - cacheItem.timestamp > REFRESH_THRESHOLD) {
-      console.log('Cache is stale, using cached data but refreshing in background');
+      debugLog('Cache is stale, using cached data but refreshing in background');
       
       // Update access count
       cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
@@ -369,7 +386,7 @@ export const getSearchResultsWithRefresh = async (
       needsRefresh = true;
     } else {
       // Cache is still fresh
-      console.log('Using fresh cached search results');
+      debugLog('Using fresh cached search results');
       cacheItem.timestamp = now; // Update timestamp to mark as recently accessed
       cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
       saveCache(cache);
@@ -384,12 +401,12 @@ export const getSearchResultsWithRefresh = async (
   // Create a promise for refreshed data if needed
   const refreshPromise = new Promise<SearchResultItem[] | null>((resolve) => {
     if (!needsRefresh) {
-      console.log('No refresh needed, using existing results');
+      debugLog('No refresh needed, using existing results');
       resolve(immediateResults);
       return;
     }
     
-    console.log('Fetching fresh data from API');
+    debugLog('Fetching fresh data from API');
     
     // Use a separate async function for the fetch logic
     const fetchData = async () => {
@@ -405,7 +422,7 @@ export const getSearchResultsWithRefresh = async (
         
         const backendUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-search?${backendUrlParams.toString()}`;
         
-        console.log(`Making API request to: ${backendUrl}`);
+        debugLog(`Making API request to: ${backendUrl}`);
         
         // Use AbortController to handle timeouts
         const controller = new AbortController();
@@ -428,19 +445,19 @@ export const getSearchResultsWithRefresh = async (
         }
         
         const newResults = await response.json();
-        console.log('API returned results:', newResults.length);
+        debugLog('API returned results:', newResults.length);
         
         // Cache the new results if we actually got data back
         if (Array.isArray(newResults) && newResults.length > 0) {
           cacheSearchResults(artist, song, newResults);
         } else {
-          console.log('API returned empty results, not caching');
+          debugLog('API returned empty results, not caching');
         }
         
         // Ensure results are properly formatted as an array
         const resultArray = Array.isArray(newResults) ? newResults : [];
         
-        console.log('API results processed:', { 
+        debugLog('API results processed:', { 
           isArray: Array.isArray(newResults), 
           length: resultArray.length,
           results: resultArray
@@ -449,21 +466,21 @@ export const getSearchResultsWithRefresh = async (
         // Always call the callback with the results (even if empty)
         // This ensures that the UI is updated even if there are no results
         if (refreshCallback) {
-          console.log('Calling refresh callback with results:', resultArray.length);
+          debugLog('Calling refresh callback with results:', resultArray.length);
           refreshCallback(resultArray);
         }
         
         resolve(resultArray);
       } catch (error) {
-        console.error("Error in background refresh:", error);
-        console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
-        console.log("URL used:", `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-search?${artist ? `artist=${encodeURIComponent(artist)}` : ''}${song ? `&song=${encodeURIComponent(song)}` : ''}`);
+        debugError("Error in background refresh:", error);
+        debugLog("VITE_API_URL:", import.meta.env.VITE_API_URL);
+        debugLog("URL used:", `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-search?${artist ? `artist=${encodeURIComponent(artist)}` : ''}${song ? `&song=${encodeURIComponent(song)}` : ''}`);
         
         // For explicit errors, don't return cached data
         if (error.name !== 'AbortError') {
           resolve(null);
         } else {
-          console.log('Request timed out, returning cached data if available');
+          debugLog('Request timed out, returning cached data if available');
           resolve(immediateResults); // Return cached results if available on timeout
         }
       }

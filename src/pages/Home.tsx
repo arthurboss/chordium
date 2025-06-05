@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom"; // Import useLocation
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TabContainer from "@/components/TabContainer";
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
 import { useSampleSongs } from "@/hooks/use-sample-songs";
@@ -20,8 +20,8 @@ const getInitialTab = (pathname: string): string => {
 const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
-  const [demoSong, setDemoSong] = useState<SongData | null>(null);
-  const [selectedSong, setSelectedSong] = useState<SongData | null>(null);
+  const [demoSong, setDemoSong] = useState<Song | null>(null);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { sampleSongs, mySongs, setMySongs } = useSampleSongs();
   useSaveSongs(mySongs);
   useSearchRedirect();

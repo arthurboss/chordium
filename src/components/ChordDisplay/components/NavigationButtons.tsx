@@ -19,6 +19,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
       size="sm" 
       onClick={onReturn}
       aria-label="Go back"
+      className="w-24"
     >
       <ArrowLeft className="h-4 w-4 mr-1" />
       Back

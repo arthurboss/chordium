@@ -1,3 +1,11 @@
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 const config = {
   // Server configuration
   server: {
@@ -18,6 +26,12 @@ const config = {
       '--disable-dev-shm-usage',
       '--no-sandbox'
     ]
+  },
+
+  // Supabase configuration
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY
   },
 
   // CifraClub specific

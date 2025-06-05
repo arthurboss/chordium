@@ -2,7 +2,11 @@ import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import logger from '../utils/logger.js';
 
-// Helper functions outside the class
+import config from '../config/config.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
+
 function buildSearchQuery(artist, song) {
   if (artist && song) return `${artist} ${song}`;
   return artist || song || '';
@@ -38,15 +42,17 @@ class SearchController {
 
   async getArtistSongs(req, res) {
     try {
-      const { artistUrl } = req.query;
-      
-      if (!artistUrl) {
-        return res.status(400).json({ error: 'Missing artist URL' });
+      const { artistPath } = req.query;
+      if (!artistPath) {
+        logger.error('Missing artist path parameter');
+        return res.status(400).json({ error: 'Missing artist path' });
       }
-
-      logger.info(`Fetching songs for artist: ${artistUrl}`);
+      logger.info(`Fetching songs for artist with path: ${artistPath}`);
+      // Always scrape Cifra Club for artist songs
+      const artistUrl = `${cifraClubService.baseUrl}/${artistPath}/`;
       const songs = await cifraClubService.getArtistSongs(artistUrl);
-      res.json(songs);
+      logger.info(`Found ${songs.length} songs for artist ${artistPath} from Cifra Club`);
+      return res.json(songs);
     } catch (error) {
       logger.error('Error fetching artist songs:', error);
       res.status(500).json({ error: 'Failed to fetch artist songs', details: error.message });
@@ -75,9 +81,32 @@ class SearchController {
     }
   }
 
-}
+  async getArtists(req, res) {
+    try {
+      const { artist } = req.query;
+      logger.info(`Searching for artists matching: "${artist}"`);
 
-// The helper functions are now defined at the top of the file
+      // Fetch from Supabase instead of scraping Cifra Club
+      let supabaseQuery = supabase.from('artists').select('*');
+      if (artist) {
+        // Case-insensitive search on displayName
+        supabaseQuery = supabaseQuery.ilike('displayName', `%${artist}%`);
+      }
+      const { data: artists, error } = await supabaseQuery;
+
+      if (error) {
+        logger.error('Supabase error fetching artists:', error);
+        return res.status(500).json({ error: 'Failed to fetch artists', details: error.message });
+      }
+
+      logger.info(`Found ${artists.length} artists from Supabase`);
+      return res.json(artists);
+    } catch (error) {
+      logger.error('Error fetching artists:', error);
+      res.status(500).json({ error: 'Failed to fetch artists', details: error.message });
+    }
+  }
+}
 
 const searchController = new SearchController();
 

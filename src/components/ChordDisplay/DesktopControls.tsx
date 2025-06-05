@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
@@ -7,6 +7,8 @@ import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';
 import { ChordSheetControlsProps } from './types';
+import StickyBottomContainer from '../StickyBottomContainer';
+import { useStickyAtBottom } from '@/hooks/use-sticky-at-bottom';
 
 function TextPreferencesMenu({
   fontSize,
@@ -142,62 +144,46 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setIsEditing,
   handleDownload,
 }) => {
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const isMdScreen = window.innerWidth >= 768 && window.innerWidth < 1024;
-      const threshold = isMdScreen ? 100 : 140; // pixels from bottom to trigger the change
-
-      setIsAtBottom(scrollPosition >= documentHeight - threshold);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check initial position
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const isAtBottom = useStickyAtBottom();
 
   return (
-    <Card className={`sticky bottom-4 mb-4 transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-4'} bg-background/70 backdrop-blur-sm hidden sm:block`}>
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex flex-col space-y-3">
-          <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
-            {/* Left: Play/Pause (Auto Scroll) button */}
-            <div className="flex items-center justify-start">
-              <PlayButton
-                autoScroll={autoScroll}
-                setAutoScroll={setAutoScroll}
-                size={16}
-                className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'bg-primary/10 text-primary hover:bg-primary/20'}`}
-                variant="outline"
-              />
-              {/* Speed controls only show when playing, always between PlayButton and Transpose */}
-              {autoScroll && (
-                <div className="ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
-                  <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
-                </div>
-              )}
-            </div>
-            {/* Center: Transpose always centered and fixed */}
-            <div className="flex items-center justify-center">
-              <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
-            </div>
-            {/* Right: Text Preferences */}
-            <div className="flex items-center justify-end">
-              <TextPreferencesMenu
-                fontSize={fontSize} setFontSize={setFontSize}
-                fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-                fontStyle={fontStyle} setFontStyle={setFontStyle}
-                viewMode={viewMode} setViewMode={setViewMode}
-              />
+    <StickyBottomContainer isAtBottom={isAtBottom} desktopOnly>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col space-y-3">
+            <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
+              {/* Left: Play/Pause (Auto Scroll) button */}
+              <div className="flex items-center justify-start">
+                <PlayButton
+                  autoScroll={autoScroll}
+                  setAutoScroll={setAutoScroll}
+                  size={16}
+                  className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                  variant="outline"
+                />
+                {/* Speed controls only show when playing, always between PlayButton and Transpose */}
+                {autoScroll && (
+                  <div className="ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
+                    <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
+                  </div>
+                )}
+              </div>
+              {/* Center: Transpose always centered and fixed */}
+              <div className="flex items-center justify-center">
+                <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
+              </div>
+              {/* Right: Text Preferences */}
+              <div className="flex items-center justify-end">
+                <TextPreferencesMenu
+                  fontSize={fontSize} setFontSize={setFontSize}
+                  fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+                  fontStyle={fontStyle} setFontStyle={setFontStyle}
+                  viewMode={viewMode} setViewMode={setViewMode}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+    </StickyBottomContainer>
   );
 };
 

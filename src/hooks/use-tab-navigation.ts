@@ -1,15 +1,15 @@
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { getSearchParamsType } from "@/utils/search-utils";
 
 interface TabNavigationProps {
-  sampleSongs: SongData[];
-  mySongs: SongData[];
+  sampleSongs: Song[];
+  mySongs: Song[];
   setActiveTab: (tab: string) => void;
   activeTab: string; // Added: current activeTab from Home's state
-  setDemoSong: React.Dispatch<React.SetStateAction<SongData | null>>;
-  setSelectedSong: React.Dispatch<React.SetStateAction<SongData | null>>;
+  setDemoSong: React.Dispatch<React.SetStateAction<Song | null>>;
+  setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
 }
 
 export const useTabNavigation = ({
@@ -34,6 +34,8 @@ export const useTabNavigation = ({
       determinedTab = "search";
     } else if (currentPath.startsWith("/upload")) {
       determinedTab = "upload";
+    } else if (currentPath.startsWith("/artist/")) {
+      determinedTab = "search"; // Show artist songs in search tab
     } else if (currentPath.startsWith("/my-songs") || currentPath === "/") {
       determinedTab = "my-songs";
     } else {
@@ -55,7 +57,7 @@ export const useTabNavigation = ({
       if (sampleSongs && sampleSongs.length > 0) {
         const foundDemo = sampleSongs.find((song) => song.id === songIdFromQuery);
         if (foundDemo) {
-          setDemoSong({ ...foundDemo } as SongData);
+          setDemoSong({ ...foundDemo } as Song);
           setSelectedSong(null); // Clear other selection
           songFound = true;
         }

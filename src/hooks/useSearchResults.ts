@@ -1,210 +1,177 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { useState, useEffect, useRef } from "react";
+import { Artist } from "@/types/artist";
 import { SearchResultItem } from "@/utils/search-result-item";
-import { 
-  getCachedSearchResults, 
-  cacheSearchResults, 
-  setLastSearchQuery,
-  clearExpiredSearchCache,
-  getSearchResultsWithRefresh
-} from "@/utils/search-cache-utils";
-import { useArtistSongs } from "./useArtistSongs";
+import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
+import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
 
-export function useSearchResults() {
-  const [searchParams] = useSearchParams();
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const lastRequestParams = useRef<string | null>(null);
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-  const { artistSongs, currentArtistUrl } = useArtistSongs();
+/**
+ * Custom hook to handle search results fetching and filtering
+ * 
+ * @param artist - The artist search term
+ * @param song - The song search term
+ * @param filterArtist - The filter string for artists (used for local filtering only)
+ * @param filterSong - The filter string for songs (used for local filtering only)
+ * @param shouldFetch - Boolean flag that controls when to fetch from API. 
+ *                      Only fetch when this is true (e.g., when form is submitted)
+ */
+export function useSearchResults(
+  artist: string, 
+  song: string, 
+  filterArtist: string, 
+  filterSong: string, 
+  shouldFetch: boolean = false
+) {
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [allArtists, setAllArtists] = useState<Artist[]>([]); // Store all fetched artists
+  const [songs, setSongs] = useState<SearchResultItem[]>([]);
+  const [allSongs, setAllSongs] = useState<SearchResultItem[]>([]); // Store all fetched songs
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const lastFetchedArtist = useRef<string>("");
+  // Track if we should continue to fetch (this will reset after a successful fetch)
+  const [shouldContinueFetching, setShouldContinueFetching] = useState(shouldFetch);
 
-  // Extract artist and song strings for the dependency array
-  const artistParam = searchParams.get('artist');
-  const songParam = searchParams.get('song');
-  
-  // Check if we should filter locally
-  const shouldFilterLocally = useCallback((artist: string | null, song: string | null) => {
-    // Only filter locally if we have artist songs loaded and only the song parameter is changing
-    return artistSongs && 
-           artistSongs.length > 0 && 
-           currentArtistUrl && 
-           artist === null && 
-           song !== null && 
-           song.length > 0;
-  }, [artistSongs, currentArtistUrl]);
-  
-  // Filter artist songs locally based on song name
-  const filterArtistSongs = useCallback((songQuery: string): SearchResultItem[] => {
-    if (!artistSongs) return [];
-    
-    const query = songQuery.toLowerCase();
-    return artistSongs
-      .filter(song => 
-        song.title.toLowerCase().includes(query) ||
-        (song.artist && song.artist.toLowerCase().includes(query))
-      )
-      .map(song => ({
-        title: song.title,
-        url: song.path || ''
-      }));
-  }, [artistSongs]);
-  
-  // Log search params for debugging
+
+
+  // Update internal fetch tracking when prop changes
   useEffect(() => {
-    console.log('Search params changed:', { artist: artistParam, song: songParam });
-  }, [artistParam, songParam]);
-  
-  // Clear expired cache entries when component mounts
+    console.log('[useSearchResults] shouldFetch:', shouldFetch, 'artist:', artist, 'song:', song);
+    setShouldContinueFetching(shouldFetch);
+  }, [shouldFetch, artist, song]);
+
+  // Fetch artists or songs from backend when shouldFetch is true
   useEffect(() => {
-    clearExpiredSearchCache();
-  }, []);
-
-  useEffect(() => {
-    // Create a unique identifier for this search session
-    const searchId = `search-${Date.now()}`;
-    console.log(`[${searchId}] Search effect running with params:`, { artistParam, songParam });
-
-    const paramsString = JSON.stringify({ artistParam, songParam });
-
-    // Skip if params haven't changed to avoid unnecessary API calls
-    if (lastRequestParams.current === paramsString) {
-      console.log(`[${searchId}] Skipping search - params haven't changed`);
+    console.log('[useSearchResults] Fetch effect triggered. shouldContinueFetching:', shouldContinueFetching, 'artist:', artist, 'song:', song);
+    if (!shouldContinueFetching) {
       return;
     }
-    
-    // Check if we should filter locally
-    if (shouldFilterLocally(artistParam, songParam) && songParam) {
-      console.log(`[${searchId}] Filtering artist songs locally for:`, songParam);
-      const filteredSongs = filterArtistSongs(songParam);
-      console.log(`[${searchId}] Filtered ${filteredSongs.length} songs`);
-      setResults(filteredSongs);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    // Always update lastRequestParams
-    lastRequestParams.current = paramsString;
-
-    // Debounce: clear previous timeout
-    if (debounceTimeout.current) {
-      console.log(`[${searchId}] Clearing previous search timeout`);
-      clearTimeout(debounceTimeout.current);
-    }
-
-    debounceTimeout.current = setTimeout(() => {
-      // Clear debounce reference once executed
-      debounceTimeout.current = null;
-
-      if (!artistParam && !songParam) {
-        console.log(`[${searchId}] No search parameters provided, clearing results`);
-        setResults([]);
-        setLoading(false); // Ensure loading is set to false after results update
-        setError(null);
-        return;
-      }
-
-      // Store last query in cache
-      console.log(`[${searchId}] Storing last search query:`, { artistParam, songParam });
-      setLastSearchQuery(artistParam, songParam);
-
-      // Set loading state
+    // Allow fetch if either artist or song is present
+    if (
+      (artist || song) &&
+      !loading &&
+      (lastFetchedArtist.current !== artist + '|' + song) &&
+      ((artist && artist.trim() !== '') || (song && song.trim() !== ''))
+    ) {
       setLoading(true);
       setError(null);
 
-      console.log(`[${searchId}] Starting search for:`, { artistParam, songParam });
-
-      // Log before calling getSearchResultsWithRefresh
-      console.log(`[${searchId}] Calling getSearchResultsWithRefresh with:`, { artistParam, songParam });
-
-      // Define a callback for when background refresh completes
-      const refreshCallback = (newResults: SearchResultItem[]) => {
-        console.log(`[${searchId}] Background refresh completed with results:`, newResults?.length, newResults);
-
-        // Check if this is still the current search before updating state
-        if (lastRequestParams.current === paramsString) {
-          console.log(`[${searchId}] Updating results from background refresh`);
-          setResults(prevResults => {
-            const newResultsArray = newResults ? [...newResults] : []; // Ensure it's a new array
-            if (prevResults.length === newResultsArray.length && 
-                JSON.stringify(prevResults) === JSON.stringify(newResultsArray)) {
-              console.log(`[${searchId}] Results from refreshCallback match previous results, forcing state update with new reference`);
-              return newResultsArray; 
-            }
-            console.log(`[${searchId}] Updating with new distinct results from refreshCallback.`);
-            return newResultsArray;
-          });
-          setLoading(false); // Ensure loading is set to false after results update
+      // Check cache first
+      const cachedResults = getCachedSearchResults(artist || null, song || null);
+      if (cachedResults) {
+        console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
+        // Process cached results
+        if (!artist && song) {
+          // Song-only search
+          setAllSongs(cachedResults);
+          setSongs(cachedResults);
+          setAllArtists([]);
+          setArtists([]);
         } else {
-          console.log(`[${searchId}] Background refresh completed but search params changed, ignoring results`);
+          // Artist search - cached results are Artist objects
+          const artistResults = cachedResults as unknown as Artist[];
+          setAllArtists(artistResults);
+          setArtists(artistResults);
+          setAllSongs([]);
+          setSongs([]);
         }
-      };
+        setLoading(false);
+        setHasFetched(true);
+        lastFetchedArtist.current = artist + '|' + song;
+        setShouldContinueFetching(false);
+        return;
+      }
 
-      // Use the conditional refresh functionality
-      getSearchResultsWithRefresh(artistParam, songParam, refreshCallback)
-        .then(({ immediate, refreshPromise }) => {
-          console.log(`[${searchId}] getSearchResultsWithRefresh resolved. Immediate:`, immediate, 'RefreshPromise:', refreshPromise);
-          if (immediate) {
-            // We have cached results, display them immediately
-            console.log(`[${searchId}] Showing cached search results, count:`, immediate.length, immediate);
-
-            if (lastRequestParams.current === paramsString) {
-              Promise.resolve().then(() => {
-                console.log(`[${searchId}] Microtask: Setting results and loading for immediate cache. Count:`, immediate?.length, immediate);
-                // Ensure a new array reference is always set.
-                // If 'immediate' is null (e.g. cache miss), set to empty array.
-                setResults(immediate ? [...immediate] : []); 
-                setLoading(false); 
-              });
-            } else {
-              console.log(`[${searchId}] Search params changed during cache lookup, abandoning results`);
-              return;
-            }
-            
-            // Wait for potential background refresh to complete (handled by refreshCallback)
-            refreshPromise.catch(error => {
-              console.error(`[${searchId}] Background refresh failed silently:`, error);
-            });
-          } else {
-            // No cached results. refreshPromise is for the initial fetch.
-            // The refreshCallback (defined above) will be called by getSearchResultsWithRefresh
-            // with the data, and it will call setResults and setLoading(false).
-            console.log(`[${searchId}] No cached data available, initial fetch will trigger refreshCallback.`);
-            refreshPromise
-              .then(freshResultsFromPromise => {
-                console.log(`[${searchId}] Initial fetch promise also resolved (data likely already handled by callback). Count:`, freshResultsFromPromise?.length);
-                // The refreshCallback should have already handled setting loading to false.
-              })
-              .catch(err => {
-                console.error(`[${searchId}] Error in initial fetch promise:`, err);
-                if (lastRequestParams.current === paramsString) {
-                  setError("Failed to fetch search results. Please try again.");
-                  setLoading(false); // Ensure loading is false on error
-                }
-              });
+      // Choose endpoint based on search type
+      let url;
+      if (!artist && song) {
+        // Song only search
+        url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
+      } else {
+        // Artist only or artist+song search
+        url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
+      }
+      console.log('[useSearchResults] Fetching:', url);
+      fetch(url)
+        .then(async res => {
+          if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
+          const contentType = res.headers.get('content-type');
+          const text = await res.text();
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Invalid response from backend (not JSON)');
           }
+          const data = JSON.parse(text);
+          return data;
+        })
+        .then((data) => {
+          console.log('[useSearchResults] Response received:', data);
+          
+          // Cache the results
+          console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
+          cacheSearchResults(artist || null, song || null, data);
+          
+          if (!artist && song) {
+            // Song-only search - data should be song results
+            console.log('[useSearchResults] Processing song-only search, setting songs:', data);
+            setAllSongs(data);
+            setSongs(data);
+            setAllArtists([]);
+            setArtists([]);
+          } else {
+            // Artist search - data should be artist results
+            console.log('[useSearchResults] Processing artist search, setting artists:', data);
+            setAllArtists(data);
+            setArtists(data);
+            setAllSongs([]);
+            setSongs([]);
+          }
+          setLoading(false);
+          setHasFetched(true);
+          lastFetchedArtist.current = artist + '|' + song;
+          setShouldContinueFetching(false);
         })
         .catch(err => {
-          console.error(`[${searchId}] getSearchResultsWithRefresh threw error:`, err);
-          // Ensure loading and error states are set if getSearchResultsWithRefresh itself fails
-          if (lastRequestParams.current === paramsString) {
-            setError("Failed to initiate search. Please try again.");
-            setLoading(false);
-          }
+          setError(err instanceof Error ? err : new Error('Failed to fetch search results'));
+          setLoading(false);
         });
-    }, 250); // 250ms debounce
+    }
+  }, [artist, song, loading, shouldContinueFetching]);
 
-    // Cleanup function that runs when component unmounts or effect re-runs
-    return () => {
-      console.log(`[${searchId}] Cleaning up search effect`);
-      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-    };
-  }, [artistParam, songParam]);
+  // Only allow local filtering if we have a valid response
+  useEffect(() => {
+    if (hasFetched && allArtists.length > 0) {
+      if (!filterArtist) {
+        setArtists(allArtists);
+      } else {
+        // Use the dedicated artist filtering utility
+        const filtered = filterArtistsByNameOrPath(allArtists, filterArtist);
+        setArtists(filtered);
+      }
+    }
+  }, [filterArtist, allArtists, hasFetched]);
 
-  // Log hook's return values
-  console.log(`[useSearchResults hook] Returning: loading=${loading}, resultsCount=${results?.length}, error=${error}, paramsChanged=${artistParam !== searchParams.get('artist') || songParam !== searchParams.get('song')}`);
+  // Filter songs if we have song results
+  useEffect(() => {
+    console.log('[useSearchResults] Song filter effect:', { hasFetched, allSongsLength: allSongs.length, filterSong });
+    if (hasFetched && allSongs.length > 0) {
+      if (!filterSong) {
+        console.log('[useSearchResults] Setting songs (no filter):', allSongs);
+        setSongs(allSongs);
+      } else {
+        // Filter songs by title - SearchResultItem has title property
+        const filtered = allSongs.filter(song => 
+          song.title.toLowerCase().includes(filterSong.toLowerCase())
+        );
+        console.log('[useSearchResults] Setting filtered songs:', filtered);
+        setSongs(filtered);
+      }
+    }
+  }, [filterSong, allSongs, hasFetched]);
 
-  return { results, loading, error, searchParams };
+  return {
+    artists,
+    songs,
+    loading,
+    error
+  };
 }

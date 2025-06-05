@@ -16,6 +16,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({ onSave }) => {
       size="sm"
       onClick={onSave}
       aria-label="Save to My Songs"
+      className="w-24"
     >
       <Save className="mr-1 h-4 w-4" />
       Save

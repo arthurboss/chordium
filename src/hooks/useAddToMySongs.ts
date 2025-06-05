@@ -1,11 +1,11 @@
-import { SongData } from "@/types/song";
-import { handleSaveNewSong } from "@/utils/song-actions";
+import { Song } from "@/types/song";
+import { handleSaveNewSong } from "@/utils/song-save";
 import { useNavigate } from "react-router-dom";
 
-export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction<SongData[]>>, setActiveTab?: (tab: string) => void) {
+export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>, setActiveTab?: (tab: string) => void) {
   const navigate = useNavigate();
   
-  return async (song: SongData) => {
+  return async (song: Song) => {
     try {
       // Generate content if path is actually a URL (not content)
       let content = song.path;
@@ -46,7 +46,7 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         const currentSongs = getSongs();
         
         // Create the new song
-        const newSong: SongData = {
+        const newSong: Song = {
           id: `song-${Date.now()}`,
           title: song.title || "Untitled Song",
           path: content,

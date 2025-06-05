@@ -1,18 +1,18 @@
-import { SongData } from "@/types/song";
+import { Song } from "@/types/song";
 
-// Key for storing artist songs cache in sessionStorage
+// Key for storing artist songs cache in localStorage (changed from sessionStorage for persistence)
 const ARTIST_SONGS_CACHE_KEY = 'chordium-artist-songs-cache';
 
 // Maximum number of cache entries to keep
-const MAX_CACHE_ITEMS = 15;
+const MAX_CACHE_ITEMS = 20;
 
-// Cache expiration time in milliseconds (1 hour)
-const CACHE_EXPIRATION_TIME = 60 * 60 * 1000;
+// Cache expiration time in milliseconds (4 hours)
+const CACHE_EXPIRATION_TIME = 4 * 60 * 60 * 1000;
 
 // Interface for cache items
 interface ArtistCacheItem {
-  artistUrl: string;
-  songs: SongData[];
+  artistPath: string;
+  songs: Song[];
   timestamp: number;
   accessCount: number;
   artistName?: string; // Optional: store artist name for better management
@@ -28,7 +28,7 @@ interface ArtistCache {
  */
 const initializeCache = (): ArtistCache => {
   try {
-    const cache = sessionStorage.getItem(ARTIST_SONGS_CACHE_KEY);
+    const cache = localStorage.getItem(ARTIST_SONGS_CACHE_KEY);
     return cache ? JSON.parse(cache) : { items: [] };
   } catch (e) {
     console.error('Failed to parse artist songs cache:', e);
@@ -37,11 +37,11 @@ const initializeCache = (): ArtistCache => {
 };
 
 /**
- * Save the artist songs cache to sessionStorage
+ * Save the artist songs cache to localStorage
  */
 const saveCache = (cache: ArtistCache): void => {
   try {
-    sessionStorage.setItem(ARTIST_SONGS_CACHE_KEY, JSON.stringify(cache));
+    localStorage.setItem(ARTIST_SONGS_CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
     console.error('Failed to save artist songs cache:', e);
   }
@@ -51,26 +51,26 @@ const saveCache = (cache: ArtistCache): void => {
  * Save artist songs to the cache
  */
 export const cacheArtistSongs = (
-  artistUrl: string,
-  songs: SongData[]
+  artistPath: string,
+  songs: Song[]
 ): void => {
   const cache = initializeCache();
   
   // Look for existing entry to preserve access count
-  const existingItem = cache.items.find(item => item.artistUrl === artistUrl);
+  const existingItem = cache.items.find(item => item.artistPath === artistPath);
   const accessCount = existingItem ? existingItem.accessCount + 1 : 1;
   
-  // Extract artist name from first song if available
-  const artistName = songs.length > 0 ? songs[0].artist : undefined;
+  // Extract artist name from path if available (for better management)
+  const artistName = artistPath.split('/').pop() || undefined;
   
-  // Remove any existing entry with the same artist URL
-  const filteredItems = cache.items.filter(item => item.artistUrl !== artistUrl);
+  // Remove any existing entry with the same artist path
+  const filteredItems = cache.items.filter(item => item.artistPath !== artistPath);
   
   // Add the new entry
   let newItems = [
     ...filteredItems,
     {
-      artistUrl,
+      artistPath,
       songs,
       timestamp: Date.now(),
       accessCount,
@@ -103,9 +103,9 @@ export const cacheArtistSongs = (
  * Get cached artist songs if they exist
  * @returns The cached songs or null if not found or expired
  */
-export const getCachedArtistSongs = (artistUrl: string): SongData[] | null => {
+export const getCachedArtistSongs = (artistPath: string): Song[] | null => {
   const cache = initializeCache();
-  const cacheItem = cache.items.find(item => item.artistUrl === artistUrl);
+  const cacheItem = cache.items.find(item => item.artistPath === artistPath);
   
   if (!cacheItem) return null;
   
@@ -116,7 +116,7 @@ export const getCachedArtistSongs = (artistUrl: string): SongData[] | null => {
     
     // Remove expired item
     const updatedCache: ArtistCache = {
-      items: cache.items.filter(item => item.artistUrl !== artistUrl)
+      items: cache.items.filter(item => item.artistPath !== artistPath)
     };
     saveCache(updatedCache);
     
@@ -156,8 +156,22 @@ export const clearExpiredArtistCache = (): number => {
  */
 export const clearArtistSongsCache = (): void => {
   try {
-    sessionStorage.removeItem(ARTIST_SONGS_CACHE_KEY);
+    localStorage.removeItem(ARTIST_SONGS_CACHE_KEY);
   } catch (e) {
     console.error('Failed to clear artist songs cache:', e);
   }
+};
+
+/**
+ * Utility for debugging: inspect artist cache
+ */
+export const inspectArtistCache = () => {
+  const cache = initializeCache();
+  return cache.items.map(item => ({
+    artistPath: item.artistPath,
+    artistName: item.artistName,
+    timestamp: item.timestamp,
+    accessCount: item.accessCount,
+    songsCount: item.songs.length
+  }));
 };
