@@ -17,7 +17,15 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 This project is built with modern web technologies:
 
+### Frontend
 - **React** - UI library
+
+### Backend
+- **Node.js/Express** - API server
+- **Supabase** - Database
+- **Puppeteer** - Web scraping
+
+For detailed backend documentation, see the [Backend README](./backend/README.md).
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
