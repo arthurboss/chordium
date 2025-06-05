@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 // Mock Supabase client
 export const supabase = {
   from: jest.fn().mockReturnThis(),

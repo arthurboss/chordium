@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 // Mock CifraClub service
 export default {
   baseUrl: 'https://www.cifraclub.com.br',
