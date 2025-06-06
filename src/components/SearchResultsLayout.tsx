@@ -1,14 +1,13 @@
 import React from 'react';
-import { SearchResultItem } from "@/utils/search-result-item";
 import { Song } from "@/types/song";
 import ArtistResults from "@/components/ArtistResults";
-import GroupedSongResults from "@/components/GroupedSongResults";
+import SongItem from "@/components/SongItem";
 import { Artist } from '@/types/artist';
 import SearchResultsSection from "@/components/SearchResultsSection";
 
 interface SearchResultsLayoutProps {
   artists: Artist[];
-  songs: SearchResultItem[];
+  songs: Song[];
   onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   onArtistSelect?: (artist: Artist) => void;
@@ -42,8 +41,17 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       )}
       
       {hasSongs && (
-        <SearchResultsSection title="Songs by Artist">
-          <GroupedSongResults songs={songs} onView={onView} onDelete={onDelete} />
+        <SearchResultsSection title="Songs">
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+            {songs.map((song, index) => (
+              <SongItem 
+                key={`${song.path}-${index}`}
+                item={song} 
+                onView={onView} 
+                onDelete={onDelete} 
+              />
+            ))}
+          </div>
         </SearchResultsSection>
       )}
     </div>

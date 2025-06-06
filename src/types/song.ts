@@ -1,5 +1,5 @@
 export interface Song {
-  path: string;
+  path: string;  // Internal path for navigation/identification
   title: string;
-  artist?: string;
+  artist: string; // Always present, extracted from content or context
 }

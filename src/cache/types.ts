@@ -2,12 +2,8 @@
  * Cache system type definitions
  */
 
-import { SearchResultItem } from "@/utils/search-result-item";
 import { Song } from "@/types/song";
 import { ChordSheetData } from "@/hooks/useChordSheet";
-
-// Re-export SearchResultItem for consistency
-export type { SearchResultItem };
 
 // Base cache item interface
 export interface BaseCacheItem {
@@ -18,7 +14,7 @@ export interface BaseCacheItem {
 
 // Search cache types
 export interface SearchCacheItem extends BaseCacheItem {
-  results: SearchResultItem[];
+  results: Song[];
   query: {
     artist: string | null;
     song: string | null;

@@ -1,4 +1,4 @@
-import { extractPathFromUrl } from './url-utils.js';
+import { extractPathFromUrl, extractFullPathFromUrl } from './url-utils.js';
 import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
 
 /**
@@ -32,11 +32,27 @@ export function transformToSongResults(results) {
     const cleanedTitle = cleanCifraClubTitle(result.title);
     
     // Extract title and artist from the cleaned title
-    const { title, artist } = extractTitleAndArtist(cleanedTitle);
+    const { title, artist: titleArtist } = extractTitleAndArtist(cleanedTitle);
+    
+    // Extract full path from URL for unified format
+    const path = extractFullPathFromUrl(result.url);
+    
+    // If no artist found in title, extract from URL path (e.g., "john-lennon/imagine" -> "John Lennon")
+    let artist = titleArtist;
+    if (!artist && path) {
+      const pathSegments = path.split('/');
+      if (pathSegments.length >= 2) {
+        // First segment is artist slug, convert to readable name
+        artist = pathSegments[0]
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+    }
     
     return {
       title,
-      url: result.url,
+      path,
       artist
     };
   });

@@ -76,14 +76,14 @@ describe('CifraClubService - Song Search with Artist', () => {
       // Check first result
       expect(results[0]).toEqual({
         title: 'Wonderwall',
-        url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
+        path: 'oasis/wonderwall',
         artist: 'Oasis'
       });
 
       // Check second result
       expect(results[1]).toEqual({
         title: 'Sweet Child O Mine',
-        url: 'https://www.cifraclub.com.br/guns-n-roses/sweet-child-o-mine/',
+        path: 'guns-n-roses/sweet-child-o-mine',
         artist: 'Guns N Roses'
       });
     });
@@ -108,7 +108,7 @@ describe('CifraClubService - Song Search with Artist', () => {
 
       expect(results[0]).toEqual({
         title: 'Back in Black',
-        url: 'https://www.cifraclub.com.br/ac-dc/back-in-black/',
+        path: 'ac-dc/back-in-black',
         artist: 'AC/DC'
       });
     });

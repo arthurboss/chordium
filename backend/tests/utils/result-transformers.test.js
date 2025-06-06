@@ -51,8 +51,8 @@ describe('Result Transformers', () => {
       const transformed = transformToSongResults(results);
 
       expect(transformed).toEqual([
-        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/', artist: 'Oasis' },
-        { title: 'Creep', url: 'https://www.cifraclub.com.br/radiohead/creep/', artist: 'Radiohead' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Creep', path: 'radiohead/creep', artist: 'Radiohead' }
       ]);
     });
 
@@ -67,7 +67,7 @@ describe('Result Transformers', () => {
       const transformed = transformToSongResults(results);
 
       expect(transformed).toEqual([
-        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/', artist: '' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: '' }
       ]);
     });
   });

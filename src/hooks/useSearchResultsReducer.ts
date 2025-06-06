@@ -1,16 +1,7 @@
 import { useReducer, useMemo, useEffect } from 'react';
 import { Artist } from '@/types/artist';
 import { Song } from '@/types/song';
-import { SearchResultItem } from '@/utils/search-result-item';
 import { useSongActions } from '@/utils/search-song-actions';
-
-// Helper function to convert Song to SearchResultItem
-function artistSongToSearchResultItem(song: Song): SearchResultItem {
-  return {
-    title: song.title,
-    url: song.path
-  };
-}
 
 // Helper function to filter Song[] by title
 function filterArtistSongsByTitle(songs: Song[], filter: string): Song[] {
@@ -30,14 +21,14 @@ export interface SearchResultsState {
   activeArtist: Artist | null;
   artistSongs: Song[];
   artists: Artist[];
-  songs: SearchResultItem[];
+  songs: Song[]; // Changed from SearchResultItem[] to Song[]
   filteredArtistSongs: Song[];
 }
 
 // Define action types
 export type SearchResultsAction = 
   | { type: 'SEARCH_START' }
-  | { type: 'SEARCH_SUCCESS'; artists: Artist[]; songs: SearchResultItem[] }
+  | { type: 'SEARCH_SUCCESS'; artists: Artist[]; songs: Song[] }
   | { type: 'SEARCH_ERROR'; error: Error }
   | { type: 'SET_HAS_SEARCHED'; value: boolean }
   | { type: 'ARTIST_SONGS_START'; artist: Artist }
@@ -197,11 +188,10 @@ export function useSearchResultsReducer(
   // Generate search results state data for UI
   const stateData = useMemo(() => determineUIState(state), [state]);
   
-  // Generate a compatible array of SearchResultItems for the song actions
+  // Generate songs array for the song actions
   const memoizedSongs = useMemo(() => {
     if (state.activeArtist) {
-      // Convert Song[] to SearchResultItem[]
-      return state.artistSongs.map(artistSongToSearchResultItem);
+      return state.artistSongs;
     } else {
       return state.songs;
     }

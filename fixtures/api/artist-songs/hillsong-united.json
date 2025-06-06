@@ -1,295 +1,367 @@
-
 [
     {
         "title": "Oceans (Where Feet May Fail)",
-        "path": "oceans-where-feet-may-fail"
+        "path": "oceans-where-feet-may-fail",
+        "artist": "Hillsong United"
     },
     {
         "title": "So Will I (100 Billion X)",
-        "path": "so-will-i-100-billion-x"
+        "path": "so-will-i-100-billion-x",
+        "artist": "Hillsong United"
     },
     {
         "title": "I Surrender",
-        "path": "i-surrender"
+        "path": "i-surrender",
+        "artist": "Hillsong United"
     },
     {
         "title": "Poder Pra Salvar",
-        "path": "poder-pra-salvar"
+        "path": "poder-pra-salvar",
+        "artist": "Hillsong United"
     },
     {
         "title": "Yo También (Un Billón de Veces)",
-        "path": "yo-tambien-un-billon-de-veces"
+        "path": "yo-tambien-un-billon-de-veces",
+        "artist": "Hillsong United"
     },
     {
         "title": "Desde Mi Interior",
-        "path": "desde-mi-interior"
+        "path": "desde-mi-interior",
+        "artist": "Hillsong United"
     },
     {
         "title": "Océanos (Donde Mis Pies Pueden Fallar)",
-        "path": "oceanos-donde-mis-pies-pueden-fallar"
+        "path": "oceanos-donde-mis-pies-pueden-fallar",
+        "artist": "Hillsong United"
     },
     {
         "title": "Es Tiempo",
-        "path": "es-tiempo"
+        "path": "es-tiempo",
+        "artist": "Hillsong United"
     },
     {
         "title": "Tómalo",
-        "path": "tomalo"
+        "path": "tomalo",
+        "artist": "Hillsong United"
     },
     {
         "title": "Hosanna",
-        "path": "hosanna"
+        "path": "hosanna",
+        "artist": "Hillsong United"
     },
     {
         "title": "A beautiful exchange",
-        "path": "a-beautiful-exchange"
+        "path": "a-beautiful-exchange",
+        "artist": "Hillsong United"
     },
     {
         "title": "A Million Suns",
-        "path": "a-million-suns"
+        "path": "a-million-suns",
+        "artist": "Hillsong United"
     },
     {
         "title": "A Minha Fé",
-        "path": "a-minha-fe"
+        "path": "a-minha-fe",
+        "artist": "Hillsong United"
     },
     {
         "title": "A Reprise",
-        "path": "a-reprise"
+        "path": "a-reprise",
+        "artist": "Hillsong United"
     },
     {
         "title": "A Song To Sing",
-        "path": "a-song-to-sing"
+        "path": "a-song-to-sing",
+        "artist": "Hillsong United"
     },
     {
         "title": "A Tus Pies",
-        "path": "a-tus-pies"
+        "path": "a-tus-pies",
+        "artist": "Hillsong United"
     },
     {
         "title": "Above All",
-        "path": "above-all"
+        "path": "above-all",
+        "artist": "Hillsong United"
     },
     {
         "title": "Abra Meus Olhos (open My Eyes)",
-        "path": "abra-meus-olhos-open-my-eyes"
+        "path": "abra-meus-olhos-open-my-eyes",
+        "artist": "Hillsong United"
     },
     {
         "title": "Abre los cielos",
-        "path": "abre-los-cielos"
+        "path": "abre-los-cielos",
+        "artist": "Hillsong United"
     },
     {
         "title": "Abre mis ojos",
-        "path": "abre-mis-ojos"
+        "path": "abre-mis-ojos",
+        "artist": "Hillsong United"
     },
     {
         "title": "Abre Mis Ojos Oh Cristo",
-        "path": "abre-mis-ojos-oh-cristo"
+        "path": "abre-mis-ojos-oh-cristo",
+        "artist": "Hillsong United"
     },
     {
         "title": "Acércame a ti",
-        "path": "acercame-a-ti"
+        "path": "acercame-a-ti",
+        "artist": "Hillsong United"
     },
     {
         "title": "Across the heart",
-        "path": "across-the-heart"
+        "path": "across-the-heart",
+        "artist": "Hillsong United"
     },
     {
         "title": "Adonai",
-        "path": "adonai"
+        "path": "adonai",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aftermath",
-        "path": "aftermath"
+        "path": "aftermath",
+        "artist": "Hillsong United"
     },
     {
         "title": "Age To Age",
-        "path": "age-to-age"
+        "path": "age-to-age",
+        "artist": "Hillsong United"
     },
     {
         "title": "Alabare al Señor (anástasis)",
-        "path": "alabare-al-senor-anastasis"
+        "path": "alabare-al-senor-anastasis",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aleluya",
-        "path": "aleluya"
+        "path": "aleluya",
+        "artist": "Hillsong United"
     },
     {
         "title": "Alive In Us",
-        "path": "alive-in-us"
+        "path": "alive-in-us",
+        "artist": "Hillsong United"
     },
     {
         "title": "All About You",
-        "path": "all-about-you"
+        "path": "all-about-you",
+        "artist": "Hillsong United"
     },
     {
         "title": "All About You Live",
-        "path": "all-about-you-live/guitarpro"
+        "path": "all-about-you-live/guitarpro",
+        "artist": "Hillsong United"
     },
     {
         "title": "All day",
-        "path": "all-day"
+        "path": "all-day",
+        "artist": "Hillsong United"
     },
     {
         "title": "All for love",
-        "path": "all-for-love"
+        "path": "all-for-love",
+        "artist": "Hillsong United"
     },
     {
         "title": "All I do",
-        "path": "all-i-do"
+        "path": "all-i-do",
+        "artist": "Hillsong United"
     },
     {
         "title": "All I need is You",
-        "path": "all-need-is-you"
+        "path": "all-need-is-you",
+        "artist": "Hillsong United"
     },
     {
         "title": "All In All",
-        "path": "all-in-all"
+        "path": "all-in-all",
+        "artist": "Hillsong United"
     },
     {
         "title": "All of my days",
-        "path": "all-of-my-days"
+        "path": "all-of-my-days",
+        "artist": "Hillsong United"
     },
     {
         "title": "All",
-        "path": "all"
+        "path": "all",
+        "artist": "Hillsong United"
     },
     {
         "title": "All the heavens",
-        "path": "all-the-heavens"
+        "path": "all-the-heavens",
+        "artist": "Hillsong United"
     },
     {
         "title": "Altísimo",
-        "path": "altisimo"
+        "path": "altisimo",
+        "artist": "Hillsong United"
     },
     {
         "title": "Always Will",
-        "path": "always-will"
+        "path": "always-will",
+        "artist": "Hillsong United"
     },
     {
         "title": "Always",
-        "path": "always"
+        "path": "always",
+        "artist": "Hillsong United"
     },
     {
         "title": "Am I To Believe?",
-        "path": "am-to-believe"
+        "path": "am-to-believe",
+        "artist": "Hillsong United"
     },
     {
         "title": "Am I To Believe",
-        "path": "am-i-to-believe"
+        "path": "am-i-to-believe",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amazing Grace (Broken Vessels)",
-        "path": "amazing-grace-broken-vessels"
+        "path": "amazing-grace-broken-vessels",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amazing Love",
-        "path": "amazing-love"
+        "path": "amazing-love",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amigos en verdad",
-        "path": "amigos-en-verdad"
+        "path": "amigos-en-verdad",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amor Como Fuego",
-        "path": "amor-como-fuego"
+        "path": "amor-como-fuego",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amor Incrível",
-        "path": "amor-incrivel"
+        "path": "amor-incrivel",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amor Real",
-        "path": "amor-real"
+        "path": "amor-real",
+        "artist": "Hillsong United"
     },
     {
         "title": "Amor sin comparación",
-        "path": "amor-sin-comparacion"
+        "path": "amor-sin-comparacion",
+        "artist": "Hillsong United"
     },
     {
         "title": "An Introduction",
-        "path": "an-introduction"
+        "path": "an-introduction",
+        "artist": "Hillsong United"
     },
     {
         "title": "Anclado",
-        "path": "anclado"
+        "path": "anclado",
+        "artist": "Hillsong United"
     },
     {
         "title": "Another In The Fire",
-        "path": "another-in-the-fire"
+        "path": "another-in-the-fire",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aquella Cruz",
-        "path": "aquella-cruz"
+        "path": "aquella-cruz",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aquí Estoy",
-        "path": "aqui-estoy"
+        "path": "aqui-estoy",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aquí Hay Salvación",
-        "path": "aqui-hay-salvacion"
+        "path": "aqui-hay-salvacion",
+        "artist": "Hillsong United"
     },
     {
         "title": "Arms Open Wide",
-        "path": "arms-open-wide"
+        "path": "arms-open-wide",
+        "artist": "Hillsong United"
     },
     {
         "title": "As It Is (in Heaven)",
-        "path": "as-it-is-in-heaven"
+        "path": "as-it-is-in-heaven",
+        "artist": "Hillsong United"
     },
     {
         "title": "As It Is (In Heaven)",
-        "path": "as-it-is-in-heaven-"
+        "path": "as-it-is-in-heaven-",
+        "artist": "Hillsong United"
     },
     {
         "title": "As You Find Me",
-        "path": "as-you-find-me"
+        "path": "as-you-find-me",
+        "artist": "Hillsong United"
     },
     {
         "title": "Asombroso Dios",
-        "path": "asombroso-dios"
+        "path": "asombroso-dios",
+        "artist": "Hillsong United"
     },
     {
         "title": "Asombroso",
-        "path": "asombroso"
+        "path": "asombroso",
+        "artist": "Hillsong United"
     },
     {
         "title": "Asombro",
-        "path": "asombro"
+        "path": "asombro",
+        "artist": "Hillsong United"
     },
     {
         "title": "At The Cross",
-        "path": "at-the-cross"
+        "path": "at-the-cross",
+        "artist": "Hillsong United"
     },
     {
         "title": "Até Te Ver (till I See You)",
-        "path": "ate-te-ver-till-i-see-you"
+        "path": "ate-te-ver-till-i-see-you",
+        "artist": "Hillsong United"
     },
     {
         "title": "Aún",
-        "path": "aun"
+        "path": "aun",
+        "artist": "Hillsong United"
     },
     {
         "title": "Avivamiento",
-        "path": "avivamiento"
+        "path": "avivamiento",
+        "artist": "Hillsong United"
     },
     {
         "title": "Awakening",
-        "path": "awakening"
+        "path": "awakening",
+        "artist": "Hillsong United"
     },
     {
         "title": "Awesome God",
-        "path": "awesome-god"
+        "path": "awesome-god",
+        "artist": "Hillsong United"
     },
     {
         "title": "Beautiful Exchange",
-        "path": "beautiful-exchange"
+        "path": "beautiful-exchange",
+        "artist": "Hillsong United"
     },
     {
         "title": "Behold (Then Sings My Soul)",
-        "path": "behold-then-sings-my-soul"
+        "path": "behold-then-sings-my-soul",
+        "artist": "Hillsong United"
     },
     {
         "title": "Bendito El Que Habita",
-        "path": "bendito-el-que-habita"
+        "path": "bendito-el-que-habita",
+        "artist": "Hillsong United"
     }
 ]

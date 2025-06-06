@@ -6,14 +6,16 @@ import {
 } from '../../utils/dom-extractors.js';
 
 // Mock DOM environment for testing
-const mockDocument = (queryMock) => {
+const mockDocument = (queryMock, title = 'Oasis - Cifra Club') => {
   global.document = {
     querySelectorAll: queryMock,
-    querySelector: queryMock
+    querySelector: queryMock,
+    title: title
   };
   global.window = {
     location: {
-      origin: 'https://www.cifraclub.com.br'
+      origin: 'https://www.cifraclub.com.br',
+      pathname: '/oasis/'
     }
   };
 };
@@ -25,7 +27,7 @@ describe('DOM Extractors', () => {
   });
 
   describe('extractSearchResults', () => {
-    it('should extract valid search results', () => {
+    it('should extract valid search results with artist information', () => {
       const mockLinks = [
         {
           textContent: 'Oasis - Cifra Club',
@@ -33,7 +35,7 @@ describe('DOM Extractors', () => {
           parentElement: { className: 'gs-title' }
         },
         {
-          textContent: 'Wonderwall - Cifra Club',
+          textContent: 'Wonderwall - Oasis - Cifra Club',
           href: '/oasis/wonderwall/',
           parentElement: { className: 'gs-title' }
         }
@@ -49,15 +51,38 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Oasis - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Wonderwall - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/wonderwall/' }
+        { title: 'Oasis', path: 'oasis', artist: 'Oasis' },
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
+      ]);
+    });
+
+    it('should extract artist from URL when not in title', () => {
+      const mockLinks = [
+        {
+          textContent: 'Some Song Title - Cifra Club',
+          href: 'https://www.cifraclub.com.br/ac-dc/back-in-black/',
+          parentElement: { className: 'gs-title' }
+        }
+      ];
+
+      mockDocument((selector) => {
+        if (selector === '.gsc-result a') {
+          return mockLinks;
+        }
+        return [];
+      });
+
+      const results = extractSearchResults();
+
+      expect(results).toEqual([
+        { title: 'Some Song Title', path: 'ac-dc/back-in-black', artist: 'Ac Dc' }
       ]);
     });
 
     it('should filter out links without gs-title parent', () => {
       const mockLinks = [
         {
-          textContent: 'Valid Result',
+          textContent: 'Valid Result - Artist Name - Cifra Club',
           href: 'https://www.cifraclub.com.br/valid/',
           parentElement: { className: 'gs-title' }
         },
@@ -78,13 +103,13 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Valid Result', url: 'https://www.cifraclub.com.br/valid/' }
+        { title: 'Valid Result', path: 'valid', artist: 'Artist Name' }
       ]);
     });
   });
 
   describe('extractArtistSongs', () => {
-    it('should extract artist songs and deduplicate', () => {
+    it('should extract artist songs and deduplicate with artist information', () => {
       const mockLinks = [
         {
           textContent: '  Wonderwall  ',
@@ -105,13 +130,13 @@ describe('DOM Extractors', () => {
           return mockLinks;
         }
         return [];
-      });
+      }, 'Oasis - Cifra Club');
 
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/' },
-        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
       ]);
     });
 
@@ -128,12 +153,38 @@ describe('DOM Extractors', () => {
           return mockLinks;
         }
         return [];
-      });
+      }, 'Oasis - Cifra Club');
 
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/' }
+        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
+      ]);
+    });
+    
+    it('should extract artist from URL pathname when title is not available', () => {
+      const mockLinks = [
+        {
+          textContent: 'Song Title',
+          href: 'https://www.cifraclub.com.br/ac-dc/song-title/'
+        }
+      ];
+
+      // Mock with no title, so it should fallback to URL extraction
+      mockDocument((selector) => {
+        if (selector === 'a.art_music-link') {
+          return mockLinks;
+        }
+        return [];
+      }, '');
+      
+      // Update the pathname for this test
+      global.window.location.pathname = '/ac-dc/';
+
+      const results = extractArtistSongs();
+
+      expect(results).toEqual([
+        { title: 'Song Title', path: 'ac-dc/song-title', artist: 'Ac Dc' }
       ]);
     });
   });
