@@ -72,6 +72,30 @@ yarn dev
 
 The app will be available at http://localhost:8080.
 
+## 🧪 Testing
+
+### Running Tests
+
+```sh
+# Run unit tests (backend)
+npm run test
+
+# Run all e2e tests locally 
+npm run test:e2e
+
+# Run specific e2e test (including scraping-dependent tests)
+npm run test:e2e -- --spec "cypress/e2e/search/song-search.cy.ts"
+
+# Run cache-specific e2e tests
+npm run test:e2e -- --spec "cypress/e2e/cache/**/*.cy.ts"
+```
+
+### Important Notes
+
+- **Song Search Tests**: The `cypress/e2e/search/song-search.cy.ts` tests are excluded from GitHub Actions because they use real web scraping from external sites. These should only be run locally to avoid unnecessary load on external services.
+- **Cache Tests**: Cache-specific e2e tests are run separately in CI to isolate their concerns.
+- **GitHub Actions**: Only non-scraping, non-cache tests run automatically on GitHub to keep CI fast and avoid external dependencies.
+
 ## 🏗️ Project Structure
 
 - `src/components` - UI components, including chord diagrams

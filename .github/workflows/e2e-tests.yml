@@ -1,4 +1,4 @@
-name: E2E Tests (Non-Cache)
+name: E2E Tests (Non-Cache, Non-Scraping)
 on:
   push:
     branches: ['*']
@@ -40,7 +40,7 @@ jobs:
           npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
           npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
       
-      - name: Cypress run (excluding cache tests)
+      - name: Cypress run (excluding cache tests and scraping-dependent tests)
         uses: cypress-io/github-action@v6
         with:
           start: npm run dev
@@ -50,7 +50,7 @@ jobs:
           config-file: cypress.config.cjs
           record: false
           install: false
-          spec: 'cypress/e2e/!(cache)/**/*.cy.ts,cypress/e2e/!(cache-e2e*).cy.ts'
+          spec: 'cypress/e2e/browser-navigation.cy.ts,cypress/e2e/home.cy.ts,cypress/e2e/keyboard-navigation.cy.ts,cypress/e2e/lazy-loading.cy.ts,cypress/e2e/song-card-keyboard.cy.ts,cypress/e2e/song-card.cy.ts,cypress/e2e/tab-navigation.cy.ts,cypress/e2e/theme.cy.ts,cypress/e2e/artist-search/**/*.cy.ts'
         env:
           NODE_OPTIONS: "--experimental-vm-modules"
       
@@ -112,19 +112,19 @@ jobs:
             const path = require('path');
             
             const screenshotDir = 'cypress/screenshots';
-            let comment = '## 🧪 E2E Test Failures (Non-Cache)\n\n';
+            let comment = '## 🧪 E2E Test Failures (Non-Cache, Non-Scraping)\n\n';
             
             if (fs.existsSync(screenshotDir)) {
               const files = fs.readdirSync(screenshotDir);
               if (files.length > 0) {
-                comment += 'Non-cache E2E tests failed. Screenshots have been uploaded as artifacts.\n\n';
+                comment += 'Non-cache, non-scraping E2E tests failed. Screenshots have been uploaded as artifacts.\n\n';
                 comment += '**Failed tests:**\n';
                 files.forEach(file => {
-                  if (!file.includes('cache')) {
+                  if (!file.includes('cache') && !file.includes('song-search')) {
                     comment += `- ${file}\n`;
                   }
                 });
-                comment += '\n💡 **Tip:** These tests cover general application functionality excluding cache-specific features.\n';
+                comment += '\n💡 **Tip:** These tests cover general application functionality excluding cache-specific features and scraping-dependent tests.\n';
               } else {
                 comment += 'E2E tests failed but no screenshots were captured.\n';
               }
