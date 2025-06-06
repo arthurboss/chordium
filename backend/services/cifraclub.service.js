@@ -3,6 +3,7 @@ import puppeteerService from './puppeteer.service.js';
 import config from '../config/config.js';
 import SEARCH_TYPES from '../constants/searchTypes.js';
 import logger from '../utils/logger.js';
+import { cleanCifraClubTitle, extractTitleAndArtist } from '../utils/title-parsing.js';
 
 class CifraClubService {
   constructor() {
@@ -56,6 +57,25 @@ class CifraClubService {
         .filter(Boolean);
       return filtered;
     }
+    
+    if (searchType === SEARCH_TYPES.SONG) {
+      return results
+        .filter(result => this.isValidResult(result, searchType))
+        .map(result => {
+          // Clean the title by removing "- Cifra Club" suffix
+          const cleanedTitle = cleanCifraClubTitle(result.title);
+          
+          // Extract title and artist from the cleaned title
+          const { title, artist } = extractTitleAndArtist(cleanedTitle);
+          
+          return {
+            title,
+            url: result.url,
+            artist
+          };
+        });
+    }
+    
     return results
       .filter(result => this.isValidResult(result, searchType))
       .map(result => ({
