@@ -6,7 +6,7 @@ import {
   getArtistSearchResult, 
   getArtistSongs, 
   getChordSheet 
-} from '../fixtures/index.js';
+} from '../../../fixtures/index.js';
 
 /**
  * Example demonstrating how to enhance controller tests with fixture data
