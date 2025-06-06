@@ -31,5 +31,6 @@ export function formatSearchResult(item: SearchResultItem): Song {
   return {
     title: title,
     path: item.url,
+    artist: item.artist,
   };
 }

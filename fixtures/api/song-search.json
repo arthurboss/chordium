@@ -1,0 +1,33 @@
+{
+  "wonderwall": [
+    {
+      "title": "Wonderwall",
+      "url": "https://www.cifraclub.com.br/oasis/wonderwall/",
+      "artist": "Oasis"
+    },
+    {
+      "title": "Wonderwall Live",
+      "url": "https://www.cifraclub.com.br/noel-gallagher/wonderwall-live/",
+      "artist": "Noel Gallagher"
+    },
+    {
+      "title": "Wonderwall (Español)",
+      "url": "https://www.cifraclub.com.br/oasis/wonderwall-espaol/",
+      "artist": "Oasis"
+    }
+  ],
+  "creep": [
+    {
+      "title": "Creep",
+      "url": "https://www.cifraclub.com.br/radiohead/creep/",
+      "artist": "Radiohead"
+    },
+    {
+      "title": "Creep (Acoustic Version)",
+      "url": "https://www.cifraclub.com.br/radiohead/creep-acoustic/",
+      "artist": "Radiohead"
+    }
+  ],
+  "empty": [],
+  "noresults": []
+}

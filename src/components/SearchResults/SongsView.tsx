@@ -54,13 +54,13 @@ export const SongsView: React.FC<SongsViewProps> = ({
     } else if (isArtistSong) {
       // Handle Song from artist search (path + title only)
       songTitle = item.title;
-      songArtist = activeArtist?.displayName || 'Unknown Artist';
+      songArtist = activeArtist?.displayName ?? 'Unknown Artist';
       songId = item.path;
     } else {
       // Handle SearchResultItem - convert to Song for consistent handling
       const converted = formatSearchResult(item);
       songTitle = converted.title;
-      songArtist = activeArtist?.displayName || 'Unknown Artist'; // Use activeArtist for SearchResultItems too
+      songArtist = item.artist ?? activeArtist?.displayName ?? 'Unknown Artist'; // Use artist from SearchResultItem first
       songId = item.url; // Use URL as identifier for SearchResultItem
     }
 
