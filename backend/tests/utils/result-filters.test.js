@@ -27,8 +27,8 @@ describe('Result Filters', () => {
       const filtered = filterResults(results, SEARCH_TYPES.SONG);
 
       expect(filtered).toEqual([
-        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/', artist: 'Oasis' },
-        { title: 'Creep', url: 'https://www.cifraclub.com.br/radiohead/creep/', artist: 'Radiohead' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Creep', path: 'radiohead/creep', artist: 'Radiohead' }
       ]);
     });
 

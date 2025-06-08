@@ -148,3 +148,33 @@ export function extractPathFromUrl(url) {
     return null;
   }
 }
+
+/**
+ * Extracts the full path from a CifraClub URL
+ * @param {string} url - The URL to parse
+ * @returns {string|null} - The full path (e.g., "oasis/wonderwall") or null if invalid
+ */
+export function extractFullPathFromUrl(url) {
+  try {
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      logger.debug('Extract full path failed: Invalid URL input', { url });
+      return null;
+    }
+
+    const urlObj = new URL(url.trim());
+    const fullPath = urlObj.pathname.replace(/(^\/+|\/+$)/g, '');
+    
+    // Handle root path case
+    if (!fullPath || fullPath === '') {
+      return '';
+    }
+    
+    return fullPath;
+  } catch (error) {
+    logger.debug('Extract full path failed: URL parsing error', { 
+      url, 
+      error: error.message 
+    });
+    return null;
+  }
+}

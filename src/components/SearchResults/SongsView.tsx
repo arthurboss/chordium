@@ -1,8 +1,6 @@
 import React, { useCallback } from 'react';
 import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
-import { SearchResultItem } from '@/utils/search-result-item';
-import { formatSearchResult } from '@/utils/format-search-result';
 import ResultCard from '@/components/ResultCard';
 import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
 import { ListChildComponentProps } from 'react-window';
@@ -13,11 +11,11 @@ import '@/components/custom-scrollbar.css';
 interface SongsViewProps {
   // For artist-based searches
   activeArtist?: Artist;
-  filteredSongs?: Song[] | Song[];
+  filteredSongs?: Song[];
   // For song-only searches
-  songs?: SearchResultItem[];
+  songs?: Song[];
   filterSong: string;
-  onView: (songData: Song | SearchResultItem | Song) => void;
+  onView: (songData: Song) => void;
   onAdd: (songId: string) => void;
   searchType?: 'artist' | 'song';
 }
@@ -33,49 +31,24 @@ export const SongsView: React.FC<SongsViewProps> = ({
 }) => {
   // Determine which data source to use
   const isArtistSearch = searchType === 'artist' && activeArtist;
-  const displaySongs: (Song | SearchResultItem | Song)[] = isArtistSearch ? filteredSongs : songs;
-  const title = isArtistSearch ? activeArtist!.displayName : 'Search Results';
+  const displaySongs: Song[] = isArtistSearch ? filteredSongs : songs;
+  const title = isArtistSearch ? activeArtist?.displayName : 'Search Results';
 
   // Render a song item for the virtualized list
-  const renderSongItem = useCallback(({ index, style, item }: ListChildComponentProps & { item: Song | SearchResultItem | Song }) => {
-    // Type guards to check the type of item
-    const isSongData = 'id' in item;
-    const isArtistSong = 'path' in item && 'title' in item && !('url' in item);
-    
-    let songTitle: string;
-    let songArtist: string;
-    let songId: string;
-    
-    if (isSongData) {
-      // Handle Song with id and artist properties
-      songTitle = item.title;
-      songArtist = item.artist;
-      songId = item.id;
-    } else if (isArtistSong) {
-      // Handle Song from artist search (path + title only)
-      songTitle = item.title;
-      songArtist = activeArtist?.displayName ?? 'Unknown Artist';
-      songId = item.path;
-    } else {
-      // Handle SearchResultItem - convert to Song for consistent handling
-      const converted = formatSearchResult(item);
-      songTitle = converted.title;
-      songArtist = item.artist ?? activeArtist?.displayName ?? 'Unknown Artist'; // Use artist from SearchResultItem first
-      songId = item.url; // Use URL as identifier for SearchResultItem
-    }
-
+  const renderSongItem = useCallback(({ index, style }: ListChildComponentProps) => {
+    const item = displaySongs[index];
     return (
       <div className="virtualized-item" style={style}>
         <ResultCard
-          key={`${isSongData ? item.id : isArtistSong ? item.path : item.url}-${index}`}
+          key={`${item.path}-${index}`}
           icon="music"
-          title={songTitle}
-          subtitle={songArtist}
+          title={item.title}
+          subtitle={item.artist}
           onView={() => onView(item)}
-          onDelete={() => onAdd(songId)}
-          idOrUrl={songId}
+          onDelete={() => onAdd(item.path)}
+          idOrUrl={item.path}
           deleteButtonIcon="plus"
-          deleteButtonLabel={`Add ${songTitle}`}
+          deleteButtonLabel={`Add ${item.title}`}
           viewButtonIcon="external"
           viewButtonLabel="View Chords"
           isDeletable={true}
@@ -83,7 +56,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
         />
       </div>
     );
-  }, [onView, onAdd, activeArtist?.displayName]);
+  }, [onView, onAdd, displaySongs]);
 
   return (
     <SearchResultsSection title={title}>

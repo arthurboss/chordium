@@ -1,4 +1,4 @@
-import { SearchResultItem } from "../types";
+import { Song } from "@/types/song";
 
 // Environment-based logging utility to prevent memory leaks in tests
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
@@ -36,7 +36,7 @@ const inMemoryCache = new Map<string, CacheItem>();
 // Interface for cache items
 interface CacheItem {
   key: string;
-  results: SearchResultItem[];
+  results: Song[];
   timestamp: number;
   accessCount: number;
   query: {
@@ -149,7 +149,7 @@ const saveCache = (cache: SearchCache): void => {
 export const cacheSearchResults = (
   artist: string | null, 
   song: string | null, 
-  results: SearchResultItem[],
+  results: Song[],
   extra?: Record<string, string | null>
 ): void => {
   const cache = initializeCache();
@@ -211,7 +211,7 @@ export const cacheSearchResults = (
  * Get cached search results if they exist
  * @returns The cached results or null if not found or expired
  */
-export const getCachedSearchResults = (artist: string | null, song: string | null, extra?: Record<string, string | null>): SearchResultItem[] | null => {
+export const getCachedSearchResults = (artist: string | null, song: string | null, extra?: Record<string, string | null>): Song[] | null => {
   const key = generateCacheKey(artist, song, extra);
 
   // Try in-memory cache first
@@ -327,10 +327,10 @@ export const clearSearchCache = (): void => {
 export const getSearchResultsWithRefresh = async (
   artist: string | null, 
   song: string | null,
-  refreshCallback?: (newResults: SearchResultItem[]) => void
+  refreshCallback?: (newResults: Song[]) => void
 ): Promise<{
-  immediate: SearchResultItem[] | null;
-  refreshPromise: Promise<SearchResultItem[] | null>;
+  immediate: Song[] | null;
+  refreshPromise: Promise<Song[] | null>;
 }> => {
   debugLog('getSearchResultsWithRefresh called with:', { artist, song });
   const cache = initializeCache();
@@ -341,7 +341,7 @@ export const getSearchResultsWithRefresh = async (
   const REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;
   
   let needsRefresh = false;
-  let immediateResults: SearchResultItem[] | null = null;
+  let immediateResults: Song[] | null = null;
   
   if (cacheItem) {
     const now = Date.now();
@@ -399,7 +399,7 @@ export const getSearchResultsWithRefresh = async (
   }
   
   // Create a promise for refreshed data if needed
-  const refreshPromise = new Promise<SearchResultItem[] | null>((resolve) => {
+  const refreshPromise = new Promise<Song[] | null>((resolve) => {
     if (!needsRefresh) {
       debugLog('No refresh needed, using existing results');
       resolve(immediateResults);

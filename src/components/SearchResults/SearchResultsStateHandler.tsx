@@ -1,7 +1,6 @@
 import React from 'react';
 import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
-import { SearchResultItem } from '@/utils/search-result-item';
 import SearchResultsLayout from '@/components/SearchResultsLayout';
 import SearchLoadingState from './SearchLoadingState';
 import SearchErrorState from './SearchErrorState';
@@ -13,17 +12,17 @@ type UIState =
   | { state: 'error'; error: Error }
   | { state: 'artist-songs-loading'; activeArtist: Artist | null }
   | { state: 'artist-songs-error'; artistSongsError: string; activeArtist: Artist | null }
-  | { state: 'songs-view'; activeArtist?: Artist; artistSongs?: Song[]; songs?: SearchResultItem[]; searchType: 'artist' | 'song'; hasSongs: boolean }
+  | { state: 'songs-view'; activeArtist?: Artist; artistSongs?: Song[]; songs?: Song[]; searchType: 'artist' | 'song'; hasSongs: boolean }
   | { state: 'hasSearched'; hasSongs: boolean }
   | { state: 'default' };
 
 interface SearchResultsStateHandlerProps {
   stateData: UIState;
   artists: Artist[];
-  songs: SearchResultItem[];
+  songs: Song[];
   filteredSongs: Song[];
   filterSong: string;
-  onView: (songData: Song | SearchResultItem) => void;
+  onView: (songData: Song) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
 }

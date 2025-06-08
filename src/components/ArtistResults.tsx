@@ -1,5 +1,4 @@
 import React from 'react';
-import { SearchResultItem } from "@/utils/search-result-item";
 import { ListChildComponentProps } from 'react-window';
 import VirtualizedListWithArrow from "@/components/ui/VirtualizedListWithArrow";
 import ArtistItem from "@/components/ArtistItem";
@@ -23,7 +22,7 @@ const ArtistResults: React.FC<ArtistResultsProps> = ({ artists, onArtistSelect }
       <VirtualizedListWithArrow
         items={artists}
         itemHeight={CARD_HEIGHTS.RESULT_CARD}
-        renderItem={({ index, style, item }: ListChildComponentProps & { item: SearchResultItem }) => (
+        renderItem={({ index, style, item }: ListChildComponentProps & { item: Artist }) => (
           <ArtistItem key={index} item={item} style={style} onArtistSelect={onArtistSelect} />
         )}
       />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
-import { SearchResultItem } from "@/utils/search-result-item";
+import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
 
@@ -23,8 +23,8 @@ export function useSearchResults(
 ) {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [allArtists, setAllArtists] = useState<Artist[]>([]); // Store all fetched artists
-  const [songs, setSongs] = useState<SearchResultItem[]>([]);
-  const [allSongs, setAllSongs] = useState<SearchResultItem[]>([]); // Store all fetched songs
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [allSongs, setAllSongs] = useState<Song[]>([]); // Store all fetched songs
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
@@ -158,7 +158,7 @@ export function useSearchResults(
         console.log('[useSearchResults] Setting songs (no filter):', allSongs);
         setSongs(allSongs);
       } else {
-        // Filter songs by title - SearchResultItem has title property
+        // Filter songs by title - Song has title property
         const filtered = allSongs.filter(song => 
           song.title.toLowerCase().includes(filterSong.toLowerCase())
         );

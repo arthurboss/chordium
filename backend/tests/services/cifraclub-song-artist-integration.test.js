@@ -71,14 +71,14 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
       // Check first result
       expect(results[0]).toEqual({
         title: 'Wonderwall',
-        url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
+        path: 'oasis/wonderwall',
         artist: 'Oasis'
       });
 
       // Check second result
       expect(results[1]).toEqual({
         title: 'Sweet Child O Mine',
-        url: 'https://www.cifraclub.com.br/guns-n-roses/sweet-child-o-mine/',
+        path: 'guns-n-roses/sweet-child-o-mine',
         artist: 'Guns N Roses'
       });
     });
@@ -103,7 +103,7 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
 
       expect(results[0]).toEqual({
         title: 'Wonderful',
-        url: 'https://www.cifraclub.com.br/luca-hanni/wonderful/',
+        path: 'luca-hanni/wonderful',
         artist: 'Luca Hänni'
       });
     });
@@ -128,8 +128,8 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
 
       expect(results[0]).toEqual({
         title: 'Instrumental Track',
-        url: 'https://www.cifraclub.com.br/unknown/instrumental-track/',
-        artist: ''
+        path: 'unknown/instrumental-track',
+        artist: 'Unknown'
       });
     });
 
@@ -153,7 +153,7 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
 
       expect(results[0]).toEqual({
         title: 'Song - With - Multiple - Hyphens',
-        url: 'https://www.cifraclub.com.br/artist-name/song-with-multiple-hyphens/',
+        path: 'artist-name/song-with-multiple-hyphens',
         artist: 'Artist Name'
       });
     });
@@ -188,7 +188,7 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
       expect(results).toHaveLength(1);
       expect(results[0]).toEqual({
         title: 'Valid Song',
-        url: 'https://www.cifraclub.com.br/valid-artist/valid-song/',
+        path: 'valid-artist/valid-song',
         artist: 'Valid Artist'
       });
     });

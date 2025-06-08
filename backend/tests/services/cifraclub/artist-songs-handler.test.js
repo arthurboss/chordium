@@ -46,11 +46,13 @@ describe("CifraClub Artist Songs Handler", () => {
       const expectedSongs = [
         {
           title: "Wonderwall",
-          url: "https://www.cifraclub.com.br/oasis/wonderwall/",
+          path: "oasis/wonderwall",
+          artist: "Oasis",
         },
         {
           title: "Don't Look Back in Anger",
-          url: "https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/",
+          path: "oasis/dont-look-back-in-anger",
+          artist: "Oasis",
         },
       ];
 
