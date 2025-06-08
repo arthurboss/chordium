@@ -51,7 +51,9 @@ describe('Song Search E2E', () => {
       // Verify UI displays results correctly - check for any song results
       cy.get('[data-cy="songs-view"], .grid', { timeout: 10000 }).should('be.visible');
       cy.get('[data-cy="result-card"], .grid > div', { timeout: 10000 }).should('have.length.greaterThan', 0);
-    });    it('should maintain search functionality with unified Song interface', () => {
+    });    
+    
+    it('should maintain search functionality with unified Song interface', () => {
       cy.intercept('GET', '/api/cifraclub-search*').as('searchRequest');
       
       cy.get('#song-search-input').type('bohemian rhapsody');
