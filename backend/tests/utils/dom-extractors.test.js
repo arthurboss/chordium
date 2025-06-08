@@ -5,6 +5,42 @@ import {
   extractChordSheet 
 } from '../../utils/dom-extractors.js';
 
+/**
+ * Tests for DOM extractors that parse raw HTML and return unprocessed data.
+ * These tests validate the raw extraction format which includes:
+ * - url: Full URL for backend validation and processing
+ * - path: Relative path for frontend routing (derived from url)
+ * - title: Extracted and cleaned title
+ * - artist: Artist name extracted from title or URL
+ * 
+ * Note: This raw format gets transformed by result-transformers.js before 
+ * being sent to the frontend API (removes 'url', keeps only title/path/artist).
+ */
+
+/**
+ * Tests for DOM extractors that parse raw HTML and return unprocessed data.
+ * These tests validate the raw extraction format which includes:
+ * - url: Full URL for backend validation and processing
+ * - path: Relative path for frontend routing (derived from url)
+ * - title: Extracted and cleaned title
+ * - artist: Artist name extracted from title or URL
+ * 
+ * Note: This raw format gets transformed by result-transformers.js before 
+ * being sent to the frontend API (removes 'url', keeps only title/path/artist).
+ */
+
+/**
+ * Tests for DOM extractors that parse raw HTML and return unprocessed data.
+ * These tests validate the raw extraction format which includes:
+ * - url: Full URL for backend validation and processing
+ * - path: Relative path for frontend routing (derived from url)
+ * - title: Extracted and cleaned title
+ * - artist: Artist name extracted from title or URL
+ * 
+ * Note: This raw format gets transformed by result-transformers.js before 
+ * being sent to the frontend API (removes 'url', keeps only title/path/artist).
+ */
+
 // Mock DOM environment for testing
 const mockDocument = (queryMock, title = 'Oasis - Cifra Club') => {
   global.document = {
@@ -51,8 +87,8 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Oasis', path: 'oasis', artist: 'Oasis' },
-        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
+        { title: 'Oasis', path: 'oasis', artist: 'Oasis', url: 'https://www.cifraclub.com.br/oasis/' },
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis', url: 'https://www.cifraclub.com.br/oasis/wonderwall/' }
       ]);
     });
 
@@ -75,7 +111,7 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Some Song Title', path: 'ac-dc/back-in-black', artist: 'Ac Dc' }
+        { title: 'Some Song Title', path: 'ac-dc/back-in-black', artist: 'Ac Dc', url: 'https://www.cifraclub.com.br/ac-dc/back-in-black/' }
       ]);
     });
 
@@ -103,7 +139,7 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Valid Result', path: 'valid', artist: 'Artist Name' }
+        { title: 'Valid Result', path: 'valid', artist: 'Artist Name', url: 'https://www.cifraclub.com.br/valid/' }
       ]);
     });
   });
@@ -135,8 +171,8 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' },
-        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
+        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
       ]);
     });
 
@@ -158,7 +194,7 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
+        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
       ]);
     });
     
@@ -184,7 +220,7 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Song Title', path: 'ac-dc/song-title', artist: 'Ac Dc' }
+        { title: 'Song Title', url: 'https://www.cifraclub.com.br/ac-dc/song-title/', path: 'ac-dc/song-title', artist: 'Ac Dc' }
       ]);
     });
   });
@@ -208,12 +244,7 @@ describe('DOM Extractors', () => {
     });
 
     it('should return empty string when no pre element found', () => {
-      mockDocument((selector) => {
-        if (selector === 'pre') {
-          return null;
-        }
-        return null;
-      });
+      mockDocument(() => null);
 
       const result = extractChordSheet();
 

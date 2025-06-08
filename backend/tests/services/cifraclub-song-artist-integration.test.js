@@ -129,7 +129,7 @@ describe('CifraClubService - Song Search with Artist Integration', () => {
       expect(results[0]).toEqual({
         title: 'Instrumental Track',
         path: 'unknown/instrumental-track',
-        artist: ''
+        artist: 'Unknown'
       });
     });
 

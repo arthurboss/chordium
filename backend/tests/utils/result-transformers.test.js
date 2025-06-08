@@ -5,6 +5,17 @@ import {
   transformToGenericResults 
 } from '../../utils/result-transformers.js';
 
+/**
+ * Tests for result transformers that convert raw DOM extraction data 
+ * into final API response format for the frontend.
+ * 
+ * Input: Raw data from DOM extractors (includes 'url' field for validation)
+ * Output: Clean API format (only title/path/artist for songs, no 'url' field)
+ * 
+ * These transformers ensure the frontend receives properly formatted data
+ * while the backend retains the 'url' field for internal validation.
+ */
+
 describe('Result Transformers', () => {
   describe('transformToArtistResults', () => {
     it('should transform results to artist objects', () => {
@@ -56,6 +67,25 @@ describe('Result Transformers', () => {
       ]);
     });
 
+    it('should strip url field from final API response', () => {
+      const results = [
+        { 
+          title: 'Wonderwall - Oasis - Cifra Club', 
+          url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
+          path: 'oasis/wonderwall',
+          artist: 'Oasis'
+        }
+      ];
+
+      const transformed = transformToSongResults(results);
+
+      // Verify that url field is not included in final response
+      expect(transformed[0]).not.toHaveProperty('url');
+      expect(transformed).toEqual([
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
+      ]);
+    });
+
     it('should handle songs without artist information', () => {
       const results = [
         { 
@@ -67,7 +97,7 @@ describe('Result Transformers', () => {
       const transformed = transformToSongResults(results);
 
       expect(transformed).toEqual([
-        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: '' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
       ]);
     });
   });

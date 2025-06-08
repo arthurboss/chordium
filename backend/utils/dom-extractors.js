@@ -109,6 +109,7 @@ export function extractArtistSongs() {
         
         songMap.set(url, {
           title: title.replace(/\s+/g, ' ').trim(),
+          url,  // Include URL for consistency with extractSearchResults
           path,
           artist: artistName
         });
