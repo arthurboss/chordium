@@ -17,30 +17,6 @@ import {
  * being sent to the frontend API (removes 'url', keeps only title/path/artist).
  */
 
-/**
- * Tests for DOM extractors that parse raw HTML and return unprocessed data.
- * These tests validate the raw extraction format which includes:
- * - url: Full URL for backend validation and processing
- * - path: Relative path for frontend routing (derived from url)
- * - title: Extracted and cleaned title
- * - artist: Artist name extracted from title or URL
- * 
- * Note: This raw format gets transformed by result-transformers.js before 
- * being sent to the frontend API (removes 'url', keeps only title/path/artist).
- */
-
-/**
- * Tests for DOM extractors that parse raw HTML and return unprocessed data.
- * These tests validate the raw extraction format which includes:
- * - url: Full URL for backend validation and processing
- * - path: Relative path for frontend routing (derived from url)
- * - title: Extracted and cleaned title
- * - artist: Artist name extracted from title or URL
- * 
- * Note: This raw format gets transformed by result-transformers.js before 
- * being sent to the frontend API (removes 'url', keeps only title/path/artist).
- */
-
 // Mock DOM environment for testing
 const mockDocument = (queryMock, title = 'Oasis - Cifra Club') => {
   global.document = {
