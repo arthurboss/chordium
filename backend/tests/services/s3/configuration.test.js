@@ -13,6 +13,7 @@ describe('S3 Configuration and Initialization', () => {
 
   beforeEach(() => {
     resetMocks(s3StorageService);
+    s3StorageService.enabled = null; // Ensure re-initialization for each test
   });
 
   afterEach(() => {
