@@ -11,5 +11,9 @@ router.get('/cifraclub-search', (req, res) => searchController.search(req, res))
 
 router.get('/cifraclub-chord-sheet', (req, res) => searchController.getChordSheet(req, res));
 
+// S3 cached artist management endpoints
+router.post('/artist-songs/add', (req, res) => searchController.addSongToArtist(req, res));
+router.delete('/artist-songs/remove', (req, res) => searchController.removeSongFromArtist(req, res));
+router.get('/artists/cached', (req, res) => searchController.listCachedArtists(req, res));
 
 export default router;
