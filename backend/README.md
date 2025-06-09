@@ -1,72 +1,40 @@
 # Chordium Backend
 
-This is the backend service for the Chordium application, providing API endpoints for searching and retrieving chord sheets.
+Backend service for searching and retrieving chord sheets with optional S3 caching.
 
-## 🚀 Features
-
-- Search for artists and songs
-- Fetch artist songs
-- Retrieve chord sheets
-- Fallback mechanism from database to web scraping
-
-## 🛠️ Tech Stack
-
-- **Node.js** - JavaScript runtime
-- **Express** - Web framework
-- **Supabase** - Database
-- **Puppeteer** - Web scraping
-- **Jest** - Testing framework
-
-## 🏗️ Project Structure
-
-```
-backend/
-├── config/           # Configuration files
-├── controllers/      # Request handlers
-├── middleware/       # Express middleware
-├── models/           # Database models
-├── routes/           # API routes
-├── services/         # Business logic
-├── tests/            # Test files
-└── utils/            # Utility functions
-```
-
-## 🚀 Getting Started
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Set up environment variables (copy `.env.example` to `.env` and fill in your values)
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## 🧪 Running Tests
+## Quick Start
 
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Generate test coverage
-npm run test:coverage
+npm install
+npm run dev  # Start development server
+npm test     # Run all tests
 ```
 
-## 🌐 API Endpoints
+## Tests
 
-- `GET /api/artists?artist=<name>` - Search for artists
-- `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search CifraClub
+```bash
+# All tests
+npm test
+
+# S3 caching tests (44 tests)
+npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js
+```
+
+## API Endpoints
+
+- `GET /api/artists?artist=<name>` - Search artists
+- `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs
 - `GET /api/artist-songs?artistPath=<path>` - Get artist songs
 - `GET /api/chord-sheet?url=<encoded-url>` - Get chord sheet
 
-## 🔒 Environment Variables
+## Environment
+
+Copy `.env.example` to `.env` and configure:
 
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_SERVICE_ROLE` - Supabase service role key
-- `NODE_ENV` - Environment (development/production)
+- `AWS_ACCESS_KEY_ID` - AWS access key (optional, for S3 caching)
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key (optional, for S3 caching)
+- `S3_BUCKET_NAME` - S3 bucket name (default: chordium)
+
+S3 caching is optional - app works without AWS credentials.
