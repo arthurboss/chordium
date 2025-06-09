@@ -16,8 +16,14 @@ npm test     # Run all tests
 # All tests
 npm test
 
-# S3 caching tests (44 tests)
-npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js
+# S3 caching tests
+npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js
+
+# Run specific S3 test categories
+npm test -- tests/services/s3/configuration.test.js    # Configuration & environment
+npm test -- tests/services/s3/error-handling.test.js   # Error scenarios
+npm test -- tests/services/s3/data-processing.test.js  # Data processing
+npm test -- tests/services/s3/connection.test.js       # Connection testing
 ```
 
 ## API Endpoints

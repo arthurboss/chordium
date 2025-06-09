@@ -70,10 +70,10 @@ jobs:
       - name: Run backend unit tests
         run: npm test
 
-      - name: Run S3 comprehensive test suite
+      - name: Run S3 modular test suite
         run: |
-          echo "Running comprehensive S3 caching test suite..."
-          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose
+          echo "Running modular S3 caching test suite..."
+          npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose
         env:
           # Mock AWS credentials for testing (these don't need to be real)
           AWS_ACCESS_KEY_ID: mock-access-key
@@ -84,7 +84,7 @@ jobs:
       - name: Generate S3 test coverage report
         run: |
           echo "Generating S3 test coverage report..."
-          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --coverage --coverageDirectory=coverage/s3-comprehensive
+          npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --coverage --coverageDirectory=coverage/s3-comprehensive
 
       - name: Upload backend test coverage
         uses: actions/upload-artifact@v4.6.2
@@ -122,11 +122,11 @@ jobs:
       - name: Install backend dependencies
         run: npm ci
 
-      - name: Run S3 comprehensive test suite (focused)
+      - name: Run S3 modular test suite (focused)
         run: |
-          echo "🚀 Running comprehensive S3 caching test suite..."
-          echo "📊 Expected: 44 tests across 3 test files"
-          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose --coverage --coverageDirectory=coverage/s3-focused
+          echo "🚀 Running modular S3 caching test suite..."
+          echo "📊 Expected: 44 unit tests + 23 integration tests = 67 total tests"
+          npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose --coverage --coverageDirectory=coverage/s3-focused
         env:
           AWS_ACCESS_KEY_ID: mock-access-key-for-testing
           AWS_SECRET_ACCESS_KEY: mock-secret-key-for-testing
@@ -137,7 +137,7 @@ jobs:
         run: |
           echo "🔍 Validating S3 test suite results..."
           # Check if the expected number of tests passed
-          if npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --passWithNoTests | grep -q "44 passed"; then
+          if npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --passWithNoTests | grep -q "67 passed"; then
             echo "✅ All S3 tests passed successfully!"
           else
             echo "❌ S3 test validation failed"
@@ -158,11 +158,25 @@ jobs:
           echo "📋 S3 Test Suite Summary" > s3-test-summary.md
           echo "========================" >> s3-test-summary.md
           echo "" >> s3-test-summary.md
-          echo "- **Unit Tests**: tests/services/s3-storage-unit.test.js (21 tests)" >> s3-test-summary.md
+          echo "## Modular Test Structure (Refactored)" >> s3-test-summary.md
+          echo "" >> s3-test-summary.md
+          echo "- **Configuration Tests**: tests/services/s3/configuration.test.js (5 tests)" >> s3-test-summary.md
+          echo "- **Error Handling Tests**: tests/services/s3/error-handling.test.js (5 tests)" >> s3-test-summary.md
+          echo "- **Data Processing Tests**: tests/services/s3/data-processing.test.js (4 tests)" >> s3-test-summary.md
+          echo "- **List Operations Tests**: tests/services/s3/list-operations.test.js (2 tests)" >> s3-test-summary.md
+          echo "- **Connection Tests**: tests/services/s3/connection.test.js (3 tests)" >> s3-test-summary.md
+          echo "- **Key Generation Tests**: tests/services/s3/key-generation.test.js (3 tests)" >> s3-test-summary.md
           echo "- **Performance Tests**: tests/integration/s3-cache-performance.test.js (10 tests)" >> s3-test-summary.md  
           echo "- **Data Validation Tests**: tests/integration/s3-data-validation.test.js (13 tests)" >> s3-test-summary.md
           echo "" >> s3-test-summary.md
-          echo "**Total**: 44 comprehensive tests" >> s3-test-summary.md
+          echo "**Total**: 67 comprehensive tests (44 unit + 23 integration)" >> s3-test-summary.md
+          echo "" >> s3-test-summary.md
+          echo "**Benefits of Modular Structure**:" >> s3-test-summary.md
+          echo "- ✅ DRY (Don't Repeat Yourself) principle with shared utilities" >> s3-test-summary.md
+          echo "- ✅ SRP (Single Responsibility Principle) with focused test files" >> s3-test-summary.md
+          echo "- ✅ Better maintainability and readability" >> s3-test-summary.md
+          echo "- ✅ Easier to run specific test categories" >> s3-test-summary.md
+          echo "- ✅ Improved test isolation and debugging" >> s3-test-summary.md
           echo "" >> s3-test-summary.md
           echo "**Coverage Areas**:" >> s3-test-summary.md
           echo "- Configuration and initialization" >> s3-test-summary.md
