@@ -1,7 +1,7 @@
 name: Unit Tests
 # Runs unit tests for both frontend (Vitest) and backend (Jest) in parallel
-# Frontend: 51 tests covering utils, cache, metadata extraction, session storage  
-# Backend: 24 tests covering logger utility with comprehensive edge cases
+# Frontend: tests covering utils, cache, metadata extraction, session storage  
+# Backend: tests covering logger utility and comprehensive S3 caching functionality
 on:
   push:
     branches: ['*']
@@ -70,6 +70,22 @@ jobs:
       - name: Run backend unit tests
         run: npm test
 
+      - name: Run S3 comprehensive test suite
+        run: |
+          echo "Running comprehensive S3 caching test suite..."
+          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose
+        env:
+          # Mock AWS credentials for testing (these don't need to be real)
+          AWS_ACCESS_KEY_ID: mock-access-key
+          AWS_SECRET_ACCESS_KEY: mock-secret-key
+          AWS_REGION: us-east-1
+          S3_BUCKET_NAME: test-bucket
+
+      - name: Generate S3 test coverage report
+        run: |
+          echo "Generating S3 test coverage report..."
+          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --coverage --coverageDirectory=coverage/s3-comprehensive
+
       - name: Upload backend test coverage
         uses: actions/upload-artifact@v4.6.2
         if: always()
@@ -77,3 +93,89 @@ jobs:
           name: backend-test-coverage
           path: backend/coverage/
           retention-days: 7
+
+      - name: Upload S3 comprehensive test coverage
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: s3-comprehensive-test-coverage
+          path: backend/coverage/s3-comprehensive/
+          retention-days: 7
+
+  s3-integration-tests:
+    name: S3 Integration Tests (Standalone)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Run S3 comprehensive test suite (focused)
+        run: |
+          echo "🚀 Running comprehensive S3 caching test suite..."
+          echo "📊 Expected: 44 tests across 3 test files"
+          npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --verbose --coverage --coverageDirectory=coverage/s3-focused
+        env:
+          AWS_ACCESS_KEY_ID: mock-access-key-for-testing
+          AWS_SECRET_ACCESS_KEY: mock-secret-key-for-testing
+          AWS_REGION: us-east-1
+          S3_BUCKET_NAME: test-bucket-chordium
+
+      - name: Validate S3 test results
+        run: |
+          echo "🔍 Validating S3 test suite results..."
+          # Check if the expected number of tests passed
+          if npm test -- tests/services/s3-storage-unit.test.js tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js --passWithNoTests | grep -q "44 passed"; then
+            echo "✅ All S3 tests passed successfully!"
+          else
+            echo "❌ S3 test validation failed"
+            exit 1
+          fi
+
+      - name: Upload S3 focused test coverage
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: s3-focused-test-coverage
+          path: backend/coverage/s3-focused/
+          retention-days: 7
+
+      - name: Generate S3 test summary
+        if: always()
+        run: |
+          echo "📋 S3 Test Suite Summary" > s3-test-summary.md
+          echo "========================" >> s3-test-summary.md
+          echo "" >> s3-test-summary.md
+          echo "- **Unit Tests**: tests/services/s3-storage-unit.test.js (21 tests)" >> s3-test-summary.md
+          echo "- **Performance Tests**: tests/integration/s3-cache-performance.test.js (10 tests)" >> s3-test-summary.md  
+          echo "- **Data Validation Tests**: tests/integration/s3-data-validation.test.js (13 tests)" >> s3-test-summary.md
+          echo "" >> s3-test-summary.md
+          echo "**Total**: 44 comprehensive tests" >> s3-test-summary.md
+          echo "" >> s3-test-summary.md
+          echo "**Coverage Areas**:" >> s3-test-summary.md
+          echo "- Configuration and initialization" >> s3-test-summary.md
+          echo "- Error handling and resilience" >> s3-test-summary.md
+          echo "- Performance optimization" >> s3-test-summary.md
+          echo "- Data processing and validation" >> s3-test-summary.md
+          echo "- Concurrent access patterns" >> s3-test-summary.md
+          echo "- Memory and resource management" >> s3-test-summary.md
+
+      - name: Upload S3 test summary
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: s3-test-summary
+          path: backend/s3-test-summary.md
+          retention-days: 30
