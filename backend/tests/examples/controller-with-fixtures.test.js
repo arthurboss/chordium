@@ -28,6 +28,13 @@ const mockCifraClubService = {
   baseUrl: 'https://www.cifraclub.com.br'
 };
 
+const mockS3StorageService = {
+  getArtistSongs: jest.fn(),
+  saveArtistSongs: jest.fn(),
+  saveChordSheet: jest.fn(),
+  getChordSheet: jest.fn()
+};
+
 jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient)
 }));
@@ -35,6 +42,10 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
 jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
   __esModule: true,
   default: mockCifraClubService
+}));
+
+jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+  s3StorageService: mockS3StorageService
 }));
 
 // Import after mocking
@@ -62,6 +73,10 @@ describe('Search Controller Enhanced with Fixtures', () => {
     mockCifraClubService.search.mockResolvedValue([]);
     mockCifraClubService.getArtistSongs.mockResolvedValue([]);
     mockCifraClubService.getChordSheet.mockResolvedValue('');
+    
+    // Reset S3 service mocks - return null to simulate cache miss
+    mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+    mockS3StorageService.getChordSheet.mockResolvedValue(null);
   });
 
   describe('Song Search with Real API Response Data', () => {

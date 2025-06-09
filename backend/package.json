@@ -10,7 +10,8 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "test:s3-config": "node --experimental-vm-modules ./node_modules/.bin/jest tests/services/s3/configuration.test.js --verbose"
   },
   "jest": {
     "testEnvironment": "node",
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.7",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",

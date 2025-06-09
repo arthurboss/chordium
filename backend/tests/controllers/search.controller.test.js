@@ -3,9 +3,15 @@ import express from 'express';
 import { jest } from '@jest/globals';
 import http from 'http';
 
+// Import fixtures
+import { GlobalFixtureLoader } from '../../../fixtures/index.js';
+
 // Import mocks first
 import { supabase, createClient } from '../__mocks__/supabase.js';
 import cifraClubService from '../__mocks__/cifraclub.service.js';
+
+// Initialize fixture loader
+const fixtureLoader = new GlobalFixtureLoader();
 
 // Mock the modules before importing the router
 const mockSupabaseClient = {
@@ -21,6 +27,13 @@ const mockCifraClubService = {
   baseUrl: 'https://www.cifraclub.com.br'
 };
 
+const mockS3StorageService = {
+  getArtistSongs: jest.fn(),
+  saveArtistSongs: jest.fn(),
+  saveChordSheet: jest.fn(),
+  getChordSheet: jest.fn()
+};
+
 // Mock the modules
 jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient)
@@ -29,6 +42,10 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
 jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
   __esModule: true,
   default: mockCifraClubService
+}));
+
+jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+  s3StorageService: mockS3StorageService
 }));
 
 // Import the modules after setting up the mocks
@@ -75,6 +92,10 @@ beforeEach(() => {
   mockCifraClubService.search.mockResolvedValue([]);
   mockCifraClubService.getArtistSongs.mockResolvedValue([]);
   mockCifraClubService.getChordSheet.mockResolvedValue('');
+  
+  // Reset S3 service mocks - return null to simulate cache miss
+  mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+  mockS3StorageService.getChordSheet.mockResolvedValue(null);
 });
 
 afterAll(() => {
@@ -104,21 +125,10 @@ beforeEach(() => {
 });
 
 describe('Search Controller', () => {
-  // Mock data
-  const mockArtists = [
-    { id: 1, displayName: 'Test', path: 'test', songCount: null },
-    { id: 2, displayName: 'Crash Test Dummies', path: 'crash-test-dummies', songCount: null }
-  ];
-
-  const mockSongs = [
-    { title: 'Test Me - Melanie Martinez', url: 'https://www.cifraclub.com.br/melanie-martinez/test-me/' },
-    { title: 'Love Test - The Growlers', url: 'https://www.cifraclub.com.br/the-growlers/love-test/' },
-    { title: 'Test Drive - Ariana Grande', url: 'https://www.cifraclub.com.br/ariana-grande/test-drive/' },
-    { title: 'The Test - The Academy Is...', url: 'https://www.cifraclub.com.br/the-academy-is/the-test/' },
-    { title: 'Test of time - Petra', url: 'https://www.cifraclub.com.br/petra/test-of-time/' },
-    { title: 'Test Pattern - The Thermals', url: 'https://www.cifraclub.com.br/the-thermals/test-pattern/' },
-    { title: 'Fight Test - The Flaming Lips', url: 'https://www.cifraclub.com.br/flaming-lips/fight-test/' }
-  ];
+  // Get fixture data instead of inline mocks
+  const mockArtists = fixtureLoader.loadApiFixture('artists').slice(0, 2); // Get first 2 artists
+  const mockSongs = fixtureLoader.getSongSearchResult('test'); // Get test songs from fixtures
+  const mockArtistSongs = fixtureLoader.getArtistSongs('radiohead'); // Get artist songs from fixtures
 
   beforeEach(() => {
     // Clear all mocks before each test
@@ -129,6 +139,10 @@ describe('Search Controller', () => {
     supabase.from.mockReturnThis();
     supabase.select.mockReturnThis();
     supabase.ilike.mockReturnThis();
+    
+    // Reset S3 service mocks - return null to simulate cache miss
+    mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+    mockS3StorageService.getChordSheet.mockResolvedValue(null);
   });
 
   describe('GET /api/artists', () => {
@@ -291,14 +305,14 @@ describe('Search Controller', () => {
     it('should fetch artist songs from CifraClub', async () => {
       const artistPath = 'test-artist';
       
-      mockCifraClubService.getArtistSongs.mockResolvedValue(mockSongs);
+      mockCifraClubService.getArtistSongs.mockResolvedValue(mockArtistSongs);
 
       const response = await global.agent
         .get('/api/artist-songs')
         .query({ artistPath });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockSongs);
+      expect(response.body).toEqual(mockArtistSongs);
       expect(mockCifraClubService.getArtistSongs).toHaveBeenCalledWith(
         `https://www.cifraclub.com.br/${artistPath}/`
       );
