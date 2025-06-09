@@ -75,12 +75,14 @@ describe('S3 Configuration and Initialization', () => {
   test('should handle partial credentials gracefully', () => {
     // Reset service state to force re-initialization
     resetMocks(s3StorageService);
-    
+    s3StorageService.enabled = null;
+
     process.env = {
       ...originalEnv,
       AWS_ACCESS_KEY_ID: 'test-key',
-      // Missing AWS_SECRET_ACCESS_KEY
+      AWS_SECRET_ACCESS_KEY: undefined, // Explicitly unset
     };
+    delete process.env.AWS_SECRET_ACCESS_KEY; // Ensure it's truly missing
 
     const result = s3StorageService._checkEnabled();
 
