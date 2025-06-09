@@ -72,6 +72,9 @@ describe('S3 Configuration and Initialization', () => {
   });
 
   test('should handle partial credentials gracefully', () => {
+    // Reset service state to force re-initialization
+    resetMocks(s3StorageService);
+    
     process.env = {
       ...originalEnv,
       AWS_ACCESS_KEY_ID: 'test-key',

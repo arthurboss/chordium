@@ -28,6 +28,70 @@
       "artist": "Radiohead"
     }
   ],
+  "test": [
+    {
+      "title": "Test Me",
+      "url": "https://www.cifraclub.com.br/melanie-martinez/test-me/",
+      "artist": "Melanie Martinez"
+    },
+    {
+      "title": "Love Test",
+      "url": "https://www.cifraclub.com.br/the-growlers/love-test/",
+      "artist": "The Growlers"
+    },
+    {
+      "title": "Test Drive",
+      "url": "https://www.cifraclub.com.br/ariana-grande/test-drive/",
+      "artist": "Ariana Grande"
+    },
+    {
+      "title": "The Test",
+      "url": "https://www.cifraclub.com.br/the-academy-is/the-test/",
+      "artist": "The Academy Is..."
+    },
+    {
+      "title": "Test of time",
+      "url": "https://www.cifraclub.com.br/petra/test-of-time/",
+      "artist": "Petra"
+    },
+    {
+      "title": "Test Pattern",
+      "url": "https://www.cifraclub.com.br/the-thermals/test-pattern/",
+      "artist": "The Thermals"
+    },
+    {
+      "title": "Fight Test",
+      "url": "https://www.cifraclub.com.br/flaming-lips/fight-test/",
+      "artist": "The Flaming Lips"
+    }
+  ],
+  "wonderful": [
+    {
+      "title": "Wonderful Tonight",
+      "url": "https://www.cifraclub.com.br/eric-clapton/wonderful-tonight/",
+      "artist": "Eric Clapton"
+    },
+    {
+      "title": "Wonderful Life",
+      "url": "https://www.cifraclub.com.br/black/wonderful-life/",
+      "artist": "Black"
+    },
+    {
+      "title": "What a Wonderful World",
+      "url": "https://www.cifraclub.com.br/louis-armstrong/what-a-wonderful-world/",
+      "artist": "Louis Armstrong"
+    },
+    {
+      "title": "Wonderful World",
+      "url": "https://www.cifraclub.com.br/sam-cooke/wonderful-world/",
+      "artist": "Sam Cooke"
+    },
+    {
+      "title": "Wonderful",
+      "url": "https://www.cifraclub.com.br/everclear/wonderful/",
+      "artist": "Everclear"
+    }
+  ],
   "empty": [],
   "noresults": []
 }

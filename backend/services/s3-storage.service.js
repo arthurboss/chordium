@@ -10,9 +10,6 @@ class S3StorageService {
 
   _initialize() {
     if (this.enabled !== null) return; // Already initialized
-
-    console.log('S3 Initialize - AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID ? 'Found' : 'Missing');
-    console.log('S3 Initialize - AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'Found' : 'Missing');
     
     // Check if AWS credentials are available
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
