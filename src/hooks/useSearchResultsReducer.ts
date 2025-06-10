@@ -178,7 +178,9 @@ export function determineUIState(state: SearchResultsState) {
 // Custom hook that encapsulates the reducer and provides actions
 export function useSearchResultsReducer(
   filterSong: string,
-  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>,
+  setActiveTab?: (tab: string) => void,
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>
 ) {
   const [state, dispatch] = useReducer(searchResultsReducer, initialState);
   
@@ -200,7 +202,9 @@ export function useSearchResultsReducer(
   // Memoize the song actions
   const songActions = useSongActions({
     setMySongs,
-    memoizedSongs
+    memoizedSongs,
+    setActiveTab,
+    setSelectedSong
   });
   
   // Memoize the handlers to prevent unnecessary re-renders

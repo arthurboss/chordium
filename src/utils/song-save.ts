@@ -26,7 +26,6 @@ export const handleSaveNewSong = (
   }
   
   const newSong: Song = {
-    id: `song-${Date.now()}`,
     title: title || "Untitled Song",
     path: content,
     artist,

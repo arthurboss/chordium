@@ -7,7 +7,7 @@ interface SongViewerProps {
   song: Song;
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
-  onDelete: (songId: string) => void;
+  onDelete: (songPath: string) => void;
   onUpdate: (content: string) => void;
   backButtonLabel?: string;
   deleteButtonLabel?: string;
@@ -43,7 +43,7 @@ const SongViewer = ({
           <Button 
             variant={deleteButtonVariant}
             size="sm"
-            onClick={() => onDelete(song.id)}
+            onClick={() => onDelete(song.path)}
             tabIndex={0}
             aria-label={deleteButtonLabel}
           >

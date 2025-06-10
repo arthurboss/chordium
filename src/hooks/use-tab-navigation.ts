@@ -49,13 +49,13 @@ export const useTabNavigation = ({
       setActiveTab(determinedTab);
     }
 
-    // Handle song selection if a song ID is in query params AND the determined tab is "my-songs"
+    // Handle song selection if a song path is in query params AND the determined tab is "my-songs"
     // This prevents trying to load a song if the user is, for example, on the "/search" or "/upload" tab.
     if (songIdFromQuery && determinedTab === "my-songs") {
       let songFound = false;
       // Check sample songs only if sampleSongs array is available and has items
       if (sampleSongs && sampleSongs.length > 0) {
-        const foundDemo = sampleSongs.find((song) => song.id === songIdFromQuery);
+        const foundDemo = sampleSongs.find((song) => song.path === songIdFromQuery);
         if (foundDemo) {
           setDemoSong({ ...foundDemo } as Song);
           setSelectedSong(null); // Clear other selection
@@ -65,7 +65,7 @@ export const useTabNavigation = ({
 
       // If not found in demo songs, check user's songs (if available and has items)
       if (!songFound && mySongs && mySongs.length > 0) {
-        const foundMySong = mySongs.find(song => song.id === songIdFromQuery);
+        const foundMySong = mySongs.find(song => song.path === songIdFromQuery);
         if (foundMySong) {
           setSelectedSong(foundMySong);
           setDemoSong(null); // Clear other selection

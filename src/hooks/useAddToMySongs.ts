@@ -47,7 +47,6 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         
         // Create the new song
         const newSong: Song = {
-          id: `song-${Date.now()}`,
           title: song.title || "Untitled Song",
           path: content,
           artist: song.artist,

@@ -12,6 +12,7 @@ import './custom-scrollbar.css';
 interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
   artist: string;
   song: string;
   filterArtist: string;
@@ -25,6 +26,8 @@ interface SearchResultsProps {
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
   setMySongs, 
+  setActiveTab,
+  setSelectedSong,
   artist, 
   song,
   filterArtist,
@@ -41,7 +44,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     stateData,
     handleView,
     handleAdd
-  } = useSearchResultsReducer(filterSong, setMySongs);
+  } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong);
 
   // Fetch search results from API - only when shouldFetch is true (form submitted)
   const { artists, songs, loading, error } = useSearchResults(

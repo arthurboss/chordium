@@ -8,6 +8,7 @@ import { Artist } from "@/types/artist";
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
 }
 
 // Define the search form state
@@ -78,7 +79,7 @@ function searchFormReducer(state: SearchFormState, action: SearchFormAction): Se
   }
 }
 
-const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
+const SearchTab = ({ setMySongs, setActiveTab, setSelectedSong }: SearchTabProps) => {
   // Use our form reducer
   const [state, dispatch] = useReducer(searchFormReducer, initialState);
   
@@ -122,6 +123,7 @@ const SearchTab = ({ setMySongs, setActiveTab }: SearchTabProps) => {
       <SearchResults
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
+        setSelectedSong={setSelectedSong}
         artist={state.searchedArtist} // Always use searchedArtist
         song={state.searchedSong}    // Always use searchedSong
         filterArtist={state.artistQuery}

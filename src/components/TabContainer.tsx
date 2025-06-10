@@ -57,7 +57,7 @@ const TabContainer = ({
   
   const handleSongSelect = (song: Song) => {
     setSelectedSong(song);
-    navigate(`/my-songs?song=${song.id}`);
+    navigate(`/my-songs?song=${encodeURIComponent(song.path)}`);
   };
   
   const handleSaveUploadedSong = (content: string, title: string) => {
@@ -68,8 +68,8 @@ const TabContainer = ({
     handleUpdateSong(content, selectedSong, mySongs, setMySongs, setSelectedSong);
   };
   
-  const handleSongDelete = (songId: string) => {
-    handleDeleteSong(songId, mySongs, setMySongs, selectedSong, setSelectedSong);
+  const handleSongDelete = (songPath: string) => {
+    handleDeleteSong(songPath, mySongs, setMySongs, selectedSong, setSelectedSong);
   };
 
   // Handle keyboard navigation for the tabs
@@ -118,6 +118,7 @@ const TabContainer = ({
           <SearchTab 
             setMySongs={setMySongs}
             setActiveTab={setActiveTab}
+            setSelectedSong={setSelectedSong}
           />
         </TabsContent>
         

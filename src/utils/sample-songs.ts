@@ -12,25 +12,17 @@ export const loadSampleSongs = async (): Promise<Song[]> => {
   // Create a new promise and cache it
   cachedSongs = (async () => {
     console.log('Loading sample songs (first time)');
-    const sampleSong1Content = await fetch("/src/data/songs/wonderwall.txt").then(res =>
-      res.text()
-    );
-    const sampleSong2Content = await fetch(
-      "/src/data/songs/hotel-california.txt"
-    ).then((res) => res.text());
-
+    
     const songs = [
       {
-        id: "wonderwall",
         title: "Wonderwall",
         artist: "Oasis",
-        path: sampleSong1Content,
+        path: "wonderwall",
       },
       { 
-        id: "hotel-california", 
         title: "Hotel California", 
         artist: "Eagles", 
-        path: sampleSong2Content 
+        path: "hotel-california"
       },
     ];
     
