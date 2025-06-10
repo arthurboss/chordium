@@ -1,12 +1,12 @@
 name: Unit Tests
 # Runs unit tests for both frontend (Vitest) and backend (Jest) in parallel
-# Frontend: tests covering utils, cache, metadata extraction, session storage  
+# Frontend: tests covering utils, cache, metadata extraction, session storage
 # Backend: tests covering logger utility and comprehensive S3 caching functionality
 on:
   push:
-    branches: ['*']
+    branches: ["*"]
   pull_request:
-    branches: ['*']
+    branches: ["*"]
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -24,8 +24,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.4.0
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -60,8 +60,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.4.0
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
@@ -78,7 +78,7 @@ jobs:
           # Mock AWS credentials for testing (these don't need to be real)
           AWS_ACCESS_KEY_ID: mock-access-key
           AWS_SECRET_ACCESS_KEY: mock-secret-key
-          AWS_REGION: us-east-1
+          AWS_REGION: eu-central-1
           S3_BUCKET_NAME: test-bucket
 
       - name: Generate S3 test coverage report
@@ -115,8 +115,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.4.0
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
@@ -132,7 +132,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: mock-access-key-for-testing
           AWS_SECRET_ACCESS_KEY: mock-secret-key-for-testing
-          AWS_REGION: us-east-1
+          AWS_REGION: eu-central-1
           S3_BUCKET_NAME: test-bucket-chordium
 
       - name: Upload S3 focused test coverage

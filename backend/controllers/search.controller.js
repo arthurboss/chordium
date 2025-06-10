@@ -81,22 +81,22 @@ class SearchController {
       }
       
       // Extract artist name from path (remove trailing slash if present)
-      const artistName = artistPath.replace(/\/$/, '');
+      const normalizedArtistPath = artistPath.replace(/\/$/, '');
       logger.info(`Fetching songs for artist with path: ${artistPath}`);
       
       // Try to get cached songs from S3 first
       try {
-        const cachedSongs = await S3StorageService.getArtistSongs(artistName);
+        const cachedSongs = await S3StorageService.getArtistSongs(normalizedArtistPath);
         if (cachedSongs && cachedSongs.length > 0) {
-          logger.info(`Found ${cachedSongs.length} cached songs for artist ${artistName} in S3`);
+          logger.info(`Found ${cachedSongs.length} cached songs for artist ${normalizedArtistPath} in S3`);
           return res.json(cachedSongs);
         }
       } catch (cacheError) {
-        logger.warn(`Failed to retrieve cached songs for ${artistName} from S3:`, cacheError.message);
+        logger.warn(`Failed to retrieve cached songs for ${normalizedArtistPath} from S3:`, cacheError.message);
       }
       
       // Cache miss or error - fetch from CifraClub and cache the results
-      logger.info(`No cached data for ${artistName}, fetching from CifraClub...`);
+      logger.info(`No cached data for ${normalizedArtistPath}, fetching from CifraClub...`);
       const artistUrl = `${cifraClubService.baseUrl}/${artistPath}/`;
       const songs = await cifraClubService.getArtistSongs(artistUrl);
       logger.info(`Found ${songs.length} songs for artist ${artistPath} from CifraClub`);
@@ -104,10 +104,10 @@ class SearchController {
       // Cache the results in S3 for future requests
       if (songs && songs.length > 0) {
         try {
-          await S3StorageService.storeArtistSongs(artistName, songs);
-          logger.info(`Cached ${songs.length} songs for artist ${artistName} in S3`);
+          await S3StorageService.storeArtistSongs(normalizedArtistPath, songs);
+          logger.info(`Cached ${songs.length} songs for artist ${normalizedArtistPath} in S3`);
         } catch (cacheError) {
-          logger.warn(`Failed to cache songs for ${artistName} in S3:`, cacheError.message);
+          logger.warn(`Failed to cache songs for ${normalizedArtistPath} in S3:`, cacheError.message);
         }
       }
       
