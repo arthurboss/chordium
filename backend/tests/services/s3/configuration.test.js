@@ -46,7 +46,7 @@ describe("S3 Configuration and Initialization", () => {
         secretAccessKey: "test-secret-key",
         sessionToken: "test-session-token",
       },
-      region: "us-east-1",
+      region: "eu-central-1",
     });
   });
 
