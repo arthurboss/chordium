@@ -1,5 +1,11 @@
-import AWS from 'aws-sdk';
-import logger from '../utils/logger.js';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  HeadBucketCommand,
+} from "@aws-sdk/client-s3";
+import logger from "../utils/logger.js";
 
 class S3StorageService {
   constructor() {
@@ -10,28 +16,32 @@ class S3StorageService {
 
   _initialize() {
     if (this.enabled !== null) return; // Already initialized
-    
+
     // Check if AWS credentials are available
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      logger.warn('AWS credentials not found. S3 storage will be disabled.');
+      logger.warn("AWS credentials not found. S3 storage will be disabled.");
       this.enabled = false;
       return;
     }
 
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      sessionToken: process.env.AWS_SESSION_TOKEN, // Add session token support
-      region: process.env.AWS_REGION || 'eu-central-1'
+    this.s3 = new S3Client({
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        ...(process.env.AWS_SESSION_TOKEN && {
+          sessionToken: process.env.AWS_SESSION_TOKEN,
+        }),
+      },
+      region: process.env.AWS_REGION || "eu-central-1",
     });
-    this.bucketName = process.env.S3_BUCKET_NAME || 'chordium';
+    this.bucketName = process.env.S3_BUCKET_NAME || "chordium";
     this.enabled = true;
   }
 
   _checkEnabled() {
     this._initialize();
     if (!this.enabled) {
-      logger.warn('S3 storage is disabled. Skipping operation.');
+      logger.warn("S3 storage is disabled. Skipping operation.");
       return false;
     }
     return true;
@@ -49,21 +59,25 @@ class S3StorageService {
 
     try {
       const key = `artist-songs/${artistPath}.json`;
-      const params = {
+      const command = new GetObjectCommand({
         Bucket: this.bucketName,
-        Key: key
-      };
+        Key: key,
+      });
 
-      const result = await this.s3.getObject(params).promise();
-      const songs = JSON.parse(result.Body.toString());
+      const result = await this.s3.send(command);
+      const body = await result.Body.transformToString();
+      const songs = JSON.parse(body);
       logger.info(`Retrieved ${songs.length} songs for ${artistPath} from S3`);
       return songs;
     } catch (error) {
-      if (error.code === 'NoSuchKey') {
+      if (error.name === "NoSuchKey") {
         logger.info(`No cached songs found for ${artistPath} in S3`);
         return null;
       }
-      logger.error(`Error retrieving songs from S3 for ${artistPath}:`, error.message);
+      logger.error(
+        `Error retrieving songs from S3 for ${artistPath}:`,
+        error.message
+      );
       return null; // Return null instead of throwing to allow fallback
     }
   }
@@ -80,31 +94,36 @@ class S3StorageService {
 
     try {
       // Remove URL field to save storage space - can be reconstructed from path
-      const optimizedSongs = songs.map(song => ({
+      const optimizedSongs = songs.map((song) => ({
         title: song.title,
         path: song.path,
-        artist: song.artist
+        artist: song.artist,
         // URL removed - can be reconstructed as: `${baseUrl}/${artistPath}/${song.path}/`
       }));
 
       const key = `artist-songs/${artistPath}.json`;
-      const params = {
+      const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
         Body: JSON.stringify(optimizedSongs, null, 2),
-        ContentType: 'application/json',
+        ContentType: "application/json",
         Metadata: {
-          'artist': artistPath,
-          'song-count': optimizedSongs.length.toString(),
-          'last-updated': new Date().toISOString()
-        }
-      };
+          artist: artistPath,
+          "song-count": optimizedSongs.length.toString(),
+          "last-updated": new Date().toISOString(),
+        },
+      });
 
-      await this.s3.putObject(params).promise();
-      logger.info(`Stored ${optimizedSongs.length} songs for ${artistPath} in S3 (optimized schema)`);
+      await this.s3.send(command);
+      logger.info(
+        `Stored ${optimizedSongs.length} songs for ${artistPath} in S3 (optimized schema)`
+      );
       return true;
     } catch (error) {
-      logger.error(`Error storing songs to S3 for ${artistPath}:`, error.message);
+      logger.error(
+        `Error storing songs to S3 for ${artistPath}:`,
+        error.message
+      );
       return false; // Return false instead of throwing to allow graceful degradation
     }
   }
@@ -116,11 +135,11 @@ class S3StorageService {
    */
   async addSongToArtist(artistPath, newSong) {
     try {
-      const existingSongs = await this.getArtistSongs(artistPath) || [];
-      
+      const existingSongs = (await this.getArtistSongs(artistPath)) || [];
+
       // Check if song already exists (by path or title)
-      const songExists = existingSongs.some(song => 
-        song.path === newSong.path || song.title === newSong.title
+      const songExists = existingSongs.some(
+        (song) => song.path === newSong.path || song.title === newSong.title
       );
 
       if (!songExists) {
@@ -152,7 +171,9 @@ class S3StorageService {
       }
 
       const initialCount = existingSongs.length;
-      const updatedSongs = existingSongs.filter(song => song.path !== songPath);
+      const updatedSongs = existingSongs.filter(
+        (song) => song.path !== songPath
+      );
 
       if (updatedSongs.length < initialCount) {
         await this.storeArtistSongs(artistPath, updatedSongs);
@@ -172,22 +193,27 @@ class S3StorageService {
    * List all artist song files in S3
    */
   async listArtists() {
-    try {
-      const params = {
-        Bucket: this.bucketName,
-        Prefix: 'artist-songs/'
-      };
+    if (!this._checkEnabled()) {
+      return [];
+    }
 
-      const result = await this.s3.listObjectsV2(params).promise();
-      const artists = result.Contents?.map(obj => {
-        const filename = obj.Key.replace('artist-songs/', '');
-        return filename.replace('.json', '');
-      }) || [];
+    try {
+      const command = new ListObjectsV2Command({
+        Bucket: this.bucketName,
+        Prefix: "artist-songs/",
+      });
+
+      const result = await this.s3.send(command);
+      const artists =
+        result.Contents?.map((obj) => {
+          const filename = obj.Key.replace("artist-songs/", "");
+          return filename.replace(".json", "");
+        }) || [];
 
       logger.info(`Found ${artists.length} artists in S3 storage`);
       return artists;
     } catch (error) {
-      logger.error('Error listing artists from S3:', error);
+      logger.error("Error listing artists from S3:", error);
       throw error;
     }
   }
@@ -201,11 +227,14 @@ class S3StorageService {
     }
 
     try {
-      await this.s3.headBucket({ Bucket: this.bucketName }).promise();
+      const command = new HeadBucketCommand({ Bucket: this.bucketName });
+      await this.s3.send(command);
       logger.info(`S3 connection successful to bucket: ${this.bucketName}`);
       return true;
     } catch (error) {
-      logger.error(`S3 connection failed for bucket ${this.bucketName}: ${error.message}`);
+      logger.error(
+        `S3 connection failed for bucket ${this.bucketName}: ${error.message}`
+      );
       return false;
     }
   }

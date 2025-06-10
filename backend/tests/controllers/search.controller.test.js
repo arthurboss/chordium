@@ -29,6 +29,7 @@ const mockCifraClubService = {
 
 const mockS3StorageService = {
   getArtistSongs: jest.fn(),
+  storeArtistSongs: jest.fn(),
   saveArtistSongs: jest.fn(),
   saveChordSheet: jest.fn(),
   getChordSheet: jest.fn()
