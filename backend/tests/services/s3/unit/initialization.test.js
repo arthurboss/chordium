@@ -47,7 +47,7 @@ describe("S3 Service Initialization", () => {
         accessKeyId: "test-access-key",
         secretAccessKey: "test-secret-key",
       },
-      region: "us-east-1",
+      region: "eu-central-1",
     });
   });
 
@@ -80,7 +80,7 @@ describe("S3 Service Initialization", () => {
         secretAccessKey: "test-secret-key",
         sessionToken: "test-session-token",
       },
-      region: "us-east-1",
+      region: "eu-central-1",
     });
   });
 

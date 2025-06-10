@@ -10,7 +10,7 @@ export function createTestEnvironment(customEnv = {}) {
   return {
     AWS_ACCESS_KEY_ID: "test-access-key",
     AWS_SECRET_ACCESS_KEY: "test-secret-key",
-    AWS_REGION: "us-east-1",
+    AWS_REGION: "eu-central-1",
     S3_BUCKET_NAME: "test-bucket",
     ...customEnv,
   };
