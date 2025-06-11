@@ -6,6 +6,7 @@ import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
 import { ListChildComponentProps } from 'react-window';
 import { CARD_HEIGHTS } from '@/constants/ui-constants';
 import SearchResultsSection from '../SearchResultsSection';
+import { cyAttr } from '@/utils/test-utils';
 import '@/components/custom-scrollbar.css';
 
 interface SongsViewProps {
@@ -59,7 +60,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
   }, [onView, onAdd, displaySongs]);
 
   return (
-    <SearchResultsSection title={title}>
+    <SearchResultsSection title={title} {...cyAttr("songs-view")}>
       {displaySongs.length === 0 && filterSong && (
         <p className="mb-4 text-muted-foreground">No songs matching "{filterSong}"</p>
       )}

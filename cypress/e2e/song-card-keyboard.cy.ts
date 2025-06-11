@@ -5,7 +5,7 @@ describe('SongCard Interactive Elements Tests', () => {
     
     // Ensure we're on the My Songs tab
     cy.get('button[role="tab"]').contains('My Songs').click();
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // Wait for songs to load
     cy.contains('Hotel California').should('be.visible');

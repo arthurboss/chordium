@@ -10,7 +10,7 @@ describe('Chordium E2E Tests', () => {
   });
 
   it('should show My Songs tab by default', () => {
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     cy.contains('Hotel California').should('be.visible');
   });
 
@@ -21,7 +21,7 @@ describe('Chordium E2E Tests', () => {
 
   it('should navigate to My Songs tab', () => {
     cy.get('button[role="tab"]').contains('My Songs').click();
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     // Sample songs should be visible
     cy.contains('Hotel California').should('be.visible');
     cy.contains('Wonderwall').should('be.visible');

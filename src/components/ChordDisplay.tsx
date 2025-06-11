@@ -9,6 +9,7 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
 import { downloadTextFile } from '@/utils/download-utils';
+import { cyAttr } from '@/utils/test-utils';
 
 interface ChordDisplayProps {
   title?: string;
@@ -80,7 +81,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   }
 
   return (
-    <div ref={ref} id="chord-display">
+    <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
       <ChordHeader title={title} artist={artist} />
       <ChordContent
         processedContent={processedContent}

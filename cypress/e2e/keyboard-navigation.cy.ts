@@ -30,21 +30,21 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
     
     // Activate with Enter key
     cy.focused().type('{enter}');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // Focus on Search tab
     cy.get('button[role="tab"]').contains('Search').focus();
     
     // Activate with Space key
     cy.focused().type(' ');
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Focus on Upload tab
     cy.get('button[role="tab"]').contains('Upload').focus();
     
     // Activate with Enter key
     cy.focused().type('{enter}');
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
   });
 
   it('should make song card buttons focusable with keyboard', () => {

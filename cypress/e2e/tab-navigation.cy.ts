@@ -8,7 +8,7 @@ describe('Tab Navigation URL Tests', () => {
 
   it('should default to My Songs tab and have /my-songs in URL', () => {
     // Check that My Songs tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // Check URL has been updated to /my-songs (or root which also maps to my-songs)
     cy.url().then(url => {
@@ -22,7 +22,7 @@ describe('Tab Navigation URL Tests', () => {
     cy.get('button[role="tab"]').contains('Search').click();
     
     // Verify Search tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Check that URL is updated
     cy.url().should('include', '/search');
@@ -33,7 +33,7 @@ describe('Tab Navigation URL Tests', () => {
     cy.get('button[role="tab"]').contains('Upload').click();
     
     // Verify Upload tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
     
     // Check that URL is updated
     cy.url().should('include', '/upload');
@@ -48,7 +48,7 @@ describe('Tab Navigation URL Tests', () => {
     cy.get('button[role="tab"]').contains('My Songs').click();
     
     // Verify My Songs tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // Check that URL is updated
     cy.url().should('include', '/my-songs');
@@ -59,13 +59,13 @@ describe('Tab Navigation URL Tests', () => {
     cy.visit('/search');
     
     // Check that Search tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Navigate directly to upload page
     cy.visit('/upload');
     
     // Check that Upload tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
   });
 
   it('should set search tab active when URL has q parameter', () => {
@@ -73,7 +73,7 @@ describe('Tab Navigation URL Tests', () => {
     cy.visit('/search?q=test');
     
     // Check that Search tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
   });
 
   it('should open a song when clicking on View Chords', () => {
@@ -84,7 +84,7 @@ describe('Tab Navigation URL Tests', () => {
     cy.get('[role="tabpanel"]').should('be.visible');
     
     // Verify the My Songs tab remains active
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // URL should include a song parameter
     cy.url().should('include', 'song=');
@@ -95,41 +95,41 @@ describe('Tab Navigation URL Tests', () => {
     cy.visit('/search');
     
     // Verify Search tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Navigate to upload
     cy.visit('/upload');
     
     // Verify Upload tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
     
     // Navigate to my-songs
     cy.visit('/my-songs');
     
     // Verify My Songs tab is active
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
   });
 
   it('should navigate between tabs using buttons', () => {
     // Start at My Songs tab
     cy.visit('/');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     cy.url().should('match', /\/(my-songs)?$/);
     
     // Switch to Search tab
     cy.get('button[role="tab"]').contains('Search').click();
     cy.url().should('include', '/search');
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Switch to Upload tab
     cy.get('button[role="tab"]').contains('Upload').click();
     cy.url().should('include', '/upload');
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
     
     // Switch back to My Songs tab
     cy.get('button[role="tab"]').contains('My Songs').click();
     cy.url().should('include', '/my-songs');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
   });
 });
 
@@ -140,7 +140,7 @@ describe('Tab and SongCard Keyboard Navigation', () => {
     
     // Ensure we're on the My Songs tab
     cy.get('[data-cy="tab-my-songs"]').click();
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
     
     // Wait for songs to load
     cy.contains('Hotel California').should('be.visible');
@@ -163,10 +163,10 @@ describe('Tab and SongCard Keyboard Navigation', () => {
 
   it('should have keyboard-accessible song cards', () => {
     // Check if song cards have buttons with tabindex
-    cy.get('[data-cy^="view-chords-btn-"]').first()
+    cy.get('[data-cy^="view-btn-"]').first()
       .should('have.attr', 'tabindex', '0');
       
-    cy.get('[data-cy^="delete-song-btn-"]').first()
+    cy.get('[data-cy^="delete-btn-"]').first()
       .should('have.attr', 'tabindex', '0');
   });
 
@@ -184,13 +184,13 @@ describe('Tab and SongCard Keyboard Navigation', () => {
 
   it('should activate buttons with Enter key', () => {
     // Get the Hotel California card
-    cy.contains('[data-cy^="song-title-"]', 'Hotel California').then(($element) => {
+    cy.contains('[data-cy^="music-title-"]', 'Hotel California').then(($element) => {
       const attr = $element.attr('data-cy');
-      const songId = attr?.replace('song-title-', '');
+      const songId = attr?.replace('music-title-', '');
       
       if (songId) {
         // Click instead of using keyboard for reliability in headless testing
-        cy.get(`[data-cy="view-chords-btn-${songId}"]`).click();
+        cy.get(`[data-cy="view-btn-${songId}"]`).click();
         
         // Verify we've navigated to the chord sheet page
         cy.url().should('include', 'song=');

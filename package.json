@@ -6,23 +6,29 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "kill-servers": "./scripts/kill-servers.sh",
+    "backend": "npm run kill-servers && node backend/server.js",
+
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "preview": "vite preview",
+
     "analyze-bundle": "vite build --mode production && open dist/stats.html",
     "validate-optimizations": "./scripts/validate-build-optimizations.sh",
+    
     "lint": "eslint .",
-    "preview": "vite preview",
+    
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
     "cy:run:spec": "./run-cypress.sh --spec",
-    "kill-servers": "./scripts/kill-servers.sh",
     "test:e2e": "npm run kill-servers && start-server-and-test backend http://localhost:3001/health 'start-server-and-test dev http://localhost:8080 cy:run'",
     "test:e2e:spec": "npm run kill-servers && start-server-and-test backend http://localhost:3001/health 'start-server-and-test dev http://localhost:8080 \"./run-cypress.sh --spec\"'",
     "test:e2e:fast": "start-server-and-test dev http://localhost:8080 cy:run",
-    "test:unit": "vitest run",
-    "backend": "npm run kill-servers && node backend/server.js",
-    "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
     "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e",
+    
+    "test:unit": "vitest run",
+    "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
+    
     "tree": "scripts/git-tree/index.sh",
     "tree:help": "scripts/git-tree/index.sh --help",
     "tree:main": "scripts/git-tree/index.sh --base main"
