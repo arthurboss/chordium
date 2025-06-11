@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "kill-servers": "./scripts/kill-servers.sh",
     "backend": "npm run kill-servers && node backend/server.js",
+    "dev:all": "start-servers-and-test backend http://localhost:3001/health dev",
+    
+    "kill-servers": "./scripts/kill-servers.sh",
 
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
@@ -23,12 +25,10 @@
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
     "cy:run:spec": "./run-cypress.sh --spec",
-    "test:e2e": "npm run kill-servers && start-server-and-test backend http://localhost:3001/health 'start-server-and-test dev http://localhost:8080 cy:run'",
-    "test:e2e:spec": "npm run kill-servers && start-server-and-test backend http://localhost:3001/health 'start-server-and-test dev http://localhost:8080 \"./run-cypress.sh --spec\"'",
-    "test:e2e:fast": "start-server-and-test dev http://localhost:8080 cy:run",
-    "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e",
-    
-    "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
+    "test:e2e": "npm run kill-servers && ./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run\"'",
+    "test:e2e:spec": "npm run kill-servers && ./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run -- --spec\"'",
+    "test:e2e:fast": "./scripts/start-servers-and-test.sh 'npm run dev' http://localhost:8080 \"npm run cy:run\"",
+    "test:all": "./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health \"npm run test:e2e\"",
     
     "tree": "scripts/git-tree/index.sh",
     "tree:help": "scripts/git-tree/index.sh --help",
@@ -107,7 +107,6 @@
     "jsdom": "26.1.0",
     "postcss": "^8.5.3",
     "rollup-plugin-visualizer": "5.14.0",
-    "start-server-and-test": "2.0.11",
     "tailwindcss": "^3.4.17",
     "terser": "5.39.0",
     "typescript": "^5.8.3",
