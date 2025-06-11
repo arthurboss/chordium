@@ -1,16 +1,29 @@
 #!/bin/bash
-# Usage: ./scripts/start-servers-and-test.sh "<start-server-cmd>" <url-to-wait-for> "<test-cmd>"
-# Example: ./scripts/start-servers-and-test.sh "npm run dev" http://localhost:8080 "./run-cypress.sh"
+# Usage: ./scripts/start-servers-and-test.sh "<start-server-script>" <url-to-wait-for> "<test-script>"
+# Example: ./scripts/start-servers-and-test.sh "dev" http://localhost:8080 "cy:run"
 
 set -e
 
-START_CMD="$1"
+START_SCRIPT="$1"
 WAIT_URL="$2"
-TEST_CMD="$3"
+TEST_SCRIPT="$3"
 
-if [ -z "$START_CMD" ] || [ -z "$WAIT_URL" ] || [ -z "$TEST_CMD" ]; then
-  echo "Usage: $0 '<start-server-cmd>' <url-to-wait-for> '<test-cmd>'"
+if [ -z "$START_SCRIPT" ] || [ -z "$WAIT_URL" ] || [ -z "$TEST_SCRIPT" ]; then
+  echo "Usage: $0 '<start-server-script>' <url-to-wait-for> '<test-script>'"
   exit 1
+fi
+
+# Convert script names to npm run commands
+if [[ "$START_SCRIPT" != npm* ]] && [[ "$START_SCRIPT" != ./* ]]; then
+  START_CMD="npm run $START_SCRIPT"
+else
+  START_CMD="$START_SCRIPT"
+fi
+
+if [[ "$TEST_SCRIPT" != npm* ]] && [[ "$TEST_SCRIPT" != ./* ]]; then
+  TEST_CMD="npm run $TEST_SCRIPT"
+else
+  TEST_CMD="$TEST_SCRIPT"
 fi
 
 # Start the server in the background
