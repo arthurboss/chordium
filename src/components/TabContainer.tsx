@@ -56,8 +56,18 @@ const TabContainer = ({
   };
   
   const handleSongSelect = (song: Song) => {
-    setSelectedSong(song);
-    navigate(`/my-songs?song=${encodeURIComponent(song.path)}`);
+    // For My Songs: Navigate to /my-songs/:artist/:song
+    if (song.artist && song.title) {
+      // Create URL-friendly slugs
+      const artistSlug = song.artist.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const songSlug = song.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
+      navigate(`/my-songs/${artistSlug}/${songSlug}`);
+    } else {
+      // Fallback for songs without proper artist/title structure
+      setSelectedSong(song);
+      navigate(`/my-songs?song=${encodeURIComponent(song.path)}`);
+    }
   };
   
   const handleSaveUploadedSong = (content: string, title: string) => {

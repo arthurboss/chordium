@@ -105,7 +105,13 @@ export function useChordSheet(url?: string) {
               
               // Store the original URL in sessionStorage and navigate without URL query parameter
               storeChordUrl(artistSlug, songSlug, fetchUrl);
-              navigate(`/chord/${artistSlug}/${songSlug}`, { replace: true });
+              
+              // Determine if we're in My Songs context based on current path
+              const currentPath = window.location.pathname;
+              const isMySONgsContext = currentPath.startsWith('/my-songs/');
+              const newPath = isMySONgsContext ? `/my-songs/${artistSlug}/${songSlug}` : `/${artistSlug}/${songSlug}`;
+              
+              navigate(newPath, { replace: true });
             }
             
             setChordData({
@@ -157,7 +163,13 @@ export function useChordSheet(url?: string) {
             
             // Store the original URL in sessionStorage and navigate without URL query parameter
             storeChordUrl(artistSlug, songSlug, fetchUrl);
-            navigate(`/chord/${artistSlug}/${songSlug}`, { replace: true });
+            
+            // Determine if we're in My Songs context based on current path
+            const currentPath = window.location.pathname;
+            const isMySONgsContext = currentPath.startsWith('/my-songs/');
+            const newPath = isMySONgsContext ? `/my-songs/${artistSlug}/${songSlug}` : `/${artistSlug}/${songSlug}`;
+            
+            navigate(newPath, { replace: true });
           }
           
           setChordData({

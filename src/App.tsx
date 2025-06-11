@@ -42,6 +42,16 @@ const router = createBrowserRouter([
         element: <Suspense fallback={<Loading />}><Home /></Suspense>
       },
       {
+        // Route for songs from My Songs: /my-songs/artist/song
+        path: "my-songs/:artist/:song", 
+        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+      },
+      {
+        // Route for songs from search results: /artist/song
+        path: ":artist/:song",
+        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+      },
+      {
         path: "chord/:artist/:song",
         element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
       },

@@ -184,9 +184,9 @@ describe('Tab and SongCard Keyboard Navigation', () => {
 
   it('should activate buttons with Enter key', () => {
     // Get the Hotel California card
-    cy.contains('[data-cy^="music-title-"]', 'Hotel California').then(($element) => {
+    cy.contains('[data-cy^="song-title-"]', 'Hotel California').then(($element) => {
       const attr = $element.attr('data-cy');
-      const songId = attr?.replace('music-title-', '');
+      const songId = attr?.replace('song-title-', '');
       
       if (songId) {
         // Click instead of using keyboard for reliability in headless testing
