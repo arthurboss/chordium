@@ -5,11 +5,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "backend": "npm run kill-servers && node backend/server.js",
-    "dev:all": "start-servers-and-test backend http://localhost:3001/health dev",
+    "fe": "vite",
+    "be": "node backend/server.js",
+    "dev": "./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health 'npm run fe'",
     
-    "kill-servers": "./scripts/kill-servers.sh",
+    "kill": "./scripts/kill-servers.sh",
+    "kill:fe": "./scripts/kill-servers.sh fe",
+    "kill:be": "./scripts/kill-servers.sh be",
 
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
@@ -25,10 +27,10 @@
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
     "cy:run:spec": "./run-cypress.sh --spec",
-    "test:e2e": "npm run kill-servers && ./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run\"'",
-    "test:e2e:spec": "npm run kill-servers && ./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run -- --spec\"'",
-    "test:e2e:fast": "./scripts/start-servers-and-test.sh 'npm run dev' http://localhost:8080 \"npm run cy:run\"",
-    "test:all": "./scripts/start-servers-and-test.sh 'npm run backend' http://localhost:3001/health \"npm run test:e2e\"",
+    "test:e2e": "npm run kill -- be && ./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run\"'",
+    "test:e2e:spec": "npm run kill -- be && ./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run -- --spec\"'",
+    "test:e2e:fast": "./scripts/start-servers-and-test.sh 'npm run fe' http://localhost:8080 \"npm run cy:run\"",
+    "test:all": "./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health \"npm run test:e2e\"",
     
     "tree": "scripts/git-tree/index.sh",
     "tree:help": "scripts/git-tree/index.sh --help",
