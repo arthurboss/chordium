@@ -7,7 +7,9 @@
   "scripts": {
     "fe": "vite",
     "be": "node backend/server.js",
-    "dev": "./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health 'npm run fe'",
+    "dev": "npm run wait 'npm run be' http://localhost:3001/health 'npm run fe'",
+    
+    "wait": "./scripts/start-servers-and-test.sh \"$@\"",
     
     "kill": "./scripts/kill-servers.sh",
     "kill:fe": "./scripts/kill-servers.sh fe",
@@ -26,11 +28,11 @@
 
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
-    "cy:run:spec": "./run-cypress.sh --spec",
-    "test:e2e": "npm run kill -- be && ./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run\"'",
-    "test:e2e:spec": "npm run kill -- be && ./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health './scripts/start-servers-and-test.sh \"npm run dev\" http://localhost:8080 \"npm run cy:run -- --spec\"'",
-    "test:e2e:fast": "./scripts/start-servers-and-test.sh 'npm run fe' http://localhost:8080 \"npm run cy:run\"",
-    "test:all": "./scripts/start-servers-and-test.sh 'npm run be' http://localhost:3001/health \"npm run test:e2e\"",
+
+    "test:e2e": "npm run wait 'npm run dev' http://localhost:8080 \"npm run cy:run\"",
+    "test:e2e:spec": "npm run wait 'npm run dev' http://localhost:8080 \"npm run cy:run -- --spec\"",
+    "test:e2e:fast": "npm run wait 'npm run fe' http://localhost:8080 \"npm run cy:run\"",
+    "test:all": "npm run kill:be && npm run wait 'npm run be' http://localhost:3001/health 'npm run test:e2e'",
     
     "tree": "scripts/git-tree/index.sh",
     "tree:help": "scripts/git-tree/index.sh --help",
