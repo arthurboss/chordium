@@ -6,9 +6,9 @@ interface ResultCardProps {
   icon: "music" | "user";
   title: string;
   subtitle?: string;
-  onView: (idOrUrl: string) => void;
+  onView: (path: string) => void;
   onDelete?: (id: string) => void;
-  idOrUrl: string;
+  path: string;
   viewButtonIcon?: "view" | "external" | "none"; // Add "none" option to hide view button
   viewButtonLabel?: string;
   deleteButtonIcon?: "trash" | "plus";
@@ -24,7 +24,7 @@ const ResultCard = ({
   subtitle,
   onView,
   onDelete,
-  idOrUrl,
+  path,
   viewButtonIcon = "view",
   viewButtonLabel,
   deleteButtonIcon = "trash",
@@ -41,8 +41,8 @@ const ResultCard = ({
     <div className="min-w-0 flex-1">
       <h3
         className={`w-full block font-semibold truncate ${compact ? 'text-sm' : 'text-base  mb-1'}`}
-        {...cyAttr(`${icon}-title-${idOrUrl}`)}
-        {...cyAttr(`${icon}-title${compact && '-compact'}-${idOrUrl}`)}
+        {...cyAttr(`${icon}-title-${path}`)}
+        {...cyAttr(`${icon}-title${compact && '-compact'}-${path}`)}
         title={title}
       >
         {title}
@@ -50,7 +50,7 @@ const ResultCard = ({
       {subtitle && (
         <p
           className={`text-muted-foreground text-${compact ? 'xs' : 'sm'} truncate w-full block`}
-          {...cyAttr(`${icon}-subtitle-${idOrUrl}`)}
+          {...cyAttr(`${icon}-subtitle-${path}`)}
           title={subtitle}
         >
           {subtitle}
@@ -66,10 +66,10 @@ const ResultCard = ({
         ? "text-chord hover:underline font-medium text-[10px] flex items-center gap-1 px-1"
         : "text-chord hover:underline font-medium text-sm flex items-center gap-1"
       }
-      onClick={e => { if (compact) { e.stopPropagation(); } onView(idOrUrl); }}
+      onClick={e => { if (compact) { e.stopPropagation(); } onView(path); }}
       tabIndex={0}
       aria-label={viewButtonLabel || (icon === 'music' ? `View chords for ${title}` : `See songs by ${title}`)}
-      {...cyAttr(`view-btn${compact ? '-compact' : ''}-${idOrUrl}`)}
+      {...cyAttr(`view-btn${compact ? '-compact' : ''}-${path}`)}
     >
       {viewButtonIcon === 'external' ? (
         <ExternalLink className="h-3 w-3" />
@@ -85,10 +85,10 @@ const ResultCard = ({
         (deleteButtonIcon === 'plus' ? 'text-primary' : 'text-destructive dark:text-red-500') +
         (compact ? ' hover:underline text-[10px] flex items-center gap-1 px-1' : ' hover:underline text-sm flex items-center gap-1')
       }
-      onClick={e => { if (compact) { e.stopPropagation(); } onDelete(idOrUrl); }}
+      onClick={e => { if (compact) { e.stopPropagation(); } onDelete(path); }}
       tabIndex={0}
       aria-label={deleteButtonLabel || `Delete ${title}`}
-      {...cyAttr(`delete-btn${compact ? '-compact' : ''}-${idOrUrl}`)}
+      {...cyAttr(`delete-btn${compact ? '-compact' : ''}-${path}`)}
     >
       {deleteButtonIcon === 'plus' ? (
         <Plus className={compact ? "h-3 w-3" : "h-4 w-4"} />
@@ -101,11 +101,11 @@ const ResultCard = ({
 
   if (compact) {
     return (
-      <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${icon}-card-compact-${idOrUrl}`)}>
+      <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${icon}-card-compact-${path}`)}>
         <CardContent
           className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
-          onClick={() => onView(idOrUrl)}
-          {...cyAttr(`${icon}-card-compact-content-${idOrUrl}`)}
+          onClick={() => onView(path)}
+          {...cyAttr(`${icon}-card-compact-content-${path}`)}
         >
           <Icon className="h-6 w-6 text-chord" />
           {TitleBlock}
@@ -118,11 +118,11 @@ const ResultCard = ({
   }
 
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-28" {...cyAttr(`${icon}-card-${idOrUrl}`)}>
+    <Card className="overflow-hidden cursor-pointer w-full h-28" {...cyAttr(`${icon}-card-${path}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-col justify-between"
-        onClick={() => onView(idOrUrl)}
-        {...cyAttr(`${icon}-card-content-${idOrUrl}`)}
+        onClick={() => onView(path)}
+        {...cyAttr(`${icon}-card-content-${path}`)}
       >
         <div className="flex items-start gap-2 w-full">
           <Icon className="h-6 w-6 text-chord mt-1" />

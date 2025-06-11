@@ -18,6 +18,8 @@
     
     "lint": "eslint .",
     
+    "test:unit": "vitest run",
+
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
     "cy:run:spec": "./run-cypress.sh --spec",
@@ -26,7 +28,6 @@
     "test:e2e:fast": "start-server-and-test dev http://localhost:8080 cy:run",
     "test:all": "start-server-and-test backend http://localhost:3001/health test:e2e",
     
-    "test:unit": "vitest run",
     "dev:all": "start-server-and-test backend http://localhost:3001/health dev",
     
     "tree": "scripts/git-tree/index.sh",

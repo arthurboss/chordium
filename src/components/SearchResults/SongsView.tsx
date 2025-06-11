@@ -47,7 +47,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
           subtitle={item.artist}
           onView={() => onView(item)}
           onDelete={() => onAdd(item.path)}
-          idOrUrl={item.path}
+          path={item.path}
           deleteButtonIcon="plus"
           deleteButtonLabel={`Add ${item.title}`}
           viewButtonIcon="external"

@@ -22,7 +22,7 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
               subtitle={song.artist}
               onView={() => onSongSelect(song)}
               onDelete={onDeleteSong}
-              idOrUrl={song.path}
+              path={song.path}
               isDeletable={true}
             />
           ))}
@@ -30,7 +30,7 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
       ) : (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">You haven't saved any songs yet.</p>
-          <Button 
+          <Button
             onClick={onUploadClick}
             variant="outline"
             tabIndex={0}
