@@ -11,7 +11,7 @@ export const loadSongs = (initialSongs: Song[]): Song[] => {
     try {
       const parsedSongs = JSON.parse(savedSongs);
       const hasDemoSongs = initialSongs.every(initialSong => 
-        parsedSongs.some((parsedSong: Song) => parsedSong.id === initialSong.id)
+        parsedSongs.some((parsedSong: Song) => parsedSong.path === initialSong.path)
       );
       
       if (!hasDemoSongs) {

@@ -13,7 +13,7 @@ describe('Tab Navigation URL Tests', () => {
     // Check URL has been updated to /my-songs (or root which also maps to my-songs)
     cy.url().then(url => {
       const path = new URL(url).pathname;
-      expect(path === '/' || path === '/my-songs').to.be.true;
+      expect(path === '/' || path === '/my-songs').to.equal(true);
     });
   });
 
