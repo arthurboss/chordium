@@ -10,7 +10,7 @@ import ErrorState from "@/components/ErrorState";
 import { useChordSheet, ChordSheetData } from "@/hooks/useChordSheet";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMySongs } from "@/hooks/useAddToMySongs";
-import { loadSongs } from "@/utils/song-storage";
+import { getSongs, migrateSongsFromOldStorage } from "@/utils/unified-song-storage";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { extractSongMetadata } from "@/utils/metadata-extraction";
 
@@ -39,15 +39,23 @@ const ChordViewer = () => {
       
       const loadSongFromMySongs = async () => {
         try {
+          // Ensure data migration has occurred
+          migrateSongsFromOldStorage();
+          
+          // Get all songs using unified storage
+          const allSongs = getSongs();
           const sampleSongs = await loadSampleSongs();
-          const songs = loadSongs(sampleSongs);
+          
+          // Combine sample songs and user songs
+          const songs = [...sampleSongs, ...allSongs];
+          
           const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
           const songName = decodeURIComponent(song.replace(/-/g, ' '));
           
           // Find the song in My Songs by matching artist and title
           const foundSong = songs.find(s => {
-            const songArtist = s.artist?.toLowerCase() || '';
-            const songTitle = s.title?.toLowerCase() || '';
+            const songArtist = s.artist?.toLowerCase() ?? '';
+            const songTitle = s.title?.toLowerCase() ?? '';
             return songArtist.includes(artistName.toLowerCase()) || songTitle.includes(songName.toLowerCase()) ||
                    songTitle === songName.toLowerCase();
           });
@@ -58,10 +66,10 @@ const ChordViewer = () => {
             
             setLocalSongData({
               content: foundSong.path,
-              artist: foundSong.artist || metadata.artist || artistName,
-              song: foundSong.title || metadata.title || songName,
-              key: metadata.songKey || '',
-              tuning: metadata.guitarTuning || '',
+              artist: foundSong.artist ?? metadata.artist ?? artistName,
+              song: foundSong.title ?? metadata.title ?? songName,
+              key: metadata.songKey ?? '',
+              tuning: metadata.guitarTuning ?? '',
               capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',
               loading: false,
               error: null
@@ -129,9 +137,9 @@ const ChordViewer = () => {
   const createSongData = () => {
     return {
       id: uuidv4(),
-      title: currentChordData.song || formatTitle(),
-      artist: currentChordData.artist || '',
-      path: currentChordData.content || '',
+      title: currentChordData.song ?? formatTitle(),
+      artist: currentChordData.artist ?? '',
+      path: currentChordData.content ?? '',
       key: currentChordData.key,
       tuning: currentChordData.tuning,
       capo: currentChordData.capo

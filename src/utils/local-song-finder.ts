@@ -1,5 +1,4 @@
-import { loadSongs } from './song-storage';
-import { loadSampleSongs } from './sample-songs';
+import { getSongs, migrateSongsFromOldStorage } from './unified-song-storage';
 import { extractSongMetadata } from './metadata-extraction';
 import { Song } from '../types/song';
 
@@ -25,16 +24,22 @@ export async function findLocalSong(
   songParam: string
 ): Promise<LocalSongResult | null> {
   try {
-    const sampleSongs = await loadSampleSongs();
-    const mySongs = loadSongs(sampleSongs);
+    // Ensure migration has happened
+    migrateSongsFromOldStorage();
+    
+    // Get all songs from unified storage
+    const mySongs = getSongs();
     
     const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
     const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
     
-    // Search in both sample songs and My Songs
+    console.log(`Looking for song: "${songName}" by "${artistName}"`);
+    console.log('Available songs:', mySongs.map(song => `"${song.title}" by "${song.artist}"`));
+    
+    // Search in My Songs
     const foundSong = mySongs.find((song: Song) => {
-      const songArtist = song.artist?.toLowerCase() || '';
-      const songTitle = song.title?.toLowerCase() || '';
+      const songArtist = song.artist?.toLowerCase() ?? '';
+      const songTitle = song.title?.toLowerCase() ?? '';
       return (
         songArtist.includes(artistName.toLowerCase()) ||
         songTitle.includes(songName.toLowerCase()) ||
@@ -43,18 +48,20 @@ export async function findLocalSong(
     });
     
     if (foundSong) {
+      console.log('Found song in local storage:', foundSong.title);
       // Extract metadata from the song content if needed
       const metadata = extractSongMetadata(foundSong.path);
       return {
-        title: foundSong.title || '',
-        artist: foundSong.artist || '',
+        title: foundSong.title ?? '',
+        artist: foundSong.artist ?? '',
         path: foundSong.path,
-        key: metadata.songKey || '',
-        tuning: metadata.guitarTuning || '',
+        key: metadata.songKey ?? '',
+        tuning: metadata.guitarTuning ?? '',
         capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',
       };
     }
     
+    console.log('Song not found in local storage');
     return null;
   } catch (error) {
     console.error('Error loading local songs:', error);

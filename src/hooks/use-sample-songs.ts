@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Song } from "@/types/song";
 import { loadSampleSongs } from "@/utils/sample-songs";
-import { loadSongs } from "@/utils/song-storage";
+import { loadSongs, migrateSongsFromOldStorage } from "@/utils/unified-song-storage";
 
 // Custom hook to load sample songs and initialize user songs from storage.
 export function useSampleSongs() {
@@ -10,6 +10,9 @@ export function useSampleSongs() {
 
   useEffect(() => {
     const initializeSongs = async () => {
+      // Migrate songs from old storage system if needed
+      migrateSongsFromOldStorage();
+      
       const samples = await loadSampleSongs();
       setSampleSongs(samples);
       const initialSongs = samples.map(song => ({ ...song }));

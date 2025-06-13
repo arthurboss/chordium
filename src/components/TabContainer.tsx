@@ -56,15 +56,20 @@ const TabContainer = ({
   };
   
   const handleSongSelect = (song: Song) => {
+    console.log('🎵 [TabContainer] handleSongSelect called with:', song);
+    
     // For My Songs: Navigate to /my-songs/:artist/:song
     if (song.artist && song.title) {
       // Create URL-friendly slugs
       const artistSlug = song.artist.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const songSlug = song.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       
-      navigate(`/my-songs/${artistSlug}/${songSlug}`);
+      const targetUrl = `/my-songs/${artistSlug}/${songSlug}`;
+      console.log('🎯 [TabContainer] Navigating to:', targetUrl);
+      navigate(targetUrl);
     } else {
       // Fallback for songs without proper artist/title structure
+      console.log('🔄 [TabContainer] Using fallback navigation for:', song.path);
       setSelectedSong(song);
       navigate(`/my-songs?song=${encodeURIComponent(song.path)}`);
     }

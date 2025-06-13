@@ -41,8 +41,12 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         );
       } else {
         // User is on chord viewer page - use toast to show success and redirect
-        // Since we don't have direct access to setMySongs, we need to get the songs from storage
-        const { getSongs, saveSongs } = await import('@/utils/song-storage-utils');
+        // Use unified storage system to maintain consistency
+        const { getSongs, saveSongs, migrateSongsFromOldStorage } = await import('@/utils/unified-song-storage');
+        
+        // Perform migration if needed to ensure data consistency
+        migrateSongsFromOldStorage();
+        
         const currentSongs = getSongs();
         
         // Create the new song
