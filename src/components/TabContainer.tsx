@@ -12,6 +12,7 @@ import { handleSaveNewSong } from "../utils/song-save";
 import { handleUpdateSong } from "../utils/song-update";
 import { handleDeleteSong } from "../utils/song-delete";
 import { cyAttr } from "@/utils/test-utils";
+import { toSlug } from "@/utils/url-slug-utils";
 
 interface TabContainerProps {
   activeTab: string;
@@ -60,9 +61,9 @@ const TabContainer = ({
     
     // For My Songs: Navigate to /my-songs/:artist/:song
     if (song.artist && song.title) {
-      // Create URL-friendly slugs
-      const artistSlug = song.artist.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const songSlug = song.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      // Create URL-friendly slugs using Unicode-aware function
+      const artistSlug = toSlug(song.artist);
+      const songSlug = toSlug(song.title);
       
       const targetUrl = `/my-songs/${artistSlug}/${songSlug}`;
       console.log('🎯 [TabContainer] Navigating to:', targetUrl);

@@ -5,12 +5,20 @@
  */
 
 /**
- * Converts a string to URL-friendly slug format
+ * Converts a string to URL-friendly slug format compatible with CifraClub URLs
+ * Removes diacritics (accents) to match CifraClub's URL normalization (ê → e, ç → c, etc.)
  * @param text - Text to convert to slug
- * @returns URL-friendly slug
+ * @returns URL-friendly slug with diacritics removed to match CifraClub format
  */
 export function toSlug(text: string): string {
-  return text.toLowerCase().replace(/\s+/g, "-");
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Decompose Unicode characters (ê → e + combining accent)
+    .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+    .replace(/[^\p{L}\p{N}\s-]/gu, '') // Keep Unicode letters, numbers, spaces, and hyphens
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+    .replace(/(^-|-$)/g, ''); // Remove leading/trailing hyphens
 }
 
 /**

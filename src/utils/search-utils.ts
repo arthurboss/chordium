@@ -1,4 +1,5 @@
 // Utility functions for search parameter handling
+import { toSlug } from './url-slug-utils';
 
 export type SearchParamType = 'artist-song' | 'artist' | 'song' | null;
 
@@ -15,10 +16,10 @@ export function getSearchParamsType(params: URLSearchParams): SearchParamType {
   return null;
 }
 
-// This function assumes parameters are already formatted correctly
+// This function uses CifraClub-compatible slug conversion (removes diacritics)
 export function formatSearchUrl(artist?: string, song?: string): string {
   const parts: string[] = [];
-  if (artist) parts.push(`artist=${encodeURIComponent(artist.trim().replace(/\s+/g, '-'))}`);
-  if (song) parts.push(`song=${encodeURIComponent(song.trim().replace(/\s+/g, '-'))}`);
+  if (artist) parts.push(`artist=${encodeURIComponent(toSlug(artist.trim()))}`);
+  if (song) parts.push(`song=${encodeURIComponent(toSlug(song.trim()))}`);
   return `/search${parts.length ? '?' + parts.join('&') : ''}`;
 }

@@ -73,7 +73,15 @@ describe('NavigationUtils', () => {
       
       const path = navigationUtils.generateNavigationPath(data, false);
       
-      expect(path).toBe("/guns-n'-roses/sweet-child-o'-mine");
+      expect(path).toBe("/guns-n-roses/sweet-child-o-mine");
+    });
+
+    it('should remove diacritics to match CifraClub URL format', () => {
+      const data = { artist: "Leonardo Gonçalves", song: "Getsêmani" };
+      
+      const path = navigationUtils.generateNavigationPath(data, false);
+      
+      expect(path).toBe("/leonardo-goncalves/getsemani");
     });
   });
 });

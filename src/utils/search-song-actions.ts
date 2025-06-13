@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Song } from '@/types/song';
 import { useNavigate } from 'react-router-dom';
+import { toSlug } from '@/utils/url-slug-utils';
 
 export interface UseSongActionsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -21,9 +22,9 @@ export const useSongActions = ({
     
     // For search results: Navigate directly to /:artist/:song
     if (songData.artist && songData.title && navigate) {
-      // Create URL-friendly slugs
-      const artistSlug = songData.artist.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const songSlug = songData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      // Create URL-friendly slugs using Unicode-aware function
+      const artistSlug = toSlug(songData.artist);
+      const songSlug = toSlug(songData.title);
       
       console.log('[handleView] Navigating to search result song:', `/${artistSlug}/${songSlug}`);
       navigate(`/${artistSlug}/${songSlug}`);
