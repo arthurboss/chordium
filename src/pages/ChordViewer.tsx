@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
@@ -8,6 +7,8 @@ import SongChordDetails from "@/components/SongChordDetails";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
 import { useChordSheet, ChordSheetData } from "@/hooks/useChordSheet";
+import { Song } from "@/types/song";
+import { ChordSheet } from "@/types/chordSheet";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMySongs } from "@/hooks/useAddToMySongs";
 import { getSongs, migrateSongsFromOldStorage } from "@/utils/unified-song-storage";
@@ -135,14 +136,24 @@ const ChordViewer = () => {
   
   // Create song data object from chord sheet data
   const createSongData = () => {
-    return {
-      id: uuidv4(),
+    const song: Song = {
       title: currentChordData.song ?? formatTitle(),
       artist: currentChordData.artist ?? '',
-      path: currentChordData.content ?? '',
+      path: currentChordData.content ?? ''
+    };
+    
+    const chordSheet: ChordSheet = {
+      title: currentChordData.song ?? formatTitle(),
+      artist: currentChordData.artist ?? '',
       key: currentChordData.key,
       tuning: currentChordData.tuning,
       capo: currentChordData.capo
+    };
+    
+    return {
+      song,
+      chordSheet,
+      content: currentChordData.content ?? ''
     };
   };
   
@@ -188,7 +199,7 @@ const ChordViewer = () => {
           capo={currentChordData.capo}
         />
         <SongViewer 
-          song={songData}
+          song={songData.song}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
           onDelete={isFromMySongs ? undefined : handleSaveSong}  
