@@ -123,19 +123,29 @@ class SearchController {
       const { url } = req.query;
       
       if (!url) {
+        logger.error('❌ getChordSheet: Missing song URL parameter');
         return res.status(400).json({ error: 'Missing song URL' });
       }
 
-      logger.info(`Fetching chord sheet: ${url}`);
+      logger.info(`🎵 CHORD SHEET FETCH START: ${url}`);
+      logger.info(`📊 Flow Step 1: Backend received chord sheet request`);
+      logger.info(`📋 Request Details:`, { url, timestamp: new Date().toISOString() });
+      
       const content = await cifraClubService.getChordSheet(url);
       
       if (!content) {
+        logger.error(`❌ Flow Step 2: No content returned from CifraClub service for ${url}`);
         return res.status(404).json({ error: 'Chord sheet not found' });
       }
 
+      logger.info(`✅ Flow Step 2: Chord sheet content extracted successfully`);
+      logger.info(`📏 Content length: ${content.length} characters`);
+      logger.info(`📤 Flow Step 3: Sending minimal response to frontend: { content: "..." }`);
+      logger.info(`⚠️  LIMITATION: Backend only returns content, no metadata (title, artist, key, capo)`);
+
       res.json({ content });
     } catch (error) {
-      logger.error('Error fetching chord sheet:', error);
+      logger.error('❌ Error fetching chord sheet:', error);
       res.status(500).json({ error: 'Failed to fetch chord sheet', details: error.message });
     }
   }

@@ -5,9 +5,8 @@ import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
 
 // Mock toast
-const mockToast = vi.fn();
 vi.mock('@/hooks/use-toast', () => ({
-  toast: mockToast
+  toast: vi.fn()
 }));
 
 // Mock song-save module to avoid conflicts
@@ -15,25 +14,52 @@ vi.mock('@/utils/song-save', () => ({
   handleSaveNewSong: vi.fn()
 }));
 
+// Mock chord sheet storage
+vi.mock('@/utils/chord-sheet-storage', () => ({
+  saveChordSheet: vi.fn(),
+  generateChordSheetId: vi.fn()
+}));
+
 // Mock react-router-dom
-const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    useNavigate: () => vi.fn(),
     BrowserRouter: ({ children }: { children: React.ReactNode }) => children
   };
 });
 
 // Mock unified storage
-const mockGetSongs = vi.fn();
-const mockSaveSongs = vi.fn();
-const mockMigrateSongsFromOldStorage = vi.fn();
 vi.mock('@/utils/unified-song-storage', () => ({
-  getSongs: mockGetSongs,
-  saveSongs: mockSaveSongs,
-  migrateSongsFromOldStorage: mockMigrateSongsFromOldStorage
+  getSongs: vi.fn(),
+  saveSongs: vi.fn(),
+  migrateSongsFromOldStorage: vi.fn()
+}));
+
+describe('useAddToMySongs Storage Integration', () => {
+
+// Mock chord sheet storage
+vi.mock('@/utils/chord-sheet-storage', () => ({
+  saveChordSheet: vi.fn(),
+  generateChordSheetId: vi.fn()
+}));
+
+// Mock react-router-dom
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => children
+  };
+});
+
+// Mock unified storage
+vi.mock('@/utils/unified-song-storage', () => ({
+  getSongs: vi.fn(),
+  saveSongs: vi.fn(),
+  migrateSongsFromOldStorage: vi.fn()
 }));
 
 describe('useAddToMySongs Storage Integration', () => {
@@ -44,10 +70,14 @@ describe('useAddToMySongs Storage Integration', () => {
     mockGetSongs.mockClear();
     mockSaveSongs.mockClear();
     mockMigrateSongsFromOldStorage.mockClear();
+    mockSaveChordSheet.mockClear();
+    mockGenerateChordSheetId.mockClear();
     
     // Setup default mock implementations
     mockGetSongs.mockReturnValue([]);
     mockMigrateSongsFromOldStorage.mockImplementation(() => {});
+    mockSaveChordSheet.mockReturnValue('test-artist-test-song');
+    mockGenerateChordSheetId.mockReturnValue('test-artist-test-song');
   });
 
   const testSong: Song = {
@@ -59,6 +89,7 @@ describe('useAddToMySongs Storage Integration', () => {
   const testChordSheet: ChordSheet = {
     title: 'Test Song',
     artist: 'Test Artist',
+    chords: 'test-content',
     key: 'C',
     tuning: 'Standard',
     capo: '2'
@@ -83,12 +114,15 @@ describe('useAddToMySongs Storage Integration', () => {
     // Verify songs are retrieved from unified storage
     expect(mockGetSongs).toHaveBeenCalled();
     
+    // Verify chord sheet is saved separately
+    expect(mockSaveChordSheet).toHaveBeenCalledWith(testChordSheet);
+    
     // Verify songs are saved via unified storage (only Song data, no chord metadata)
     expect(mockSaveSongs).toHaveBeenCalledWith([
       expect.objectContaining({
         title: testSong.title,
         artist: testSong.artist,
-        path: expect.any(String)
+        path: 'test-artist-test-song' // Should use the generated ID
       })
     ]);
   });

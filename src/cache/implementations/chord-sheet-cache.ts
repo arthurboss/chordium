@@ -256,8 +256,12 @@ export const getChordSheetWithRefresh = async (
     // Use a separate async function for the fetch logic
     const fetchData = async () => {
       try {
-        console.log('Fetching chord sheet from backend');
+        console.log('🌐 FRONTEND FETCH START: Fetching chord sheet from backend');
+        console.log('📊 Flow Step 4: Frontend making API call to backend');
+        console.log('📋 Request details:', { fetchUrl, timestamp: new Date().toISOString() });
+        
         const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
+        console.log('🔗 API URL:', apiUrl);
         
         // Use AbortController to implement timeout
         const controller = new AbortController();
@@ -279,7 +283,21 @@ export const getChordSheetWithRefresh = async (
           throw new Error(`Failed to fetch chord sheet: ${response.statusText}`);
         }
         
+        console.log('✅ Flow Step 5: Backend response received successfully');
         const data = await response.json();
+        
+        console.log('📦 Backend response structure:', {
+          hasContent: !!data.content,
+          hasError: !!data.error,
+          hasCapo: !!data.capo,
+          hasTuning: !!data.tuning,
+          hasKey: !!data.key,
+          hasArtist: !!data.artist,
+          hasSong: !!data.song,
+          contentLength: data.content ? data.content.length : 0
+        });
+        
+        console.log('⚠️  LIMITATION: Backend response minimal - only contains content field');
         
         if (data.error) {
           throw new Error(`Backend error: ${data.error}`);
@@ -289,6 +307,7 @@ export const getChordSheetWithRefresh = async (
           throw new Error('No chord sheet content found');
         }
         
+        console.log('🔄 Flow Step 6: Constructing cache entry with available data');
         const freshData = {
           content: data.content || '',
           capo: data.capo || '',
@@ -300,38 +319,29 @@ export const getChordSheetWithRefresh = async (
           timestamp: Date.now() // Add a timestamp for future staleness checks
         };
         
+        console.log('💾 Flow Step 7: Caching chord sheet data');
+        console.log('🔑 Cache details:', {
+          artist,
+          song,
+          hasContent: !!freshData.content,
+          contentLength: freshData.content.length
+        });
+        
         // Cache the new data
         cacheChordSheet(artist, song, freshData);
         
-        // If a callback was provided, call it with the new data
-        if (refreshCallback) {
-          refreshCallback(freshData);
-        }
-        
+        console.log('✅ Flow Step 8: Chord sheet cached successfully');
         resolve(freshData);
       } catch (error) {
-        console.error("Error in chord sheet background refresh:", error);
-        
-        // For timeout errors, explicitly log that
-        if (error.name === 'AbortError') {
-          console.warn('Chord sheet fetch timed out after 15 seconds');
-        }
-        
-        // If we have cached data, return it on error; otherwise return null
-        if (cachedData) {
-          console.log('Error occurred, using cached chord sheet data');
-          resolve(cachedData);
-        } else {
-          console.log('Error occurred and no cached data available');
-          resolve(null);
-        }
+        console.error('❌ Error in fetchData:', error);
+        resolve(null);
       }
     };
     
     // Execute the fetch
     fetchData();
   });
-  
+
   return {
     immediate: cachedData,
     refreshPromise

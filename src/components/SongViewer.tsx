@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
-import { RefObject } from "react";
+import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
+import { getChordSheet } from "@/utils/chord-sheet-storage";
 
 interface SongViewerProps {
   song: Song;
@@ -26,6 +27,12 @@ const SongViewer = ({
   deleteButtonVariant = "destructive",
   hideDeleteButton = false
 }: SongViewerProps) => {
+  // Load chord sheet content using song.path as the chord sheet ID
+  const chordContent = useMemo(() => {
+    const chordSheet = getChordSheet(song.path);
+    return chordSheet?.chords || '';
+  }, [song.path]);
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center mb-6">
@@ -56,7 +63,7 @@ const SongViewer = ({
           ref={chordDisplayRef}
           title={song.title} 
           artist={song.artist} 
-          content={song.path}
+          content={chordContent}
           onSave={onUpdate}
         />
       </div>
