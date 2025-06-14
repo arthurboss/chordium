@@ -6,14 +6,13 @@ import { FetchErrorHandler } from "@/utils/fetch-error-handler";
 import { validateURL } from "@/utils/url-validator";
 import { URLDeterminationStrategy } from "./useChordSheet/url-determination-strategy";
 import { DataHandlers } from "./useChordSheet/data-handlers";
-import { BackgroundRefreshHandler } from "./useChordSheet/background-refresh-handler";
 import { CacheCoordinator } from "./useChordSheet/cache-coordinator";
 
 export interface ChordSheetData {
   content: string;
-  capo: string;
-  tuning: string;
-  key: string;
+  guitarCapo: number;
+  guitarTuning: string[];
+  songKey: string;
   artist: string;
   song: string;
   loading: boolean;
@@ -23,9 +22,9 @@ export interface ChordSheetData {
 
 const initialState: ChordSheetData = {
   content: "",
-  capo: "",
-  tuning: "",
-  key: "",
+  guitarCapo: 0,
+  guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+  songKey: "",
   artist: "",
   song: "",
   loading: true,
@@ -42,7 +41,6 @@ export function useChordSheet(url?: string) {
   const urlStrategy = useMemo(() => new URLDeterminationStrategy(), []);
   const navigationUtils = useMemo(() => new NavigationUtils(), []);
   const dataHandlers = useMemo(() => new DataHandlers(), []);
-  const refreshHandler = useMemo(() => new BackgroundRefreshHandler(navigationUtils), [navigationUtils]);
   const cacheCoordinator = useMemo(() => new CacheCoordinator(), []);
   const errorHandler = useMemo(() => new FetchErrorHandler(), []);
 
@@ -119,37 +117,17 @@ export function useChordSheet(url?: string) {
     };
 
     const fetchChordSheetData = async (fetchUrl: string, isReconstructed: boolean) => {
-      // Create background handler function
-      const backgroundHandler = (updatedData: Record<string, unknown>) => {
-        refreshHandler.handleBackgroundRefresh(
-          updatedData,
-          fetchUrl,
-          params,
-          setChordData,
-          navigate
-        );
-      };
+      // Construct song path from artist and song parameters for cache key
+      const songPath = `${params.artist ?? 'unknown'}:${params.song ?? 'unknown'}`;
+      
+      // Use the cache coordinator for fetching  
+      const chordData = await cacheCoordinator.getChordSheetData(songPath, fetchUrl);
 
-      // Use the cache coordinator for fetching
-      const { immediate, refreshPromise } = await cacheCoordinator.getChordSheetWithRefresh(
-        params.artist || null,
-        params.song || null,
-        fetchUrl,
-        backgroundHandler
-      );
-
-      if (immediate) {
-        dataHandlers.handleImmediateData(immediate, refreshPromise, setChordData);
-        return;
-      }
-
-      // Wait for fresh data if no cached data available
-      const freshData = await refreshPromise;
-      if (!freshData?.content) {
+      if (!chordData?.content) {
         throw new Error("No chord sheet content found. This song may not be available.");
       }
 
-      handleFreshData(freshData, fetchUrl);
+      handleFreshData(chordData, fetchUrl);
     };
 
     const handleFreshData = (freshData: Record<string, unknown>, fetchUrl: string) => {
@@ -183,15 +161,12 @@ export function useChordSheet(url?: string) {
     loadChordSheet();
   }, [
     url, 
-    params.artist, 
-    params.song, 
-    params.id, 
+    params,
     navigate, 
     loadingStrategy,
     urlStrategy,
     navigationUtils,
     dataHandlers,
-    refreshHandler,
     cacheCoordinator,
     errorHandler
   ]);

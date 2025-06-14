@@ -1,4 +1,8 @@
 import { Song } from '@/types/song';
+import { ChordSheet } from '@/types/chordSheet';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { cacheChordSheet } from '@/cache/implementations/chord-sheet-cache';
+import { generateChordSheetId } from '@/utils/chord-sheet-id-generator';
 
 /**
  * Unified song storage utility following SRP (Single Responsibility Principle)
@@ -126,5 +130,67 @@ export const migrateSongsFromOldStorage = (): void => {
     }
   } catch (e) {
     console.error('Failed to migrate songs from old storage:', e);
+  }
+};
+
+/**
+ * Migration utility to convert old Song objects that have chord content in the path field
+ * to the new structure where chord content is stored in the ChordSheet cache
+ */
+export const migrateChordContentFromPath = (): void => {
+  try {
+    const songs = getSongs();
+    let migrationOccurred = false;
+    
+    const migratedSongs = songs.map(song => {
+      // Check if this song has chord content in the path field
+      // Old format: path contains actual chord content (multi-line, with chords)
+      // New format: path contains just the identifier/URL
+      const hasChordContentInPath = song.path && (
+        song.path.includes('\n') || // Multi-line content
+        song.path.includes('[') ||  // Chord brackets like [C] [G]
+        song.path.length > 100      // Very long content (probably chords)
+      );
+      
+      if (hasChordContentInPath) {
+        console.log(`🔄 Migrating song "${song.title}" - moving chord content from path to ChordSheet cache`);
+        
+        // Generate a proper chord sheet ID for this song
+        const chordSheetId = generateChordSheetId(song.artist, song.title);
+        
+        // Create a ChordSheet object with the chord content
+        const chordSheet: ChordSheet = {
+          title: song.title,
+          artist: song.artist,
+          songChords: song.path, // Move chord content from path to songChords
+          songKey: '', // Default values for now
+          guitarTuning: GUITAR_TUNINGS.STANDARD,
+          guitarCapo: 0
+        };
+        
+        // Cache the chord sheet content
+        cacheChordSheet(chordSheetId, chordSheet);
+        
+        // Update the song to only contain metadata
+        const updatedSong: Song = {
+          title: song.title,
+          artist: song.artist,
+          path: chordSheetId // Now path points to the chord sheet ID
+        };
+        
+        migrationOccurred = true;
+        return updatedSong;
+      }
+      
+      // No migration needed for this song
+      return song;
+    });
+    
+    if (migrationOccurred) {
+      saveSongs(migratedSongs);
+      console.log('✅ Successfully migrated chord content from Song.path to ChordSheet cache');
+    }
+  } catch (e) {
+    console.error('❌ Failed to migrate chord content from path:', e);
   }
 };

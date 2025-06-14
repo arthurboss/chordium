@@ -1,8 +1,10 @@
+import { GuitarTuning } from "./guitarTuning";
+
 export interface ChordSheet {
-  title: string;
+  title: Required<string>; // Song title. Must be provided.
   artist: string; // if unavailable, it should be "Unknown Artist"
-  chords: string; // The actual chord sheet content, can be a string of chords or lyrics with chords
-  key: string; // Musical key, empty string if not available
-  tuning: string; // Guitar tuning, empty string if not available
-  capo: string; // Capo position, empty string if not available
+  songChords: string; // The actual chord sheet content, can be a string of chords or lyrics with chords
+  songKey: string; // Empty string if not available
+  guitarTuning: GuitarTuning;
+  guitarCapo: number; // Capo position, 0 if not available since it is the default value
 }

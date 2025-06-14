@@ -20,18 +20,27 @@ export const useSongActions = ({
   const handleView = useCallback((songData: Song) => {
     console.log('[handleView] Called with:', songData);
     
-    // For search results: Navigate directly to /:artist/:song
+    // For search results: Navigate directly to /:artist/:song and pass the Song object as state
     if (songData.artist && songData.title && navigate) {
       // Create URL-friendly slugs using Unicode-aware function
       const artistSlug = toSlug(songData.artist);
       const songSlug = toSlug(songData.title);
       
-      console.log('[handleView] Navigating to search result song:', `/${artistSlug}/${songSlug}`);
-      navigate(`/${artistSlug}/${songSlug}`);
+      console.log('[handleView] Navigating to search result song:', `/${artistSlug}/${songSlug}`, 'with song data:', songData);
+      // Pass the Song object as navigation state so ChordViewer can use it directly
+      navigate(`/${artistSlug}/${songSlug}`, { 
+        state: { 
+          song: songData 
+        } 
+      });
     } else if (songData.path) {
       console.log('[handleView] Using fallback approach - opening song path');
       // Fallback for songs with path but no artist/title structure
-      navigate(`/song/${encodeURIComponent(songData.path)}`);
+      navigate(`/song/${encodeURIComponent(songData.path)}`, {
+        state: {
+          song: songData
+        }
+      });
     }
   }, [navigate]);
 

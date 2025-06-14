@@ -222,14 +222,20 @@ describe('Search Controller Enhanced with Fixtures', () => {
   describe('Chord Sheet Content with Real Data', () => {
     it('should return realistic chord sheet for Wonderwall', async () => {
       const wonderwallChordSheet = getChordSheet('wonderwall');
-      mockCifraClubService.getChordSheet.mockResolvedValue(wonderwallChordSheet.content);
+      const mockChordSheetResponse = {
+        songChords: wonderwallChordSheet.content,
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0
+      };
+      mockCifraClubService.getChordSheet.mockResolvedValue(mockChordSheetResponse);
 
       const response = await request(app)
         .get('/api/cifraclub-chord-sheet')
         .query({ url: wonderwallChordSheet.url });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ content: wonderwallChordSheet.content });
+      expect(response.body).toEqual(mockChordSheetResponse);
       
       // Verify realistic chord content
       expect(wonderwallChordSheet.content).toContain('[');
@@ -239,14 +245,20 @@ describe('Search Controller Enhanced with Fixtures', () => {
 
     it('should return realistic chord sheet for Creep', async () => {
       const creepChordSheet = getChordSheet('creep');
-      mockCifraClubService.getChordSheet.mockResolvedValue(creepChordSheet.content);
+      const mockChordSheetResponse = {
+        songChords: creepChordSheet.content,
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0
+      };
+      mockCifraClubService.getChordSheet.mockResolvedValue(mockChordSheetResponse);
 
       const response = await request(app)
         .get('/api/cifraclub-chord-sheet')
         .query({ url: creepChordSheet.url });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ content: creepChordSheet.content });
+      expect(response.body).toEqual(mockChordSheetResponse);
       
       // Verify chord content structure
       expect(creepChordSheet.content).toContain('[');

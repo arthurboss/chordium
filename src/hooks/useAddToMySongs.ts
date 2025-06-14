@@ -2,21 +2,19 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { handleSaveNewSong } from "@/utils/song-save";
 import { useNavigate } from "react-router-dom";
-import { saveChordSheet } from "@/utils/chord-sheet-storage";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { useCallback } from "react";
 
 interface AddToMySongsData {
   song: Song;
   chordSheet: ChordSheet;
-  content: string; // The actual chord sheet content
 }
 
 export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>, setActiveTab?: (tab: string) => void) {
   const navigate = useNavigate();
   
   return useCallback(async (data: AddToMySongsData) => {
-    const { song, chordSheet, content } = data;
+    const { song, chordSheet } = data;
     
     try {
       console.log('🎵 ADD TO MY SONGS START:', song.title, 'by', song.artist);
@@ -28,14 +26,14 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         timestamp: new Date().toISOString()
       });
       console.log('📦 Backend data received:', {
-        hasContent: !!content,
-        contentLength: content?.length || 0,
+        hasChords: !!chordSheet.songChords,
+        chordsLength: chordSheet.songChords?.length ?? 0,
         chordSheetData: {
           title: chordSheet.title,
           artist: chordSheet.artist,
-          key: chordSheet.key,
-          tuning: chordSheet.tuning,
-          capo: chordSheet.capo
+          songKey: chordSheet.songKey,
+          guitarTuning: chordSheet.guitarTuning,
+          guitarCapo: chordSheet.guitarCapo
         }
       });
 
@@ -48,10 +46,10 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       const fullChordSheet: ChordSheet = {
         title: song.title || chordSheet.title || "Untitled Song",
         artist: song.artist || chordSheet.artist || "Unknown Artist",
-        chords: content || '',
-        key: chordSheet.key || '',
-        tuning: chordSheet.tuning || '',
-        capo: chordSheet.capo || ''
+        songChords: chordSheet.songChords ?? '',
+        songKey: chordSheet.songKey ?? '',
+        guitarTuning: chordSheet.guitarTuning ?? ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: chordSheet.guitarCapo ?? 0
       };
       
       console.log('💾 Flow Step 11: Saving chord sheet content to localStorage');
@@ -61,16 +59,15 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         dataStructure: {
           title: fullChordSheet.title,
           artist: fullChordSheet.artist,
-          chords: `${fullChordSheet.chords.substring(0, 50)}...`,
-          key: fullChordSheet.key,
-          tuning: fullChordSheet.tuning,
-          capo: fullChordSheet.capo
+          songChords: `${fullChordSheet.songChords.substring(0, 50)}...`,
+          songKey: fullChordSheet.songKey,
+          guitarTuning: fullChordSheet.guitarTuning,
+          guitarCapo: fullChordSheet.guitarCapo
         }
       });
 
-      // Save chord sheet using the new storage system
-      saveChordSheet(chordSheetId, fullChordSheet);
-      console.log('✅ Flow Step 12: Chord sheet content saved to localStorage');
+      // Save chord sheet using the API cache (already cached from fetch)
+      console.log('✅ Flow Step 12: Chord sheet already cached in API cache');
       
       console.log('💾 Flow Step 13: Saving song metadata (separate from chord content)');
       
@@ -88,19 +85,20 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       } else {
         // User is on chord viewer page - use unified storage
         console.log('🔍 Context: Chord viewer page - using unified storage');
-        const { getSongs, saveSongs, migrateSongsFromOldStorage } = await import('@/utils/unified-song-storage');
+        const { getSongs, saveSongs, migrateSongsFromOldStorage, migrateChordContentFromPath } = await import('@/utils/unified-song-storage');
         
         // Perform migration if needed to ensure data consistency
         migrateSongsFromOldStorage();
+        migrateChordContentFromPath();
         
         const currentSongs = getSongs();
         console.log('📚 Current songs count:', currentSongs.length);
         
         // Create the new song metadata (path points to chord sheet ID)
         const newSong: Song = {
-          title: fullChordSheet.title,
+          title: song.title || chordSheet.title || "Untitled Song",
           path: chordSheetId, // This is the key - path is the chord sheet ID
-          artist: fullChordSheet.artist
+          artist: song.artist || chordSheet.artist || "Unknown Artist"
         };
         
         console.log('💾 Saving song metadata:', {
@@ -118,7 +116,7 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         const { toast } = await import('@/hooks/use-toast');
         toast({
           title: 'Song added to My Songs',
-          description: `${fullChordSheet.artist} - ${fullChordSheet.title} has been added to your songs.`,
+          description: `${newSong.artist} - ${newSong.title} has been added to your songs.`,
           variant: 'default'
         });
         
@@ -127,13 +125,12 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       }
       
       console.log('🎉 COMPLETE FLOW SUMMARY:');
-      console.log('1. ✅ Backend scraped chord sheet content');
-      console.log('2. ✅ Frontend received minimal backend response: { content: "..." }');
-      console.log('3. ✅ Frontend enriched data with Song metadata');
-      console.log('4. ✅ Chord sheet content saved to localStorage["chord-sheets"][ID]');
-      console.log('5. ✅ Song metadata saved to localStorage["my-songs"] with Song.path = ID');
-      console.log('6. ✅ Future retrieval: song.path -> getChordSheet(song.path) -> content');
-      console.log('🎉 ADD TO MY SONGS COMPLETE - Full separation achieved!');
+      console.log('1. ✅ Backend scraped chord sheet data');
+      console.log('2. ✅ Frontend received ChordSheet response from backend');
+      console.log('3. ✅ Chord sheet data cached in API cache with 1-day TTL');
+      console.log('4. ✅ Song metadata saved to localStorage["my-songs"] with Song.path = ID');
+      console.log('5. ✅ Future retrieval: song.path -> API cache lookup -> chordSheet');
+      console.log('🎉 ADD TO MY SONGS COMPLETE - Using single API cache for chord sheets!');
       
     } catch (err) {
       console.error('❌ Error in addToMySongs:', err);

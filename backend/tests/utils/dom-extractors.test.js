@@ -216,15 +216,57 @@ describe('DOM Extractors', () => {
 
       const result = extractChordSheet();
 
-      expect(result).toBe('[C] This is a [G] chord sheet [F] example [C]');
+      expect(result).toEqual({
+        songChords: '[C] This is a [G] chord sheet [F] example [C]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0
+      });
     });
 
-    it('should return empty string when no pre element found', () => {
+    it('should return empty structure when no pre element found', () => {
       mockDocument(() => null);
 
       const result = extractChordSheet();
 
-      expect(result).toBe('');
+      expect(result).toEqual({
+        songChords: '',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0
+      });
+    });
+
+    it('should handle complex chord sheet with multiple sections', () => {
+      const mockPreElement = {
+        textContent: `[Intro]
+[C] [G] [Am] [F]
+
+[Verse 1]
+[C] Today is gonna be the [G] day
+That they're gonna [Am] throw it back to [F] you`
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        return null;
+      });
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: `[Intro]
+[C] [G] [Am] [F]
+
+[Verse 1]
+[C] Today is gonna be the [G] day
+That they're gonna [Am] throw it back to [F] you`,
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0
+      });
     });
   });
 });

@@ -5,7 +5,7 @@ import { extractChordSheet } from "./dom-extractors.js";
 /**
  * Generic chord sheet fetcher that can work with any website
  * @param {string} songUrl - URL of the song page
- * @returns {Promise<string>} - The chord sheet content
+ * @returns {Promise<Object>} - The ChordSheet object with chords, key, tuning, capo
  */
 export async function fetchChordSheet(songUrl) {
   logger.info(`🔍 SCRAPING START: Fetching chord sheet from: ${songUrl}`);
@@ -15,18 +15,19 @@ export async function fetchChordSheet(songUrl) {
     logger.info(`🌐 Flow Step 2b: Loading page with Puppeteer...`);
     await page.goto(songUrl, { waitUntil: "networkidle2" });
     logger.info(`✅ Flow Step 2c: Song page loaded successfully`);
-    logger.debug("Extracting chord sheet content from DOM...");
+    logger.debug("Extracting chord sheet data from DOM...");
 
-    const content = await page.evaluate(extractChordSheet);
-    logger.info(`📝 Flow Step 2d: Chord sheet content extracted`);
-    logger.info(`📏 Extracted content length: ${content ? content.length : 0} characters`);
+    const chordSheet = await page.evaluate(extractChordSheet);
+    logger.info(`📝 Flow Step 2d: Chord sheet data extracted`);
+    logger.info(`📏 Extracted chords length: ${chordSheet?.songChords ? chordSheet.songChords.length : 0} characters`);
+    logger.info(`🎵 Key: ${chordSheet?.songKey || 'not found'}, Capo: ${chordSheet?.guitarCapo || 'not found'}, Tuning: ${chordSheet?.guitarTuning || 'not found'}`);
     
-    if (!content) {
+    if (!chordSheet?.songChords) {
       logger.warn(`⚠️  No chord sheet content found in page`);
     } else {
-      logger.info(`✅ Content extraction successful - returning to controller`);
+      logger.info(`✅ ChordSheet extraction successful - returning to controller`);
     }
 
-    return content;
+    return chordSheet;
   });
 }

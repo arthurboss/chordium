@@ -123,10 +123,23 @@ export function extractArtistSongs() {
 }
 
 /**
- * Extracts chord sheet content from CifraClub song page DOM
- * @returns {string} - The chord sheet content or empty string
+ * Extracts chord sheet data from CifraClub song page DOM
+ * @returns {Object} - ChordSheet object with chords, key, tuning, capo
  */
 export function extractChordSheet() {
   const preElement = document.querySelector('pre');
-  return preElement ? preElement.textContent : '';
+  const songChords = preElement ? preElement.textContent : '';
+  
+  // Extract key, tuning, and capo information
+  // These fields will be implemented when DOM structure is identified
+  const songKey = '';
+  const guitarTuning = ['E', 'A', 'D', 'G', 'B', 'E']; // Standard tuning default
+  const guitarCapo = 0; // No capo default
+  
+  return {
+    songChords,
+    songKey,
+    guitarTuning,
+    guitarCapo
+  };
 }

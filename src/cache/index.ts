@@ -25,8 +25,9 @@ export {
 export { 
   getCachedChordSheet, 
   cacheChordSheet, 
-  clearExpiredChordSheetCache, 
-  getChordSheetWithRefresh,
+  clearExpiredChordSheetCache,
+  clearChordSheetCache,
+  isChordSheetCached,
   generateChordSheetCacheKey
 } from './implementations/chord-sheet-cache';
 

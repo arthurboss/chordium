@@ -4,11 +4,12 @@ import userEvent from '@testing-library/user-event';
 import SongViewer from '../SongViewer';
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
-import { getChordSheet } from '@/utils/chord-sheet-storage';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { getCachedChordSheet } from '@/cache';
 
-// Mock chord sheet storage
-vi.mock('@/utils/chord-sheet-storage', () => ({
-  getChordSheet: vi.fn()
+// Mock chord sheet cache
+vi.mock('@/cache', () => ({
+  getCachedChordSheet: vi.fn()
 }));
 
 // Mock ChordDisplay component
@@ -24,7 +25,7 @@ vi.mock('@/components/ChordDisplay', () => ({
 }));
 
 describe('SongViewer', () => {
-  const mockGetChordSheet = vi.mocked(getChordSheet);
+  const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
   const mockChordDisplayRef = { current: document.createElement('div') };
   const mockOnBack = vi.fn();
   const mockOnDelete = vi.fn();
@@ -40,7 +41,7 @@ describe('SongViewer', () => {
   });
 
   describe('Chord Content Loading', () => {
-    it('should load chord content from chord sheet storage using song.path as ID', () => {
+    it('should load chord content from chord sheet cache using song.path as ID', () => {
       const testSong: Song = {
         title: 'Getsêmani',
         artist: 'Leonardo Gonçalves',
@@ -50,14 +51,14 @@ describe('SongViewer', () => {
       const mockChordSheet: ChordSheet = {
         title: 'Getsêmani',
         artist: 'Leonardo Gonçalves',
-        chords: '[Intro] C7M  C/G  C4  Dm7(5-)\n        C  C/G  F9  Fm6\n\n[Primeira Parte]\n\nC                C7M\n  No  Getsêmani foi',
-        key: 'C',
-        tuning: 'Standard',
-        capo: '2'
+        songChords: '[Intro] C7M  C/G  C4  Dm7(5-)\n        C  C/G  F9  Fm6\n\n[Primeira Parte]\n\nC                C7M\n  No  Getsêmani foi',
+        songKey: 'C',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 2
       };
 
-      // Mock that the chord sheet storage returns the actual chord content
-      mockGetChordSheet.mockReturnValue(mockChordSheet);
+      // Mock that the chord sheet cache returns the actual chord content
+      mockGetCachedChordSheet.mockReturnValue(mockChordSheet);
 
       const { container } = render(
         <SongViewer
@@ -69,8 +70,8 @@ describe('SongViewer', () => {
         />
       );
 
-      // Verify that chord sheet storage was called with the song.path as ID
-      expect(mockGetChordSheet).toHaveBeenCalledWith('leonardo-goncalves-getsemani');
+      // Verify that chord sheet cache was called with the song.path as ID
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('leonardo-goncalves-getsemani');
 
       // Verify that ChordDisplay receives the actual chord content, not the ID
       expect(container.querySelector('[data-testid="chord-content"]')).toHaveTextContent(/\[Intro\] C7M/);
@@ -80,13 +81,13 @@ describe('SongViewer', () => {
 
     it('should handle missing chord sheet gracefully', () => {
       const testSong: Song = {
-        title: 'Missing Song',
-        artist: 'Unknown Artist',
+        title: 'Non-existent Song',
+        artist: 'Non-existent Artist',
         path: 'non-existent-chord-sheet-id'
       };
 
-      // Mock that the chord sheet is not found
-      mockGetChordSheet.mockReturnValue(null);
+      // Mock that the chord sheet cache returns null for missing content
+      mockGetCachedChordSheet.mockReturnValue(null);
 
       const { container } = render(
         <SongViewer
@@ -98,7 +99,7 @@ describe('SongViewer', () => {
         />
       );
 
-      expect(mockGetChordSheet).toHaveBeenCalledWith('non-existent-chord-sheet-id');
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('non-existent-chord-sheet-id');
 
       // Should show an error message or empty content
       expect(container.querySelector('[data-testid="chord-content"]')).toHaveTextContent('');
@@ -108,19 +109,20 @@ describe('SongViewer', () => {
       const testSong: Song = {
         title: 'Test Song',
         artist: 'Test Artist',
-        path: 'test-artist-test-song' // This should NOT appear as content
+        path: 'test-artist-test-song'
       };
 
       const mockChordSheet: ChordSheet = {
         title: 'Test Song',
         artist: 'Test Artist',
-        chords: 'C G Am F\nThis is the actual chord content',
-        key: 'C',
-        tuning: 'Standard',
-        capo: ''
+        songChords: 'C G Am F',
+        songKey: '',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       };
 
-      mockGetChordSheet.mockReturnValue(mockChordSheet);
+      // Mock the chord sheet content
+      mockGetCachedChordSheet.mockReturnValue(mockChordSheet);
 
       const { container } = render(
         <SongViewer
@@ -138,78 +140,56 @@ describe('SongViewer', () => {
     });
   });
 
-  describe('Button Interactions', () => {
-    const testSong: Song = {
-      title: 'Test Song',
-      artist: 'Test Artist',
-      path: 'test-id'
-    };
-
+  describe('User Interactions', () => {
     it('should call onBack when back button is clicked', async () => {
       const user = userEvent.setup();
-      mockGetChordSheet.mockReturnValue({ title: 'Test', artist: 'Test', chords: 'Test content' });
+      const testSong: Song = {
+        title: 'Test Song',
+        artist: 'Test Artist',
+        path: 'test'
+      };
 
-      const { container } = render(
+      mockGetCachedChordSheet.mockReturnValue({ 
+        title: 'Test', 
+        artist: 'Test', 
+        songChords: 'Test content', 
+        songKey: '', 
+        guitarTuning: GUITAR_TUNINGS.STANDARD, 
+        guitarCapo: 0 
+      });
+
+      const { getByRole } = render(
         <SongViewer
           song={testSong}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
           onUpdate={mockOnUpdate}
-          backButtonLabel="Back to My Songs"
         />
       );
 
-      const backButton = container.querySelector('button[aria-label="Back to My Songs"]');
-      if (backButton) {
-        await user.click(backButton);
-      }
+      await user.click(getByRole('button', { name: 'Back to My Songs' }));
       expect(mockOnBack).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onDelete with song.path when delete button is clicked', async () => {
+    it('should call onDelete when delete button is clicked', async () => {
       const user = userEvent.setup();
-      mockGetChordSheet.mockReturnValue({ title: 'Test', artist: 'Test', chords: 'Test content' });
-
-      const { container } = render(
-        <SongViewer
-          song={testSong}
-          chordDisplayRef={mockChordDisplayRef}
-          onBack={mockOnBack}
-          onDelete={mockOnDelete}
-          onUpdate={mockOnUpdate}
-          deleteButtonLabel="Delete Song"
-        />
-      );
-
-      const deleteButton = container.querySelector('button[aria-label="Delete Song"]');
-      if (deleteButton) {
-        await user.click(deleteButton);
-      }
-      expect(mockOnDelete).toHaveBeenCalledWith('test-id');
-    });
-  });
-
-  describe('Chord Content Updates', () => {
-    it('should update chord sheet storage when content is saved', async () => {
       const testSong: Song = {
         title: 'Test Song',
         artist: 'Test Artist',
         path: 'test-artist-test-song'
       };
 
-      const mockChordSheet: ChordSheet = {
-        title: 'Test Song',
-        artist: 'Test Artist',
-        chords: 'Original content',
-        key: 'C',
-        tuning: 'Standard',
-        capo: ''
-      };
+      mockGetCachedChordSheet.mockReturnValue({ 
+        title: 'Test', 
+        artist: 'Test', 
+        songChords: 'Test content', 
+        songKey: '', 
+        guitarTuning: GUITAR_TUNINGS.STANDARD, 
+        guitarCapo: 0 
+      });
 
-      mockGetChordSheet.mockReturnValue(mockChordSheet);
-
-      const { container } = render(
+      const { getByRole } = render(
         <SongViewer
           song={testSong}
           chordDisplayRef={mockChordDisplayRef}
@@ -219,12 +199,43 @@ describe('SongViewer', () => {
         />
       );
 
-      // Simulate content change and save
+      await user.click(getByRole('button', { name: 'Delete Song' }));
+      expect(mockOnDelete).toHaveBeenCalledWith('test-artist-test-song');
+    });
+  });
+
+  describe('Chord Content Updates', () => {
+    it('should update chord sheet when content is saved', async () => {
       const user = userEvent.setup();
-      const saveButton = container.querySelector('[data-testid="chord-display"] button');
-      if (saveButton) {
-        await user.click(saveButton);
-      }
+      const testSong: Song = {
+        title: 'Test Song',
+        artist: 'Test Artist',
+        path: 'test'
+      };
+
+      const mockChordSheet: ChordSheet = {
+        title: 'Test Song',
+        artist: 'Test Artist',
+        songChords: 'Original content',
+        songKey: '',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
+      };
+
+      mockGetCachedChordSheet.mockReturnValue(mockChordSheet);
+
+      const { getByText } = render(
+        <SongViewer
+          song={testSong}
+          chordDisplayRef={mockChordDisplayRef}
+          onBack={mockOnBack}
+          onDelete={mockOnDelete}
+          onUpdate={mockOnUpdate}
+        />
+      );
+
+      // Click the save button in the mocked ChordDisplay
+      await user.click(getByText('Save'));
 
       // Should call onUpdate with the content
       expect(mockOnUpdate).toHaveBeenCalledWith('Original content');

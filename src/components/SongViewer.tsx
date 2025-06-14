@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
-import { getChordSheet } from "@/utils/chord-sheet-storage";
+import { getCachedChordSheet } from "@/cache";
 
 interface SongViewerProps {
   song: Song;
+  chordContent?: string; // Direct chord content (for search results)
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
   onDelete: (songPath: string) => void;
@@ -18,6 +19,7 @@ interface SongViewerProps {
 
 const SongViewer = ({ 
   song, 
+  chordContent: directChordContent,
   chordDisplayRef, 
   onBack, 
   onDelete, 
@@ -27,11 +29,37 @@ const SongViewer = ({
   deleteButtonVariant = "destructive",
   hideDeleteButton = false
 }: SongViewerProps) => {
-  // Load chord sheet content using song.path as the chord sheet ID
+  
+  console.log('🎵 SONG VIEWER DEBUG:');
+  console.log('Received song prop:', song);
+  console.log('Song title:', song.title);
+  console.log('Song artist:', song.artist);
+  console.log('Song path:', song.path);
+  console.log('Direct chord content provided:', !!directChordContent);
+
+  // Load chord sheet content - use direct content if provided, otherwise load from cache
   const chordContent = useMemo(() => {
-    const chordSheet = getChordSheet(song.path);
-    return chordSheet?.chords || '';
-  }, [song.path]);
+    console.log('🔍 LOADING CHORD CONTENT:');
+    
+    if (directChordContent) {
+      console.log('✅ Using direct chord content (search result)');
+      console.log('Direct content preview:', directChordContent.substring(0, 100) + '...');
+      return directChordContent;
+    }
+    
+    console.log('🏪 Loading from cache (My Songs)');
+    console.log('Trying to get cached chord sheet for path:', song.path);
+    
+    // Try to get from cache using song path
+    const cachedChordSheet = getCachedChordSheet(song.path);
+    
+    console.log('Found cached chord sheet:', cachedChordSheet);
+    console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
+    
+    return cachedChordSheet?.songChords ?? '';
+  }, [song.path, directChordContent]);
+
+  console.log('📄 Final chord content for display:', chordContent);
 
   return (
     <div className="animate-fade-in">

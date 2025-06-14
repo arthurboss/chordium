@@ -1,4 +1,4 @@
-import { ChordSheetData } from "@/hooks/useChordSheet";
+import { ChordSheet } from "@/types/chordSheet";
 
 // Key for storing chord sheet cache in localStorage
 const CHORD_SHEET_CACHE_KEY = 'chordium-chord-sheet-cache';
@@ -9,13 +9,10 @@ const MAX_CACHE_ITEMS = 30;
 // Cache expiration time in milliseconds (24 hours)
 const CACHE_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
 
-// Import type from centralized types file
-import type { CachedChordSheetData } from '../types';
-
 // Interface for cache items
 interface CacheItem {
   key: string;
-  data: CachedChordSheetData;
+  chordSheet: ChordSheet;
   timestamp: number;
   accessCount: number;
 }
@@ -26,18 +23,11 @@ interface ChordSheetCache {
 }
 
 /**
- * Generate a cache key based on artist and song
+ * Generate a cache key based on song path
  */
-export const generateChordSheetCacheKey = (artist: string | null, song: string | null): string => {
-  // Clean and normalize inputs
-  const cleanArtist = artist ? artist.trim().toLowerCase() : null;
-  const cleanSong = song ? song.trim().toLowerCase() : null;
-  
-  // Use null or empty string representation to ensure consistent keys
-  const artistKey = cleanArtist === null ? 'null' : (cleanArtist || '');
-  const songKey = cleanSong === null ? 'null' : (cleanSong || '');
-  
-  return `chord:${artistKey}:${songKey}`;
+export const generateChordSheetCacheKey = (songPath: string): string => {
+  // Use the song path directly as the key (already unique and consistent)
+  return `chord-sheet:${songPath}`;
 };
 
 /**
@@ -53,7 +43,7 @@ const initializeCache = (): ChordSheetCache => {
     // Clean up any problematic cache entries
     if (cache.items && Array.isArray(cache.items)) {
       cache.items = cache.items.filter(item => 
-        item && item.key && item.data && typeof item.data === 'object'
+        item?.key && item?.chordSheet && typeof item.chordSheet === 'object'
       );
     } else {
       return { items: [] };
@@ -87,19 +77,15 @@ const saveCache = (cache: ChordSheetCache): void => {
  * Save chord sheet data to the cache
  */
 export const cacheChordSheet = (
-  artist: string | null, 
-  song: string | null, 
-  data: CachedChordSheetData
+  songPath: string, 
+  chordSheet: ChordSheet
 ): void => {
   const cache = initializeCache();
-  const key = generateChordSheetCacheKey(artist, song);
+  const key = generateChordSheetCacheKey(songPath);
   
   // Look for existing entry to preserve access count
   const existingItem = cache.items.find(item => item.key === key);
   const accessCount = existingItem ? existingItem.accessCount + 1 : 1;
-  
-  // Make sure we strip any timestamp from the data itself
-  const { timestamp, ...cleanData } = data;
   
   // Remove any existing entry with the same key
   const filteredItems = cache.items.filter(item => item.key !== key);
@@ -109,7 +95,7 @@ export const cacheChordSheet = (
     ...filteredItems,
     {
       key,
-      data: cleanData,
+      chordSheet,
       timestamp: Date.now(),
       accessCount,
     }
@@ -141,15 +127,18 @@ export const cacheChordSheet = (
  * Get cached chord sheet if it exists
  * @returns The cached data or null if not found or expired
  */
-export const getCachedChordSheet = (artist: string | null, song: string | null): CachedChordSheetData | null => {
+export const getCachedChordSheet = (songPath: string): ChordSheet | null => {
   const cache = initializeCache();
-  const key = generateChordSheetCacheKey(artist, song);
+  const key = generateChordSheetCacheKey(songPath);
   const cacheItem = cache.items.find(item => item.key === key);
   
-  if (!cacheItem) return null;
+  if (!cacheItem) {
+    return null;
+  }
   
   // Check if cache entry is expired
   const now = Date.now();
+  
   if (now - cacheItem.timestamp > CACHE_EXPIRATION_TIME) {
     console.log('Chord sheet cache expired, will fetch fresh data');
     
@@ -167,13 +156,7 @@ export const getCachedChordSheet = (artist: string | null, song: string | null):
   cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
   saveCache(cache);
   
-  // Add timestamp to the returned data
-  const cachedData = {
-    ...cacheItem.data,
-    timestamp: cacheItem.timestamp
-  };
-  
-  return cachedData;
+  return cacheItem.chordSheet;
 };
 
 /**
@@ -208,142 +191,36 @@ export const clearChordSheetCache = (): void => {
 };
 
 /**
- * Get cached chord sheet with conditional background refresh
- * If sheet is stale (24-hour threshold), display cache but refresh in background
- * @returns An object containing the cached data and a promise for potentially refreshed data
+ * Check if a chord sheet is cached for the given song path
  */
-export const getChordSheetWithRefresh = async (
-  artist: string | null, 
-  song: string | null,
-  fetchUrl: string,
-  refreshCallback?: (newData: CachedChordSheetData) => void
-): Promise<{
-  immediate: CachedChordSheetData | null;
-  refreshPromise: Promise<CachedChordSheetData | null>;
-}> => {
-  const cachedData = getCachedChordSheet(artist, song);
+export const isChordSheetCached = (songPath: string): boolean => {
+  const cache = initializeCache();
+  const key = generateChordSheetCacheKey(songPath);
+  const cacheItem = cache.items.find(item => item.key === key);
   
-  // Threshold for "stale" data that needs a background refresh (24 hours)
-  const REFRESH_THRESHOLD = 24 * 60 * 60 * 1000;
+  if (!cacheItem) return false;
   
-  let needsRefresh = false;
-  
-  if (cachedData) {
-    // We have cached data to use
-    const now = Date.now();
-    const cacheTime = cachedData.timestamp || 0; // Default to 0 if somehow missing
-    
-    // Check if the data is stale and needs background refresh
-    if (now - cacheTime > REFRESH_THRESHOLD) {
-      console.log('Chord sheet is stale, showing cached version but refreshing in background');
-      needsRefresh = true;
-    } else {
-      console.log('Using fresh cached chord sheet');
-    }
-  } else {
-    // No cached data
-    console.log('No cached chord sheet available, must fetch');
-    needsRefresh = true;
-  }
-  
-  // Create a promise for refreshed data if needed
-  const refreshPromise = new Promise<CachedChordSheetData | null>((resolve) => {
-    if (!needsRefresh) {
-      resolve(cachedData);
-      return;
-    }
-    
-    // Use a separate async function for the fetch logic
-    const fetchData = async () => {
-      try {
-        console.log('🌐 FRONTEND FETCH START: Fetching chord sheet from backend');
-        console.log('📊 Flow Step 4: Frontend making API call to backend');
-        console.log('📋 Request details:', { fetchUrl, timestamp: new Date().toISOString() });
-        
-        const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
-        console.log('🔗 API URL:', apiUrl);
-        
-        // Use AbortController to implement timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-        
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          },
-          signal: controller.signal
-        });
-        
-        // Clear the timeout since we got a response
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch chord sheet: ${response.statusText}`);
-        }
-        
-        console.log('✅ Flow Step 5: Backend response received successfully');
-        const data = await response.json();
-        
-        console.log('📦 Backend response structure:', {
-          hasContent: !!data.content,
-          hasError: !!data.error,
-          hasCapo: !!data.capo,
-          hasTuning: !!data.tuning,
-          hasKey: !!data.key,
-          hasArtist: !!data.artist,
-          hasSong: !!data.song,
-          contentLength: data.content ? data.content.length : 0
-        });
-        
-        console.log('⚠️  LIMITATION: Backend response minimal - only contains content field');
-        
-        if (data.error) {
-          throw new Error(`Backend error: ${data.error}`);
-        }
-        
-        if (!data.content) {
-          throw new Error('No chord sheet content found');
-        }
-        
-        console.log('🔄 Flow Step 6: Constructing cache entry with available data');
-        const freshData = {
-          content: data.content || '',
-          capo: data.capo || '',
-          tuning: data.tuning || '',
-          key: data.key || '',
-          artist: data.artist || '',
-          song: data.song || '',
-          originalUrl: fetchUrl,
-          timestamp: Date.now() // Add a timestamp for future staleness checks
-        };
-        
-        console.log('💾 Flow Step 7: Caching chord sheet data');
-        console.log('🔑 Cache details:', {
-          artist,
-          song,
-          hasContent: !!freshData.content,
-          contentLength: freshData.content.length
-        });
-        
-        // Cache the new data
-        cacheChordSheet(artist, song, freshData);
-        
-        console.log('✅ Flow Step 8: Chord sheet cached successfully');
-        resolve(freshData);
-      } catch (error) {
-        console.error('❌ Error in fetchData:', error);
-        resolve(null);
-      }
-    };
-    
-    // Execute the fetch
-    fetchData();
-  });
+  // Check if cache entry is expired
+  const now = Date.now();
+  return (now - cacheItem.timestamp) <= CACHE_EXPIRATION_TIME;
+};
 
+/**
+ * Get cache statistics
+ */
+export const getCacheStats = () => {
+  const cache = initializeCache();
+  const now = Date.now();
+  
+  const validItems = cache.items.filter(item => 
+    (now - item.timestamp) <= CACHE_EXPIRATION_TIME
+  );
+  
   return {
-    immediate: cachedData,
-    refreshPromise
+    totalItems: cache.items.length,
+    validItems: validItems.length,
+    expiredItems: cache.items.length - validItems.length,
+    maxItems: MAX_CACHE_ITEMS,
+    cacheExpirationTime: CACHE_EXPIRATION_TIME
   };
 };

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SongList from '../SongList';
 import { Song } from '@/types/song';
@@ -30,6 +30,11 @@ describe('SongList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    cleanup();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   describe('Song Display - Metadata Only', () => {
