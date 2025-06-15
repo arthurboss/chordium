@@ -17,19 +17,19 @@ interface SongViewerProps {
   hideDeleteButton?: boolean;
 }
 
-const SongViewer = ({ 
-  song, 
+const SongViewer = ({
+  song,
   chordContent: directChordContent,
-  chordDisplayRef, 
-  onBack, 
-  onDelete, 
+  chordDisplayRef,
+  onBack,
+  onDelete,
   onUpdate,
   backButtonLabel = "Back to My Songs",
   deleteButtonLabel = "Delete Song",
   deleteButtonVariant = "destructive",
   hideDeleteButton = false
 }: SongViewerProps) => {
-  
+
   console.log('🎵 SONG VIEWER DEBUG:');
   console.log('Received song prop:', song);
   console.log('Song title:', song.title);
@@ -40,22 +40,22 @@ const SongViewer = ({
   // Load chord sheet content - use direct content if provided, otherwise load from cache
   const chordContent = useMemo(() => {
     console.log('🔍 LOADING CHORD CONTENT:');
-    
+
     if (directChordContent) {
       console.log('✅ Using direct chord content (search result)');
       console.log('Direct content preview:', directChordContent.substring(0, 100) + '...');
       return directChordContent;
     }
-    
+
     console.log('🏪 Loading from cache (My Songs)');
     console.log('Trying to get cached chord sheet for path:', song.path);
-    
+
     // Try to get from cache using song path
     const cachedChordSheet = getCachedChordSheet(song.path);
-    
+
     console.log('Found cached chord sheet:', cachedChordSheet);
     console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
-    
+
     return cachedChordSheet?.songChords ?? '';
   }, [song.path, directChordContent]);
 
@@ -64,8 +64,8 @@ const SongViewer = ({
   return (
     <div className="animate-fade-in">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           onClick={onBack}
           className="mr-2"
@@ -75,22 +75,30 @@ const SongViewer = ({
           {backButtonLabel}
         </Button>
         {!hideDeleteButton && (
-          <Button 
-            variant={deleteButtonVariant}
+          <Button
             size="sm"
-            onClick={() => onDelete(song.path)}
+            variant={deleteButtonVariant}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Delete button clicked, calling onDelete with path:', song.path);
+              if (onDelete) {
+                onDelete(song.path);
+              } else {
+                console.error('onDelete is not provided!');
+              }
+            }}
             tabIndex={0}
-            aria-label={deleteButtonLabel}
+            aria-label={deleteButtonLabel || `Delete ${song.title}`}
           >
-            {deleteButtonLabel}
+            {deleteButtonLabel || "Delete Song"}
           </Button>
         )}
       </div>
       <div className="mt-6">
-        <ChordDisplay 
+        <ChordDisplay
           ref={chordDisplayRef}
-          title={song.title} 
-          artist={song.artist} 
+          title={song.title}
+          artist={song.artist}
           content={chordContent}
           onSave={onUpdate}
         />
