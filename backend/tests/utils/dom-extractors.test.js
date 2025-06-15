@@ -274,5 +274,63 @@ That they're gonna [Am] throw it back to [F] you`,
         artist: 'Oasis'
       });
     });
+
+    it('should prioritize h1.t1 element for title on chord sheet pages', () => {
+      const mockPreElement = {
+        textContent: '[C] Some chord content [G]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Live Forever'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        return null;
+      }, 'Different Title - Oasis - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[C] Some chord content [G]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Live Forever', // Should use h1.t1 content, not page title
+        artist: 'Oasis' // Should still extract artist from page title
+      });
+    });
+
+    it('should fallback to page title when h1.t1 is not available', () => {
+      const mockPreElement = {
+        textContent: '[D] Fallback test [A]'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return null; // h1.t1 not found
+        }
+        return null;
+      }, 'Rock N Roll Star - Oasis - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[D] Fallback test [A]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Rock N Roll Star', // Should use page title when h1.t1 not found
+        artist: 'Oasis'
+      });
+    });
   });
 });

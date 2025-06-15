@@ -134,20 +134,41 @@ export function extractChordSheet() {
   let title = '';
   let artist = '';
   
+  // For chord sheet pages, try to get title from h1.t1 first (CifraClub specific)
+  const titleElement = document.querySelector('h1.t1');
+  if (titleElement) {
+    title = titleElement.textContent?.trim() || '';
+  }
+  
   // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
-  const pageTitle = document.title;
-  if (pageTitle) {
-    // Remove "- Cifra Club" suffix first
-    const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
-    
-    // Split by " - " to separate song and artist
-    const parts = cleanTitle.split(' - ');
-    if (parts.length >= 2) {
-      // Format: "Song Title - Artist Name"
-      title = parts.slice(0, -1).join(' - ').trim();
-      artist = parts[parts.length - 1].trim();
-    } else {
-      title = cleanTitle;
+  // Only use this if we didn't find title from h1.t1
+  if (!title) {
+    const pageTitle = document.title;
+    if (pageTitle) {
+      // Remove "- Cifra Club" suffix first
+      const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
+      
+      // Split by " - " to separate song and artist
+      const parts = cleanTitle.split(' - ');
+      if (parts.length >= 2) {
+        // Format: "Song Title - Artist Name"
+        title = parts.slice(0, -1).join(' - ').trim();
+        artist = parts[parts.length - 1].trim();
+      } else {
+        title = cleanTitle;
+      }
+    }
+  }
+  
+  // If we got title from h1.t1 but not artist, extract artist from page title
+  if (title && !artist) {
+    const pageTitle = document.title;
+    if (pageTitle) {
+      const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
+      const parts = cleanTitle.split(' - ');
+      if (parts.length >= 2) {
+        artist = parts[parts.length - 1].trim();
+      }
     }
   }
   
