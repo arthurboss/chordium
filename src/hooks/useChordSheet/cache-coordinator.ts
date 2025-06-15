@@ -55,15 +55,11 @@ export class CacheCoordinator {
    * 
    * @param songPath - Song path for cache key
    * @param fetchUrl - URL to fetch from if not cached
-   * @param title - Song title from search result
-   * @param artist - Artist name from search result
    * @returns Promise with chord sheet data or null if failed
    */
   async getChordSheetData(
     songPath: string,
-    fetchUrl: string,
-    title?: string,
-    artist?: string
+    fetchUrl: string
   ): Promise<Record<string, unknown> | null> {
     // First check cache
     const cachedChordSheet = getCachedChordSheet(songPath);
@@ -79,15 +75,8 @@ export class CacheCoordinator {
       console.log('📊 Flow Step 4: Frontend making API call to backend');
       console.log('📋 Request details:', { fetchUrl, timestamp: new Date().toISOString() });
       
-      // Build API URL with title and artist if available
-      let apiUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
-      
-      if (title) {
-        apiUrl += `&title=${encodeURIComponent(title)}`;
-      }
-      if (artist) {
-        apiUrl += `&artist=${encodeURIComponent(artist)}`;
-      }
+      // Build API URL (backend now scrapes title and artist from the source page)
+      const apiUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
       
       console.log('🔗 API URL:', apiUrl);
       

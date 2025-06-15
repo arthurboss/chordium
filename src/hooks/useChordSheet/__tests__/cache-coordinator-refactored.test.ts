@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CacheCoordinator } from '../cache-coordinator';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 
 // Mock the cache functions
 vi.mock('../../../cache/implementations/chord-sheet-cache', () => ({
@@ -43,10 +44,10 @@ describe('CacheCoordinator', () => {
       const cachedChordSheet = {
         title: 'Hotel California',
         artist: 'Eagles',
-        chords: '[C]On a dark desert highway...',
-        key: 'C',
-        tuning: 'Standard',
-        capo: ''
+        songChords: '[C]On a dark desert highway...',
+        songKey: 'C',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       };
 
       mockGetCachedChordSheet.mockReturnValue(cachedChordSheet);
@@ -59,9 +60,9 @@ describe('CacheCoordinator', () => {
       expect(mockGetCachedChordSheet).toHaveBeenCalledWith('eagles:hotel-california');
       expect(result).toEqual({
         content: '[C]On a dark desert highway...',
-        capo: '',
-        tuning: 'Standard',
-        key: 'C',
+        guitarCapo: 0,
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        songKey: 'C',
         artist: 'Eagles',
         song: 'Hotel California',
         originalUrl: 'https://example.com/chord-sheet',
@@ -75,10 +76,10 @@ describe('CacheCoordinator', () => {
       const backendResponse = {
         title: 'Hey Jude',
         artist: 'The Beatles',
-        chords: '[F]Hey Jude, don\'t make it bad...',
-        key: 'F',
-        tuning: 'Standard',
-        capo: ''
+        songChords: '[F]Hey Jude, don\'t make it bad...',
+        songKey: 'F',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       };
 
       mockFetch.mockResolvedValue({
@@ -92,12 +93,19 @@ describe('CacheCoordinator', () => {
       );
 
       expect(mockGetCachedChordSheet).toHaveBeenCalledWith('beatles:hey-jude');
-      expect(mockCacheChordSheet).toHaveBeenCalledWith('beatles:hey-jude', backendResponse);
+      expect(mockCacheChordSheet).toHaveBeenCalledWith('beatles:hey-jude', {
+        title: 'Hey Jude',
+        artist: 'The Beatles',
+        songChords: '[F]Hey Jude, don\'t make it bad...',
+        songKey: 'F',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
+      });
       expect(result).toEqual({
         content: '[F]Hey Jude, don\'t make it bad...',
-        capo: '',
-        tuning: 'Standard',
-        key: 'F',
+        guitarCapo: 0,
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        songKey: 'F',
         artist: 'The Beatles',
         song: 'Hey Jude',
         originalUrl: 'https://example.com/chord-sheet',

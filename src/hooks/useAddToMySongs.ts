@@ -43,9 +43,10 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       console.log('� ID Generation: Using Song.path directly (no redundant generation)');
 
       // Create complete ChordSheet object for storage
+      // Backend now provides accurate title and artist from scraped data
       const fullChordSheet: ChordSheet = {
-        title: song.title || chordSheet.title || "Untitled Song",
-        artist: song.artist || chordSheet.artist || "Unknown Artist",
+        title: chordSheet.title || song.title || "Untitled Song",
+        artist: chordSheet.artist || song.artist || "Unknown Artist",
         songChords: chordSheet.songChords ?? '',
         songKey: chordSheet.songKey ?? '',
         guitarTuning: chordSheet.guitarTuning ?? ['E', 'A', 'D', 'G', 'B', 'E'],
@@ -76,11 +77,11 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         console.log('🏠 Context: Home page with state management');
         handleSaveNewSong(
           chordSheetId, 
-          song.title, 
+          fullChordSheet.title, 
           setMySongs, 
           navigate, 
           setActiveTab,
-          song.artist
+          fullChordSheet.artist
         );
       } else {
         // User is on chord viewer page - use unified storage
@@ -95,10 +96,11 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
         console.log('📚 Current songs count:', currentSongs.length);
         
         // Create the new song metadata (path points to chord sheet ID)
+        // Backend now provides accurate title and artist from scraped data
         const newSong: Song = {
-          title: song.title || chordSheet.title || "Untitled Song",
+          title: chordSheet.title || song.title || "Untitled Song",
           path: chordSheetId, // This is the key - path is the chord sheet ID
-          artist: song.artist || chordSheet.artist || "Unknown Artist"
+          artist: chordSheet.artist || song.artist || "Unknown Artist"
         };
         
         console.log('💾 Saving song metadata:', {
