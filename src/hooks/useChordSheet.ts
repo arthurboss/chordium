@@ -31,7 +31,7 @@ const initialState: ChordSheetData = {
   error: null,
 };
 
-export function useChordSheet(url?: string) {
+export function useChordSheet(url?: string, originalPath?: string) {
   const [chordData, setChordData] = useState<ChordSheetData>(initialState);
   const params = useParams<{ artist?: string; song?: string; id?: string }>();
   const navigate = useNavigate();
@@ -76,10 +76,11 @@ export function useChordSheet(url?: string) {
 
     const fetchFromRemote = async () => {
       // Determine the fetch URL using our URL strategy
-      const { url: fetchUrl, isReconstructed } = await urlStrategy.determineFetchUrl(
+      const { fetchUrl, storageKey, isReconstructed } = await urlStrategy.determineFetchUrl(
         url,
         params.artist,
-        params.song
+        params.song,
+        originalPath
       );
 
       if (!fetchUrl) {
@@ -110,18 +111,15 @@ export function useChordSheet(url?: string) {
       dataHandlers.setLoadingState(fetchUrl, setChordData);
 
       try {
-        await fetchChordSheetData(fetchUrl, isReconstructed);
+        await fetchChordSheetData(fetchUrl, storageKey, isReconstructed);
       } catch (err) {
         handleFetchError(err, fetchUrl, isReconstructed);
       }
     };
 
-    const fetchChordSheetData = async (fetchUrl: string, isReconstructed: boolean) => {
-      // Construct song path from artist and song parameters for cache key
-      const songPath = `${params.artist ?? 'unknown'}:${params.song ?? 'unknown'}`;
-      
-      // Use the cache coordinator for fetching  
-      const chordData = await cacheCoordinator.getChordSheetData(songPath, fetchUrl);
+    const fetchChordSheetData = async (fetchUrl: string, storageKey: string, isReconstructed: boolean) => {
+      // Use the cache coordinator for fetching with consistent storage key
+      const chordData = await cacheCoordinator.getChordSheetData(storageKey, fetchUrl);
 
       if (!chordData?.content) {
         throw new Error("No chord sheet content found. This song may not be available.");
@@ -161,6 +159,7 @@ export function useChordSheet(url?: string) {
     loadChordSheet();
   }, [
     url, 
+    originalPath,
     params,
     navigate, 
     loadingStrategy,

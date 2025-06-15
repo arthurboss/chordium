@@ -40,7 +40,10 @@ const ChordViewer = () => {
   
   // Get chord data from server (for search results only)
   // Skip server fetch for My Songs context
-  const chordData = useChordSheet();
+  // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
+  const originalSongPath = navigationSong?.path;
+  console.log('🔗 Original song path from navigation state:', originalSongPath);
+  const chordData = useChordSheet(undefined, originalSongPath);
   
   // Load song from My Songs if this is a My Songs route
   useEffect(() => {
