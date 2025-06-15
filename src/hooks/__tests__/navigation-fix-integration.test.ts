@@ -1,35 +1,33 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useChordSheet } from '@/hooks/useChordSheet';
 import { Song } from '@/types/song';
 
-// Mock dependencies
+// Mock dependencies before importing the hook
 const mockGetSongs = vi.fn();
 const mockMigrateSongsFromOldStorage = vi.fn();
+const mockFindLocalSong = vi.fn();
+const mockIsMySONgsRoute = vi.fn();
+const mockUseParams = vi.fn();
+const mockUseNavigate = vi.fn();
 
 vi.mock('@/utils/unified-song-storage', () => ({
   getSongs: mockGetSongs,
   migrateSongsFromOldStorage: mockMigrateSongsFromOldStorage
 }));
 
-const mockFindLocalSong = vi.fn();
 vi.mock('@/utils/local-song-finder', () => ({
   findLocalSong: mockFindLocalSong
 }));
 
-const mockIsMySONgsRoute = vi.fn();
 vi.mock('@/utils/route-context-detector', () => ({
   isMySONgsRoute: mockIsMySONgsRoute
 }));
 
-const mockUseParams = vi.fn();
-const mockUseNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useParams: mockUseParams,
   useNavigate: mockUseNavigate
 }));
 
-// Mock other dependencies
 vi.mock('@/utils/chord-sheet-loading-strategy', () => ({
   ChordSheetLoadingStrategy: vi.fn().mockImplementation(() => ({
     shouldLoadLocal: vi.fn(),
@@ -81,6 +79,9 @@ vi.mock('@/utils/url-validator', () => ({
   validateURL: vi.fn()
 }));
 
+// Import useChordSheet after all mocks are set up
+import { useChordSheet } from '@/hooks/useChordSheet';
+
 describe('Add to My Songs - Navigation Fix Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -93,10 +94,7 @@ describe('Add to My Songs - Navigation Fix Integration', () => {
   const testSong: Song = {
     title: 'Wonderwall',
     artist: 'Oasis',
-    path: 'chord content for wonderwall',
-    key: 'Em',
-    tuning: 'Standard',
-    capo: '2'
+    path: 'oasis/wonderwall'
   };
 
   it('should successfully load songs from My Songs without navigation issues', async () => {

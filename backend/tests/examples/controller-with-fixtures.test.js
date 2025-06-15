@@ -6,7 +6,7 @@ import {
   getArtistSearchResult, 
   getArtistSongs, 
   getChordSheet 
-} from '../../../fixtures/index.js';
+} from '../fixture-loader.js';
 
 /**
  * Example demonstrating how to enhance controller tests with fixture data
@@ -226,7 +226,9 @@ describe('Search Controller Enhanced with Fixtures', () => {
         songChords: wonderwallChordSheet.content,
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: 0
+        guitarCapo: 0,
+        title: 'Wonderwall',  // Now comes from page scraping
+        artist: 'Oasis'
       };
       mockCifraClubService.getChordSheet.mockResolvedValue(mockChordSheetResponse);
 
@@ -249,7 +251,9 @@ describe('Search Controller Enhanced with Fixtures', () => {
         songChords: creepChordSheet.content,
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: 0
+        guitarCapo: 0,
+        title: 'Creep',  // Now comes from page scraping
+        artist: 'Radiohead'
       };
       mockCifraClubService.getChordSheet.mockResolvedValue(mockChordSheetResponse);
 

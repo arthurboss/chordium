@@ -57,7 +57,6 @@ function adaptChordSheetFixture(fixtureItem) {
     guitarTuning: fixtureItem.guitarTuning || 'E A D G B E',
     guitarCapo: fixtureItem.guitarCapo || 0
   };
-}
 
 /**
  * Global Fixture Loader Class
@@ -119,22 +118,13 @@ export class GlobalFixtureLoader {
   }
 
   /**
-   * Get song search fixture data with schema adaptation
+   * Get song search fixture data
    * @param {string} query - The search query key
-   * @returns {Array} Song search results adapted to Song interface
+   * @returns {Array} Song search results
    */
   getSongSearchResult(query) {
     const fixtures = this.loadApiFixture('song-search');
-    const rawResults = fixtures?.[query] || [];
-    
-    // Apply schema adaptation if needed
-    return rawResults.map(item => {
-      // If the item has 'url' instead of 'path', or combined title-artist, adapt it
-      if (item.url && !item.path) {
-        return adaptCifraClubSearchToSong(item);
-      }
-      return item;
-    });
+    return fixtures?.[query] || [];
   }
 
   /**
@@ -158,28 +148,13 @@ export class GlobalFixtureLoader {
   }
 
   /**
-   * Get chord sheet fixture data with schema adaptation
+   * Get chord sheet fixture data
    * @param {string} songKey - The song identifier key
-   * @returns {Object} Chord sheet content adapted to ChordSheet interface
+   * @returns {Object} Chord sheet content
    */
   getChordSheet(songKey) {
     const fixtures = this.loadApiFixture('chord-sheets');
-    const rawChordSheet = fixtures?.[songKey] || null;
-    
-    if (rawChordSheet) {
-      return adaptChordSheetFixture(rawChordSheet);
-    }
-    
-    return null;
-  }
-
-  /**
-   * Get CifraClub search results with schema adaptation
-   * @returns {Array} Search results adapted to Song interface
-   */
-  getCifraClubSearchResults() {
-    const rawResults = this.loadApiFixture('cifraclub-search') || [];
-    return rawResults.map(item => adaptCifraClubSearchToSong(item));
+    return fixtures?.[songKey] || null;
   }
 
   /**
@@ -241,10 +216,6 @@ export const getSongSearchResult = (query) => globalFixtureLoader.getSongSearchR
 export const getArtistSearchResult = (query) => globalFixtureLoader.getArtistSearchResult(query);
 export const getArtistSongs = (artistPath) => globalFixtureLoader.getArtistSongs(artistPath);
 export const getChordSheet = (songKey) => globalFixtureLoader.getChordSheet(songKey);
-export const getCifraClubSearchResults = () => globalFixtureLoader.getCifraClubSearchResults();
-
-// Export adapter functions for direct use in tests
-export { adaptCifraClubSearchToSong, adaptChordSheetFixture };
 
 // Export the instance as default
 export default globalFixtureLoader;

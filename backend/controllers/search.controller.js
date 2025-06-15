@@ -143,20 +143,13 @@ class SearchController {
         return res.status(404).json({ error: 'Chord sheet not found' });
       }
 
-      // Enhance the ChordSheet with title and artist from search result if available
-      const enhancedChordSheet = {
-        ...chordSheet,
-        title: title || chordSheet.title || '',
-        artist: artist || chordSheet.artist || 'Unknown Artist'
-      };
-
       logger.info(`✅ Flow Step 2: Chord sheet data extracted successfully`);
-      logger.info(`📏 Chords length: ${enhancedChordSheet.songChords.length} characters`);
-      logger.info(`📝 Title: "${enhancedChordSheet.title}", Artist: "${enhancedChordSheet.artist}"`);
-      logger.info(`🎵 Metadata - Key: ${enhancedChordSheet.songKey || 'none'}, Capo: ${enhancedChordSheet.guitarCapo || 'none'}, Tuning: ${enhancedChordSheet.guitarTuning ? JSON.stringify(enhancedChordSheet.guitarTuning) : 'none'}`);
+      logger.info(`📏 Chords length: ${chordSheet.songChords.length} characters`);
+      logger.info(`📝 Title: "${chordSheet.title}", Artist: "${chordSheet.artist}"`);
+      logger.info(`🎵 Metadata - Key: ${chordSheet.songKey || 'none'}, Capo: ${chordSheet.guitarCapo || 'none'}, Tuning: ${chordSheet.guitarTuning ? JSON.stringify(chordSheet.guitarTuning) : 'none'}`);
       logger.info(`📤 Flow Step 3: Sending ChordSheet response to frontend`);
 
-      res.json(enhancedChordSheet);
+      res.json(chordSheet);
     } catch (error) {
       logger.error('❌ Error fetching chord sheet:', error);
       res.status(500).json({ error: 'Failed to fetch chord sheet', details: error.message });

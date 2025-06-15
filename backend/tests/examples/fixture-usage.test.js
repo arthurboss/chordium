@@ -1,10 +1,10 @@
 import { jest } from '@jest/globals';
-import globalFixtureLoader, { 
+import backendFixtureLoader, { 
   getSongSearchResult, 
   getArtistSearchResult, 
   getArtistSongs, 
   getChordSheet 
-} from '../../../fixtures/index.js';
+} from '../fixture-loader.js';
 
 // Mock the actual service to demonstrate replacing real calls with fixture data
 const mockCifraClubService = {
@@ -167,10 +167,10 @@ describe('Example: Using Fixtures Instead of Real API Calls', () => {
 
   describe('Fixture Loader Direct Usage', () => {
     it('should load all fixture types using the loader instance', () => {
-      const songFixtures = globalFixtureLoader.getSongSearchFixtures();
-      const artistFixtures = globalFixtureLoader.getArtistSearchFixtures();
-      const artistSongsFixtures = globalFixtureLoader.getArtistSongsFixtures();
-      const chordSheetsFixtures = globalFixtureLoader.getChordSheetFixtures();
+      const songFixtures = backendFixtureLoader.loadFixture('song-search');
+      const artistFixtures = backendFixtureLoader.loadFixture('artist-search');
+      const artistSongsFixtures = backendFixtureLoader.loadFixture('artist-songs');
+      const chordSheetsFixtures = backendFixtureLoader.loadFixture('chord-sheets');
       
       // Verify fixture structure
       expect(songFixtures).toHaveProperty('wonderwall');
@@ -185,20 +185,20 @@ describe('Example: Using Fixtures Instead of Real API Calls', () => {
 
     it('should cache loaded fixtures', () => {
       // First load
-      const fixtures1 = globalFixtureLoader.getSongSearchFixtures();
+      const fixtures1 = backendFixtureLoader.loadFixture('song-search');
       // Second load (should use cache)
-      const fixtures2 = globalFixtureLoader.getSongSearchFixtures();
+      const fixtures2 = backendFixtureLoader.loadFixture('song-search');
       
       // Should be the same reference (cached)
       expect(fixtures1).toBe(fixtures2);
     });
 
     it('should clear cache when requested', () => {
-      globalFixtureLoader.getSongSearchFixtures(); // Load into cache
-      globalFixtureLoader.clearCache();
+      backendFixtureLoader.loadFixture('song-search'); // Load into cache
+      backendFixtureLoader.clearCache();
       
       // Should reload from file
-      const fixtures = globalFixtureLoader.getSongSearchFixtures();
+      const fixtures = backendFixtureLoader.loadFixture('song-search');
       expect(fixtures).toHaveProperty('wonderwall');
     });
   });

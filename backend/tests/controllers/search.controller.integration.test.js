@@ -3,10 +3,10 @@ import express from 'express';
 import { jest } from '@jest/globals';
 
 // Import fixtures
-import { GlobalFixtureLoader } from '../../../fixtures/index.js';
+import { BackendFixtureLoader } from '../fixture-loader.js';
 
 // Initialize fixture loader
-const fixtureLoader = new GlobalFixtureLoader();
+const fixtureLoader = new BackendFixtureLoader();
 
 // Mock the Supabase client
 const mockSupabase = {

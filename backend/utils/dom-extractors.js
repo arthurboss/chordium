@@ -124,11 +124,58 @@ export function extractArtistSongs() {
 
 /**
  * Extracts chord sheet data from CifraClub song page DOM
- * @returns {Object} - ChordSheet object with chords, key, tuning, capo
+ * @returns {Object} - ChordSheet object with chords, key, tuning, capo, title, artist
  */
 export function extractChordSheet() {
   const preElement = document.querySelector('pre');
   const songChords = preElement ? preElement.textContent : '';
+  
+  // Extract title and artist from page
+  let title = '';
+  let artist = '';
+  
+  // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
+  const pageTitle = document.title;
+  if (pageTitle) {
+    // Remove "- Cifra Club" suffix first
+    const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
+    
+    // Split by " - " to separate song and artist
+    const parts = cleanTitle.split(' - ');
+    if (parts.length >= 2) {
+      // Format: "Song Title - Artist Name"
+      title = parts.slice(0, -1).join(' - ').trim();
+      artist = parts[parts.length - 1].trim();
+    } else {
+      title = cleanTitle;
+    }
+  }
+  
+  // Fallback: extract artist from URL if not found in title
+  if (!artist) {
+    const pathname = window.location.pathname;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    if (pathSegments.length >= 2) {
+      // For song URLs like "/oasis/wonderwall/", artist is first segment
+      artist = pathSegments[0]
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+  }
+  
+  // Extract song title from URL if not found in page title
+  if (!title) {
+    const pathname = window.location.pathname;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    if (pathSegments.length >= 2) {
+      // For song URLs like "/oasis/wonderwall/", song is second segment
+      title = pathSegments[1]
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+  }
   
   // Extract key, tuning, and capo information
   // These fields will be implemented when DOM structure is identified
@@ -140,6 +187,8 @@ export function extractChordSheet() {
     songChords,
     songKey,
     guitarTuning,
-    guitarCapo
+    guitarCapo,
+    title: title || '',
+    artist: artist || 'Unknown Artist'
   };
 }

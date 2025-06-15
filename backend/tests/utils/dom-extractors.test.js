@@ -202,7 +202,7 @@ describe('DOM Extractors', () => {
   });
 
   describe('extractChordSheet', () => {
-    it('should extract chord sheet content from pre element', () => {
+    it('should extract chord sheet content from pre element with title and artist', () => {
       const mockPreElement = {
         textContent: '[C] This is a [G] chord sheet [F] example [C]'
       };
@@ -212,7 +212,7 @@ describe('DOM Extractors', () => {
           return mockPreElement;
         }
         return null;
-      });
+      }, 'Wonderwall - Oasis - Cifra Club');
 
       const result = extractChordSheet();
 
@@ -220,12 +220,14 @@ describe('DOM Extractors', () => {
         songChords: '[C] This is a [G] chord sheet [F] example [C]',
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: 0
+        guitarCapo: 0,
+        title: 'Wonderwall',
+        artist: 'Oasis'
       });
     });
 
     it('should return empty structure when no pre element found', () => {
-      mockDocument(() => null);
+      mockDocument(() => null, 'Default Song - Default Artist - Cifra Club');
 
       const result = extractChordSheet();
 
@@ -233,7 +235,9 @@ describe('DOM Extractors', () => {
         songChords: '',
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: 0
+        guitarCapo: 0,
+        title: 'Default Song',
+        artist: 'Default Artist'
       });
     });
 
@@ -252,7 +256,7 @@ That they're gonna [Am] throw it back to [F] you`
           return mockPreElement;
         }
         return null;
-      });
+      }, 'Champagne Supernova - Oasis - Cifra Club');
 
       const result = extractChordSheet();
 
@@ -265,7 +269,9 @@ That they're gonna [Am] throw it back to [F] you`
 That they're gonna [Am] throw it back to [F] you`,
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: 0
+        guitarCapo: 0,
+        title: 'Champagne Supernova',
+        artist: 'Oasis'
       });
     });
   });

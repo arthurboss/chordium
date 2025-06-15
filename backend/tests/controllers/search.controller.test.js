@@ -1,17 +1,16 @@
 import request from 'supertest';
 import express from 'express';
 import { jest } from '@jest/globals';
-import http from 'http';
 
 // Import fixtures
-import { GlobalFixtureLoader } from '../../../fixtures/index.js';
+import { BackendFixtureLoader } from '../fixture-loader.js';
 
 // Import mocks first
 import { supabase, createClient } from '../__mocks__/supabase.js';
 import cifraClubService from '../__mocks__/cifraclub.service.js';
 
 // Initialize fixture loader
-const fixtureLoader = new GlobalFixtureLoader();
+const fixtureLoader = new BackendFixtureLoader();
 
 // Mock the modules before importing the router
 const mockSupabaseClient = {
@@ -127,7 +126,7 @@ beforeEach(() => {
 
 describe('Search Controller', () => {
   // Get fixture data instead of inline mocks
-  const mockArtists = fixtureLoader.loadApiFixture('artists').slice(0, 2); // Get first 2 artists
+  const mockArtists = fixtureLoader.loadFixture('artists').slice(0, 2); // Get first 2 artists
   const mockSongs = fixtureLoader.getSongSearchResult('test'); // Get test songs from fixtures
   const mockArtistSongs = fixtureLoader.getArtistSongs('radiohead'); // Get artist songs from fixtures
 
