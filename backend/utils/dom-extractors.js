@@ -203,8 +203,19 @@ export function extractChordSheet() {
     songKey = keyElement.textContent?.trim() || '';
   }
   
+  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  let guitarCapo = 0;
+  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  if (capoElement) {
+    const capoText = capoElement.textContent?.trim() || '';
+    // Extract number from text like "1ª casa", "2ª casa", etc.
+    const capoMatch = capoText.match(/(\d+)/);
+    if (capoMatch) {
+      guitarCapo = parseInt(capoMatch[1], 10);
+    }
+  }
+  
   const guitarTuning = ['E', 'A', 'D', 'G', 'B', 'E']; // Standard tuning default
-  const guitarCapo = 0; // No capo default
   
   return {
     songChords,
@@ -229,4 +240,24 @@ export function extractSongKey() {
   }
   
   return '';
+}
+
+/**
+ * Extracts guitar capo position from CifraClub page DOM
+ * Looks for span[data-cy="song-capo"] and extracts the number from the anchor text
+ * @returns {number} - Capo position (e.g., 1, 2, 3, etc.) or 0 if not found
+ */
+export function extractGuitarCapo() {
+  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  if (capoElement) {
+    const capoText = capoElement.textContent?.trim() || '';
+    // Extract number from text like "1ª casa", "2ª casa", etc.
+    const capoMatch = capoText.match(/(\d+)/);
+    if (capoMatch) {
+      return parseInt(capoMatch[1], 10);
+    }
+  }
+  
+  return 0;
 }
