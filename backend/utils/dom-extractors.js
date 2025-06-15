@@ -1,4 +1,3 @@
-
 /**
  * Extracts search results from CifraClub search page DOM
  * @returns {Array} - Array of search results with title, path, and artist
@@ -140,9 +139,15 @@ export function extractChordSheet() {
     title = titleElement.textContent?.trim() || '';
   }
   
+  // For chord sheet pages, try to get artist from h2.t3 a first (CifraClub specific)
+  const artistElement = document.querySelector('h2.t3 a');
+  if (artistElement) {
+    artist = artistElement.textContent?.trim() || '';
+  }
+  
   // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
-  // Only use this if we didn't find title from h1.t1
-  if (!title) {
+  // Only use this if we didn't find title from h1.t1 or artist from h2.t3 a
+  if (!title || !artist) {
     const pageTitle = document.title;
     if (pageTitle) {
       // Remove "- Cifra Club" suffix first
@@ -152,22 +157,14 @@ export function extractChordSheet() {
       const parts = cleanTitle.split(' - ');
       if (parts.length >= 2) {
         // Format: "Song Title - Artist Name"
-        title = parts.slice(0, -1).join(' - ').trim();
-        artist = parts[parts.length - 1].trim();
-      } else {
+        if (!title) {
+          title = parts.slice(0, -1).join(' - ').trim();
+        }
+        if (!artist) {
+          artist = parts[parts.length - 1].trim();
+        }
+      } else if (!title) {
         title = cleanTitle;
-      }
-    }
-  }
-  
-  // If we got title from h1.t1 but not artist, extract artist from page title
-  if (title && !artist) {
-    const pageTitle = document.title;
-    if (pageTitle) {
-      const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
-      const parts = cleanTitle.split(' - ');
-      if (parts.length >= 2) {
-        artist = parts[parts.length - 1].trim();
       }
     }
   }
@@ -199,8 +196,13 @@ export function extractChordSheet() {
   }
   
   // Extract key, tuning, and capo information
-  // These fields will be implemented when DOM structure is identified
-  const songKey = '';
+  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  let songKey = '';
+  const keyElement = document.querySelector('span#cifra_tom a');
+  if (keyElement) {
+    songKey = keyElement.textContent?.trim() || '';
+  }
+  
   const guitarTuning = ['E', 'A', 'D', 'G', 'B', 'E']; // Standard tuning default
   const guitarCapo = 0; // No capo default
   
@@ -212,4 +214,19 @@ export function extractChordSheet() {
     title: title || '',
     artist: artist || 'Unknown Artist'
   };
+}
+
+/**
+ * Extracts song key from CifraClub page DOM
+ * @returns {string} - Song key (e.g., 'C', 'G', 'Am', 'D#m', etc.) or empty string if not found
+ */
+export function extractSongKey() {
+  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  const keyElement = document.querySelector('span#cifra_tom a');
+  if (keyElement) {
+    const key = keyElement.textContent?.trim() || '';
+    return key;
+  }
+  
+  return '';
 }

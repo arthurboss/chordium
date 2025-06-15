@@ -2,7 +2,8 @@ import { describe, it, expect } from '@jest/globals';
 import { 
   extractSearchResults, 
   extractArtistSongs, 
-  extractChordSheet 
+  extractChordSheet,
+  extractSongKey
 } from '../../utils/dom-extractors.js';
 
 /**
@@ -291,6 +292,9 @@ That they're gonna [Am] throw it back to [F] you`,
         if (selector === 'h1.t1') {
           return mockH1Element;
         }
+        if (selector === 'h2.t3 a') {
+          return null; // h2.t3 a not available, should fallback to page title
+        }
         return null;
       }, 'Different Title - Oasis - Cifra Club');
 
@@ -302,7 +306,7 @@ That they're gonna [Am] throw it back to [F] you`,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0,
         title: 'Live Forever', // Should use h1.t1 content, not page title
-        artist: 'Oasis' // Should still extract artist from page title
+        artist: 'Oasis' // Should extract artist from page title since h2.t3 a not available
       });
     });
 
@@ -318,6 +322,9 @@ That they're gonna [Am] throw it back to [F] you`,
         if (selector === 'h1.t1') {
           return null; // h1.t1 not found
         }
+        if (selector === 'h2.t3 a') {
+          return null; // h2.t3 a not found
+        }
         return null;
       }, 'Rock N Roll Star - Oasis - Cifra Club');
 
@@ -329,8 +336,318 @@ That they're gonna [Am] throw it back to [F] you`,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0,
         title: 'Rock N Roll Star', // Should use page title when h1.t1 not found
-        artist: 'Oasis'
+        artist: 'Oasis' // Should use page title when h2.t3 a not found
       });
+    });
+
+    it('should prioritize h2.t3 a element for artist on chord sheet pages', () => {
+      const mockPreElement = {
+        textContent: '[Em] Some chord content [Am]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Champagne Supernova'
+      };
+
+      const mockH2AElement = {
+        textContent: 'Oasis'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        if (selector === 'h2.t3 a') {
+          return mockH2AElement;
+        }
+        return null;
+      }, 'Different Title - Different Artist - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[Em] Some chord content [Am]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Champagne Supernova', // Should use h1.t1 content
+        artist: 'Oasis' // Should use h2.t3 a content, not page title
+      });
+    });
+
+    it('should use both h1.t1 and h2.t3 a when available', () => {
+      const mockPreElement = {
+        textContent: '[G] Chord content here [C]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Some Might Say'
+      };
+
+      const mockH2AElement = {
+        textContent: 'Oasis'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        if (selector === 'h2.t3 a') {
+          return mockH2AElement;
+        }
+        return null;
+      }, 'Wrong Title - Wrong Artist - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[G] Chord content here [C]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Some Might Say', // Should use h1.t1 content
+        artist: 'Oasis' // Should use h2.t3 a content
+      });
+    });
+
+    it('should fallback to page title when h2.t3 a is not available', () => {
+      const mockPreElement = {
+        textContent: '[Am] Fallback artist test [F]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Dont Look Back In Anger'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        if (selector === 'h2.t3 a') {
+          return null; // h2.t3 a not found
+        }
+        return null;
+      }, 'Different Title - Oasis - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[Am] Fallback artist test [F]',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Dont Look Back In Anger', // Should use h1.t1 content
+        artist: 'Oasis' // Should fallback to page title for artist
+      });
+    });
+
+    it('should extract song key using extractSongKey function', () => {
+      const mockPreElement = {
+        textContent: '[C] Some chord content [G]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Test Song'
+      };
+
+      const mockH2AElement = {
+        textContent: 'Test Artist'
+      };
+
+      const mockKeyElement = {
+        textContent: 'Am'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        if (selector === 'h2.t3 a') {
+          return mockH2AElement;
+        }
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      }, 'Test Song - Test Artist - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[C] Some chord content [G]',
+        songKey: 'Am', // Should use extractSongKey function
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Test Song',
+        artist: 'Test Artist'
+      });
+    });
+
+    it('should handle missing song key gracefully', () => {
+      const mockPreElement = {
+        textContent: '[C] Some chord content [G]'
+      };
+
+      const mockH1Element = {
+        textContent: 'Test Song'
+      };
+
+      const mockH2AElement = {
+        textContent: 'Test Artist'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'pre') {
+          return mockPreElement;
+        }
+        if (selector === 'h1.t1') {
+          return mockH1Element;
+        }
+        if (selector === 'h2.t3 a') {
+          return mockH2AElement;
+        }
+        if (selector === 'span#cifra_tom a') {
+          return null; // Key element not found
+        }
+        return null;
+      }, 'Test Song - Test Artist - Cifra Club');
+
+      const result = extractChordSheet();
+
+      expect(result).toEqual({
+        songChords: '[C] Some chord content [G]',
+        songKey: '', // Should be empty when not found
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        title: 'Test Song',
+        artist: 'Test Artist'
+      });
+    });
+  });
+
+  describe('extractSongKey', () => {
+    it('should extract song key from span#cifra_tom a element', () => {
+      const mockKeyElement = {
+        textContent: 'C'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('C');
+    });
+
+    it('should extract complex song keys with sharps and flats', () => {
+      const mockKeyElement = {
+        textContent: 'F#m'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('F#m');
+    });
+
+    it('should handle song keys with flats', () => {
+      const mockKeyElement = {
+        textContent: 'Bb'
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('Bb');
+    });
+
+    it('should trim whitespace from extracted key', () => {
+      const mockKeyElement = {
+        textContent: '  Am  '
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('Am');
+    });
+
+    it('should return empty string when span#cifra_tom a element is not found', () => {
+      mockDocument((selector) => {
+        return null; // Element not found
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when anchor element exists but has no text', () => {
+      const mockKeyElement = {
+        textContent: ''
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when anchor element textContent is null', () => {
+      const mockKeyElement = {
+        textContent: null
+      };
+
+      mockDocument((selector) => {
+        if (selector === 'span#cifra_tom a') {
+          return mockKeyElement;
+        }
+        return null;
+      });
+
+      const result = extractSongKey();
+
+      expect(result).toBe('');
     });
   });
 });
