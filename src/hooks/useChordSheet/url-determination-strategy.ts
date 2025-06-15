@@ -1,4 +1,5 @@
 import { getChordUrl } from "../../utils/session-storage-utils";
+import { generateChordSheetId } from "../../utils/chord-sheet-id-generator";
 
 /**
  * URL determination strategy for chord sheet fetching
@@ -41,9 +42,10 @@ export class URLDeterminationStrategy {
     }
 
     // Create consistent storage key from formatted artist/song (always slugified)
-    const artistSlug = artist.toLowerCase();
-    const songSlug = song.toLowerCase();
-    const storageKey = `${artistSlug}:${songSlug}`;
+    // Convert URL parameters back to proper names first
+    const artistName = artist.replace(/-/g, ' ');
+    const songName = song.replace(/-/g, ' ');
+    const storageKey = generateChordSheetId(artistName, songName);
 
     // Priority 3: Use original path for fetching if available
     if (originalPath) {
@@ -61,6 +63,8 @@ export class URLDeterminationStrategy {
     }
 
     // Priority 5: Reconstruct from params (fallback)
+    const artistSlug = artist.toLowerCase();
+    const songSlug = song.toLowerCase();
     const reconstructedUrl = `https://www.cifraclub.com.br/${artistSlug}/${songSlug}/`;
     console.log("Reconstructed URL from params:", reconstructedUrl);
     

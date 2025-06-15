@@ -1,4 +1,5 @@
 import { ChordSheet } from "@/types/chordSheet";
+import { generateChordSheetId, parseChordSheetId } from '../../utils/chord-sheet-id-generator';
 
 // Key for storing chord sheet cache in localStorage
 const CHORD_SHEET_CACHE_KEY = 'chordium-chord-sheet-cache';
@@ -24,10 +25,19 @@ interface ChordSheetCache {
 
 /**
  * Generate a cache key based on song path
+ * For legacy compatibility, if songPath contains artist and song info,
+ * this will normalize it to the proper cache key format
  */
 export const generateChordSheetCacheKey = (songPath: string): string => {
-  // Use the song path directly as the key (already unique and consistent)
-  return `chord-sheet:${songPath}`;
+  // If it's already in the correct format (has underscores), return as-is
+  if (songPath.includes('_')) {
+    return songPath;
+  }
+  
+  // For paths that don't have underscores, they might be in CifraClub format
+  // We can't reliably convert them without knowing the artist/song split
+  // So return as-is and let the caller handle the conversion
+  return songPath;
 };
 
 /**

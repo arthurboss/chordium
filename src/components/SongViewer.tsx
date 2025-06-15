@@ -3,6 +3,7 @@ import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
 import { getCachedChordSheet } from "@/cache";
+import { generateChordSheetId } from '@/utils/chord-sheet-id-generator';
 
 interface SongViewerProps {
   song: Song;
@@ -48,16 +49,21 @@ const SongViewer = ({
     }
 
     console.log('🏪 Loading from cache (My Songs)');
-    console.log('Trying to get cached chord sheet for path:', song.path);
+    console.log('Song object:', song);
+    console.log('Song path (might be CifraClub format):', song.path);
 
-    // Try to get from cache using song path
-    const cachedChordSheet = getCachedChordSheet(song.path);
+    // Generate the proper cache key from artist and title for cache lookup
+    const cacheKey = generateChordSheetId(song.artist, song.title);
+    console.log('Generated cache key:', cacheKey);
+
+    // Try to get from cache using the proper cache key
+    const cachedChordSheet = getCachedChordSheet(cacheKey);
 
     console.log('Found cached chord sheet:', cachedChordSheet);
     console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
 
     return cachedChordSheet?.songChords ?? '';
-  }, [song.path, directChordContent]);
+  }, [song, directChordContent]);
 
   console.log('📄 Final chord content for display:', chordContent);
 

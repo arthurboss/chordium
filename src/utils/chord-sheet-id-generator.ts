@@ -8,14 +8,17 @@
 
 /**
  * Normalizes a string by removing diacritics, converting to lowercase,
- * and replacing spaces with underscores
+ * removing certain special characters, and replacing spaces with underscores
  */
 function normalizeNamePart(text: string): string {
   return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
     .toLowerCase()
-    .replace(/\s+/g, '_'); // Replace spaces with underscores
+    .replace(/[()[\]{}]/g, '') // Remove parentheses and brackets
+    .replace(/\s+/g, '_') // Replace spaces with underscores
+    .replace(/_{2,}/g, '_') // Replace multiple underscores with single underscore
+    .replace(/(^_+)|(_+$)/g, ''); // Remove leading/trailing underscores
 }
 
 /**

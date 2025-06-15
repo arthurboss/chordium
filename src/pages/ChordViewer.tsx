@@ -14,6 +14,7 @@ import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMySongs } from "@/hooks/useAddToMySongs";
 import { getSongs, migrateSongsFromOldStorage, migrateChordContentFromPath, deleteSong } from "@/utils/unified-song-storage";
 import { getCachedChordSheet } from "@/cache/implementations/chord-sheet-cache";
+import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { extractSongMetadata } from "@/utils/metadata-extraction";
 import { toast } from "@/hooks/use-toast";
@@ -43,7 +44,7 @@ const ChordViewer = () => {
     const songs = getSongs();
 
     // Check if current song is in My Songs
-    const songPath = navigationSong?.path || `${artist}:${song}`;
+    const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const isInMySongs = songs.some(s => s.path === songPath);
     setIsFromMySongs(isInMySongs);
 
@@ -92,12 +93,15 @@ const ChordViewer = () => {
           if (foundSong) {
             console.log('🔍 FOUND SONG IN MY SONGS:');
             console.log('Found song object:', foundSong);
-            console.log('Song path (should be chord sheet ID):', foundSong.path);
+            console.log('Song path (CifraClub format):', foundSong.path);
 
-            // After migration, foundSong.path should be a ChordSheet ID
-            // Try to get the chord content from the cache
+            // Generate the proper cache key from artist and title
+            const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
+            console.log('Generated cache key:', cacheKey);
+
+            // Try to get the chord content from the cache using the proper cache key
             console.log('🏪 Trying to get cached chord sheet...');
-            const cachedChordSheet = getCachedChordSheet(foundSong.path);
+            const cachedChordSheet = getCachedChordSheet(cacheKey);
             console.log('Cached chord sheet result:', cachedChordSheet);
 
             let content = '';
@@ -219,7 +223,7 @@ const ChordViewer = () => {
     // Use navigation Song object as primary source, fallback to URL/chord data
     const songTitle = navigationSong?.title || getSongTitle();
     const artistName = navigationSong?.artist || getArtistName();
-    const cacheKey = artist && song ? `${artist}:${song}` : id || 'unknown';
+    const cacheKey = artist && song ? generateChordSheetId(artist, song) : id || 'unknown';
 
     console.log('🏷️ Final song title (prioritizing navigation state):', songTitle);
     console.log('🎤 Final artist name (prioritizing navigation state):', artistName);
@@ -258,7 +262,7 @@ const ChordViewer = () => {
 
   // Delete song from My Songs
   const handleDeleteSong = () => {
-    const songPath = navigationSong?.path || `${artist}:${song}`;
+    const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const songTitle = navigationSong?.title || getSongTitle();
 
     console.log('🗑️ Deleting song from My Songs:', songPath);
