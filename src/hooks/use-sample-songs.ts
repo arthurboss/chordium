@@ -16,7 +16,9 @@ export function useSampleSongs() {
       const samples = await loadSampleSongs();
       setSampleSongs(samples);
       const initialSongs = samples.map(song => ({ ...song }));
-      setMySongs(loadSongs(initialSongs));
+      const loadedSongs = loadSongs(initialSongs);
+      
+      setMySongs(loadedSongs);
     };
     initializeSongs();
   }, []);

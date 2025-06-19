@@ -85,8 +85,11 @@ export const loadSongs = (initialSongs: Song[]): Song[] => {
   }
   
   // Check if demo songs are already included
+  // Compare by title and artist instead of path since path contains full chord content
   const hasDemoSongs = initialSongs.every(initialSong => 
-    savedSongs.some(savedSong => savedSong.path === initialSong.path)
+    savedSongs.some(savedSong => 
+      savedSong.title === initialSong.title && savedSong.artist === initialSong.artist
+    )
   );
   
   if (!hasDemoSongs) {
