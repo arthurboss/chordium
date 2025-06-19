@@ -34,7 +34,15 @@ const config = {
       '--enable-features=NetworkService,NetworkServiceLogging',
       '--disable-web-security',
       '--disable-features=VizDisplayCompositor',
-      '--start-maximized'
+      '--start-maximized',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--aggressive-cache-discard',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--no-first-run',
+      '--no-default-browser-check'
     ]
   },
 
