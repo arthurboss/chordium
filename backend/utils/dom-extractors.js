@@ -57,7 +57,6 @@ export function extractSearchResults() {
       
       return {
         title,
-        url,  // Include the full URL for validation
         path,
         artist: artist || ''
       };
@@ -108,7 +107,6 @@ export function extractArtistSongs() {
         
         songMap.set(url, {
           title: title.replace(/\s+/g, ' ').trim(),
-          url,  // Include URL for consistency with extractSearchResults
           path,
           artist: artistName
         });

@@ -144,6 +144,7 @@ const TabContainer = ({
             setMySongs={setMySongs}
             setActiveTab={setActiveTab}
             setSelectedSong={setSelectedSong}
+            mySongs={mySongs}
           />
         </TabsContent>
         

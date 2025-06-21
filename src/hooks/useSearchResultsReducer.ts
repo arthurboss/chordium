@@ -185,7 +185,8 @@ export function useSearchResultsReducer(
   filterSong: string,
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>,
   setActiveTab?: (tab: string) => void,
-  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>,
+  mySongs: Song[] = []
 ) {
   const [state, dispatch] = useReducer(searchResultsReducer, initialState);
   
@@ -209,7 +210,8 @@ export function useSearchResultsReducer(
     setMySongs,
     memoizedSongs,
     setActiveTab,
-    setSelectedSong
+    setSelectedSong,
+    mySongs
   });
   
   // Memoize the handlers to prevent unnecessary re-renders

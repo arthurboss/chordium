@@ -13,13 +13,14 @@ interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
+  // Add mySongs for deduplication
+  mySongs?: Song[];
   artist: string;
   song: string;
   filterArtist: string;
   filterSong: string;
   activeArtist: Artist | null;
   onArtistSelect: (artist: Artist) => void;
-  onBackToArtistList?: () => void;
   hasSearched?: boolean;
   shouldFetch?: boolean;
 }
@@ -28,6 +29,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   setMySongs, 
   setActiveTab,
   setSelectedSong,
+  mySongs = [],
   artist, 
   song,
   filterArtist,
@@ -37,14 +39,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   hasSearched,
   shouldFetch,
 }) => {
-  // Initialize our reducer
+  // Initialize our reducer with mySongs for deduplication
   const {
     state,
     dispatch,
     stateData,
     handleView,
     handleAdd
-  } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong);
+  } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong, mySongs);
 
   // Fetch search results from API - only when shouldFetch is true (form submitted)
   const { artists, songs, loading, error } = useSearchResults(

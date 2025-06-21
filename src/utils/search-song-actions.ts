@@ -1,48 +1,38 @@
 import { useCallback } from 'react';
 import { Song } from '@/types/song';
 import { useNavigate } from 'react-router-dom';
-import { toSlug } from '@/utils/url-slug-utils';
+import { useEnhancedSongSelection } from './enhanced-song-selection';
 
 export interface UseSongActionsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   memoizedSongs: Song[];
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
+  // New prop for My Songs to enable deduplication
+  mySongs?: Song[];
 }
 
 export const useSongActions = ({ 
   setMySongs, 
   memoizedSongs, 
   setActiveTab, 
-  setSelectedSong
+  setSelectedSong,
+  mySongs = []
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
+  
+  // Use the enhanced song selection hook for deduplication
+  const { handleSongSelection } = useEnhancedSongSelection({
+    navigate,
+    setSelectedSong,
+    setActiveTab,
+    mySongs
+  });
+
   const handleView = useCallback((songData: Song) => {
-    console.log('[handleView] Called with:', songData);
-    
-    // For search results: Navigate directly to /:artist/:song and pass the Song object as state
-    if (songData.artist && songData.title && navigate) {
-      // Create URL-friendly slugs using Unicode-aware function
-      const artistSlug = toSlug(songData.artist);
-      const songSlug = toSlug(songData.title);
-      
-      console.log('[handleView] Navigating to search result song:', `/${artistSlug}/${songSlug}`, 'with song data:', songData);
-      // Pass the Song object as navigation state so ChordViewer can use it directly
-      navigate(`/${artistSlug}/${songSlug}`, { 
-        state: { 
-          song: songData 
-        } 
-      });
-    } else if (songData.path) {
-      console.log('[handleView] Using fallback approach - opening song path');
-      // Fallback for songs with path but no artist/title structure
-      navigate(`/song/${encodeURIComponent(songData.path)}`, {
-        state: {
-          song: songData
-        }
-      });
-    }
-  }, [navigate]);
+    console.log('[handleView] Called with enhanced song selection:', songData);
+    handleSongSelection(songData);
+  }, [handleSongSelection]);
 
   const handleAdd = useCallback((songId: string) => {
     if (!setMySongs) return;
