@@ -7,22 +7,6 @@ import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 
 /**
- * Convert ChordSheet to ChordSheetData format for compatibility with legacy components
- */
-function convertChordSheetToData(chordSheet: ChordSheet, originalUrl?: string) {
-  return {
-    content: chordSheet.songChords,
-    guitarCapo: chordSheet.guitarCapo,
-    guitarTuning: chordSheet.guitarTuning, 
-    songKey: chordSheet.songKey,
-    artist: chordSheet.artist,
-    song: chordSheet.title,
-    originalUrl,
-    timestamp: Date.now()
-  };
-}
-
-/**
  * Convert response from backend to ChordSheet format
  * Backend now returns the new ChordSheet format directly
  */
@@ -53,20 +37,23 @@ export class CacheCoordinator {
   /**
    * Gets chord sheet data, checking cache first then fetching if needed
    * 
-   * @param songPath - Song path for cache key
+   * @param storageKey - Combined storage key (artist_name-song_title)
    * @param fetchUrl - URL to fetch from if not cached
    * @returns Promise with chord sheet data or null if failed
    */
   async getChordSheetData(
-    songPath: string,
+    storageKey: string,
     fetchUrl: string
-  ): Promise<Record<string, unknown> | null> {
+  ): Promise<ChordSheet | null> {
+    // Parse the storage key to get artist and title
+    const { artist, title } = this.parseStorageKey(storageKey);
+    
     // First check cache
-    const cachedChordSheet = getCachedChordSheet(songPath);
+    const cachedChordSheet = getCachedChordSheet(artist, title);
     
     if (cachedChordSheet) {
       console.log('Using cached chord sheet');
-      return convertChordSheetToData(cachedChordSheet, fetchUrl);
+      return cachedChordSheet;
     }
 
     // Not cached, fetch from backend
@@ -127,22 +114,41 @@ export class CacheCoordinator {
       
       console.log('💾 Flow Step 7: Caching chord sheet data');
       console.log('🔑 Cache details:', {
-        songPath,
+        artist,
+        title,
         hasChords: !!chordSheet.songChords,
         chordsLength: chordSheet.songChords.length
       });
       
-      // Cache the chord sheet
-      cacheChordSheet(songPath, chordSheet);
+      // Cache the chord sheet using the parsed artist and title
+      cacheChordSheet(artist, title, chordSheet);
       
       console.log('✅ Flow Step 8: Chord sheet cached successfully');
       
-      // Return in the expected format
-      return convertChordSheetToData(chordSheet, fetchUrl);
+      // Return the chord sheet directly
+      return chordSheet;
       
     } catch (error) {
       console.error('❌ Error fetching chord sheet:', error);
       return null;
     }
+  }
+
+  /**
+   * Parse storage key back to artist and title
+   * @param storageKey - Combined storage key (artist_name-song_title)
+   * @returns Object with artist and title
+   */
+  private parseStorageKey(storageKey: string): { artist: string; title: string } {
+    // Split on the last dash to separate artist from title
+    const lastDashIndex = storageKey.lastIndexOf('-');
+    if (lastDashIndex === -1) {
+      return { artist: storageKey, title: '' };
+    }
+    
+    const artist = storageKey.substring(0, lastDashIndex).replace(/_/g, ' ');
+    const title = storageKey.substring(lastDashIndex + 1).replace(/_/g, ' ');
+    
+    return { artist, title };
   }
 }

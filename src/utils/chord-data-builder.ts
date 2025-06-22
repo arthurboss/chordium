@@ -1,22 +1,24 @@
-import { ChordSheetData } from '../hooks/useChordSheet';
+import { ChordSheetWithUIState, toChordSheetWithUIState } from '@/types/chordSheetWithUIState';
+import { ChordSheet } from '@/types/chordSheet';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 import { LocalSongResult } from './local-song-finder';
 
 /**
- * Builds ChordSheetData from a local song result
+ * Builds ChordSheetWithUIState from a local song result
  * Follows SRP: Single responsibility of data transformation
  * 
  * @param localSong - The local song result to transform
- * @returns ChordSheetData - Formatted data for the chord sheet component
+ * @returns ChordSheetWithUIState - Formatted data for the chord sheet component
  */
-export function buildChordSheetData(localSong: LocalSongResult): ChordSheetData {
-  return {
-    content: localSong.path,
+export function buildChordSheetData(localSong: LocalSongResult): ChordSheetWithUIState {
+  const chordSheet: ChordSheet = {
+    title: localSong.title,
     artist: localSong.artist,
-    song: localSong.title,
-    key: localSong.key,
-    tuning: localSong.tuning,
-    capo: localSong.capo,
-    loading: false,
-    error: null
+    songChords: localSong.path, // For local songs, path contains the chord content
+    songKey: localSong.key || '',
+    guitarTuning: GUITAR_TUNINGS.STANDARD, // Default to standard tuning
+    guitarCapo: parseInt(localSong.capo || '0', 10) || 0
   };
+
+  return toChordSheetWithUIState(chordSheet);
 }

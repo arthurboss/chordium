@@ -1,4 +1,3 @@
-import { extractPathFromUrl, extractFullPathFromUrl } from './url-utils.js';
 import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
 
 /**
@@ -8,7 +7,7 @@ import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
  */
 export function transformToArtistResults(results) {
   return results.map(result => {
-    const path = extractPathFromUrl(result.url);
+    const path = result.path;
     if (!path) {
       return null;
     }
@@ -34,8 +33,8 @@ export function transformToSongResults(results) {
     // Extract title and artist from the cleaned title
     const { title, artist: titleArtist } = extractTitleAndArtist(cleanedTitle);
     
-    // Extract full path from URL for unified format
-    const path = extractFullPathFromUrl(result.url);
+    // Use the path directly from the result
+    const path = result.path;
     
     // If no artist found in title, extract from URL path (e.g., "john-lennon/imagine" -> "John Lennon")
     let artist = titleArtist;

@@ -3,7 +3,6 @@ import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
 import { getCachedChordSheet } from "@/cache";
-import { generateChordSheetId } from '@/utils/chord-sheet-id-generator';
 
 interface SongViewerProps {
   song: Song;
@@ -52,20 +51,17 @@ const SongViewer = ({
     console.log('Song object:', song);
     console.log('Song path (might be CifraClub format):', song.path);
 
-    // Generate the proper cache key from artist and title for cache lookup
-    const cacheKey = generateChordSheetId(song.artist, song.title);
-    console.log('Generated cache key:', cacheKey);
+    // Validate song object to prevent cache key generation errors
+    if (!song.artist || !song.title) {
+      console.warn('⚠️ SongViewer received invalid song object:', song);
+      return '';
+    }
 
-    // Try to get from cache using the proper cache key
-    const cachedChordSheet = getCachedChordSheet(cacheKey);
-
-    // console.log('Found cached chord sheet:', cachedChordSheet);
-    // console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
+    // Try to get from cache using artist and title
+    const cachedChordSheet = getCachedChordSheet(song.artist, song.title);
 
     return cachedChordSheet?.songChords ?? '';
   }, [song, directChordContent]);
-
-  // console.log('📄 Final chord content for display:', chordContent);
 
   return (
     <div className="animate-fade-in">

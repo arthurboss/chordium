@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom"; // Import useLocation
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,9 +22,16 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [demoSong, setDemoSong] = useState<Song | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { sampleSongs, mySongs, setMySongs } = useSampleSongs();
+  const { sampleSongs, mySongs, setMySongs, refreshMySongs } = useSampleSongs();
   useSaveSongs(mySongs);
   useSearchRedirect();
+
+  // Refresh My Songs when the active tab changes to my-songs
+  useEffect(() => {
+    if (activeTab === 'my-songs') {
+      refreshMySongs();
+    }
+  }, [activeTab, refreshMySongs]);
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({

@@ -1,17 +1,29 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CacheCoordinator } from '../cache-coordinator';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { ChordSheet } from '@/types/chordSheet';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // Mock the cache functions
 vi.mock('../../../cache/implementations/chord-sheet-cache', () => ({
   clearExpiredChordSheetCache: vi.fn(),
-  getCachedChordSheet: vi.fn(),
+  getCachedChordSheet: vi.fn(),  
   cacheChordSheet: vi.fn(),
 }));
 
-// Mock fetch
+// Mock fetch for backend API calls
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
+
+// Load real sample songs from JSON files for testing
+const loadTestSampleSong = (filename: string): ChordSheet => {
+  const filePath = join(process.cwd(), 'src', 'data', 'songs', `${filename}.json`);
+  const content = readFileSync(filePath, 'utf-8');
+  return JSON.parse(content) as ChordSheet;
+};
+
+let hotelCaliforniaChordSheet: ChordSheet;
+let wonderwallChordSheet: ChordSheet;
 
 // Get the mocked functions
 import {
@@ -30,6 +42,10 @@ describe('CacheCoordinator', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cacheCoordinator = new CacheCoordinator();
+    
+    // Load real sample songs before each test
+    hotelCaliforniaChordSheet = loadTestSampleSong('eagles-hotel_california');
+    wonderwallChordSheet = loadTestSampleSong('oasis-wonderwall');
   });
 
   describe('clearExpiredCache', () => {
@@ -41,76 +57,36 @@ describe('CacheCoordinator', () => {
 
   describe('getChordSheetData', () => {
     it('should return cached data when available', async () => {
-      const cachedChordSheet = {
-        title: 'Hotel California',
-        artist: 'Eagles',
-        songChords: '[C]On a dark desert highway...',
-        songKey: 'C',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
-      };
-
-      mockGetCachedChordSheet.mockReturnValue(cachedChordSheet);
+      expect(hotelCaliforniaChordSheet).not.toBeNull();
+      mockGetCachedChordSheet.mockReturnValue(hotelCaliforniaChordSheet);
 
       const result = await cacheCoordinator.getChordSheetData(
-        'eagles:hotel-california',
-        'https://example.com/chord-sheet'
+        'eagles-hotel_california',
+        'https://cifraclub.com.br/eagles/hotel-california/'
       );
 
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('eagles:hotel-california');
-      expect(result).toEqual({
-        content: '[C]On a dark desert highway...',
-        guitarCapo: 0,
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        songKey: 'C',
-        artist: 'Eagles',
-        song: 'Hotel California',
-        originalUrl: 'https://example.com/chord-sheet',
-        timestamp: expect.any(Number)
-      });
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('eagles', 'hotel california');
+      expect(result).toEqual(hotelCaliforniaChordSheet);
     });
 
     it('should fetch from backend when not cached', async () => {
+      expect(wonderwallChordSheet).not.toBeNull();
       mockGetCachedChordSheet.mockReturnValue(null);
 
-      const backendResponse = {
-        title: 'Hey Jude',
-        artist: 'The Beatles',
-        songChords: '[F]Hey Jude, don\'t make it bad...',
-        songKey: 'F',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
-      };
-
+      // Mock backend response to return the same data as our sample song
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(backendResponse)
+        json: () => Promise.resolve(wonderwallChordSheet)
       });
 
       const result = await cacheCoordinator.getChordSheetData(
-        'beatles:hey-jude',
-        'https://example.com/chord-sheet'
+        'oasis-wonderwall',
+        'https://cifraclub.com.br/oasis/wonderwall/'
       );
 
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('beatles:hey-jude');
-      expect(mockCacheChordSheet).toHaveBeenCalledWith('beatles:hey-jude', {
-        title: 'Hey Jude',
-        artist: 'The Beatles',
-        songChords: '[F]Hey Jude, don\'t make it bad...',
-        songKey: 'F',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
-      });
-      expect(result).toEqual({
-        content: '[F]Hey Jude, don\'t make it bad...',
-        guitarCapo: 0,
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        songKey: 'F',
-        artist: 'The Beatles',
-        song: 'Hey Jude',
-        originalUrl: 'https://example.com/chord-sheet',
-        timestamp: expect.any(Number)
-      });
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall');
+      expect(mockCacheChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall', wonderwallChordSheet);
+      expect(result).toEqual(wonderwallChordSheet);
     });
 
     it('should handle fetch errors gracefully', async () => {
@@ -118,7 +94,7 @@ describe('CacheCoordinator', () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       const result = await cacheCoordinator.getChordSheetData(
-        'test:song',
+        'test-song',
         'https://example.com/chord-sheet'
       );
 

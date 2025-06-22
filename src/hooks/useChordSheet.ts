@@ -8,18 +8,12 @@ import { URLDeterminationStrategy } from "./useChordSheet/url-determination-stra
 import { DataHandlers } from "./useChordSheet/data-handlers";
 import { CacheCoordinator } from "./useChordSheet/cache-coordinator";
 import { ChordSheet } from "@/types/chordSheet";
+import { ChordSheetWithUIState, createDefaultChordSheetWithUIState } from "@/types/chordSheetWithUIState";
 
-const initialState: ChordSheet = {
-  title: "",
-  artist: "Unknown Artist",
-  songChords: "",
-  songKey: "",
-  guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-  guitarCapo: 0,
-};
+const initialState: ChordSheetWithUIState = createDefaultChordSheetWithUIState();
 
 export function useChordSheet(url?: string, originalPath?: string) {
-  const [chordData, setChordData] = useState<ChordSheet>(initialState);
+  const [chordData, setChordData] = useState<ChordSheetWithUIState>(initialState);
   const params = useParams<{ artist?: string; song?: string; id?: string }>();
   const navigate = useNavigate();
   
@@ -106,20 +100,20 @@ export function useChordSheet(url?: string, originalPath?: string) {
 
     const fetchChordSheetData = async (fetchUrl: string, storageKey: string, isReconstructed: boolean) => {
       // Use the cache coordinator for fetching with consistent storage key
-      const chordData = await cacheCoordinator.getChordSheetData(storageKey, fetchUrl);
+      const chordSheet = await cacheCoordinator.getChordSheetData(storageKey, fetchUrl);
 
-      if (!chordData?.content) {
+      if (!chordSheet?.songChords) {
         throw new Error("No chord sheet content found. This song may not be available.");
       }
 
-      handleFreshData(chordData, fetchUrl);
+      handleFreshData(chordSheet, fetchUrl);
     };
 
-    const handleFreshData = (freshData: Record<string, unknown>, fetchUrl: string) => {
-      // Update URL if needed using navigation utils (only if artist/song exist)
-      if (freshData.artist && freshData.song && typeof freshData.artist === 'string' && typeof freshData.song === 'string') {
+    const handleFreshData = (chordSheet: ChordSheet, fetchUrl: string) => {
+      // Update URL if needed using navigation utils (only if artist/title exist)
+      if (chordSheet.artist && chordSheet.title) {
         navigationUtils.performUrlUpdate(
-          { artist: freshData.artist, song: freshData.song },
+          { artist: chordSheet.artist, song: chordSheet.title },
           params,
           fetchUrl,
           navigate,
@@ -127,7 +121,7 @@ export function useChordSheet(url?: string, originalPath?: string) {
         );
       }
       
-      dataHandlers.handleFreshData(freshData, setChordData);
+      dataHandlers.handleFreshData(chordSheet, setChordData);
     };
 
     const handleFetchError = (err: unknown, fetchUrl: string, isReconstructed: boolean) => {

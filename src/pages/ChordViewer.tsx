@@ -9,7 +9,7 @@ import ErrorState from "@/components/ErrorState";
 import { useChordSheet } from "@/hooks/useChordSheet";
 import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
-import { GUITAR_TUNINGS } from "@/types/guitarTuning";
+import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMySongs } from "@/hooks/useAddToMySongs";
 import { getSongs, migrateSongsFromOldStorage, migrateChordContentFromPath, deleteSong } from "@/utils/unified-song-storage";
@@ -111,31 +111,41 @@ const ChordViewer = () => {
             const cachedChordSheet = getCachedChordSheet(foundSong.artist, foundSong.title);
             console.log('Cached chord sheet result:', cachedChordSheet);
 
-            let content = '';
+            let songChords = '';
             let songKey = '';
+            let guitarCapo = 0;
+            let guitarTuning: GuitarTuning = GUITAR_TUNINGS.STANDARD;
 
-            if (cachedChordSheet) {
+            // First, check if this is a sample song and load it directly from files
+            if (isSampleSong(foundSong.artist, foundSong.title)) {
+              console.log('📁 Loading sample song from files...');
+              const sampleChordSheet = await loadSampleChordSheet(foundSong.artist, foundSong.title);
+              if (sampleChordSheet) {
+                console.log('✅ Loaded sample song from files');
+                songChords = sampleChordSheet.songChords;
+                songKey = sampleChordSheet.songKey;
+                guitarCapo = sampleChordSheet.guitarCapo || 0;
+                guitarTuning = sampleChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
+              }
+            } else if (cachedChordSheet) {
               console.log('✅ Using cached chord sheet data');
               // Use cached chord sheet data
-              content = cachedChordSheet.songChords;
+              songChords = cachedChordSheet.songChords;
               songKey = cachedChordSheet.songKey;
-              console.log('Content from cache:', content?.substring(0, 100) + '...');
+              guitarCapo = cachedChordSheet.guitarCapo || 0;
+              guitarTuning = cachedChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
+              console.log('Content from cache:', songChords?.substring(0, 100) + '...');
             } else {
-              console.log('⚠️ No cached chord sheet found, using fallback (pre-migration data)');
-              // Fallback: if migration hasn't occurred yet, foundSong.path might still contain content
-              content = foundSong.path;
-              const metadata = extractSongMetadata(foundSong.path);
-              songKey = metadata.songKey ?? '';
-              console.log('Content from fallback:', content?.substring(0, 100) + '...');
+              console.log('❌ No cached chord sheet found for:', foundSong.artist, foundSong.title);
             }
 
-            const localData = {
-              content: content,
+            const localData: LocalSongData = {
+              title: navigationSong?.title || foundSong.title || songName,
               artist: navigationSong?.artist || foundSong.artist || artistName,
-              song: navigationSong?.title || foundSong.title || songName,
+              songChords: songChords,
               songKey: songKey,
-              guitarTuning: GUITAR_TUNINGS.STANDARD,
-              guitarCapo: 0,
+              guitarTuning: guitarTuning,
+              guitarCapo: guitarCapo,
               loading: false,
               error: null
             };
@@ -144,9 +154,9 @@ const ChordViewer = () => {
             setLocalSongData(localData);
           } else {
             setLocalSongData({
-              content: '',
+              title: navigationSong?.title || songName,
               artist: navigationSong?.artist || artistName,
-              song: navigationSong?.title || songName,
+              songChords: '',
               songKey: '',
               guitarTuning: GUITAR_TUNINGS.STANDARD,
               guitarCapo: 0,
@@ -157,9 +167,9 @@ const ChordViewer = () => {
         } catch (error) {
           console.error('Error loading song from My Songs:', error);
           setLocalSongData({
-            content: '',
-            artist: navigationSong?.artist || artist,
-            song: navigationSong?.title || song,
+            title: navigationSong?.title || song || '',
+            artist: navigationSong?.artist || artist || '',
+            songChords: '',
             songKey: '',
             guitarTuning: GUITAR_TUNINGS.STANDARD,
             guitarCapo: 0,
@@ -175,10 +185,25 @@ const ChordViewer = () => {
     }
   }, [isFromMySongs, artist, song, navigationSong?.artist, navigationSong?.title]);
 
-  // Use local data for My Songs, server data for search results
-  const currentChordData = isFromMySongs ?
-    (localSongData || { loading: isLoadingLocal, error: null, content: '', artist: '', song: '', songKey: '', guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'], guitarCapo: 0 }) :
-    chordData;
+  // Helper to normalize data for UI consumption
+  const getCurrentChordData = () => {
+    if (isFromMySongs && localSongData) {
+      return {
+        ...localSongData,
+        loading: isLoadingLocal
+      };
+    }
+    
+    // Convert ChordSheet from hook to LocalSongData-like structure for UI
+    // Preserve the actual loading and error state from the hook
+    return {
+      ...chordData,
+      loading: chordData.loading,
+      error: chordData.error
+    };
+  };
+
+  const currentChordData = getCurrentChordData();
 
   console.log('🔄 CURRENT CHORD DATA SELECTION:');
   console.log('isFromMySongs:', isFromMySongs);
@@ -247,7 +272,7 @@ const ChordViewer = () => {
     const chordSheet: ChordSheet = {
       title: songTitle, // Use URL params - the song title from search result
       artist: artistName, // Use URL params - the artist name from search result
-      songChords: currentChordData.content ?? '',
+      songChords: currentChordData.songChords ?? '',
       songKey: currentChordData.songKey ?? '',
       guitarTuning: GUITAR_TUNINGS.STANDARD,
       guitarCapo: currentChordData.guitarCapo ?? 0
@@ -320,11 +345,11 @@ const ChordViewer = () => {
         <SongChordDetails
           songKey={currentChordData.songKey}
           tuning={Array.isArray(currentChordData.guitarTuning) ? currentChordData.guitarTuning.join('-') : 'Standard'}
-          capo={currentChordData.guitarCapo?.toString() || '0'}
+          capo={currentChordData.guitarCapo !== undefined ? currentChordData.guitarCapo.toString() : '0'}
         />
         <SongViewer
           song={songData.song}
-          chordContent={isFromMySongs ? undefined : currentChordData.content}
+          chordContent={currentChordData.songChords}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
           onDelete={isFromMySongs ? handleDeleteSong : handleSaveSong}

@@ -1,4 +1,4 @@
-import { ChordSheetData } from '../hooks/useChordSheet';
+import { ChordSheetWithUIState } from '@/types/chordSheetWithUIState';
 import { findLocalSong } from './local-song-finder';
 import { buildChordSheetData } from './chord-data-builder';
 import { isMySONgsRoute } from './route-context-detector';
@@ -28,9 +28,9 @@ export class ChordSheetLoadingStrategy {
    * 
    * @param artist - Artist parameter from route
    * @param song - Song parameter from route
-   * @returns Promise<ChordSheetData | null> - Chord data or null if not found locally
+   * @returns Promise<ChordSheetWithUIState | null> - Chord data or null if not found locally
    */
-  async loadLocal(artist: string, song: string): Promise<ChordSheetData | null> {
+  async loadLocal(artist: string, song: string): Promise<ChordSheetWithUIState | null> {
     try {
       console.log('Loading from My Songs locally...');
       const localSong = await findLocalSong(artist, song);

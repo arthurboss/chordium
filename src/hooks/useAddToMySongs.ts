@@ -86,39 +86,24 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       } else {
         // User is on chord viewer page - use unified storage
         console.log('🔍 Context: Chord viewer page - using unified storage');
-        const { getSongs, saveSongs, migrateSongsFromOldStorage, migrateChordContentFromPath } = await import('@/utils/unified-song-storage');
+        const { addChordSheet } = await import('@/utils/unified-song-storage');
         
-        // Perform migration if needed to ensure data consistency
-        migrateSongsFromOldStorage();
-        migrateChordContentFromPath();
-        
-        const currentSongs = getSongs();
-        console.log('📚 Current songs count:', currentSongs.length);
-        
-        // Create the new song metadata (path points to chord sheet ID)
-        // Backend now provides accurate title and artist from scraped data
-        const newSong: Song = {
-          title: chordSheet.title || song.title || "Untitled Song",
-          path: chordSheetId, // This is the key - path is the chord sheet ID
-          artist: chordSheet.artist || song.artist || "Unknown Artist"
-        };
-        
-        console.log('💾 Saving song metadata:', {
-          title: newSong.title,
-          artist: newSong.artist,
-          path: newSong.path, // This will be used to load chord content later
-          note: 'Song.path points to chord sheet ID for content retrieval'
+        console.log('� Adding chord sheet to My Songs cache:', {
+          title: fullChordSheet.title,
+          artist: fullChordSheet.artist,
+          contentLength: fullChordSheet.songChords.length
         });
         
-        // Save the updated songs list
-        saveSongs([newSong, ...currentSongs]);
-        console.log('✅ Flow Step 14: Song metadata saved to localStorage');
+        // Add the chord sheet to My Songs cache
+        addChordSheet(fullChordSheet);
+        
+        console.log('✅ Flow Step 14: Song added to My Songs cache');
         
         // Show success toast
         const { toast } = await import('@/hooks/use-toast');
         toast({
           title: 'Song added to My Songs',
-          description: `${newSong.artist} - ${newSong.title} has been added to your songs.`,
+          description: `${fullChordSheet.artist} - ${fullChordSheet.title} has been added to your songs.`,
           variant: 'default'
         });
         

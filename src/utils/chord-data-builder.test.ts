@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildChordSheetData } from './chord-data-builder';
 import { LocalSongResult } from './local-song-finder';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 
 describe('buildChordSheetData', () => {
   it('should build chord sheet data from local song result', () => {
@@ -19,12 +20,12 @@ describe('buildChordSheetData', () => {
 
     // Assert
     expect(result).toEqual({
-      content: 'chord content...',
+      title: 'Hotel California',
       artist: 'Eagles',
-      song: 'Hotel California',
-      key: 'Am',
-      tuning: 'Standard',
-      capo: '',
+      songChords: 'chord content...',
+      songKey: 'Am',
+      guitarTuning: GUITAR_TUNINGS.STANDARD,
+      guitarCapo: 0,
       loading: false,
       error: null
     });
@@ -46,12 +47,12 @@ describe('buildChordSheetData', () => {
 
     // Assert
     expect(result).toEqual({
-      content: '',
+      title: '',
       artist: '',
-      song: '',
-      key: '',
-      tuning: '',
-      capo: '',
+      songChords: '',
+      songKey: '',
+      guitarTuning: GUITAR_TUNINGS.STANDARD,
+      guitarCapo: 0,
       loading: false,
       error: null
     });
@@ -72,12 +73,12 @@ describe('buildChordSheetData', () => {
     const result = buildChordSheetData(localSong);
 
     // Assert
-    expect(result.content).toBe('Some chord content with chords...');
+    expect(result.songChords).toBe('Some chord content with chords...');
     expect(result.artist).toBe('Oasis');
-    expect(result.song).toBe('Wonderwall');
-    expect(result.key).toBe('Em');
-    expect(result.tuning).toBe('Drop D');
-    expect(result.capo).toBe('Capo 2nd fret');
+    expect(result.title).toBe('Wonderwall');
+    expect(result.songKey).toBe('Em');
+    expect(result.guitarTuning).toBe(GUITAR_TUNINGS.STANDARD); // Default to standard
+    expect(result.guitarCapo).toBe(0); // Parsed from non-numeric string results in 0 (default)
     expect(result.loading).toBe(false);
     expect(result.error).toBeNull();
   });

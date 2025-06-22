@@ -113,7 +113,7 @@ describe('Complete Cache System Integration', () => {
 
       const loaded = await loadSampleChordSheet('oasis', 'wonderwall');
       
-      expect(fetch).toHaveBeenCalledWith('/src/data/songs/oasis-wonderwall.json');
+      expect(fetch).toHaveBeenCalledWith('/data/songs/oasis-wonderwall.json');
       expect(loaded).toEqual(sampleSong);
     });
   });

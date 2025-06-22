@@ -9,11 +9,18 @@ import { addToMySongs, getAllFromMySongs } from '../cache/implementations/my-son
  * @returns Promise<void>
  */
 export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]): Promise<void> {
-  // Only populate in development mode
-  if (!import.meta.env.DEV) {
+  // Check development mode using multiple methods for reliability
+  const isDev = import.meta.env.DEV || 
+                import.meta.env.MODE === 'development' ||
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1';
+
+  if (!isDev) {
     console.log('🏭 Production mode: Skipping sample song population');
     return;
   }
+
+  console.log('🔧 Development mode detected, checking My Songs cache...');
 
   // Check if My Songs is already populated
   const existingSongs = getAllFromMySongs();
@@ -45,8 +52,8 @@ export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
 
     // Load the chord sheet data from JSON files using the renamed files
     const [wonderwallResponse, hotelCaliforniaResponse] = await Promise.all([
-      fetch('/src/data/songs/oasis-wonderwall.json'),
-      fetch('/src/data/songs/eagles-hotel_california.json')
+      fetch('/data/songs/oasis-wonderwall.json'),
+      fetch('/data/songs/eagles-hotel_california.json')
     ]);
 
     if (!wonderwallResponse.ok || !hotelCaliforniaResponse.ok) {
@@ -70,11 +77,12 @@ export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
  * Main function to initialize sample songs in development mode
  * Follows SRP: Single responsibility of sample song initialization
  * 
+ * @param providedChordSheets - Optional array of chord sheets to use instead of loading from files
  * @returns Promise<void>
  */
-export async function initializeDevModeSampleSongs(): Promise<void> {
+export async function initializeDevModeSampleSongs(providedChordSheets?: ChordSheet[]): Promise<void> {
   try {
-    const sampleChordSheets = await loadSampleChordSheets();
+    const sampleChordSheets = providedChordSheets || await loadSampleChordSheets();
     if (sampleChordSheets.length > 0) {
       await populateDevModeSampleSongs(sampleChordSheets);
     }

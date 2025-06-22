@@ -14,8 +14,8 @@ export const URL_VALIDATION_ERRORS = {
 };
 
 /**
- * Validates if a result URL is valid for the given search type
- * @param {Object} result - The result object with url property
+ * Validates if a result path is valid for the given search type
+ * @param {Object} result - The result object with path property
  * @param {string} searchType - The type of search (ARTIST, SONG, etc.)
  * @returns {boolean} - Whether the result is valid
  */
@@ -27,7 +27,7 @@ export function isValidResult(result, searchType) {
       return false;
     }
 
-    if (!result.url || typeof result.url !== 'string' || result.url.trim() === '') {
+    if (!result.path || typeof result.path !== 'string' || result.path.trim() === '') {
       logger.debug(`URL validation failed: ${URL_VALIDATION_ERRORS.MISSING_URL}`, { result });
       return false;
     }
@@ -37,12 +37,11 @@ export function isValidResult(result, searchType) {
       return false;
     }
 
-    const url = new URL(result.url.trim());
-    const path = url.pathname.replace(/(^\/+|\/+$)/g, ''); // Remove leading/trailing slashes
+    const path = result.path.trim().replace(/(^\/+|\/+$)/g, ''); // Remove leading/trailing slashes
     
-    // Filter out URLs ending with .html
+    // Filter out paths ending with .html
     if (path.endsWith('.html')) {
-      logger.debug('URL validation failed: HTML file detected', { url: result.url });
+      logger.debug('URL validation failed: HTML file detected', { path: result.path });
       return false;
     }
     
@@ -52,7 +51,7 @@ export function isValidResult(result, searchType) {
       case SEARCH_TYPES.ARTIST:
         if (segments.length !== 1) {
           logger.debug(`URL validation failed: ${URL_VALIDATION_ERRORS.INVALID_PATH_SEGMENTS}`, { 
-            url: result.url, 
+            path: result.path, 
             expectedSegments: 1, 
             actualSegments: segments.length 
           });
@@ -62,7 +61,7 @@ export function isValidResult(result, searchType) {
       case SEARCH_TYPES.SONG:
         if (segments.length !== 2) {
           logger.debug(`URL validation failed: ${URL_VALIDATION_ERRORS.INVALID_PATH_SEGMENTS}`, { 
-            url: result.url, 
+            path: result.path, 
             expectedSegments: 2, 
             actualSegments: segments.length 
           });
@@ -75,7 +74,7 @@ export function isValidResult(result, searchType) {
     }
   } catch (error) {
     logger.debug(`URL validation failed: ${URL_VALIDATION_ERRORS.INVALID_URL_FORMAT}`, { 
-      url: result?.url, 
+      path: result?.path, 
       error: error.message 
     });
     return false;
