@@ -59,13 +59,13 @@ const SongViewer = ({
     // Try to get from cache using the proper cache key
     const cachedChordSheet = getCachedChordSheet(cacheKey);
 
-    console.log('Found cached chord sheet:', cachedChordSheet);
-    console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
+    // console.log('Found cached chord sheet:', cachedChordSheet);
+    // console.log('Chord content:', cachedChordSheet?.songChords ?? 'NO CONTENT');
 
     return cachedChordSheet?.songChords ?? '';
   }, [song, directChordContent]);
 
-  console.log('📄 Final chord content for display:', chordContent);
+  // console.log('📄 Final chord content for display:', chordContent);
 
   return (
     <div className="animate-fade-in">

@@ -23,7 +23,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   console.log('🎼 CHORD DISPLAY DEBUG:');
   console.log('Received props - title:', title, 'artist:', artist);
   console.log('Content length:', content?.length ?? 0);
-  console.log('Content preview:', content?.substring(0, 100) + '...');
+  // console.log('Content preview:', content?.substring(0, 100) + '...');
 
   // Use custom hooks for different concerns
   const { 

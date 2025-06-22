@@ -13,7 +13,6 @@ describe('Simple Cache Test', () => {
   });
 
   it('should work with minimal chord sheet', () => {
-    const songPath = 'test-song';
     const chordSheet: ChordSheet = {
       title: 'Test',
       artist: 'Test',
@@ -24,12 +23,14 @@ describe('Simple Cache Test', () => {
     };
 
     console.log('Caching chord sheet...');
-    cacheChordSheet(songPath, chordSheet);
+    cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
     
     console.log('Retrieving chord sheet...');
-    const retrieved = getCachedChordSheet(songPath);
+    const retrieved = getCachedChordSheet(chordSheet.artist, chordSheet.title);
     
     console.log('Retrieved:', retrieved);
     expect(retrieved).not.toBeNull();
+    expect(retrieved?.title).toBe('Test');
+    expect(retrieved?.artist).toBe('Test');
   });
 });

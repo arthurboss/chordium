@@ -171,7 +171,7 @@ describe('Song Deduplication Utils', () => {
   describe('Integration Scenarios', () => {
     it('should handle sample songs vs searched songs correctly', () => {
       const sampleSongs = [
-        { path: 'sample/wonderwall', title: 'Wonderwall', artist: 'Oasis' }
+        { path: 'oasis/wonderwall', title: 'Wonderwall', artist: 'Oasis' }
       ];
 
       const searchedSongs = [
@@ -182,7 +182,7 @@ describe('Song Deduplication Utils', () => {
       const foundSample = findExistingSong(sampleSongs, 'Oasis', 'Wonderwall');
       expect(foundSample).toEqual(sampleSongs[0]);
 
-      // Should find the searched song when added to my songs
+      // Should find the searched song when added to my songs (same path now!)
       const foundSearched = findExistingSong(searchedSongs, 'Oasis', 'Wonderwall');
       expect(foundSearched).toEqual(searchedSongs[0]);
     });

@@ -7,32 +7,19 @@ import { validateURL } from "@/utils/url-validator";
 import { URLDeterminationStrategy } from "./useChordSheet/url-determination-strategy";
 import { DataHandlers } from "./useChordSheet/data-handlers";
 import { CacheCoordinator } from "./useChordSheet/cache-coordinator";
+import { ChordSheet } from "@/types/chordSheet";
 
-export interface ChordSheetData {
-  content: string;
-  guitarCapo: number;
-  guitarTuning: string[];
-  songKey: string;
-  artist: string;
-  song: string;
-  loading: boolean;
-  error: string | null;
-  originalUrl?: string;
-}
-
-const initialState: ChordSheetData = {
-  content: "",
-  guitarCapo: 0,
-  guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+const initialState: ChordSheet = {
+  title: "",
+  artist: "Unknown Artist",
+  songChords: "",
   songKey: "",
-  artist: "",
-  song: "",
-  loading: true,
-  error: null,
+  guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+  guitarCapo: 0,
 };
 
 export function useChordSheet(url?: string, originalPath?: string) {
-  const [chordData, setChordData] = useState<ChordSheetData>(initialState);
+  const [chordData, setChordData] = useState<ChordSheet>(initialState);
   const params = useParams<{ artist?: string; song?: string; id?: string }>();
   const navigate = useNavigate();
   

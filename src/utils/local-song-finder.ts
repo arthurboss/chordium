@@ -1,6 +1,7 @@
 import { getSongs, migrateSongsFromOldStorage } from './unified-song-storage';
-import { extractSongMetadata } from './metadata-extraction';
+import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
 import { Song } from '../types/song';
+import { extractSongMetadata } from './metadata-extraction';
 
 export interface LocalSongResult {
   title: string;
@@ -49,12 +50,21 @@ export async function findLocalSong(
     
     if (foundSong) {
       console.log('Found song in local storage:', foundSong.title);
-      // Extract metadata from the song content if needed
-      const metadata = extractSongMetadata(foundSong.path);
+      
+      // Try to get the chord sheet from cache using the artist and title
+      const cachedChordSheet = getCachedChordSheet(foundSong.artist, foundSong.title);
+      
+      if (!cachedChordSheet) {
+        console.log('❌ Song found but no cached chord sheet available');
+        return null;
+      }
+      
+      // Extract metadata from the chord sheet content
+      const metadata = extractSongMetadata(cachedChordSheet.songChords);
       return {
         title: foundSong.title ?? '',
         artist: foundSong.artist ?? '',
-        path: foundSong.path,
+        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
         key: metadata.songKey ?? '',
         tuning: metadata.guitarTuning ?? '',
         capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',

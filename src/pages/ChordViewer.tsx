@@ -6,7 +6,7 @@ import SongViewer from "@/components/SongViewer";
 import SongChordDetails from "@/components/SongChordDetails";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { useChordSheet, ChordSheetData } from "@/hooks/useChordSheet";
+import { useChordSheet } from "@/hooks/useChordSheet";
 import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS } from "@/types/guitarTuning";
@@ -16,8 +16,15 @@ import { getSongs, migrateSongsFromOldStorage, migrateChordContentFromPath, dele
 import { getCachedChordSheet } from "@/cache/implementations/chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
+import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
 import { extractSongMetadata } from "@/utils/metadata-extraction";
 import { toast } from "@/hooks/use-toast";
+
+// UI state interface for local song data with loading and error states  
+interface LocalSongData extends ChordSheet {
+  loading: boolean;
+  error: string | null;
+}
 
 const ChordViewer = () => {
   const { artist, song, id } = useParams();
@@ -27,7 +34,7 @@ const ChordViewer = () => {
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const addToMySongs = useAddToMySongs();
 
-  const [localSongData, setLocalSongData] = useState<ChordSheetData | null>(null);
+  const [localSongData, setLocalSongData] = useState<LocalSongData | null>(null);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
 
   // Get Song object from navigation state (if passed from search results)
@@ -99,9 +106,9 @@ const ChordViewer = () => {
             const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
             console.log('Generated cache key:', cacheKey);
 
-            // Try to get the chord content from the cache using the proper cache key
+            // Try to get the chord content from the cache using artist and title
             console.log('🏪 Trying to get cached chord sheet...');
-            const cachedChordSheet = getCachedChordSheet(cacheKey);
+            const cachedChordSheet = getCachedChordSheet(foundSong.artist, foundSong.title);
             console.log('Cached chord sheet result:', cachedChordSheet);
 
             let content = '';

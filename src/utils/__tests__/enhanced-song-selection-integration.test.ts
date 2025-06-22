@@ -18,12 +18,12 @@ describe('Enhanced Song Selection - Integration Test', () => {
     {
       title: "Wonderwall",
       artist: "Oasis", 
-      path: "sample/wonderwall", // Sample song path
+      path: "oasis/wonderwall", // Consistent path schema
     },
     { 
       title: "Hotel California", 
       artist: "Eagles", 
-      path: "sample/hotel-california", // Sample song path
+      path: "eagles/hotel-california", // Consistent path schema
     },
     // User also added a searched song
     {

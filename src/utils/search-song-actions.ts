@@ -40,7 +40,18 @@ export const useSongActions = ({
       song.path === songId || song.title === songId
     );
     if (item) {
-      setMySongs(prev => [...prev, item]);
+      // Check if song already exists in My Songs by path (much cleaner!)
+      setMySongs(prev => {
+        const existing = prev.find(existingSong => existingSong.path === item.path);
+        
+        if (existing) {
+          console.log('[handleAdd] Song already exists in My Songs:', item.title, 'by', item.artist);
+          return prev; // Don't add duplicate
+        }
+        
+        console.log('[handleAdd] Adding new song to My Songs:', item.title, 'by', item.artist);
+        return [...prev, item];
+      });
     }
   }, [setMySongs, memoizedSongs]);
 

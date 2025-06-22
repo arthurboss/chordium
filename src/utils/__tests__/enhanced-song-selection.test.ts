@@ -17,12 +17,12 @@ describe('Enhanced Song Selection with Deduplication', () => {
     {
       title: "Wonderwall",
       artist: "Oasis", 
-      path: "sample/wonderwall",
+      path: "oasis/wonderwall",
     },
     { 
       title: "Hotel California", 
       artist: "Eagles", 
-      path: "sample/hotel-california",
+      path: "eagles/hotel-california",
     },
   ];
 
