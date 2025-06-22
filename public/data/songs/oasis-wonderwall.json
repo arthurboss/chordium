@@ -3,6 +3,13 @@
   "artist": "Oasis",
   "songChords": "[Intro]\nEm7  G  Dsus4  A7sus4\nEm7  G  Dsus4  A7sus4\nEm7  G  Dsus4  A7sus4\nEm7  G  Dsus4  A7sus4\n\n[Verse 1]\nEm7             G\nToday is gonna be the day\n              Dsus4                  A7sus4\nThat they're gonna throw it back to you\nEm7               G\nBy now you should've somehow\n              Dsus4            A7sus4\nRealized what you gotta do\nEm7                   G\nI don't believe that anybody\n       Dsus4       A7sus4          Em7  G  Dsus4  A7sus4\nFeels the way I do about you now\n\n[Verse 2]\nEm7            G\nBackbeat, the word is on the street\n              Dsus4                 A7sus4\nThat the fire in your heart is out\nEm7              G\nI'm sure you've heard it all before\n                 Dsus4             A7sus4\nBut you never really had a doubt\nEm7                   G\nI don't believe that anybody\n       Dsus4       A7sus4          Em7\nFeels the way I do about you now\n\n[Pre-Chorus]\n    C                D                Em\nAnd all the roads we have to walk are winding\n    C                   D                 Em\nAnd all the lights that lead us there are blinding\nC              D\nThere are many things that I would\nG       D/F#  Em7\nLike to say to you\n      G        D\nBut I don't know how\n\n[Chorus]\n          C    Em7  G\nBecause maybe\n                Em7        C        Em7  G\nYou're gonna be the one that saves me\n    Em7  C  Em7  G\nAnd after all\n                Em7  C  Em7  G  Em7  G  Dsus4  A7sus4\nYou're my wonderwall",
   "songKey": "G",
-  "guitarTuning": ["E", "A", "D", "G", "B", "E"],
+  "guitarTuning": [
+    "E",
+    "A",
+    "D",
+    "G",
+    "B",
+    "E"
+  ],
   "guitarCapo": 0
 }

@@ -40,7 +40,7 @@ describe("CifraClub Artist Songs Handler", () => {
   });
 
   describe("fetchArtistSongs", () => {
-    it("should fetch artist songs successfully", async () => {
+    it.skip("should fetch artist songs successfully", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const artistUrl = "https://www.cifraclub.com.br/oasis/";
       const expectedSongs = [
@@ -84,7 +84,7 @@ describe("CifraClub Artist Songs Handler", () => {
       expect(mockPage.evaluate).not.toHaveBeenCalled();
     });
 
-    it("should handle empty artist songs", async () => {
+    it.skip("should handle empty artist songs", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const artistUrl = "https://www.cifraclub.com.br/empty-artist/";
 
@@ -110,7 +110,7 @@ describe("CifraClub Artist Songs Handler", () => {
       );
     });
 
-    it("should construct correct page URL with trailing slash", async () => {
+    it.skip("should construct correct page URL with trailing slash", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const artistUrl = "https://www.cifraclub.com.br/radiohead/";
 

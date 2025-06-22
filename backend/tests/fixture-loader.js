@@ -80,13 +80,46 @@ export class BackendFixtureLoader {
   }
 
   /**
-   * Get chord sheet fixture data
-   * @param {string} songKey - The song identifier key
-   * @returns {Object} Chord sheet content
+   * Get chord sheet fixture data from actual song files
+   * @param {string} songKey - The song identifier key (e.g., 'wonderwall', 'creep', 'hotel_california')
+   * @returns {Object} Chord sheet content with path and chords
    */
   getChordSheet(songKey) {
-    const fixtures = this.loadFixture('chord-sheets');
-    return fixtures?.[songKey] || null;
+    try {
+      // Map song keys to actual file names
+      const songFileMap = {
+        'wonderwall': 'oasis-wonderwall.json',
+        'creep': 'radiohead-creep.json',
+        'hotel_california': 'eagles-hotel_california.json'
+      };
+
+      const fileName = songFileMap[songKey];
+      if (!fileName) {
+        console.warn(`No song file mapping found for key: ${songKey}`);
+        return null;
+      }
+
+      // Load from public/data/songs/ directory
+      const songFilePath = path.join(__dirname, '../../public/data/songs/', fileName);
+      const fileContent = fs.readFileSync(songFilePath, 'utf8');
+      const songData = JSON.parse(fileContent);
+
+      // Generate path from artist and title since it's not in the ChordSheet interface
+      const artistSlug = songData.artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
+      const titleSlug = songData.title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
+      const generatedPath = `${artistSlug}/${titleSlug}`;
+
+      // Return in the format expected by tests
+      return {
+        path: generatedPath,
+        content: songData.songChords || songData.chords || songData.lyrics || '',
+        title: songData.title,
+        artist: songData.artist
+      };
+    } catch (error) {
+      console.error(`Failed to load chord sheet for ${songKey}:`, error);
+      return null;
+    }
   }
 
   /**

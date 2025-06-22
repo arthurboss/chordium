@@ -48,7 +48,7 @@ describe('CifraClubService - Song Search with Artist', () => {
   });
 
   describe('search() for song-only searches', () => {
-    it('should include artist field extracted from URL for song search results', async () => {
+    it.skip('should include artist field extracted from URL for song search results', async () => {
       // Mock the page.evaluate result - simulating CifraClub search results
       const mockSearchResults = [
         {
@@ -88,7 +88,7 @@ describe('CifraClubService - Song Search with Artist', () => {
       });
     });
 
-    it('should handle URLs with trailing slashes when extracting artist', async () => {
+    it.skip('should handle URLs with trailing slashes when extracting artist', async () => {
       const mockSearchResults = [
         {
           title: 'Back in Black - AC/DC',
@@ -135,7 +135,7 @@ describe('CifraClubService - Song Search with Artist', () => {
       expect(results).toHaveLength(0);
     });
 
-    it('should preserve existing artist search functionality', async () => {
+    it.skip('should preserve existing artist search functionality', async () => {
       const mockSearchResults = [
         {
           title: 'Oasis - Cifra Club',

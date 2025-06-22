@@ -65,8 +65,8 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Oasis', path: 'oasis', artist: 'Oasis', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis', url: 'https://www.cifraclub.com.br/oasis/wonderwall/' }
+        { title: 'Oasis', path: 'oasis', artist: 'Oasis' },
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
       ]);
     });
 
@@ -89,7 +89,7 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Some Song Title', path: 'ac-dc/back-in-black', artist: 'Ac Dc', url: 'https://www.cifraclub.com.br/ac-dc/back-in-black/' }
+        { title: 'Some Song Title', path: 'ac-dc/back-in-black', artist: 'Ac Dc' }
       ]);
     });
 
@@ -117,7 +117,7 @@ describe('DOM Extractors', () => {
       const results = extractSearchResults();
 
       expect(results).toEqual([
-        { title: 'Valid Result', path: 'valid', artist: 'Artist Name', url: 'https://www.cifraclub.com.br/valid/' }
+        { title: 'Valid Result', path: 'valid', artist: 'Artist Name' }
       ]);
     });
   });
@@ -149,8 +149,8 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Wonderwall', url: 'https://www.cifraclub.com.br/oasis/wonderwall/', path: 'oasis/wonderwall', artist: 'Oasis' },
-        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
+        { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
       ]);
     });
 
@@ -172,7 +172,7 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Don\'t Look Back in Anger', url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
+        { title: 'Don\'t Look Back in Anger', path: 'oasis/dont-look-back-in-anger', artist: 'Oasis' }
       ]);
     });
     
@@ -198,7 +198,7 @@ describe('DOM Extractors', () => {
       const results = extractArtistSongs();
 
       expect(results).toEqual([
-        { title: 'Song Title', url: 'https://www.cifraclub.com.br/ac-dc/song-title/', path: 'ac-dc/song-title', artist: 'Ac Dc' }
+        { title: 'Song Title', path: 'ac-dc/song-title', artist: 'Ac Dc' }
       ]);
     });
   });
@@ -206,7 +206,25 @@ describe('DOM Extractors', () => {
   describe('extractChordSheet', () => {
     it('should extract chord sheet content from pre element with title and artist', () => {
       const mockPreElement = {
-        textContent: '[C] This is a [G] chord sheet [F] example [C]'
+        textContent: `[Intro]
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+
+[Verse 1]
+Em7             G
+Today is gonna be the day
+              Dsus4                  A7sus4
+That they're gonna throw it back to you
+Em7               G
+By now you should've somehow
+              Dsus4            A7sus4
+Realized what you gotta do
+Em7                   G
+I don't believe that anybody
+       Dsus4       A7sus4          Em7  G  Dsus4  A7sus4
+Feels the way I do about you now`
       };
 
       mockDocument((selector) => {
@@ -219,7 +237,25 @@ describe('DOM Extractors', () => {
       const result = extractChordSheet();
 
       expect(result).toEqual({
-        songChords: '[C] This is a [G] chord sheet [F] example [C]',
+        songChords: `[Intro]
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+Em7  G  Dsus4  A7sus4
+
+[Verse 1]
+Em7             G
+Today is gonna be the day
+              Dsus4                  A7sus4
+That they're gonna throw it back to you
+Em7               G
+By now you should've somehow
+              Dsus4            A7sus4
+Realized what you gotta do
+Em7                   G
+I don't believe that anybody
+       Dsus4       A7sus4          Em7  G  Dsus4  A7sus4
+Feels the way I do about you now`,
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0,
@@ -246,11 +282,27 @@ describe('DOM Extractors', () => {
     it('should handle complex chord sheet with multiple sections', () => {
       const mockPreElement = {
         textContent: `[Intro]
-[C] [G] [Am] [F]
+Bm  F#  A  E  G  D  Em  F#
 
 [Verse 1]
-[C] Today is gonna be the [G] day
-That they're gonna [Am] throw it back to [F] you`
+Bm                        F#
+On a dark desert highway, cool wind in my hair
+A                               E
+Warm smell of colitas, rising up through the air
+G                         D
+Up ahead in the distance, I saw a shimmering light
+Em                                         F#
+My head grew heavy and my sight grew dim, I had to stop for the night
+
+[Verse 2]
+Bm                            F#
+There she stood in the doorway, I heard the mission bell
+A                                           E
+And I was thinking to myself, "This could be Heaven or this could be Hell"
+G                              D
+Then she lit up a candle and she showed me the way
+Em                                       F#
+There were voices down the corridor, I thought I heard them say`
       };
 
       mockDocument((selector) => {
@@ -258,22 +310,38 @@ That they're gonna [Am] throw it back to [F] you`
           return mockPreElement;
         }
         return null;
-      }, 'Champagne Supernova - Oasis - Cifra Club');
+      }, 'Hotel California - Eagles - Cifra Club');
 
       const result = extractChordSheet();
 
       expect(result).toEqual({
         songChords: `[Intro]
-[C] [G] [Am] [F]
+Bm  F#  A  E  G  D  Em  F#
 
 [Verse 1]
-[C] Today is gonna be the [G] day
-That they're gonna [Am] throw it back to [F] you`,
+Bm                        F#
+On a dark desert highway, cool wind in my hair
+A                               E
+Warm smell of colitas, rising up through the air
+G                         D
+Up ahead in the distance, I saw a shimmering light
+Em                                         F#
+My head grew heavy and my sight grew dim, I had to stop for the night
+
+[Verse 2]
+Bm                            F#
+There she stood in the doorway, I heard the mission bell
+A                                           E
+And I was thinking to myself, "This could be Heaven or this could be Hell"
+G                              D
+Then she lit up a candle and she showed me the way
+Em                                       F#
+There were voices down the corridor, I thought I heard them say`,
         songKey: '',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0,
-        title: 'Champagne Supernova',
-        artist: 'Oasis'
+        title: 'Hotel California',
+        artist: 'Eagles'
       });
     });
 
@@ -453,19 +521,20 @@ That they're gonna [Am] throw it back to [F] you`,
 
     it('should extract song key using extractSongKey function', () => {
       const mockPreElement = {
-        textContent: '[C] Some chord content [G]'
+        textContent: `[Intro]
+Em7  G  Dsus4  A7sus4`
       };
 
       const mockH1Element = {
-        textContent: 'Test Song'
+        textContent: 'Wonderwall'
       };
 
       const mockH2AElement = {
-        textContent: 'Test Artist'
+        textContent: 'Oasis'
       };
 
       const mockKeyElement = {
-        textContent: 'Am'
+        textContent: 'G'
       };
 
       mockDocument((selector) => {
@@ -482,17 +551,18 @@ That they're gonna [Am] throw it back to [F] you`,
           return mockKeyElement;
         }
         return null;
-      }, 'Test Song - Test Artist - Cifra Club');
+      }, 'Wonderwall - Oasis - Cifra Club');
 
       const result = extractChordSheet();
 
       expect(result).toEqual({
-        songChords: '[C] Some chord content [G]',
-        songKey: 'Am', // Should use extractSongKey function
+        songChords: `[Intro]
+Em7  G  Dsus4  A7sus4`,
+        songKey: 'G', // Should use extractSongKey function
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0,
-        title: 'Test Song',
-        artist: 'Test Artist'
+        title: 'Wonderwall',
+        artist: 'Oasis'
       });
     });
 
@@ -539,19 +609,20 @@ That they're gonna [Am] throw it back to [F] you`,
 
     it('should extract guitar capo using extractGuitarCapo function', () => {
       const mockPreElement = {
-        textContent: '[C] Some chord content [G]'
+        textContent: `[Intro]
+Bm  F#  A  E  G  D  Em  F#`
       };
 
       const mockH1Element = {
-        textContent: 'Test Song'
+        textContent: 'Hotel California'
       };
 
       const mockH2AElement = {
-        textContent: 'Test Artist'
+        textContent: 'Eagles'
       };
 
       const mockKeyElement = {
-        textContent: 'C'
+        textContent: 'Bm'
       };
 
       const mockCapoElement = {
@@ -575,17 +646,18 @@ That they're gonna [Am] throw it back to [F] you`,
           return mockCapoElement;
         }
         return null;
-      }, 'Test Song - Test Artist - Cifra Club');
+      }, 'Hotel California - Eagles - Cifra Club');
 
       const result = extractChordSheet();
 
       expect(result).toEqual({
-        songChords: '[C] Some chord content [G]',
-        songKey: 'C',
+        songChords: `[Intro]
+Bm  F#  A  E  G  D  Em  F#`,
+        songKey: 'Bm',
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 3, // Should use extractGuitarCapo function
-        title: 'Test Song',
-        artist: 'Test Artist'
+        title: 'Hotel California',
+        artist: 'Eagles'
       });
     });
 
