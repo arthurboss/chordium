@@ -95,7 +95,7 @@ describe('Search Controller Integration Tests', () => {
 
     it('should search for artists in Supabase', async () => {
       // Mock successful Supabase response
-      const mockArtist = { id: 1, displayName: 'Test Artist', path: 'test-artist' };
+      const mockArtist = { id: 1, displayName: 'Test Artist', path: 'test-artist', songCount: 25 };
       mockSupabase.ilike.mockResolvedValueOnce({
         data: [mockArtist],
         error: null
@@ -106,7 +106,12 @@ describe('Search Controller Integration Tests', () => {
         .query({ artist: 'test' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([mockArtist]);
+      // Expect normalized format (without id)
+      expect(response.body).toEqual([{
+        displayName: 'Test Artist',
+        path: 'test-artist',
+        songCount: 25
+      }]);
       expect(mockSupabase.from).toHaveBeenCalledWith('artists');
       expect(mockSupabase.select).toHaveBeenCalledWith('*');
       expect(mockSupabase.ilike).toHaveBeenCalledWith('displayName', '%test%');
@@ -119,10 +124,8 @@ describe('Search Controller Integration Tests', () => {
         error: { message: 'Database error' }
       });
 
-      // Mock CifraClub response
+      // Mock CifraClub response - this is what the transformToArtistResults returns
       const mockResults = [{ 
-        title: 'Test Artist', 
-        url: 'https://www.cifraclub.com.br/test-artist',
         displayName: 'Test Artist',
         path: 'test-artist',
         songCount: null
@@ -143,7 +146,7 @@ describe('Search Controller Integration Tests', () => {
   describe('GET /api/cifraclub-search', () => {
     it('should search for artists with Supabase fallback', async () => {
       // Mock successful Supabase response
-      const mockArtist = { id: 1, displayName: 'Test Artist', path: 'test-artist' };
+      const mockArtist = { id: 1, displayName: 'Test Artist', path: 'test-artist', songCount: 10 };
       mockSupabase.ilike.mockResolvedValueOnce({
         data: [mockArtist],
         error: null
@@ -154,7 +157,12 @@ describe('Search Controller Integration Tests', () => {
         .query({ artist: 'test' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([mockArtist]);
+      // Expect normalized format (without id)
+      expect(response.body).toEqual([{
+        displayName: 'Test Artist',
+        path: 'test-artist',
+        songCount: 10
+      }]);
       expect(mockSupabase.from).toHaveBeenCalledWith('artists');
     });
 

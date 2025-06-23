@@ -147,13 +147,13 @@ describe('Search Controller', () => {
 
   describe('GET /api/artists', () => {
     it('should return artists from Supabase when available', async () => {
-      const mockArtistsResponse = [
+      const mockSupabaseResponse = [
         { id: 1, displayName: 'Test', path: 'test', songCount: null }
       ];
       
       // Mock successful Supabase response
       mockSupabaseClient.ilike.mockResolvedValueOnce({ 
-        data: mockArtistsResponse, 
+        data: mockSupabaseResponse, 
         error: null 
       });
 
@@ -162,7 +162,12 @@ describe('Search Controller', () => {
         .query({ artist: 'test' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockArtistsResponse);
+      // Expect normalized format (without id)
+      expect(response.body).toEqual([{
+        displayName: 'Test',
+        path: 'test',
+        songCount: null
+      }]);
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('artists');
       expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
       expect(mockSupabaseClient.ilike).toHaveBeenCalledWith('displayName', '%test%');

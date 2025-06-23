@@ -4,13 +4,13 @@ import SEARCH_TYPES from '../../constants/searchTypes.js';
 
 describe('URL Utils', () => {
   describe('isValidResult - Legacy URL-based tests (deprecated)', () => {
-    it.skip('should return true for valid artist URL', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/' };
+    it('should return true for valid artist URL', () => {
+      const result = { path: 'oasis' };
       expect(isValidResult(result, SEARCH_TYPES.ARTIST)).toBe(true);
     });
 
-    it.skip('should return true for valid song URL', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/wonderwall/' };
+    it('should return true for valid song URL', () => {
+      const result = { path: 'oasis/wonderwall' };
       expect(isValidResult(result, SEARCH_TYPES.SONG)).toBe(true);
     });
 

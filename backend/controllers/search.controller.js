@@ -2,6 +2,7 @@ import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import { s3StorageService as S3StorageService } from '../services/s3-storage.service.js';
 import logger from '../utils/logger.js';
+import { normalizeArtistResults } from '../utils/response-normalizers.js';
 
 import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
@@ -44,7 +45,9 @@ class SearchController {
             
           if (!error && artists && artists.length > 0) {
             logger.info(`Found ${artists.length} artists in Supabase`);
-            return res.json(artists);
+            // Normalize Supabase results to match CifraClub format
+            const normalizedResults = normalizeArtistResults(artists, 'supabase');
+            return res.json(normalizedResults);
           }
           
           if (error) {
@@ -174,7 +177,9 @@ class SearchController {
 
         if (!error && artists && artists.length > 0) {
           logger.info(`Found ${artists.length} artists in Supabase`);
-          return res.json(artists);
+          // Normalize Supabase results to match CifraClub format
+          const normalizedResults = normalizeArtistResults(artists, 'supabase');
+          return res.json(normalizedResults);
         }
 
         if (error) {
