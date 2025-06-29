@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from '../useChordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { TestRouter } from '@/__tests__/shared/test-setup';
+import React from 'react';
 
 // Mock all the dependencies
 vi.mock('../useChordSheet/cache-coordinator', () => ({
@@ -23,7 +25,11 @@ describe('useChordSheet Hook - ChordSheet Interface', () => {
   });
 
   it('should return ChordSheet data structure', async () => {
-    const { result } = renderHook(() => useChordSheet());
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <TestRouter>{children}</TestRouter>
+    );
+
+    const { result } = renderHook(() => useChordSheet(), { wrapper });
     
     // The hook should return an object with ChordSheet properties
     expect(result.current).toEqual(

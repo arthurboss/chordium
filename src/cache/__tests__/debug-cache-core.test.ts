@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateCacheKey } from '@/cache/core/cache-key-generator';
 import { initializeCache } from '@/cache/core/cache-initializer';
+import { getTestSong } from '@/__tests__/shared/test-setup';
 
 describe('Debug Cache Core', () => {
   let localStorageMock: any;
@@ -29,9 +30,11 @@ describe('Debug Cache Core', () => {
   });
 
   it('should test cache key generation', () => {
-    const key = generateCacheKey('Oasis', 'Wonderwall');
+    const testSong = getTestSong(0);
+    const key = generateCacheKey(testSong.artist, testSong.title);
     console.log('Generated key:', key);
-    expect(key).toBe('oasis-wonderwall');
+    const expectedKey = testSong.artist.toLowerCase().replace(/\s+/g, '-') + '-' + testSong.title.toLowerCase().replace(/\s+/g, '-');
+    expect(key).toBe(expectedKey);
   });
 
   it('should test cache initialization', () => {

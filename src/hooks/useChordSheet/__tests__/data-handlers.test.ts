@@ -2,24 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataHandlers } from '../data-handlers';
 import { ChordSheet } from '@/types/chordSheet';
 import { toChordSheetWithUIState } from '@/types/chordSheetWithUIState';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { getTestSong } from '@/__tests__/shared/test-setup';
 
-// Mock fetch to load real sample songs
+// Mock fetch
 global.fetch = vi.fn();
-
-// Load real sample songs from JSON files for testing
-const loadTestSampleSong = (filename: string): ChordSheet => {
-  const filePath = join(process.cwd(), 'src', 'data', 'songs', `${filename}.json`);
-  const content = readFileSync(filePath, 'utf-8');
-  return JSON.parse(content) as ChordSheet;
-};
 
 describe('DataHandlers', () => {
   let dataHandlers: DataHandlers;
   const mockSetChordData = vi.fn();
 
-  // Real sample ChordSheet for testing - loaded from actual sample files
+  // Real sample ChordSheet for testing - use shared test setup
   let sampleChordSheet: ChordSheet;
 
   beforeEach(() => {
@@ -27,7 +19,15 @@ describe('DataHandlers', () => {
     dataHandlers = new DataHandlers();
     
     // Load real sample song before each test
-    sampleChordSheet = loadTestSampleSong('eagles-hotel_california');
+    const testSong = getTestSong(1); // Hotel California
+    sampleChordSheet = {
+      title: testSong.title,
+      artist: testSong.artist,
+      songChords: testSong.songChords,
+      songKey: testSong.songKey,
+      guitarTuning: testSong.guitarTuning,
+      guitarCapo: testSong.guitarCapo
+    };
   });
 
   describe('handleImmediateData', () => {

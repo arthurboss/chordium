@@ -1,14 +1,29 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Song } from '@/types/song';
+import { ChordSheet } from '@/types/chordSheet';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 import {
   getSongs,
-  saveSongs,
-  addSong,
-  updateSong,
+  getChordSheets,
+  addChordSheet,
+  updateChordSheet,
+  deleteChordSheet,
   deleteSong,
   loadSongs,
-  migrateSongsFromOldStorage
+  loadChordSheets
 } from '../unified-song-storage';
+
+// Mock the cache implementations
+vi.mock('../../cache/implementations/my-songs-cache', () => ({
+  getAllFromMySongs: vi.fn(() => []),
+  addToMySongs: vi.fn(),
+  updateInMySongs: vi.fn(),
+  removeFromMySongs: vi.fn(),
+}));
+
+vi.mock('../../cache/implementations/chord-sheet-cache', () => ({
+  cacheChordSheet: vi.fn(),
+}));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -187,47 +202,6 @@ describe('Unified Song Storage', () => {
       
       expect(result).toEqual(expected);
       expect(getSongs()).toEqual(expected);
-    });
-  });
-
-  describe('migrateSongsFromOldStorage', () => {
-    it('should migrate songs from chordium-songs to mySongs', () => {
-      const oldSongs = [testSong1, testSong2];
-      localStorageMock.setItem('chordium-songs', JSON.stringify(oldSongs));
-      
-      migrateSongsFromOldStorage();
-      
-      expect(getSongs()).toEqual(oldSongs);
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('chordium-songs');
-    });
-
-    it('should merge old songs with existing songs without duplicates', () => {
-      localStorageMock.setItem('mySongs', JSON.stringify([testSong1]));
-      localStorageMock.setItem('chordium-songs', JSON.stringify([testSong1, testSong2]));
-      
-      migrateSongsFromOldStorage();
-      
-      const songs = getSongs();
-      expect(songs).toHaveLength(2);
-      expect(songs.some(song => song.path === testSong1.path && song.title === testSong1.title)).toBe(true);
-      expect(songs.some(song => song.path === testSong2.path && song.title === testSong2.title)).toBe(true);
-    });
-
-    it('should handle migration errors gracefully', () => {
-      localStorageMock.setItem('chordium-songs', 'invalid-json');
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      
-      migrateSongsFromOldStorage();
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to migrate songs from old storage:', expect.any(Error));
-      consoleSpy.mockRestore();
-    });
-
-    it('should do nothing when no old storage exists', () => {
-      migrateSongsFromOldStorage();
-      
-      expect(getSongs()).toEqual([]);
-      expect(localStorageMock.removeItem).not.toHaveBeenCalled();
     });
   });
 });

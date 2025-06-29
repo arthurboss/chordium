@@ -7,19 +7,21 @@ import {
 } from '../implementations/chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { getTestSong, setupLocalStorageMock } from '@/__tests__/shared/test-setup';
 
-describe('Refactored Chord Sheet Cache Integration', () => {
+describe('Chord Sheet Cache Comprehensive Integration', () => {
   beforeEach(() => {
+    setupLocalStorageMock();
     clearChordSheetCache();
     vi.clearAllMocks();
   });
 
-  it('should store and retrieve ChordSheet objects using song.path as key', () => {
-    // Arrange
-    const songPath = 'leonardo-goncalves:getsemani';
+  it('should store and retrieve ChordSheet objects using artist and title', () => {
+    // Arrange - use test song for consistency
+    const testSong = getTestSong(0); // Wonderwall
     const chordSheet: ChordSheet = {
-      title: 'Getsêmani',
-      artist: 'Leonardo Gonçalves',
+      title: testSong.title,
+      artist: testSong.artist,
       songChords: '[Intro] C7M G/B Am7...',
       songKey: 'C',
       guitarTuning: GUITAR_TUNINGS.STANDARD,
@@ -27,27 +29,28 @@ describe('Refactored Chord Sheet Cache Integration', () => {
     };
 
     // Act
-    cacheChordSheet(songPath, chordSheet);
-    const retrieved = getCachedChordSheet(songPath);
+    cacheChordSheet(testSong.artist, testSong.title, chordSheet);
+    const retrieved = getCachedChordSheet(testSong.artist, testSong.title);
 
     // Assert
     expect(retrieved).toEqual(chordSheet);
   });
 
-  it('should generate consistent cache keys from song paths', () => {
+  it('should generate consistent cache keys from artist and title', () => {
     // Arrange
-    const songPath = 'leonardo-goncalves:getsemani';
+    const testSong = getTestSong(1); // Hotel California
     
     // Act
-    const key = generateChordSheetCacheKey(songPath);
+    const key = generateChordSheetCacheKey(testSong.artist, testSong.title);
     
-    // Assert
-    expect(key).toBe('chord-sheet:leonardo-goncalves:getsemani');
+    // Assert - should be normalized properly
+    const expectedKey = `${testSong.artist.toLowerCase().replace(/\s+/g, '_')}-${testSong.title.toLowerCase().replace(/\s+/g, '_')}`;
+    expect(key).toBe(expectedKey);
   });
 
   it('should return null for non-existent cache entries', () => {
     // Act
-    const result = getCachedChordSheet('non-existent:song');
+    const result = getCachedChordSheet('Non-Existent', 'Artist');
     
     // Assert
     expect(result).toBeNull();
@@ -55,7 +58,6 @@ describe('Refactored Chord Sheet Cache Integration', () => {
 
   it('should store complete ChordSheet structure without extra fields', () => {
     // Arrange
-    const songPath = 'test:song';
     const chordSheet: ChordSheet = {
       title: 'Test Song',
       artist: 'Test Artist',
@@ -66,8 +68,8 @@ describe('Refactored Chord Sheet Cache Integration', () => {
     };
 
     // Act
-    cacheChordSheet(songPath, chordSheet);
-    const retrieved = getCachedChordSheet(songPath);
+    cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
+    const retrieved = getCachedChordSheet(chordSheet.artist, chordSheet.title);
 
     // Assert - verify structure matches exactly
     expect(retrieved).toEqual({
@@ -87,7 +89,6 @@ describe('Refactored Chord Sheet Cache Integration', () => {
 
   it('should demonstrate the new consistent cache structure', () => {
     // This test verifies the expected structure as described in the user requirements
-    const songPath = 'chord:leonardo gonçalves:getsêmani';
     const chordSheet: ChordSheet = {
       title: 'Getsêmani',
       artist: 'Leonardo Gonçalves',
@@ -97,7 +98,7 @@ describe('Refactored Chord Sheet Cache Integration', () => {
       guitarCapo: 2
     };
 
-    cacheChordSheet(songPath, chordSheet);
+    cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
     
     // Verify the cache structure by checking localStorage directly
     const cacheData = localStorage.getItem('chordium-chord-sheet-cache');

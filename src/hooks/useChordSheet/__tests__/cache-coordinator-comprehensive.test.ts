@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CacheCoordinator } from '../cache-coordinator';
 import { ChordSheet } from '@/types/chordSheet';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { getTestSong } from '@/__tests__/shared/test-setup';
 
 // Mock the cache functions
 vi.mock('../../../cache/implementations/chord-sheet-cache', () => ({
@@ -14,13 +13,6 @@ vi.mock('../../../cache/implementations/chord-sheet-cache', () => ({
 // Mock fetch for backend API calls
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
-
-// Load real sample songs from JSON files for testing
-const loadTestSampleSong = (filename: string): ChordSheet => {
-  const filePath = join(process.cwd(), 'src', 'data', 'songs', `${filename}.json`);
-  const content = readFileSync(filePath, 'utf-8');
-  return JSON.parse(content) as ChordSheet;
-};
 
 let hotelCaliforniaChordSheet: ChordSheet;
 let wonderwallChordSheet: ChordSheet;
@@ -36,16 +28,34 @@ const mockClearExpiredCache = vi.mocked(clearExpiredChordSheetCache);
 const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
 const mockCacheChordSheet = vi.mocked(cacheChordSheet);
 
-describe('CacheCoordinator', () => {
+describe('CacheCoordinator - Comprehensive Tests', () => {
   let cacheCoordinator: CacheCoordinator;
 
   beforeEach(() => {
     vi.clearAllMocks();
     cacheCoordinator = new CacheCoordinator();
     
-    // Load real sample songs before each test
-    hotelCaliforniaChordSheet = loadTestSampleSong('eagles-hotel_california');
-    wonderwallChordSheet = loadTestSampleSong('oasis-wonderwall');
+    // Load real sample songs from shared test setup
+    const hotelCalifornia = getTestSong(1); // Hotel California
+    const wonderwall = getTestSong(0); // Wonderwall
+    
+    hotelCaliforniaChordSheet = {
+      title: hotelCalifornia.title,
+      artist: hotelCalifornia.artist,
+      songChords: hotelCalifornia.songChords,
+      songKey: hotelCalifornia.songKey,
+      guitarTuning: hotelCalifornia.guitarTuning,
+      guitarCapo: hotelCalifornia.guitarCapo
+    };
+    
+    wonderwallChordSheet = {
+      title: wonderwall.title,
+      artist: wonderwall.artist,
+      songChords: wonderwall.songChords,
+      songKey: wonderwall.songKey,
+      guitarTuning: wonderwall.guitarTuning,
+      guitarCapo: wonderwall.guitarCapo
+    };
   });
 
   describe('clearExpiredCache', () => {

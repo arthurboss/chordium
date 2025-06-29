@@ -4,6 +4,7 @@ import { addToMySongs, getAllFromMySongs } from '../implementations/my-songs-cac
 import { loadSampleChordSheet, isSampleSong } from '@/services/sample-song-loader';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { getTestSong } from '@/__tests__/shared/test-setup';
 
 // Mock localStorage
 const mockLocalStorage: { [key: string]: string } = {};
@@ -47,14 +48,7 @@ describe('Complete Cache System Integration', () => {
     guitarCapo: 2
   };
 
-  const sampleSong: ChordSheet = {
-    title: 'Wonderwall',
-    artist: 'Oasis',
-    songChords: '[Intro]\nEm7  G  Dsus4  A7sus4',
-    songKey: 'G',
-    guitarTuning: GUITAR_TUNINGS.STANDARD,
-    guitarCapo: 0
-  };
+  const sampleSong = getTestSong(0); // Use first test song as sample
 
   describe('Scraped Song Cache (chord-sheet-cache)', () => {
     it('should cache scraped songs in chord-sheet-cache', () => {
@@ -71,7 +65,7 @@ describe('Complete Cache System Integration', () => {
       // They should only be loaded from files when needed
       
       // Verify sample song is not in cache initially
-      const retrieved = getCachedChordSheet('Oasis', 'Wonderwall');
+      const retrieved = getCachedChordSheet(sampleSong.artist, sampleSong.title);
       expect(retrieved).toBeNull();
     });
   });
@@ -99,8 +93,9 @@ describe('Complete Cache System Integration', () => {
 
   describe('Sample Song Loading', () => {
     it('should identify sample songs correctly', () => {
-      expect(isSampleSong('Oasis', 'Wonderwall')).toBe(true);
-      expect(isSampleSong('Eagles', 'Hotel California')).toBe(true);
+      expect(isSampleSong(sampleSong.artist, sampleSong.title)).toBe(true);
+      const anotherTestSong = getTestSong(1);
+      expect(isSampleSong(anotherTestSong.artist, anotherTestSong.title)).toBe(true);
       expect(isSampleSong('External Artist', 'Scraped Song')).toBe(false);
     });
 
@@ -111,9 +106,12 @@ describe('Complete Cache System Integration', () => {
         json: () => Promise.resolve(sampleSong)
       } as Response);
 
-      const loaded = await loadSampleChordSheet('oasis', 'wonderwall');
+      // Use normalized filename format for the API
+      const normalizedArtist = sampleSong.artist.toLowerCase().replace(/\s+/g, '-');
+      const normalizedTitle = sampleSong.title.toLowerCase().replace(/\s+/g, '-');
+      const loaded = await loadSampleChordSheet(normalizedArtist, normalizedTitle);
       
-      expect(fetch).toHaveBeenCalledWith('/data/songs/oasis-wonderwall.json');
+      expect(fetch).toHaveBeenCalledWith(`/data/songs/${normalizedArtist}-${normalizedTitle}.json`);
       expect(loaded).toEqual(sampleSong);
     });
   });

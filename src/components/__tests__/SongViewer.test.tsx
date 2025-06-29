@@ -70,8 +70,8 @@ describe('SongViewer', () => {
         />
       );
 
-      // Verify that chord sheet cache was called with the proper cache key generated from artist and title
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('leonardo_goncalves-getsemani');
+      // Verify that chord sheet cache was called with the proper artist and title parameters
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('Leonardo Gonçalves', 'Getsêmani');
 
       // Verify that ChordDisplay receives the actual chord content, not the ID
       expect(container.querySelector('[data-testid="chord-content"]')).toHaveTextContent(/\[Intro\] C7M/);
@@ -99,7 +99,7 @@ describe('SongViewer', () => {
         />
       );
 
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('non-existent_artist-non-existent_song');
+      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('Non-existent Artist', 'Non-existent Song');
 
       // Should show an error message or empty content
       expect(container.querySelector('[data-testid="chord-content"]')).toHaveTextContent('');

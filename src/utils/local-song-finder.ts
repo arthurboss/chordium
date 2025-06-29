@@ -1,4 +1,4 @@
-import { getSongs, migrateSongsFromOldStorage } from './unified-song-storage';
+import { getSongs } from './unified-song-storage';
 import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
 import { Song } from '../types/song';
 import { extractSongMetadata } from './metadata-extraction';
@@ -25,9 +25,6 @@ export async function findLocalSong(
   songParam: string
 ): Promise<LocalSongResult | null> {
   try {
-    // Ensure migration has happened
-    migrateSongsFromOldStorage();
-    
     // Get all songs from unified storage
     const mySongs = getSongs();
     

@@ -193,8 +193,8 @@ const ScrapeTestPage = () => {
                         capo: chordData.capo,
                       };
                       
-                      // Get current songs from localStorage
-                      const storageKey = 'chordium-songs';
+                      // Get current songs from localStorage using unified storage
+                      const storageKey = 'chordium-user-saved-songs';
                       const existingSongs = JSON.parse(localStorage.getItem(storageKey) || '[]');
                       
                       // Add new song to the beginning

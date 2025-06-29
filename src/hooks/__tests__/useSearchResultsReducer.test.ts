@@ -2,18 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { searchResultsReducer, SearchResultsState, SearchResultsAction, initialState } from '../useSearchResultsReducer';
 import { Artist } from '@/types/artist';
 import { Song } from '@/types/song';
+import { getArtistSearchResult, getSongSearchResult } from '../../../fixtures/index.js';
 
-// Mock data for testing
-const mockArtist: Artist = {
-  path: 'test-artist',
-  displayName: 'Test Artist',
-  songCount: 10
+// Use fixtures instead of hardcoded mocks
+const getTestArtist = (): Artist => {
+  const radioheadResults = getArtistSearchResult('radiohead');
+  return radioheadResults[0]; // Returns { path: "radiohead/", displayName: "Radiohead", songCount: null }
 };
 
-const mockSong: Song = {
-  path: 'test-artist/test-song',
-  title: 'Test Song',
-  artist: 'Test Artist'
+const getTestSong = (): Song => {
+  const creepResults = getSongSearchResult('creep');
+  return {
+    path: creepResults[0].url || creepResults[0].path,
+    title: creepResults[0].title,
+    artist: creepResults[0].artist
+  }; // Returns Creep by Radiohead
 };
 
 const mockError = new Error('Test error message');
@@ -77,27 +80,30 @@ describe('useSearchResultsReducer', () => {
 
       const action: SearchResultsAction = { 
         type: 'SEARCH_SUCCESS', 
-        artists: [mockArtist], 
-        songs: [mockSong] 
+        artists: [getTestArtist()], 
+        songs: [getTestSong()] 
       };
       const newState = searchResultsReducer(stateWithArtistError, action);
 
       expect(newState.artistSongsError).toBeNull();
       expect(newState.error).toBeNull();
       expect(newState.loading).toBe(false);
-      expect(newState.artists).toEqual([mockArtist]);
-      expect(newState.songs).toEqual([mockSong]);
+      expect(newState.artists).toEqual([getTestArtist()]);
+      expect(newState.songs).toEqual([getTestSong()]);
     });
 
     it('should preserve other state when clearing errors on search start', () => {
+      const testArtist = getTestArtist();
+      const testSong = getTestSong();
+      
       const stateWithData: SearchResultsState = {
         ...initialState,
         error: mockError,
         artistSongsError: 'Failed to fetch artist songs',
         hasSearched: true,
-        activeArtist: mockArtist,
-        artistSongs: [mockSong],
-        filteredArtistSongs: [mockSong]
+        activeArtist: testArtist,
+        artistSongs: [testSong],
+        filteredArtistSongs: [testSong]
       };
 
       const action: SearchResultsAction = { type: 'SEARCH_START' };
@@ -110,15 +116,16 @@ describe('useSearchResultsReducer', () => {
 
       // Other state should be preserved
       expect(newState.hasSearched).toBe(true);
-      expect(newState.activeArtist).toEqual(mockArtist);
-      expect(newState.artistSongs).toEqual([mockSong]);
-      expect(newState.filteredArtistSongs).toEqual([mockSong]);
+      expect(newState.activeArtist).toEqual(testArtist);
+      expect(newState.artistSongs).toEqual([testSong]);
+      expect(newState.filteredArtistSongs).toEqual([testSong]);
     });
   });
 
   describe('Search Flow', () => {
     it('should handle complete search error clearing flow', () => {
       let state = initialState;
+      const testArtist = getTestArtist();
 
       // 1. Start with a previous artist songs error
       state = searchResultsReducer(state, {
@@ -136,17 +143,18 @@ describe('useSearchResultsReducer', () => {
       // 3. Search succeeds - should remain cleared and show results
       state = searchResultsReducer(state, {
         type: 'SEARCH_SUCCESS',
-        artists: [mockArtist],
+        artists: [testArtist],
         songs: []
       });
       expect(state.artistSongsError).toBeNull();
       expect(state.error).toBeNull();
       expect(state.loading).toBe(false);
-      expect(state.artists).toEqual([mockArtist]);
+      expect(state.artists).toEqual([testArtist]);
     });
 
     it('should handle artist selection after error clearing', () => {
       let state = initialState;
+      const testArtist = getTestArtist();
 
       // 1. Start with a previous error
       state = searchResultsReducer(state, {
@@ -160,17 +168,17 @@ describe('useSearchResultsReducer', () => {
       // 3. Search succeeds with new artists
       state = searchResultsReducer(state, {
         type: 'SEARCH_SUCCESS',
-        artists: [mockArtist],
+        artists: [testArtist],
         songs: []
       });
 
       // 4. User selects an artist - should start fresh without previous errors
       state = searchResultsReducer(state, {
         type: 'ARTIST_SONGS_START',
-        artist: mockArtist
+        artist: testArtist
       });
 
-      expect(state.activeArtist).toEqual(mockArtist);
+      expect(state.activeArtist).toEqual(testArtist);
       expect(state.artistSongsLoading).toBe(true);
       expect(state.artistSongsError).toBeNull();
     });
@@ -195,11 +203,14 @@ describe('useSearchResultsReducer', () => {
     });
 
     it('should clear artist when requested', () => {
+      const testArtist = getTestArtist();
+      const testSong = getTestSong();
+      
       const stateWithArtist: SearchResultsState = {
         ...initialState,
-        activeArtist: mockArtist,
-        artistSongs: [mockSong],
-        filteredArtistSongs: [mockSong],
+        activeArtist: testArtist,
+        artistSongs: [testSong],
+        filteredArtistSongs: [testSong],
         artistSongsError: 'Some error'
       };
 
@@ -216,17 +227,20 @@ describe('useSearchResultsReducer', () => {
   describe('State Consistency', () => {
     it('should maintain state consistency during error transitions', () => {
       // Test that no unintended state changes occur during error handling
+      const testArtist = getTestArtist();
+      const testSong = getTestSong();
+      
       const complexState: SearchResultsState = {
         loading: false,
         error: null,
         hasSearched: true,
         artistSongsLoading: false,
         artistSongsError: 'Timeout error',
-        activeArtist: mockArtist,
-        artistSongs: [mockSong],
-        artists: [mockArtist],
-        songs: [mockSong],
-        filteredArtistSongs: [mockSong]
+        activeArtist: testArtist,
+        artistSongs: [testSong],
+        artists: [testArtist],
+        songs: [testSong],
+        filteredArtistSongs: [testSong]
       };
 
       // Start new search
@@ -239,11 +253,11 @@ describe('useSearchResultsReducer', () => {
 
       // These should remain unchanged
       expect(newState.hasSearched).toBe(true);
-      expect(newState.activeArtist).toEqual(mockArtist);
-      expect(newState.artistSongs).toEqual([mockSong]);
-      expect(newState.artists).toEqual([mockArtist]);
-      expect(newState.songs).toEqual([mockSong]);
-      expect(newState.filteredArtistSongs).toEqual([mockSong]);
+      expect(newState.activeArtist).toEqual(testArtist);
+      expect(newState.artistSongs).toEqual([testSong]);
+      expect(newState.artists).toEqual([testArtist]);
+      expect(newState.songs).toEqual([testSong]);
+      expect(newState.filteredArtistSongs).toEqual([testSong]);
     });
   });
 });

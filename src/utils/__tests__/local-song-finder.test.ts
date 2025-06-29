@@ -1,15 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { findLocalSong } from '../local-song-finder';
 import { Song } from '@/types/song';
-import { getSongs, migrateSongsFromOldStorage } from '../unified-song-storage';
+import { getSongs } from '../unified-song-storage';
 import { getCachedChordSheet } from '../../cache/implementations/chord-sheet-cache';
 import { extractSongMetadata } from '../metadata-extraction';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 
 // Mock dependencies with proper function definitions
 vi.mock('../unified-song-storage', () => ({
-  getSongs: vi.fn(),
-  migrateSongsFromOldStorage: vi.fn()
+  getSongs: vi.fn()
 }));
 
 vi.mock('../../cache/implementations/chord-sheet-cache', () => ({
@@ -21,14 +20,12 @@ vi.mock('../metadata-extraction', () => ({
 }));
 
 const mockGetSongs = vi.mocked(getSongs);
-const mockMigrateSongsFromOldStorage = vi.mocked(migrateSongsFromOldStorage);
 const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
 const mockExtractSongMetadata = vi.mocked(extractSongMetadata);
 
 describe('findLocalSong', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockMigrateSongsFromOldStorage.mockImplementation(() => {});
     mockExtractSongMetadata.mockReturnValue({
       songKey: 'C',
       guitarTuning: 'Standard'
@@ -61,7 +58,6 @@ describe('findLocalSong', () => {
 
     const result = await findLocalSong('oasis', 'wonderwall');
 
-    expect(mockMigrateSongsFromOldStorage).toHaveBeenCalled();
     expect(mockGetCachedChordSheet).toHaveBeenCalledWith('Oasis', 'Wonderwall');
     expect(result).toEqual({
       title: 'Wonderwall',

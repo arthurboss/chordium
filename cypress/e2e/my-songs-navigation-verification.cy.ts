@@ -1,4 +1,4 @@
-describe('Navigation Fix Verification', () => {
+describe('My Songs Navigation Verification', () => {
   beforeEach(() => {
     cy.visit('/');
     

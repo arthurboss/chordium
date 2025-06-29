@@ -7,7 +7,6 @@ import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
 import { useSampleSongs } from "@/hooks/use-sample-songs";
-import { useSaveSongs } from "@/hooks/use-save-songs";
 import { useSearchRedirect } from "@/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -23,7 +22,6 @@ const Home = () => {
   const [demoSong, setDemoSong] = useState<Song | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { sampleSongs, mySongs, setMySongs, refreshMySongs } = useSampleSongs();
-  useSaveSongs(mySongs);
   useSearchRedirect();
 
   // Refresh My Songs when the active tab changes to my-songs

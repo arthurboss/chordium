@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { findLocalSong } from './local-song-finder';
-import { loadSongs } from './song-storage';
+import { getSongs } from './unified-song-storage';
 import { loadSampleSongs } from './sample-songs';
 import { extractSongMetadata } from './metadata-extraction';
 
 // Mock dependencies
-vi.mock('./song-storage');
+vi.mock('./unified-song-storage');
 vi.mock('./sample-songs');
 vi.mock('./metadata-extraction');
 
-const mockedLoadSongs = vi.mocked(loadSongs);
+const mockedGetSongs = vi.mocked(getSongs);
 const mockedLoadSampleSongs = vi.mocked(loadSampleSongs);
 const mockedExtractSongMetadata = vi.mocked(extractSongMetadata);
 
@@ -29,7 +29,7 @@ describe('findLocalSong', () => {
     const mockMetadata = { songKey: 'Am', guitarTuning: 'Standard' };
 
     mockedLoadSampleSongs.mockResolvedValue(mockSampleSongs);
-    mockedLoadSongs.mockReturnValue(mockMySongs);
+    mockedGetSongs.mockReturnValue(mockMySongs);
     mockedExtractSongMetadata.mockReturnValue(mockMetadata);
 
     // Act
@@ -54,7 +54,7 @@ describe('findLocalSong', () => {
     const mockMetadata = { songKey: 'Em', guitarTuning: 'Standard' };
 
     mockedLoadSampleSongs.mockResolvedValue(mockSongs);
-    mockedLoadSongs.mockReturnValue(mockSongs);
+    mockedGetSongs.mockReturnValue(mockSongs);
     mockedExtractSongMetadata.mockReturnValue(mockMetadata);
 
     // Act
@@ -79,7 +79,7 @@ describe('findLocalSong', () => {
     const mockMetadata = { guitarTuning: 'Capo 2nd fret' };
 
     mockedLoadSampleSongs.mockResolvedValue(mockSongs);
-    mockedLoadSongs.mockReturnValue(mockSongs);
+    mockedGetSongs.mockReturnValue(mockSongs);
     mockedExtractSongMetadata.mockReturnValue(mockMetadata);
 
     // Act
@@ -93,7 +93,7 @@ describe('findLocalSong', () => {
   it('should return null when song not found', async () => {
     // Arrange
     mockedLoadSampleSongs.mockResolvedValue([]);
-    mockedLoadSongs.mockReturnValue([]);
+    mockedGetSongs.mockReturnValue([]);
 
     // Act
     const result = await findLocalSong('unknown-artist', 'unknown-song');
@@ -119,7 +119,7 @@ describe('findLocalSong', () => {
       { title: 'Song With Spaces', artist: 'Artist With Spaces', path: 'content...' }
     ];
     mockedLoadSampleSongs.mockResolvedValue(mockSongs);
-    mockedLoadSongs.mockReturnValue(mockSongs);
+    mockedGetSongs.mockReturnValue(mockSongs);
     mockedExtractSongMetadata.mockReturnValue({});
 
     // Act

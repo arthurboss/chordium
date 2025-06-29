@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { setupLocalStorageMock } from '@/__tests__/shared/test-setup';
 
 describe('localStorage test', () => {
+  beforeEach(() => {
+    // Setup localStorage mock for each test
+    setupLocalStorageMock();
+  });
+
   it('should work with localStorage directly', () => {
     // Test basic localStorage functionality
     console.log('Initial localStorage check:', localStorage.getItem('test-key'));

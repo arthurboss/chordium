@@ -28,7 +28,7 @@ describe('Sample Song Loader', () => {
 
     const result = await loadSampleChordSheet('oasis', 'wonderwall');
     
-    expect(fetch).toHaveBeenCalledWith('/src/data/songs/oasis-wonderwall.json');
+    expect(fetch).toHaveBeenCalledWith('/data/songs/oasis-wonderwall.json');
     expect(result).toEqual(mockChordSheet);
   });
 
@@ -49,7 +49,7 @@ describe('Sample Song Loader', () => {
 
     const result = await loadSampleChordSheet('eagles', 'hotel_california');
     
-    expect(fetch).toHaveBeenCalledWith('/src/data/songs/eagles-hotel_california.json');
+    expect(fetch).toHaveBeenCalledWith('/data/songs/eagles-hotel_california.json');
     expect(result).toEqual(mockChordSheet);
   });
 

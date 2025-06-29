@@ -4,15 +4,13 @@ import { Song } from '@/types/song';
 
 // Mock dependencies before importing the hook
 const mockGetSongs = vi.fn();
-const mockMigrateSongsFromOldStorage = vi.fn();
 const mockFindLocalSong = vi.fn();
 const mockIsMySONgsRoute = vi.fn();
 const mockUseParams = vi.fn();
 const mockUseNavigate = vi.fn();
 
 vi.mock('@/utils/unified-song-storage', () => ({
-  getSongs: mockGetSongs,
-  migrateSongsFromOldStorage: mockMigrateSongsFromOldStorage
+  getSongs: mockGetSongs
 }));
 
 vi.mock('@/utils/local-song-finder', () => ({
@@ -82,13 +80,12 @@ vi.mock('@/utils/url-validator', () => ({
 // Import useChordSheet after all mocks are set up
 import { useChordSheet } from '@/hooks/useChordSheet';
 
-describe('Add to My Songs - Navigation Fix Integration', () => {
+describe('Add to My Songs - Navigation Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue({ artist: 'oasis', song: 'wonderwall' });
     mockUseNavigate.mockReturnValue(vi.fn());
     mockIsMySONgsRoute.mockReturnValue(true);
-    mockMigrateSongsFromOldStorage.mockImplementation(() => {});
   });
 
   const testSong: Song = {

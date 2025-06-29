@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from './useChordSheet';
 import { ChordSheetLoadingStrategy } from '../utils/chord-sheet-loading-strategy';
-import { getChordSheetWithRefresh } from '../cache/implementations/chord-sheet-cache';
+import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
 
 // Mock dependencies
 vi.mock('../utils/chord-sheet-loading-strategy');
@@ -22,7 +22,6 @@ const mockStrategy = {
 };
 
 const mockedChordSheetLoadingStrategy = vi.mocked(ChordSheetLoadingStrategy);
-const mockedGetChordSheetWithRefresh = vi.mocked(getChordSheetWithRefresh);
 
 describe('useChordSheet', () => {
   beforeEach(() => {

@@ -8,8 +8,6 @@ import RootLayout from "@/components/layouts/RootLayout";
 const Home = lazy(() => import("./pages/Home"));
 const ChordViewer = lazy(() => import("./pages/ChordViewer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const TestPage = lazy(() => import("./pages/TestPage"));
-const ScrapeTestPage = lazy(() => import("./pages/ScrapeTestPage"));
 
 const queryClient = new QueryClient();
 
@@ -58,14 +56,6 @@ const router = createBrowserRouter([
       {
         path: "chord/:id",
         element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
-      },
-      {
-        path: "test",
-        element: <Suspense fallback={<Loading />}><TestPage /></Suspense>
-      },
-      {
-        path: "scrape-test",
-        element: <Suspense fallback={<Loading />}><ScrapeTestPage /></Suspense>
       },
       {
         // Catch-all route for 404

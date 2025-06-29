@@ -7,6 +7,7 @@ import {
 } from '../implementations/chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { getTestSong } from '@/__tests__/shared/test-setup';
 
 // Create a proper localStorage mock that actually stores data
 const createLocalStorageMock = () => {
@@ -43,61 +44,63 @@ describe('Chord Sheet Cache Key Format', () => {
   describe('generateChordSheetCacheKey', () => {
     it('should generate key in format artist_name-song_title without chord-sheet prefix', () => {
       // Test the new format: artist name with underscores, dash separator, song title with underscores
-      const key = generateChordSheetCacheKey('charlie_brown_jr-so_os_loucos_sabem');
+      const key = generateChordSheetCacheKey('Charlie Brown Jr.', 'Só os Loucos Sabem');
       expect(key).toBe('charlie_brown_jr-so_os_loucos_sabem');
     });
 
     it('should handle single word artist and song', () => {
-      const key = generateChordSheetCacheKey('oasis-wonderwall');
+      const testSong = getTestSong(0); // Oasis - Wonderwall
+      const key = generateChordSheetCacheKey(testSong.artist, testSong.title);
+      // Key should be lowercase, with underscores for spaces, dash separator
       expect(key).toBe('oasis-wonderwall');
     });
 
     it('should handle complex artist and song names', () => {
-      const key = generateChordSheetCacheKey('the_beatles-hey_jude');
+      const key = generateChordSheetCacheKey('The Beatles', 'Hey Jude');
       expect(key).toBe('the_beatles-hey_jude');
     });
 
     it('should handle names with special characters already normalized', () => {
-      const key = generateChordSheetCacheKey('joao_gilberto-garota_de_ipanema');
+      const key = generateChordSheetCacheKey('João Gilberto', 'Garota de Ipanema');
       expect(key).toBe('joao_gilberto-garota_de_ipanema');
     });
   });
 
   describe('cache storage and retrieval with new key format', () => {
     it('should store and retrieve chord sheet using new key format', () => {
-      const songPath = 'charlie_brown_jr-so_os_loucos_sabem';
+      const testSong = getTestSong(0);
       const chordSheet: ChordSheet = {
-        title: 'Só os Loucos Sabem',
-        artist: 'Charlie Brown Jr.',
-        songChords: '[Intro] Em C G D\n[Verse] Em C G D\nSó os loucos sabem...',
-        songKey: 'Em',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
+        title: testSong.title,
+        artist: testSong.artist,
+        songChords: testSong.songChords,
+        songKey: testSong.songKey,
+        guitarTuning: testSong.guitarTuning,
+        guitarCapo: testSong.guitarCapo
       };
 
       // Cache the chord sheet
-      cacheChordSheet(songPath, chordSheet);
+      cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
 
       // Retrieve the chord sheet
-      const retrieved = getCachedChordSheet(songPath);
+      const retrieved = getCachedChordSheet(chordSheet.artist, chordSheet.title);
 
       // Should match exactly
       expect(retrieved).toEqual(chordSheet);
     });
 
     it('should verify key is stored exactly as provided (no prefix)', () => {
-      const songPath = 'oasis-wonderwall';
+      const testSong = getTestSong(1);
       const chordSheet: ChordSheet = {
-        title: 'Wonderwall',
-        artist: 'Oasis',
-        songChords: '[Intro] Em7 G D A\n[Verse] Em7 G D A\nToday is gonna be...',
-        songKey: 'G',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 2
+        title: testSong.title,
+        artist: testSong.artist,
+        songChords: testSong.songChords,
+        songKey: testSong.songKey,
+        guitarTuning: testSong.guitarTuning,
+        guitarCapo: testSong.guitarCapo
       };
 
       // Cache the chord sheet
-      cacheChordSheet(songPath, chordSheet);
+      cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
 
       // Check localStorage directly to verify the key format
       const cacheData = localStorage.getItem('chordium-chord-sheet-cache');
@@ -105,7 +108,8 @@ describe('Chord Sheet Cache Key Format', () => {
       
       const cache = JSON.parse(cacheData || '{}');
       expect(cache.items).toHaveLength(1);
-      expect(cache.items[0].key).toBe('oasis-wonderwall');
+      const expectedKey = generateChordSheetCacheKey(testSong.artist, testSong.title);
+      expect(cache.items[0].key).toBe(expectedKey);
       // Should NOT have 'chord-sheet:' prefix
       expect(cache.items[0].key).not.toContain('chord-sheet:');
     });
@@ -113,10 +117,12 @@ describe('Chord Sheet Cache Key Format', () => {
 
   describe('backward compatibility', () => {
     it('should not retrieve old format keys when using new format', () => {
+      const testSong = getTestSong(2);
+      
       // Manually insert an old format key into localStorage
       const oldCacheData = {
         items: [{
-          key: 'chord-sheet:charlie-brown-jr:so-os-loucos-sabem',
+          key: `chord-sheet:${generateChordSheetCacheKey(testSong.artist, testSong.title)}`,
           chordSheet: {
             title: 'Old Format',
             artist: 'Old Artist',
@@ -133,7 +139,7 @@ describe('Chord Sheet Cache Key Format', () => {
       localStorage.setItem('chordium-chord-sheet-cache', JSON.stringify(oldCacheData));
 
       // Try to retrieve using new format
-      const retrieved = getCachedChordSheet('charlie_brown_jr-so_os_loucos_sabem');
+      const retrieved = getCachedChordSheet(testSong.artist, testSong.title);
       
       // Should return null because the key formats don't match
       expect(retrieved).toBeNull();
@@ -141,48 +147,50 @@ describe('Chord Sheet Cache Key Format', () => {
   });
 
   describe('real world examples', () => {
-    it('should handle Leonardo Gonçalves songs correctly', () => {
-      const songPath = 'leonardo_goncalves-getsemani';
+    it('should handle special character normalization in artist names', () => {
+      const testSong = getTestSong(2); // Radiohead - Creep (index 2 exists)
       const chordSheet: ChordSheet = {
-        title: 'Getsêmani',
-        artist: 'Leonardo Gonçalves',
-        songChords: '[Intro] C7M G/B Am7\n[Verse] C7M G/B Am7\nNo Getsêmani...',
-        songKey: 'C',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
+        title: testSong.title,
+        artist: testSong.artist,
+        songChords: testSong.songChords,
+        songKey: testSong.songKey,
+        guitarTuning: testSong.guitarTuning,
+        guitarCapo: testSong.guitarCapo
       };
 
-      cacheChordSheet(songPath, chordSheet);
-      const retrieved = getCachedChordSheet(songPath);
+      cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
+      const retrieved = getCachedChordSheet(chordSheet.artist, chordSheet.title);
       
       expect(retrieved).toEqual(chordSheet);
       
       // Verify key format in storage
       const cacheData = localStorage.getItem('chordium-chord-sheet-cache');
       const cache = JSON.parse(cacheData || '{}');
-      expect(cache.items[0].key).toBe('leonardo_goncalves-getsemani');
+      const expectedKey = generateChordSheetCacheKey(testSong.artist, testSong.title);
+      expect(cache.items[0].key).toBe(expectedKey);
     });
 
     it('should handle multi-word artists and songs', () => {
-      const songPath = 'red_hot_chili_peppers-under_the_bridge';
+      const testSong = getTestSong(1); // Eagles - Hotel California (index 1 exists)
       const chordSheet: ChordSheet = {
-        title: 'Under The Bridge',
-        artist: 'Red Hot Chili Peppers',
-        songChords: '[Intro] D F# Bm F# G D\n[Verse] D F# Bm\nSometimes I feel...',
-        songKey: 'D',
-        guitarTuning: GUITAR_TUNINGS.STANDARD,
-        guitarCapo: 0
+        title: testSong.title,
+        artist: testSong.artist,
+        songChords: testSong.songChords,
+        songKey: testSong.songKey,
+        guitarTuning: testSong.guitarTuning,
+        guitarCapo: testSong.guitarCapo
       };
 
-      cacheChordSheet(songPath, chordSheet);
-      const retrieved = getCachedChordSheet(songPath);
+      cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
+      const retrieved = getCachedChordSheet(chordSheet.artist, chordSheet.title);
       
       expect(retrieved).toEqual(chordSheet);
       
       // Verify key format in storage
       const cacheData = localStorage.getItem('chordium-chord-sheet-cache');
       const cache = JSON.parse(cacheData || '{}');
-      expect(cache.items[0].key).toBe('red_hot_chili_peppers-under_the_bridge');
+      const expectedKey = generateChordSheetCacheKey(testSong.artist, testSong.title);
+      expect(cache.items[0].key).toBe(expectedKey);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the search-utils module
 vi.mock('@/utils/search-utils', () => ({
@@ -47,12 +47,12 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
   }
 };
 
-describe('Tab Navigation Fix', () => {
+describe('Tab Navigation Priority', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('My Songs navigation priority fix', () => {
+  describe('My Songs navigation priority', () => {
     it('should prioritize /my-songs path over query parameters', () => {
       // Mock getSearchParamsType to return 'song' (which is truthy)
       vi.mocked(getSearchParamsType).mockReturnValue('song');

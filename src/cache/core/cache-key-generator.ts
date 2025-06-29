@@ -21,6 +21,7 @@ function normalizeNamePart(text: string): string {
     .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
     .toLowerCase()
     .replace(/[()[\]{}]/g, '') // Remove parentheses and brackets
+    .replace(/\./g, '') // Remove periods
     .replace(/\s+/g, '_') // Replace spaces with underscores
     .replace(/_{2,}/g, '_') // Replace multiple underscores with single underscore
     .replace(/(^_+)|(_+$)/g, ''); // Remove leading/trailing underscores

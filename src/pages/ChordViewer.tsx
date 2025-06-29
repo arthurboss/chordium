@@ -12,7 +12,7 @@ import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMySongs } from "@/hooks/useAddToMySongs";
-import { getSongs, migrateSongsFromOldStorage, migrateChordContentFromPath, deleteSong } from "@/utils/unified-song-storage";
+import { getSongs, deleteSong } from "@/utils/unified-song-storage";
 import { getCachedChordSheet } from "@/cache/implementations/chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
@@ -75,10 +75,6 @@ const ChordViewer = () => {
 
       const loadSongFromMySongs = async () => {
         try {
-          // Ensure data migration has occurred
-          migrateSongsFromOldStorage();
-          migrateChordContentFromPath();
-
           // Get all songs using unified storage
           const allSongs = getSongs();
           const sampleSongs = await loadSampleSongs();

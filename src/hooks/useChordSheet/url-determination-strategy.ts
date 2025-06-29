@@ -1,6 +1,20 @@
 import { getChordUrl } from "../../utils/session-storage-utils";
 import { generateChordSheetId } from "../../utils/chord-sheet-id-generator";
 
+// Environment-based logging utility to prevent infinite loops in tests
+const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
+const isVitestRunning = typeof process !== 'undefined' && process.env.VITEST === 'true';
+const shouldLog = !isTestEnvironment && !isVitestRunning;
+
+const debugLog = (message: string, ...args: unknown[]) => {
+  if (shouldLog) {
+    console.log(message, ...args);
+  } else {
+    // Debug: This should not print during tests
+    // console.log('[BLOCKED LOG]', message, 'shouldLog:', shouldLog, 'isTest:', isTestEnvironment, 'isVitest:', isVitestRunning);
+  }
+};
+
 /**
  * URL determination strategy for chord sheet fetching
  * Specific to useChordSheet hook - handles URL priority logic
@@ -50,15 +64,15 @@ export class URLDeterminationStrategy {
     // Priority 3: Use original path for fetching if available
     if (originalPath) {
       const fetchUrl = `https://www.cifraclub.com.br/${originalPath}/`;
-      console.log("Using original path for fetch:", fetchUrl);
-      console.log("Using formatted key for storage:", storageKey);
+      debugLog("Using original path for fetch:", fetchUrl);
+      debugLog("Using formatted key for storage:", storageKey);
       return { fetchUrl, storageKey, isReconstructed: false };
     }
 
     // Priority 4: Try session storage
     const storedUrl = getChordUrl(artist, song);
     if (storedUrl) {
-      console.log("Found URL in session storage:", storedUrl);
+      debugLog("Found URL in session storage:", storedUrl);
       return { fetchUrl: storedUrl, storageKey, isReconstructed: false };
     }
 
@@ -66,7 +80,7 @@ export class URLDeterminationStrategy {
     const artistSlug = artist.toLowerCase();
     const songSlug = song.toLowerCase();
     const reconstructedUrl = `https://www.cifraclub.com.br/${artistSlug}/${songSlug}/`;
-    console.log("Reconstructed URL from params:", reconstructedUrl);
+    debugLog("Reconstructed URL from params:", reconstructedUrl);
     
     return { fetchUrl: reconstructedUrl, storageKey, isReconstructed: true };
   }
