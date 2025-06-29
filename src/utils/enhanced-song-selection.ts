@@ -8,7 +8,7 @@ export interface EnhancedSongSelectionProps {
   navigate?: NavigateFunction;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
   setActiveTab?: (tab: string) => void;
-  mySongs: Song[];
+  myChordSheets: Song[];
 }
 
 export interface EnhancedSongSelectionReturn {
@@ -16,23 +16,23 @@ export interface EnhancedSongSelectionReturn {
 }
 
 /**
- * Enhanced song selection hook that checks for duplicates in My Songs
+ * Enhanced song selection hook that checks for duplicates in My Chord Sheets
  * before navigating to a song. Works for both search results and sample songs.
  */
 export function useEnhancedSongSelection({
   navigate,
   setSelectedSong,
   setActiveTab,
-  mySongs
+  myChordSheets
 }: EnhancedSongSelectionProps): EnhancedSongSelectionReturn {
   
   const navigateToExistingSong = useCallback((existingSong: Song) => {
-    console.log('[Enhanced Song Selection] Found existing song in My Songs:', existingSong);
+    console.log('[Enhanced Song Selection] Found existing song in My Chord Sheets:', existingSong);
     
     if (navigate) {
       const artistSlug = toSlug(existingSong.artist || '');
       const songSlug = toSlug(existingSong.title || '');
-      navigate(`/my-songs/${artistSlug}/${songSlug}`);
+      navigate(`/my-chord-sheets/${artistSlug}/${songSlug}`);
     }
     
     if (setSelectedSong) {
@@ -40,12 +40,12 @@ export function useEnhancedSongSelection({
     }
     
     if (setActiveTab) {
-      setActiveTab('my-songs');
+      setActiveTab('my-chord-sheets');
     }
   }, [navigate, setSelectedSong, setActiveTab]);
 
   const navigateToNewSong = useCallback((song: Song) => {
-    console.log('[Enhanced Song Selection] Song not found in My Songs, proceeding with normal navigation');
+    console.log('[Enhanced Song Selection] Song not found in My Chord Sheets, proceeding with normal navigation');
     
     if (song.artist && song.title && navigate) {
       const artistSlug = toSlug(song.artist);
@@ -66,9 +66,9 @@ export function useEnhancedSongSelection({
   const handleSongSelection = useCallback((song: Song) => {
     console.log('[Enhanced Song Selection] Processing song:', song);
     
-    // Check if the song already exists in My Songs
+    // Check if the song already exists in My Chord Sheets
     if (song.artist && song.title) {
-      const existingInMySongs = findExistingSong(mySongs, song.artist, song.title);
+      const existingInMySongs = findExistingSong(myChordSheets, song.artist, song.title);
       
       if (existingInMySongs) {
         navigateToExistingSong(existingInMySongs);
@@ -76,9 +76,9 @@ export function useEnhancedSongSelection({
       }
     }
     
-    // If song doesn't exist in My Songs, proceed with normal navigation
+    // If song doesn't exist in My Chord Sheets, proceed with normal navigation
     navigateToNewSong(song);
-  }, [mySongs, navigateToExistingSong, navigateToNewSong]);
+  }, [myChordSheets, navigateToExistingSong, navigateToNewSong]);
 
   return {
     handleSongSelection

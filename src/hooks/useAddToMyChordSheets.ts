@@ -1,24 +1,24 @@
 import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
-import { handleSaveNewSong } from "@/utils/song-save";
+import { handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { useNavigate } from "react-router-dom";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { useCallback } from "react";
 
-interface AddToMySongsData {
+interface AddToMyChordSheetsData {
   song: Song;
   chordSheet: ChordSheet;
 }
 
-export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>, setActiveTab?: (tab: string) => void) {
+export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>, setActiveTab?: (tab: string) => void) {
   const navigate = useNavigate();
   
-  return useCallback(async (data: AddToMySongsData) => {
+  return useCallback(async (data: AddToMyChordSheetsData) => {
     const { song, chordSheet } = data;
     
     try {
-      console.log('🎵 ADD TO MY SONGS START:', song.title, 'by', song.artist);
-      console.log('📊 Flow Step 9: User clicked "Add to My Songs"');
+      console.log('🎵 ADD TO MY CHORD SHEETS START:', song.title, 'by', song.artist);
+      console.log('📊 Flow Step 9: User clicked "Add to My Chord Sheets"');
       console.log('📋 Song details:', {
         title: song.title,
         artist: song.artist,
@@ -39,8 +39,8 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
 
       // Generate chord sheet ID from song data (this should match Song.path)
       const chordSheetId = song.path || generateChordSheetId(song.artist, song.title);
-      console.log('� Flow Step 10: Using chord sheet ID:', chordSheetId);
-      console.log('� ID Generation: Using Song.path directly (no redundant generation)');
+      console.log('🔑 Flow Step 10: Using chord sheet ID:', chordSheetId);
+      console.log('🔑 ID Generation: Using Song.path directly (no redundant generation)');
 
       // Create complete ChordSheet object for storage
       // Backend now provides accurate title and artist from scraped data
@@ -54,7 +54,7 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       };
       
       console.log('💾 Flow Step 11: Saving chord sheet content to localStorage');
-      console.log('�️  Storage structure:', {
+      console.log('🗄️ Storage structure:', {
         storageKey: 'chord-sheets',
         chordSheetId,
         dataStructure: {
@@ -70,12 +70,12 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
       // Save chord sheet using the API cache (already cached from fetch)
       console.log('✅ Flow Step 12: Chord sheet already cached in API cache');
       
-      console.log('💾 Flow Step 13: Saving song metadata (separate from chord content)');
+      console.log('💾 Flow Step 13: Saving chord sheet metadata (separate from chord content)');
       
       if (setMySongs && setActiveTab) {
         // User is on home page with state
         console.log('🏠 Context: Home page with state management');
-        handleSaveNewSong(
+        handleSaveNewChordSheetFromUI(
           chordSheetId, 
           fullChordSheet.title, 
           setMySongs, 
@@ -84,43 +84,43 @@ export function useAddToMySongs(setMySongs?: React.Dispatch<React.SetStateAction
           fullChordSheet.artist
         );
       } else {
-        // User is on chord viewer page - use unified storage
-        console.log('🔍 Context: Chord viewer page - using unified storage');
-        const { addChordSheet } = await import('@/utils/unified-song-storage');
+        // User is on chord viewer page - use modular chord sheet storage
+        console.log('🔍 Context: Chord viewer page - using modular chord sheet storage');
+        const { addChordSheet } = await import('@/utils/chord-sheet-storage');
         
-        console.log('� Adding chord sheet to My Songs cache:', {
+        console.log('🎧 Adding chord sheet to My Chord Sheets cache:', {
           title: fullChordSheet.title,
           artist: fullChordSheet.artist,
           contentLength: fullChordSheet.songChords.length
         });
         
-        // Add the chord sheet to My Songs cache
+        // Add the chord sheet to My Chord Sheets cache
         addChordSheet(fullChordSheet);
         
-        console.log('✅ Flow Step 14: Song added to My Songs cache');
+        console.log('✅ Flow Step 14: Chord sheet added to My Chord Sheets cache');
         
         // Show success toast
         const { toast } = await import('@/hooks/use-toast');
         toast({
-          title: 'Song added to My Songs',
-          description: `${fullChordSheet.artist} - ${fullChordSheet.title} has been added to your songs.`,
+          title: 'Chord sheet added to My Chord Sheets',
+          description: `${fullChordSheet.artist} - ${fullChordSheet.title} has been added to your chord sheets.`,
           variant: 'default'
         });
         
-        // Redirect to My Songs tab
-        navigate('/my-songs');
+        // Redirect to My Chord Sheets tab
+        navigate('/my-chord-sheets');
       }
       
       console.log('🎉 COMPLETE FLOW SUMMARY:');
       console.log('1. ✅ Backend scraped chord sheet data');
       console.log('2. ✅ Frontend received ChordSheet response from backend');
       console.log('3. ✅ Chord sheet data cached in API cache with 1-day TTL');
-      console.log('4. ✅ Song metadata saved to localStorage["my-songs"] with Song.path = ID');
+      console.log('4. ✅ Chord sheet metadata saved to localStorage["my-chord-sheets"] with Song.path = ID');
       console.log('5. ✅ Future retrieval: song.path -> API cache lookup -> chordSheet');
-      console.log('🎉 ADD TO MY SONGS COMPLETE - Using single API cache for chord sheets!');
+      console.log('🎉 ADD TO MY CHORD SHEETS COMPLETE - Using single API cache for chord sheets!');
       
     } catch (err) {
-      console.error('❌ Error in addToMySongs:', err);
+      console.error('❌ Error in addToMyChordSheets:', err);
       console.error('💥 Flow failed at step:', err.message);
       throw err;
     }

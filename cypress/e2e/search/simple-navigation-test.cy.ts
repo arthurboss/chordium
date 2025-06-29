@@ -30,12 +30,12 @@ describe('Search to Song Navigation - Simple Test', () => {
     // Click on the "View Chords" button for the first result
     cy.get('[data-cy^="view-btn-compact-"]').first().click();
     
-    // Should navigate to My Songs tab
-    cy.get('[data-cy="tab-my-songs"][data-state="active"]', { timeout: 5000 }).should('contain.text', 'My Songs');
-    cy.url().should('include', '/my-songs');
+    // Should navigate to My Chord Sheets tab
+    cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]', { timeout: 5000 }).should('contain.text', 'My Chord Sheets');
+    cy.url().should('include', '/my-chord-sheets');
     
     // Should show the SongViewer component (not the song list)
     cy.get('.animate-fade-in').should('be.visible'); // SongViewer has this class
-    cy.contains('button', 'Back to My Songs').should('be.visible');
+    cy.contains('button', 'Back to My Chord Sheets').should('be.visible');
   });
 });

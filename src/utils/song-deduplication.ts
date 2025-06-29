@@ -77,24 +77,24 @@ export interface NavigationCallbacks {
 
 /**
  * Checks if a song exists in my songs and navigates to it if found
- * @param mySongs - User's saved songs
+ * @param myChordSheets - User's saved songs
  * @param artistOrPath - Artist name or song path
  * @param title - Song title (optional)
  * @param callbacks - Navigation callback functions
  * @returns true if song was found and navigation initiated, false otherwise
  */
 export function shouldOpenExistingSong(
-  mySongs: Song[],
+  myChordSheets: Song[],
   artistOrPath: string,
   title?: string,
   callbacks: NavigationCallbacks = {}
 ): boolean {
-  const existingSong = findExistingSong(mySongs, artistOrPath, title);
+  const existingSong = findExistingSong(myChordSheets, artistOrPath, title);
   
   if (existingSong) {
-    // Navigate to the existing song in My Songs
+    // Navigate to the existing song in My Chord Sheets
     if (callbacks.navigate && existingSong.path) {
-      callbacks.navigate(`/my-songs/${existingSong.path}`);
+      callbacks.navigate(`/my-chord-sheets/${existingSong.path}`);
     }
     
     if (callbacks.setSelectedSong) {
@@ -102,7 +102,7 @@ export function shouldOpenExistingSong(
     }
     
     if (callbacks.setActiveTab) {
-      callbacks.setActiveTab('my-songs');
+      callbacks.setActiveTab('my-chord-sheets');
     }
     
     return true;

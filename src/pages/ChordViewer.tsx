@@ -11,13 +11,12 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
-import { useAddToMySongs } from "@/hooks/useAddToMySongs";
-import { getSongs, deleteSong } from "@/utils/unified-song-storage";
+import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
+import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { getCachedChordSheet } from "@/cache/implementations/chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
-import { extractSongMetadata } from "@/utils/metadata-extraction";
 import { toast } from "@/hooks/use-toast";
 
 // UI state interface for local song data with loading and error states  
@@ -32,7 +31,7 @@ const ChordViewer = () => {
   const navigate = useNavigate();
   const { navigateBackToSearch } = useNavigationHistory();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  const addToMySongs = useAddToMySongs();
+  const addToMyChordSheets = useAddToMyChordSheets();
 
   const [localSongData, setLocalSongData] = useState<LocalSongData | null>(null);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
@@ -44,39 +43,39 @@ const ChordViewer = () => {
   console.log('URL params - artist:', artist, 'song:', song, 'id:', id);
   console.log('Navigation state song:', navigationSong);
 
-  // Determine if this song is actually in "My Songs" by checking storage
-  const [isFromMySongs, setIsFromMySongs] = useState(false);
+  // Determine if this song is actually in "My Chord Sheets" by checking storage
+  const [isFromMyChordSheets, setIsFromMyChordSheets] = useState(false);
 
   useEffect(() => {
-    const songs = getSongs();
+    const songs = getMyChordSheetsAsSongs();
 
-    // Check if current song is in My Songs
+    // Check if current song is in My Chord Sheets
     const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const isInMySongs = songs.some(s => s.path === songPath);
-    setIsFromMySongs(isInMySongs);
+    setIsFromMyChordSheets(isInMySongs);
 
-    console.log('📋 Checking if song is in My Songs:');
+    console.log('📋 Checking if song is in My Chord Sheets:');
     console.log('Song path:', songPath);
-    console.log('Is in My Songs:', isInMySongs);
-    console.log('My Songs count:', songs.length);
+    console.log('Is in My Chord Sheets:', isInMySongs);
+    console.log('My Chord Sheets count:', songs.length);
   }, [navigationSong?.path, artist, song]);
 
   // Get chord data from server (for search results only)
-  // Skip server fetch for My Songs context
+  // Skip server fetch for My Chord Sheets context
   // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
   const originalSongPath = navigationSong?.path;
   console.log('🔗 Original song path from navigation state:', originalSongPath);
   const chordData = useChordSheet(undefined, originalSongPath);
 
-  // Load song from My Songs if this is a My Songs route
+  // Load song from My Chord Sheets if this is a My Chord Sheets route
   useEffect(() => {
-    if (isFromMySongs && artist && song) {
+    if (isFromMyChordSheets && artist && song) {
       setIsLoadingLocal(true);
 
-      const loadSongFromMySongs = async () => {
+      const loadSongFromMyChordSheets = async () => {
         try {
-          // Get all songs using unified storage
-          const allSongs = getSongs();
+          // Get all chord sheets using unified storage
+          const allSongs = getMyChordSheetsAsSongs();
           const sampleSongs = await loadSampleSongs();
 
           // Combine sample songs and user songs
@@ -85,7 +84,7 @@ const ChordViewer = () => {
           const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
           const songName = decodeURIComponent(song.replace(/-/g, ' '));
 
-          // Find the song in My Songs by matching artist and title
+          // Find the song in My Chord Sheets by matching artist and title
           const foundSong = songs.find(s => {
             const songArtist = s.artist?.toLowerCase() ?? '';
             const songTitle = s.title?.toLowerCase() ?? '';
@@ -94,7 +93,7 @@ const ChordViewer = () => {
           });
 
           if (foundSong) {
-            console.log('🔍 FOUND SONG IN MY SONGS:');
+            console.log('🔍 FOUND SONG IN MY CHORD SHEETS:');
             console.log('Found song object:', foundSong);
             console.log('Song path (CifraClub format):', foundSong.path);
 
@@ -157,11 +156,11 @@ const ChordViewer = () => {
               guitarTuning: GUITAR_TUNINGS.STANDARD,
               guitarCapo: 0,
               loading: false,
-              error: `Song "${songName}" by "${artistName}" not found in My Songs`
+              error: `Song "${songName}" by "${artistName}" not found in My Chord Sheets`
             });
           }
         } catch (error) {
-          console.error('Error loading song from My Songs:', error);
+          console.error('Error loading song from My Chord Sheets:', error);
           setLocalSongData({
             title: navigationSong?.title || song || '',
             artist: navigationSong?.artist || artist || '',
@@ -170,20 +169,20 @@ const ChordViewer = () => {
             guitarTuning: GUITAR_TUNINGS.STANDARD,
             guitarCapo: 0,
             loading: false,
-            error: 'Failed to load song from My Songs'
+            error: 'Failed to load song from My Chord Sheets'
           });
         }
 
         setIsLoadingLocal(false);
       };
 
-      loadSongFromMySongs();
+      loadSongFromMyChordSheets();
     }
-  }, [isFromMySongs, artist, song, navigationSong?.artist, navigationSong?.title]);
+  }, [isFromMyChordSheets, artist, song, navigationSong?.artist, navigationSong?.title]);
 
   // Helper to normalize data for UI consumption
   const getCurrentChordData = () => {
-    if (isFromMySongs && localSongData) {
+    if (isFromMyChordSheets && localSongData) {
       return {
         ...localSongData,
         loading: isLoadingLocal
@@ -202,16 +201,16 @@ const ChordViewer = () => {
   const currentChordData = getCurrentChordData();
 
   console.log('🔄 CURRENT CHORD DATA SELECTION:');
-  console.log('isFromMySongs:', isFromMySongs);
+  console.log('isFromMyChordSheets:', isFromMyChordSheets);
   console.log('localSongData:', localSongData);
   console.log('chordData (from server):', chordData);
   console.log('selectedCurrentChordData:', currentChordData);
 
   // Handle back navigation
   const handleBack = () => {
-    if (isFromMySongs) {
-      // If viewing from My Songs, go back to My Songs tab
-      navigate('/my-songs');
+    if (isFromMyChordSheets) {
+      // If viewing from My Chord Sheets, go back to My Chord Sheets tab
+      navigate('/my-chord-sheets');
     } else {
       // If viewing from search results, go back to search
       navigateBackToSearch();
@@ -244,7 +243,7 @@ const ChordViewer = () => {
   const createSongData = () => {
     console.log('🎼 CREATE SONG DATA DEBUG:');
     console.log('currentChordData:', currentChordData);
-    console.log('isFromMySongs:', isFromMySongs);
+    console.log('isFromMyChordSheets:', isFromMyChordSheets);
     console.log('navigationSong (from search result):', navigationSong);
     console.log('URL params - artist:', artist, 'songParam:', song, 'id:', id);
 
@@ -282,29 +281,29 @@ const ChordViewer = () => {
     };
   };
 
-  // Add song to My Songs
-  const handleSaveSong = () => {
+  // Add chord sheet to My Chord Sheets
+  const handleSaveChordSheet = () => {
     const songData = createSongData();
-    addToMySongs(songData);
+    addToMyChordSheets(songData);
   };
 
-  // Delete song from My Songs
+  // Delete song from My Chord Sheets
   const handleDeleteSong = () => {
     const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const songTitle = navigationSong?.title || getSongTitle();
 
-    console.log('🗑️ Deleting song from My Songs:', songPath);
+    console.log('🗑️ Deleting chord sheet from My Chord Sheets:', songPath);
 
     // Delete from storage
-    deleteSong(songPath);
+    deleteChordSheetByPath(songPath);
 
     // Show toast notification
     toast({
-      title: "Song deleted",
-      description: `"${songTitle}" has been removed from My Songs`
+      title: "Chord sheet deleted",
+      description: `"${songTitle}" has been removed from My Chord Sheets`
     });
 
-    // Navigate back to My Songs
+    // Navigate back to My Chord Sheets
     navigate('/');
   };
 
@@ -348,11 +347,11 @@ const ChordViewer = () => {
           chordContent={currentChordData.songChords}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
-          onDelete={isFromMySongs ? handleDeleteSong : handleSaveSong}
+          onDelete={isFromMyChordSheets ? handleDeleteSong : handleSaveChordSheet}
           onUpdate={() => { }}
-          backButtonLabel={isFromMySongs ? "Back to My Songs" : "Back to Search"}
-          deleteButtonLabel={isFromMySongs ? "Remove from My Songs" : "Add to My Songs"}
-          deleteButtonVariant={isFromMySongs ? "destructive" : "default"}
+          backButtonLabel={isFromMyChordSheets ? "Back to My Chord Sheets" : "Back to Search"}
+          deleteButtonLabel={isFromMyChordSheets ? "Remove from My Chord Sheets" : "Add to My Chord Sheets"}
+          deleteButtonVariant={isFromMyChordSheets ? "destructive" : "default"}
           hideDeleteButton={false}
         />
       </main>

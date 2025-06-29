@@ -19,8 +19,8 @@ describe('Enhanced Song Selection - Basic Deduplication', () => {
   });
 
   it('should handle song selection with deduplication check', () => {
-    // Use fixture data for My Songs
-    const mySongs = [
+    // Use fixture data for My Chord Sheets
+    const myChordSheets = [
       {
         path: 'oasis/wonderwall-from-search',
         title: 'Wonderwall',
@@ -33,11 +33,11 @@ describe('Enhanced Song Selection - Basic Deduplication', () => {
         navigate: mockNavigate,
         setSelectedSong: mockSetSelectedSong,
         setActiveTab: mockSetActiveTab,
-        mySongs
+        myChordSheets
       })
     );
 
-    // Test selecting a song that exists in My Songs
+    // Test selecting a song that exists in My Chord Sheets
     const wonderwallFromSearch = {
       title: 'Wonderwall',
       artist: 'Oasis',
@@ -46,9 +46,9 @@ describe('Enhanced Song Selection - Basic Deduplication', () => {
 
     result.current.handleSongSelection(wonderwallFromSearch);
 
-    // Should navigate to existing song in My Songs
-    expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-    expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongs[0]);
-    expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+    // Should navigate to existing song in My Chord Sheets
+    expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+    expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheets[0]);
+    expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
   });
 });

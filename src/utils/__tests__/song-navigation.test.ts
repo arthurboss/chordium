@@ -80,7 +80,7 @@ describe('Song Navigation', () => {
     );
   });
 
-  it('should pass Song object for My Songs navigation', () => {
+  it('should pass Song object for My Chord Sheets navigation', () => {
     const mockSong: Song = {
       title: 'My Song',
       artist: 'My Artist',

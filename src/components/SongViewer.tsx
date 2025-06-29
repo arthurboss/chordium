@@ -24,7 +24,7 @@ const SongViewer = ({
   onBack,
   onDelete,
   onUpdate,
-  backButtonLabel = "Back to My Songs",
+  backButtonLabel = "Back to My Chord Sheets",
   deleteButtonLabel = "Delete Song",
   deleteButtonVariant = "destructive",
   hideDeleteButton = false
@@ -47,7 +47,7 @@ const SongViewer = ({
       return directChordContent;
     }
 
-    console.log('🏪 Loading from cache (My Songs)');
+    console.log('🏪 Loading from cache (My Chord Sheets)');
     console.log('Song object:', song);
     console.log('Song path (might be CifraClub format):', song.path);
 

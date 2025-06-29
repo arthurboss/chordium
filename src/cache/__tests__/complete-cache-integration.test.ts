@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { cacheChordSheet, getCachedChordSheet } from '../implementations/chord-sheet-cache';
-import { addToMySongs, getAllFromMySongs } from '../implementations/my-songs-cache';
+import { addToMyChordSheets, getAllFromMyChordSheets } from '../implementations/my-chord-sheets-cache';
 import { loadSampleChordSheet, isSampleSong } from '@/services/sample-song-loader';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
@@ -70,24 +70,24 @@ describe('Complete Cache System Integration', () => {
     });
   });
 
-  describe('My Songs Cache (chordium-user-saved-songs)', () => {
-    it('should store user-saved songs in My Songs cache', () => {
-      // Add a song to My Songs
-      addToMySongs(scrapedSong.artist, scrapedSong.title, scrapedSong);
+  describe('My Chord Sheets Cache (chordium-user-saved-songs)', () => {
+    it('should store user-saved songs in My ChordSheets cache', () => {
+      // Add a song to My ChordSheets
+      addToMyChordSheets(scrapedSong.artist, scrapedSong.title, scrapedSong);
       
-      // Should be retrievable from My Songs
-      const mySongs = getAllFromMySongs();
-      expect(mySongs).toHaveLength(1);
-      expect(mySongs[0]).toEqual(scrapedSong);
+      // Should be retrievable from My ChordSheets
+      const myChordSheets = getAllFromMyChordSheets();
+      expect(myChordSheets).toHaveLength(1);
+      expect(myChordSheets[0]).toEqual(scrapedSong);
     });
 
-    it('should handle sample songs in My Songs (dev mode)', () => {
-      // In dev mode, sample songs can be in My Songs as starter content
-      addToMySongs(sampleSong.artist, sampleSong.title, sampleSong);
+    it('should handle sample songs in My ChordSheets (dev mode)', () => {
+      // In dev mode, sample songs can be in My ChordSheets as starter content
+      addToMyChordSheets(sampleSong.artist, sampleSong.title, sampleSong);
       
-      const mySongs = getAllFromMySongs();
-      expect(mySongs).toHaveLength(1);
-      expect(mySongs[0]).toEqual(sampleSong);
+      const myChordSheets = getAllFromMyChordSheets();
+      expect(myChordSheets).toHaveLength(1);
+      expect(myChordSheets[0]).toEqual(sampleSong);
     });
   });
 
@@ -121,8 +121,8 @@ describe('Complete Cache System Integration', () => {
       // Cache a scraped song
       cacheChordSheet(scrapedSong.artist, scrapedSong.title, scrapedSong);
       
-      // Add a sample song to My Songs
-      addToMySongs(sampleSong.artist, sampleSong.title, sampleSong);
+      // Add a sample song to My ChordSheets
+      addToMyChordSheets(sampleSong.artist, sampleSong.title, sampleSong);
       
       // Scraped song should be in chord-sheet-cache
       const cachedScraped = getCachedChordSheet(scrapedSong.artist, scrapedSong.title);
@@ -132,10 +132,10 @@ describe('Complete Cache System Integration', () => {
       const cachedSample = getCachedChordSheet(sampleSong.artist, sampleSong.title);
       expect(cachedSample).toBeNull();
       
-      // Sample song should be in My Songs
-      const mySongs = getAllFromMySongs();
-      expect(mySongs).toHaveLength(1);
-      expect(mySongs[0]).toEqual(sampleSong);
+      // Sample song should be in My ChordSheets
+      const myChordSheets = getAllFromMyChordSheets();
+      expect(myChordSheets).toHaveLength(1);
+      expect(myChordSheets[0]).toEqual(sampleSong);
     });
   });
 

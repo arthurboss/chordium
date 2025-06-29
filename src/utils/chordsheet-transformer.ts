@@ -10,7 +10,7 @@ export interface LegacyChordSheet {
   chords: string;
   key?: string;
   tuning?: string;
-  capo?: string;
+  capo?: string | number;
   bpm?: number;
   strumming?: string;
   notes?: string;
@@ -25,22 +25,50 @@ export const transformLegacyToNew = (legacy: LegacyChordSheet): ChordSheet => {
   // Find matching tuning or default to standard
   let guitarTuning: GuitarTuning = GUITAR_TUNINGS.STANDARD;
   if (legacy.tuning) {
-    const tuningEntry = Object.entries(GUITAR_TUNINGS).find(([_, value]) => 
-      value.join('-') === legacy.tuning || 
-      legacy.tuning.toLowerCase().includes(Object.keys(GUITAR_TUNINGS).find(key => key.toLowerCase().replace('_', ' ') === legacy.tuning?.toLowerCase())?.toLowerCase() || '')
-    );
-    if (tuningEntry) {
-      guitarTuning = tuningEntry[1] as GuitarTuning;
+    const tuningLower = legacy.tuning.toLowerCase().trim();
+    
+    // Try to match against known tuning names first
+    if (tuningLower === 'standard') {
+      guitarTuning = GUITAR_TUNINGS.STANDARD;
+    } else if (tuningLower === 'drop_d' || tuningLower === 'drop d') {
+      guitarTuning = GUITAR_TUNINGS.DROP_D;
+    } else {
+      // Try to match by tuning array values
+      const tuningEntry = Object.entries(GUITAR_TUNINGS).find(([key, value]) => {
+        return value.join(' ') === legacy.tuning || 
+               value.join(' ').toLowerCase() === tuningLower;
+      });
+      
+      if (tuningEntry) {
+        guitarTuning = tuningEntry[1] as GuitarTuning;
+      } else {
+        // Try to parse as space-separated tuning
+        const tuningParts = legacy.tuning.split(' ').map(s => s.trim()).filter(s => s.length > 0);
+        if (tuningParts.length === 6) {
+          guitarTuning = tuningParts as GuitarTuning;
+        }
+      }
+    }
+  }
+
+  // Parse capo value whether it's string or number
+  let guitarCapo = 0;
+  if (legacy.capo !== undefined && legacy.capo !== null) {
+    if (typeof legacy.capo === 'string') {
+      const parsed = parseInt(legacy.capo.replace(/\D/g, ''), 10);
+      guitarCapo = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    } else if (typeof legacy.capo === 'number') {
+      guitarCapo = legacy.capo < 0 ? 0 : legacy.capo;
     }
   }
 
   return {
     title: legacy.title,
-    artist: legacy.artist,
+    artist: legacy.artist || 'Unknown Artist',
     songChords: legacy.chords,
     songKey: legacy.key || '',
     guitarTuning,
-    guitarCapo: legacy.capo ? parseInt(legacy.capo.replace(/\D/g, ''), 10) || 0 : 0
+    guitarCapo
   };
 };
 
@@ -50,75 +78,75 @@ export const transformLegacyToNew = (legacy: LegacyChordSheet): ChordSheet => {
  * @returns Legacy ChordSheet object
  */
 export const transformNewToLegacy = (chordSheet: ChordSheet): LegacyChordSheet => {
-  // Find tuning name
-  const tuningName = Object.entries(GUITAR_TUNINGS).find(([_, value]) => 
-    JSON.stringify(value) === JSON.stringify(chordSheet.guitarTuning)
-  )?.[0] || 'STANDARD';
+  // Convert guitar tuning array to string
+  const tuningString = chordSheet.guitarTuning.join(' ');
 
   return {
     title: chordSheet.title,
     artist: chordSheet.artist,
     chords: chordSheet.songChords,
     key: chordSheet.songKey,
-    tuning: tuningName.replace('_', ' ').toLowerCase(),
-    capo: chordSheet.guitarCapo > 0 ? `Capo ${chordSheet.guitarCapo}` : ''
+    tuning: tuningString,
+    capo: chordSheet.guitarCapo > 0 ? chordSheet.guitarCapo : ''
   };
 };
 
 /**
  * Create a default ChordSheet object
- * @param title - Song title
- * @param artist - Artist name
+ * @param overrides - Optional overrides for default values
  * @returns Default ChordSheet object
  */
-export const createDefaultChordSheet = (title: string, artist: string): ChordSheet => {
+export const createDefaultChordSheet = (overrides?: Partial<ChordSheet>): ChordSheet => {
   return {
-    title,
-    artist,
+    title: '',
+    artist: 'Unknown Artist',
     songChords: '',
     songKey: '',
     guitarTuning: GUITAR_TUNINGS.STANDARD,
-    guitarCapo: 0
+    guitarCapo: 0,
+    ...overrides
   };
 };
 
 /**
  * Validate ChordSheet object
  * @param chordSheet - ChordSheet to validate
- * @returns Validation result
+ * @returns True if valid, false otherwise
  */
-export const validateChordSheet = (chordSheet: ChordSheet): { isValid: boolean; errors: string[] } => {
+export const validateChordSheet = (chordSheet: unknown): boolean => {
+  if (!chordSheet || typeof chordSheet !== 'object') {
+    return false;
+  }
+
+  const sheet = chordSheet as Record<string, unknown>;
   const errors: string[] = [];
 
-  if (!chordSheet.title?.trim()) {
+  if (!sheet.title || typeof sheet.title !== 'string' || !sheet.title.trim()) {
     errors.push('Title is required');
   }
 
-  if (!chordSheet.artist?.trim()) {
+  if (!sheet.artist || typeof sheet.artist !== 'string' || !sheet.artist.trim()) {
     errors.push('Artist is required');
   }
 
-  if (!chordSheet.songChords?.trim()) {
+  if (!sheet.songChords || typeof sheet.songChords !== 'string' || !sheet.songChords.trim()) {
     errors.push('Content is required');
   }
 
-  if (chordSheet.guitarTuning) {
+  if (sheet.guitarTuning) {
     const isValidTuning = Object.values(GUITAR_TUNINGS).some(tuning => 
-      JSON.stringify(tuning) === JSON.stringify(chordSheet.guitarTuning)
+      JSON.stringify(tuning) === JSON.stringify(sheet.guitarTuning)
     );
     if (!isValidTuning) {
       errors.push('Invalid tuning');
     }
   }
 
-  if (chordSheet.guitarCapo && (chordSheet.guitarCapo < 0 || chordSheet.guitarCapo > 12)) {
+  if (sheet.guitarCapo && (typeof sheet.guitarCapo !== 'number' || sheet.guitarCapo < 0 || sheet.guitarCapo > 12)) {
     errors.push('Capo must be between 0 and 12');
   }
 
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
+  return errors.length === 0;
 };
 
 /**

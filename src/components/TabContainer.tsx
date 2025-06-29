@@ -8,16 +8,14 @@ import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleSaveNewSong } from "../utils/song-save";
-import { handleUpdateSong } from "../utils/song-update";
-import { handleDeleteSong } from "../utils/song-delete";
+import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  mySongs: Song[];
+  myChordSheets: Song[];
   setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
   selectedSong: Song | null;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
@@ -27,7 +25,7 @@ interface TabContainerProps {
 const TabContainer = ({ 
   activeTab, 
   setActiveTab, 
-  mySongs, 
+  myChordSheets, 
   setMySongs,
   selectedSong,
   setSelectedSong,
@@ -51,21 +49,21 @@ const TabContainer = ({
       navigate("/upload");
     } else if (value === "search") {
       navigate("/search");
-    } else if (value === "my-songs") {
-      navigate("/my-songs");
+    } else if (value === "my-chord-sheets") {
+      navigate("/my-chord-sheets");
     }
   };
   
   const handleSongSelect = (song: Song) => {
     console.log('🎵 [TabContainer] handleSongSelect called with:', song);
     
-    // For My Songs: Navigate to /my-songs/:artist/:song and pass Song object as state
+    // For My Chord Sheets: Navigate to /my-chord-sheets/:artist/:song and pass Song object as state
     if (song.artist && song.title) {
       // Create URL-friendly slugs using Unicode-aware function
       const artistSlug = toSlug(song.artist);
       const songSlug = toSlug(song.title);
       
-      const targetUrl = `/my-songs/${artistSlug}/${songSlug}`;
+      const targetUrl = `/my-chord-sheets/${artistSlug}/${songSlug}`;
       console.log('🎯 [TabContainer] Navigating to:', targetUrl, 'with song data:', song);
       // Pass the Song object as navigation state so ChordViewer can use it directly
       navigate(targetUrl, {
@@ -77,7 +75,7 @@ const TabContainer = ({
       // Fallback for songs without proper artist/title structure
       console.log('🔄 [TabContainer] Using fallback navigation for:', song.path);
       setSelectedSong(song);
-      navigate(`/my-songs?song=${encodeURIComponent(song.path)}`, {
+      navigate(`/my-chord-sheets?song=${encodeURIComponent(song.path)}`, {
         state: {
           song: song
         }
@@ -85,16 +83,16 @@ const TabContainer = ({
     }
   };
   
-  const handleSaveUploadedSong = (content: string, title: string) => {
-    handleSaveNewSong(content, title, setMySongs, navigate, setActiveTab);
+  const handleSaveUploadedChordSheet = (content: string, title: string) => {
+    handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
   };
   
-  const handleSongUpdate = (content: string) => {
-    handleUpdateSong(content, selectedSong, mySongs, setMySongs, setSelectedSong);
+  const handleChordSheetUpdate = (content: string) => {
+    handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
   };
   
-  const handleSongDelete = (songPath: string) => {
-    handleDeleteSong(songPath, mySongs, setMySongs, selectedSong, setSelectedSong);
+  const handleChordSheetDelete = (songPath: string) => {
+    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
   };
 
   // Handle keyboard navigation for the tabs
@@ -113,12 +111,12 @@ const TabContainer = ({
         {...cyAttr("tabs-list")}
       >
         <TabsTrigger 
-          value="my-songs" 
+          value="my-chord-sheets" 
           className="text-xs sm:text-sm" 
-          onKeyDown={(e) => handleKeyDown(e, "my-songs")}
-          {...cyAttr("tab-my-songs")}
+          onKeyDown={(e) => handleKeyDown(e, "my-chord-sheets")}
+          {...cyAttr("tab-my-chord-sheets")}
         >
-          My Songs
+          My Chord Sheets
         </TabsTrigger>
         <TabsTrigger 
           value="search" 
@@ -144,31 +142,31 @@ const TabContainer = ({
             setMySongs={setMySongs}
             setActiveTab={setActiveTab}
             setSelectedSong={setSelectedSong}
-            mySongs={mySongs}
+            myChordSheets={myChordSheets}
           />
         </TabsContent>
         
         <TabsContent value="upload" className="focus-visible:outline-none focus-visible:ring-0">
           <UploadTab 
             chordDisplayRef={chordDisplayRef}
-            onSaveUploadedSong={handleSaveUploadedSong}
+            onSaveUploadedSong={handleSaveUploadedChordSheet}
           />
         </TabsContent>
         
-        <TabsContent value="my-songs" className="focus-visible:outline-none focus-visible:ring-0">
+        <TabsContent value="my-chord-sheets" className="focus-visible:outline-none focus-visible:ring-0">
           {selectedSong ? (
             <SongViewer 
               song={selectedSong}
               chordDisplayRef={chordDisplayRef}
               onBack={() => setSelectedSong(null)}
-              onDelete={handleSongDelete}
-              onUpdate={handleSongUpdate}
+              onDelete={handleChordSheetDelete}
+              onUpdate={handleChordSheetUpdate}
             />
           ) : (
             <SongList 
-              songs={mySongs}
+              songs={myChordSheets}
               onSongSelect={handleSongSelect}
-              onDeleteSong={handleSongDelete}
+              onDeleteSong={handleChordSheetDelete}
               onUploadClick={() => handleTabChange("upload")}
             />
           )}

@@ -1,14 +1,14 @@
 /**
  * Tests for the "local first" behavior in useSearchResults hook
  * 
- * The expectation is that if a song exists in "My Songs" (local storage),
+ * The expectation is that if a song exists in "My Chord Sheets" (local storage),
  * it should be shown immediately in search results without making a backend API call.
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useSearchResults } from '../useSearchResults';
-import { addToMySongs, clearMySongs, getFromMySongs } from '@/cache/implementations/my-songs-cache';
+import { addToMyChordSheets, clearMyChordSheets, getFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 import { ChordSheet } from '@/types/chordSheet';
 
 // Mock the search cache to avoid conflicts
@@ -25,7 +25,7 @@ describe('useSearchResults - Local First Behavior', () => {
   beforeEach(() => {
     // Clear all mocks and local storage before each test
     vi.clearAllMocks();
-    clearMySongs();
+    clearMyChordSheets();
     mockFetch.mockClear();
     
     // Mock localStorage with actual implementation for testing
@@ -48,12 +48,12 @@ describe('useSearchResults - Local First Behavior', () => {
   });
 
   afterEach(() => {
-    clearMySongs();
+    clearMyChordSheets();
     vi.restoreAllMocks();
   });
 
-  it('should show songs from My Songs immediately when searching for existing local songs', async () => {
-    // Arrange: Add a song to My Songs first
+  it('should show songs from My Chord Sheets immediately when searching for existing local songs', async () => {
+    // Arrange: Add a song to My Chord Sheets first
     const testChordSheet: ChordSheet = {
       artist: 'Oasis',
       title: 'Wonderwall',
@@ -63,14 +63,14 @@ describe('useSearchResults - Local First Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Oasis', 'Wonderwall', testChordSheet);
+    addToMyChordSheets('Oasis', 'Wonderwall', testChordSheet);
 
-    // Verify the song was added to My Songs
-    const storedSong = getFromMySongs('Oasis', 'Wonderwall');
+    // Verify the song was added to My Chord Sheets
+    const storedSong = getFromMyChordSheets('Oasis', 'Wonderwall');
     expect(storedSong).not.toBeNull();
     expect(storedSong?.title).toBe('Wonderwall');
 
-    // Act: Search for the song that exists in My Songs
+    // Act: Search for the song that exists in My Chord Sheets
     const { result } = renderHook(() => 
       useSearchResults('', 'wonderwall', '', 'wonderwall', true)
     );
@@ -83,7 +83,7 @@ describe('useSearchResults - Local First Behavior', () => {
     // Should NOT have made any fetch calls since the song exists locally
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show the song from My Songs in results
+    // Should show the song from My Chord Sheets in results
     expect(result.current.songs).toHaveLength(1);
     expect(result.current.songs[0]).toMatchObject({
       title: 'Wonderwall',
@@ -91,8 +91,8 @@ describe('useSearchResults - Local First Behavior', () => {
     });
   });
 
-  it('should show songs from My Songs immediately when searching by artist and song that exists locally', async () => {
-    // Arrange: Add multiple songs to My Songs
+  it('should show songs from My Chord Sheets immediately when searching by artist and song that exists locally', async () => {
+    // Arrange: Add multiple songs to My Chord Sheets
     const testChordSheet1: ChordSheet = {
       artist: 'Oasis',
       title: 'Wonderwall',
@@ -111,8 +111,8 @@ describe('useSearchResults - Local First Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Oasis', 'Wonderwall', testChordSheet1);
-    addToMySongs('Oasis', 'Champagne Supernova', testChordSheet2);
+    addToMyChordSheets('Oasis', 'Wonderwall', testChordSheet1);
+    addToMyChordSheets('Oasis', 'Champagne Supernova', testChordSheet2);
 
     // Act: Search for a specific artist + song combination that exists locally
     const { result } = renderHook(() => 
@@ -127,7 +127,7 @@ describe('useSearchResults - Local First Behavior', () => {
     // Should NOT have made any fetch calls
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show the specific song from My Songs
+    // Should show the specific song from My Chord Sheets
     expect(result.current.songs).toHaveLength(1);
     expect(result.current.songs[0]).toMatchObject({
       title: 'Wonderwall',
@@ -135,8 +135,8 @@ describe('useSearchResults - Local First Behavior', () => {
     });
   });
 
-  it('should fall back to API when song does not exist in My Songs', async () => {
-    // Arrange: Add a different song to My Songs
+  it('should fall back to API when song does not exist in My Chord Sheets', async () => {
+    // Arrange: Add a different song to My Chord Sheets
     const testChordSheet: ChordSheet = {
       artist: 'Radiohead',
       title: 'Creep',
@@ -146,9 +146,9 @@ describe('useSearchResults - Local First Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Radiohead', 'Creep', testChordSheet);
+    addToMyChordSheets('Radiohead', 'Creep', testChordSheet);
 
-    // Mock API response for a song not in My Songs
+    // Mock API response for a song not in My Chord Sheets
     const apiResponse = [
       {
         artist: 'Oasis',
@@ -164,12 +164,12 @@ describe('useSearchResults - Local First Behavior', () => {
       text: () => Promise.resolve(JSON.stringify(apiResponse))
     });
 
-    // Act: Search for a song that does NOT exist in My Songs
+    // Act: Search for a song that does NOT exist in My Chord Sheets
     const { result } = renderHook(() => 
       useSearchResults('', 'wonderwall', '', 'wonderwall', true)
     );
 
-    // Assert: Should make an API call since song is not in My Songs
+    // Assert: Should make an API call since song is not in My Chord Sheets
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/cifraclub-search?artist=&song=wonderwall')
@@ -188,8 +188,8 @@ describe('useSearchResults - Local First Behavior', () => {
     });
   });
 
-  it('should prioritize My Songs results over API results when both are available', async () => {
-    // Arrange: Add a song to My Songs with different details than what API would return
+  it('should prioritize My Chord Sheets results over API results when both are available', async () => {
+    // Arrange: Add a song to My Chord Sheets with different details than what API would return
     const localChordSheet: ChordSheet = {
       artist: 'Oasis',
       title: 'Wonderwall',
@@ -199,7 +199,7 @@ describe('useSearchResults - Local First Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Oasis', 'Wonderwall', localChordSheet);
+    addToMyChordSheets('Oasis', 'Wonderwall', localChordSheet);
 
     // Mock API response (this should not be called)
     mockFetch.mockResolvedValueOnce({
@@ -215,7 +215,7 @@ describe('useSearchResults - Local First Behavior', () => {
       ]))
     });
 
-    // Act: Search for the song that exists in My Songs
+    // Act: Search for the song that exists in My Chord Sheets
     const { result } = renderHook(() => 
       useSearchResults('oasis', 'wonderwall', 'oasis', 'wonderwall', true)
     );
@@ -228,17 +228,17 @@ describe('useSearchResults - Local First Behavior', () => {
     // Should NOT have made any fetch calls
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show the local version (Song objects don't have songChords, but this proves it's from My Songs)
+    // Should show the local version (Song objects don't have songChords, but this proves it's from My Chord Sheets)
     expect(result.current.songs).toHaveLength(1);
     expect(result.current.songs[0]).toMatchObject({
       title: 'Wonderwall',
       artist: 'Oasis',
-      path: '/my-songs/Oasis/Wonderwall' // Local songs have this path pattern
+      path: '/my-chord-sheets/Oasis/Wonderwall' // Local songs have this path pattern
     });
   });
 
-  it('should show multiple My Songs results when searching by partial title', async () => {
-    // Arrange: Add multiple songs with similar titles to My Songs
+  it('should show multiple My Chord Sheets results when searching by partial title', async () => {
+    // Arrange: Add multiple songs with similar titles to My Chord Sheets
     const wonderwallChordSheet: ChordSheet = {
       artist: 'Oasis',
       title: 'Wonderwall',
@@ -257,8 +257,8 @@ describe('useSearchResults - Local First Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Oasis', 'Wonderwall', wonderwallChordSheet);
-    addToMySongs('Stevie Wonder', 'I Wonder', wonderChordSheet);
+    addToMyChordSheets('Oasis', 'Wonderwall', wonderwallChordSheet);
+    addToMyChordSheets('Stevie Wonder', 'I Wonder', wonderChordSheet);
 
     // Act: Search with partial title that matches both songs
     const { result } = renderHook(() => 
@@ -273,7 +273,7 @@ describe('useSearchResults - Local First Behavior', () => {
     // Should NOT have made any fetch calls
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show both matching songs from My Songs
+    // Should show both matching songs from My Chord Sheets
     expect(result.current.songs).toHaveLength(2);
     expect(result.current.songs).toEqual(
       expect.arrayContaining([

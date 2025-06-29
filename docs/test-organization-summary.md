@@ -52,7 +52,7 @@ src/
         cache-key-generation.test.ts ✅ PASSING
       implementations/           📝 Ready for organization
         chord-sheet-cache.test.ts
-        my-songs-cache.test.ts
+        my-chord-sheets-cache.test.ts
       integration/               📝 Ready for organization
         
   hooks/
@@ -129,10 +129,9 @@ const testData = { ...testChordSheet } as ChordSheet;
 - Easy to understand test organization
 - Reusable test utilities
 
-## Next Steps Recommendation
+## Testing Standards
 
-1. **Continue the pattern** for remaining test files
-2. **Apply shared setup** to fix fetch/localStorage issues
+1. **Use the established pattern** for all test files
+2. **Apply shared setup** to ensure consistent test environment
 3. **Add Router context** to hook tests as needed
 4. **Group related tests** into logical subfolders
-5. **Remove old monolithic test files** once split into focused suites

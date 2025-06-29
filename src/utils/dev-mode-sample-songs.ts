@@ -1,43 +1,41 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { addToMySongs, getAllFromMySongs } from '../cache/implementations/my-songs-cache';
+import { addToMyChordSheets, getAllFromMyChordSheets } from '../cache/implementations/my-chord-sheets-cache';
 
 /**
- * Populates My Songs with sample songs in development mode only
+ * Populates My Chord Sheets with sample songs in development mode only
  * Follows SRP: Single responsibility of development mode sample song initialization
  * 
  * @param sampleChordSheets - Array of sample chord sheets to add
  * @returns Promise<void>
  */
 export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]): Promise<void> {
-  // Check development mode using multiple methods for reliability
-  const isDev = import.meta.env.DEV || 
-                import.meta.env.MODE === 'development' ||
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1';
+  // Check development mode using build-time environment variable only
+  // Runtime checks like hostname are unreliable for build-time decisions
+  const isDev = import.meta.env.DEV;
 
   if (!isDev) {
     console.log('🏭 Production mode: Skipping sample song population');
     return;
   }
 
-  console.log('🔧 Development mode detected, checking My Songs cache...');
+  console.log('🔧 Development mode detected, checking My Chord Sheets cache...');
 
-  // Check if My Songs is already populated
-  const existingSongs = getAllFromMySongs();
+  // Check if My Chord Sheets is already populated
+  const existingSongs = getAllFromMyChordSheets();
   if (existingSongs.length > 0) {
-    console.log('📚 My Songs already populated, skipping sample song initialization');
+    console.log('📚 My Chord Sheets already populated, skipping sample song initialization');
     return;
   }
 
-  console.log('🔧 Development mode: Populating My Songs with sample chord sheets...');
+  console.log('🔧 Development mode: Populating My Chord Sheets with sample chord sheets...');
   
-  // Add each sample chord sheet to My Songs
+  // Add each sample chord sheet to My Chord Sheets
   sampleChordSheets.forEach((chordSheet) => {
-    addToMySongs(chordSheet.artist, chordSheet.title, chordSheet);
-    console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to My Songs`);
+    addToMyChordSheets(chordSheet.artist, chordSheet.title, chordSheet);
+    console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to My Chord Sheets`);
   });
 
-  console.log(`✅ Successfully populated My Songs with ${sampleChordSheets.length} sample songs`);
+  console.log(`✅ Successfully populated My Chord Sheets with ${sampleChordSheets.length} sample songs`);
 }
 
 /**

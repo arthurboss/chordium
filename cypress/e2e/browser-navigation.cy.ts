@@ -8,7 +8,7 @@ describe('Browser Navigation Tests', () => {
 
   it('should update active tab based on direct URL navigation', () => {
     // Check default tab
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Navigate directly to search page
     cy.visit('/search');
@@ -19,13 +19,13 @@ describe('Browser Navigation Tests', () => {
     cy.get('[data-state="active"]').should('contain.text', 'Upload');
     
     // Navigate back to my songs
-    cy.visit('/my-songs');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.visit('/my-chord-sheets');
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
   });
 
   it('should set active tab when navigating with tab buttons', () => {
-    // Start at My Songs tab
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    // Start at My Chord Sheets tab
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Navigate to Search using tab button
     cy.get('button[role="tab"]').contains('Search').click();
@@ -37,18 +37,18 @@ describe('Browser Navigation Tests', () => {
     cy.url().should('include', '/upload');
     cy.get('[data-state="active"]').should('contain.text', 'Upload');
     
-    // Navigate back to My Songs using tab button
-    cy.get('button[role="tab"]').contains('My Songs').click();
-    cy.url().should('include', '/my-songs');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    // Navigate back to My Chord Sheets using tab button
+    cy.get('button[role="tab"]').contains('My Chord Sheets').click();
+    cy.url().should('include', '/my-chord-sheets');
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
   });
 
-  it('should navigate to artist/song route when viewing a song from My Songs', () => {
-    // Click View Chords on a song from My Songs
+  it('should navigate to artist/song route when viewing a song from My Chord Sheets', () => {
+    // Click View Chords on a song from My Chord Sheets
     cy.contains('View Chords').first().click();
     
-    // URL should follow pattern /my-songs/artist/song-name
-    cy.url().should('match', /\/my-songs\/[\w-]+\/[\w-]+$/);
+    // URL should follow pattern /my-chord-sheets/artist/song-name
+    cy.url().should('match', /\/my-chord-sheets\/[\w-]+\/[\w-]+$/);
     
     // Should show song content
     cy.get('body').should('not.contain', 'Not Found');
@@ -93,6 +93,6 @@ describe('Browser Navigation Tests', () => {
     
     // Go back to home (simulating back button)
     cy.visit('/');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
   });
 });

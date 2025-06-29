@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { 
-  addToMySongs, 
-  getAllFromMySongs, 
-  getFromMySongs, 
-  updateInMySongs, 
-  removeFromMySongs, 
+  addToMyChordSheets, 
+  getAllFromMyChordSheets, 
+  getFromMyChordSheets, 
+  updateInMyChordSheets, 
+  removeFromMyChordSheets, 
   isInMySongs, 
-  clearMySongs 
-} from '@/cache/implementations/my-songs-cache';
+  clearMyChordSheets 
+} from '@/cache/implementations/my-chord-sheets-cache';
 import { generateCacheKey } from '@/cache/core/cache-key-generator';
 import { setupLocalStorageMock, getTestSong } from '@/__tests__/shared/test-setup';
 
-describe('My Songs Cache Integration', () => {
+describe('My Chord Sheets Cache Integration', () => {
   // Use flexible test songs from the test setup
   const testSong1 = getTestSong(0);
   const testSong2 = getTestSong(1);
@@ -20,7 +20,7 @@ describe('My Songs Cache Integration', () => {
   beforeEach(() => {
     // Setup localStorage mock for each test
     setupLocalStorageMock();
-    clearMySongs();
+    clearMyChordSheets();
   });
 
   it('should use the correct cache key format', () => {
@@ -32,31 +32,31 @@ describe('My Songs Cache Integration', () => {
     expect(expectedKey1).not.toBe(expectedKey2);
   });
 
-  it('should add and retrieve chord sheets from My Songs', () => {
+  it('should add and retrieve chord sheets from My Chord Sheets', () => {
     // Add a chord sheet
-    addToMySongs(testSong1.artist, testSong1.title, testSong1 as ChordSheet);
+    addToMyChordSheets(testSong1.artist, testSong1.title, testSong1);
     
     // Check if it exists
     expect(isInMySongs(testSong1.artist, testSong1.title)).toBe(true);
     
     // Retrieve it
-    const retrieved = getFromMySongs(testSong1.artist, testSong1.title);
+    const retrieved = getFromMyChordSheets(testSong1.artist, testSong1.title);
     expect(retrieved).toEqual(testSong1);
     
     // Get all songs
-    const allSongs = getAllFromMySongs();
+    const allSongs = getAllFromMyChordSheets();
     expect(allSongs).toHaveLength(1);
     expect(allSongs[0]).toEqual(testSong1);
   });
 
   it('should handle multiple chord sheets with proper ordering', () => {
     // Add first chord sheet
-    addToMySongs(testSong1.artist, testSong1.title, testSong1);
+    addToMyChordSheets(testSong1.artist, testSong1.title, testSong1);
     
     // Add second chord sheet (should be at the beginning)
-    addToMySongs(testSong2.artist, testSong2.title, testSong2);
+    addToMyChordSheets(testSong2.artist, testSong2.title, testSong2);
     
-    const allSongs = getAllFromMySongs();
+    const allSongs = getAllFromMyChordSheets();
     expect(allSongs).toHaveLength(2);
     
     // Second song should be first (most recent)
@@ -66,7 +66,7 @@ describe('My Songs Cache Integration', () => {
 
   it('should update existing chord sheets', () => {
     // Add original
-    addToMySongs(testSong1.artist, testSong1.title, testSong1);
+    addToMyChordSheets(testSong1.artist, testSong1.title, testSong1);
     
     // Update it
     const updatedChordSheet = {
@@ -75,38 +75,38 @@ describe('My Songs Cache Integration', () => {
       songChords: 'Updated chord content'
     };
     
-    updateInMySongs(testSong1.artist, testSong1.title, updatedChordSheet);
+    updateInMyChordSheets(testSong1.artist, testSong1.title, updatedChordSheet);
     
     // Retrieve and verify update
-    const retrieved = getFromMySongs(testSong1.artist, testSong1.title);
+    const retrieved = getFromMyChordSheets(testSong1.artist, testSong1.title);
     expect(retrieved?.songKey).toBe('Am');
     expect(retrieved?.songChords).toBe('Updated chord content');
   });
 
   it('should remove chord sheets', () => {
     // Add two chord sheets
-    addToMySongs(testSong1.artist, testSong1.title, testSong1);
-    addToMySongs(testSong2.artist, testSong2.title, testSong2);
+    addToMyChordSheets(testSong1.artist, testSong1.title, testSong1);
+    addToMyChordSheets(testSong2.artist, testSong2.title, testSong2);
     
-    expect(getAllFromMySongs()).toHaveLength(2);
+    expect(getAllFromMyChordSheets()).toHaveLength(2);
     
     // Remove one
-    removeFromMySongs(testSong1.artist, testSong1.title);
+    removeFromMyChordSheets(testSong1.artist, testSong1.title);
     
     // Verify removal
     expect(isInMySongs(testSong1.artist, testSong1.title)).toBe(false);
     expect(isInMySongs(testSong2.artist, testSong2.title)).toBe(true);
     
-    const remaining = getAllFromMySongs();
+    const remaining = getAllFromMyChordSheets();
     expect(remaining).toHaveLength(1);
     expect(remaining[0]).toEqual(testSong2);
   });
 
   it('should maintain cache structure in localStorage', () => {
-    addToMySongs(testSong1.artist, testSong1.title, testSong1);
+    addToMyChordSheets(testSong1.artist, testSong1.title, testSong1);
     
     // Check the raw localStorage structure
-    const rawData = localStorage.getItem('chordium-user-saved-songs');
+    const rawData = localStorage.getItem('chordium-user-saved-chord-sheets');
     expect(rawData).toBeTruthy();
     
     if (rawData) {

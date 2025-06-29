@@ -67,7 +67,7 @@ describe('Debug Cache Core', () => {
 
   it('should manually test addToMySongs logic', () => {
     // Manual implementation to debug
-    const MY_SONGS_CACHE_KEY = 'mySongs';
+    const MY_SONGS_CACHE_KEY = 'myChordSheets';
     const cacheKey = generateCacheKey('Oasis', 'Wonderwall');
     console.log('Cache key:', cacheKey);
     

@@ -19,7 +19,7 @@ describe('Enhanced Song Selection - Case Insensitive Matching', () => {
   });
 
   it('should handle case-insensitive matching for deduplication', () => {
-    const mySongsWithCase = [
+    const myChordSheetsWithCase = [
       {
         path: 'oasis/wonderwall',
         title: 'WONDERWALL',
@@ -32,7 +32,7 @@ describe('Enhanced Song Selection - Case Insensitive Matching', () => {
         navigate: mockNavigate,
         setSelectedSong: mockSetSelectedSong,
         setActiveTab: mockSetActiveTab,
-        mySongs: mySongsWithCase
+        myChordSheets: myChordSheetsWithCase
       })
     );
 
@@ -45,7 +45,7 @@ describe('Enhanced Song Selection - Case Insensitive Matching', () => {
     result.current.handleSongSelection(searchSong);
 
     // Should find the case-insensitive match
-    expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-    expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongsWithCase[0]);
+    expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+    expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheetsWithCase[0]);
   });
 });

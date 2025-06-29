@@ -13,8 +13,8 @@ describe('Enhanced Song Selection - Integration Test', () => {
   let mockSetSelectedSong: ReturnType<typeof vi.fn>;
   let mockSetActiveTab: ReturnType<typeof vi.fn>;
 
-  // Simulate the real app scenario: Sample songs are loaded as My Songs
-  const mySongsWithSamples: Song[] = [
+  // Simulate the real app scenario: Sample songs are loaded as My Chord Sheets
+  const myChordSheetsWithSamples: Song[] = [
     {
       title: "Wonderwall",
       artist: "Oasis", 
@@ -46,7 +46,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
           navigate: mockNavigate,
           setSelectedSong: mockSetSelectedSong,
           setActiveTab: mockSetActiveTab,
-          mySongs: mySongsWithSamples
+          myChordSheets: myChordSheetsWithSamples
         })
       );
 
@@ -60,10 +60,10 @@ describe('Enhanced Song Selection - Integration Test', () => {
       // When user clicks on the search result
       result.current.handleSongSelection(wonderwallSearchResult);
 
-      // Should navigate to the existing sample song in My Songs, not the search result
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-      expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongsWithSamples[0]); // The sample Wonderwall
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      // Should navigate to the existing sample song in My Chord Sheets, not the search result
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+      expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheetsWithSamples[0]); // The sample Wonderwall
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
     it('should handle tab switching with persistent sample songs', () => {
@@ -72,7 +72,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
           navigate: mockNavigate,
           setSelectedSong: mockSetSelectedSong,
           setActiveTab: mockSetActiveTab,
-          mySongs: mySongsWithSamples
+          myChordSheets: myChordSheetsWithSamples
         })
       );
 
@@ -88,9 +88,9 @@ describe('Enhanced Song Selection - Integration Test', () => {
       
       result.current.handleSongSelection(wonderwall1);
       
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-      expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongsWithSamples[0]);
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+      expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheetsWithSamples[0]);
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
       
       // Reset mocks
       mockNavigate.mockClear();
@@ -107,9 +107,9 @@ describe('Enhanced Song Selection - Integration Test', () => {
       result.current.handleSongSelection(wonderwall2);
       
       // Should still find the same existing song (case-insensitive)
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-      expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongsWithSamples[0]);
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+      expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheetsWithSamples[0]);
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
     it('should handle new songs that are not duplicates', () => {
@@ -118,11 +118,11 @@ describe('Enhanced Song Selection - Integration Test', () => {
           navigate: mockNavigate,
           setSelectedSong: mockSetSelectedSong,
           setActiveTab: mockSetActiveTab,
-          mySongs: mySongsWithSamples
+          myChordSheets: myChordSheetsWithSamples
         })
       );
 
-      // User searches for a song not in My Songs
+      // User searches for a song not in My Chord Sheets
       const newSong = {
         title: 'Creep',
         artist: 'Radiohead',
@@ -139,40 +139,40 @@ describe('Enhanced Song Selection - Integration Test', () => {
       expect(mockSetActiveTab).not.toHaveBeenCalled();
     });
 
-    it('should handle sample songs clicked directly from My Songs', () => {
+    it('should handle sample songs clicked directly from My Chord Sheets', () => {
       const { result } = renderHook(() => 
         useEnhancedSongSelection({
           navigate: mockNavigate,
           setSelectedSong: mockSetSelectedSong,
           setActiveTab: mockSetActiveTab,
-          mySongs: mySongsWithSamples
+          myChordSheets: myChordSheetsWithSamples
         })
       );
 
-      // User clicks directly on Wonderwall from My Songs
+      // User clicks directly on Wonderwall from My Chord Sheets
       // This should work normally (no deduplication needed since it's the same song)
-      const wonderwallFromMySongs = mySongsWithSamples[0];
+      const wonderwallFromMySongs = myChordSheetsWithSamples[0];
 
       result.current.handleSongSelection(wonderwallFromMySongs);
 
       // Should navigate to the existing song (finds itself)
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
-      expect(mockSetSelectedSong).toHaveBeenCalledWith(mySongsWithSamples[0]);
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
+      expect(mockSetSelectedSong).toHaveBeenCalledWith(myChordSheetsWithSamples[0]);
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
-    it('should handle user adding songs to My Songs and then searching again', () => {
+    it('should handle user adding songs to My Chord Sheets and then searching again', () => {
       // Start with just sample songs
-      const initialMySongs = [mySongsWithSamples[0], mySongsWithSamples[1]]; // Just Wonderwall and Hotel California
+      const initialMySongs = [myChordSheetsWithSamples[0], myChordSheetsWithSamples[1]]; // Just Wonderwall and Hotel California
       
       const { result, rerender } = renderHook(
-        ({ mySongs }) => useEnhancedSongSelection({
+        ({ myChordSheets }) => useEnhancedSongSelection({
           navigate: mockNavigate,
           setSelectedSong: mockSetSelectedSong,
           setActiveTab: mockSetActiveTab,
-          mySongs
+          myChordSheets
         }),
-        { initialProps: { mySongs: initialMySongs } }
+        { initialProps: { myChordSheets: initialMySongs } }
       );
 
       // User searches for and adds Metallica song
@@ -182,7 +182,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
         artist: 'Metallica'
       };
 
-      // First time: song not in My Songs, should navigate normally
+      // First time: song not in My Chord Sheets, should navigate normally
       result.current.handleSongSelection(metallicaSong);
       
       expect(mockNavigate).toHaveBeenCalledWith('/metallica/nothing-else-matters', { 
@@ -194,23 +194,23 @@ describe('Enhanced Song Selection - Integration Test', () => {
       mockSetSelectedSong.mockClear();
       mockSetActiveTab.mockClear();
 
-      // Simulate user adding the song to My Songs
+      // Simulate user adding the song to My Chord Sheets
       const updatedMySongs = [...initialMySongs, {
-        path: 'metallica/nothing-else-matters-my-songs',
+        path: 'metallica/nothing-else-matters-my-chord-sheets',
         title: 'Nothing Else Matters',
         artist: 'Metallica'
       }];
 
-      // Re-render with updated My Songs
-      rerender({ mySongs: updatedMySongs });
+      // Re-render with updated My Chord Sheets
+      rerender({ myChordSheets: updatedMySongs });
 
       // User searches for the same song again
       result.current.handleSongSelection(metallicaSong);
 
-      // Now should find existing song and navigate to My Songs
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/metallica/nothing-else-matters');
+      // Now should find existing song and navigate to My Chord Sheets
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/metallica/nothing-else-matters');
       expect(mockSetSelectedSong).toHaveBeenCalledWith(updatedMySongs[2]); // The added song
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
   });
 });

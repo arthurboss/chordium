@@ -1,4 +1,4 @@
-import { getAllFromMySongs } from '@/cache/implementations/my-songs-cache';
+import { getAllFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 import { ChordSheet } from '@/types/chordSheet';
 import { Song } from '@/types/song';
 import { isAccentInsensitiveMatch } from './accent-insensitive-search';
@@ -12,19 +12,19 @@ export function convertChordSheetToSong(chordSheet: ChordSheet): Song {
   return {
     title: chordSheet.title,
     artist: chordSheet.artist,
-    path: `/my-songs/${encodeURIComponent(chordSheet.artist)}/${encodeURIComponent(chordSheet.title)}`
+    path: `/my-chord-sheets/${encodeURIComponent(chordSheet.artist)}/${encodeURIComponent(chordSheet.title)}`
   };
 }
 
 /**
- * Search My Songs for matches using accent-insensitive search
+ * Search My Chord Sheets for matches using accent-insensitive search
  * @param artistQuery - Artist search term (optional)
  * @param songQuery - Song/title search term (optional)
- * @returns Array of Song objects from My Songs that match the search
+ * @returns Array of Song objects from My Chord Sheets that match the search
  */
-export function searchMySongs(artistQuery?: string, songQuery?: string): Song[] {
-  // Get all songs from My Songs
-  const allMyChordSheets = getAllFromMySongs();
+export function searchMyChordSheets(artistQuery?: string, songQuery?: string): Song[] {
+  // Get all chord sheets from My Chord Sheets
+  const allMyChordSheets = getAllFromMyChordSheets();
   
   // If no search terms, return empty array (don't return all songs)
   if (!artistQuery?.trim() && !songQuery?.trim()) {
@@ -61,6 +61,6 @@ export function searchMySongs(artistQuery?: string, songQuery?: string): Song[] 
  * @returns True if any local songs match the search
  */
 export function hasLocalMatches(artistQuery?: string, songQuery?: string): boolean {
-  const matches = searchMySongs(artistQuery, songQuery);
+  const matches = searchMyChordSheets(artistQuery, songQuery);
   return matches.length > 0;
 }

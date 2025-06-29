@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 import { cacheChordSheet, getCachedChordSheet } from '@/cache/implementations/chord-sheet-cache';
-import { addToMySongs, getAllFromMySongs } from '@/cache/implementations/my-songs-cache';
+import { addToMyChordSheets, getAllFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 import { loadSampleChordSheet } from '@/services/sample-song-loader';
 
 // Mock localStorage
@@ -54,13 +54,13 @@ describe('ChordSheet Interface Integration Test', () => {
     expect(cachedSheet?.songChords).toContain('[Verse]');
     expect(cachedSheet?.songKey).toBe('C');
     
-    // 2. Test My Songs caching (for user-saved songs)
-    addToMySongs('Test Artist', 'Test Song', mockChordSheet);
-    const mySongs = getAllFromMySongs();
+    // 2. Test My ChordSheets caching (for user-saved chord sheets)
+    addToMyChordSheets('Test Artist', 'Test Song', mockChordSheet);
+    const myChordSheets = getAllFromMyChordSheets();
     
-    expect(mySongs).toHaveLength(1);
-    expect(mySongs[0]).toEqual(mockChordSheet);
-    expect(mySongs[0].songChords).toContain('[Verse]');
+    expect(myChordSheets).toHaveLength(1);
+    expect(myChordSheets[0]).toEqual(mockChordSheet);
+    expect(myChordSheets[0].songChords).toContain('[Verse]');
     
     // 3. Test sample song loading
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -84,7 +84,7 @@ describe('ChordSheet Interface Integration Test', () => {
     expect(result2).toBeNull();
   });
 
-  it('should distinguish between external cache and My Songs cache', () => {
+  it('should distinguish between external cache and My Chord Sheets cache', () => {
     const externalSong: ChordSheet = {
       ...mockChordSheet,
       title: 'External Song',
@@ -100,12 +100,12 @@ describe('ChordSheet Interface Integration Test', () => {
     // Cache in external cache (for scraped songs)
     cacheChordSheet('Test Artist', 'External Song', externalSong);
     
-    // Cache in My Songs (for user-saved songs)
-    addToMySongs('Test Artist', 'My Song', mySong);
+    // Cache in My ChordSheets (for user-saved chord sheets)
+    addToMyChordSheets('Test Artist', 'My Song', mySong);
     
     // Verify they're in different caches
     const external = getCachedChordSheet('Test Artist', 'External Song');
-    const myList = getAllFromMySongs();
+    const myList = getAllFromMyChordSheets();
     
     expect(external?.songChords).toContain('External content');
     expect(myList[0].songChords).toContain('My content');

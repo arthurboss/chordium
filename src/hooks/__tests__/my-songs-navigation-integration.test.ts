@@ -3,27 +3,29 @@ import { renderHook, act } from '@testing-library/react';
 import { Song } from '@/types/song';
 
 // Mock dependencies before importing the hook
-const mockGetSongs = vi.fn();
+const mockGetMyChordSheetsAsSongs = vi.fn();
 const mockFindLocalSong = vi.fn();
-const mockIsMySONgsRoute = vi.fn();
-const mockUseParams = vi.fn();
-const mockUseNavigate = vi.fn();
+const mockIsMyChordSheetsRoute = vi.fn();
 
-vi.mock('@/utils/unified-song-storage', () => ({
-  getSongs: mockGetSongs
+// Mock chord-sheet-storage to provide test data
+vi.mock('@/utils/chord-sheet-storage', () => ({
+  getMyChordSheetsAsSongs: mockGetMyChordSheetsAsSongs
 }));
 
-vi.mock('@/utils/local-song-finder', () => ({
+vi.mock('@/utils/local-chord-sheet-finder', () => ({
   findLocalSong: mockFindLocalSong
 }));
 
 vi.mock('@/utils/route-context-detector', () => ({
-  isMySONgsRoute: mockIsMySONgsRoute
+  isMyChordSheetsRoute: mockIsMyChordSheetsRoute
 }));
 
+const mockUseParams = vi.fn();
+const mockUseNavigate = vi.fn();
+
 vi.mock('react-router-dom', () => ({
-  useParams: mockUseParams,
-  useNavigate: mockUseNavigate
+  useParams: () => mockUseParams(),
+  useNavigate: () => mockUseNavigate()
 }));
 
 vi.mock('@/utils/chord-sheet-loading-strategy', () => ({
@@ -80,12 +82,15 @@ vi.mock('@/utils/url-validator', () => ({
 // Import useChordSheet after all mocks are set up
 import { useChordSheet } from '@/hooks/useChordSheet';
 
-describe('Add to My Songs - Navigation Integration', () => {
+describe('Add to My Chord Sheets - Navigation Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseParams.mockReturnValue({ artist: 'oasis', song: 'wonderwall' });
     mockUseNavigate.mockReturnValue(vi.fn());
-    mockIsMySONgsRoute.mockReturnValue(true);
+    mockIsMyChordSheetsRoute.mockReturnValue(true);
+    
+    // Setup default mock return for chord sheet storage
+    mockGetMyChordSheetsAsSongs.mockReturnValue([]);
   });
 
   const testSong: Song = {
@@ -94,9 +99,10 @@ describe('Add to My Songs - Navigation Integration', () => {
     path: 'oasis/wonderwall'
   };
 
-  it('should successfully load songs from My Songs without navigation issues', async () => {
-    // Setup: Song exists in unified storage and can be found locally
-    mockGetSongs.mockReturnValue([testSong]);
+  it('should successfully load songs from My Chord Sheets without navigation issues', async () => {
+    // Setup: Song exists in My Chord Sheets and can be found locally
+    mockGetMyChordSheetsAsSongs.mockReturnValue([testSong]);
+    
     mockFindLocalSong.mockResolvedValue({
       title: 'Wonderwall',
       artist: 'Oasis',
@@ -110,12 +116,12 @@ describe('Add to My Songs - Navigation Integration', () => {
     const mockLoadingStrategy = {
       shouldLoadLocal: vi.fn().mockReturnValue(true),
       loadLocal: vi.fn().mockResolvedValue({
-        content: 'chord content for wonderwall',
+        title: 'Wonderwall',
         artist: 'Oasis',
-        song: 'Wonderwall',
-        key: 'Em',
-        tuning: 'Standard',
-        capo: '2',
+        songChords: 'chord content for wonderwall',
+        songKey: 'Em',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 2,
         loading: false,
         error: null
       })
@@ -124,7 +130,7 @@ describe('Add to My Songs - Navigation Integration', () => {
     const { ChordSheetLoadingStrategy } = await import('@/utils/chord-sheet-loading-strategy');
     vi.mocked(ChordSheetLoadingStrategy).mockImplementation(() => mockLoadingStrategy);
 
-    // Act: Render the hook (simulating clicking on a song in My Songs)
+    // Act: Render the hook (simulating clicking on a song in My Chord Sheets)
     const { result } = renderHook(() => useChordSheet());
 
     // Wait for async operations to complete
@@ -146,12 +152,12 @@ describe('Add to My Songs - Navigation Integration', () => {
   it('should handle the complete workflow: add song, then navigate to it', async () => {
     // Simulate the complete workflow
     
-    // Step 1: Song gets added to My Songs (this would happen via useAddToMySongs)
-    mockGetSongs.mockReturnValue([testSong]);
+    // Step 1: Song gets added to My Chord Sheets (this would happen via useAddToMyChordSheets)
+    mockGetMyChordSheetsAsSongs.mockReturnValue([testSong]);
     
-    // Step 2: User clicks on the song in My Songs page
-    // The route context should be detected as My Songs
-    mockIsMySONgsRoute.mockReturnValue(true);
+    // Step 2: User clicks on the song in My Chord Sheets page
+    // The route context should be detected as My Chord Sheets
+    mockIsMyChordSheetsRoute.mockReturnValue(true);
     
     // Step 3: Local song finder should find the song
     mockFindLocalSong.mockResolvedValue({
@@ -165,14 +171,18 @@ describe('Add to My Songs - Navigation Integration', () => {
 
     // Step 4: Loading strategy should load from local
     const mockLoadingStrategy = {
-      shouldLoadLocal: vi.fn().mockReturnValue(true),
+      shouldLoadLocal: vi.fn().mockImplementation((artist, song) => {
+        // Call the mocked route detector function to simulate real behavior
+        mockIsMyChordSheetsRoute();
+        return Boolean(artist) && Boolean(song) && mockIsMyChordSheetsRoute();
+      }),
       loadLocal: vi.fn().mockResolvedValue({
-        content: 'chord content for wonderwall',
+        title: 'Wonderwall',
         artist: 'Oasis',
-        song: 'Wonderwall',
-        key: 'Em',
-        tuning: 'Standard',
-        capo: '2',
+        songChords: 'chord content for wonderwall',
+        songKey: 'Em',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 2,
         loading: false,
         error: null
       })
@@ -189,7 +199,7 @@ describe('Add to My Songs - Navigation Integration', () => {
     });
 
     // Assert: Verify the entire chain worked correctly
-    expect(mockIsMySONgsRoute).toHaveBeenCalled();
+    expect(mockIsMyChordSheetsRoute).toHaveBeenCalled();
     expect(mockLoadingStrategy.shouldLoadLocal).toHaveBeenCalledWith('oasis', 'wonderwall');
     expect(mockLoadingStrategy.loadLocal).toHaveBeenCalledWith('oasis', 'wonderwall');
     

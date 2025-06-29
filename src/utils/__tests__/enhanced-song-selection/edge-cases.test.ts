@@ -24,7 +24,7 @@ describe('Enhanced Song Selection - Edge Cases', () => {
         navigate: mockNavigate,
         setSelectedSong: mockSetSelectedSong,
         setActiveTab: mockSetActiveTab,
-        mySongs: []
+        myChordSheets: []
       })
     );
 

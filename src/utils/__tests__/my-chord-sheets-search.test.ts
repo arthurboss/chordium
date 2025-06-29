@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { searchMySongs, convertChordSheetToSong, hasLocalMatches } from '../my-songs-search';
-import { addToMySongs, clearMySongs } from '@/cache/implementations/my-songs-cache';
+import { searchMyChordSheets, convertChordSheetToSong, hasLocalMatches } from '../my-chord-sheets-search';
+import { addToMyChordSheets, clearMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 import { ChordSheet } from '@/types/chordSheet';
 
-describe('My Songs Search Utility', () => {
+describe('My Chord Sheets Search Utility', () => {
   beforeEach(() => {
-    // Clear My Songs before each test
-    clearMySongs();
+    // Clear My Chord Sheets before each test
+    clearMyChordSheets();
     
     // Mock localStorage
     const storage: Record<string, string> = {};
@@ -28,7 +28,7 @@ describe('My Songs Search Utility', () => {
   });
 
   afterEach(() => {
-    clearMySongs();
+    clearMyChordSheets();
     vi.restoreAllMocks();
   });
 
@@ -48,7 +48,7 @@ describe('My Songs Search Utility', () => {
       expect(song).toEqual({
         title: 'Wonderwall',
         artist: 'Oasis',
-        path: '/my-songs/Oasis/Wonderwall'
+        path: '/my-chord-sheets/Oasis/Wonderwall'
       });
     });
 
@@ -67,14 +67,14 @@ describe('My Songs Search Utility', () => {
       expect(song).toEqual({
         title: 'Do Lado de Cá',
         artist: 'Café Tacvba',
-        path: '/my-songs/Caf%C3%A9%20Tacvba/Do%20Lado%20de%20C%C3%A1'
+        path: '/my-chord-sheets/Caf%C3%A9%20Tacvba/Do%20Lado%20de%20C%C3%A1'
       });
     });
   });
 
-  describe('searchMySongs', () => {
+  describe('searchMyChordSheets', () => {
     beforeEach(() => {
-      // Add test songs to My Songs
+      // Add test songs to My Chord Sheets
       const songs = [
         {
           artist: 'Chimarruts',
@@ -115,12 +115,12 @@ describe('My Songs Search Utility', () => {
       ];
 
       songs.forEach(song => {
-        addToMySongs(song.artist, song.title, song.chordSheet);
+        addToMyChordSheets(song.artist, song.title, song.chordSheet);
       });
     });
 
     it('should find songs by accent-insensitive title search', () => {
-      const results = searchMySongs(undefined, 'do lado de ca');
+      const results = searchMyChordSheets(undefined, 'do lado de ca');
       
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
@@ -130,7 +130,7 @@ describe('My Songs Search Utility', () => {
     });
 
     it('should find songs by accent-insensitive artist search', () => {
-      const results = searchMySongs('jose gonzalez');
+      const results = searchMyChordSheets('jose gonzalez');
       
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
@@ -140,7 +140,7 @@ describe('My Songs Search Utility', () => {
     });
 
     it('should find songs by both artist and title search', () => {
-      const results = searchMySongs('oasis', 'wonderwall');
+      const results = searchMyChordSheets('oasis', 'wonderwall');
       
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
@@ -150,7 +150,7 @@ describe('My Songs Search Utility', () => {
     });
 
     it('should find songs with partial matches', () => {
-      const results = searchMySongs(undefined, 'wonder');
+      const results = searchMyChordSheets(undefined, 'wonder');
       
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
@@ -160,25 +160,25 @@ describe('My Songs Search Utility', () => {
     });
 
     it('should return empty array when no matches found', () => {
-      const results = searchMySongs('beatles', 'hey jude');
+      const results = searchMyChordSheets('beatles', 'hey jude');
       
       expect(results).toHaveLength(0);
     });
 
     it('should return empty array when no search terms provided', () => {
-      const results = searchMySongs();
+      const results = searchMyChordSheets();
       
       expect(results).toHaveLength(0);
     });
 
     it('should handle empty string search terms', () => {
-      const results = searchMySongs('', '');
+      const results = searchMyChordSheets('', '');
       
       expect(results).toHaveLength(0);
     });
 
     it('should handle whitespace-only search terms', () => {
-      const results = searchMySongs('   ', '   ');
+      const results = searchMyChordSheets('   ', '   ');
       
       expect(results).toHaveLength(0);
     });
@@ -193,9 +193,9 @@ describe('My Songs Search Utility', () => {
         guitarCapo: 0,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
       };
-      addToMySongs('Radiohead', 'Heart-Shaped Box', anotherChordSheet);
+      addToMyChordSheets('Radiohead', 'Heart-Shaped Box', anotherChordSheet);
 
-      const results = searchMySongs(undefined, 'heart');
+      const results = searchMyChordSheets(undefined, 'heart');
       
       expect(results).toHaveLength(2);
       expect(results).toEqual(
@@ -218,7 +218,7 @@ describe('My Songs Search Utility', () => {
         guitarCapo: 0,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
       };
-      addToMySongs('Chimarruts', 'Do Lado de Cá', chordSheet);
+      addToMyChordSheets('Chimarruts', 'Do Lado de Cá', chordSheet);
     });
 
     it('should return true when matches exist', () => {

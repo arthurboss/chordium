@@ -7,26 +7,26 @@ import { isCacheItemExpired } from '../core/cache-expiration-checker';
 import { enforceCacheLimit } from '../core/cache-size-enforcer';
 import { CacheItem } from '../core/cache-item';
 
-// Key for storing my songs cache in localStorage
-const MY_SONGS_CACHE_KEY = 'chordium-user-saved-songs';
+// Key for storing my chord sheets cache in localStorage
+const MY_CHORD_SHEETS_CACHE_KEY = 'chordium-user-saved-chord-sheets';
 
-// Maximum number of songs to keep in My Songs (higher than regular cache)
-const MAX_MY_SONGS = 100;
+// Maximum number of chord sheets to keep in My Chord Sheets (higher than regular cache)
+const MAX_MY_CHORD_SHEETS = 100;
 
-// My Songs cache expiration time in milliseconds (30 days)
-const MY_SONGS_EXPIRATION_TIME = 30 * 24 * 60 * 60 * 1000;
+// My Chord Sheets cache expiration time in milliseconds (30 days)
+const MY_CHORD_SHEETS_EXPIRATION_TIME = 30 * 24 * 60 * 60 * 1000;
 
-type MySongsCacheItem = CacheItem<ChordSheet>;
+type MyChordSheetsCacheItem = CacheItem<ChordSheet>;
 
 /**
- * Add a chord sheet to My Songs using the same cache structure as chord-sheet-cache
+ * Add a chord sheet to My Chord Sheets using the same cache structure as chord-sheet-cache
  * @param artist - Artist name
  * @param title - Song title
  * @param chordSheet - ChordSheet object to store
  */
-export function addToMySongs(artist: string, title: string, chordSheet: ChordSheet): void {
+export function addToMyChordSheets(artist: string, title: string, chordSheet: ChordSheet): void {
   const cacheKey = generateCacheKey(artist, title);
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   
   // Look for existing entry to preserve access count
   const existingItem = cache.items.find(item => item.key === cacheKey);
@@ -36,7 +36,7 @@ export function addToMySongs(artist: string, title: string, chordSheet: ChordShe
   const filteredItems = cache.items.filter(item => item.key !== cacheKey);
   
   // Add the new entry at the beginning (most recent first)
-  const newItem: MySongsCacheItem = {
+  const newItem: MyChordSheetsCacheItem = {
     key: cacheKey,
     data: chordSheet,
     timestamp: Date.now(),
@@ -46,33 +46,33 @@ export function addToMySongs(artist: string, title: string, chordSheet: ChordShe
   let newItems = [newItem, ...filteredItems];
   
   // Enforce cache size limit
-  newItems = enforceCacheLimit(newItems, MAX_MY_SONGS);
+  newItems = enforceCacheLimit(newItems, MAX_MY_CHORD_SHEETS);
   
   try {
-    localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify({ items: newItems }));
+    localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify({ items: newItems }));
   } catch (e) {
-    console.error('Failed to save My Songs:', e);
+    console.error('Failed to save My Chord Sheets:', e);
   }
 }
 
 /**
- * Get a chord sheet from My Songs
+ * Get a chord sheet from My Chord Sheets
  * @param artist - Artist name
  * @param title - Song title
  * @returns ChordSheet object or null if not found
  */
-export function getFromMySongs(artist: string, title: string): ChordSheet | null {
+export function getFromMyChordSheets(artist: string, title: string): ChordSheet | null {
   const cacheKey = generateCacheKey(artist, title);
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   const cacheItem = cache.items.find(item => item.key === cacheKey);
   
   if (!cacheItem) {
     return null;
   }
   
-  // Check if cache entry is expired (for My Songs, this might be much longer)
-  if (isCacheItemExpired(cacheItem, MY_SONGS_EXPIRATION_TIME)) {
-    console.log('My Songs entry expired, removing from storage');
+  // Check if cache entry is expired (for My Chord Sheets, this might be much longer)
+  if (isCacheItemExpired(cacheItem, MY_CHORD_SHEETS_EXPIRATION_TIME)) {
+    console.log('My Chord Sheets entry expired, removing from storage');
     
     // Remove expired item
     const updatedCache = {
@@ -80,9 +80,9 @@ export function getFromMySongs(artist: string, title: string): ChordSheet | null
     };
     
     try {
-      localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify(updatedCache));
+      localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify(updatedCache));
     } catch (e) {
-      console.error('Failed to save updated My Songs:', e);
+      console.error('Failed to save updated My Chord Sheets:', e);
     }
     
     return null;
@@ -93,32 +93,32 @@ export function getFromMySongs(artist: string, title: string): ChordSheet | null
   cacheItem.accessCount = (cacheItem.accessCount ?? 0) + 1;
   
   try {
-    localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify(cache));
+    localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify(cache));
   } catch (e) {
-    console.error('Failed to update My Songs access:', e);
+    console.error('Failed to update My Chord Sheets access:', e);
   }
   
   return cacheItem.data;
 }
 
 /**
- * Get all chord sheets from My Songs
+ * Get all chord sheets from My Chord Sheets
  * @returns Array of ChordSheet objects
  */
-export function getAllFromMySongs(): ChordSheet[] {
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+export function getAllFromMyChordSheets(): ChordSheet[] {
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   
   // Filter out expired items
   const validItems = cache.items.filter(item => 
-    !isCacheItemExpired(item, MY_SONGS_EXPIRATION_TIME)
+    !isCacheItemExpired(item, MY_CHORD_SHEETS_EXPIRATION_TIME)
   );
   
   // If we filtered out expired items, save the updated cache
   if (validItems.length !== cache.items.length) {
     try {
-      localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify({ items: validItems }));
+      localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify({ items: validItems }));
     } catch (e) {
-      console.error('Failed to save My Songs after cleanup:', e);
+      console.error('Failed to save My Chord Sheets after cleanup:', e);
     }
   }
   
@@ -136,14 +136,14 @@ export function getAllFromMySongs(): ChordSheet[] {
 }
 
 /**
- * Update a chord sheet in My Songs
+ * Update a chord sheet in My Chord Sheets
  * @param artist - Artist name
  * @param title - Song title
  * @param chordSheet - Updated ChordSheet object
  */
-export function updateInMySongs(artist: string, title: string, chordSheet: ChordSheet): void {
+export function updateInMyChordSheets(artist: string, title: string, chordSheet: ChordSheet): void {
   const cacheKey = generateCacheKey(artist, title);
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   
   const existingItemIndex = cache.items.findIndex(item => item.key === cacheKey);
   
@@ -157,75 +157,75 @@ export function updateInMySongs(artist: string, title: string, chordSheet: Chord
     };
     
     try {
-      localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify(cache));
+      localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify(cache));
     } catch (e) {
-      console.error('Failed to update My Songs:', e);
+      console.error('Failed to update My Chord Sheets:', e);
     }
   } else {
     // Item doesn't exist, add it
-    addToMySongs(artist, title, chordSheet);
+    addToMyChordSheets(artist, title, chordSheet);
   }
 }
 
 /**
- * Remove a chord sheet from My Songs
+ * Remove a chord sheet from My Chord Sheets
  * @param artist - Artist name
  * @param title - Song title
  */
-export function removeFromMySongs(artist: string, title: string): void {
+export function removeFromMyChordSheets(artist: string, title: string): void {
   const cacheKey = generateCacheKey(artist, title);
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   
   const filteredItems = cache.items.filter(item => item.key !== cacheKey);
   
   if (filteredItems.length !== cache.items.length) {
     try {
-      localStorage.setItem(MY_SONGS_CACHE_KEY, JSON.stringify({ items: filteredItems }));
+      localStorage.setItem(MY_CHORD_SHEETS_CACHE_KEY, JSON.stringify({ items: filteredItems }));
     } catch (e) {
-      console.error('Failed to remove from My Songs:', e);
+      console.error('Failed to remove from My Chord Sheets:', e);
     }
   }
 }
 
 /**
- * Check if a chord sheet exists in My Songs
+ * Check if a chord sheet exists in My Chord Sheets
  * @param artist - Artist name
  * @param title - Song title
  * @returns True if exists and not expired
  */
 export function isInMySongs(artist: string, title: string): boolean {
   const cacheKey = generateCacheKey(artist, title);
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   const cacheItem = cache.items.find(item => item.key === cacheKey);
   
   if (!cacheItem) return false;
   
-  return !isCacheItemExpired(cacheItem, MY_SONGS_EXPIRATION_TIME);
+  return !isCacheItemExpired(cacheItem, MY_CHORD_SHEETS_EXPIRATION_TIME);
 }
 
 /**
- * Clear all My Songs
+ * Clear all My Chord Sheets
  */
-export function clearMySongs(): void {
-  clearCache(MY_SONGS_CACHE_KEY);
+export function clearMyChordSheets(): void {
+  clearCache(MY_CHORD_SHEETS_CACHE_KEY);
 }
 
 /**
- * Get My Songs statistics
+ * Get My Chord Sheets statistics
  */
 export function getMySongsStats() {
-  const cache = initializeCache<MySongsCacheItem>(MY_SONGS_CACHE_KEY);
+  const cache = initializeCache<MyChordSheetsCacheItem>(MY_CHORD_SHEETS_CACHE_KEY);
   
   const validItems = cache.items.filter(item => 
-    !isCacheItemExpired(item, MY_SONGS_EXPIRATION_TIME)
+    !isCacheItemExpired(item, MY_CHORD_SHEETS_EXPIRATION_TIME)
   );
   
   return {
     totalItems: cache.items.length,
     validItems: validItems.length,
     expiredItems: cache.items.length - validItems.length,
-    maxItems: MAX_MY_SONGS,
-    cacheExpirationTime: MY_SONGS_EXPIRATION_TIME
+    maxItems: MAX_MY_CHORD_SHEETS,
+    cacheExpirationTime: MY_CHORD_SHEETS_EXPIRATION_TIME
   };
 }
 
@@ -234,6 +234,6 @@ export function getMySongsStats() {
  * @param cacheKey - Cache key to parse (artist_name-song_title)
  * @returns Object with artist and title
  */
-export function parseMySongsCacheKey(cacheKey: string): { artist: string; title: string } {
+export function parseMyChordSheetsCacheKey(cacheKey: string): { artist: string; title: string } {
   return parseCacheKey(cacheKey);
 }

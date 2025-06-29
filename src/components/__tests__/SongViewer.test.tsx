@@ -168,7 +168,7 @@ describe('SongViewer', () => {
         />
       );
 
-      await user.click(getByRole('button', { name: 'Back to My Songs' }));
+      await user.click(getByRole('button', { name: 'Back to My Chord Sheets' }));
       expect(mockOnBack).toHaveBeenCalledTimes(1);
     });
 

@@ -1,4 +1,4 @@
-import { getSongs } from './unified-song-storage';
+import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
 import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
 import { Song } from '../types/song';
 import { extractSongMetadata } from './metadata-extraction';
@@ -13,7 +13,7 @@ export interface LocalSongResult {
 }
 
 /**
- * Finds a song in local storage (My Songs) by artist and song parameters
+ * Finds a song in local storage (My Chord Sheets) by artist and song parameters
  * Follows SRP: Single responsibility of finding local songs
  * 
  * @param artistParam - URL-encoded artist parameter (e.g., "eagles", "oasis")
@@ -25,17 +25,17 @@ export async function findLocalSong(
   songParam: string
 ): Promise<LocalSongResult | null> {
   try {
-    // Get all songs from unified storage
-    const mySongs = getSongs();
+    // Get all songs from modular chord sheet storage
+    const myChordSheets = getMyChordSheetsAsSongs();
     
     const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
     const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
     
     console.log(`Looking for song: "${songName}" by "${artistName}"`);
-    console.log('Available songs:', mySongs.map(song => `"${song.title}" by "${song.artist}"`));
+    console.log('Available songs:', myChordSheets.map(song => `"${song.title}" by "${song.artist}"`));
     
-    // Search in My Songs
-    const foundSong = mySongs.find((song: Song) => {
+    // Search in My Chord Sheets
+    const foundSong = myChordSheets.find((song: Song) => {
       const songArtist = song.artist?.toLowerCase() ?? '';
       const songTitle = song.title?.toLowerCase() ?? '';
       return (

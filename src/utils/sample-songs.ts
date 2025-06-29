@@ -38,7 +38,7 @@ export const loadSampleSongs = async (): Promise<Song[]> => {
   const wonderwallResponse = await fetch('/data/songs/oasis-wonderwall.json');
   const wonderwallChordSheet: ChordSheet = await wonderwallResponse.json();
   
-  // Initialize dev mode sample songs in My Songs (only in dev mode)
+  // Initialize dev mode sample songs in My Chord Sheets (only in dev mode)
   // Pass the loaded chord sheets to the dev mode initializer
   const chordSheets = [wonderwallChordSheet, hotelCaliforniaChordSheet];
   await initializeDevModeSampleSongs(chordSheets);

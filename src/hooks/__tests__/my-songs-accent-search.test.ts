@@ -1,5 +1,5 @@
 /**
- * Tests for accent-insensitive search in My Songs
+ * Tests for accent-insensitive search in My Chord Sheets
  * 
  * The expectation is that users should be able to search for songs
  * without worrying about accents. For example:
@@ -11,7 +11,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useSearchResults } from '../useSearchResults';
-import { addToMySongs, clearMySongs } from '@/cache/implementations/my-songs-cache';
+import { addToMyChordSheets, clearMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 import { ChordSheet } from '@/types/chordSheet';
 
 // Mock the search cache to avoid conflicts
@@ -31,11 +31,11 @@ const mockFetch = vi.fn().mockImplementation(() =>
 
 global.fetch = mockFetch;
 
-describe('My Songs - Accent-Insensitive Search', () => {
+describe('My Chord Sheets - Accent-Insensitive Search', () => {
   beforeEach(() => {
     // Clear all mocks and local storage before each test
     vi.clearAllMocks();
-    clearMySongs();
+    clearMyChordSheets();
     mockFetch.mockClear();
     
     // Mock localStorage with actual implementation for testing
@@ -58,12 +58,12 @@ describe('My Songs - Accent-Insensitive Search', () => {
   });
 
   afterEach(() => {
-    clearMySongs();
+    clearMyChordSheets();
     vi.restoreAllMocks();
   });
 
   it('should find songs when searching without accents for titles with accents', async () => {
-    // Arrange: Add a song with accents to My Songs
+    // Arrange: Add a song with accents to My Chord Sheets
     const chordSheet: ChordSheet = {
       artist: 'Chimarruts',
       title: 'Do Lado de Cá',
@@ -73,7 +73,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Chimarruts', 'Do Lado de Cá', chordSheet);
+    addToMyChordSheets('Chimarruts', 'Do Lado de Cá', chordSheet);
 
     // Act: Search for the song WITHOUT accents
     const { result } = renderHook(() => 
@@ -88,7 +88,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
     // Should NOT have made any fetch calls since song exists locally
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show the song from My Songs
+    // Should show the song from My Chord Sheets
     expect(result.current.songs).toHaveLength(1);
     expect(result.current.songs[0]).toMatchObject({
       title: 'Do Lado de Cá',
@@ -97,7 +97,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
   });
 
   it('should find songs when searching with accents for titles without accents', async () => {
-    // Arrange: Add a song without accents to My Songs
+    // Arrange: Add a song without accents to My Chord Sheets
     const chordSheet: ChordSheet = {
       artist: 'Oasis',
       title: 'Wonderwall',
@@ -107,7 +107,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Oasis', 'Wonderwall', chordSheet);
+    addToMyChordSheets('Oasis', 'Wonderwall', chordSheet);
 
     // Act: Search WITH accents (shouldn't affect the match)
     const { result } = renderHook(() => 
@@ -122,7 +122,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
     // Should NOT have made any fetch calls
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Should show the song from My Songs
+    // Should show the song from My Chord Sheets
     expect(result.current.songs).toHaveLength(1);
     expect(result.current.songs[0]).toMatchObject({
       title: 'Wonderwall',
@@ -131,7 +131,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
   });
 
   it('should find Portuguese songs with various accent patterns', async () => {
-    // Arrange: Add Portuguese songs with various accents to My Songs
+    // Arrange: Add Portuguese songs with various accents to My Chord Sheets
     const song1: ChordSheet = {
       artist: 'Caetano Veloso',
       title: 'Você É Linda',
@@ -150,8 +150,8 @@ describe('My Songs - Accent-Insensitive Search', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Caetano Veloso', 'Você É Linda', song1);
-    addToMySongs('João Gilberto', 'Garota de Ipanema', song2);
+    addToMyChordSheets('Caetano Veloso', 'Você É Linda', song1);
+    addToMyChordSheets('João Gilberto', 'Garota de Ipanema', song2);
 
     // Act: Search for "voce e linda" (without accents)
     const { result } = renderHook(() => 
@@ -191,8 +191,8 @@ describe('My Songs - Accent-Insensitive Search', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Manu Chao', 'Bongo Bong', song1);
-    addToMySongs('José González', 'Heartbeats', song2);
+    addToMyChordSheets('Manu Chao', 'Bongo Bong', song1);
+    addToMyChordSheets('José González', 'Heartbeats', song2);
 
     // Act: Search for "jose gonzalez" (without accent)
     const { result } = renderHook(() => 
@@ -232,8 +232,8 @@ describe('My Songs - Accent-Insensitive Search', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    addToMySongs('Céline Dion', 'Pour que tu m\'aimes encore', song1);
-    addToMySongs('François Hardy', 'Tous les garçons et les filles', song2);
+    addToMyChordSheets('Céline Dion', 'Pour que tu m\'aimes encore', song1);
+    addToMyChordSheets('François Hardy', 'Tous les garçons et les filles', song2);
 
     // Act: Search for "celine dion" (without accents)
     const { result } = renderHook(() => 
@@ -283,7 +283,7 @@ describe('My Songs - Accent-Insensitive Search', () => {
     ];
     
     songs.forEach(song => {
-      addToMySongs(song.artist, song.title, song.chordSheet);
+      addToMyChordSheets(song.artist, song.title, song.chordSheet);
     });
 
     // Act: Search for "mana" (without accent)

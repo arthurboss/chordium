@@ -1,11 +1,11 @@
 import { ChordSheetWithUIState } from '@/types/chordSheetWithUIState';
-import { findLocalSong } from './local-song-finder';
+import { findLocalSong } from './local-chord-sheet-finder';
 import { buildChordSheetData } from './chord-data-builder';
-import { isMySONgsRoute } from './route-context-detector';
+import { isMyChordSheetsRoute } from './route-context-detector';
 
 /**
  * Strategy class for loading chord sheets with proper hierarchy:
- * 1. Local songs (My Songs context)
+ * 1. Local songs (My Chord Sheets context)
  * 2. Cache (handled elsewhere)
  * 3. Remote fetch (last resort)
  * 
@@ -20,7 +20,7 @@ export class ChordSheetLoadingStrategy {
    * @returns boolean - True if should load local
    */
   shouldLoadLocal(artist?: string, song?: string): boolean {
-    return isMySONgsRoute() && Boolean(artist) && Boolean(song);
+    return isMyChordSheetsRoute() && Boolean(artist) && Boolean(song);
   }
 
   /**
@@ -32,7 +32,7 @@ export class ChordSheetLoadingStrategy {
    */
   async loadLocal(artist: string, song: string): Promise<ChordSheetWithUIState | null> {
     try {
-      console.log('Loading from My Songs locally...');
+      console.log('Loading from My Chord Sheets locally...');
       const localSong = await findLocalSong(artist, song);
       
       if (localSong) {

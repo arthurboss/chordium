@@ -36,12 +36,12 @@ const router = createBrowserRouter([
         element: <Suspense fallback={<Loading />}><Home /></Suspense>
       },
       {
-        path: "my-songs",
+        path: "my-chord-sheets",
         element: <Suspense fallback={<Loading />}><Home /></Suspense>
       },
       {
-        // Route for songs from My Songs: /my-songs/artist/song
-        path: "my-songs/:artist/:song", 
+        // Route for songs from My Chord Sheets: /my-chord-sheets/artist/song
+        path: "my-chord-sheets/:artist/:song", 
         element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
       },
       {

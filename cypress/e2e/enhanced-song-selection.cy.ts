@@ -2,15 +2,15 @@ describe('Enhanced Song Selection - E2E Integration', () => {
   beforeEach(() => {
     cy.visit('/');
     // Wait for the app to load
-    cy.get('[data-cy="tab-my-songs"]').should('be.visible');
+    cy.get('[data-cy="tab-my-chord-sheets"]').should('be.visible');
   });
 
   it('should handle sample song selection with deduplication', () => {
-    // 1. First, verify that sample songs are loaded in "My Songs"
-    cy.get('[data-cy="tab-my-songs"]').click();
+    // 1. First, verify that sample songs are loaded in "My Chord Sheets"
+    cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('.song-card, [data-cy="song-card"]').should('have.length.at.least', 1);
     
-    // Check if Wonderwall is in My Songs (it should be loaded as a sample song)
+    // Check if Wonderwall is in My Chord Sheets (it should be loaded as a sample song)
     cy.contains('Wonderwall').should('exist');
     
     // 2. Go to Search tab and search for "Wonderwall"
@@ -28,20 +28,20 @@ describe('Enhanced Song Selection - E2E Integration', () => {
         // If Wonderwall appears in search results, click on it
         cy.contains('Wonderwall').first().click();
         
-        // 4. Verify that we're navigated to the My Songs version (deduplication worked)
-        cy.url().should('include', '/my-songs');
+        // 4. Verify that we're navigated to the My Chord Sheets version (deduplication worked)
+        cy.url().should('include', '/my-chord-sheets');
         cy.url().should('include', 'wonderwall');
       } else {
         // If no search results, that's also fine - just verify the app doesn't crash
-        cy.get('[data-cy="tab-my-songs"]').click();
+        cy.get('[data-cy="tab-my-chord-sheets"]').click();
         cy.contains('Wonderwall').should('exist');
       }
     });
   });
 
   it('should handle navigation between tabs correctly', () => {
-    // 1. Start with sample songs in My Songs
-    cy.get('[data-cy="tab-my-songs"]').click();
+    // 1. Start with sample songs in My Chord Sheets
+    cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('body').should(($body) => {
       expect($body.text()).to.satisfy((text: string) => 
         text.includes('Wonderwall') || text.includes('Hotel California')
@@ -50,7 +50,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     
     // 2. Go to search and back multiple times to test persistence
     cy.get('[data-cy="tab-search"]').click();
-    cy.get('[data-cy="tab-my-songs"]').click();
+    cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('[data-cy="tab-search"]').click();
     
     // 3. Verify search functionality works
@@ -58,7 +58,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     cy.get('input[placeholder*="song" i], input[name*="song" i]').first().should('be.visible');
     
     // 4. The test should verify that sample songs still appear and behave correctly
-    cy.get('[data-cy="tab-my-songs"]').click();
+    cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('body').should(($body) => {
       expect($body.text()).to.satisfy((text: string) => 
         text.includes('Wonderwall') || text.includes('Hotel California')
@@ -66,9 +66,9 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     });
   });
 
-  it('should click on sample song directly from My Songs', () => {
-    // 1. Go to My Songs tab
-    cy.get('[data-cy="tab-my-songs"]').click();
+  it('should click on sample song directly from My Chord Sheets', () => {
+    // 1. Go to My Chord Sheets tab
+    cy.get('[data-cy="tab-my-chord-sheets"]').click();
     
     // 2. Find and click on a sample song (like Wonderwall)
     cy.get('body').then(($body) => {
@@ -76,13 +76,13 @@ describe('Enhanced Song Selection - E2E Integration', () => {
         cy.contains('Wonderwall').first().click();
         
         // Should navigate to the song view
-        cy.url().should('include', '/my-songs');
+        cy.url().should('include', '/my-chord-sheets');
         cy.url().should('include', 'wonderwall');
       } else if ($body.text().includes('Hotel California')) {
         cy.contains('Hotel California').first().click();
         
         // Should navigate to the song view
-        cy.url().should('include', '/my-songs');
+        cy.url().should('include', '/my-chord-sheets');
         cy.url().should('include', 'hotel-california');
       }
     });

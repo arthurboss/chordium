@@ -7,7 +7,7 @@ const mockStoreChordUrl = vi.fn();
 const mockNavigationUtils = {
   shouldUpdateUrl: vi.fn(),
   generateNavigationPath: vi.fn(),
-  isMySONgsContext: vi.fn(),
+  isMyChordSheetsContext: vi.fn(),
   performUrlUpdate: vi.fn(),
 } as NavigationUtils;
 
@@ -65,7 +65,7 @@ describe('BackgroundRefreshHandler', () => {
       const params = { artist: 'beatles', song: 'hey-jude' };
 
       mockNavigationUtils.shouldUpdateUrl.mockReturnValue(true);
-      mockNavigationUtils.isMySONgsContext.mockReturnValue(false);
+      mockNavigationUtils.isMyChordSheetsContext.mockReturnValue(false);
       mockNavigationUtils.generateNavigationPath.mockReturnValue('/the-beatles/hey-jude');
 
       Object.defineProperty(window, 'location', {

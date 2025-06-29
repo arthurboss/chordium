@@ -17,7 +17,7 @@ src/
         cache-key-generation.test.ts
       implementations/       # Implementation-specific tests
         chord-sheet-cache.test.ts
-        my-songs-cache.test.ts
+        my-chord-sheets-cache.test.ts
       integration/           # Integration tests across cache components
         cache-integration.test.ts
         
@@ -33,7 +33,7 @@ src/
       storage/               # Storage-related utilities
         chordsheet-operations.test.ts
         song-compatibility.test.ts
-        migration.test.ts
+        my-chord-sheets-cache.test.ts
       navigation/            # Navigation-related utilities
         song-navigation.test.ts
         enhanced-selection.test.ts

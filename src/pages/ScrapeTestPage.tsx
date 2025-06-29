@@ -205,14 +205,14 @@ const ScrapeTestPage = () => {
                       
                       toast({
                         title: "Success!",
-                        description: `${chordData.song} added to My Songs`,
+                        description: `${chordData.song} added to My Chord Sheets`,
                         variant: "default"
                       });
                     }}
                     variant="outline"
                     className="w-full sm:w-auto"
                   >
-                    Add to My Songs
+                    Add to My Chord Sheets
                   </Button>
                 </div>
               )}

@@ -30,29 +30,29 @@ export class NavigationUtils {
    * Generates the navigation path based on context
    * 
    * @param data - Data containing artist and song
-   * @param isMySONgsContext - Whether this is in My Songs context
+   * @param isMyChordSheetsContext - Whether this is in My Chord Sheets context
    * @returns string - The navigation path
    */
   generateNavigationPath(
     data: { artist: string; song: string }, 
-    isMySONgsContext: boolean
+    isMyChordSheetsContext: boolean
   ): string {
     const artistSlug = toSlug(data.artist);
     const songSlug = toSlug(data.song);
 
-    return isMySONgsContext
-      ? `/my-songs/${artistSlug}/${songSlug}`
+    return isMyChordSheetsContext
+      ? `/my-chord-sheets/${artistSlug}/${songSlug}`
       : `/${artistSlug}/${songSlug}`;
   }
 
   /**
-   * Detects if current path is in My Songs context
+   * Detects if current path is in My Chord Sheets context
    * 
    * @param pathname - Current window pathname
-   * @returns boolean - True if in My Songs context
+   * @returns boolean - True if in My Chord Sheets context
    */
-  isMySONgsContext(pathname: string): boolean {
-    return pathname.startsWith('/my-songs/');
+  isMyChordSheetsContext(pathname: string): boolean {
+    return pathname.startsWith('/my-chord-sheets/');
   }
 
   /**
@@ -75,13 +75,13 @@ export class NavigationUtils {
 
     const artistSlug = toSlug(data.artist);
     const songSlug = toSlug(data.song);
-    const isMySONgs = this.isMySONgsContext(pathname);
+    const isMyChordSheets = this.isMyChordSheetsContext(pathname);
 
     // Store the URL mapping
     storeChordUrl(artistSlug, songSlug, fetchUrl);
     
     // Generate and navigate to new path
-    const newPath = this.generateNavigationPath(data, isMySONgs);
+    const newPath = this.generateNavigationPath(data, isMyChordSheets);
     navigate(newPath, { replace: true });
   }
 }

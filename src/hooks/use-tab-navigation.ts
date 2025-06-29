@@ -5,7 +5,7 @@ import { getSearchParamsType } from "@/utils/search-utils";
 
 interface TabNavigationProps {
   sampleSongs: Song[];
-  mySongs: Song[];
+  myChordSheets: Song[];
   setActiveTab: (tab: string) => void;
   activeTab: string; // Added: current activeTab from Home's state
   setDemoSong: React.Dispatch<React.SetStateAction<Song | null>>;
@@ -24,11 +24,11 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       console.log('✅ [determineActiveTab] Determined: upload');
       return "upload";
     
-    case path.startsWith("/my-songs"):
-      // This includes /my-songs/artist/song routes - should stay in my-songs tab
-      // Path-based routing takes priority over query parameters for My Songs
-      console.log('✅ [determineActiveTab] Determined: my-songs (path starts with /my-songs)');
-      return "my-songs";
+    case path.startsWith("/my-chord-sheets"):
+      // This includes /my-chord-sheets/artist/song routes - should stay in my-chord-sheets tab
+      // Path-based routing takes priority over query parameters for My Chord Sheets
+      console.log('✅ [determineActiveTab] Determined: my-chord-sheets (path starts with /my-chord-sheets)');
+      return "my-chord-sheets";
     
     case path.startsWith("/search"):
       // Explicit search path
@@ -41,9 +41,9 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       return "search";
     
     case path === "/":
-      // Root path defaults to my-songs
-      console.log('✅ [determineActiveTab] Determined: my-songs (root path)');
-      return "my-songs";
+      // Root path defaults to my-chord-sheets
+      console.log('✅ [determineActiveTab] Determined: my-chord-sheets (root path)');
+      return "my-chord-sheets";
     
     default:
       // Handle search context based on query parameters only for non-specific paths
@@ -52,25 +52,25 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
         return "search";
       }
       
-      // Fallback for unknown paths, default to "my-songs"
-      console.log('✅ [determineActiveTab] Determined: my-songs (default fallback)');
-      return "my-songs";
+      // Fallback for unknown paths, default to "my-chord-sheets"
+      console.log('✅ [determineActiveTab] Determined: my-chord-sheets (default fallback)');
+      return "my-chord-sheets";
   }
 };
 
 /**
- * Handles song selection logic for My Songs tab
+ * Handles song selection logic for My Chord Sheets tab
  */
 const handleSongSelection = (
   songIdFromQuery: string,
   determinedTab: string,
   sampleSongs: Song[],
-  mySongs: Song[],
+  myChordSheets: Song[],
   setDemoSong: React.Dispatch<React.SetStateAction<Song | null>>,
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
-  // Only handle song selection if we're in my-songs tab
-  if (determinedTab !== "my-songs") {
+  // Only handle song selection if we're in my-chord-sheets tab
+  if (determinedTab !== "my-chord-sheets") {
     return;
   }
 
@@ -85,8 +85,8 @@ const handleSongSelection = (
   }
 
   // Check user's songs if not found in sample songs
-  if (mySongs?.length > 0) {
-    const foundMySong = mySongs.find(song => song.path === songIdFromQuery);
+  if (myChordSheets?.length > 0) {
+    const foundMySong = myChordSheets.find(song => song.path === songIdFromQuery);
     if (foundMySong) {
       setSelectedSong(foundMySong);
       setDemoSong(null);
@@ -101,7 +101,7 @@ const handleSongSelection = (
 
 export const useTabNavigation = ({
   sampleSongs,
-  mySongs,
+  myChordSheets,
   setActiveTab,
   activeTab, // Consumed here
   setDemoSong,
@@ -139,17 +139,17 @@ export const useTabNavigation = ({
       setActiveTab(determinedTab);
     }
 
-    // Handle song selection for My Songs tab
+    // Handle song selection for My Chord Sheets tab
     if (songIdFromQuery) {
       console.log('🎵 [useTabNavigation] Handling song selection:', songIdFromQuery, 'for tab:', determinedTab);
       handleSongSelection(
         songIdFromQuery,
         determinedTab,
         sampleSongs,
-        mySongs,
+        myChordSheets,
         setDemoSong,
         setSelectedSong
       );
     }
-  }, [location, sampleSongs, mySongs, setActiveTab, activeTab, setDemoSong, setSelectedSong]);
+  }, [location, sampleSongs, myChordSheets, setActiveTab, activeTab, setDemoSong, setSelectedSong]);
 };

@@ -1,7 +1,7 @@
 import { ChordSheetWithUIState, toChordSheetWithUIState } from '@/types/chordSheetWithUIState';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
-import { LocalSongResult } from './local-song-finder';
+import { LocalSongResult } from './local-chord-sheet-finder';
 
 /**
  * Builds ChordSheetWithUIState from a local song result

@@ -111,9 +111,9 @@ describe('Song Deduplication Utils', () => {
       );
 
       expect(result).toBe(true);
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/oasis/wonderwall');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/oasis/wonderwall');
       expect(mockSetSelectedSong).toHaveBeenCalledWith(mockSongs[0]);
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
     it('should return false if song not found', () => {
@@ -151,9 +151,9 @@ describe('Song Deduplication Utils', () => {
       );
 
       expect(result).toBe(true);
-      expect(mockNavigate).toHaveBeenCalledWith('/my-songs/metallica/nothing-else-matters');
+      expect(mockNavigate).toHaveBeenCalledWith('/my-chord-sheets/metallica/nothing-else-matters');
       expect(mockSetSelectedSong).toHaveBeenCalledWith(mockSongs[2]);
-      expect(mockSetActiveTab).toHaveBeenCalledWith('my-songs');
+      expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
     it('should handle missing callbacks gracefully', () => {

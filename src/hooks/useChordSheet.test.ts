@@ -2,11 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from './useChordSheet';
 import { ChordSheetLoadingStrategy } from '../utils/chord-sheet-loading-strategy';
-import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
+import { validateURL } from '../utils/url-validator';
 
-// Mock dependencies
+// Mock all dependencies first - with factory functions to avoid hoisting issues
 vi.mock('../utils/chord-sheet-loading-strategy');
-vi.mock('../cache/implementations/chord-sheet-cache');
+vi.mock('./useChordSheet/cache-coordinator');
+vi.mock('./useChordSheet/data-handlers');
+vi.mock('./useChordSheet/url-determination-strategy');
+vi.mock('../utils/navigation-utils');
+vi.mock('../utils/fetch-error-handler');
+vi.mock('../utils/route-context-detector', () => ({
+  isMyChordSheetsRoute: vi.fn(() => true)
+}));
+vi.mock('../utils/url-validator', () => ({
+  validateURL: vi.fn()
+}));
 
 const mockUseParams = vi.fn();
 const mockUseNavigate = vi.fn();
@@ -21,7 +31,50 @@ const mockStrategy = {
   loadLocal: vi.fn(),
 };
 
+const mockCacheCoordinator = {
+  clearExpiredCache: vi.fn(),
+  getChordSheetData: vi.fn(),
+};
+
+const mockDataHandlers = {
+  handleFreshData: vi.fn(),
+  handleErrorState: vi.fn(),
+  setLoadingState: vi.fn(),
+};
+
+const mockUrlStrategy = {
+  determineFetchUrl: vi.fn(),
+};
+
+const mockNavigationUtils = {
+  performUrlUpdate: vi.fn(),
+};
+
+const mockErrorHandler = {
+  formatFetchError: vi.fn(),
+};
+
 const mockedChordSheetLoadingStrategy = vi.mocked(ChordSheetLoadingStrategy);
+
+vi.mock('./useChordSheet/cache-coordinator', () => ({
+  CacheCoordinator: vi.fn(() => mockCacheCoordinator)
+}));
+
+vi.mock('./useChordSheet/data-handlers', () => ({
+  DataHandlers: vi.fn(() => mockDataHandlers)
+}));
+
+vi.mock('./useChordSheet/url-determination-strategy', () => ({
+  URLDeterminationStrategy: vi.fn(() => mockUrlStrategy)
+}));
+
+vi.mock('../utils/navigation-utils', () => ({
+  NavigationUtils: vi.fn(() => mockNavigationUtils)
+}));
+
+vi.mock('../utils/fetch-error-handler', () => ({
+  FetchErrorHandler: vi.fn(() => mockErrorHandler)
+}));
 
 describe('useChordSheet', () => {
   beforeEach(() => {
@@ -29,17 +82,35 @@ describe('useChordSheet', () => {
     mockedChordSheetLoadingStrategy.mockImplementation(() => mockStrategy);
     mockUseParams.mockReturnValue({ artist: 'eagles', song: 'hotel-california' });
     mockUseNavigate.mockReturnValue(vi.fn());
+    mockCacheCoordinator.getChordSheetData.mockResolvedValue(null);
+    
+    // Setup data handlers to simulate real behavior
+    mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
+      if (freshData) {
+        setChordData(freshData);
+      }
+    });
+    
+    // Setup URL strategy mock
+    mockUrlStrategy.determineFetchUrl.mockResolvedValue({
+      fetchUrl: 'https://example.com/test-song',
+      storageKey: 'eagles-hotel-california',
+      isReconstructed: false
+    });
+    
+    // Setup validation mock
+    vi.mocked(validateURL).mockImplementation(() => {}); // No error means valid
   });
 
-  it('should load from local storage when in My Songs context', async () => {
+  it('should load from local storage when in My Chord Sheets context', async () => {
     // Arrange
     const mockLocalData = {
-      content: 'local chord content',
+      title: 'Hotel California',
       artist: 'Eagles',
-      song: 'Hotel California',
-      key: 'Am',
-      tuning: 'Standard',
-      capo: '',
+      songChords: 'local chord content',
+      songKey: 'Am',
+      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+      guitarCapo: 0,
       loading: false,
       error: null
     };
@@ -55,30 +126,37 @@ describe('useChordSheet', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current).toEqual(mockLocalData);
+    expect(result.current.title).toBe('Hotel California');
+    expect(result.current.artist).toBe('Eagles');
+    expect(result.current.songChords).toBe('local chord content');
+    expect(result.current.songKey).toBe('Am');
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
     expect(mockStrategy.shouldLoadLocal).toHaveBeenCalledWith('eagles', 'hotel-california');
     expect(mockStrategy.loadLocal).toHaveBeenCalledWith('eagles', 'hotel-california');
   });
 
   it('should fall back to remote fetch when local not available', async () => {
     // Arrange
-    const mockRemoteData = {
-      content: 'remote chord content',
+    mockStrategy.shouldLoadLocal.mockReturnValue(true);
+    mockStrategy.loadLocal.mockResolvedValue(null); // Not found locally
+
+    const remoteData = {
+      title: 'Hotel California',
       artist: 'Eagles',
-      song: 'Hotel California',
-      key: 'Am',
-      tuning: 'Standard',
-      capo: '',
+      songChords: 'chord content...',
+      songKey: 'Am',
+      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+      guitarCapo: 0,
       loading: false,
       error: null
     };
 
-    mockStrategy.shouldLoadLocal.mockReturnValue(true);
-    mockStrategy.loadLocal.mockResolvedValue(null); // Not found locally
+    mockCacheCoordinator.getChordSheetData.mockResolvedValue(remoteData);
 
-    mockedGetChordSheetWithRefresh.mockResolvedValue({
-      immediate: mockRemoteData,
-      refreshPromise: Promise.resolve(mockRemoteData)
+    // Setup data handlers to call setChordData with the fetched data
+    mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
+      setChordData(freshData);
     });
 
     // Act
@@ -89,28 +167,34 @@ describe('useChordSheet', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current).toEqual(mockRemoteData);
-    expect(mockedGetChordSheetWithRefresh).toHaveBeenCalled();
+    expect(result.current.title).toBe('Hotel California');
+    expect(result.current.artist).toBe('Eagles');
+    expect(result.current.songChords).toBe('chord content...');
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+    expect(mockCacheCoordinator.getChordSheetData).toHaveBeenCalled();
   });
 
   it('should skip local loading for search context', async () => {
     // Arrange
-    const mockRemoteData = {
-      content: 'remote chord content',
+    mockStrategy.shouldLoadLocal.mockReturnValue(false); // Search context
+
+    const remoteData = {
+      title: 'Hotel California',
       artist: 'Eagles',
-      song: 'Hotel California',
-      key: 'Am',
-      tuning: 'Standard',
-      capo: '',
+      songChords: 'chord content...',
+      songKey: 'Am',
+      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+      guitarCapo: 0,
       loading: false,
       error: null
     };
 
-    mockStrategy.shouldLoadLocal.mockReturnValue(false); // Search context
+    mockCacheCoordinator.getChordSheetData.mockResolvedValue(remoteData);
 
-    mockedGetChordSheetWithRefresh.mockResolvedValue({
-      immediate: mockRemoteData,
-      refreshPromise: Promise.resolve(mockRemoteData)
+    // Setup data handlers to call setChordData with the fetched data
+    mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
+      setChordData(freshData);
     });
 
     // Act
@@ -122,6 +206,6 @@ describe('useChordSheet', () => {
     });
 
     expect(mockStrategy.loadLocal).not.toHaveBeenCalled();
-    expect(mockedGetChordSheetWithRefresh).toHaveBeenCalled();
+    expect(mockCacheCoordinator.getChordSheetData).toHaveBeenCalled();
   });
 });

@@ -3,9 +3,9 @@ describe('SongCard E2E Tests', () => {
     // Visit the homepage before each test
     cy.visit('/');
     
-    // Ensure we're on the My Songs tab
-    cy.get('button[role="tab"]').contains('My Songs').click();
-    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
+    // Ensure we're on the My Chord Sheets tab
+    cy.get('button[role="tab"]').contains('My Chord Sheets').click();
+    cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Wait for songs to load
     cy.contains('Hotel California').should('be.visible');

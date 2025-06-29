@@ -40,12 +40,12 @@ describe('NavigationUtils', () => {
       expect(shouldUpdate).toBe(true);
     });
 
-    it('should generate correct My Songs path', () => {
+    it('should generate correct My Chord Sheets path', () => {
       const data = { artist: 'The Beatles', song: 'Hey Jude' };
       
       const path = navigationUtils.generateNavigationPath(data, true);
       
-      expect(path).toBe('/my-songs/the-beatles/hey-jude');
+      expect(path).toBe('/my-chord-sheets/the-beatles/hey-jude');
     });
 
     it('should generate correct search context path', () => {
@@ -56,16 +56,16 @@ describe('NavigationUtils', () => {
       expect(path).toBe('/eagles/hotel-california');
     });
 
-    it('should detect My Songs context from path', () => {
-      const isMySONgs = navigationUtils.isMySONgsContext('/my-songs/eagles/hotel-california');
+    it('should detect My Chord Sheets context from path', () => {
+      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/my-chord-sheets/eagles/hotel-california');
       
-      expect(isMySONgs).toBe(true);
+      expect(isMyChordSheets).toBe(true);
     });
 
     it('should detect search context from path', () => {
-      const isMySONgs = navigationUtils.isMySONgsContext('/eagles/hotel-california');
+      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/eagles/hotel-california');
       
-      expect(isMySONgs).toBe(false);
+      expect(isMyChordSheets).toBe(false);
     });
 
     it('should handle special characters in artist/song names', () => {

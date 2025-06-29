@@ -1,17 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheetLoadingStrategy } from './chord-sheet-loading-strategy';
-import { findLocalSong } from './local-song-finder';
+import { findLocalSong } from './local-chord-sheet-finder';
 import { buildChordSheetData } from './chord-data-builder';
-import { isMySONgsRoute } from './route-context-detector';
+import { isMyChordSheetsRoute } from './route-context-detector';
 
 // Mock dependencies
-vi.mock('./local-song-finder');
+vi.mock('./local-chord-sheet-finder');
 vi.mock('./chord-data-builder');
 vi.mock('./route-context-detector');
 
 const mockedFindLocalSong = vi.mocked(findLocalSong);
 const mockedBuildChordSheetData = vi.mocked(buildChordSheetData);
-const mockedIsMySONgsRoute = vi.mocked(isMySONgsRoute);
+const mockedIsMyChordSheetsRoute = vi.mocked(isMyChordSheetsRoute);
 
 describe('ChordSheetLoadingStrategy', () => {
   let strategy: ChordSheetLoadingStrategy;
@@ -22,9 +22,9 @@ describe('ChordSheetLoadingStrategy', () => {
   });
 
   describe('shouldLoadLocal', () => {
-    it('should return true for My Songs route with artist and song params', () => {
+    it('should return true for My Chord Sheets route with artist and song params', () => {
       // Arrange
-      mockedIsMySONgsRoute.mockReturnValue(true);
+      mockedIsMyChordSheetsRoute.mockReturnValue(true);
 
       // Act
       const result = strategy.shouldLoadLocal('eagles', 'hotel-california');
@@ -35,7 +35,7 @@ describe('ChordSheetLoadingStrategy', () => {
 
     it('should return false for search route even with params', () => {
       // Arrange
-      mockedIsMySONgsRoute.mockReturnValue(false);
+      mockedIsMyChordSheetsRoute.mockReturnValue(false);
 
       // Act
       const result = strategy.shouldLoadLocal('eagles', 'hotel-california');
@@ -44,9 +44,9 @@ describe('ChordSheetLoadingStrategy', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false for My Songs route without artist param', () => {
+    it('should return false for My Chord Sheets route without artist param', () => {
       // Arrange
-      mockedIsMySONgsRoute.mockReturnValue(true);
+      mockedIsMyChordSheetsRoute.mockReturnValue(true);
 
       // Act
       const result = strategy.shouldLoadLocal(undefined, 'hotel-california');
@@ -55,9 +55,9 @@ describe('ChordSheetLoadingStrategy', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false for My Songs route without song param', () => {
+    it('should return false for My Chord Sheets route without song param', () => {
       // Arrange
-      mockedIsMySONgsRoute.mockReturnValue(true);
+      mockedIsMyChordSheetsRoute.mockReturnValue(true);
 
       // Act
       const result = strategy.shouldLoadLocal('eagles', undefined);

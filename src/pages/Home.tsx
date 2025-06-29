@@ -13,7 +13,7 @@ import { useSearchRedirect } from "@/hooks/use-search-redirect";
 const getInitialTab = (pathname: string): string => {
   if (pathname.startsWith("/search")) return "search";
   if (pathname.startsWith("/upload")) return "upload";
-  return "my-songs"; // Default
+  return "my-chord-sheets"; // Default
 };
 
 const Home = () => {
@@ -21,12 +21,12 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [demoSong, setDemoSong] = useState<Song | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { sampleSongs, mySongs, setMySongs, refreshMySongs } = useSampleSongs();
+  const { sampleSongs, myChordSheets, setMySongs, refreshMySongs } = useSampleSongs();
   useSearchRedirect();
 
-  // Refresh My Songs when the active tab changes to my-songs
+  // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
   useEffect(() => {
-    if (activeTab === 'my-songs') {
+    if (activeTab === 'my-chord-sheets') {
       refreshMySongs();
     }
   }, [activeTab, refreshMySongs]);
@@ -34,7 +34,7 @@ const Home = () => {
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
     sampleSongs,
-    mySongs,
+    myChordSheets,
     setActiveTab,
     activeTab, // Pass current activeTab state to the hook
     setDemoSong,
@@ -49,7 +49,7 @@ const Home = () => {
         <TabContainer 
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
-          mySongs={mySongs}
+          myChordSheets={myChordSheets}
           setMySongs={setMySongs}
           selectedSong={selectedSong}
           setSelectedSong={setSelectedSong}

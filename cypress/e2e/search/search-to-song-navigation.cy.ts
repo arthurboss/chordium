@@ -1,7 +1,7 @@
 /**
  * E2E tests for navigation from search results to song view page
  * Tests the requirement: when clicking "View Chords" on a search result,
- * it should redirect to the My Songs tab and show the song in SongViewer
+ * it should redirect to the My Chord Sheets tab and show the song in SongViewer
  */
 
 describe('Search to Song Navigation E2E', () => {
@@ -34,13 +34,13 @@ describe('Search to Song Navigation E2E', () => {
     // Click on the first "View Chords" button in search results
     cy.get('[data-cy^="view-btn-compact-"]').first().click();
     
-    // Should navigate to My Songs tab
-    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
-    cy.url().should('include', '/my-songs');
+    // Should navigate to My Chord Sheets tab
+    cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
+    cy.url().should('include', '/my-chord-sheets');
     
     // Should show the SongViewer component (not the song list)
     cy.get('.animate-fade-in').should('be.visible'); // SongViewer has this class
-    cy.contains('button', 'Back to My Songs').should('be.visible');
+    cy.contains('button', 'Back to My Chord Sheets').should('be.visible');
     
     // Should show the chord display
     cy.get('[data-cy="chord-display"]').should('be.visible');
@@ -80,13 +80,13 @@ describe('Search to Song Navigation E2E', () => {
     // Click on the first "View Chords" button in artist songs
     cy.get('[data-cy^="view-btn-compact-"]').first().click();
     
-    // Should navigate to My Songs tab
-    cy.get('[data-cy="tab-my-songs"][data-state="active"]').should('contain.text', 'My Songs');
-    cy.url().should('include', '/my-songs');
+    // Should navigate to My Chord Sheets tab
+    cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
+    cy.url().should('include', '/my-chord-sheets');
     
     // Should show the SongViewer component
     cy.get('.animate-fade-in').should('be.visible');
-    cy.contains('button', 'Back to My Songs').should('be.visible');
+    cy.contains('button', 'Back to My Chord Sheets').should('be.visible');
     
     // Should show the chord display
     cy.get('[data-cy="chord-display"]').should('be.visible');
@@ -113,8 +113,8 @@ describe('Search to Song Navigation E2E', () => {
     // Click view chords
     cy.get('[data-cy^="view-btn-compact-"]').first().click();
     
-    // Should navigate to My Songs tab
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    // Should navigate to My Chord Sheets tab
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Should show song viewer with external URL handling
     cy.get('.animate-fade-in').should('be.visible');
@@ -138,11 +138,11 @@ describe('Search to Song Navigation E2E', () => {
     cy.get('.animate-fade-in').should('be.visible');
     
     // Click back button
-    cy.contains('button', 'Back to My Songs').click();
+    cy.contains('button', 'Back to My Chord Sheets').click();
     
-    // Should go back to My Songs list (not search)
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
-    cy.url().should('include', '/my-songs');
+    // Should go back to My Chord Sheets list (not search)
+    cy.get('[data-state="active"]').should('contain.text', 'My Chord Sheets');
+    cy.url().should('include', '/my-chord-sheets');
     cy.url().should('not.include', 'song=');
     
     // Should show the song list, not search results

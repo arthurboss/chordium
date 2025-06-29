@@ -1,21 +1,28 @@
-import { Song } from "../types/song";
-import { ChordSheet } from "../types/chordSheet";
+import { Song } from "@/types/song";
+import { ChordSheet } from "@/types/chordSheet";
 import { toast } from "@/hooks/use-toast";
-import { updateInMySongs, getFromMySongs } from "@/cache/implementations/my-songs-cache";
+import { updateChordSheet } from './updateChordSheet';
+import { getFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
 
 /**
- * Updates an existing song's chord content in the ChordSheet storage system
- * Follows SRP: Single responsibility to update chord content via cache API
+ * Handles chord sheet update from UI context (both UI state and persistent storage)
+ * Follows SRP: Single responsibility to coordinate UI updates with storage update
+ * 
+ * @param content - New chord content
+ * @param selectedSong - Currently selected song
+ * @param myChordSheets - Current UI state array  
+ * @param setMySongs - UI state setter
+ * @param setSelectedSong - Selected song setter
  */
-export const handleUpdateSong = (
+export const handleUpdateChordSheetFromUI = (
   content: string,
   selectedSong: Song | null,
-  mySongs: Song[],
+  myChordSheets: Song[],
   setMySongs: React.Dispatch<React.SetStateAction<Song[]>>,
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   if (!selectedSong) {
-    console.warn('No song selected for update');
+    console.warn('No chord sheet selected for update');
     return;
   }
   
@@ -25,7 +32,7 @@ export const handleUpdateSong = (
     console.error('Invalid song path format for update:', selectedSong.path);
     toast({
       title: "Update failed",
-      description: "Invalid song format",
+      description: "Invalid chord sheet format",
       variant: "destructive"
     });
     return;
@@ -39,12 +46,12 @@ export const handleUpdateSong = (
   const title = titlePart.replace(/_/g, ' ');
   
   // Get the existing ChordSheet
-  const existingChordSheet = getFromMySongs(artist, title);
+  const existingChordSheet = getFromMyChordSheets(artist, title);
   if (!existingChordSheet) {
     console.error('ChordSheet not found in cache:', { artist, title });
     toast({
       title: "Update failed", 
-      description: "Song not found in storage",
+      description: "Chord sheet not found in storage",
       variant: "destructive"
     });
     return;
@@ -56,18 +63,18 @@ export const handleUpdateSong = (
     songChords: content
   };
   
-  // Save to cache
-  updateInMySongs(artist, title, updatedChordSheet);
+  // Save to cache using modular function
+  updateChordSheet(artist, title, updatedChordSheet);
   
   // Update UI state - keep the same Song object but refresh from new data
-  const updatedSongs = mySongs.map(song => 
+  const updatedSongs = myChordSheets.map(song => 
     song.path === selectedSong.path ? { ...song } : song
   );
   setMySongs(updatedSongs);
   setSelectedSong({ ...selectedSong });
   
   toast({
-    title: "Song updated",
+    title: "Chord sheet updated",
     description: `"${selectedSong.title}" has been updated`
   });
 };

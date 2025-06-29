@@ -8,8 +8,8 @@ export interface UseSongActionsProps {
   memoizedSongs: Song[];
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  // New prop for My Songs to enable deduplication
-  mySongs?: Song[];
+  // New prop for My Chord Sheets to enable deduplication
+  myChordSheets?: Song[];
 }
 
 export const useSongActions = ({ 
@@ -17,7 +17,7 @@ export const useSongActions = ({
   memoizedSongs, 
   setActiveTab, 
   setSelectedSong,
-  mySongs = []
+  myChordSheets = []
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
   
@@ -26,7 +26,7 @@ export const useSongActions = ({
     navigate,
     setSelectedSong,
     setActiveTab,
-    mySongs
+    myChordSheets
   });
 
   const handleView = useCallback((songData: Song) => {
@@ -40,16 +40,16 @@ export const useSongActions = ({
       song.path === songId || song.title === songId
     );
     if (item) {
-      // Check if song already exists in My Songs by path (much cleaner!)
+      // Check if song already exists in My Chord Sheets by path (much cleaner!)
       setMySongs(prev => {
         const existing = prev.find(existingSong => existingSong.path === item.path);
         
         if (existing) {
-          console.log('[handleAdd] Song already exists in My Songs:', item.title, 'by', item.artist);
+          console.log('[handleAdd] Song already exists in My Chord Sheets:', item.title, 'by', item.artist);
           return prev; // Don't add duplicate
         }
         
-        console.log('[handleAdd] Adding new song to My Songs:', item.title, 'by', item.artist);
+        console.log('[handleAdd] Adding new song to My Chord Sheets:', item.title, 'by', item.artist);
         return [...prev, item];
       });
     }

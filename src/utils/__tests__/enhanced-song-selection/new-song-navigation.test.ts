@@ -18,13 +18,13 @@ describe('Enhanced Song Selection - New Song Navigation', () => {
     mockSetActiveTab = vi.fn();
   });
 
-  it('should handle new song selection (not in My Songs)', () => {
+  it('should handle new song selection (not in My Chord Sheets)', () => {
     const { result } = renderHook(() => 
       useEnhancedSongSelection({
         navigate: mockNavigate,
         setSelectedSong: mockSetSelectedSong,
         setActiveTab: mockSetActiveTab,
-        mySongs: []
+        myChordSheets: []
       })
     );
 
