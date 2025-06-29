@@ -3,6 +3,8 @@ import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
+import { searchMySongs } from "@/utils/my-songs-search";
+import { isAccentInsensitiveMatch } from "@/utils/accent-insensitive-search";
 
 /**
  * Custom hook to handle search results fetching and filtering
@@ -56,7 +58,27 @@ export function useSearchResults(
       setLoading(true);
       setError(null);
 
-      // Check cache first
+      // STEP 1: Check My Songs first (local-first behavior)
+      console.log('🏠 LOCAL FIRST: Checking My Songs for matches...');
+      const localSongs = searchMySongs(artist || undefined, song || undefined);
+      
+      if (localSongs.length > 0) {
+        console.log('✅ LOCAL FIRST: Found', localSongs.length, 'songs in My Songs, using local results');
+        // Found local matches - use them immediately without API call
+        setAllSongs(localSongs);
+        setSongs(localSongs);
+        setAllArtists([]);
+        setArtists([]);
+        setLoading(false);
+        setHasFetched(true);
+        lastFetchedArtist.current = artist + '|' + song;
+        setShouldContinueFetching(false);
+        return;
+      }
+      
+      console.log('📡 LOCAL FIRST: No local matches found, proceeding to API/cache...');
+
+      // STEP 2: Check API cache if no local matches
       const cachedResults = getCachedSearchResults(artist || null, song || null);
       if (cachedResults) {
         console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
@@ -158,9 +180,9 @@ export function useSearchResults(
         console.log('[useSearchResults] Setting songs (no filter):', allSongs);
         setSongs(allSongs);
       } else {
-        // Filter songs by title - Song has title property
+        // Filter songs by title using accent-insensitive matching
         const filtered = allSongs.filter(song => 
-          song.title.toLowerCase().includes(filterSong.toLowerCase())
+          isAccentInsensitiveMatch(filterSong, song.title)
         );
         console.log('[useSearchResults] Setting filtered songs:', filtered);
         setSongs(filtered);
