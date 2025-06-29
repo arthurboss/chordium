@@ -217,10 +217,13 @@ const ChordViewer = () => {
     }
   };
 
-  // Extract song title - prioritize navigation state, fallback to URL params
+  // Extract song title - prioritize navigation state, then chord data, fallback to URL params
   const getSongTitle = () => {
     if (navigationSong?.title) {
       return navigationSong.title;
+    }
+    if (currentChordData.title && currentChordData.title !== '') {
+      return currentChordData.title;
     }
     if (song) {
       return decodeURIComponent(song.replace(/-/g, ' '));
@@ -228,10 +231,13 @@ const ChordViewer = () => {
     return 'Chord Sheet';
   };
 
-  // Extract artist name - prioritize navigation state, fallback to URL params
+  // Extract artist name - prioritize navigation state, then chord data, fallback to URL params
   const getArtistName = () => {
     if (navigationSong?.artist) {
       return navigationSong.artist;
+    }
+    if (currentChordData.artist && currentChordData.artist !== '' && currentChordData.artist !== 'Unknown Artist') {
+      return currentChordData.artist;
     }
     if (artist) {
       return decodeURIComponent(artist.replace(/-/g, ' '));
