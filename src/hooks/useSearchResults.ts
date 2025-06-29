@@ -3,7 +3,6 @@ import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
-import { searchMyChordSheets } from "@/utils/my-chord-sheets-search";
 import { isAccentInsensitiveMatch } from "@/utils/accent-insensitive-search";
 
 /**
@@ -58,27 +57,7 @@ export function useSearchResults(
       setLoading(true);
       setError(null);
 
-      // STEP 1: Check My Chord Sheets first (local-first behavior)
-      console.log('🏠 LOCAL FIRST: Checking My Chord Sheets for matches...');
-      const localSongs = searchMyChordSheets(artist || undefined, song || undefined);
-      
-      if (localSongs.length > 0) {
-        console.log('✅ LOCAL FIRST: Found', localSongs.length, 'songs in My Chord Sheets, using local results');
-        // Found local matches - use them immediately without API call
-        setAllSongs(localSongs);
-        setSongs(localSongs);
-        setAllArtists([]);
-        setArtists([]);
-        setLoading(false);
-        setHasFetched(true);
-        lastFetchedArtist.current = artist + '|' + song;
-        setShouldContinueFetching(false);
-        return;
-      }
-      
-      console.log('📡 LOCAL FIRST: No local matches found, proceeding to API/cache...');
-
-      // STEP 2: Check API cache if no local matches
+      // Check API cache first
       const cachedResults = getCachedSearchResults(artist || null, song || null);
       if (cachedResults) {
         console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
@@ -119,7 +98,7 @@ export function useSearchResults(
           if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
           const contentType = res.headers.get('content-type');
           const text = await res.text();
-          if (!contentType || !contentType.includes('application/json')) {
+          if (!contentType?.includes('application/json')) {
             throw new Error('Invalid response from backend (not JSON)');
           }
           const data = JSON.parse(text);
