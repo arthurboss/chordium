@@ -123,7 +123,7 @@ class SearchController {
 
   async getChordSheet(req, res) {
     try {
-      const { url, title, artist } = req.query;
+      const { url } = req.query;
       
       if (!url) {
         logger.error('❌ getChordSheet: Missing song URL parameter');
@@ -133,9 +133,7 @@ class SearchController {
       logger.info(`🎵 CHORD SHEET FETCH START: ${url}`);
       logger.info(`📊 Flow Step 1: Backend received chord sheet request`);
       logger.info(`📋 Request Details:`, { 
-        url, 
-        title: title || 'not provided',
-        artist: artist || 'not provided',
+        url,
         timestamp: new Date().toISOString() 
       });
       
