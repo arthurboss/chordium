@@ -1,5 +1,6 @@
 import { getChordUrl } from "../../utils/session-storage-utils";
 import { generateChordSheetId } from "../../utils/chord-sheet-id-generator";
+import { toSlug } from "../../utils/url-slug-utils";
 
 // Environment-based logging utility to prevent infinite loops in tests
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
@@ -77,8 +78,8 @@ export class URLDeterminationStrategy {
     }
 
     // Priority 5: Reconstruct from params (fallback)
-    const artistSlug = artist.toLowerCase();
-    const songSlug = song.toLowerCase();
+    const artistSlug = toSlug(artist);
+    const songSlug = toSlug(song);
     const reconstructedUrl = `https://www.cifraclub.com.br/${artistSlug}/${songSlug}/`;
     debugLog("Reconstructed URL from params:", reconstructedUrl);
     

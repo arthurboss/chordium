@@ -20,10 +20,11 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
               icon="music"
               title={song.title}
               subtitle={song.artist}
-              onView={() => onSongSelect(song)}
+              onView={(path) => onSongSelect(song)} // Still call onSongSelect with song object
               onDelete={onDeleteSong}
               path={song.path}
               isDeletable={true}
+              song={song} // Pass song object for enhanced navigation
             />
           ))}
         </div>

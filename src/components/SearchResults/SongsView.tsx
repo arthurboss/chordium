@@ -45,7 +45,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
           icon="music"
           title={item.title}
           subtitle={item.artist}
-          onView={() => onView(item)}
+          onView={(path) => onView(item)} // ResultCard passes path, but we still call onView with song
           onDelete={() => onAdd(item.path)}
           path={item.path}
           deleteButtonIcon="plus"
@@ -54,6 +54,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
           viewButtonLabel="View Chords"
           isDeletable={true}
           compact
+          song={item} // Pass the song object for enhanced navigation
         />
       </div>
     );

@@ -1,12 +1,13 @@
 import { Music, User, Trash2, Plus, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cyAttr } from "@/utils/test-utils";
+import { Song } from "@/types/song";
 
 interface ResultCardProps {
   icon: "music" | "user";
   title: string;
   subtitle?: string;
-  onView: (path: string) => void;
+  onView: (song: Song) => void; // Accepts Song object for enhanced navigation
   onDelete?: (id: string) => void;
   path: string;
   viewButtonIcon?: "view" | "external" | "none"; // Add "none" option to hide view button
@@ -16,6 +17,7 @@ interface ResultCardProps {
   isDeletable?: boolean;
   compact?: boolean;
   rightElement?: React.ReactNode;
+  song?: Song; // Add optional song object for complete navigation data
 }
 
 const ResultCard = ({
@@ -32,6 +34,7 @@ const ResultCard = ({
   isDeletable = true,
   compact = false,
   rightElement,
+  song, // Destructure song prop
 }: ResultCardProps) => {
   // Shared icon
   const Icon = icon === "music" ? Music : User;
@@ -66,7 +69,7 @@ const ResultCard = ({
         ? "text-chord hover:underline font-medium text-[10px] flex items-center gap-1 px-1"
         : "text-chord hover:underline font-medium text-sm flex items-center gap-1"
       }
-      onClick={e => { if (compact) { e.stopPropagation(); } onView(path); }}
+      onClick={e => { if (compact) { e.stopPropagation(); } onView(song || { title, artist: subtitle || '', path }); }} // Pass song object or construct from props
       tabIndex={0}
       aria-label={viewButtonLabel || (icon === 'music' ? `View chords for ${title}` : `See songs by ${title}`)}
       {...cyAttr(`view-btn${compact ? '-compact' : ''}-${path}`)}
@@ -74,7 +77,7 @@ const ResultCard = ({
       {viewButtonIcon === 'external' ? (
         <ExternalLink className="h-3 w-3" />
       ) : null}
-      {viewButtonLabel || (icon === 'music' ? (compact ? "View" : "View Chords") : (compact ? "Songs" : "See Songs"))}
+      {viewButtonLabel ?? (icon === 'music' ? (compact ? "View" : "View Chords") : (compact ? "Songs" : "See Songs"))}
     </button>
   );
 
@@ -104,7 +107,7 @@ const ResultCard = ({
       <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${icon}-card-compact-${path}`)}>
         <CardContent
           className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
-          onClick={() => onView(path)}
+          onClick={() => onView(song || { title, artist: subtitle || '', path })} // Pass song object or construct from props
           {...cyAttr(`${icon}-card-compact-content-${path}`)}
         >
           <Icon className="h-6 w-6 text-chord" />
@@ -121,7 +124,7 @@ const ResultCard = ({
     <Card className="overflow-hidden cursor-pointer w-full h-28" {...cyAttr(`${icon}-card-${path}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-col justify-between"
-        onClick={() => onView(path)}
+        onClick={() => onView(song || { title, artist: subtitle || '', path })} // Pass song object or construct from props
         {...cyAttr(`${icon}-card-content-${path}`)}
       >
         <div className="flex items-start gap-2 w-full">
