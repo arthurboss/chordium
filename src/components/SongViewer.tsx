@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
-import { getCachedChordSheet } from "@/cache";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 
 interface SongViewerProps {
   song: Song;
@@ -58,7 +58,7 @@ const SongViewer = ({
     }
 
     // Try to get from cache using artist and title
-    const cachedChordSheet = getCachedChordSheet(song.artist, song.title);
+    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(song.artist, song.title);
 
     return cachedChordSheet?.songChords ?? '';
   }, [song, directChordContent]);

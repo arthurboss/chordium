@@ -1,5 +1,5 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { addToMyChordSheets, getAllFromMyChordSheets } from '../cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Populates My Chord Sheets with sample songs in development mode only
@@ -21,7 +21,7 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
   console.log('🔧 Development mode detected, checking My Chord Sheets cache...');
 
   // Check if My Chord Sheets is already populated
-  const existingSongs = getAllFromMyChordSheets();
+  const existingSongs = unifiedChordSheetCache.getAllSavedChordSheets();
   if (existingSongs.length > 0) {
     console.log('📚 My Chord Sheets already populated, skipping sample song initialization');
     return;
@@ -31,7 +31,8 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
   
   // Add each sample chord sheet to My Chord Sheets
   sampleChordSheets.forEach((chordSheet) => {
-    addToMyChordSheets(chordSheet.artist, chordSheet.title, chordSheet);
+    unifiedChordSheetCache.cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
+    unifiedChordSheetCache.setSavedStatus(chordSheet.artist, chordSheet.title, true);
     console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to My Chord Sheets`);
   });
 

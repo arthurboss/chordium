@@ -36,12 +36,7 @@ const Header = () => (
                 Search
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/scrape-test" className="w-full cursor-pointer">
-                <Guitar className="h-4 w-4 mr-2" />
-                Chord Scraper
-              </Link>
-            </DropdownMenuItem>
+
           </DropdownMenuContent>
         </DropdownMenu>
         <ThemeToggle />

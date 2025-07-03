@@ -1,4 +1,4 @@
-import { removeFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Delete a ChordSheet from myChordSheets cache
@@ -6,5 +6,5 @@ import { removeFromMyChordSheets } from '@/cache/implementations/my-chord-sheets
  * @param artist Artist of the chord sheet to delete
  */
 export const deleteChordSheet = (title: string, artist: string): void => {
-  removeFromMyChordSheets(artist, title);
+  unifiedChordSheetCache.removeChordSheet(artist, title);
 };

@@ -47,10 +47,18 @@ describe('DataHandlers', () => {
 
       dataHandlers.handleImmediateData(sampleChordSheet, mockRefreshPromise, mockSetChordData);
 
-      // Wait for promise to reject
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Background refresh error (silent):', expect.any(Error));
+      // Wait for promise to reject and be handled
+      try {
+        await mockRefreshPromise;
+      } catch {
+        // Expected to throw
+      }
+      
+      // Give a moment for any async handling
+      await vi.waitFor(() => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Background refresh error (silent):', expect.any(Error));
+      }, { timeout: 100 });
+      
       consoleErrorSpy.mockRestore();
     });
   });

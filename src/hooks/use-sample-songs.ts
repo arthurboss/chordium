@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Song } from "@/types/song";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { chordSheetToSong } from "@/utils/chord-sheet-storage";
-import { getAllFromMyChordSheets } from "@/cache/implementations/my-chord-sheets-cache";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 
 // Custom hook to load sample songs and initialize user songs from storage.
 export function useSampleSongs() {
@@ -11,7 +11,7 @@ export function useSampleSongs() {
 
   const refreshMySongs = useCallback(() => {
     // Get My Chord Sheets from the cache (this includes both user-added and dev-mode sample songs)
-    const chordSheets = getAllFromMyChordSheets();
+    const chordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
     const songs = chordSheets.map(chordSheetToSong);
     
     console.log('🔄 Refreshing My Chord Sheets from cache:', songs.length, 'songs');

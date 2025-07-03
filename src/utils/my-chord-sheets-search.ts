@@ -1,4 +1,4 @@
-import { getAllFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
 import { Song } from '@/types/song';
 import { isAccentInsensitiveMatch } from './accent-insensitive-search';
@@ -24,7 +24,7 @@ export function convertChordSheetToSong(chordSheet: ChordSheet): Song {
  */
 export function searchMyChordSheets(artistQuery?: string, songQuery?: string): Song[] {
   // Get all chord sheets from My Chord Sheets
-  const allMyChordSheets = getAllFromMyChordSheets();
+  const allMyChordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
   
   // If no search terms, return empty array (don't return all songs)
   if (!artistQuery?.trim() && !songQuery?.trim()) {

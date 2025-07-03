@@ -1,17 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { findLocalSong } from '../local-chord-sheet-finder';
 import { getMyChordSheetsAsSongs } from '../chord-sheet-storage';
-import { getCachedChordSheet } from '../../cache/implementations/chord-sheet-cache';
+import { unifiedChordSheetCache } from '../../cache/implementations/unified-chord-sheet-cache';
 import { extractSongMetadata } from '../metadata-extraction';
 import { GUITAR_TUNINGS } from '../../types/guitarTuning';
 
 // Mock dependencies
 vi.mock('../chord-sheet-storage');
-vi.mock('../../cache/implementations/chord-sheet-cache');
+vi.mock('../../cache/implementations/unified-chord-sheet-cache');
 vi.mock('../metadata-extraction');
 
 const mockedGetMyChordSheetsAsSongs = vi.mocked(getMyChordSheetsAsSongs);
-const mockedGetCachedChordSheet = vi.mocked(getCachedChordSheet);
+const mockedGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheet);
 const mockedExtractSongMetadata = vi.mocked(extractSongMetadata);
 
 describe('findLocalSong', () => {

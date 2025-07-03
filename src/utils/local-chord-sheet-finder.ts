@@ -1,5 +1,5 @@
 import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
-import { getCachedChordSheet } from '../cache/implementations/chord-sheet-cache';
+import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
 import { Song } from '../types/song';
 import { extractSongMetadata } from './metadata-extraction';
 
@@ -49,7 +49,7 @@ export async function findLocalSong(
       console.log('Found song in local storage:', foundSong.title);
       
       // Try to get the chord sheet from cache using the artist and title
-      const cachedChordSheet = getCachedChordSheet(foundSong.artist, foundSong.title);
+      const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
       
       if (!cachedChordSheet) {
         console.log('❌ Song found but no cached chord sheet available');

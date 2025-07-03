@@ -2,7 +2,7 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { toast } from "@/hooks/use-toast";
 import { updateChordSheet } from './updateChordSheet';
-import { getFromMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Handles chord sheet update from UI context (both UI state and persistent storage)
@@ -46,7 +46,7 @@ export const handleUpdateChordSheetFromUI = (
   const title = titlePart.replace(/_/g, ' ');
   
   // Get the existing ChordSheet
-  const existingChordSheet = getFromMyChordSheets(artist, title);
+  const existingChordSheet = unifiedChordSheetCache.getCachedChordSheet(artist, title);
   if (!existingChordSheet) {
     console.error('ChordSheet not found in cache:', { artist, title });
     toast({

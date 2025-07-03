@@ -5,7 +5,7 @@
 import { vi } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
-import { generateChordSheetCacheKey } from '@/cache/implementations/chord-sheet-cache';
+import { generateCacheKey as generateChordSheetCacheKey } from '@/cache/core/cache-key-generator';
 
 // Mock localStorage with proper implementation
 export const mockLocalStorage = (() => {

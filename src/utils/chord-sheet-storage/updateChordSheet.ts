@@ -1,5 +1,5 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { updateInMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Update a ChordSheet in myChordSheets cache
@@ -8,5 +8,5 @@ import { updateInMyChordSheets } from '@/cache/implementations/my-chord-sheets-c
  * @param updatedChordSheet Updated chord sheet data
  */
 export const updateChordSheet = (artist: string, title: string, updatedChordSheet: ChordSheet): void => {
-  updateInMyChordSheets(artist, title, updatedChordSheet);
+  unifiedChordSheetCache.cacheChordSheet(artist, title, updatedChordSheet, { saved: true });
 };

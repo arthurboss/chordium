@@ -13,15 +13,17 @@ import { ChordSheet } from '../../types/chordSheet';
 import { GUITAR_TUNINGS } from '../../types/guitarTuning';
 
 // Mock the cache module
-vi.mock('../../cache/implementations/chord-sheet-cache', () => ({
-  getCachedChordSheet: vi.fn(),
-  cacheChordSheet: vi.fn()
+vi.mock('../../cache/implementations/unified-chord-sheet-cache', () => ({
+  unifiedChordSheetCache: {
+    getCachedChordSheet: vi.fn(),
+    cacheChordSheet: vi.fn()
+  }
 }));
 
-import { getCachedChordSheet, cacheChordSheet } from '../../cache/implementations/chord-sheet-cache';
+import { unifiedChordSheetCache } from '../../cache/implementations/unified-chord-sheet-cache';
 
-const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
-const mockCacheChordSheet = vi.mocked(cacheChordSheet);
+const mockGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheet);
+const mockCacheChordSheet = vi.mocked(unifiedChordSheetCache.cacheChordSheet);
 
 // Real sample songs for testing
 const hotelCaliforniaChordSheet: ChordSheet = {

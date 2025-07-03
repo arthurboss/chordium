@@ -13,7 +13,7 @@ import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
-import { getCachedChordSheet } from "@/cache/implementations/chord-sheet-cache";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
@@ -103,7 +103,7 @@ const ChordViewer = () => {
 
             // Try to get the chord content from the cache using artist and title
             console.log('🏪 Trying to get cached chord sheet...');
-            const cachedChordSheet = getCachedChordSheet(foundSong.artist, foundSong.title);
+            const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
             console.log('Cached chord sheet result:', cachedChordSheet);
 
             let songChords = '';

@@ -3,11 +3,16 @@ import { CacheCoordinator } from '../cache-coordinator';
 import { ChordSheet } from '@/types/chordSheet';
 import { getTestSong } from '@/__tests__/shared/test-setup';
 
-// Mock the cache functions
-vi.mock('../../../cache/implementations/chord-sheet-cache', () => ({
+// Mock the unified cache functions and instance
+vi.mock('../../../cache/implementations/unified-chord-sheet-cache', () => ({
   clearExpiredChordSheetCache: vi.fn(),
-  getCachedChordSheet: vi.fn(),  
+  getCachedChordSheet: vi.fn(),
   cacheChordSheet: vi.fn(),
+  unifiedChordSheetCache: {
+    getCachedChordSheet: vi.fn(),
+    cacheChordSheet: vi.fn(),
+    clearExpiredEntries: vi.fn(),
+  },
 }));
 
 // Mock fetch for backend API calls
@@ -18,15 +23,11 @@ let hotelCaliforniaChordSheet: ChordSheet;
 let wonderwallChordSheet: ChordSheet;
 
 // Get the mocked functions
-import {
-  clearExpiredChordSheetCache,
-  getCachedChordSheet,
-  cacheChordSheet,
-} from '../../../cache/implementations/chord-sheet-cache';
-
+import { clearExpiredChordSheetCache, getCachedChordSheet, cacheChordSheet, unifiedChordSheetCache } from '../../../cache/implementations/unified-chord-sheet-cache';
 const mockClearExpiredCache = vi.mocked(clearExpiredChordSheetCache);
 const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
 const mockCacheChordSheet = vi.mocked(cacheChordSheet);
+const mockUnifiedChordSheetCache = vi.mocked(unifiedChordSheetCache);
 
 describe('CacheCoordinator', () => {
   let cacheCoordinator: CacheCoordinator;
@@ -68,20 +69,20 @@ describe('CacheCoordinator', () => {
   describe('getChordSheetData', () => {
     it('should return cached data when available', async () => {
       expect(hotelCaliforniaChordSheet).not.toBeNull();
-      mockGetCachedChordSheet.mockReturnValue(hotelCaliforniaChordSheet);
+      mockUnifiedChordSheetCache.getCachedChordSheet.mockReturnValue(hotelCaliforniaChordSheet);
 
       const result = await cacheCoordinator.getChordSheetData(
         'eagles-hotel_california',
         'https://cifraclub.com.br/eagles/hotel-california/'
       );
 
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('eagles', 'hotel california');
+      expect(mockUnifiedChordSheetCache.getCachedChordSheet).toHaveBeenCalledWith('eagles', 'hotel california');
       expect(result).toEqual(hotelCaliforniaChordSheet);
     });
 
     it('should fetch from backend when not cached', async () => {
       expect(wonderwallChordSheet).not.toBeNull();
-      mockGetCachedChordSheet.mockReturnValue(null);
+      mockUnifiedChordSheetCache.getCachedChordSheet.mockReturnValue(null);
 
       // Mock backend response to return the same data as our sample song
       mockFetch.mockResolvedValue({
@@ -94,13 +95,13 @@ describe('CacheCoordinator', () => {
         'https://cifraclub.com.br/oasis/wonderwall/'
       );
 
-      expect(mockGetCachedChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall');
-      expect(mockCacheChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall', wonderwallChordSheet);
+      expect(mockUnifiedChordSheetCache.getCachedChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall');
+      expect(mockUnifiedChordSheetCache.cacheChordSheet).toHaveBeenCalledWith('oasis', 'wonderwall', wonderwallChordSheet);
       expect(result).toEqual(wonderwallChordSheet);
     });
 
     it('should handle fetch errors gracefully', async () => {
-      mockGetCachedChordSheet.mockReturnValue(null);
+      mockUnifiedChordSheetCache.getCachedChordSheet.mockReturnValue(null);
       mockFetch.mockRejectedValue(new Error('Network error'));
 
       const result = await cacheCoordinator.getChordSheetData(

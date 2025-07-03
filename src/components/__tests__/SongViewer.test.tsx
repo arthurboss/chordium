@@ -5,11 +5,13 @@ import SongViewer from '../SongViewer';
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
-import { getCachedChordSheet } from '@/cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 // Mock chord sheet cache
-vi.mock('@/cache', () => ({
-  getCachedChordSheet: vi.fn()
+vi.mock('@/cache/implementations/unified-chord-sheet-cache', () => ({
+  unifiedChordSheetCache: {
+    getCachedChordSheet: vi.fn()
+  }
 }));
 
 // Mock ChordDisplay component
@@ -25,7 +27,7 @@ vi.mock('@/components/ChordDisplay', () => ({
 }));
 
 describe('SongViewer', () => {
-  const mockGetCachedChordSheet = vi.mocked(getCachedChordSheet);
+  const mockGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheet);
   const mockChordDisplayRef = { current: document.createElement('div') };
   const mockOnBack = vi.fn();
   const mockOnDelete = vi.fn();

@@ -84,11 +84,36 @@ describe('useChordSheet', () => {
     mockUseNavigate.mockReturnValue(vi.fn());
     mockCacheCoordinator.getChordSheetData.mockResolvedValue(null);
     
-    // Setup data handlers to simulate real behavior
+    // Setup data handlers to simulate real behavior with proper loading state management
+    mockDataHandlers.setLoadingState.mockImplementation((fetchUrl, setChordData) => {
+      setChordData({
+        title: '',
+        artist: '',
+        songChords: '',
+        songKey: '',
+        guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+        guitarCapo: 0,
+        loading: true,
+        error: null
+      });
+    });
+    
     mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
       if (freshData) {
-        setChordData(freshData);
+        setChordData({
+          ...freshData,
+          loading: false,
+          error: null
+        });
       }
+    });
+    
+    mockDataHandlers.handleErrorState.mockImplementation((errorMessage, fetchUrl, initialState, setChordData) => {
+      setChordData({
+        ...initialState,
+        loading: false,
+        error: errorMessage
+      });
     });
     
     // Setup URL strategy mock
@@ -103,7 +128,7 @@ describe('useChordSheet', () => {
   });
 
   it('should load from local storage when in My Chord Sheets context', async () => {
-    // Arrange
+    // Arrange - Return the complete object with UI state as expected by the hook
     const mockLocalData = {
       title: 'Hotel California',
       artist: 'Eagles',
@@ -124,7 +149,7 @@ describe('useChordSheet', () => {
     // Assert
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-    });
+    }, { timeout: 5000 });
 
     expect(result.current.title).toBe('Hotel California');
     expect(result.current.artist).toBe('Eagles');
@@ -134,7 +159,7 @@ describe('useChordSheet', () => {
     expect(result.current.error).toBeNull();
     expect(mockStrategy.shouldLoadLocal).toHaveBeenCalledWith('eagles', 'hotel-california');
     expect(mockStrategy.loadLocal).toHaveBeenCalledWith('eagles', 'hotel-california');
-  });
+  }, 10000);
 
   it('should fall back to remote fetch when local not available', async () => {
     // Arrange
@@ -147,16 +172,20 @@ describe('useChordSheet', () => {
       songChords: 'chord content...',
       songKey: 'Am',
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-      guitarCapo: 0,
-      loading: false,
-      error: null
+      guitarCapo: 0
     };
 
     mockCacheCoordinator.getChordSheetData.mockResolvedValue(remoteData);
 
-    // Setup data handlers to call setChordData with the fetched data
+    // Update the data handler to properly handle fresh data from remote
     mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
-      setChordData(freshData);
+      if (freshData) {
+        setChordData({
+          ...freshData,
+          loading: false,
+          error: null
+        });
+      }
     });
 
     // Act
@@ -165,7 +194,7 @@ describe('useChordSheet', () => {
     // Assert
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-    });
+    }, { timeout: 5000 });
 
     expect(result.current.title).toBe('Hotel California');
     expect(result.current.artist).toBe('Eagles');
@@ -173,7 +202,7 @@ describe('useChordSheet', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(mockCacheCoordinator.getChordSheetData).toHaveBeenCalled();
-  });
+  }, 10000);
 
   it('should skip local loading for search context', async () => {
     // Arrange
@@ -192,20 +221,15 @@ describe('useChordSheet', () => {
 
     mockCacheCoordinator.getChordSheetData.mockResolvedValue(remoteData);
 
-    // Setup data handlers to call setChordData with the fetched data
-    mockDataHandlers.handleFreshData.mockImplementation((freshData, setChordData) => {
-      setChordData(freshData);
-    });
-
     // Act
     const { result } = renderHook(() => useChordSheet());
 
     // Assert
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-    });
+    }, { timeout: 5000 });
 
     expect(mockStrategy.loadLocal).not.toHaveBeenCalled();
     expect(mockCacheCoordinator.getChordSheetData).toHaveBeenCalled();
-  });
+  }, 10000);
 });

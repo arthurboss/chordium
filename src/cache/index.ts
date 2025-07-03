@@ -22,14 +22,8 @@ export {
   inspectArtistCache 
 } from './implementations/artist-cache';
 
-export { 
-  getCachedChordSheet, 
-  cacheChordSheet, 
-  clearExpiredChordSheetCache,
-  clearChordSheetCache,
-  isChordSheetCached,
-  generateChordSheetCacheKey
-} from './implementations/chord-sheet-cache';
+// Unified chord sheet cache
+export { unifiedChordSheetCache } from './implementations/unified-chord-sheet-cache';
 
 // Cache utilities
 export { debugCache, clearAllCaches } from './utils/cache-debug';

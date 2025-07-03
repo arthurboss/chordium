@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { searchMyChordSheets, convertChordSheetToSong, hasLocalMatches } from '../my-chord-sheets-search';
-import { addToMyChordSheets, clearMyChordSheets } from '@/cache/implementations/my-chord-sheets-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
 
 describe('My Chord Sheets Search Utility', () => {
   beforeEach(() => {
     // Clear My Chord Sheets before each test
-    clearMyChordSheets();
+    unifiedChordSheetCache.clearAllCache();
     
     // Mock localStorage
     const storage: Record<string, string> = {};
@@ -28,7 +28,7 @@ describe('My Chord Sheets Search Utility', () => {
   });
 
   afterEach(() => {
-    clearMyChordSheets();
+    unifiedChordSheetCache.clearAllCache();
     vi.restoreAllMocks();
   });
 
@@ -115,7 +115,7 @@ describe('My Chord Sheets Search Utility', () => {
       ];
 
       songs.forEach(song => {
-        addToMyChordSheets(song.artist, song.title, song.chordSheet);
+        unifiedChordSheetCache.cacheChordSheet(song.artist, song.title, song.chordSheet, { saved: true });
       });
     });
 
@@ -193,7 +193,7 @@ describe('My Chord Sheets Search Utility', () => {
         guitarCapo: 0,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
       };
-      addToMyChordSheets('Radiohead', 'Heart-Shaped Box', anotherChordSheet);
+      unifiedChordSheetCache.cacheChordSheet('Radiohead', 'Heart-Shaped Box', anotherChordSheet, { saved: true });
 
       const results = searchMyChordSheets(undefined, 'heart');
       
@@ -218,7 +218,7 @@ describe('My Chord Sheets Search Utility', () => {
         guitarCapo: 0,
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
       };
-      addToMyChordSheets('Chimarruts', 'Do Lado de Cá', chordSheet);
+      unifiedChordSheetCache.cacheChordSheet('Chimarruts', 'Do Lado de Cá', chordSheet, { saved: true });
     });
 
     it('should return true when matches exist', () => {
