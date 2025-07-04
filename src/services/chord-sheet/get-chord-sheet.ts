@@ -1,9 +1,19 @@
 import { ChordSheet } from '../../types/chordSheet';
-import { unifiedChordSheetCache } from '../../cache/implementations/unified-chord-sheet-cache';
+import { ChordSheetRepository } from '../../storage/repositories/chord-sheet-repository';
 
 /**
- * Retrieves a chord sheet from cache by artist and title
+ * Retrieves a chord sheet from IndexedDB by artist and title
  */
-export function getChordSheet(artist: string, title: string): ChordSheet | null {
-  return unifiedChordSheetCache.getCachedChordSheet(artist, title);
+export async function getChordSheet(artist: string, title: string): Promise<ChordSheet | null> {
+  const repository = new ChordSheetRepository();
+  try {
+    await repository.initialize();
+    const record = await repository.get(artist, title);
+    return record?.chordSheet || null;
+  } catch (error) {
+    console.error('Failed to get chord sheet from IndexedDB:', error);
+    return null;
+  } finally {
+    await repository.close();
+  }
 }

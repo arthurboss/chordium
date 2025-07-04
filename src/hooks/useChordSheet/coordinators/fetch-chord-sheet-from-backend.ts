@@ -4,23 +4,23 @@ import { convertResponseToChordSheet } from '../utils/convert-response-to-chord-
 /**
  * Fetch chord sheet from backend API
  * 
- * @param fetchUrl - URL to fetch the chord sheet from
+ * @param fetchPath - Path to fetch the chord sheet from (e.g., "artist/song")
  * @param artist - Artist name for logging
  * @param title - Song title for logging
  * @returns Promise with chord sheet data or null if failed
  */
 export async function fetchChordSheetFromBackend(
-  fetchUrl: string,
+  fetchPath: string,
   artist: string,
   title: string
 ): Promise<ChordSheet | null> {
   try {
     console.log('🌐 FRONTEND FETCH START: Fetching chord sheet from backend');
     console.log('📊 Flow Step 4: Frontend making API call to backend');
-    console.log('📋 Request details:', { fetchUrl, timestamp: new Date().toISOString() });
+    console.log('📋 Request details:', { fetchPath, timestamp: new Date().toISOString() });
     
-    // Build API URL (backend now scrapes title and artist from the source page)
-    const apiUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
+    // Build API URL with path parameter (backend handles URL construction)
+    const apiUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:3001'}/api/cifraclub-chord-sheet?path=${encodeURIComponent(fetchPath)}`;
     
     console.log('🔗 API URL:', apiUrl);
     

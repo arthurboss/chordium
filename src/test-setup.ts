@@ -19,3 +19,5 @@ Object.defineProperty(globalThis, 'localStorage', {
 
 // Basic fetch mock
 global.fetch = vi.fn();
+
+// Note: IndexedDB tests use in-memory storage instead of mocking IndexedDB

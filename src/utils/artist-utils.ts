@@ -18,9 +18,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     throw new Error('Invalid artist path');
   }
 
-  // Try to get cached results first
-  const cachedSongs = getCachedArtistSongs(artistPath);
-  if (cachedSongs) {
+  // Try to get cached results first (async)
+  const cachedSongs = await getCachedArtistSongs(artistPath);
+  if (cachedSongs && cachedSongs.length > 0) {
     console.log(`🎯 CACHE HIT: Using cached songs for artist: ${artistPath} (${cachedSongs.length} songs)`);
     return cachedSongs;
   }
@@ -41,9 +41,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     const data: Song[] = await resp.json();
     console.log(`Received ${data.length} songs for artist ${artistPath}`);
     
-    // Cache the results for future use
+    // Cache the results for future use (async)
     console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
-    cacheArtistSongs(artistPath, data);
+    await cacheArtistSongs(artistPath, data);
     
     // Return the data as-is (Song objects with title and path)
     return data;

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
-import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
+import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache/index";
 import { isAccentInsensitiveMatch } from "@/utils/accent-insensitive-search";
 
 /**
@@ -57,59 +57,60 @@ export function useSearchResults(
       setLoading(true);
       setError(null);
 
-      // Check API cache first
-      const cachedResults = getCachedSearchResults(artist || null, song || null);
-      if (cachedResults) {
-        console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
-        // Process cached results
-        if (!artist && song) {
-          // Song-only search
-          setAllSongs(cachedResults);
-          setSongs(cachedResults);
-          setAllArtists([]);
-          setArtists([]);
-        } else {
-          // Artist search - cached results are Artist objects
-          const artistResults = cachedResults as unknown as Artist[];
-          setAllArtists(artistResults);
-          setArtists(artistResults);
-          setAllSongs([]);
-          setSongs([]);
-        }
-        setLoading(false);
-        setHasFetched(true);
-        lastFetchedArtist.current = artist + '|' + song;
-        setShouldContinueFetching(false);
-        return;
-      }
+      const fetchData = async () => {
+        try {
+          // Check IndexedDB cache first (async)
+          const cachedResults = await getCachedSearchResults(artist || null, song || null);
+          if (cachedResults && cachedResults.length > 0) {
+            console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
+            // Process cached results
+            if (!artist && song) {
+              // Song-only search
+              setAllSongs(cachedResults);
+              setSongs(cachedResults);
+              setAllArtists([]);
+              setArtists([]);
+            } else {
+              // Artist search - cached results are Artist objects
+              const artistResults = cachedResults as unknown as Artist[];
+              setAllArtists(artistResults);
+              setArtists(artistResults);
+              setAllSongs([]);
+              setSongs([]);
+            }
+            setLoading(false);
+            setHasFetched(true);
+            lastFetchedArtist.current = artist + '|' + song;
+            setShouldContinueFetching(false);
+            return;
+          }
 
-      // Choose endpoint based on search type
-      let url;
-      if (!artist && song) {
-        // Song only search
-        url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
-      } else {
-        // Artist only or artist+song search
-        url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
-      }
-      console.log('[useSearchResults] Fetching:', url);
-      fetch(url)
-        .then(async res => {
+          // Choose endpoint based on search type
+          let url;
+          if (!artist && song) {
+            // Song only search
+            url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
+          } else {
+            // Artist only or artist+song search
+            url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
+          }
+          console.log('[useSearchResults] Fetching:', url);
+          
+          const res = await fetch(url);
           if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
+          
           const contentType = res.headers.get('content-type');
           const text = await res.text();
           if (!contentType?.includes('application/json')) {
             throw new Error('Invalid response from backend (not JSON)');
           }
           const data = JSON.parse(text);
-          return data;
-        })
-        .then((data) => {
+          
           console.log('[useSearchResults] Response received:', data);
           
-          // Cache the results
+          // Cache the results (async)
           console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
-          cacheSearchResults(artist || null, song || null, data);
+          await cacheSearchResults(artist || null, song || null, data);
           
           if (!artist && song) {
             // Song-only search - data should be song results
@@ -130,11 +131,13 @@ export function useSearchResults(
           setHasFetched(true);
           lastFetchedArtist.current = artist + '|' + song;
           setShouldContinueFetching(false);
-        })
-        .catch(err => {
+        } catch (err) {
           setError(err instanceof Error ? err : new Error('Failed to fetch search results'));
           setLoading(false);
-        });
+        }
+      };
+
+      fetchData();
     }
   }, [artist, song, loading, shouldContinueFetching]);
 

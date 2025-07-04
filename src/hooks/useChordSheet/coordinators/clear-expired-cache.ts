@@ -1,4 +1,4 @@
-import { clearExpiredChordSheetCache } from '../../../cache/implementations/unified-chord-sheet-cache';
+import { clearExpiredChordSheetCache } from '../../../cache/implementations/unified-chord-sheet';
 
 /**
  * Clears expired cache entries

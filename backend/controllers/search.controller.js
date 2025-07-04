@@ -123,24 +123,35 @@ class SearchController {
 
   async getChordSheet(req, res) {
     try {
-      const { url } = req.query;
+      const { url, path } = req.query;
       
-      if (!url) {
-        logger.error('❌ getChordSheet: Missing song URL parameter');
-        return res.status(400).json({ error: 'Missing song URL' });
+      // Support both URL (legacy) and path (new) parameters
+      let songUrl;
+      if (path) {
+        // Construct URL from path: baseUrl + path
+        songUrl = `${cifraClubService.baseUrl}/${path}/`;
+        logger.info(`🎵 CHORD SHEET FETCH START (from path): ${path} -> ${songUrl}`);
+      } else if (url) {
+        // Legacy support for full URL
+        songUrl = url;
+        logger.info(`🎵 CHORD SHEET FETCH START (from URL): ${url}`);
+      } else {
+        logger.error('❌ getChordSheet: Missing song URL or path parameter');
+        return res.status(400).json({ error: 'Missing song URL or path parameter' });
       }
 
-      logger.info(`🎵 CHORD SHEET FETCH START: ${url}`);
       logger.info(`📊 Flow Step 1: Backend received chord sheet request`);
       logger.info(`📋 Request Details:`, { 
-        url,
+        songUrl,
+        originalPath: path,
+        originalUrl: url,
         timestamp: new Date().toISOString() 
       });
       
-      const chordSheet = await cifraClubService.getChordSheet(url);
+      const chordSheet = await cifraClubService.getChordSheet(songUrl);
       
       if (!chordSheet?.songChords) {
-        logger.error(`❌ Flow Step 2: No chord sheet data returned from CifraClub service for ${url}`);
+        logger.error(`❌ Flow Step 2: No chord sheet data returned from CifraClub service for ${songUrl}`);
         return res.status(404).json({ error: 'Chord sheet not found' });
       }
 

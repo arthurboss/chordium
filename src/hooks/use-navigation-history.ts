@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLastSearchQuery } from '@/cache/implementations/search-cache';
 
 /**
  * Hook to manage navigation between pages with state preservation
@@ -13,7 +12,7 @@ export function useNavigationHistory() {
    */
   const navigateBackToSearch = useCallback(() => {
     // Check if we have a last search query
-    const lastQuery = getLastSearchQuery();
+    const lastQuery = null; // Placeholder: search query history not implemented yet
     
     if (lastQuery) {
       // Construct URL parameters

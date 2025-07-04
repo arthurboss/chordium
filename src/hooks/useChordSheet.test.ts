@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from './useChordSheet';
 import { ChordSheetLoadingStrategy } from '../utils/chord-sheet-loading-strategy';
-import { validateURL } from '../utils/url-validator';
 
 // Mock all dependencies first - with factory functions to avoid hoisting issues
 vi.mock('../utils/chord-sheet-loading-strategy');
@@ -118,13 +117,10 @@ describe('useChordSheet', () => {
     
     // Setup URL strategy mock
     mockUrlStrategy.determineFetchUrl.mockResolvedValue({
-      fetchUrl: 'https://example.com/test-song',
+      fetchPath: 'eagles/hotel-california',
       storageKey: 'eagles-hotel-california',
       isReconstructed: false
     });
-    
-    // Setup validation mock
-    vi.mocked(validateURL).mockImplementation(() => {}); // No error means valid
   });
 
   it('should load from local storage when in My Chord Sheets context', async () => {

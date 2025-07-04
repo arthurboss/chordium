@@ -5,25 +5,24 @@ export * from './config';
 // Core cache functionality
 export { BaseCache } from './core/base-cache';
 
-// Cache implementations - export specific functions to avoid conflicts
+// IndexedDB cache implementations - using async implementations
 export { 
   cacheSearchResults, 
   getCachedSearchResults, 
-  clearSearchCache, 
-  inspectSearchCache, 
-  getLastSearchQuery,
-  generateCacheKey as generateSearchCacheKey
-} from './implementations/search-cache';
+  clearSearchCache,
+  clearExpiredSearchCache
+} from './implementations/search-cache/index';
 
 export { 
   cacheArtistSongs, 
   getCachedArtistSongs, 
-  clearArtistSongsCache, 
-  inspectArtistCache 
+  clearArtistCache as clearArtistSongsCache,
+  clearExpiredArtistCache,
+  removeArtistFromCache
 } from './implementations/artist-cache';
 
-// Unified chord sheet cache
-export { unifiedChordSheetCache } from './implementations/unified-chord-sheet-cache';
+// Unified chord sheet cache - IndexedDB version
+export { unifiedChordSheetCache } from './implementations/unified-chord-sheet';
 
-// Cache utilities
+// Cache utilities - will need to be updated for async operations
 export { debugCache, clearAllCaches } from './utils/cache-debug';

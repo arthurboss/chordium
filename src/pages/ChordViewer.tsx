@@ -13,7 +13,7 @@ import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+import { ChordSheetRepository } from "@/storage/repositories/chord-sheet-repository";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
@@ -47,17 +47,21 @@ const ChordViewer = () => {
   const [isFromMyChordSheets, setIsFromMyChordSheets] = useState(false);
 
   useEffect(() => {
-    const songs = getMyChordSheetsAsSongs();
+    const checkMyChordSheets = async () => {
+      const songs = await getMyChordSheetsAsSongs();
 
-    // Check if current song is in My Chord Sheets
-    const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
-    const isInMySongs = songs.some(s => s.path === songPath);
-    setIsFromMyChordSheets(isInMySongs);
+      // Check if current song is in My Chord Sheets
+      const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
+      const isInMySongs = songs.some(s => s.path === songPath);
+      setIsFromMyChordSheets(isInMySongs);
 
-    console.log('📋 Checking if song is in My Chord Sheets:');
-    console.log('Song path:', songPath);
-    console.log('Is in My Chord Sheets:', isInMySongs);
-    console.log('My Chord Sheets count:', songs.length);
+      console.log('📋 Checking if song is in My Chord Sheets:');
+      console.log('Song path:', songPath);
+      console.log('Is in My Chord Sheets:', isInMySongs);
+      console.log('My Chord Sheets count:', songs.length);
+    };
+
+    checkMyChordSheets();
   }, [navigationSong?.path, artist, song]);
 
   // Get chord data from server (for search results only)
@@ -65,7 +69,7 @@ const ChordViewer = () => {
   // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
   const originalSongPath = navigationSong?.path;
   console.log('🔗 Original song path from navigation state:', originalSongPath);
-  const chordData = useChordSheet(undefined, originalSongPath);
+  const chordData = useChordSheet(originalSongPath);
 
   // Load song from My Chord Sheets if this is a My Chord Sheets route
   useEffect(() => {
@@ -74,8 +78,8 @@ const ChordViewer = () => {
 
       const loadSongFromMyChordSheets = async () => {
         try {
-          // Get all chord sheets using unified storage
-          const allSongs = getMyChordSheetsAsSongs();
+          // Get all chord sheets using IndexedDB storage
+          const allSongs = await getMyChordSheetsAsSongs();
           const sampleSongs = await loadSampleSongs();
 
           // Combine sample songs and user songs
@@ -97,14 +101,13 @@ const ChordViewer = () => {
             console.log('Found song object:', foundSong);
             console.log('Song path (CifraClub format):', foundSong.path);
 
-            // Generate the proper cache key from artist and title
-            const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
-            console.log('Generated cache key:', cacheKey);
-
-            // Try to get the chord content from the cache using artist and title
-            console.log('🏪 Trying to get cached chord sheet...');
-            const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
-            console.log('Cached chord sheet result:', cachedChordSheet);
+            // Try to get the chord content from IndexedDB using artist and title
+            console.log('🏪 Trying to get chord sheet from IndexedDB...');
+            const repository = new ChordSheetRepository();
+            await repository.initialize();
+            const cachedChordSheet = await repository.get(foundSong.artist, foundSong.title);
+            await repository.close();
+            console.log('IndexedDB chord sheet result:', cachedChordSheet);
 
             let songChords = '';
             let songKey = '';
@@ -123,15 +126,15 @@ const ChordViewer = () => {
                 guitarTuning = sampleChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
               }
             } else if (cachedChordSheet) {
-              console.log('✅ Using cached chord sheet data');
-              // Use cached chord sheet data
-              songChords = cachedChordSheet.songChords;
-              songKey = cachedChordSheet.songKey;
-              guitarCapo = cachedChordSheet.guitarCapo || 0;
-              guitarTuning = cachedChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
-              console.log('Content from cache:', songChords?.substring(0, 100) + '...');
+              console.log('✅ Using IndexedDB chord sheet data');
+              // Use IndexedDB chord sheet data
+              songChords = cachedChordSheet.chordSheet.songChords;
+              songKey = cachedChordSheet.chordSheet.songKey;
+              guitarCapo = cachedChordSheet.chordSheet.guitarCapo ?? 0;
+              guitarTuning = cachedChordSheet.chordSheet.guitarTuning ?? GUITAR_TUNINGS.STANDARD;
+              console.log('Content from IndexedDB:', songChords?.substring(0, 100) + '...');
             } else {
-              console.log('❌ No cached chord sheet found for:', foundSong.artist, foundSong.title);
+              console.log('❌ No chord sheet found in IndexedDB for:', foundSong.artist, foundSong.title);
             }
 
             const localData: LocalSongData = {

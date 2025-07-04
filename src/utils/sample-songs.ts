@@ -41,7 +41,11 @@ export const loadSampleSongs = async (): Promise<Song[]> => {
   // Initialize dev mode sample songs in My Chord Sheets (only in dev mode)
   // Pass the loaded chord sheets to the dev mode initializer
   const chordSheets = [wonderwallChordSheet, hotelCaliforniaChordSheet];
-  await initializeDevModeSampleSongs(chordSheets);
+  
+  // Only populate IndexedDB with sample songs in development mode
+  if (import.meta.env.DEV) {
+    await initializeDevModeSampleSongs(chordSheets);
+  }
   
   // Convert ChordSheet objects to Song objects with consistent paths
   const songs: Song[] = [

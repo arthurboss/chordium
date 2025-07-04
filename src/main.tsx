@@ -4,15 +4,21 @@ import App from './App.tsx';
 import './index.css';
 import './cache/utils/cache-debug';
 
-// Setting up React 19 with enhanced error handling and Strict Mode
-const rootElement = document.getElementById("root");
-if (!rootElement) {
-  throw new Error("Failed to find the root element");
-}
+// Initialize the React app
+const initializeApp = async () => {
+  // Setting up React 19 with enhanced error handling and Strict Mode
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    throw new Error("Failed to find the root element");
+  }
 
-const root = createRoot(rootElement);
-root.render(
-  // <React.StrictMode>
-  <App />
-  // </React.StrictMode>
-);
+  const root = createRoot(rootElement);
+  root.render(
+    // <React.StrictMode>
+    <App />
+    // </React.StrictMode>
+  );
+};
+
+// Start the app initialization
+initializeApp();

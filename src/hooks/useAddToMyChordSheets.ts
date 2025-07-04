@@ -88,16 +88,16 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
         console.log('🔍 Context: Chord viewer page - using modular chord sheet storage');
         const { addChordSheet } = await import('@/utils/chord-sheet-storage');
         
-        console.log('🎧 Adding chord sheet to My Chord Sheets cache:', {
+        console.log('🎧 Adding chord sheet to My Chord Sheets (IndexedDB):', {
           title: fullChordSheet.title,
           artist: fullChordSheet.artist,
           contentLength: fullChordSheet.songChords.length
         });
         
-        // Add the chord sheet to My Chord Sheets cache
-        addChordSheet(fullChordSheet);
+        // Add the chord sheet to IndexedDB storage
+        await addChordSheet(fullChordSheet);
         
-        console.log('✅ Flow Step 14: Chord sheet added to My Chord Sheets cache');
+        console.log('✅ Flow Step 14: Chord sheet added to IndexedDB storage');
         
         // Show success toast
         const { toast } = await import('@/hooks/use-toast');
@@ -115,9 +115,9 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
       console.log('1. ✅ Backend scraped chord sheet data');
       console.log('2. ✅ Frontend received ChordSheet response from backend');
       console.log('3. ✅ Chord sheet data cached in API cache with 1-day TTL');
-      console.log('4. ✅ Chord sheet metadata saved to localStorage["my-chord-sheets"] with Song.path = ID');
-      console.log('5. ✅ Future retrieval: song.path -> API cache lookup -> chordSheet');
-      console.log('🎉 ADD TO MY CHORD SHEETS COMPLETE - Using single API cache for chord sheets!');
+      console.log('4. ✅ Chord sheet saved to IndexedDB for My Chord Sheets');
+      console.log('5. ✅ Future retrieval: IndexedDB -> chordSheet');
+      console.log('🎉 ADD TO MY CHORD SHEETS COMPLETE - Using IndexedDB for persistent storage!');
       
     } catch (err) {
       console.error('❌ Error in addToMyChordSheets:', err);

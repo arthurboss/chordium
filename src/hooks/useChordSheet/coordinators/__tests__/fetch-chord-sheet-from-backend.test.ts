@@ -66,7 +66,7 @@ describe('fetchChordSheetFromBackend', () => {
 
     expect(result).toEqual(mockChordSheet);
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
+      'http://localhost:3001/api/cifraclub-chord-sheet?path=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
       expect.objectContaining({
         method: 'GET',
         headers: {
@@ -186,7 +186,7 @@ describe('fetchChordSheetFromBackend', () => {
     );
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
+      'http://localhost:3001/api/cifraclub-chord-sheet?path=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
       expect.anything()
     );
     

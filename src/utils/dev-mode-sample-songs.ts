@@ -1,5 +1,5 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
+import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
 
 /**
  * Populates My Chord Sheets with sample songs in development mode only
@@ -9,34 +9,34 @@ import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-s
  * @returns Promise<void>
  */
 export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]): Promise<void> {
-  // Check development mode using build-time environment variable only
-  // Runtime checks like hostname are unreliable for build-time decisions
-  const isDev = import.meta.env.DEV;
+  console.log('🔧 Development mode: Checking IndexedDB for existing songs...');
 
-  if (!isDev) {
-    console.log('🏭 Production mode: Skipping sample song population');
-    return;
-  }
-
-  console.log('🔧 Development mode detected, checking My Chord Sheets cache...');
-
-  // Check if My Chord Sheets is already populated
-  const existingSongs = unifiedChordSheetCache.getAllSavedChordSheets();
-  if (existingSongs.length > 0) {
-    console.log('📚 My Chord Sheets already populated, skipping sample song initialization');
-    return;
-  }
-
-  console.log('🔧 Development mode: Populating My Chord Sheets with sample chord sheets...');
+  const repository = new ChordSheetRepository();
   
-  // Add each sample chord sheet to My Chord Sheets
-  sampleChordSheets.forEach((chordSheet) => {
-    unifiedChordSheetCache.cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
-    unifiedChordSheetCache.setSavedStatus(chordSheet.artist, chordSheet.title, true);
-    console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to My Chord Sheets`);
-  });
+  try {
+    await repository.initialize();
+    
+    // Check if My Chord Sheets is already populated in IndexedDB
+    const existingSongs = await repository.getAllSaved();
+    if (existingSongs.length > 0) {
+      console.log('📚 My Chord Sheets already populated in IndexedDB, skipping sample song initialization');
+      return;
+    }
 
-  console.log(`✅ Successfully populated My Chord Sheets with ${sampleChordSheets.length} sample songs`);
+    console.log('🔧 Development mode: Populating IndexedDB with sample chord sheets...');
+    
+    // Add each sample chord sheet to IndexedDB
+    for (const chordSheet of sampleChordSheets) {
+      await repository.store(chordSheet.artist, chordSheet.title, chordSheet, { saved: true });
+      console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to IndexedDB`);
+    }
+
+    console.log(`✅ Successfully populated IndexedDB with ${sampleChordSheets.length} sample songs`);
+  } catch (error) {
+    console.error('❌ Failed to populate sample songs in IndexedDB:', error);
+  } finally {
+    await repository.close();
+  }
 }
 
 /**
@@ -75,6 +75,7 @@ export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
 /**
  * Main function to initialize sample songs in development mode
  * Follows SRP: Single responsibility of sample song initialization
+ * Note: This function assumes it's only called in development mode
  * 
  * @param providedChordSheets - Optional array of chord sheets to use instead of loading from files
  * @returns Promise<void>

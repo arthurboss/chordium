@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
-import { RefObject, useMemo } from "react";
+import { RefObject, useState, useEffect } from "react";
 import { Song } from "../types/song";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet";
 
 interface SongViewerProps {
   song: Song;
@@ -29,6 +29,7 @@ const SongViewer = ({
   deleteButtonVariant = "destructive",
   hideDeleteButton = false
 }: SongViewerProps) => {
+  const [chordContent, setChordContent] = useState<string>('');
 
   console.log('🎵 SONG VIEWER DEBUG:');
   console.log('Received song prop:', song);
@@ -37,30 +38,40 @@ const SongViewer = ({
   console.log('Song path:', song.path);
   console.log('Direct chord content provided:', !!directChordContent);
 
-  // Load chord sheet content - use direct content if provided, otherwise load from cache
-  const chordContent = useMemo(() => {
-    console.log('🔍 LOADING CHORD CONTENT:');
+  // Load chord sheet content - use direct content if provided, otherwise load from IndexedDB cache
+  useEffect(() => {
+    const loadChordContent = async () => {
+      console.log('🔍 LOADING CHORD CONTENT:');
 
-    if (directChordContent) {
-      console.log('✅ Using direct chord content (search result)');
-      console.log('Direct content preview:', directChordContent.substring(0, 100) + '...');
-      return directChordContent;
-    }
+      if (directChordContent) {
+        console.log('✅ Using direct chord content (search result)');
+        console.log('Direct content preview:', directChordContent.substring(0, 100) + '...');
+        setChordContent(directChordContent);
+        return;
+      }
 
-    console.log('🏪 Loading from cache (My Chord Sheets)');
-    console.log('Song object:', song);
-    console.log('Song path (might be CifraClub format):', song.path);
+      console.log('🏪 Loading from IndexedDB cache (My Chord Sheets)');
+      console.log('Song object:', song);
+      console.log('Song path (might be CifraClub format):', song.path);
 
-    // Validate song object to prevent cache key generation errors
-    if (!song.artist || !song.title) {
-      console.warn('⚠️ SongViewer received invalid song object:', song);
-      return '';
-    }
+      // Validate song object to prevent cache key generation errors
+      if (!song.artist || !song.title) {
+        console.warn('⚠️ SongViewer received invalid song object:', song);
+        setChordContent('');
+        return;
+      }
 
-    // Try to get from cache using artist and title
-    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(song.artist, song.title);
+      try {
+        // Try to get from IndexedDB cache using artist and title
+        const cachedChordSheet = await unifiedChordSheetCache.getCachedChordSheet(song.artist, song.title);
+        setChordContent(cachedChordSheet?.songChords ?? '');
+      } catch (error) {
+        console.error('Failed to load chord sheet from IndexedDB cache:', error);
+        setChordContent('');
+      }
+    };
 
-    return cachedChordSheet?.songChords ?? '';
+    loadChordContent();
   }, [song, directChordContent]);
 
   return (

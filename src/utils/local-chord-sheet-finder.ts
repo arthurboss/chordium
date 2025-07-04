@@ -1,5 +1,5 @@
 import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
-import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
+import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
 import { Song } from '../types/song';
 import { extractSongMetadata } from './metadata-extraction';
 
@@ -26,7 +26,7 @@ export async function findLocalSong(
 ): Promise<LocalSongResult | null> {
   try {
     // Get all songs from modular chord sheet storage
-    const myChordSheets = getMyChordSheetsAsSongs();
+    const myChordSheets = await getMyChordSheetsAsSongs();
     
     const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
     const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
@@ -48,20 +48,23 @@ export async function findLocalSong(
     if (foundSong) {
       console.log('Found song in local storage:', foundSong.title);
       
-      // Try to get the chord sheet from cache using the artist and title
-      const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
+      // Try to get the chord sheet from IndexedDB using the artist and title
+      const repository = new ChordSheetRepository();
+      await repository.initialize();
+      const cachedRecord = await repository.get(foundSong.artist, foundSong.title);
+      await repository.close();
       
-      if (!cachedChordSheet) {
+      if (!cachedRecord) {
         console.log('❌ Song found but no cached chord sheet available');
         return null;
       }
       
       // Extract metadata from the chord sheet content
-      const metadata = extractSongMetadata(cachedChordSheet.songChords);
+      const metadata = extractSongMetadata(cachedRecord.chordSheet.songChords);
       return {
         title: foundSong.title ?? '',
         artist: foundSong.artist ?? '',
-        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
+        path: cachedRecord.chordSheet.songChords, // Return the actual chord content for API compatibility
         key: metadata.songKey ?? '',
         tuning: metadata.guitarTuning ?? '',
         capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',

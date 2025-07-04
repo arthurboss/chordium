@@ -1,4 +1,4 @@
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+import { getChordSheets } from '@/utils/chord-sheet-storage';
 import { ChordSheet } from '@/types/chordSheet';
 import { Song } from '@/types/song';
 import { isAccentInsensitiveMatch } from './accent-insensitive-search';
@@ -22,9 +22,9 @@ export function convertChordSheetToSong(chordSheet: ChordSheet): Song {
  * @param songQuery - Song/title search term (optional)
  * @returns Array of Song objects from My Chord Sheets that match the search
  */
-export function searchMyChordSheets(artistQuery?: string, songQuery?: string): Song[] {
-  // Get all chord sheets from My Chord Sheets
-  const allMyChordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
+export async function searchMyChordSheets(artistQuery?: string, songQuery?: string): Promise<Song[]> {
+  // Get all chord sheets from IndexedDB
+  const allMyChordSheets = await getChordSheets();
   
   // If no search terms, return empty array (don't return all songs)
   if (!artistQuery?.trim() && !songQuery?.trim()) {
@@ -60,7 +60,7 @@ export function searchMyChordSheets(artistQuery?: string, songQuery?: string): S
  * @param songQuery - Song/title search term (optional)
  * @returns True if any local songs match the search
  */
-export function hasLocalMatches(artistQuery?: string, songQuery?: string): boolean {
-  const matches = searchMyChordSheets(artistQuery, songQuery);
+export async function hasLocalMatches(artistQuery?: string, songQuery?: string): Promise<boolean> {
+  const matches = await searchMyChordSheets(artistQuery, songQuery);
   return matches.length > 0;
 }

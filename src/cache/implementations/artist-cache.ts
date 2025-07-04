@@ -1,177 +1,163 @@
 import { Song } from "@/types/song";
+import { ArtistCacheRepository } from '@/storage/repositories/artist-cache-repository';
 
-// Key for storing artist songs cache in localStorage (changed from sessionStorage for persistence)
-const ARTIST_SONGS_CACHE_KEY = 'chordium-artist-songs-cache';
-
-// Maximum number of cache entries to keep
+// Configuration
 const MAX_CACHE_ITEMS = 20;
-
-// Cache expiration time in milliseconds (4 hours)
-const CACHE_EXPIRATION_TIME = 4 * 60 * 60 * 1000;
-
-// Interface for cache items
-interface ArtistCacheItem {
-  artistPath: string;
-  songs: Song[];
-  timestamp: number;
-  accessCount: number;
-  artistName?: string; // Optional: store artist name for better management
-}
-
-// Interface for the entire cache
-interface ArtistCache {
-  items: ArtistCacheItem[];
-}
+const CACHE_EXPIRATION_TIME = 4 * 60 * 60 * 1000; // 4 hours
 
 /**
- * Initialize the artist songs cache
+ * IndexedDB-based artist cache implementation
+ * Follows SRP: Single responsibility for artist songs caching using IndexedDB
+ * Follows DRY: No duplicate artist data
  */
-const initializeCache = (): ArtistCache => {
-  try {
-    const cache = localStorage.getItem(ARTIST_SONGS_CACHE_KEY);
-    return cache ? JSON.parse(cache) : { items: [] };
-  } catch (e) {
-    console.error('Failed to parse artist songs cache:', e);
-    return { items: [] };
+export class ArtistCacheIndexedDB {
+  private readonly repository: ArtistCacheRepository;
+  private initialized = false;
+
+  constructor() {
+    this.repository = new ArtistCacheRepository();
   }
-};
 
-/**
- * Save the artist songs cache to localStorage
- */
-const saveCache = (cache: ArtistCache): void => {
-  try {
-    localStorage.setItem(ARTIST_SONGS_CACHE_KEY, JSON.stringify(cache));
-  } catch (e) {
-    console.error('Failed to save artist songs cache:', e);
-  }
-};
-
-/**
- * Save artist songs to the cache
- */
-export const cacheArtistSongs = (
-  artistPath: string,
-  songs: Song[]
-): void => {
-  const cache = initializeCache();
-  
-  // Look for existing entry to preserve access count
-  const existingItem = cache.items.find(item => item.artistPath === artistPath);
-  const accessCount = existingItem ? existingItem.accessCount + 1 : 1;
-  
-  // Extract artist name from path if available (for better management)
-  const artistName = artistPath.split('/').pop() || undefined;
-  
-  // Remove any existing entry with the same artist path
-  const filteredItems = cache.items.filter(item => item.artistPath !== artistPath);
-  
-  // Add the new entry
-  let newItems = [
-    ...filteredItems,
-    {
-      artistPath,
-      songs,
-      timestamp: Date.now(),
-      accessCount,
-      artistName
+  /**
+   * Initialize the IndexedDB connection
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.repository.initialize();
+      this.initialized = true;
     }
-  ];
-  
-  // If we exceed max cache size, remove least valuable items
-  if (newItems.length > MAX_CACHE_ITEMS) {
-    // Sort by a combined score of recency and access count
-    newItems.sort((a, b) => {
-      // Calculate a score based on access count and timestamp
-      const scoreA = a.accessCount * 0.7 + (a.timestamp / Date.now()) * 0.3;
-      const scoreB = b.accessCount * 0.7 + (b.timestamp / Date.now()) * 0.3;
-      return scoreA - scoreB; // Sort ascending, so lowest scores are first to be removed
-    });
-    
-    // Remove items until we're at the limit
-    newItems = newItems.slice(newItems.length - MAX_CACHE_ITEMS);
   }
-  
-  const newCache: ArtistCache = {
-    items: newItems
-  };
-  
-  saveCache(newCache);
-};
 
-/**
- * Get cached artist songs if they exist
- * @returns The cached songs or null if not found or expired
- */
-export const getCachedArtistSongs = (artistPath: string): Song[] | null => {
-  const cache = initializeCache();
-  const cacheItem = cache.items.find(item => item.artistPath === artistPath);
-  
-  if (!cacheItem) return null;
-  
-  // Check if cache entry is expired
-  const now = Date.now();
-  if (now - cacheItem.timestamp > CACHE_EXPIRATION_TIME) {
-    console.log('Artist cache expired, will fetch fresh data');
-    
-    // Remove expired item
-    const updatedCache: ArtistCache = {
-      items: cache.items.filter(item => item.artistPath !== artistPath)
-    };
-    saveCache(updatedCache);
-    
-    return null;
+  /**
+   * Close the IndexedDB connection
+   */
+  async close(): Promise<void> {
+    if (this.initialized) {
+      await this.repository.close();
+      this.initialized = false;
+    }
   }
-  
-  // Update the timestamp and increment access count
-  cacheItem.timestamp = now;
-  cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
-  saveCache(cache);
-  
-  return cacheItem.songs;
-};
 
-/**
- * Clear all expired cache entries
- * @returns The number of entries removed
- */
-export const clearExpiredArtistCache = (): number => {
-  const cache = initializeCache();
-  const now = Date.now();
-  
-  const initialCount = cache.items.length;
-  cache.items = cache.items.filter(item => now - item.timestamp <= CACHE_EXPIRATION_TIME);
-  const removedCount = initialCount - cache.items.length;
-  
-  if (removedCount > 0) {
-    console.log(`Removed ${removedCount} expired artist cache entries`);
-    saveCache(cache);
+  /**
+   * Cache artist songs
+   * @param artistPath - Artist path (e.g., "/john-mayer/")
+   * @param songs - Array of songs for the artist
+   * @param artistName - Optional artist name for better management
+   */
+  async cacheArtistSongs(artistPath: string, songs: Song[], artistName?: string): Promise<void> {
+    if (!artistPath || !songs) {
+      console.warn('Cannot cache artist songs: invalid parameters', { artistPath, songsCount: songs?.length });
+      return;
+    }
+
+    await this.ensureInitialized();
+
+    try {
+      await this.repository.store(artistPath, songs);
+      console.log('Artist songs cached successfully', { artistPath, artistName, songsCount: songs.length });
+    } catch (error) {
+      console.error('Failed to cache artist songs in IndexedDB:', error);
+    }
   }
-  
-  return removedCount;
-};
 
-/**
- * Clear all cached artist songs
- */
-export const clearArtistSongsCache = (): void => {
-  try {
-    localStorage.removeItem(ARTIST_SONGS_CACHE_KEY);
-  } catch (e) {
-    console.error('Failed to clear artist songs cache:', e);
+  /**
+   * Get cached artist songs
+   * @param artistPath - Artist path (e.g., "/john-mayer/")
+   * @returns Cached songs or null if not found/expired
+   */
+  async getCachedArtistSongs(artistPath: string): Promise<Song[] | null> {
+    if (!artistPath) {
+      console.warn('Cannot retrieve artist songs: invalid artist path', { artistPath });
+      return null;
+    }
+
+    await this.ensureInitialized();
+
+    try {
+      const songs = await this.repository.get(artistPath);
+      
+      if (songs) {
+        console.log('Using cached artist songs', { artistPath, songsCount: songs.length });
+      } else {
+        console.log('No cached artist songs found', { artistPath });
+      }
+      
+      return songs;
+    } catch (error) {
+      console.error('Failed to get cached artist songs from IndexedDB:', error);
+      return null;
+    }
   }
-};
 
-/**
- * Utility for debugging: inspect artist cache
- */
-export const inspectArtistCache = () => {
-  const cache = initializeCache();
-  return cache.items.map(item => ({
-    artistPath: item.artistPath,
-    artistName: item.artistName,
-    timestamp: item.timestamp,
-    accessCount: item.accessCount,
-    songsCount: item.songs.length
-  }));
-};
+  /**
+   * Clear expired cache entries
+   * @returns Number of entries removed
+   */
+  async clearExpiredEntries(): Promise<number> {
+    await this.ensureInitialized();
+
+    try {
+      const removedCount = await this.repository.removeExpired();
+      if (removedCount > 0) {
+        console.log(`Removed ${removedCount} expired artist cache entries`);
+      }
+      return removedCount;
+    } catch (error) {
+      console.error('Failed to clear expired artist cache entries from IndexedDB:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Clear all cached artist songs
+   */
+  async clearAllCache(): Promise<void> {
+    await this.ensureInitialized();
+
+    try {
+      await this.repository.clear();
+      console.log('All artist cache cleared');
+    } catch (error) {
+      console.error('Failed to clear all artist cache from IndexedDB:', error);
+    }
+  }
+
+  /**
+   * Remove a specific artist from cache
+   * @param artistPath - Artist path to remove
+   */
+  async removeArtist(artistPath: string): Promise<void> {
+    if (!artistPath) {
+      console.warn('Cannot remove artist: invalid artist path', { artistPath });
+      return;
+    }
+
+    await this.ensureInitialized();
+
+    try {
+      await this.repository.delete(artistPath);
+      console.log('Artist removed from cache', { artistPath });
+    } catch (error) {
+      console.error('Failed to remove artist from IndexedDB:', error);
+    }
+  }
+}
+
+// Create a singleton instance
+export const artistCacheIndexedDB = new ArtistCacheIndexedDB();
+
+// Export convenience functions for the artist cache
+export const cacheArtistSongs = async (artistPath: string, songs: Song[], artistName?: string) => 
+  await artistCacheIndexedDB.cacheArtistSongs(artistPath, songs, artistName);
+
+export const getCachedArtistSongs = async (artistPath: string) => 
+  await artistCacheIndexedDB.getCachedArtistSongs(artistPath);
+
+export const clearArtistCache = async () => 
+  await artistCacheIndexedDB.clearAllCache();
+
+export const clearExpiredArtistCache = async () => 
+  await artistCacheIndexedDB.clearExpiredEntries();
+
+export const removeArtistFromCache = async (artistPath: string) => 
+  await artistCacheIndexedDB.removeArtist(artistPath);

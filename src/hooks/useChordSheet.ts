@@ -3,16 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ChordSheetLoadingStrategy } from "@/utils/chord-sheet-loading-strategy";
 import { NavigationUtils } from "@/utils/navigation-utils";
 import { FetchErrorHandler } from "@/utils/fetch-error-handler";
-import { validateURL } from "@/utils/url-validator";
 import { URLDeterminationStrategy } from "./useChordSheet/url-determination-strategy";
 import { DataHandlers } from "./useChordSheet/data-handlers";
-import { CacheCoordinator } from "./useChordSheet/cache-coordinator";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet";
+import { getChordSheetData } from "./useChordSheet/coordinators/get-chord-sheet-data";
 import { ChordSheet } from "@/types/chordSheet";
 import { ChordSheetWithUIState, createDefaultChordSheetWithUIState } from "@/types/chordSheetWithUIState";
 
 const initialState: ChordSheetWithUIState = createDefaultChordSheetWithUIState();
 
-export function useChordSheet(url?: string, originalPath?: string) {
+export function useChordSheet(originalPath?: string) {
   const [chordData, setChordData] = useState<ChordSheetWithUIState>(initialState);
   const params = useParams<{ artist?: string; song?: string; id?: string }>();
   const navigate = useNavigate();
@@ -22,13 +22,12 @@ export function useChordSheet(url?: string, originalPath?: string) {
   const urlStrategy = useMemo(() => new URLDeterminationStrategy(), []);
   const navigationUtils = useMemo(() => new NavigationUtils(), []);
   const dataHandlers = useMemo(() => new DataHandlers(), []);
-  const cacheCoordinator = useMemo(() => new CacheCoordinator(), []);
   const errorHandler = useMemo(() => new FetchErrorHandler(), []);
 
   // Clear expired cache entries when hook is first used
   useEffect(() => {
-    cacheCoordinator.clearExpiredCache();
-  }, [cacheCoordinator]);
+    unifiedChordSheetCache.clearExpiredEntries();
+  }, []);
 
   useEffect(() => {
     const loadChordSheet = async () => {
@@ -56,15 +55,14 @@ export function useChordSheet(url?: string, originalPath?: string) {
     };
 
     const fetchFromRemote = async () => {
-      // Determine the fetch URL using our URL strategy
-      const { fetchUrl, storageKey, isReconstructed } = await urlStrategy.determineFetchUrl(
-        url,
+      // Determine the fetch path using our URL strategy
+      const { fetchPath, storageKey, isReconstructed } = await urlStrategy.determineFetchUrl(
         params.artist,
         params.song,
         originalPath
       );
 
-      if (!fetchUrl) {
+      if (!fetchPath) {
         dataHandlers.handleErrorState(
           "Could not find the chord sheet. Please try searching for it again.",
           undefined,
@@ -74,14 +72,11 @@ export function useChordSheet(url?: string, originalPath?: string) {
         return;
       }
 
-      // Validate URL format
-      try {
-        validateURL(fetchUrl);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Invalid URL format";
+      // Basic path validation (should be artist/song format)
+      if (!fetchPath.includes('/')) {
         dataHandlers.handleErrorState(
-          errorMessage,
-          fetchUrl,
+          "Invalid path format. Expected format: artist/song",
+          fetchPath,
           initialState,
           setChordData
         );
@@ -89,33 +84,33 @@ export function useChordSheet(url?: string, originalPath?: string) {
       }
 
       // Set loading state
-      dataHandlers.setLoadingState(fetchUrl, setChordData);
+      dataHandlers.setLoadingState(fetchPath, setChordData);
 
       try {
-        await fetchChordSheetData(fetchUrl, storageKey, isReconstructed);
+        await fetchChordSheetData(fetchPath, storageKey, isReconstructed);
       } catch (err) {
-        handleFetchError(err, fetchUrl, isReconstructed);
+        handleFetchError(err, fetchPath, isReconstructed);
       }
     };
 
-    const fetchChordSheetData = async (fetchUrl: string, storageKey: string, isReconstructed: boolean) => {
+    const fetchChordSheetData = async (fetchPath: string, storageKey: string, isReconstructed: boolean) => {
       // Use the cache coordinator for fetching with consistent storage key
-      const chordSheet = await cacheCoordinator.getChordSheetData(storageKey, fetchUrl);
+      const chordSheet = await getChordSheetData(storageKey, fetchPath);
 
       if (!chordSheet?.songChords) {
         throw new Error("No chord sheet content found. This song may not be available.");
       }
 
-      handleFreshData(chordSheet, fetchUrl);
+      handleFreshData(chordSheet, fetchPath);
     };
 
-    const handleFreshData = (chordSheet: ChordSheet, fetchUrl: string) => {
+    const handleFreshData = (chordSheet: ChordSheet, fetchPath: string) => {
       // Update URL if needed using navigation utils (only if artist/title exist)
       if (chordSheet.artist && chordSheet.title) {
         navigationUtils.performUrlUpdate(
           { artist: chordSheet.artist, song: chordSheet.title },
           params,
-          fetchUrl,
+          fetchPath,
           navigate,
           window.location.pathname
         );
@@ -124,14 +119,14 @@ export function useChordSheet(url?: string, originalPath?: string) {
       dataHandlers.handleFreshData(chordSheet, setChordData);
     };
 
-    const handleFetchError = (err: unknown, fetchUrl: string, isReconstructed: boolean) => {
+    const handleFetchError = (err: unknown, fetchPath: string, isReconstructed: boolean) => {
       console.error("Error fetching chord sheet:", err);
 
-      const errorMessage = errorHandler.formatFetchError(err, fetchUrl, isReconstructed);
+      const errorMessage = errorHandler.formatFetchError(err, fetchPath, isReconstructed);
       
       dataHandlers.handleErrorState(
         errorMessage,
-        fetchUrl,
+        fetchPath,
         initialState,
         setChordData
       );
@@ -139,7 +134,6 @@ export function useChordSheet(url?: string, originalPath?: string) {
 
     loadChordSheet();
   }, [
-    url, 
     originalPath,
     params,
     navigate, 
@@ -147,7 +141,6 @@ export function useChordSheet(url?: string, originalPath?: string) {
     urlStrategy,
     navigationUtils,
     dataHandlers,
-    cacheCoordinator,
     errorHandler
   ]);
 
