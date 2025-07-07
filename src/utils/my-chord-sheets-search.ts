@@ -2,6 +2,7 @@ import { getChordSheets } from '@/utils/chord-sheet-storage';
 import { ChordSheet } from '@/types/chordSheet';
 import { Song } from '@/types/song';
 import { isAccentInsensitiveMatch } from './accent-insensitive-search';
+import { generateUnifiedCacheKey } from '@/storage/utils/unified-cache-key-generator';
 
 /**
  * Converts a ChordSheet to a Song object for search results
@@ -12,7 +13,7 @@ export function convertChordSheetToSong(chordSheet: ChordSheet): Song {
   return {
     title: chordSheet.title,
     artist: chordSheet.artist,
-    path: `/my-chord-sheets/${encodeURIComponent(chordSheet.artist)}/${encodeURIComponent(chordSheet.title)}`
+    path: generateUnifiedCacheKey(chordSheet.artist, chordSheet.title)
   };
 }
 

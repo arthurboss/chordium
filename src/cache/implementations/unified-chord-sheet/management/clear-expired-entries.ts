@@ -9,7 +9,7 @@ import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-reposit
  */
 export async function clearExpiredEntries(repository: ChordSheetRepository): Promise<number> {
   try {
-    return await repository.removeExpiredEntries();
+    return await repository.cleanupExpiredRecords();
   } catch (error) {
     console.error('Failed to clear expired entries from IndexedDB:', error);
     return 0;

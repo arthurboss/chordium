@@ -1,14 +1,20 @@
+import { generateUnifiedCacheKey } from '@/storage/utils/unified-cache-key-generator';
+
 /**
  * Generates chord sheet IDs following the format: artist_name-song_title
  * - Spaces within artist/title are replaced with underscores
  * - Artist and title are separated by a dash
  * - Diacritics are removed to match CifraClub normalization
  * - All lowercase
+ * 
+ * @deprecated Use generateUnifiedCacheKey directly instead
  */
 
 /**
  * Normalizes a string by removing diacritics, converting to lowercase,
  * removing certain special characters, and replacing spaces with underscores
+ * 
+ * @deprecated Use generateUnifiedCacheKey directly instead
  */
 function normalizeNamePart(text: string): string {
   return text
@@ -28,12 +34,11 @@ function normalizeNamePart(text: string): string {
  * @param artist - Artist name
  * @param title - Song title
  * @returns Normalized ID string
+ * @deprecated Use generateUnifiedCacheKey directly instead
  */
 export function generateChordSheetId(artist: string, title: string): string {
-  const normalizedArtist = normalizeNamePart(artist);
-  const normalizedTitle = normalizeNamePart(title);
-  
-  return `${normalizedArtist}-${normalizedTitle}`;
+  console.warn('generateChordSheetId is deprecated. Use generateUnifiedCacheKey instead.');
+  return generateUnifiedCacheKey(artist, title);
 }
 
 /**

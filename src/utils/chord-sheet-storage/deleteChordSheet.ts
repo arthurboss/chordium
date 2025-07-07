@@ -1,17 +1,17 @@
 import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
 
 /**
- * Delete a ChordSheet from IndexedDB storage
- * @param title Title of the chord sheet to delete
- * @param artist Artist of the chord sheet to delete
+ * Remove a ChordSheet from "My Chord Sheets" (mark as not saved)
+ * @param title Title of the chord sheet to remove
+ * @param artist Artist of the chord sheet to remove
  */
 export const deleteChordSheet = async (title: string, artist: string): Promise<void> => {
   const repository = new ChordSheetRepository();
   try {
     await repository.initialize();
-    await repository.delete(artist, title);
+    await repository.removeFromSaved(artist, title);
   } catch (error) {
-    console.error('❌ Failed to delete chord sheet from IndexedDB:', error);
+    console.error('❌ Failed to remove chord sheet from My Chord Sheets:', error);
     throw error;
   } finally {
     await repository.close();

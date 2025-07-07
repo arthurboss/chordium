@@ -6,9 +6,9 @@ import { FetchErrorHandler } from "@/utils/fetch-error-handler";
 import { URLDeterminationStrategy } from "./useChordSheet/url-determination-strategy";
 import { DataHandlers } from "./useChordSheet/data-handlers";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet";
-import { getChordSheetData } from "./useChordSheet/coordinators/get-chord-sheet-data";
 import { ChordSheet } from "@/types/chordSheet";
 import { ChordSheetWithUIState, createDefaultChordSheetWithUIState } from "@/types/chordSheetWithUIState";
+import { parseStorageKey } from './useChordSheet/utils/parse-storage-key';
 
 const initialState: ChordSheetWithUIState = createDefaultChordSheetWithUIState();
 
@@ -94,8 +94,33 @@ export function useChordSheet(originalPath?: string) {
     };
 
     const fetchChordSheetData = async (fetchPath: string, storageKey: string, isReconstructed: boolean) => {
-      // Use the cache coordinator for fetching with consistent storage key
-      const chordSheet = await getChordSheetData(storageKey, fetchPath);
+      // Parse storage key to get artist and title for cache lookup
+      const { artist, title } = parseStorageKey(storageKey);
+      
+      // First try to get from cache
+      let chordSheet = await unifiedChordSheetCache.getCachedChordSheet(artist, title);
+      
+      if (!chordSheet) {
+        // Not in cache, fetch from backend
+        try {
+          const backendUrl = `http://localhost:3001/api/cifraclub-chord-sheet?path=${encodeURIComponent(fetchPath)}`;
+          const response = await fetch(backendUrl);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          chordSheet = await response.json();
+          
+          // Cache the fetched chord sheet
+          if (chordSheet && artist && title) {
+            await unifiedChordSheetCache.cacheChordSheet(artist, title, chordSheet);
+          }
+        } catch (error) {
+          console.error('Failed to fetch chord sheet:', error);
+          throw error;
+        }
+      }
 
       if (!chordSheet?.songChords) {
         throw new Error("No chord sheet content found. This song may not be available.");

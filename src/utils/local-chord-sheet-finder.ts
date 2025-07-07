@@ -51,20 +51,20 @@ export async function findLocalSong(
       // Try to get the chord sheet from IndexedDB using the artist and title
       const repository = new ChordSheetRepository();
       await repository.initialize();
-      const cachedRecord = await repository.get(foundSong.artist, foundSong.title);
+      const cachedChordSheet = await repository.get(foundSong.artist, foundSong.title);
       await repository.close();
       
-      if (!cachedRecord) {
+      if (!cachedChordSheet) {
         console.log('❌ Song found but no cached chord sheet available');
         return null;
       }
       
       // Extract metadata from the chord sheet content
-      const metadata = extractSongMetadata(cachedRecord.chordSheet.songChords);
+      const metadata = extractSongMetadata(cachedChordSheet.songChords);
       return {
         title: foundSong.title ?? '',
         artist: foundSong.artist ?? '',
-        path: cachedRecord.chordSheet.songChords, // Return the actual chord content for API compatibility
+        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
         key: metadata.songKey ?? '',
         tuning: metadata.guitarTuning ?? '',
         capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',

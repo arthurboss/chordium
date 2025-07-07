@@ -1,6 +1,10 @@
 import { Song } from "@/types/song";
+import { Artist } from "@/types/artist";
 import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
 import { debugError } from '../utilities/debug-logger';
+
+// Union type for search results
+export type SearchResultData = Song[] | Artist[];
 
 /**
  * Retrieves cached search results for a given query
@@ -13,7 +17,7 @@ import { debugError } from '../utilities/debug-logger';
 export async function getCachedSearchResults(
   repository: SearchCacheRepository,
   query: string
-): Promise<Song[] | null> {
+): Promise<SearchResultData | null> {
   try {
     return await repository.get(query);
   } catch (error) {

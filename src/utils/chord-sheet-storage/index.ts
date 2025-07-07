@@ -9,3 +9,4 @@ export { handleDeleteChordSheetFromUI } from './handleDeleteChordSheetFromUI';
 export { updateChordSheet } from './updateChordSheet';
 export { handleUpdateChordSheetFromUI } from './handleUpdateChordSheetFromUI';
 export { handleSaveNewChordSheetFromUI } from './handleSaveNewChordSheetFromUI';
+export { removeChordSheetFromSaved } from './removeChordSheetFromSaved';

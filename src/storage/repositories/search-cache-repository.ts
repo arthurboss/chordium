@@ -1,6 +1,10 @@
 import { Song } from '@/types/song';
+import { Artist } from '@/types/artist';
 import { BaseCacheRepository } from './base-cache-repository';
 import { ChordSheetDBConnection } from '../connection/chord-sheet-db-connection';
+
+// Union type for search results
+export type SearchResultData = Song[] | Artist[];
 
 /**
  * Search results cache metadata
@@ -17,7 +21,10 @@ export interface SearchCacheMetadata {
 export interface SearchCacheRecord {
   readonly id: string;
   readonly query: string;
-  readonly results: Song[];
+  readonly results: SearchResultData;
+  readonly timestamp?: number;       // For timestamp index
+  readonly searchType?: string;      // For searchType index  
+  readonly dataSource?: string;      // For dataSource index
   readonly metadata: SearchCacheMetadata;
 }
 
@@ -25,7 +32,7 @@ export interface SearchCacheRecord {
  * Repository for search results cache storage operations
  * Follows SRP: Single responsibility for search cache persistence
  */
-export class SearchCacheRepository implements BaseCacheRepository<Song[]> {
+export class SearchCacheRepository implements BaseCacheRepository<SearchResultData> {
   private readonly connection: ChordSheetDBConnection;
   private readonly storeName = 'searchCache';
   private readonly expirationTime = 24 * 60 * 60 * 1000; // 24 hours
@@ -42,7 +49,7 @@ export class SearchCacheRepository implements BaseCacheRepository<Song[]> {
     await this.connection.close();
   }
 
-  async store(query: string, results: Song[]): Promise<void> {
+  async store(query: string, results: SearchResultData): Promise<void> {
     const db = await this.connection.initialize();
     const transaction = db.transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
@@ -52,6 +59,9 @@ export class SearchCacheRepository implements BaseCacheRepository<Song[]> {
       id: this.generateSearchKey(query),
       query,
       results,
+      timestamp: now, // Add timestamp for index
+      searchType: results.length > 0 && Array.isArray(results) && results[0] && 'title' in results[0] ? 'songs' : 'artists', // Add searchType
+      dataSource: 'api', // Add dataSource for index
       metadata: {
         cachedAt: now,
         expiresAt: now + this.expirationTime,
@@ -72,7 +82,7 @@ export class SearchCacheRepository implements BaseCacheRepository<Song[]> {
     });
   }
 
-  async get(query: string): Promise<Song[] | null> {
+  async get(query: string): Promise<SearchResultData | null> {
     const db = await this.connection.initialize();
     const transaction = db.transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
@@ -107,7 +117,7 @@ export class SearchCacheRepository implements BaseCacheRepository<Song[]> {
     });
   }
 
-  async getAll(): Promise<Song[][]> {
+  async getAll(): Promise<SearchResultData[]> {
     const db = await this.connection.initialize();
     const transaction = db.transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);

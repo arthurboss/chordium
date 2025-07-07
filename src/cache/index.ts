@@ -13,14 +13,6 @@ export {
   clearExpiredSearchCache
 } from './implementations/search-cache/index';
 
-export { 
-  cacheArtistSongs, 
-  getCachedArtistSongs, 
-  clearArtistCache as clearArtistSongsCache,
-  clearExpiredArtistCache,
-  removeArtistFromCache
-} from './implementations/artist-cache';
-
 // Unified chord sheet cache - IndexedDB version
 export { unifiedChordSheetCache } from './implementations/unified-chord-sheet';
 

@@ -63,26 +63,46 @@ export function useSearchResults(
           const cachedResults = await getCachedSearchResults(artist || null, song || null);
           if (cachedResults && cachedResults.length > 0) {
             console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
-            // Process cached results
+            
+            // Type guard to determine if we have Songs or Artists
+            const firstItem = cachedResults[0];
+            const isSongResults = 'title' in firstItem && 'path' in firstItem;
+            const isArtistResults = 'name' in firstItem && 'songs' in firstItem;
+            
             if (!artist && song) {
-              // Song-only search
-              setAllSongs(cachedResults);
-              setSongs(cachedResults);
-              setAllArtists([]);
-              setArtists([]);
+              // Song-only search - should be Song[]
+              if (isSongResults) {
+                const songResults = cachedResults as Song[];
+                setAllSongs(songResults);
+                setSongs(songResults);
+                setAllArtists([]);
+                setArtists([]);
+              } else {
+                console.warn('Expected Song[] but got Artist[] for song-only search');
+                // Fall through to API fetch
+              }
             } else {
-              // Artist search - cached results are Artist objects
-              const artistResults = cachedResults as unknown as Artist[];
-              setAllArtists(artistResults);
-              setArtists(artistResults);
-              setAllSongs([]);
-              setSongs([]);
+              // Artist search - should be Artist[]
+              if (isArtistResults) {
+                const artistResults = cachedResults as Artist[];
+                setAllArtists(artistResults);
+                setArtists(artistResults);
+                setAllSongs([]);
+                setSongs([]);
+              } else {
+                console.warn('Expected Artist[] but got Song[] for artist search');
+                // Fall through to API fetch
+              }
             }
-            setLoading(false);
-            setHasFetched(true);
-            lastFetchedArtist.current = artist + '|' + song;
-            setShouldContinueFetching(false);
-            return;
+            
+            // Only return early if we successfully processed the cache
+            if ((isSongResults && !artist && song) || (isArtistResults && artist)) {
+              setLoading(false);
+              setHasFetched(true);
+              lastFetchedArtist.current = artist + '|' + song;
+              setShouldContinueFetching(false);
+              return;
+            }
           }
 
           // Choose endpoint based on search type

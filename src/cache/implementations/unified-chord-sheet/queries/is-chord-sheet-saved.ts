@@ -15,13 +15,7 @@ export async function isChordSheetSaved(
   title: string
 ): Promise<boolean> {
   try {
-    const record = await repository.get(artist, title);
-    
-    if (!record) {
-      return false;
-    }
-
-    return record.metadata.saved;
+    return await repository.isSaved(artist, title);
   } catch (error) {
     console.error('Failed to check saved status in IndexedDB:', error);
     return false;

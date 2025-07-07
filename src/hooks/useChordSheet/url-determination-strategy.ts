@@ -1,5 +1,5 @@
+import { generateUnifiedCacheKey } from "../../storage/utils/unified-cache-key-generator";
 import { getChordUrl } from "../../utils/session-storage-utils";
-import { generateChordSheetId } from "../../utils/chord-sheet-id-generator";
 import { toSlug } from "../../utils/url-slug-utils";
 
 // Environment-based logging utility to prevent infinite loops in tests
@@ -50,7 +50,7 @@ export class URLDeterminationStrategy {
     // Convert URL parameters back to proper names first
     const artistName = artist.replace(/-/g, ' ');
     const songName = song.replace(/-/g, ' ');
-    const storageKey = generateChordSheetId(artistName, songName);
+    const storageKey = generateUnifiedCacheKey(artistName, songName);
 
     // Priority 1: Use original path for fetching if available
     if (originalPath) {

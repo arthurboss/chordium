@@ -8,32 +8,23 @@
     "fe": "vite",
     "be": "node backend/server.js",
     "dev": "npm run wait 'be' http://localhost:3001/health 'fe'",
-    
     "wait": "./scripts/start-servers-and-test.sh \"$@\"",
-    
     "kill": "./scripts/kill-servers.sh",
     "kill:fe": "./scripts/kill-servers.sh fe",
     "kill:be": "./scripts/kill-servers.sh be",
-
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
-
     "analyze-bundle": "vite build --mode production && open dist/stats.html",
     "validate-optimizations": "./scripts/validate-build-optimizations.sh",
-    
     "lint": "eslint .",
-    
     "test:unit": "vitest run",
-
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
-
     "test:e2e": "npm run wait 'dev' http://localhost:8080 'cy:run'",
     "test:e2e:spec": "npm run wait 'dev' http://localhost:8080 'cy:run -- --spec'",
     "test:e2e:fast": "npm run wait 'fe' http://localhost:8080 'cy:run'",
     "test:all": "npm run kill:be && npm run wait 'be' http://localhost:3001/health 'test:e2e'",
-    
     "tree": "scripts/git-tree/index.sh",
     "tree:help": "scripts/git-tree/index.sh --help",
     "tree:main": "scripts/git-tree/index.sh --base main"
@@ -107,6 +98,7 @@
     "eslint": "^9.25.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "fake-indexeddb": "6.0.1",
     "globals": "^15.15.0",
     "jsdom": "26.1.0",
     "postcss": "^8.5.3",

@@ -1,6 +1,10 @@
 import { Song } from "@/types/song";
+import { Artist } from "@/types/artist";
 import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
 import { debugLog, debugError } from '../utilities/debug-logger';
+
+// Union type for search results
+export type SearchResultData = Song[] | Artist[];
 
 /**
  * Caches search results for a given query in IndexedDB
@@ -8,12 +12,12 @@ import { debugLog, debugError } from '../utilities/debug-logger';
  * 
  * @param repository - The search cache repository instance
  * @param query - The search query key
- * @param results - Array of songs returned from search
+ * @param results - Array of songs or artists returned from search
  */
 export async function cacheSearchResults(
   repository: SearchCacheRepository,
   query: string,
-  results: Song[]
+  results: SearchResultData
 ): Promise<void> {
   try {
     await repository.store(query, results);

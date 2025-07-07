@@ -14,7 +14,7 @@ import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { ChordSheetRepository } from "@/storage/repositories/chord-sheet-repository";
-import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
+import { generateUnifiedCacheKey } from "@/storage/utils/unified-cache-key-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
 import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
 import { toast } from "@/hooks/use-toast";
@@ -51,7 +51,7 @@ const ChordViewer = () => {
       const songs = await getMyChordSheetsAsSongs();
 
       // Check if current song is in My Chord Sheets
-      const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
+      const songPath = navigationSong?.path || generateUnifiedCacheKey(artist || '', song || '');
       const isInMySongs = songs.some(s => s.path === songPath);
       setIsFromMyChordSheets(isInMySongs);
 
@@ -128,10 +128,10 @@ const ChordViewer = () => {
             } else if (cachedChordSheet) {
               console.log('✅ Using IndexedDB chord sheet data');
               // Use IndexedDB chord sheet data
-              songChords = cachedChordSheet.chordSheet.songChords;
-              songKey = cachedChordSheet.chordSheet.songKey;
-              guitarCapo = cachedChordSheet.chordSheet.guitarCapo ?? 0;
-              guitarTuning = cachedChordSheet.chordSheet.guitarTuning ?? GUITAR_TUNINGS.STANDARD;
+              songChords = cachedChordSheet.songChords;
+              songKey = cachedChordSheet.songKey;
+              guitarCapo = cachedChordSheet.guitarCapo ?? 0;
+              guitarTuning = cachedChordSheet.guitarTuning ?? GUITAR_TUNINGS.STANDARD;
               console.log('Content from IndexedDB:', songChords?.substring(0, 100) + '...');
             } else {
               console.log('❌ No chord sheet found in IndexedDB for:', foundSong.artist, foundSong.title);
@@ -259,7 +259,7 @@ const ChordViewer = () => {
     // Use navigation Song object as primary source, fallback to URL/chord data
     const songTitle = navigationSong?.title || getSongTitle();
     const artistName = navigationSong?.artist || getArtistName();
-    const cacheKey = artist && song ? generateChordSheetId(artist, song) : id || 'unknown';
+    const cacheKey = artist && song ? generateUnifiedCacheKey(artist, song) : id || 'unknown';
 
     console.log('🏷️ Final song title (prioritizing navigation state):', songTitle);
     console.log('🎤 Final artist name (prioritizing navigation state):', artistName);
@@ -298,7 +298,7 @@ const ChordViewer = () => {
 
   // Delete song from My Chord Sheets
   const handleDeleteSong = () => {
-    const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
+    const songPath = navigationSong?.path || generateUnifiedCacheKey(artist || '', song || '');
     const songTitle = navigationSong?.title || getSongTitle();
 
     console.log('🗑️ Deleting chord sheet from My Chord Sheets:', songPath);

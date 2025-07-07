@@ -11,12 +11,24 @@ export function buildQueryKey(artist: string | null, song: string | null): strin
     return null;
   }
 
-  const artistPart = artist ? artist.toLowerCase().trim() : '';
-  const songPart = song ? song.toLowerCase().trim() : '';
+  // Normalize by trimming whitespace, removing trailing slashes, and standardizing separators
+  const artistPart = artist ? 
+    artist.toLowerCase()
+          .trim()
+          .replace(/\/+$/, '') // Remove trailing slashes
+          .replace(/[-\s]+/g, '_') // Replace spaces and hyphens with underscores for consistency
+    : '';
+  
+  const songPart = song ? 
+    song.toLowerCase()
+        .trim()
+        .replace(/\/+$/, '') // Remove trailing slashes
+        .replace(/[-\s]+/g, '_') // Replace spaces and hyphens with underscores for consistency
+    : '';
   
   if (!artistPart && !songPart) {
     return null;
   }
 
-  return `${artistPart}|${songPart}`;
+  return `search_${artistPart}|${songPart}`;
 }

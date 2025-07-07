@@ -2,7 +2,7 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { useNavigate } from "react-router-dom";
-import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
+import { generateUnifiedCacheKey } from "@/storage/utils/unified-cache-key-generator";
 import { useCallback } from "react";
 
 interface AddToMyChordSheetsData {
@@ -38,7 +38,7 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
       });
 
       // Generate chord sheet ID from song data (this should match Song.path)
-      const chordSheetId = song.path || generateChordSheetId(song.artist, song.title);
+      const chordSheetId = song.path || generateUnifiedCacheKey(song.artist, song.title);
       console.log('🔑 Flow Step 10: Using chord sheet ID:', chordSheetId);
       console.log('🔑 ID Generation: Using Song.path directly (no redundant generation)');
 

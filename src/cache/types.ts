@@ -2,7 +2,7 @@
  * Cache system type definitions
  */
 
-import { Song } from "@/types/song";
+import { SearchResult } from "@/types/search-result";
 import { ChordSheet } from "@/types/chordSheet";
 
 // Base cache item interface
@@ -14,7 +14,7 @@ export interface BaseCacheItem {
 
 // Search cache types
 export interface SearchCacheItem extends BaseCacheItem {
-  results: Song[];
+  results: SearchResult[];
   query: {
     artist: string | null;
     song: string | null;
@@ -28,17 +28,6 @@ export interface SearchCache {
     artist: string | null;
     song: string | null;
   };
-}
-
-// Artist cache types
-export interface ArtistCacheItem extends BaseCacheItem {
-  artistPath: string;
-  songs: Song[];
-  artistName?: string;
-}
-
-export interface ArtistCache {
-  items: ArtistCacheItem[];
 }
 
 // Chord sheet cache types

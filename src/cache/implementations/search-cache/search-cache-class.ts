@@ -1,4 +1,5 @@
-import { Song } from "@/types/song";
+ import { Song } from "@/types/song";
+import { Artist } from "@/types/artist";
 import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
 
 // Import modular functions
@@ -9,6 +10,9 @@ import { cacheSearchResults as cacheSearchResultsImpl } from './operations/cache
 import { getCachedSearchResults as getCachedSearchResultsImpl } from './queries/get-cached-search-results';
 import { clearAllSearchCache } from './operations/clear-all-cache';
 import { clearExpiredSearchEntries } from './operations/clear-expired-entries';
+
+// Union type for search results  
+export type SearchResultData = Song[] | Artist[];
 
 /**
  * IndexedDB-based search cache with modular architecture
@@ -45,7 +49,7 @@ export class SearchCacheIndexedDB {
   /**
    * Cache search results
    */
-  async cacheSearchResults(artist: string | null, song: string | null, results: Song[]): Promise<void> {
+  async cacheSearchResults(artist: string | null, song: string | null, results: SearchResultData): Promise<void> {
     const query = buildQueryKey(artist, song);
     
     if (!query) {
@@ -60,7 +64,7 @@ export class SearchCacheIndexedDB {
   /**
    * Get cached search results
    */
-  async getCachedSearchResults(artist: string | null, song: string | null): Promise<Song[] | null> {
+  async getCachedSearchResults(artist: string | null, song: string | null): Promise<SearchResultData | null> {
     const query = buildQueryKey(artist, song);
     
     if (!query) {

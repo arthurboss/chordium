@@ -11,7 +11,7 @@ export const updateChordSheet = async (artist: string, title: string, updatedCho
   const repository = new ChordSheetRepository();
   try {
     await repository.initialize();
-    await repository.store(artist, title, updatedChordSheet, { saved: true });
+    await repository.save(artist, title, updatedChordSheet);
   } catch (error) {
     console.error('❌ Failed to update chord sheet in IndexedDB:', error);
     throw error;

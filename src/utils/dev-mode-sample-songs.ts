@@ -16,18 +16,29 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
   try {
     await repository.initialize();
     
-    // Check if My Chord Sheets is already populated in IndexedDB
+    // In development, always refresh sample songs to ensure they have correct number values
+    console.log('🔧 Development mode: Refreshing sample songs to ensure correct number values...');
+    
+    // Check existing sample songs and update them if needed
     const existingSongs = await repository.getAllSaved();
-    if (existingSongs.length > 0) {
-      console.log('📚 My Chord Sheets already populated in IndexedDB, skipping sample song initialization');
-      return;
+    const sampleSongTitles = sampleChordSheets.map(cs => `${cs.artist}-${cs.title}`);
+    
+    // Remove old sample songs if they exist
+    for (const song of existingSongs) {
+      const songKey = `${song.artist}-${song.title}`;
+      if (sampleSongTitles.includes(songKey)) {
+        // Generate the ID to delete the song
+        const songId = `${song.artist.toLowerCase().replace(/\s+/g, '_')}-${song.title.toLowerCase().replace(/\s+/g, '_')}`;
+        await repository.delete(songId);
+        console.log(`🗑️ Removed old sample song: "${song.title}" by ${song.artist}`);
+      }
     }
 
-    console.log('🔧 Development mode: Populating IndexedDB with sample chord sheets...');
+    console.log('🔧 Development mode: Adding fresh sample chord sheets...');
     
     // Add each sample chord sheet to IndexedDB
     for (const chordSheet of sampleChordSheets) {
-      await repository.store(chordSheet.artist, chordSheet.title, chordSheet, { saved: true });
+      await repository.save(chordSheet.artist, chordSheet.title, chordSheet);
       console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to IndexedDB`);
     }
 

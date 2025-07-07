@@ -48,7 +48,7 @@ describe('My Chord Sheets Search Utility', () => {
       expect(song).toEqual({
         title: 'Wonderwall',
         artist: 'Oasis',
-        path: '/my-chord-sheets/Oasis/Wonderwall'
+        path: 'oasis-wonderwall'
       });
     });
 
@@ -67,7 +67,7 @@ describe('My Chord Sheets Search Utility', () => {
       expect(song).toEqual({
         title: 'Do Lado de Cá',
         artist: 'Café Tacvba',
-        path: '/my-chord-sheets/Caf%C3%A9%20Tacvba/Do%20Lado%20de%20C%C3%A1'
+        path: 'cafe_tacvba-do_lado_de_ca'
       });
     });
   });

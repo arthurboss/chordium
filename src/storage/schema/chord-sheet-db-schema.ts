@@ -1,6 +1,5 @@
 /**
  * IndexedDB database schema for all cache storage
- * Follows SRP: Single responsibility for database schema definition
  */
 export interface ChordSheetDBSchema {
   readonly name: string;
@@ -24,21 +23,12 @@ export interface ChordSheetDBSchema {
         readonly unique: boolean;
       }[];
     };
-    readonly artistCache: {
-      readonly name: string;
-      readonly keyPath: string;
-      readonly indexes: readonly {
-        readonly name: string;
-        readonly keyPath: string;
-        readonly unique: boolean;
-      }[];
-    };
   };
 }
 
 export const CHORD_SHEET_DB_SCHEMA: ChordSheetDBSchema = {
-  name: 'ChordiumCaches',
-  version: 2,
+  name: 'Chordium',
+  version: 9, // Test number saved field (0/1)
   stores: {
     chordSheets: {
       name: 'chordSheets',
@@ -46,7 +36,11 @@ export const CHORD_SHEET_DB_SCHEMA: ChordSheetDBSchema = {
       indexes: [
         { name: 'artist', keyPath: 'artist', unique: false },
         { name: 'title', keyPath: 'title', unique: false },
-        { name: 'saved', keyPath: 'metadata.saved', unique: false }
+        { name: 'saved', keyPath: 'saved', unique: false }, // Number values: 0 | 1 for IndexedDB compatibility
+        { name: 'timestamp', keyPath: 'timestamp', unique: false },
+        // Future-ready indexes for S3 integration
+        { name: 'dataSource', keyPath: 'dataSource', unique: false },
+        { name: 'version', keyPath: 'version', unique: false }
       ]
     },
     searchCache: {
@@ -54,15 +48,10 @@ export const CHORD_SHEET_DB_SCHEMA: ChordSheetDBSchema = {
       keyPath: 'id',
       indexes: [
         { name: 'query', keyPath: 'query', unique: false },
-        { name: 'expiresAt', keyPath: 'metadata.expiresAt', unique: false }
-      ]
-    },
-    artistCache: {
-      name: 'artistCache',
-      keyPath: 'id',
-      indexes: [
-        { name: 'artistPath', keyPath: 'artistPath', unique: false },
-        { name: 'expiresAt', keyPath: 'metadata.expiresAt', unique: false }
+        { name: 'timestamp', keyPath: 'timestamp', unique: false },
+        // Future-ready indexes for different search types
+        { name: 'searchType', keyPath: 'searchType', unique: false },
+        { name: 'dataSource', keyPath: 'dataSource', unique: false }
       ]
     }
   }

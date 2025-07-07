@@ -18,15 +18,18 @@ export const cacheChordSheet = async (
   }
 
   try {
-    // Check if item already exists to preserve some metadata
-    const existingRecord = await repository.get(artist, title);
-    const wasSaved = existingRecord?.metadata.saved ?? false;
+    // Check if item already exists and if it's saved
+    const wasSaved = await repository.isSaved(artist, title);
     
-    // Determine final saved status
-    const saved = options.saved ?? wasSaved;
+    // Determine final saved status - if options.saved is specified, use it, otherwise preserve existing saved status
+    const shouldSave = options.saved ?? wasSaved;
 
-    // Store the chord sheet with updated metadata
-    await repository.store(artist, title, chordSheet, { saved });
+    // Store the chord sheet with appropriate method
+    if (shouldSave) {
+      await repository.save(artist, title, chordSheet);
+    } else {
+      await repository.cache(artist, title, chordSheet);
+    }
   } catch (error) {
     console.error('Failed to cache chord sheet in IndexedDB:', error);
   }

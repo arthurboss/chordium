@@ -8,7 +8,7 @@ export async function saveChordSheet(artist: string, title: string, chordSheet: 
   const repository = new ChordSheetRepository();
   try {
     await repository.initialize();
-    await repository.store(artist, title, chordSheet, { saved: true });
+    await repository.save(artist, title, chordSheet);
   } catch (error) {
     console.error('Failed to save chord sheet to IndexedDB:', error);
     throw error;

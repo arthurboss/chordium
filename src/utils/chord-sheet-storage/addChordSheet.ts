@@ -10,7 +10,7 @@ export const addChordSheet = async (chordSheet: ChordSheet): Promise<void> => {
   
   try {
     await repository.initialize();
-    await repository.store(chordSheet.artist, chordSheet.title, chordSheet, { saved: true });
+    await repository.save(chordSheet.artist, chordSheet.title, chordSheet);
     console.log(`✅ Chord sheet saved to IndexedDB: "${chordSheet.title}" by "${chordSheet.artist}"`);
   } catch (error) {
     console.error('❌ Failed to save chord sheet to IndexedDB:', error);

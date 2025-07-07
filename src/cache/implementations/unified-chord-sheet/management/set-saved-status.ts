@@ -17,14 +17,15 @@ export async function setSavedStatus(
   saved: boolean
 ): Promise<boolean> {
   try {
-    const record = await repository.get(artist, title);
+    // Check if the record exists
+    const chordSheet = await repository.get(artist, title);
     
-    if (!record) {
+    if (!chordSheet) {
       return false;
     }
 
-    // Update the record with new saved status
-    await repository.store(artist, title, record.chordSheet, { saved });
+    // Update the saved status using the repository method
+    await repository.setSavedStatus(artist, title, saved);
     return true;
   } catch (error) {
     console.error('Failed to update saved status in IndexedDB:', error);

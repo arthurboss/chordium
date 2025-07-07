@@ -21,15 +21,16 @@ export const getCachedChordSheet = async (
       return null;
     }
 
-    // Check expiration based on saved status
-    const now = Date.now();
-    if (record.cacheInfo.expiresAt < now && record.cacheInfo.expiresAt !== Number.MAX_SAFE_INTEGER) {
-      console.log(`Chord sheet cache expired (saved: ${record.metadata.saved}), removing`);
-      await repository.delete(artist, title);
+    // Check expiration - saved items never expire, cached items have TTL
+    const isSaved = await repository.isSaved(artist, title);
+    const chordSheet = await repository.get(artist, title);
+    
+    if (!chordSheet && !isSaved) {
+      console.log(`Chord sheet cache expired (saved: ${isSaved}), already removed`);
       return null;
     }
 
-    return record.chordSheet;
+    return chordSheet;
   } catch (error) {
     console.error('Failed to get cached chord sheet from IndexedDB:', error);
     return null;
