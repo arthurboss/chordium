@@ -12,6 +12,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - Speed control for practice at your own pace
 - Mobile-friendly design for on-the-go learning
 - Smart metadata extraction from uploaded chord sheets
+- **Intelligent IndexedDB caching** - Fast search results and offline access to saved chord sheets
 
 ## 💻 Tech Stack
 
@@ -26,6 +27,18 @@ This project is built with modern web technologies:
 - **Puppeteer** - Web scraping
 
 For detailed backend documentation, see the [Backend README](./backend/README.md).
+
+## 🗄️ Cache Architecture
+
+Chordium features a sophisticated **frontend-only caching system** using **IndexedDB** for persistent storage. The caching system consists of three specialized layers:
+
+- **Search Cache** - 30-day TTL for search query results
+- **Artist Cache** - 4-hour TTL for artist song collections  
+- **Chord Sheet Cache** - 72-hour TTL with saved song management
+
+The cache system includes intelligent features like LRU eviction, automatic cleanup, and a number-based saved field system (0/1) for optimal IndexedDB compatibility and performance.
+
+For complete technical details, see the [Cache Architecture Documentation](./docs/cache-architecture.md).
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
