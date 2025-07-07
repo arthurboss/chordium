@@ -1,5 +1,5 @@
 /**
- * IndexedDB database schema for all cache storage
+ * IndexedDB schema for all cache storage
  */
 export interface ChordSheetDBSchema {
   readonly name: string;

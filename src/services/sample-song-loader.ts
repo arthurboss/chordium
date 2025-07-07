@@ -1,5 +1,5 @@
 import { ChordSheet } from '../types/chordSheet';
-import { generateCacheKey } from '../cache/core/cache-key-generator';
+import { generateCacheKey } from '../cache/implementations/unified-chord-sheet/utilities/generate-cache-key';
 
 /**
  * Sample Song Loader Service

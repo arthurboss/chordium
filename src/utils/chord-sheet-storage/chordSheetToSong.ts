@@ -1,6 +1,6 @@
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
-import { generateCacheKey } from '@/cache/core/cache-key-generator';
+import { generateCacheKey } from '@/cache/implementations/unified-chord-sheet/utilities/generate-cache-key';
 
 /**
  * Convert ChordSheet to Song for UI compatibility using cache key format

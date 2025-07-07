@@ -1,5 +1,14 @@
 import { ChordSheet } from "@/types/chordSheet";
-import { CacheItem } from '../core/cache-item';
+
+/**
+ * Generic cache item interface
+ */
+export interface CacheItem<T> {
+  key: string;
+  data: T;
+  timestamp: number;
+  accessCount: number;
+}
 
 /**
  * Metadata for enhanced chord sheet cache entries
