@@ -19,12 +19,11 @@ export interface SearchCacheMetadata {
  * Search cache record for IndexedDB storage
  */
 export interface SearchCacheRecord {
-  readonly id: string;
-  readonly query: string;
+  readonly id: string;                 // Serves as both primary key and query identifier
   readonly results: SearchResultData;
-  readonly timestamp?: number;       // For timestamp index
-  readonly searchType?: string;      // For searchType index  
-  readonly dataSource?: string;      // For dataSource index
+  readonly timestamp?: number;         // For timestamp index
+  readonly searchType?: string;        // For searchType index  
+  readonly dataSource?: string;        // For dataSource index
   readonly metadata: SearchCacheMetadata;
 }
 
@@ -57,7 +56,6 @@ export class SearchCacheRepository implements BaseCacheRepository<SearchResultDa
     const now = Date.now();
     const record: SearchCacheRecord = {
       id: this.generateSearchKey(query),
-      query,
       results,
       timestamp: now, // Add timestamp for index
       searchType: results.length > 0 && Array.isArray(results) && results[0] && 'title' in results[0] ? 'songs' : 'artists', // Add searchType
@@ -240,6 +238,6 @@ export class SearchCacheRepository implements BaseCacheRepository<SearchResultDa
   }
 
   private generateSearchKey(query: string): string {
-    return `search_${query.toLowerCase().trim().replace(/\s+/g, '_')}`;
+    return query.toLowerCase().trim().replace(/\s+/g, '_');
   }
 }

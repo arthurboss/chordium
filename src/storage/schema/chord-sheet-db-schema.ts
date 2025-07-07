@@ -47,7 +47,6 @@ export const CHORD_SHEET_DB_SCHEMA: ChordSheetDBSchema = {
       name: 'searchCache',
       keyPath: 'id',
       indexes: [
-        { name: 'query', keyPath: 'query', unique: false },
         { name: 'timestamp', keyPath: 'timestamp', unique: false },
         // Future-ready indexes for different search types
         { name: 'searchType', keyPath: 'searchType', unique: false },

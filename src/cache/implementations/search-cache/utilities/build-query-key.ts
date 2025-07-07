@@ -1,6 +1,7 @@
 /**
  * Builds a search query key from artist and song parameters
  * This creates a normalized key for cache storage and retrieval
+ * The key serves as both the cache ID and query identifier
  * 
  * @param artist - Artist name (can be null)
  * @param song - Song name (can be null)
@@ -30,5 +31,5 @@ export function buildQueryKey(artist: string | null, song: string | null): strin
     return null;
   }
 
-  return `search_${artistPart}|${songPart}`;
+  return `${artistPart}|${songPart}`;
 }
