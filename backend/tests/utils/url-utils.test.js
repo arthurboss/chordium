@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import { isValidResult, extractArtistSlug, extractPathFromUrl, extractFullPathFromUrl } from '../../utils/url-utils.js';
+import { isValidResult, extractArtistSlug, extractPathFromUrl, extractFullPathFromUrl, normalizeArtistPath } from '../../utils/url-utils.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 
 describe('URL Utils', () => {
@@ -190,6 +190,27 @@ describe('URL Utils', () => {
       };
 
       expect(isValidResult(validResult, SEARCH_TYPES.SONG)).toBe(true);
+    });
+  });
+
+  describe('normalizeArtistPath', () => {
+    it('should remove trailing slash from artist path', () => {
+      expect(normalizeArtistPath('oasis/')).toBe('oasis');
+    });
+
+    it('should keep path unchanged if no trailing slash', () => {
+      expect(normalizeArtistPath('oasis')).toBe('oasis');
+    });
+
+    it('should handle paths with multiple trailing slashes', () => {
+      expect(normalizeArtistPath('radiohead///')).toBe('radiohead//');
+    });
+
+    it('should throw error for invalid input', () => {
+      expect(() => normalizeArtistPath('')).toThrow('Invalid artist path: must be a non-empty string');
+      expect(() => normalizeArtistPath(null)).toThrow('Invalid artist path: must be a non-empty string');
+      expect(() => normalizeArtistPath(undefined)).toThrow('Invalid artist path: must be a non-empty string');
+      expect(() => normalizeArtistPath(123)).toThrow('Invalid artist path: must be a non-empty string');
     });
   });
 });
