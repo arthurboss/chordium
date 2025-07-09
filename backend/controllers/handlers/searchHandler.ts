@@ -5,6 +5,7 @@ import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
+import type { SearchType } from '../../../shared/types/search.js';
 
 /**
  * Handles search requests for artists or songs.
@@ -44,7 +45,7 @@ export async function searchHandler(req: Request, res: Response): Promise<Respon
     }
     
     logger.info('Fetching from CifraClub...');
-    const results = await cifraClubService.search(query, searchType);
+    const results = await cifraClubService.search(query, searchType as SearchType);
     return res.json(results);
   } catch (error) {
     logger.error('Search error:', error);

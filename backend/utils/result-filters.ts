@@ -5,14 +5,19 @@ import {
   transformToSongResults, 
   transformToGenericResults 
 } from './result-transformers.js';
+import type { SearchType } from '../../shared/types/search.js';
+import type { Artist } from '../../shared/types/domain/artist.js';
+import type { Song } from '../../shared/types/domain/song.js';
+
+interface RawResult {
+  path: string;
+  [key: string]: any;
+}
 
 /**
  * Filters and transforms search results based on search type
- * @param {Array} results - Raw search results
- * @param {string} searchType - The type of search (ARTIST, SONG, etc.)
- * @returns {Array} - Filtered and transformed results
  */
-export function filterResults(results, searchType) {
+export function filterResults(results: RawResult[], searchType: SearchType): Artist[] | Song[] {
   const validResults = results.filter(result => isValidResult(result, searchType));
   
   switch (searchType) {

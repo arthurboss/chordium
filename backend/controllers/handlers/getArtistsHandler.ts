@@ -6,14 +6,15 @@ import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { Artist } from '../../../shared/types/domain/artist.js';
+import type { Song } from '../../../shared/types/domain/song.js';
 
 interface GetArtistsQuery {
   artist?: string;
 }
 
 async function getArtistsHandler(
-  req: Request<{}, Artist[] | ErrorResponse, {}, GetArtistsQuery>,
-  res: Response<Artist[] | ErrorResponse>
+  req: Request<{}, Artist[] | Song[] | ErrorResponse, {}, GetArtistsQuery>,
+  res: Response<Artist[] | Song[] | ErrorResponse>
 ): Promise<void> {
   try {
     const { artist } = req.query;

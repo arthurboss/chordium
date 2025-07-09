@@ -2,14 +2,20 @@ import puppeteerService from "../puppeteer.service.js";
 import logger from "../../utils/logger.js";
 import { extractArtistSlug } from "../../utils/url-utils.js";
 import { extractArtistSongs } from "../../utils/dom-extractors.js";
+import type { Song } from "../../../shared/types/domain/song.js";
+import type { Page } from 'puppeteer';
+
+interface LoadStrategy {
+  name: string;
+  waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
+  timeout: number;
+  waitAfter: number;
+}
 
 /**
  * Handles fetching songs for a specific artist from CifraClub
- * @param {string} baseUrl - The CifraClub base URL
- * @param {string} artistUrl - The artist URL
- * @returns {Promise<Array>} - Array of artist songs
  */
-export async function fetchArtistSongs(baseUrl, artistUrl) {
+export async function fetchArtistSongs(baseUrl: string, artistUrl: string): Promise<Song[]> {
   const artistSlug = extractArtistSlug(artistUrl);
   if (!artistSlug) {
     throw new Error("Invalid artist URL");
@@ -18,65 +24,63 @@ export async function fetchArtistSongs(baseUrl, artistUrl) {
   const pageUrl = `${baseUrl}/${artistSlug}/`;
   logger.info(`Fetching songs for artist: ${artistSlug}`);
 
-  return puppeteerService.withPage(async (page) => {
+  return puppeteerService.withPage(async (page: Page) => {
     return await attemptPageLoad(page, pageUrl, artistSlug);
   });
 }
 
 /**
  * Simple delay function to replace page.waitForTimeout
- * @param {number} ms - Milliseconds to wait
- * @returns {Promise} - Promise that resolves after the delay
  */
-function delay(ms) {
+function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
- * Attempts to load a page with multiple strategies and retry logic
- * @param {Object} page - Puppeteer page object
- * @param {string} pageUrl - URL to load
- * @param {string} artistSlug - Artist slug for logging
- * @returns {Promise<Array>} - Array of extracted songs
+ * Attempts to load an artist page with multiple strategies and retry logic
  */
-async function attemptPageLoad(page, pageUrl, artistSlug) {
-  const strategies = [
+async function attemptPageLoad(page: Page, pageUrl: string, artistSlug: string): Promise<Song[]> {
+  const strategies: LoadStrategy[] = [
     {
       name: 'fast',
       waitUntil: 'domcontentloaded',
-      timeout: 45000,
+      timeout: 30000,
       waitAfter: 2000
     },
     {
       name: 'standard',
       waitUntil: 'load',
-      timeout: 60000,
+      timeout: 45000,
       waitAfter: 3000
     },
     {
       name: 'patient',
       waitUntil: 'networkidle0',
-      timeout: 90000,
+      timeout: 60000,
       waitAfter: 5000
     }
   ];
 
-  let lastError;
+  let lastError: Error = new Error('No strategies attempted');
 
   for (const [index, strategy] of strategies.entries()) {
     try {
-      logger.info(`Attempting to load ${pageUrl} with ${strategy.name} strategy (attempt ${index + 1}/${strategies.length})`);
+      logger.info(`Attempting artist page load with ${strategy.name} strategy (${index + 1}/${strategies.length})`);
       
-      // Set timeout for this attempt
-      await page.setDefaultNavigationTimeout(strategy.timeout);
-      
-      // Navigate to page
-      await page.goto(pageUrl, { 
-        waitUntil: strategy.waitUntil,
+      const response = await page.goto(pageUrl, { 
+        waitUntil: strategy.waitUntil, 
         timeout: strategy.timeout 
       });
-      
-      // Wait for additional content to load
+
+      if (!response) {
+        throw new Error('No response received from page.goto');
+      }
+
+      if (!response.ok()) {
+        throw new Error(`HTTP ${response.status()}: ${response.statusText()}`);
+      }
+
+      logger.info(`Artist page loaded with ${strategy.name} strategy, waiting ${strategy.waitAfter}ms for dynamic content...`);
       await delay(strategy.waitAfter);
       
       // Try to wait for some content to ensure the page loaded properly
@@ -84,18 +88,19 @@ async function attemptPageLoad(page, pageUrl, artistSlug) {
         await page.waitForSelector('body', { timeout: 5000 });
         logger.debug(`Artist page loaded successfully with ${strategy.name} strategy`);
       } catch (selectorError) {
-        logger.warn(`Could not find body selector on ${pageUrl} with ${strategy.name} strategy:`, selectorError.message);
+        const errorMessage = selectorError instanceof Error ? selectorError.message : String(selectorError);
+        logger.warn(`Could not find body selector on ${pageUrl} with ${strategy.name} strategy:`, errorMessage);
         // Continue anyway, the page might still be usable
       }
       
       // Extract songs
-      const songs = await page.evaluate(extractArtistSongs);
+      const songs = await page.evaluate(extractArtistSongs) as Song[];
       logger.info(`Successfully extracted ${songs.length} songs for ${artistSlug} using ${strategy.name} strategy`);
       return songs;
       
     } catch (error) {
-      lastError = error;
-      logger.warn(`${strategy.name} strategy failed for ${artistSlug}:`, error.message);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      logger.warn(`${strategy.name} strategy failed for ${artistSlug}:`, lastError.message);
       
       // If this isn't the last strategy, wait a bit before trying the next one
       if (index < strategies.length - 1) {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import cifraClubService from '../../services/cifraclub.service.js';
 import logger from '../../utils/logger.js';
+import { isValidChordSheetUrl } from '../../utils/url-utils.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { ChordSheet } from '../../../shared/types/domain/chord-sheet.js';
 
@@ -28,7 +29,20 @@ async function getChordSheetHandler(
     logger.info(`📊 Flow Step 1: Backend received chord sheet request`);
     logger.info(`📋 Request Details:`, { url, timestamp: new Date().toISOString() });
     
-    const chordSheet = await cifraClubService.getChordSheet(url) as ChordSheet;
+    // Validate URL format before attempting to scrape
+    if (!isValidChordSheetUrl(url)) {
+      logger.error(`❌ Flow Step 1.5: Invalid chord sheet URL format: ${url}`);
+      logger.error(`❌ URL must be a CifraClub URL with exactly 2 path segments (artist/song)`);
+      res.status(400).json({ 
+        error: 'Invalid chord sheet URL', 
+        details: 'URL must be a CifraClub chord sheet URL with format: artist/song' 
+      });
+      return;
+    }
+
+    logger.info(`✅ Flow Step 1.5: URL validation passed - proceeding to scrape`);
+    
+    const chordSheet = await cifraClubService.getChordSheet(url);
     
     if (!chordSheet?.songChords) {
       logger.error(`❌ Flow Step 2: No chord sheet data returned from CifraClub service for ${url}`);
