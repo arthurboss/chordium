@@ -177,3 +177,17 @@ export function extractFullPathFromUrl(url) {
     return null;
   }
 }
+
+/**
+ * Normalizes an artist path by removing trailing slashes
+ * This ensures consistent path format across all backend operations
+ * @param {string} artistPath - The artist path to normalize
+ * @returns {string} - The normalized artist path without trailing slash
+ */
+export function normalizeArtistPath(artistPath) {
+  if (!artistPath || typeof artistPath !== 'string') {
+    throw new Error('Invalid artist path: must be a non-empty string');
+  }
+  
+  return artistPath.replace(/\/$/, '');
+}

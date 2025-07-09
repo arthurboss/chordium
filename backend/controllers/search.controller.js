@@ -3,6 +3,7 @@ import cifraClubService from '../services/cifraclub.service.js';
 import { s3StorageService as S3StorageService } from '../services/s3-storage.service.js';
 import logger from '../utils/logger.js';
 import { normalizeArtistResults } from '../utils/response-normalizers.js';
+import { normalizeArtistPath } from '../utils/url-utils.js';
 
 import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
@@ -84,7 +85,7 @@ class SearchController {
       }
       
       // Extract artist name from path (remove trailing slash if present)
-      const normalizedArtistPath = artistPath.replace(/\/$/, '');
+      const normalizedArtistPath = normalizeArtistPath(artistPath);
       logger.info(`Fetching songs for artist with path: ${artistPath}`);
       
       // Try to get cached songs from S3 first
@@ -100,9 +101,9 @@ class SearchController {
       
       // Cache miss or error - fetch from CifraClub and cache the results
       logger.info(`No cached data for ${normalizedArtistPath}, fetching from CifraClub...`);
-      const artistUrl = `${cifraClubService.baseUrl}/${artistPath}/`;
+      const artistUrl = `${cifraClubService.baseUrl}/${normalizedArtistPath}/`;
       const songs = await cifraClubService.getArtistSongs(artistUrl);
-      logger.info(`Found ${songs.length} songs for artist ${artistPath} from CifraClub`);
+      logger.info(`Found ${songs.length} songs for artist ${normalizedArtistPath} from CifraClub`);
       
       // Cache the results in S3 for future requests
       if (songs && songs.length > 0) {
@@ -216,12 +217,15 @@ class SearchController {
         return res.status(400).json({ error: 'Song must have title and path properties' });
       }
       
-      logger.info(`Adding song "${song.title}" to artist "${artistName}"`);
+      // Normalize artist name (remove trailing slash if present)
+      const normalizedArtistName = normalizeArtistPath(artistName);
       
-      const success = await S3StorageService.addSongToArtist(artistName, song);
+      logger.info(`Adding song "${song.title}" to artist "${normalizedArtistName}"`);
+      
+      const success = await S3StorageService.addSongToArtist(normalizedArtistName, song);
       
       if (success) {
-        logger.info(`Successfully added song "${song.title}" to artist "${artistName}"`);
+        logger.info(`Successfully added song "${song.title}" to artist "${normalizedArtistName}"`);
         res.json({ success: true, message: 'Song added successfully' });
       } else {
         res.status(500).json({ error: 'Failed to add song to artist' });
@@ -240,12 +244,15 @@ class SearchController {
         return res.status(400).json({ error: 'Missing artistName or songPath' });
       }
       
-      logger.info(`Removing song with path "${songPath}" from artist "${artistName}"`);
+      // Normalize artist name (remove trailing slash if present)
+      const normalizedArtistName = normalizeArtistPath(artistName);
       
-      const success = await S3StorageService.removeSongFromArtist(artistName, songPath);
+      logger.info(`Removing song with path "${songPath}" from artist "${normalizedArtistName}"`);
+      
+      const success = await S3StorageService.removeSongFromArtist(normalizedArtistName, songPath);
       
       if (success) {
-        logger.info(`Successfully removed song with path "${songPath}" from artist "${artistName}"`);
+        logger.info(`Successfully removed song with path "${songPath}" from artist "${normalizedArtistName}"`);
         res.json({ success: true, message: 'Song removed successfully' });
       } else {
         res.status(404).json({ error: 'Song not found in artist list' });

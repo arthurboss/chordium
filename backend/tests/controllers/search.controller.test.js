@@ -330,5 +330,22 @@ describe('Search Controller', () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Missing artist path');
     });
+
+    it('should normalize artist path by removing trailing slash', async () => {
+      const artistPath = 'test-artist/';
+      
+      mockCifraClubService.getArtistSongs.mockResolvedValue(mockArtistSongs);
+
+      const response = await global.agent
+        .get('/api/artist-songs')
+        .query({ artistPath });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockArtistSongs);
+      // Should call with normalized path (no trailing slash)
+      expect(mockCifraClubService.getArtistSongs).toHaveBeenCalledWith(
+        'https://www.cifraclub.com.br/test-artist/'
+      );
+    });
   });
 });
