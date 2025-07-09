@@ -5,9 +5,10 @@ import Footer from "@/components/Footer";
 import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
-import TestComponent from "@/components/TestComponent";
+// import TestComponent from "@/components/TestComponent"; // Removed, not used elsewhere
 // import { useSampleSongs } from "@/hooks/use-sample-songs"; // ARCHIVED: sample songs now loaded via IndexedDB
 import { useSearchRedirect } from "@/hooks/use-search-redirect";
+import { useRefreshMyChordSheets } from "@/hooks/use-refresh-my-chord-sheets";
 
 
 import { getInitialTab } from "@/utils/get-initial-tab";
@@ -26,11 +27,8 @@ const Home = () => {
   useSearchRedirect();
 
   // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
-  useEffect(() => {
-    if (activeTab === 'my-chord-sheets') {
-      refreshMySongs();
-    }
-  }, [activeTab, refreshMySongs]);
+  useRefreshMyChordSheets(activeTab, refreshMySongs);
+
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
@@ -58,12 +56,7 @@ const Home = () => {
         />
       </main>
       
-      {/* Include test component for build optimization testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="hidden">
-          <TestComponent />
-        </div>
-      )}
+
       
       <Footer />
     </div>
