@@ -130,8 +130,9 @@ Utility functions that used localStorage-based storage:
 ## Files Using Cache/Storage (Need Updates)
 
 ### Components
-- `src/components/SongViewer.tsx` - Uses `unifiedChordSheetCache`
-- `src/components/TabContainer.tsx` - Uses chord-sheet-storage utilities
+- `src/components/SongViewer.tsx` - Uses `unifiedChordSheetCache` (ARCHIVED)
+- `src/components/__tests__/SongViewer.test.tsx` - Tests for SongViewer component (ARCHIVED)
+- `src/components/TabContainer.tsx` - Uses chord-sheet-storage utilities (UPDATED with TODOs)
 
 ### Pages
 - `src/pages/ChordViewer.tsx` - Uses `unifiedChordSheetCache` and chord-sheet-storage

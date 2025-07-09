@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Song } from "../types/song";
 import SongList from "./SongList";
-import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
@@ -160,13 +159,13 @@ const TabContainer = ({
         
         <TabsContent value="my-chord-sheets" className="focus-visible:outline-none focus-visible:ring-0">
           {selectedSong ? (
-            <SongViewer 
-              song={selectedSong}
-              chordDisplayRef={chordDisplayRef}
-              onBack={() => setSelectedSong(null)}
-              onDelete={handleChordSheetDelete}
-              onUpdate={handleChordSheetUpdate}
-            />
+            // TODO: Implement ChordSheetViewer or inline chord display with IndexedDB
+            <div className="p-4 text-center">
+              <p>Chord sheet display needs to be reimplemented with IndexedDB</p>
+              <button onClick={() => setSelectedSong(null)} className="mt-4 px-4 py-2 bg-gray-200 rounded">
+                Back to Song List
+              </button>
+            </div>
           ) : (
             <SongList 
               songs={myChordSheets}

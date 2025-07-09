@@ -2,11 +2,11 @@ import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SongViewer from "@/components/SongViewer";
 import SongChordDetails from "@/components/SongChordDetails";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { useChordSheet } from "@/hooks/useChordSheet";
+// TODO: Replace with IndexedDB-based hooks
+// import { useChordSheet } from "@/hooks/useChordSheet"; // ARCHIVED
 import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
@@ -28,7 +28,8 @@ const ChordViewer = () => {
   const navigate = useNavigate();
   const { navigateBackToSearch } = useNavigationHistory();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  const addToMyChordSheets = useAddToMyChordSheets();
+  // TODO: Replace with IndexedDB-based hook
+  // const addToMyChordSheets = useAddToMyChordSheets(); // ARCHIVED
 
   const [localSongData, setLocalSongData] = useState<LocalSongData | null>(null);
   const [isLoadingLocal, setIsLoadingLocal] = useState(false);
@@ -44,7 +45,9 @@ const ChordViewer = () => {
   const [isFromMyChordSheets, setIsFromMyChordSheets] = useState(false);
 
   useEffect(() => {
-    const songs = getMyChordSheetsAsSongs();
+    // TODO: Replace with IndexedDB query
+    // const songs = getMyChordSheetsAsSongs(); // ARCHIVED
+    const songs: Song[] = []; // Placeholder until IndexedDB implementation
 
     // Check if current song is in My Chord Sheets
     const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
@@ -62,7 +65,9 @@ const ChordViewer = () => {
   // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
   const originalSongPath = navigationSong?.path;
   console.log('🔗 Original song path from navigation state:', originalSongPath);
-  const chordData = useChordSheet(undefined, originalSongPath);
+  // TODO: Replace with IndexedDB-based chord sheet loading
+  // const chordData = useChordSheet(undefined, originalSongPath); // ARCHIVED
+  const chordData = { loading: false, error: null, content: '', artist: '', song: '' }; // Placeholder
 
   // Load song from My Chord Sheets if this is a My Chord Sheets route
   useEffect(() => {
@@ -345,18 +350,14 @@ const ChordViewer = () => {
           tuning={Array.isArray(currentChordData.guitarTuning) ? currentChordData.guitarTuning.join('-') : 'Standard'}
           capo={currentChordData.guitarCapo !== undefined ? currentChordData.guitarCapo.toString() : '0'}
         />
-        <SongViewer
-          song={songData.song}
-          chordContent={currentChordData.songChords}
-          chordDisplayRef={chordDisplayRef}
-          onBack={handleBack}
-          onDelete={isFromMyChordSheets ? handleDeleteSong : handleSaveChordSheet}
-          onUpdate={() => { }}
-          backButtonLabel={isFromMyChordSheets ? "Back to My Chord Sheets" : "Back to Search"}
-          deleteButtonLabel={isFromMyChordSheets ? "Remove from My Chord Sheets" : "Add to My Chord Sheets"}
-          deleteButtonVariant={isFromMyChordSheets ? "destructive" : "default"}
-          hideDeleteButton={false}
-        />
+        {/* TODO: Replace with proper chord sheet display using IndexedDB */}
+        <div className="p-4 text-center">
+          <p>Chord sheet display needs to be reimplemented with IndexedDB</p>
+          <p>Song: {songData.song?.title} by {songData.song?.artist}</p>
+          <button onClick={handleBack} className="mt-4 px-4 py-2 bg-gray-200 rounded">
+            {isFromMyChordSheets ? "Back to My Chord Sheets" : "Back to Search"}
+          </button>
+        </div>
       </main>
       <Footer />
     </div>
