@@ -21,9 +21,16 @@ export function normalizeArtistResults(artists: Artist[], source: DataSource = '
       return null;
     }
 
+    // Extract displayName from either displayName field or title field (for CifraClub results)
+    let displayName = artist.displayName || '';
+    if (!displayName && (artist as any).title) {
+      // For CifraClub results, clean the title to get artist name
+      displayName = (artist as any).title.replace(/ - Cifra Club$/, '').trim();
+    }
+
     // Normalize to consistent format, excluding internal fields like 'id'
     const normalized: Artist = {
-      displayName: artist.displayName || '',
+      displayName,
       path: artist.path || '',
       songCount: artist.songCount || null
     };
@@ -41,19 +48,29 @@ export function normalizeArtistResults(artists: Artist[], source: DataSource = '
  * Normalizes song data - mainly for validation and consistency
  * Since all sources return Song[] directly, this is mostly a pass-through with validation
  */
-export function normalizeSongResults(songs: Song[], source: DataSource = 'unknown'): Song[] {
+export function normalizeSongResults(songs: Song[], source: DataSource = 'unknown'): (Song & { displayName: string })[] {
   if (!Array.isArray(songs)) {
     return [];
   }
 
-  return songs.filter(song => {
+  return songs.map(song => {
+    if (!song || typeof song !== 'object') {
+      return null;
+    }
+
     // Basic validation - ensure required fields exist
-    return song && 
-           typeof song === 'object' && 
-           song.title && 
-           song.path && 
-           song.artist;
-  });
+    if (!song.title || !song.path || !song.artist) {
+      return null;
+    }
+
+    // Ensure displayName exists, using title as fallback
+    const normalizedSong = {
+      ...song,
+      displayName: (song as any).displayName || song.title
+    };
+
+    return normalizedSong;
+  }).filter((song): song is (Song & { displayName: string }) => song !== null);
 }
 
 /**
@@ -67,7 +84,7 @@ export function normalizeArtist(artist: Artist, source: DataSource = 'unknown'):
 /**
  * Normalizes a single song object
  */
-export function normalizeSong(song: Song, source: DataSource = 'unknown'): Song | null {
+export function normalizeSong(song: Song, source: DataSource = 'unknown'): (Song & { displayName: string }) | null {
   const result = normalizeSongResults([song], source);
   return result.length > 0 ? result[0] : null;
 }

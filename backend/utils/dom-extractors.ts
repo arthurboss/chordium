@@ -39,7 +39,7 @@ export function extractSearchResults(): DOMSearchResult[] {
       let artist = '';
       let title = rawTitle;
       
-      // First try to extract from title (format: "Song Title - Artist Name - Cifra Club")
+      // First try to extract from title (format: "Song Title - Artist Name - Cifra Club" or "Artist Name - Cifra Club")
       if (rawTitle.includes(' - ')) {
         // Remove "- Cifra Club" suffix first
         const cleanTitle = rawTitle.replace(/ - Cifra Club$/, '').trim();
@@ -50,8 +50,15 @@ export function extractSearchResults(): DOMSearchResult[] {
           // Format: "Song Title - Artist Name"
           title = parts.slice(0, -1).join(' - ').trim();
           artist = parts[parts.length - 1].trim();
-        } else {
+        } else if (parts.length === 1) {
+          // Format: "Artist Name - Cifra Club" (artist-only page)
           title = cleanTitle;
+          // For artist-only pages, set artist same as title
+          const pathSegments = path.split('/').filter(Boolean);
+          if (pathSegments.length === 1) {
+            // This is an artist page, not a song page
+            artist = cleanTitle;
+          }
         }
       }
       
