@@ -5,7 +5,7 @@ import config from '../config/config.js';
 const supabase = createClient(config.supabase.url, config.supabase.serviceRoleKey);
 
 async function searchArtistsInSupabase(query) {
-  return await supabase
+  return supabase
     .from('artists')
     .select('*')
     .ilike('displayName', `%${query}%`);
