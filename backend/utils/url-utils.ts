@@ -3,7 +3,6 @@ export {
   URL_VALIDATION_ERRORS,
   isValidResult,
   extractArtistSlug,
-  extractSongSlug,
   extractFullPathFromUrl,
   isValidChordSheetUrl,
   normalizeArtistPath

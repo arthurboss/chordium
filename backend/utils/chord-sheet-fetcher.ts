@@ -26,20 +26,20 @@ async function attemptChordSheetLoad(page: Page, songUrl: string): Promise<Chord
     {
       name: 'fast',
       waitUntil: 'domcontentloaded',
-      timeout: 30000, // Reduced from 45000
-      waitAfter: 1000  // Reduced from 2000
+      timeout: 45000,
+      waitAfter: 2000
     },
     {
       name: 'standard',
       waitUntil: 'load',
-      timeout: 45000,  // Reduced from 60000
-      waitAfter: 2000  // Reduced from 3000
+      timeout: 60000,
+      waitAfter: 3000
     },
     {
       name: 'patient',
-      waitUntil: 'networkidle2', // Changed from networkidle0 to be less strict
-      timeout: 60000,  // Reduced from 90000
-      waitAfter: 3000  // Reduced from 5000
+      waitUntil: 'networkidle0',
+      timeout: 90000,
+      waitAfter: 5000
     }
   ];
 
@@ -47,84 +47,39 @@ async function attemptChordSheetLoad(page: Page, songUrl: string): Promise<Chord
 
   for (const [index, strategy] of strategies.entries()) {
     try {
-      logger.info(`Attempting chord sheet load with ${strategy.name} strategy (${index + 1}/${strategies.length})`);
+      logger.info(`🌐 Flow Step 2b: Loading page with ${strategy.name} strategy (attempt ${index + 1}/${strategies.length})`);
       
-      // Navigate to the page with improved error handling
-      let response;
-      try {
-        response = await page.goto(songUrl, { 
-          waitUntil: strategy.waitUntil, 
-          timeout: strategy.timeout 
-        });
-      } catch (gotoError) {
-        const errorMsg = gotoError instanceof Error ? gotoError.message : String(gotoError);
-        if (errorMsg.includes('timeout') || errorMsg.includes('Timeout')) {
-          throw new Error(`Page load timeout after ${strategy.timeout}ms`);
-        } else if (errorMsg.includes('net::ERR_')) {
-          throw new Error(`Network error: ${errorMsg}`);
-        } else {
-          throw new Error(`Navigation failed: ${errorMsg}`);
-        }
-      }
-
-      if (!response) {
-        throw new Error('No response received from page.goto - page may be blocked or unavailable');
-      }
-
-      const status = response.status();
-      logger.info(`Response status: ${status} for ${strategy.name} strategy`);
-
-      if (status === 403) {
-        throw new Error('Access forbidden - possible bot detection');
-      } else if (status === 404) {
-        throw new Error('Page not found - URL may be invalid');
-      } else if (status >= 500) {
-        throw new Error(`Server error: ${status}`);
-      } else if (!response.ok()) {
-        throw new Error(`HTTP ${status}: ${response.statusText()}`);
-      }
-
-      logger.info(`Page loaded with ${strategy.name} strategy, waiting ${strategy.waitAfter}ms for dynamic content...`);
+      // Set timeout for this attempt
+      page.setDefaultNavigationTimeout(strategy.timeout);
+      
+      // Navigate to page
+      await page.goto(songUrl, { 
+        waitUntil: strategy.waitUntil,
+        timeout: strategy.timeout 
+      });
+      
+      // Wait for additional content to load
       await delay(strategy.waitAfter);
-
-      // Enable console logging from the browser
-      page.on('console', msg => {
-        logger.info(`[Browser Console] ${msg.text()}`);
-      });
-
-      logger.info(`Extracting chord sheet data...`);
       
-      // Debug: Check what's actually on the page
-      const pageInfo = await page.evaluate(() => {
-        const preElements = document.querySelectorAll('pre');
-        const h1Elements = document.querySelectorAll('h1');
-        const h2Elements = document.querySelectorAll('h2');
-        return {
-          title: document.title,
-          url: window.location.href,
-          preCount: preElements.length,
-          preTexts: Array.from(preElements).map(pre => ({
-            text: pre.textContent?.substring(0, 100) || '',
-            length: pre.textContent?.length || 0
-          })),
-          h1Count: h1Elements.length,
-          h1Texts: Array.from(h1Elements).map(h1 => h1.textContent?.trim() || ''),
-          h2Count: h2Elements.length,
-          h2Texts: Array.from(h2Elements).map(h2 => h2.textContent?.trim() || ''),
-          hasChordElements: document.querySelector('.cifra') !== null
-        };
-      });
+      // Try to wait for some content to ensure the page loaded properly
+      try {
+        await page.waitForSelector('body', { timeout: 5000 });
+        logger.info(`✅ Flow Step 2c: Song page loaded successfully with ${strategy.name} strategy`);
+      } catch (selectorError) {
+        logger.warn(`Could not find body selector on ${songUrl} with ${strategy.name} strategy:`, selectorError);
+        // Continue anyway, the page might still be usable
+      }
       
-      logger.info(`Page debug info:`, pageInfo);
+      logger.debug("Extracting chord sheet data from DOM...");
       
-      const chordSheet = await page.evaluate(extractChordSheet) as ChordSheet;
+      // Extract chord sheet
+      const chordSheet = await page.evaluate(extractChordSheet);
+      logger.info(`📝 Flow Step 2d: Chord sheet data extracted using ${strategy.name} strategy`);
+      logger.info(`📏 Extracted chords length: ${chordSheet?.songChords ? chordSheet.songChords.length : 0} characters`);
+      logger.info(`🎵 Key: ${chordSheet?.songKey || 'not found'}, Capo: ${chordSheet?.guitarCapo || 'not found'}, Tuning: ${chordSheet?.guitarTuning || 'not found'}`);
       
       if (!chordSheet?.songChords) {
-        throw new Error('No chord sheet data extracted from page');
-      }
-
-      if (chordSheet.songChords.length < 50) {
-        logger.warn(`⚠️  Warning: Chord sheet seems too short (${chordSheet.songChords.length} chars). Might be incomplete.`);
+        logger.warn(`⚠️  No chord sheet content found in page with ${strategy.name} strategy`);
       } else {
         logger.info(`✅ ChordSheet extraction successful with ${strategy.name} strategy - returning to controller`);
       }

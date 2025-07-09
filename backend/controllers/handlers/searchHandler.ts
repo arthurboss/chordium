@@ -11,14 +11,15 @@ import type { SearchType } from '../../../shared/types/search.js';
  * Handles search requests for artists or songs.
  * Tries Supabase for artists, otherwise falls back to CifraClub.
  */
-export async function searchHandler(req: Request, res: Response): Promise<Response | undefined> {
+export async function searchHandler(req: Request, res: Response): Promise<void> {
   try {
     const { artist, song } = req.query;
     const query = buildSearchQuery(artist as string, song as string);
     const searchType = determineSearchType(artist as string, song as string, SEARCH_TYPES);
     
     if (!query || !searchType) {
-      return res.status(400).json({ error: 'Missing or invalid search query' });
+      res.status(400).json({ error: 'Missing or invalid search query' });
+      return;
     }
     
     logger.info(`Search request - query: "${query}", type: ${searchType}`);
@@ -31,7 +32,8 @@ export async function searchHandler(req: Request, res: Response): Promise<Respon
         if (!error && artists && artists.length > 0) {
           logger.info(`Found ${artists.length} artists in Supabase`);
           const normalizedResults = normalizeArtistResults(artists, 'supabase');
-          return res.json(normalizedResults);
+          res.json(normalizedResults);
+          return;
         }
         
         if (error) {
@@ -46,10 +48,10 @@ export async function searchHandler(req: Request, res: Response): Promise<Respon
     
     logger.info('Fetching from CifraClub...');
     const results = await cifraClubService.search(query, searchType as SearchType);
-    return res.json(results);
+    res.json(results);
   } catch (error) {
     logger.error('Search error:', error);
-    return res.status(500).json({ 
+    res.status(500).json({ 
       error: 'Search failed', 
       details: (error as Error).message, 
       stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined 

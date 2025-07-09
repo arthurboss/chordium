@@ -66,3 +66,13 @@ export function transformToSongResults(results: BasicSearchResult[]): Song[] {
     return song;
   });
 }
+
+/**
+ * Generic transformation that removes Cifra Club suffix from titles
+ */
+export function transformToGenericResults(results: (BasicSearchResult & { url?: string })[]): Array<BasicSearchResult & { url?: string }> {
+  return results.map(result => ({
+    ...result,
+    title: result.title ? cleanCifraClubTitle(result.title) : result.title
+  }));
+}

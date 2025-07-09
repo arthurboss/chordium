@@ -8,21 +8,33 @@ import type { DataSource } from '../../shared/types/internal/index.js';
  */
 
 /**
- * Normalizes artist data - mainly for validation and consistency
- * Since Supabase returns Artist[] directly, this is mostly a pass-through with validation
+ * Normalizes artist data from different sources to a consistent format
+ * Removes internal fields like 'id' and ensures consistent field structure
  */
 export function normalizeArtistResults(artists: Artist[], source: DataSource = 'unknown'): Artist[] {
   if (!Array.isArray(artists)) {
     return [];
   }
 
-  return artists.filter(artist => {
-    // Basic validation - ensure required fields exist
-    return artist && 
-           typeof artist === 'object' && 
-           artist.displayName && 
-           artist.path;
-  });
+  return artists.map(artist => {
+    if (!artist || typeof artist !== 'object') {
+      return null;
+    }
+
+    // Normalize to consistent format, excluding internal fields like 'id'
+    const normalized: Artist = {
+      displayName: artist.displayName || '',
+      path: artist.path || '',
+      songCount: artist.songCount || null
+    };
+
+    // Validate required fields
+    if (!normalized.displayName || !normalized.path) {
+      return null;
+    }
+
+    return normalized;
+  }).filter((artist): artist is Artist => artist !== null);
 }
 
 /**
