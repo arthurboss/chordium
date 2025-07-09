@@ -8,12 +8,6 @@ import {
 import logger from "../utils/logger.js";
 import type { Song } from "../../shared/types/domain/song.js";
 
-interface OptimizedSong {
-  title: string;
-  path: string;
-  artist: string;
-}
-
 class S3StorageService {
   private s3: S3Client | null = null;
   private enabled: boolean | null = null;
@@ -94,18 +88,11 @@ class S3StorageService {
     }
 
     try {
-      // Remove URL field to save storage space - can be reconstructed from path
-      const optimizedSongs: OptimizedSong[] = songs.map((song) => ({
-        title: song.title,
-        path: song.path,
-        artist: song.artist,
-      }));
-
       const key = `artist-songs/${artistPath}.json`;
       const command = new PutObjectCommand({
         Bucket: this.bucketName!,
         Key: key,
-        Body: JSON.stringify(optimizedSongs, null, 2),
+        Body: JSON.stringify(songs, null, 2),
         ContentType: "application/json",
       });
 

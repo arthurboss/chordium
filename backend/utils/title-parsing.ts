@@ -1,23 +1,21 @@
+import type { TitleArtistResult } from '../../shared/types/internal/title-artist-result.js';
+
 /**
  * Utility functions for parsing titles and extracting artist information from CifraClub results
  */
 
 /**
  * Clean title by removing the "- Cifra Club" suffix
- * @param {string} title - Raw title from CifraClub
- * @returns {string} Cleaned title
  */
-export function cleanCifraClubTitle(title) {
+export function cleanCifraClubTitle(title: string): string {
   if (!title) return '';
   return title.trim().replace(/ - Cifra Club$/, '').trim();
 }
 
 /**
  * Extract title and artist from CifraClub title format: "Song Title - Artist Name"
- * @param {string} rawTitle - Raw title from CifraClub (may include "- Cifra Club" suffix)
- * @returns {object} Object containing title and artist
  */
-export function extractTitleAndArtist(rawTitle) {
+export function extractTitleAndArtist(rawTitle: string): TitleArtistResult {
   if (!rawTitle) {
     return { title: '', artist: '' };
   }

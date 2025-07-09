@@ -6,7 +6,10 @@
 import type { Song } from '../../shared/types/domain/song.js';
 import type { ChordSheet } from '../../shared/types/domain/chord-sheet.js';
 
-interface RawSearchResult {
+/**
+ * Search result from DOM extraction
+ */
+interface DOMSearchResult {
   title: string;
   path: string;
   artist: string;
@@ -15,7 +18,7 @@ interface RawSearchResult {
 /**
  * Extracts search results from CifraClub search page DOM
  */
-export function extractSearchResults(): RawSearchResult[] {
+export function extractSearchResults(): DOMSearchResult[] {
   const links = Array.from(document.querySelectorAll('.gsc-result a'));
   return links
     .filter(link => {

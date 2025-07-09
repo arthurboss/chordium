@@ -1,34 +1,42 @@
+import type { Artist, Song } from '../../shared/types/index.js';
 import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
 
 /**
- * Transforms raw search results into artist objects
- * @param {Array} results - Array of raw search results
- * @returns {Array} - Array of transformed artist objects
+ * Basic search result structure from DOM extraction
  */
-export function transformToArtistResults(results) {
+interface BasicSearchResult {
+  title?: string;
+  path: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Transforms raw search results into artist objects
+ */
+export function transformToArtistResults(results: BasicSearchResult[]): Artist[] {
   return results.map(result => {
     const path = result.path;
     if (!path) {
       return null;
     }
     
-    return {
-      displayName: result.title.replace(/ - Cifra Club$/, ''),
+    const artist: Artist = {
+      displayName: (result.title || '').replace(/ - Cifra Club$/, ''),
       path: path,
       songCount: null
     };
-  }).filter(Boolean);
+
+    return artist;
+  }).filter((artist): artist is Artist => artist !== null);
 }
 
 /**
  * Transforms raw search results into song objects with artist information
- * @param {Array} results - Array of raw search results
- * @returns {Array} - Array of transformed song objects
  */
-export function transformToSongResults(results) {
+export function transformToSongResults(results: BasicSearchResult[]): Song[] {
   return results.map(result => {
     // Clean the title by removing "- Cifra Club" suffix
-    const cleanedTitle = cleanCifraClubTitle(result.title);
+    const cleanedTitle = cleanCifraClubTitle(result.title || '');
     
     // Extract title and artist from the cleaned title
     const { title, artist: titleArtist } = extractTitleAndArtist(cleanedTitle);
@@ -44,27 +52,17 @@ export function transformToSongResults(results) {
         // First segment is artist slug, convert to readable name
         artist = pathSegments[0]
           .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
       }
     }
     
-    return {
+    const song: Song = {
       title,
       path,
       artist
     };
-  });
-}
 
-/**
- * Transforms raw search results into generic results (fallback)
- * @param {Array} results - Array of raw search results
- * @returns {Array} - Array of transformed generic results
- */
-export function transformToGenericResults(results) {
-  return results.map(result => ({
-    ...result,
-    title: result.title.replace(/ - Cifra Club$/, '')
-  }));
+    return song;
+  });
 }
