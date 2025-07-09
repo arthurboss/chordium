@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from './useChordSheet';
 import { ChordSheetLoadingStrategy } from '../utils/chord-sheet-loading-strategy';
 import { validateURL } from '../utils/url-validator';
+import eaglesHotelCaliforniaFixture from '../../public/data/songs/eagles-hotel_california.json';
 
 // Mock all dependencies first - with factory functions to avoid hoisting issues
 vi.mock('../utils/chord-sheet-loading-strategy');
@@ -128,14 +129,9 @@ describe('useChordSheet', () => {
   });
 
   it('should load from local storage when in My Chord Sheets context', async () => {
-    // Arrange - Return the complete object with UI state as expected by the hook
+    // Arrange - Use the actual fixture data with UI state as expected by the hook
     const mockLocalData = {
-      title: 'Hotel California',
-      artist: 'Eagles',
-      songChords: 'local chord content',
-      songKey: 'Am',
-      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-      guitarCapo: 0,
+      ...eaglesHotelCaliforniaFixture,
       loading: false,
       error: null
     };
@@ -151,10 +147,10 @@ describe('useChordSheet', () => {
       expect(result.current.loading).toBe(false);
     }, { timeout: 5000 });
 
-    expect(result.current.title).toBe('Hotel California');
-    expect(result.current.artist).toBe('Eagles');
-    expect(result.current.songChords).toBe('local chord content');
-    expect(result.current.songKey).toBe('Am');
+    expect(result.current.title).toBe(eaglesHotelCaliforniaFixture.title);
+    expect(result.current.artist).toBe(eaglesHotelCaliforniaFixture.artist);
+    expect(result.current.songChords).toBe(eaglesHotelCaliforniaFixture.songChords);
+    expect(result.current.songKey).toBe(eaglesHotelCaliforniaFixture.songKey);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(mockStrategy.shouldLoadLocal).toHaveBeenCalledWith('eagles', 'hotel-california');
