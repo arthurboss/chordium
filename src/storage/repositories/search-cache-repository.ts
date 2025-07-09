@@ -1,7 +1,7 @@
 import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
-import { BaseCacheRepository } from './base-cache-repository';
-import { ChordSheetDBConnection } from '../connection/chord-sheet-db-connection';
+import { BaseCacheRepository } from '@/cache/storage/indexeddb/repositories/base-cache-repository';
+import { ChordSheetDBConnection } from '../../cache/storage/indexeddb/connection';
 
 // Union type for search results
 export type SearchResultData = Song[] | Artist[];
@@ -19,7 +19,7 @@ export interface SearchCacheMetadata {
  * Search cache record for IndexedDB storage
  */
 export interface SearchCacheRecord {
-  readonly id: string;                 // Serves as both primary key and query identifier
+  readonly path: string;                 // Serves as both primary key and query identifier
   readonly results: SearchResultData;
   readonly timestamp?: number;         // For timestamp index
   readonly searchType?: string;        // For searchType index  
@@ -222,7 +222,7 @@ export class SearchCacheRepository implements BaseCacheRepository<SearchResultDa
     };
 
     expiredRecords.forEach(record => {
-      const deleteRequest = store.delete(record.id);
+      const deleteRequest = store.delete(record.path);
       
       deleteRequest.onerror = () => {
         processedCount++;
@@ -238,6 +238,7 @@ export class SearchCacheRepository implements BaseCacheRepository<SearchResultDa
   }
 
   private generateSearchKey(query: string): string {
-    return query.toLowerCase().trim().replace(/\s+/g, '_');
+    // Convert search query to path-like format (hyphens instead of underscores)
+    return query.toLowerCase().trim().replace(/\s+/g, '-');
   }
 }

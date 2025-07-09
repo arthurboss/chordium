@@ -1,10 +1,23 @@
 import { ChordSheet } from '@/types/chordSheet';
 
 /**
+ * Metadata for chord sheet records
+ */
+export interface ChordSheetMetadata {
+  saved: boolean;
+  timestamp: number;
+  accessCount: number;
+  dataSource?: 'scraping' | 's3' | 'sample' | 'local';
+  version?: number;
+  deletedAt?: number;
+  expiresAt?: number;
+}
+
+/**
  * IndexedDB record for chord sheet storage
  */
 export interface ChordSheetRecord {
-  id: string;                // Primary key: "artist-title"
+  path: string;              // Primary key: path from backend
   artist: string;            // Indexed for efficient artist queries
   title: string;             // Indexed for efficient title queries  
   chordSheet: ChordSheet;    // The actual chord sheet data
@@ -12,7 +25,8 @@ export interface ChordSheetRecord {
   timestamp: number;         // Cache timestamp for TTL
   accessCount: number;       // Usage tracking for LRU
   deletedAt?: number;        // Timestamp when song was deleted (for retention)
+  expiresAt?: number;        // Optional expiration timestamp for cache items
   // Future-ready fields for S3 integration
-  dataSource?: 'scraping' | 's3';  // Where the data came from
+  dataSource?: 'scraping' | 's3' | 'sample' | 'local';  // Where the data came from
   version?: number;          // Version for cache invalidation
 }

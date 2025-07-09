@@ -1,4 +1,4 @@
-import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
+import { SearchCacheRepository } from '@/cache/storage/indexeddb/repositories/search-cache-repository';
 
 /**
  * Initialize the search cache repository with IndexedDB connection

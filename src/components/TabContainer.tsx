@@ -8,7 +8,7 @@ import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
+import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/cache";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 
@@ -91,8 +91,8 @@ const TabContainer = ({
     handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
   };
   
-  const handleChordSheetDelete = (songPath: string) => {
-    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
+  const handleChordSheetDelete = async (songPath: string) => {
+    await handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
   };
 
   // Handle keyboard navigation for the tabs

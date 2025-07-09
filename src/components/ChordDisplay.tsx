@@ -3,7 +3,6 @@ import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
-import ChordHeader from './ChordDisplay/ChordHeader';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
@@ -12,16 +11,13 @@ import { downloadTextFile } from '@/utils/download-utils';
 import { cyAttr } from '@/utils/test-utils';
 
 interface ChordDisplayProps {
-  title?: string;
-  artist?: string;
   content: string;
   onSave?: (content: string) => void;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ content, onSave }, ref) => {
   
   console.log('🎼 CHORD DISPLAY DEBUG:');
-  console.log('Received props - title:', title, 'artist:', artist);
   console.log('Content length:', content?.length ?? 0);
   // console.log('Content preview:', content?.substring(0, 100) + '...');
 
@@ -88,7 +84,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
 
   return (
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
-      <ChordHeader title={title} artist={artist} />
       <ChordContent
         processedContent={processedContent}
         fontSize={fontSize}

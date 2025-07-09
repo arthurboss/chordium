@@ -2,11 +2,8 @@ import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import './cache/utils/cache-debug';
 
-// Initialize the React app
 const initializeApp = async () => {
-  // Setting up React 19 with enhanced error handling and Strict Mode
   const rootElement = document.getElementById("root");
   if (!rootElement) {
     throw new Error("Failed to find the root element");
@@ -20,5 +17,4 @@ const initializeApp = async () => {
   );
 };
 
-// Start the app initialization
 initializeApp();

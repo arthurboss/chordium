@@ -1,128 +1,121 @@
-import { Song } from "@/types/song";
+import { saveChordSheet } from "@/cache/utils/saveChordSheet";
 import { ChordSheet } from "@/types/chordSheet";
-import { handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
+import { Song } from "@/types/song";
+import { handleSaveNewChordSheetFromUI } from "@/cache";
 import { useNavigate } from "react-router-dom";
-import { generateUnifiedCacheKey } from "@/storage/utils/unified-cache-key-generator";
 import { useCallback } from "react";
 
-interface AddToMyChordSheetsData {
-  song: Song;
-  chordSheet: ChordSheet;
-}
-
-export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>, setActiveTab?: (tab: string) => void) {
+export function useAddToMyChordSheets(
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>,
+  setActiveTab?: (tab: string) => void
+) {
   const navigate = useNavigate();
-  
-  return useCallback(async (data: AddToMyChordSheetsData) => {
-    const { song, chordSheet } = data;
-    
-    try {
-      console.log('🎵 ADD TO MY CHORD SHEETS START:', song.title, 'by', song.artist);
-      console.log('📊 Flow Step 9: User clicked "Add to My Chord Sheets"');
-      console.log('📋 Song details:', {
-        title: song.title,
-        artist: song.artist,
-        path: song.path,
-        timestamp: new Date().toISOString()
-      });
-      console.log('📦 Backend data received:', {
-        hasChords: !!chordSheet.songChords,
-        chordsLength: chordSheet.songChords?.length ?? 0,
-        chordSheetData: {
+
+  return useCallback(
+    async (chordSheet: ChordSheet, path: string) => {
+      try {
+        console.log("📋 ChordSheet details:", {
           title: chordSheet.title,
           artist: chordSheet.artist,
-          songKey: chordSheet.songKey,
-          guitarTuning: chordSheet.guitarTuning,
-          guitarCapo: chordSheet.guitarCapo
-        }
-      });
+          path: path,
+          timestamp: new Date().toISOString(),
+        });
 
-      // Generate chord sheet ID from song data (this should match Song.path)
-      const chordSheetId = song.path || generateUnifiedCacheKey(song.artist, song.title);
-      console.log('🔑 Flow Step 10: Using chord sheet ID:', chordSheetId);
-      console.log('🔑 ID Generation: Using Song.path directly (no redundant generation)');
-
-      // Create complete ChordSheet object for storage
-      // Backend now provides accurate title and artist from scraped data
-      const fullChordSheet: ChordSheet = {
-        title: chordSheet.title || song.title || "Untitled Song",
-        artist: chordSheet.artist || song.artist || "Unknown Artist",
-        songChords: chordSheet.songChords ?? '',
-        songKey: chordSheet.songKey ?? '',
-        guitarTuning: chordSheet.guitarTuning ?? ['E', 'A', 'D', 'G', 'B', 'E'],
-        guitarCapo: chordSheet.guitarCapo ?? 0
-      };
-      
-      console.log('💾 Flow Step 11: Saving chord sheet content to localStorage');
-      console.log('🗄️ Storage structure:', {
-        storageKey: 'chord-sheets',
-        chordSheetId,
-        dataStructure: {
-          title: fullChordSheet.title,
-          artist: fullChordSheet.artist,
-          songChords: `${fullChordSheet.songChords.substring(0, 50)}...`,
-          songKey: fullChordSheet.songKey,
-          guitarTuning: fullChordSheet.guitarTuning,
-          guitarCapo: fullChordSheet.guitarCapo
-        }
-      });
-
-      // Save chord sheet using the API cache (already cached from fetch)
-      console.log('✅ Flow Step 12: Chord sheet already cached in API cache');
-      
-      console.log('💾 Flow Step 13: Saving chord sheet metadata (separate from chord content)');
-      
-      if (setMySongs && setActiveTab) {
-        // User is on home page with state
-        console.log('🏠 Context: Home page with state management');
-        handleSaveNewChordSheetFromUI(
-          chordSheetId, 
-          fullChordSheet.title, 
-          setMySongs, 
-          navigate, 
-          setActiveTab,
-          fullChordSheet.artist
+        // CRITICAL: Use the path as the IndexedDB key - NO path reconstruction!
+        console.log(
+          "🔑 Flow Step 10: Using path as IndexedDB key (NO reconstruction):",
+          path
         );
-      } else {
-        // User is on chord viewer page - use modular chord sheet storage
-        console.log('🔍 Context: Chord viewer page - using modular chord sheet storage');
-        const { addChordSheet } = await import('@/utils/chord-sheet-storage');
-        
-        console.log('🎧 Adding chord sheet to My Chord Sheets (IndexedDB):', {
-          title: fullChordSheet.title,
-          artist: fullChordSheet.artist,
-          contentLength: fullChordSheet.songChords.length
+
+        console.log("📦 Backend data received:", {
+          hasChords: !!chordSheet.songChords,
+          chordsLength: chordSheet.songChords?.length ?? 0,
+          chordSheetData: {
+            title: chordSheet.title,
+            artist: chordSheet.artist,
+            songKey: chordSheet.songKey,
+            guitarTuning: chordSheet.guitarTuning,
+            guitarCapo: chordSheet.guitarCapo,
+            path: path,
+          },
         });
-        
-        // Add the chord sheet to IndexedDB storage
-        await addChordSheet(fullChordSheet);
-        
-        console.log('✅ Flow Step 14: Chord sheet added to IndexedDB storage');
-        
-        // Show success toast
-        const { toast } = await import('@/hooks/use-toast');
-        toast({
-          title: 'Chord sheet added to My Chord Sheets',
-          description: `${fullChordSheet.artist} - ${fullChordSheet.title} has been added to your chord sheets.`,
-          variant: 'default'
+
+        // ChordSheet object is already complete from backend
+        console.log(
+          "💾 Flow Step 11: Saving chord sheet content to cache using path"
+        );
+        console.log("🗄️ Storage structure:", {
+          path,
+          dataStructure: {
+            title: chordSheet.title,
+            artist: chordSheet.artist,
+            songChords: `${chordSheet.songChords.substring(0, 50)}...`,
+            songKey: chordSheet.songKey,
+            guitarTuning: chordSheet.guitarTuning,
+            guitarCapo: chordSheet.guitarCapo,
+          },
         });
-        
-        // Redirect to My Chord Sheets tab
-        navigate('/my-chord-sheets');
+
+        console.log(
+          "💾 Flow Step 13: Saving chord sheet using path as cache key"
+        );
+
+        if (setMySongs && setActiveTab) {
+          // User is on home page with state
+          console.log("🏠 Context: Home page with state management");
+
+          // Pass the path to prevent reconstruction
+          handleSaveNewChordSheetFromUI(
+            path,
+            chordSheet.songChords,
+            chordSheet.title,
+            setMySongs,
+            navigate,
+            setActiveTab,
+            chordSheet.artist
+          );
+        } else {
+          // User is on chord viewer page - use direct cache storage with path
+          console.log(
+            "🔍 Context: Chord viewer page - using direct cache storage with path"
+          );
+
+          console.log(
+            "🎧 Adding chord sheet to My Chord Sheets (IndexedDB) using path:",
+            {
+              title: chordSheet.title,
+              artist: chordSheet.artist,
+              path: path,
+              contentLength: chordSheet.songChords.length,
+            }
+          );
+
+          // Store in cache using the path - this is the key fix!
+          await saveChordSheet(path, chordSheet, {
+            saved: true,
+          });
+
+          console.log(
+            "✅ Flow Step 14: Chord sheet added to IndexedDB storage using path"
+          );
+
+          // Show success toast
+          const { toast } = await import("@/hooks/use-toast");
+          toast({
+            title: "Chord sheet added to My Chord Sheets",
+            description: `${chordSheet.artist} - ${chordSheet.title} has been added to your chord sheets.`,
+            variant: "default",
+          });
+
+          // Redirect to My Chord Sheets tab
+          navigate("/my-chord-sheets");
+        }
+      } catch (err) {
+        console.error("❌ Error in addToMyChordSheets:", err);
+        console.error("💥 Flow failed at step:", err.message);
+        throw err;
       }
-      
-      console.log('🎉 COMPLETE FLOW SUMMARY:');
-      console.log('1. ✅ Backend scraped chord sheet data');
-      console.log('2. ✅ Frontend received ChordSheet response from backend');
-      console.log('3. ✅ Chord sheet data cached in API cache with 1-day TTL');
-      console.log('4. ✅ Chord sheet saved to IndexedDB for My Chord Sheets');
-      console.log('5. ✅ Future retrieval: IndexedDB -> chordSheet');
-      console.log('🎉 ADD TO MY CHORD SHEETS COMPLETE - Using IndexedDB for persistent storage!');
-      
-    } catch (err) {
-      console.error('❌ Error in addToMyChordSheets:', err);
-      console.error('💥 Flow failed at step:', err.message);
-      throw err;
-    }
-  }, [navigate, setMySongs, setActiveTab]);
+    },
+    [navigate, setMySongs, setActiveTab]
+  );
 }

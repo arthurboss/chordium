@@ -18,9 +18,9 @@ describe('IndexedDBCacheCoordinator', () => {
   it('should store and retrieve chord sheet using fixture data', async () => {
     const chordSheet = ChordSheetFixtureLoader.loadChordSheet('oasis-wonderwall');
     
-    await repository.store('Oasis', 'Wonderwall', chordSheet, { saved: false });
+    await repository.storeByPath('/oasis/wonderwall/', chordSheet, { saved: false });
     
-    const retrieved = await repository.get('Oasis', 'Wonderwall');
+    const retrieved = await repository.getByPath('/oasis/wonderwall/');
     
     expect(retrieved).toBeDefined();
     expect(retrieved?.chordSheet.title).toBe('Wonderwall');

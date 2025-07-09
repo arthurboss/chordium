@@ -1,5 +1,5 @@
 import { ChordSheet } from "@/types/chordSheet";
-import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
+import { ChordSheetRepository } from '@/cache/storage/indexeddb/repositories/chord-sheet-repository';
 
 /**
  * Gets all saved chord sheets from the cache

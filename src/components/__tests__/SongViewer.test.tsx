@@ -5,12 +5,12 @@ import SongViewer from '../SongViewer';
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet';
 
 // Mock chord sheet cache
-vi.mock('@/cache/implementations/unified-chord-sheet-cache', () => ({
+vi.mock('@/cache/implementations/unified-chord-sheet', () => ({
   unifiedChordSheetCache: {
-    getCachedChordSheet: vi.fn()
+    getCachedChordSheetByPath: vi.fn()
   }
 }));
 
@@ -27,7 +27,7 @@ vi.mock('@/components/ChordDisplay', () => ({
 }));
 
 describe('SongViewer', () => {
-  const mockGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheet);
+  const mockGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheetByPath);
   const mockChordDisplayRef = { current: document.createElement('div') };
   const mockOnBack = vi.fn();
   const mockOnDelete = vi.fn();
@@ -60,7 +60,7 @@ describe('SongViewer', () => {
       };
 
       // Mock that the chord sheet cache returns the actual chord content
-      mockGetCachedChordSheet.mockReturnValue(mockChordSheet);
+      mockGetCachedChordSheet.mockResolvedValue(mockChordSheet);
 
       const { container } = render(
         <SongViewer
@@ -89,7 +89,7 @@ describe('SongViewer', () => {
       };
 
       // Mock that the chord sheet cache returns null for missing content
-      mockGetCachedChordSheet.mockReturnValue(null);
+      mockGetCachedChordSheet.mockResolvedValue(null);
 
       const { container } = render(
         <SongViewer
@@ -124,7 +124,7 @@ describe('SongViewer', () => {
       };
 
       // Mock the chord sheet content
-      mockGetCachedChordSheet.mockReturnValue(mockChordSheet);
+      mockGetCachedChordSheet.mockResolvedValue(mockChordSheet);
 
       const { container } = render(
         <SongViewer
@@ -151,13 +151,13 @@ describe('SongViewer', () => {
         path: 'test'
       };
 
-      mockGetCachedChordSheet.mockReturnValue({ 
-        title: 'Test', 
-        artist: 'Test', 
-        songChords: 'Test content', 
-        songKey: '', 
-        guitarTuning: GUITAR_TUNINGS.STANDARD, 
-        guitarCapo: 0 
+      mockGetCachedChordSheet.mockReturnValue({
+        title: 'Test',
+        artist: 'Test',
+        songChords: 'Test content',
+        songKey: '',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       });
 
       const { getByRole } = render(
@@ -182,13 +182,13 @@ describe('SongViewer', () => {
         path: 'test-artist-test-song'
       };
 
-      mockGetCachedChordSheet.mockReturnValue({ 
-        title: 'Test', 
-        artist: 'Test', 
-        songChords: 'Test content', 
-        songKey: '', 
-        guitarTuning: GUITAR_TUNINGS.STANDARD, 
-        guitarCapo: 0 
+      mockGetCachedChordSheet.mockReturnValue({
+        title: 'Test',
+        artist: 'Test',
+        songChords: 'Test content',
+        songKey: '',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       });
 
       const { getByRole } = render(

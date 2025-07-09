@@ -1,22 +1,37 @@
-// Main cache module exports
-export * from './types';
-export * from './config';
+// Main cache system exports
+export { ChordSheetRepository } from "./storage/indexeddb/repositories/chord-sheet-repository";
+export { SearchCacheRepository } from "./storage/indexeddb/repositories/search-cache-repository";
+export { IndexedDBCacheCoordinator } from "./coordinators/indexed-db-cache-coordinator";
 
-// IndexedDB cache implementations - using async implementations
-export { 
-  cacheSearchResults, 
-  getCachedSearchResults, 
+// Cache implementations
+export { unifiedChordSheetCache } from "./implementations/unified-chord-sheet";
+
+// Cache functions
+export {
+  cacheSearchResults,
+  getCachedSearchResults,
   clearSearchCache,
-  clearExpiredSearchCache
-} from './implementations/search-cache';
+  clearExpiredSearchCache,
+} from "./implementations/search-cache";
 
-export { 
-  unifiedChordSheetCache,
+export {
   cacheChordSheet,
-  getCachedChordSheet,
+  getCachedChordSheetByPath,
   clearChordSheetCache,
-  clearExpiredChordSheetCache
-} from './implementations/unified-chord-sheet';
+  clearExpiredChordSheetCache,
+  getAllChordSheets,
+  removeChordSheetByPath,
+} from "./implementations/unified-chord-sheet";
 
-// Cache utilities - updated for async operations
-export { debugCache, clearAllCaches } from './utils/cache-debug';
+// Types
+export type { ChordSheetRecord, ChordSheetMetadata } from "./core/types";
+
+// Cache utilities
+export { saveChordSheet } from "./utils/saveChordSheet";
+export { deleteChordSheet } from "./utils/deleteChordSheet";
+export { debugCache, clearAllCaches } from "./utils/debug";
+export {
+  handleSaveNewChordSheetFromUI,
+  handleUpdateChordSheetFromUI,
+  handleDeleteChordSheetFromUI,
+} from "./utils/ui-operations";

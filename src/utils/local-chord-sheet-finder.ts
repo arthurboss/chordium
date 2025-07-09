@@ -1,80 +1,139 @@
-import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
-import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
-import { Song } from '../types/song';
-import { extractSongMetadata } from './metadata-extraction';
-
+/**
+ * Type for local song result from local storage / cache
+ */
 export interface LocalSongResult {
+  id: string;
   title: string;
-  artist: string;
+  artist?: string;
+  content: string;
   path: string;
-  key: string;
-  tuning: string;
-  capo: string;
+  metadata?: {
+    saved: boolean;
+    lastAccessed: number;
+    accessCount: number;
+  };
 }
 
 /**
- * Finds a song in local storage (My Chord Sheets) by artist and song parameters
- * Follows SRP: Single responsibility of finding local songs
- * 
- * @param artistParam - URL-encoded artist parameter (e.g., "eagles", "oasis")
- * @param songParam - URL-encoded song parameter (e.g., "hotel-california")
- * @returns Promise<LocalSongResult | null> - Found song or null if not found
+ * Find a local song by ID from local storage or cache
+ * @param id - The song ID to find
+ * @returns Promise resolving to LocalSongResult or null if not found
  */
-export async function findLocalSong(
-  artistParam: string, 
-  songParam: string
-): Promise<LocalSongResult | null> {
+export async function findLocalSong(id: string): Promise<LocalSongResult | null> {
   try {
-    // Get all songs from modular chord sheet storage
-    const myChordSheets = await getMyChordSheetsAsSongs();
+    // Try to get from unified cache first
+    const { unifiedChordSheetCache } = await import('@/cache/implementations/unified-chord-sheet');
+    const cachedItem = await unifiedChordSheetCache.getCachedChordSheetByPath(id);
     
-    const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
-    const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
-    
-    console.log(`Looking for song: "${songName}" by "${artistName}"`);
-    console.log('Available songs:', myChordSheets.map(song => `"${song.title}" by "${song.artist}"`));
-    
-    // Search in My Chord Sheets
-    const foundSong = myChordSheets.find((song: Song) => {
-      const songArtist = song.artist?.toLowerCase() ?? '';
-      const songTitle = song.title?.toLowerCase() ?? '';
-      return (
-        songArtist.includes(artistName.toLowerCase()) ||
-        songTitle.includes(songName.toLowerCase()) ||
-        songTitle === songName.toLowerCase()
-      );
-    });
-    
-    if (foundSong) {
-      console.log('Found song in local storage:', foundSong.title);
-      
-      // Try to get the chord sheet from IndexedDB using the artist and title
-      const repository = new ChordSheetRepository();
-      await repository.initialize();
-      const cachedChordSheet = await repository.get(foundSong.artist, foundSong.title);
-      await repository.close();
-      
-      if (!cachedChordSheet) {
-        console.log('❌ Song found but no cached chord sheet available');
-        return null;
-      }
-      
-      // Extract metadata from the chord sheet content
-      const metadata = extractSongMetadata(cachedChordSheet.songChords);
+    if (cachedItem) {
       return {
-        title: foundSong.title ?? '',
-        artist: foundSong.artist ?? '',
-        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
-        key: metadata.songKey ?? '',
-        tuning: metadata.guitarTuning ?? '',
-        capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',
+        id: id,
+        title: cachedItem.title,
+        artist: cachedItem.artist,
+        content: cachedItem.songChords,
+        path: cachedItem.songChords, // For backward compatibility
+        metadata: {
+          saved: true, // Assume saved if found in cache
+          lastAccessed: Date.now(),
+          accessCount: 1
+        }
       };
     }
     
-    console.log('Song not found in local storage');
+    // Fallback to localStorage for backward compatibility
+    const savedSongs = localStorage.getItem('my-songs');
+    if (savedSongs) {
+      const songs = JSON.parse(savedSongs);
+      const song = songs.find((s: { id: string }) => s.id === id);
+      if (song) {
+        return {
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          content: song.path ?? song.content,
+          path: song.path ?? song.content,
+          metadata: {
+            saved: true,
+            lastAccessed: Date.now(),
+            accessCount: 1
+          }
+        };
+      }
+    }
+    
     return null;
   } catch (error) {
-    console.error('Error loading local songs:', error);
+    console.error('Error finding local song:', error);
     return null;
+  }
+}
+
+/**
+ * Get all local songs from cache and localStorage
+ * @returns Promise resolving to array of LocalSongResult
+ */
+export async function getAllLocalSongs(): Promise<LocalSongResult[]> {
+  const songs: LocalSongResult[] = [];
+  
+  try {
+    // Get from unified cache
+    const { unifiedChordSheetCache } = await import('@/cache/implementations/unified-chord-sheet');
+    const cachedItems = await unifiedChordSheetCache.getAllSavedChordSheets();
+    
+    for (const item of cachedItems) {
+      songs.push({
+        id: `${item.artist}-${item.title}`, // Generate ID from artist and title
+        title: item.title,
+        artist: item.artist,
+        content: item.songChords,
+        path: item.songChords,
+        metadata: {
+          saved: true, // These are saved items
+          lastAccessed: Date.now(),
+          accessCount: 1
+        }
+      });
+    }
+    
+    // Fallback to localStorage for backward compatibility
+    const savedSongs = localStorage.getItem('my-songs');
+    if (savedSongs) {
+      const localSongs = JSON.parse(savedSongs);
+      for (const song of localSongs) {
+        // Avoid duplicates
+        if (!songs.find(s => s.id === song.id)) {
+          songs.push({
+            id: song.id,
+            title: song.title,
+            artist: song.artist,
+            content: song.path ?? song.content,
+            path: song.path ?? song.content,
+            metadata: {
+              saved: true,
+              lastAccessed: Date.now(),
+              accessCount: 1
+            }
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error getting local songs:', error);
+  }
+  
+  return songs;
+}
+
+/**
+ * Clear all cached chord sheets (useful for debugging/testing)
+ * @returns Promise that resolves when cache is cleared
+ */
+export async function clearAllLocalSongs(): Promise<void> {
+  try {
+    const { unifiedChordSheetCache } = await import('@/cache/implementations/unified-chord-sheet');
+    await unifiedChordSheetCache.clearAllCache();
+    console.log('🧹 All local songs cleared from cache');
+  } catch (error) {
+    console.error('Error clearing local songs:', error);
   }
 }

@@ -1,4 +1,4 @@
-import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
+import { ChordSheetRepository } from '@/cache/storage/indexeddb/repositories/chord-sheet-repository';
 
 /**
  * Initialize IndexedDB connection for chord sheet repository

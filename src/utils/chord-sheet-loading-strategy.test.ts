@@ -1,17 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheetLoadingStrategy } from './chord-sheet-loading-strategy';
-import { findLocalSong } from './local-chord-sheet-finder';
 import { buildChordSheetData } from './chord-data-builder';
 import { isMyChordSheetsRoute } from './route-context-detector';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet';
+import { GUITAR_TUNINGS } from '@/types/guitarTuning';
 
 // Mock dependencies
-vi.mock('./local-chord-sheet-finder');
 vi.mock('./chord-data-builder');
 vi.mock('./route-context-detector');
+vi.mock('@/cache/implementations/unified-chord-sheet', () => ({
+  unifiedChordSheetCache: {
+    getCachedChordSheetByPath: vi.fn()
+  }
+}));
 
-const mockedFindLocalSong = vi.mocked(findLocalSong);
 const mockedBuildChordSheetData = vi.mocked(buildChordSheetData);
 const mockedIsMyChordSheetsRoute = vi.mocked(isMyChordSheetsRoute);
+const mockedGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheetByPath);
 
 describe('ChordSheetLoadingStrategy', () => {
   let strategy: ChordSheetLoadingStrategy;
@@ -60,7 +65,7 @@ describe('ChordSheetLoadingStrategy', () => {
       mockedIsMyChordSheetsRoute.mockReturnValue(true);
 
       // Act
-      const result = strategy.shouldLoadLocal('eagles', undefined);
+      const result = strategy.shouldLoadLocal('eagles');
 
       // Assert
       expect(result).toBe(false);
@@ -70,17 +75,22 @@ describe('ChordSheetLoadingStrategy', () => {
   describe('loadLocal', () => {
     it('should load local song and build chord data', async () => {
       // Arrange
-      const mockLocalSong = {
+      const mockChordSheet = {
         title: 'Hotel California',
         artist: 'Eagles',
-        path: 'chord content...',
-        key: 'Am',
-        tuning: 'Standard',
-        capo: ''
+        songChords: 'chord content...',
+        songKey: 'Am',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0
       };
       const mockChordData = {
-        content: 'chord content...',
+        title: 'Hotel California',
         artist: 'Eagles',
+        songChords: 'chord content...',
+        songKey: 'Am',
+        guitarTuning: GUITAR_TUNINGS.STANDARD,
+        guitarCapo: 0,
+        content: 'chord content...',
         song: 'Hotel California',
         key: 'Am',
         tuning: 'Standard',
@@ -89,7 +99,7 @@ describe('ChordSheetLoadingStrategy', () => {
         error: null
       };
 
-      mockedFindLocalSong.mockResolvedValue(mockLocalSong);
+      mockedGetCachedChordSheet.mockResolvedValue(mockChordSheet);
       mockedBuildChordSheetData.mockReturnValue(mockChordData);
 
       // Act
@@ -97,25 +107,25 @@ describe('ChordSheetLoadingStrategy', () => {
 
       // Assert
       expect(result).toEqual(mockChordData);
-      expect(mockedFindLocalSong).toHaveBeenCalledWith('eagles', 'hotel-california');
-      expect(mockedBuildChordSheetData).toHaveBeenCalledWith(mockLocalSong);
+      expect(mockedGetCachedChordSheet).toHaveBeenCalledWith('eagles/hotel-california');
+      expect(mockedBuildChordSheetData).toHaveBeenCalledWith(mockChordSheet);
     });
 
     it('should return null when local song not found', async () => {
       // Arrange
-      mockedFindLocalSong.mockResolvedValue(null);
+      mockedGetCachedChordSheet.mockResolvedValue(null);
 
       // Act
       const result = await strategy.loadLocal('unknown', 'song');
 
       // Assert
       expect(result).toBeNull();
-      expect(mockedBuildChordSheetData).not.toHaveBeenCalled();
+      expect(mockedGetCachedChordSheet).toHaveBeenCalledWith('unknown/song');
     });
 
     it('should handle errors gracefully', async () => {
       // Arrange
-      mockedFindLocalSong.mockRejectedValue(new Error('Load failed'));
+      mockedGetCachedChordSheet.mockRejectedValue(new Error('Load failed'));
 
       // Act
       const result = await strategy.loadLocal('eagles', 'hotel-california');

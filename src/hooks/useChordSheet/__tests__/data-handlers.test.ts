@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DataHandlers } from '../data-handlers';
 import { ChordSheet } from '@/types/chordSheet';
 import { toChordSheetWithUIState } from '@/types/chordSheetWithUIState';
-import { getTestSong } from '@/__tests__/shared/test-setup';
+import { createTestChordSheet } from '@/__tests__/shared/test-setup';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -11,23 +11,20 @@ describe('DataHandlers', () => {
   let dataHandlers: DataHandlers;
   const mockSetChordData = vi.fn();
 
-  // Real sample ChordSheet for testing - use shared test setup
+  // Sample ChordSheet for testing
   let sampleChordSheet: ChordSheet;
 
   beforeEach(() => {
     vi.clearAllMocks();
     dataHandlers = new DataHandlers();
     
-    // Load real sample song before each test
-    const testSong = getTestSong(1); // Hotel California
-    sampleChordSheet = {
-      title: testSong.title,
-      artist: testSong.artist,
-      songChords: testSong.songChords,
-      songKey: testSong.songKey,
-      guitarTuning: testSong.guitarTuning,
-      guitarCapo: testSong.guitarCapo
-    };
+    // Create test chord sheet with realistic data
+    sampleChordSheet = createTestChordSheet({
+      title: "Hotel California",
+      artist: "Eagles",
+      songChords: "[Intro]\nBm  F#  A  E  G  D  Em  F#\n\n[Verse 1]\nBm                        F#\nOn a dark desert highway, cool wind in my hair",
+      songKey: "Bm"
+    });
   });
 
   describe('handleImmediateData', () => {

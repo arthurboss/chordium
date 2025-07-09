@@ -137,17 +137,17 @@ interface ChordSheetRecordDB {
   id: string;
   artist: string;
   title: string;
-  saved: 0 | 1;  // Number values for IndexedDB compatibility
+  saved: 0 | 1; // Number values for IndexedDB compatibility
   timestamp: number;
   // ... other fields
 }
 
-// Application layer (domain objects)  
+// Application layer (domain objects)
 interface ChordSheetRecord {
   id: string;
   artist: string;
   title: string;
-  saved: boolean;  // Boolean values for simple application logic
+  saved: boolean; // Boolean values for simple application logic
   timestamp: number;
   // ... other fields
 }
@@ -184,7 +184,7 @@ Fast, efficient filtering using IndexedDB indexes:
 async getAllSaved(): Promise<ChordSheet[]> {
   const savedIndex = store.index('saved');
   const request = savedIndex.getAll(1);  // Query for saved=1
-  
+
   const dbRecords = request.result as ChordSheetRecordDB[];
   return dbRecords.map(dbRecord => {
     const record = this.recordFromDB(dbRecord);
@@ -219,16 +219,19 @@ private migrateSavedFieldToNumber(chordStore: IDBObjectStore): void {
 ### Benefits Achieved
 
 1. **IndexedDB Compatibility** ✅
+
    - Numbers work perfectly as index keys
    - Fast filtering: `savedIndex.getAll(1)`
    - No manual array filtering needed
 
 2. **Application Simplicity** ✅
+
    - Boolean logic: `if (record.saved)`
    - Simple save/unsave: `record.saved = true/false`
    - Automatic conversion handling
 
 3. **Performance Optimization** ✅
+
    - Index-based queries instead of full table scans
    - Efficient for large datasets
    - Sub-millisecond response times
@@ -240,11 +243,11 @@ private migrateSavedFieldToNumber(chordStore: IDBObjectStore): void {
 
 ### Alternative Approaches Tested
 
-| Approach | IndexedDB Index | Conversion Overhead | Complexity | Performance |
-|----------|----------------|-------------------|------------|-------------|
-| **Boolean** | ❌ Failed | ✅ None | ✅ Simple | ❌ Manual filtering |
-| **String** | ✅ Works | ❌ High | ❌ Complex | ✅ Index queries |
-| **Number (0/1)** | ✅ Works | ✅ Minimal | ✅ Simple | ✅ Index queries |
+| Approach         | IndexedDB Index | Conversion Overhead | Complexity | Performance         |
+| ---------------- | --------------- | ------------------- | ---------- | ------------------- |
+| **Boolean**      | ❌ Failed       | ✅ None             | ✅ Simple  | ❌ Manual filtering |
+| **String**       | ✅ Works        | ❌ High             | ❌ Complex | ✅ Index queries    |
+| **Number (0/1)** | ✅ Works        | ✅ Minimal          | ✅ Simple  | ✅ Index queries    |
 
 The number-based approach provides the optimal balance of all factors.
 
@@ -268,7 +271,7 @@ interface SearchCacheItem extends BaseCacheItem {
   query: SearchQuery;
 }
 
-// Artist cache specific types  
+// Artist cache specific types
 interface ArtistCacheItem extends BaseCacheItem {
   artistPath: string;
   songs: Song[];
@@ -290,25 +293,25 @@ Centralizes all cache configuration with environment-aware settings:
 export const CACHE_CONFIG = {
   // Search cache settings
   SEARCH: {
-    TTL: 30 * 24 * 60 * 60 * 1000,        // 30 days
+    TTL: 30 * 24 * 60 * 60 * 1000, // 30 days
     MAX_ITEMS: 100,
-    MAX_SIZE_BYTES: 4 * 1024 * 1024,      // 4MB
-    STORAGE_KEY: 'chordium-search-cache'
+    MAX_SIZE_BYTES: 4 * 1024 * 1024, // 4MB
+    STORAGE_KEY: "chordium-search-cache",
   },
-  
-  // Artist cache settings  
+
+  // Artist cache settings
   ARTIST: {
-    TTL: 4 * 60 * 60 * 1000,              // 4 hours
+    TTL: 4 * 60 * 60 * 1000, // 4 hours
     MAX_ITEMS: 20,
-    STORAGE_KEY: 'chordium-artist-songs-cache'
+    STORAGE_KEY: "chordium-artist-songs-cache",
   },
-  
+
   // Chord sheet cache settings
   CHORD_SHEET: {
-    TTL: 72 * 60 * 60 * 1000,             // 72 hours
+    TTL: 72 * 60 * 60 * 1000, // 72 hours
     MAX_ITEMS: 50,
-    STORAGE_KEY: 'chordium-chord-sheet-cache'
-  }
+    STORAGE_KEY: "chordium-chord-sheet-cache",
+  },
 };
 ```
 
@@ -325,12 +328,20 @@ export abstract class BaseCache<T extends BaseCacheItem> {
   // Core cache operations
   protected abstract validateCacheItem(item: unknown): item is T;
   protected abstract createCacheItem(data: any): T;
-  
+
   // Common functionality
-  protected loadCache(): T[] { /* localStorage implementation */ }
-  protected saveCache(items: T[]): void { /* localStorage implementation */ }
-  protected isExpired(item: T): boolean { /* TTL checking */ }
-  protected evictLRU(items: T[]): T[] { /* LRU eviction */ }
+  protected loadCache(): T[] {
+    /* localStorage implementation */
+  }
+  protected saveCache(items: T[]): void {
+    /* localStorage implementation */
+  }
+  protected isExpired(item: T): boolean {
+    /* TTL checking */
+  }
+  protected evictLRU(items: T[]): T[] {
+    /* LRU eviction */
+  }
 }
 ```
 
@@ -341,23 +352,25 @@ export abstract class BaseCache<T extends BaseCacheItem> {
 **Purpose**: Caches search query results to eliminate redundant API calls for identical searches.
 
 **Configuration**:
+
 - **TTL**: 30 days (long-term caching for user search patterns)
 - **Capacity**: 100 search result sets
 - **Size Limit**: 4MB total storage
 - **Eviction**: LRU (Least Recently Used)
 
 **Key Features**:
+
 ```typescript
 // Cache search results with normalized keys (async)
 export const cacheSearchResults = async (
-  artist: string | null, 
-  song: string | null, 
+  artist: string | null,
+  song: string | null,
   results: Song[]
 ): Promise<void>
 
 // Retrieve cached results with automatic expiration (async)
 export const getCachedSearchResults = async (
-  artist: string | null, 
+  artist: string | null,
   song: string | null
 ): Promise<Song[] | null>
 
@@ -366,6 +379,7 @@ export const clearSearchCache = async (): Promise<void>
 ```
 
 **Storage Strategy**:
+
 - **IndexedDB**: Persistent, asynchronous storage with schema validation
 - **Type-Safe**: Full TypeScript coverage with strict data validation
 - **Repository Pattern**: Clean separation between cache logic and data access
@@ -375,17 +389,19 @@ export const clearSearchCache = async (): Promise<void>
 **Purpose**: Caches artist-specific song collections to improve navigation within artist pages.
 
 **Configuration**:
+
 - **TTL**: 4 hours (moderate caching for dynamic content)
 - **Capacity**: 20 artist song collections
 - **Eviction**: LRU
 - **Storage**: IndexedDB with structured schema
 
 **Key Features**:
+
 ```typescript
 // Cache artist songs with metadata (async)
 export const cacheArtistSongs = async (
-  artistPath: string, 
-  songs: Song[], 
+  artistPath: string,
+  songs: Song[],
   artistName?: string
 ): Promise<void>
 
@@ -399,6 +415,7 @@ export const clearExpiredArtistCache = async (): Promise<number>
 ```
 
 **Use Cases**:
+
 - Artist page navigation
 - Related song browsing
 - Reduced API load for popular artists
@@ -408,23 +425,25 @@ export const clearExpiredArtistCache = async (): Promise<number>
 **Purpose**: Caches processed chord sheet data to avoid re-parsing complex musical notation.
 
 **Configuration**:
+
 - **TTL**: 72 hours (extended caching for processed content)
 - **Capacity**: 50 chord sheets
 - **Eviction**: LRU
 - **Storage**: IndexedDB with comprehensive schema
 
 **Key Features**:
+
 ```typescript
 // Cache processed chord sheet data (async)
 export const cacheChordSheet = async (
-  artist: string, 
-  title: string, 
+  artist: string,
+  title: string,
   chordSheet: ChordSheet
 ): Promise<void>
 
 // Retrieve cached chord sheet (async)
-export const getCachedChordSheet = async (
-  artist: string, 
+export const getCachedChordSheetByPath = async (
+  artist: string,
   title: string
 ): Promise<ChordSheet | null>
 
@@ -434,16 +453,17 @@ export const isChordSheetSaved = async (artist: string, title: string): Promise<
 ```
 
 **Data Structure**:
+
 ```typescript
 interface ChordSheet {
-  content: string;         // Processed chord notation
-  capo: string;           // Capo information
-  tuning: string;         // Tuning details
-  key: string;            // Musical key
-  artist: string;         // Artist name
-  title: string;          // Song title
-  isSaved?: boolean;      // User save status
-  timestamp?: number;     // Cache timestamp
+  content: string; // Processed chord notation
+  capo: string; // Capo information
+  tuning: string; // Tuning details
+  key: string; // Musical key
+  artist: string; // Artist name
+  title: string; // Song title
+  isSaved?: boolean; // User save status
+  timestamp?: number; // Cache timestamp
 }
 ```
 
@@ -456,17 +476,17 @@ Provides comprehensive cache inspection and management tools:
 ```typescript
 // Global cache inspection
 export const debugCache = (): void => {
-  console.log('Search Cache:', inspectSearchCache());
-  console.log('Artist Cache:', inspectArtistCache()); 
-  console.log('Chord Sheet Cache:', inspectChordSheetCache());
-}
+  console.log("Search Cache:", inspectSearchCache());
+  console.log("Artist Cache:", inspectArtistCache());
+  console.log("Chord Sheet Cache:", inspectChordSheetCache());
+};
 
 // Clear all caches at once
 export const clearAllCaches = (): void => {
   clearSearchCache();
   clearArtistSongsCache();
   clearChordSheetCache();
-}
+};
 
 // Global window access for debugging
 window.debugCache = debugCache;
@@ -479,31 +499,31 @@ Provides centralized access to all cache functionality:
 
 ```typescript
 // Export search cache functions
-export { 
-  cacheSearchResults, 
+export {
+  cacheSearchResults,
   getCachedSearchResults,
-  clearSearchCache
-} from './implementations/search-cache';
+  clearSearchCache,
+} from "./implementations/search-cache";
 
 // Export artist cache functions
-export { 
-  cacheArtistSongs, 
+export {
+  cacheArtistSongs,
   getCachedArtistSongs,
-  clearArtistSongsCache
-} from './implementations/artist-cache';
+  clearArtistSongsCache,
+} from "./implementations/artist-cache";
 
 // Export chord sheet cache functions
-export { 
-  getCachedChordSheet, 
+export {
+  getCachedChordSheetByPath,
   cacheChordSheet,
   clearChordSheetCache,
-  isChordSheetSaved
-} from './implementations/unified-chord-sheet';
+  isChordSheetSaved,
+} from "./implementations/unified-chord-sheet";
 
 // Export utilities and types
-export * from './types';
-export * from './config';
-export { debugCache, clearAllCaches } from './utils/cache-debug';
+export * from "./types";
+export * from "./config";
+export { debugCache, clearAllCaches } from "./utils/cache-debug";
 ```
 
 ## Integration Points
@@ -513,13 +533,14 @@ export { debugCache, clearAllCaches } from './utils/cache-debug';
 The cache system integrates seamlessly with React hooks for data fetching:
 
 **Search Integration** (`src/hooks/useSearchResults.ts`):
+
 ```typescript
-import { cacheSearchResults, getCachedSearchResults } from '@/cache';
+import { cacheSearchResults, getCachedSearchResults } from "@/cache";
 
 export function useSearchResults(artist: string, song: string) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       // Check IndexedDB cache first (async)
@@ -529,62 +550,64 @@ export function useSearchResults(artist: string, song: string) {
         setLoading(false);
         return;
       }
-      
+
       // Fetch and cache new results (async)
       const results = await fetchSearchResults(artist, song);
       await cacheSearchResults(artist, song, results);
       setData(results);
       setLoading(false);
     };
-    
+
     fetchData();
   }, [artist, song]);
-  
+
   return { data, loading };
 }
 ```
 
 **Chord Sheet Integration** (`src/hooks/useChordSheet.ts`):
+
 ```typescript
-import { getCachedChordSheet, cacheChordSheet } from '@/cache';
+import { getCachedChordSheetByPath, cacheChordSheet } from "@/cache";
 
 export function useChordSheet(artist: string, song: string) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       // Check IndexedDB cache first (async)
-      const cachedData = await getCachedChordSheet(artist, song);
+      const cachedData = await getCachedChordSheetByPath(artist, song);
       if (cachedData) {
         setData(cachedData);
         setLoading(false);
         return;
       }
-      
+
       // Fetch and cache new data (async)
       const freshData = await fetchChordSheet(artist, song);
       await cacheChordSheet(artist, song, freshData);
       setData(freshData);
       setLoading(false);
     };
-    
+
     fetchData();
   }, [artist, song]);
-  
+
   return { data, loading };
 }
 ```
 
 **Artist Utils Integration** (`src/utils/artist-utils.ts`):
+
 ```typescript
-import { cacheArtistSongs, getCachedArtistSongs } from '@/cache';
+import { cacheArtistSongs, getCachedArtistSongs } from "@/cache";
 
 export async function getArtistSongs(artistPath: string): Promise<Song[]> {
   // Check IndexedDB cache first (async)
   const cached = await getCachedArtistSongs(artistPath);
   if (cached) return cached;
-  
+
   // Fetch and cache (async)
   const songs = await fetchArtistSongs(artistPath);
   await cacheArtistSongs(artistPath, songs);
@@ -604,7 +627,7 @@ abstract class BaseCacheRepository<T> {
   protected abstract dbName: string;
   protected abstract storeName: string;
   protected abstract schema: IDBObjectStoreParameters;
-  
+
   // Async CRUD operations
   abstract save(item: T): Promise<void>;
   abstract get(key: string): Promise<T | null>;
@@ -615,8 +638,8 @@ abstract class BaseCacheRepository<T> {
 
 // Specialized repositories for each cache type
 class SearchCacheRepository extends BaseCacheRepository<SearchCacheRecord> {
-  protected dbName = 'chordium-search-cache';
-  protected storeName = 'search-results';
+  protected dbName = "chordium-search-cache";
+  protected storeName = "search-results";
   // ... async implementation
 }
 ```
@@ -628,26 +651,26 @@ Each cache type has a defined IndexedDB schema for data validation:
 ```typescript
 // Search cache schema
 interface SearchCacheRecord {
-  id: string;              // Cache key
-  artist: string | null;   // Search artist
-  song: string | null;     // Search song
-  results: Song[];         // Cached results
-  timestamp: number;       // Cache timestamp
-  accessCount: number;     // Usage tracking
+  id: string; // Cache key
+  artist: string | null; // Search artist
+  song: string | null; // Search song
+  results: Song[]; // Cached results
+  timestamp: number; // Cache timestamp
+  accessCount: number; // Usage tracking
 }
 
 // Chord sheet cache schema
 interface ChordSheetRecord {
-  id: string;              // Cache key
-  artist: string;          // Artist name
-  title: string;           // Song title
-  content: string;         // Chord sheet content
-  capo: string;           // Capo information
-  tuning: string;         // Guitar tuning
-  key: string;            // Musical key
-  isSaved: boolean;       // User save status
-  timestamp: number;      // Cache timestamp
-  accessCount: number;    // Usage tracking
+  id: string; // Cache key
+  artist: string; // Artist name
+  title: string; // Song title
+  content: string; // Chord sheet content
+  capo: string; // Capo information
+  tuning: string; // Guitar tuning
+  key: string; // Musical key
+  isSaved: boolean; // User save status
+  timestamp: number; // Cache timestamp
+  accessCount: number; // Usage tracking
 }
 ```
 
@@ -660,7 +683,7 @@ All caches implement LRU eviction when capacity limits are reached:
 ```typescript
 const evictLRU = (items: CacheItem[], maxItems: number): CacheItem[] => {
   if (items.length <= maxItems) return items;
-  
+
   // Sort by access pattern (access count + recency)
   return items
     .sort((a, b) => {
@@ -669,7 +692,7 @@ const evictLRU = (items: CacheItem[], maxItems: number): CacheItem[] => {
       return scoreB - scoreA; // Descending order
     })
     .slice(0, maxItems);
-}
+};
 ```
 
 ### Time-Based Expiration
@@ -679,11 +702,11 @@ Automatic cleanup of expired entries:
 ```typescript
 const isExpired = (item: CacheItem, ttl: number): boolean => {
   return Date.now() - item.timestamp > ttl;
-}
+};
 
 const clearExpired = (items: CacheItem[], ttl: number): CacheItem[] => {
-  return items.filter(item => !isExpired(item, ttl));
-}
+  return items.filter((item) => !isExpired(item, ttl));
+};
 ```
 
 ### Size-Based Limits
@@ -694,7 +717,7 @@ Storage size monitoring and cleanup (Search Cache):
 const enforceSize = (items: CacheItem[], maxSizeBytes: number): CacheItem[] => {
   let totalSize = 0;
   const validItems: CacheItem[] = [];
-  
+
   // Sort by priority and add items until size limit
   for (const item of items.sort(byPriority)) {
     const itemSize = JSON.stringify(item).length;
@@ -703,9 +726,9 @@ const enforceSize = (items: CacheItem[], maxSizeBytes: number): CacheItem[] => {
       totalSize += itemSize;
     }
   }
-  
+
   return validItems;
-}
+};
 ```
 
 ## Performance Features
@@ -717,21 +740,21 @@ Stale-while-revalidate pattern for improved user experience:
 ```typescript
 const getWithRefresh = async (key: string): Promise<CacheItem | null> => {
   const cached = getCacheItem(key);
-  
+
   if (cached && !isExpired(cached)) {
     // Fresh data - return immediately
     return cached;
   }
-  
+
   if (cached && isNearExpiration(cached)) {
     // Serve stale data while refreshing in background
     scheduleBackgroundRefresh(key);
     return cached;
   }
-  
+
   // No valid cache - fetch fresh data
   return null;
-}
+};
 ```
 
 ### Preemptive Caching
@@ -741,14 +764,14 @@ Strategic cache warming for improved performance:
 ```typescript
 // Cache popular searches proactively
 const warmPopularSearches = async (): Promise<void> => {
-  const popular = ['john mayer', 'ed sheeran', 'taylor swift'];
+  const popular = ["john mayer", "ed sheeran", "taylor swift"];
   for (const query of popular) {
     if (!getCachedSearchResults(query, null)) {
       const results = await fetchSearchResults(query, null);
       cacheSearchResults(query, null, results);
     }
   }
-}
+};
 ```
 
 ## Testing Strategy
@@ -775,14 +798,16 @@ Real-time statistics for performance monitoring:
 ```typescript
 interface CacheStats {
   hitRate: number;
-  missRate: number; 
+  missRate: number;
   totalItems: number;
   totalSize: number;
   evictionCount: number;
 }
 
 // Available via debug utilities
-const getSearchCacheStats = (): CacheStats => { /* implementation */ }
+const getSearchCacheStats = (): CacheStats => {
+  /* implementation */
+};
 ```
 
 ### Debug Commands
@@ -791,8 +816,8 @@ Browser console access for development:
 
 ```javascript
 // Global debug functions
-debugCache();           // Inspect all caches
-clearAllCaches();       // Clear all cached data
+debugCache(); // Inspect all caches
+clearAllCaches(); // Clear all cached data
 ```
 
 ## Backend Integration
@@ -814,14 +839,14 @@ This design ensures data freshness while allowing frontend caches to optimize us
 Cache behavior adapts to different environments:
 
 ```typescript
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isTest = process.env.NODE_ENV === 'test';
+const isDevelopment = process.env.NODE_ENV === "development";
+const isTest = process.env.NODE_ENV === "test";
 
 // Shorter TTLs in development for easier testing
 const TTL = isDevelopment ? 5 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
 
 // Disable logging in test environment to prevent memory leaks
-const shouldLog = !isTest && typeof process !== 'undefined';
+const shouldLog = !isTest && typeof process !== "undefined";
 ```
 
 ## Best Practices
@@ -832,12 +857,12 @@ Consistent, normalized cache keys across all implementations:
 
 ```typescript
 const normalizeKey = (value: string | null): string => {
-  return (value || '').toLowerCase().trim();
-}
+  return (value || "").toLowerCase().trim();
+};
 
 const createCacheKey = (artist: string | null, song: string | null): string => {
   return `${normalizeKey(artist)}|${normalizeKey(song)}`;
-}
+};
 ```
 
 ### Error Handling
@@ -849,10 +874,10 @@ const safeCache = async (operation: () => Promise<any>) => {
   try {
     return await operation();
   } catch (error) {
-    console.warn('Cache operation failed, continuing without cache:', error);
+    console.warn("Cache operation failed, continuing without cache:", error);
     return null;
   }
-}
+};
 ```
 
 ### Memory Management
@@ -864,7 +889,7 @@ Automatic cleanup to prevent memory leaks:
 const getWithCleanup = (key: string): CacheItem | null => {
   clearExpiredEntries();
   return getCacheItem(key);
-}
+};
 
 // Periodic cleanup in background
 setInterval(clearExpiredEntries, 60 * 60 * 1000); // Every hour
@@ -875,37 +900,37 @@ setInterval(clearExpiredEntries, 60 * 60 * 1000); // Every hour
 ### Basic Cache Operations
 
 ```typescript
-import { 
-  cacheSearchResults, 
+import {
+  cacheSearchResults,
   getCachedSearchResults,
   cacheArtistSongs,
   getCachedArtistSongs,
   cacheChordSheet,
-  getCachedChordSheet
-} from '@/cache';
+  getCachedChordSheetByPath,
+} from "@/cache";
 
 // Search caching (async/await)
-const searchResults = await fetchSearchResults('john mayer', 'gravity');
-await cacheSearchResults('john mayer', 'gravity', searchResults);
+const searchResults = await fetchSearchResults("john mayer", "gravity");
+await cacheSearchResults("john mayer", "gravity", searchResults);
 
-const cached = await getCachedSearchResults('john mayer', 'gravity');
+const cached = await getCachedSearchResults("john mayer", "gravity");
 if (cached) {
-  console.log('Cache hit:', cached);
+  console.log("Cache hit:", cached);
 }
 
 // Artist caching (async/await)
-const artistSongs = await fetchArtistSongs('/john-mayer/');
-await cacheArtistSongs('/john-mayer/', artistSongs, 'John Mayer');
+const artistSongs = await fetchArtistSongs("/john-mayer/");
+await cacheArtistSongs("/john-mayer/", artistSongs, "John Mayer");
 
 // Chord sheet caching (async/await)
-const chordData = await fetchChordSheet('john mayer', 'gravity');
-await cacheChordSheet('john mayer', 'gravity', chordData);
+const chordData = await fetchChordSheet("john mayer", "gravity");
+await cacheChordSheet("john mayer", "gravity", chordData);
 ```
 
 ### Debug and Monitoring
 
 ```typescript
-import { debugCache, clearAllCaches } from '@/cache';
+import { debugCache, clearAllCaches } from "@/cache";
 
 // Inspect cache state
 debugCache();
@@ -931,6 +956,7 @@ Chordium's cache architecture provides a robust, scalable foundation for fronten
 ### Key Technical Achievement
 
 The **number-based saved field system (0/1)** represents a breakthrough solution that provides:
+
 - ✅ **IndexedDB Index Compatibility**: Perfect integration with database indexes for fast filtering
 - ✅ **Application Simplicity**: Boolean semantics preserved in application layer with automatic conversion
 - ✅ **Optimal Performance**: Sub-millisecond query times for "My Chord Sheets" functionality

@@ -75,4 +75,5 @@ export interface UnifiedCacheStats {
 export interface CacheChordSheetOptions {
   saved?: boolean;              // Whether to mark as saved (default: false)
   accessCount?: number;         // Initial access count (default: 1)
+  dataSource?: 'scraping' | 's3' | 'sample' | 'local';  // Where the data came from
 }

@@ -8,7 +8,6 @@ import { DataHandlers } from "./useChordSheet/data-handlers";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet";
 import { ChordSheet } from "@/types/chordSheet";
 import { ChordSheetWithUIState, createDefaultChordSheetWithUIState } from "@/types/chordSheetWithUIState";
-import { parseStorageKey } from './useChordSheet/utils/parse-storage-key';
 
 const initialState: ChordSheetWithUIState = createDefaultChordSheetWithUIState();
 
@@ -94,32 +93,47 @@ export function useChordSheet(originalPath?: string) {
     };
 
     const fetchChordSheetData = async (fetchPath: string, storageKey: string, isReconstructed: boolean) => {
-      // Parse storage key to get artist and title for cache lookup
-      const { artist, title } = parseStorageKey(storageKey);
+      // Use path-based cache lookup with ChordSheetRepository
+      const repository = new (await import("@/cache/storage/indexeddb/repositories/chord-sheet-repository")).ChordSheetRepository();
       
-      // First try to get from cache
-      let chordSheet = await unifiedChordSheetCache.getCachedChordSheet(artist, title);
+      let chordSheet: ChordSheet | null = null;
       
-      if (!chordSheet) {
-        // Not in cache, fetch from backend
-        try {
-          const backendUrl = `http://localhost:3001/api/cifraclub-chord-sheet?path=${encodeURIComponent(fetchPath)}`;
-          const response = await fetch(backendUrl);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+      try {
+        await repository.initialize();
+        
+        // First try to get from cache using the path as key
+        const cachedData = await repository.getByPath(storageKey);
+        
+        if (cachedData) {
+          chordSheet = cachedData.chordSheet;
+        } else {
+          // Not in cache, fetch from backend
+          try {
+            const backendUrl = `http://localhost:3001/api/cifraclub-chord-sheet?path=${encodeURIComponent(fetchPath)}`;
+            const response = await fetch(backendUrl);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const fetchedChordSheet = await response.json();
+            
+            // Cache the fetched chord sheet using path-based storage
+            if (fetchedChordSheet) {
+              // Store in cache (not saved to "My Chord Sheets" yet)
+              await repository.storeByPath(storageKey, fetchedChordSheet, { saved: false });
+              chordSheet = fetchedChordSheet;
+            }
+          } catch (error) {
+            console.error('Failed to fetch chord sheet:', error);
+            throw error;
           }
-          
-          chordSheet = await response.json();
-          
-          // Cache the fetched chord sheet
-          if (chordSheet && artist && title) {
-            await unifiedChordSheetCache.cacheChordSheet(artist, title, chordSheet);
-          }
-        } catch (error) {
-          console.error('Failed to fetch chord sheet:', error);
-          throw error;
         }
+        
+        await repository.close();
+      } catch (error) {
+        await repository.close();
+        throw error;
       }
 
       if (!chordSheet?.songChords) {
@@ -130,8 +144,11 @@ export function useChordSheet(originalPath?: string) {
     };
 
     const handleFreshData = (chordSheet: ChordSheet, fetchPath: string) => {
-      // Update URL if needed using navigation utils (only if artist/title exist)
-      if (chordSheet.artist && chordSheet.title) {
+      // Only update URL if we don't have an original path from navigation state
+      // This prevents overwriting search result URLs with reconstructed paths
+      const hasOriginalPath = !!originalPath;
+      
+      if (chordSheet.artist && chordSheet.title && !hasOriginalPath) {
         navigationUtils.performUrlUpdate(
           { artist: chordSheet.artist, song: chordSheet.title },
           params,

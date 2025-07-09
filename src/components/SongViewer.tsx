@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useState, useEffect } from "react";
-import { Song } from "../types/song";
+import { ChordSheet } from "../types/chordSheet";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet";
 
 interface SongViewerProps {
-  song: Song;
+  chordSheet: ChordSheet;
   chordContent?: string; // Direct chord content (for search results)
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
@@ -63,7 +63,7 @@ const SongViewer = ({
 
       try {
         // Try to get from IndexedDB cache using artist and title
-        const cachedChordSheet = await unifiedChordSheetCache.getCachedChordSheet(song.artist, song.title);
+        const cachedChordSheet = await unifiedChordSheetCache.getCachedChordSheetByPath(song.artist, song.title);
         setChordContent(cachedChordSheet?.songChords ?? '');
       } catch (error) {
         console.error('Failed to load chord sheet from IndexedDB cache:', error);

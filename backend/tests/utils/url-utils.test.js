@@ -3,43 +3,6 @@ import { isValidResult, extractArtistSlug, extractPathFromUrl, extractFullPathFr
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 
 describe('URL Utils', () => {
-  describe('isValidResult - Legacy URL-based tests (deprecated)', () => {
-    it('should return true for valid artist URL', () => {
-      const result = { path: 'oasis' };
-      expect(isValidResult(result, SEARCH_TYPES.ARTIST)).toBe(true);
-    });
-
-    it('should return true for valid song URL', () => {
-      const result = { path: 'oasis/wonderwall' };
-      expect(isValidResult(result, SEARCH_TYPES.SONG)).toBe(true);
-    });
-
-    it('should return false for HTML URLs', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/wonderwall.html' };
-      expect(isValidResult(result, SEARCH_TYPES.SONG)).toBe(false);
-    });
-
-    it('should return false for invalid URL format', () => {
-      const result = { url: 'not-a-valid-url' };
-      expect(isValidResult(result, SEARCH_TYPES.ARTIST)).toBe(false);
-    });
-
-    it('should return false for too many path segments in artist search', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/wonderwall/tabs/' };
-      expect(isValidResult(result, SEARCH_TYPES.ARTIST)).toBe(false);
-    });
-
-    it('should return false for too few path segments in song search', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/' };
-      expect(isValidResult(result, SEARCH_TYPES.SONG)).toBe(false);
-    });
-
-    it('should return false for unknown search type', () => {
-      const result = { url: 'https://www.cifraclub.com.br/oasis/' };
-      expect(isValidResult(result, 'UNKNOWN')).toBe(false);
-    });
-  });
-
   describe('extractArtistSlug', () => {
     it('should extract artist slug from valid URL', () => {
       const url = 'https://www.cifraclub.com.br/oasis/';

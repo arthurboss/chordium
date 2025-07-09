@@ -1,6 +1,6 @@
  import { Song } from "@/types/song";
 import { Artist } from "@/types/artist";
-import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
+import { SearchCacheRepository } from '@/cache/storage/indexeddb/repositories/search-cache-repository';
 
 // Import modular functions
 import { initializeSearchCacheRepository } from './utilities/initialize-repository';
@@ -14,10 +14,6 @@ import { clearExpiredSearchEntries } from './operations/clear-expired-entries';
 // Union type for search results  
 export type SearchResultData = Song[] | Artist[];
 
-/**
- * IndexedDB-based search cache with modular architecture
- * Each method delegates to a specific single-purpose function
- */
 export class SearchCacheIndexedDB {
   private readonly repository: SearchCacheRepository;
   private initialized = false;

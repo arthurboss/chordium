@@ -1,4 +1,4 @@
-import { IndexedDBCacheCoordinator } from '@/storage/coordinators/indexed-db-cache-coordinator';
+import { IndexedDBCacheCoordinator } from '@/cache/coordinators/indexed-db-cache-coordinator';
 
 /**
  * IndexedDB-based cache cleanup coordinator

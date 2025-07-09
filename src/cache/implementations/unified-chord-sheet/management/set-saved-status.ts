@@ -1,4 +1,4 @@
-import { ChordSheetRepository } from '@/storage/repositories/chord-sheet-repository';
+import { ChordSheetRepository } from '@/cache/storage/indexeddb/repositories/chord-sheet-repository';
 
 /**
  * Sets the saved status of a chord sheet in the cache

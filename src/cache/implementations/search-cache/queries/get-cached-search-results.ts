@@ -1,6 +1,6 @@
 import { Song } from "@/types/song";
 import { Artist } from "@/types/artist";
-import { SearchCacheRepository } from '@/storage/repositories/search-cache-repository';
+import { SearchCacheRepository } from '@/cache/storage/indexeddb/repositories/search-cache-repository';
 import { debugError } from '../utilities/debug-logger';
 
 // Union type for search results

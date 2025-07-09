@@ -1,7 +1,8 @@
 import { ChordSheetWithUIState } from '@/types/chordSheetWithUIState';
-import { findLocalSong } from './local-chord-sheet-finder';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet';
 import { buildChordSheetData } from './chord-data-builder';
 import { isMyChordSheetsRoute } from './route-context-detector';
+import { toSlug } from './url-slug-utils';
 
 /**
  * Strategy class for loading chord sheets with proper hierarchy:
@@ -33,7 +34,8 @@ export class ChordSheetLoadingStrategy {
   async loadLocal(artist: string, song: string): Promise<ChordSheetWithUIState | null> {
     try {
       console.log('Loading from My Chord Sheets locally...');
-      const localSong = await findLocalSong(artist, song);
+      const path = `${toSlug(artist)}/${toSlug(song)}`;
+      const localSong = await unifiedChordSheetCache.getCachedChordSheetByPath(path);
       
       if (localSong) {
         console.log('Found song in local storage:', localSong.title);

@@ -11,7 +11,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useSearchResults } from '../useSearchResults';
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet';
 import { ChordSheet } from '@/types/chordSheet';
 
 // Mock the search cache to avoid conflicts
@@ -48,8 +48,8 @@ describe('useSearchResults - Search Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    unifiedChordSheetCache.cacheChordSheet('Oasis', 'Wonderwall', testChordSheet);
-    unifiedChordSheetCache.setSavedStatus('Oasis', 'Wonderwall', true);
+    unifiedChordSheetCache.cacheChordSheetByPath('/oasis/wonderwall/', testChordSheet);
+    unifiedChordSheetCache.setSavedStatusByPath('/oasis/wonderwall/', true);
 
     // Mock API response for search
     const apiResults = [
@@ -111,10 +111,10 @@ describe('useSearchResults - Search Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    unifiedChordSheetCache.cacheChordSheet('Oasis', 'Wonderwall', testChordSheet1);
-    unifiedChordSheetCache.setSavedStatus('Oasis', 'Wonderwall', true);
-    unifiedChordSheetCache.cacheChordSheet('Oasis', 'Champagne Supernova', testChordSheet2);
-    unifiedChordSheetCache.setSavedStatus('Oasis', 'Champagne Supernova', true);
+    unifiedChordSheetCache.cacheChordSheetByPath('/oasis/wonderwall/', testChordSheet1);
+    unifiedChordSheetCache.setSavedStatusByPath('/oasis/wonderwall/', true);
+    unifiedChordSheetCache.cacheChordSheetByPath('/oasis/champagne-supernova/', testChordSheet2);
+    unifiedChordSheetCache.setSavedStatusByPath('/oasis/champagne-supernova/', true);
 
     // Mock API response for artist search
     const apiResults = [
@@ -156,8 +156,8 @@ describe('useSearchResults - Search Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    unifiedChordSheetCache.cacheChordSheet('Radiohead', 'Creep', testChordSheet);
-    unifiedChordSheetCache.setSavedStatus('Radiohead', 'Creep', true);
+    unifiedChordSheetCache.cacheChordSheetByPath('/radiohead/creep/', testChordSheet);
+    unifiedChordSheetCache.setSavedStatusByPath('/radiohead/creep/', true);
 
     // Mock API response
     const apiResponse = [
@@ -211,8 +211,8 @@ describe('useSearchResults - Search Behavior', () => {
       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E']
     };
     
-    unifiedChordSheetCache.cacheChordSheet('Oasis', 'Wonderwall', localChordSheet);
-    unifiedChordSheetCache.setSavedStatus('Oasis', 'Wonderwall', true);
+    unifiedChordSheetCache.cacheChordSheetByPath('/oasis/wonderwall/', localChordSheet);
+    unifiedChordSheetCache.setSavedStatusByPath('/oasis/wonderwall/', true);
 
     // Mock API response
     const apiResponse = [

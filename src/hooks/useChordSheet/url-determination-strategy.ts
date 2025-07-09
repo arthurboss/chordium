@@ -1,5 +1,3 @@
-import { generateUnifiedCacheKey } from "../../storage/utils/unified-cache-key-generator";
-import { getChordUrl } from "../../utils/session-storage-utils";
 import { toSlug } from "../../utils/url-slug-utils";
 
 // Environment-based logging utility to prevent infinite loops in tests
@@ -46,17 +44,10 @@ export class URLDeterminationStrategy {
       return { fetchPath: null, storageKey: null, isReconstructed: false };
     }
 
-    // Create consistent storage key from formatted artist/song (always slugified)
-    // Convert URL parameters back to proper names first
-    const artistName = artist.replace(/-/g, ' ');
-    const songName = song.replace(/-/g, ' ');
-    const storageKey = generateUnifiedCacheKey(artistName, songName);
-
-    // Priority 1: Use original path for fetching if available
+    // Priority 1: Use original path for both fetching and storage key if available
     if (originalPath) {
-      debugLog("Using original path for fetch:", originalPath);
-      debugLog("Using formatted key for storage:", storageKey);
-      return { fetchPath: originalPath, storageKey, isReconstructed: false };
+      debugLog("Using original path for both fetch and storage:", originalPath);
+      return { fetchPath: originalPath, storageKey: originalPath, isReconstructed: false };
     }
 
     // Priority 2: Reconstruct path from params (fallback)
@@ -65,6 +56,7 @@ export class URLDeterminationStrategy {
     const reconstructedPath = `${artistSlug}/${songSlug}`;
     debugLog("Reconstructed path from params:", reconstructedPath);
     
-    return { fetchPath: reconstructedPath, storageKey, isReconstructed: true };
+    // For reconstructed paths, also use the path as storage key (consistent with Song.path)
+    return { fetchPath: reconstructedPath, storageKey: reconstructedPath, isReconstructed: true };
   }
 }

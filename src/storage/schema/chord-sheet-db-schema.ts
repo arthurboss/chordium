@@ -28,11 +28,11 @@ export interface ChordSheetDBSchema {
 
 export const CHORD_SHEET_DB_SCHEMA: ChordSheetDBSchema = {
   name: 'Chordium',
-  version: 9, // Test number saved field (0/1)
+  version: 10, // Updated to use 'path' as primary key instead of 'id'
   stores: {
     chordSheets: {
       name: 'chordSheets',
-      keyPath: 'id',
+      keyPath: 'path',
       indexes: [
         { name: 'artist', keyPath: 'artist', unique: false },
         { name: 'title', keyPath: 'title', unique: false },

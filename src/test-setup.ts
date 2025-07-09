@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
+import 'fake-indexeddb/auto';
 
 // Simple global setup - individual tests will handle their own mocking
 // to prevent cross-test contamination
@@ -20,4 +21,4 @@ Object.defineProperty(globalThis, 'localStorage', {
 // Basic fetch mock
 global.fetch = vi.fn();
 
-// Note: IndexedDB tests use in-memory storage instead of mocking IndexedDB
+// IndexedDB is now provided by fake-indexeddb/auto

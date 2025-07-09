@@ -1,25 +1,21 @@
 import { ChordSheet } from '../types/chordSheet';
-import { generateCacheKey } from '../cache/implementations/unified-chord-sheet/utilities/generate-cache-key';
 
 /**
  * Sample Song Loader Service
- * SRP: Single responsibility for loading sample songs from local JSON files
- * DRY: Centralized logic for sample song loading without duplicating cache logic
  */
 
 /**
- * Load a specific sample chord sheet from local JSON files
- * @param artist - Artist name (normalized format, e.g., 'oasis')
- * @param title - Song title (normalized format, e.g., 'wonderwall')
+ * Load a specific sample chord sheet from local JSON files by path
+ * @param path - Song path (e.g., 'oasis/wonderwall')
  * @returns ChordSheet object or null if not found
  */
-export async function loadSampleChordSheet(artist: string, title: string): Promise<ChordSheet | null> {
+export async function loadSampleChordSheetByPath(path: string): Promise<ChordSheet | null> {
   try {
-    // Generate the filename using the same logic as our normalized files
-    const filename = generateCacheKey(artist, title);
+    // Convert path format to filename format for JSON files
+    const filename = path.replace('/', '-');
     const filePath = `/data/songs/${filename}.json`;
     
-    console.log(`🎵 Loading sample song: ${filePath}`);
+    console.log(`🎵 Loading sample song by path: ${filePath}`);
     
     const response = await fetch(filePath);
     
@@ -33,19 +29,18 @@ export async function loadSampleChordSheet(artist: string, title: string): Promi
     
     return chordSheet;
   } catch (error) {
-    console.error(`❌ Failed to load sample song for ${artist}-${title}:`, error);
+    console.error(`❌ Failed to load sample song for path ${path}:`, error);
     return null;
   }
 }
 
+
 /**
- * Check if a song is a known sample song
- * @param artist - Artist name
- * @param title - Song title
+ * Check if a song is a known sample song by path
+ * @param path - Song path
  * @returns boolean indicating if this is a sample song
  */
-export function isSampleSong(artist: string, title: string): boolean {
-  const normalizedKey = generateCacheKey(artist, title);
-  const knownSampleSongs = ['oasis-wonderwall', 'eagles-hotel_california'];
-  return knownSampleSongs.includes(normalizedKey);
+export function isSampleSongByPath(path: string): boolean {
+  const knownSampleSongs = ['oasis/wonderwall', 'eagles/hotel-california'];
+  return knownSampleSongs.includes(path);
 }
