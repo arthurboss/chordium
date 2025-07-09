@@ -3,7 +3,6 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useChordSheet } from './useChordSheet';
 import { ChordSheetLoadingStrategy } from '../utils/chord-sheet-loading-strategy';
 import { validateURL } from '../utils/url-validator';
-import eaglesHotelCaliforniaFixture from '../../public/data/songs/eagles-hotel_california.json';
 
 // Mock all dependencies first - with factory functions to avoid hoisting issues
 vi.mock('../utils/chord-sheet-loading-strategy');
@@ -76,6 +75,16 @@ vi.mock('../utils/navigation-utils', () => ({
 vi.mock('../utils/fetch-error-handler', () => ({
   FetchErrorHandler: vi.fn(() => mockErrorHandler)
 }));
+
+// Test fixture data
+const eaglesHotelCaliforniaFixture = {
+  title: 'Hotel California',
+  artist: 'Eagles',
+  songChords: '[Intro]\nBm  F#  A  E  G  D  Em  F#\n\n[Verse 1]\nBm                        F#\nTest verse line one here\nA                               E\nTest verse line two goes here\nG                         D\nTest verse line three now\nEm                                         F#\nTest verse line four here\n\n[Verse 2]\nBm                            F#\nTest verse two line one here\nA                                           E\nTest verse two line two goes here\nG                              D\nTest verse two line three now\nEm                                       F#\nTest verse two line four here\n\n[Chorus]\nG                         D\nTest chorus line one here\n      F#                         Bm\nTest chorus line two goes here\n              G                   D\nTest chorus line three now here\nG                               D\nTest chorus line four goes here\n    Em                          F#\nTest chorus line five here now\n              Bm      F#  A  E  G  D  Em  F#\nTest final line here',
+  songKey: 'Bm',
+  guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
+  guitarCapo: 0
+};
 
 describe('useChordSheet', () => {
   beforeEach(() => {
