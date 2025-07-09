@@ -236,8 +236,7 @@ class S3StorageService {
         `S3 connection failed for bucket ${this.bucketName}: ${error.message}`
       );
       return false;
-    }
-  }
+    }  }
 }
 
 export const s3StorageService = new S3StorageService();

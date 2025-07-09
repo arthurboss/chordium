@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 interface SongListProps {
   songs: Song[];
   onSongSelect: (song: Song) => void;
-  onDeleteSong: (songId: string) => void;
+  onDeleteSong: (songPath: string) => void;
   onUploadClick: () => void;
 }
 
@@ -16,21 +16,22 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {[...songs].reverse().map((song, index) => (
             <ResultCard
-              key={`${song.id}-${index}`}
+              key={`${song.path}-${index}`}
               icon="music"
               title={song.title}
               subtitle={song.artist}
-              onView={() => onSongSelect(song)}
+              onView={(path) => onSongSelect(song)} // Still call onSongSelect with song object
               onDelete={onDeleteSong}
-              idOrUrl={song.id}
+              path={song.path}
               isDeletable={true}
+              song={song} // Pass song object for enhanced navigation
             />
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">You haven't saved any songs yet.</p>
-          <Button 
+          <Button
             onClick={onUploadClick}
             variant="outline"
             tabIndex={0}

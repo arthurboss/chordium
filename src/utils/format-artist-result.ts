@@ -1,26 +1,29 @@
 import { Artist } from "@/types/artist";
 
 export function formatArtistResult(item: Artist): Artist {
-  let artistName = item.displayName || "Unknown Artist";
+  let displayName = item.displayName || "Unknown Artist";
   
-  // If the URL contains segments that can be used to extract a better artist name
+  // If the path contains segments that can be used to extract a better artist name
   try {
-    const url = new URL(item.url);
-    const path = url.pathname.replace(/^\/|\/$/g, '');
+    // Construct a URL-like string from the path for parsing
+    const urlString = `https://example.com/${item.path}`;
+    const url = new URL(urlString);
+    const path = url.pathname.replace(/(^\/|\/)$/g, '');
     
-    // If it's a direct artist URL without song part
+    // If it's a direct artist path without song part
     if (!path.includes('/')) {
-      artistName = path
+      displayName = path
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
     }
   } catch (e) {
-    console.error("Error parsing URL:", e);
+    console.error("Error parsing path:", e);
   }
 
   return {
-    name: artistName,
-    url: item.url
+    path: item.path,
+    displayName: displayName,
+    songCount: item.songCount
   };
 }

@@ -1,0 +1,52 @@
+[
+    {
+        "title": "Highway to Hell",
+        "path": "highway-to-hell",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Back in Black",
+        "path": "back-in-black",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Thunderstruck",
+        "path": "thunderstruck",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "You Shook Me All Night Long",
+        "path": "you-shook-me-all-night-long",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Hells Bells",
+        "path": "hells-bells",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "T.N.T.",
+        "path": "tnt",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Dirty Deeds Done Dirt Cheap",
+        "path": "dirty-deeds-done-dirt-cheap",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Shoot to Thrill",
+        "path": "shoot-to-thrill",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Rock and Roll Ain't Noise Pollution",
+        "path": "rock-and-roll-aint-noise-pollution",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "For Those About to Rock (We Salute You)",
+        "path": "for-those-about-to-rock-we-salute-you",
+        "artist": "AC/DC"
+    }
+]

@@ -58,25 +58,23 @@ describe('Data Transformation Pipeline Integration', () => {
         return [];
       });
 
-      // Step 1: DOM extraction (includes url field)
+      // Step 1: DOM extraction 
       const rawResults = extractSearchResults();
       
       expect(rawResults).toEqual([
         { 
           title: 'Wonderwall', 
-          url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
           path: 'oasis/wonderwall', 
           artist: 'Oasis' 
         },
         { 
           title: 'Creep', 
-          url: 'https://www.cifraclub.com.br/radiohead/creep/',
           path: 'radiohead/creep', 
           artist: 'Radiohead' 
         }
       ]);
 
-      // Step 2: Result transformation (strips url field)
+      // Step 2: Result transformation
       const finalResults = transformToSongResults(rawResults);
       
       expect(finalResults).toEqual([
@@ -115,7 +113,6 @@ describe('Data Transformation Pipeline Integration', () => {
       expect(rawResults).toEqual([
         { 
           title: 'Some Song', 
-          url: 'https://www.cifraclub.com.br/guns-n-roses/sweet-child-o-mine/',
           path: 'guns-n-roses/sweet-child-o-mine', 
           artist: 'Guns N Roses' 
         }
@@ -127,8 +124,6 @@ describe('Data Transformation Pipeline Integration', () => {
       expect(finalResults).toEqual([
         { title: 'Some Song', path: 'guns-n-roses/sweet-child-o-mine', artist: 'Guns N Roses' }
       ]);
-
-      expect(finalResults[0]).not.toHaveProperty('url');
     });
   });
 
@@ -152,19 +147,17 @@ describe('Data Transformation Pipeline Integration', () => {
         return [];
       }, 'Oasis - Cifra Club');
 
-      // Step 1: DOM extraction for artist songs (now includes url field)
+      // Step 1: DOM extraction for artist songs
       const rawResults = extractArtistSongs();
       
       expect(rawResults).toEqual([
         { 
           title: 'Wonderwall', 
-          url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
           path: 'oasis/wonderwall', 
           artist: 'Oasis' 
         },
         { 
           title: 'Don\'t Look Back in Anger', 
-          url: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/',
           path: 'oasis/dont-look-back-in-anger', 
           artist: 'Oasis' 
         }
@@ -180,7 +173,6 @@ describe('Data Transformation Pipeline Integration', () => {
 
       // Step 3: Verify consistency with unified Song interface
       finalResults.forEach(result => {
-        expect(result).not.toHaveProperty('url');
         expect(typeof result.title).toBe('string');
         expect(typeof result.path).toBe('string');
         expect(typeof result.artist).toBe('string');

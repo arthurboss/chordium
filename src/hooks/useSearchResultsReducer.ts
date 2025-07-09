@@ -38,7 +38,7 @@ export type SearchResultsAction =
   | { type: 'FILTER_ARTIST_SONGS'; filter: string };
 
 // Initial state
-const initialState: SearchResultsState = {
+export const initialState: SearchResultsState = {
   loading: false,
   error: null,
   hasSearched: false,
@@ -52,13 +52,17 @@ const initialState: SearchResultsState = {
 };
 
 // Reducer function
-function searchResultsReducer(state: SearchResultsState, action: SearchResultsAction): SearchResultsState {
+// NOTE: SEARCH_START and SEARCH_SUCCESS actions clear both 'error' and 'artistSongsError'
+// to ensure that error states from previous searches or artist selections don't persist
+// when a new search is initiated or completes successfully.
+export function searchResultsReducer(state: SearchResultsState, action: SearchResultsAction): SearchResultsState {
   switch (action.type) {
     case 'SEARCH_START':
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
+        artistSongsError: null
       };
     
     case 'SEARCH_SUCCESS':
@@ -66,6 +70,7 @@ function searchResultsReducer(state: SearchResultsState, action: SearchResultsAc
         ...state,
         loading: false,
         error: null,
+        artistSongsError: null,
         artists: action.artists,
         songs: action.songs
       };
@@ -178,7 +183,10 @@ export function determineUIState(state: SearchResultsState) {
 // Custom hook that encapsulates the reducer and provides actions
 export function useSearchResultsReducer(
   filterSong: string,
-  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>
+  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>,
+  setActiveTab?: (tab: string) => void,
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>,
+  myChordSheets: Song[] = []
 ) {
   const [state, dispatch] = useReducer(searchResultsReducer, initialState);
   
@@ -200,7 +208,10 @@ export function useSearchResultsReducer(
   // Memoize the song actions
   const songActions = useSongActions({
     setMySongs,
-    memoizedSongs
+    memoizedSongs,
+    setActiveTab,
+    setSelectedSong,
+    myChordSheets
   });
   
   // Memoize the handlers to prevent unnecessary re-renders

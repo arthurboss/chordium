@@ -3,7 +3,7 @@
  */
 
 import { Song } from "@/types/song";
-import { ChordSheetData } from "@/hooks/useChordSheet";
+import { ChordSheet } from "@/types/chordSheet";
 
 // Base cache item interface
 export interface BaseCacheItem {
@@ -42,7 +42,7 @@ export interface ArtistCache {
 }
 
 // Chord sheet cache types
-export type CachedChordSheetData = Omit<ChordSheetData, 'loading' | 'error'> & {
+export type CachedChordSheetData = Omit<ChordSheet, 'loading' | 'error'> & {
   timestamp?: number;
 };
 

@@ -17,6 +17,49 @@ const API_FIXTURES_DIR = path.join(__dirname, 'api');
 const E2E_FIXTURES_DIR = path.join(__dirname, 'e2e');
 
 /**
+ * Schema Adapters - Convert fixture data to match current interfaces
+ */
+
+/**
+ * Convert Cifra Club search result to Song interface
+ * @param {Object} fixtureItem - Raw fixture item with title and url
+ * @returns {Object} Song interface compatible object
+ */
+function adaptCifraClubSearchToSong(fixtureItem) {
+  // Extract artist and title from the combined title field like "Wonderful - Luca Hänni"
+  let artist = '';
+  let title = fixtureItem.title;
+  
+  const lastDashIndex = fixtureItem.title.lastIndexOf(' - ');
+  if (lastDashIndex > 0) {
+    title = fixtureItem.title.substring(0, lastDashIndex);
+    artist = fixtureItem.title.substring(lastDashIndex + 3);
+  }
+  
+  return {
+    path: fixtureItem.url || fixtureItem.path,
+    title: title,
+    artist: artist
+  };
+}
+
+/**
+ * Convert ChordSheet fixture to match current interface
+ * @param {Object} fixtureItem - Raw chord sheet fixture
+ * @returns {Object} ChordSheet interface compatible object
+ */
+function adaptChordSheetFixture(fixtureItem) {
+  return {
+    title: fixtureItem.title || '',
+    artist: fixtureItem.artist || 'Unknown Artist',
+    songChords: fixtureItem.songChords || '',
+    songKey: fixtureItem.songKey || '',
+    guitarTuning: fixtureItem.guitarTuning || 'E A D G B E',
+    guitarCapo: fixtureItem.guitarCapo || 0
+  };
+}
+
+/**
  * Global Fixture Loader Class
  * Loads and caches fixtures for consistent test data across backend and frontend
  */
@@ -76,13 +119,22 @@ export class GlobalFixtureLoader {
   }
 
   /**
-   * Get song search fixture data
+   * Get song search fixture data with schema adaptation
    * @param {string} query - The search query key
-   * @returns {Array} Song search results
+   * @returns {Array} Song search results adapted to Song interface
    */
   getSongSearchResult(query) {
     const fixtures = this.loadApiFixture('song-search');
-    return fixtures?.[query] || [];
+    const rawResults = fixtures?.[query] || [];
+    
+    // Apply schema adaptation if needed
+    return rawResults.map(item => {
+      // If the item has 'url' instead of 'path', or combined title-artist, adapt it
+      if (item.url && !item.path) {
+        return adaptCifraClubSearchToSong(item);
+      }
+      return item;
+    });
   }
 
   /**
@@ -106,13 +158,28 @@ export class GlobalFixtureLoader {
   }
 
   /**
-   * Get chord sheet fixture data
+   * Get chord sheet fixture data with schema adaptation
    * @param {string} songKey - The song identifier key
-   * @returns {Object} Chord sheet content
+   * @returns {Object} Chord sheet content adapted to ChordSheet interface
    */
   getChordSheet(songKey) {
     const fixtures = this.loadApiFixture('chord-sheets');
-    return fixtures?.[songKey] || null;
+    const rawChordSheet = fixtures?.[songKey] || null;
+    
+    if (rawChordSheet) {
+      return adaptChordSheetFixture(rawChordSheet);
+    }
+    
+    return null;
+  }
+
+  /**
+   * Get CifraClub search results with schema adaptation
+   * @returns {Array} Search results adapted to Song interface
+   */
+  getCifraClubSearchResults() {
+    const rawResults = this.loadApiFixture('cifraclub-search') || [];
+    return rawResults.map(item => adaptCifraClubSearchToSong(item));
   }
 
   /**
@@ -174,6 +241,10 @@ export const getSongSearchResult = (query) => globalFixtureLoader.getSongSearchR
 export const getArtistSearchResult = (query) => globalFixtureLoader.getArtistSearchResult(query);
 export const getArtistSongs = (artistPath) => globalFixtureLoader.getArtistSongs(artistPath);
 export const getChordSheet = (songKey) => globalFixtureLoader.getChordSheet(songKey);
+export const getCifraClubSearchResults = () => globalFixtureLoader.getCifraClubSearchResults();
+
+// Export adapter functions for direct use in tests
+export { adaptCifraClubSearchToSong, adaptChordSheetFixture };
 
 // Export the instance as default
 export default globalFixtureLoader;

@@ -1,4 +1,3 @@
-
 /**
  * Extracts search results from CifraClub search page DOM
  * @returns {Array} - Array of search results with title, path, and artist
@@ -58,7 +57,6 @@ export function extractSearchResults() {
       
       return {
         title,
-        url,  // Include the full URL for validation
         path,
         artist: artist || ''
       };
@@ -109,7 +107,6 @@ export function extractArtistSongs() {
         
         songMap.set(url, {
           title: title.replace(/\s+/g, ' ').trim(),
-          url,  // Include URL for consistency with extractSearchResults
           path,
           artist: artistName
         });
@@ -123,10 +120,142 @@ export function extractArtistSongs() {
 }
 
 /**
- * Extracts chord sheet content from CifraClub song page DOM
- * @returns {string} - The chord sheet content or empty string
+ * Extracts chord sheet data from CifraClub song page DOM
+ * @returns {Object} - ChordSheet object with chords, key, tuning, capo, title, artist
  */
 export function extractChordSheet() {
   const preElement = document.querySelector('pre');
-  return preElement ? preElement.textContent : '';
+  const songChords = preElement ? preElement.textContent : '';
+  
+  // Extract title and artist from page
+  let title = '';
+  let artist = '';
+  
+  // For chord sheet pages, try to get title from h1.t1 first (CifraClub specific)
+  const titleElement = document.querySelector('h1.t1');
+  if (titleElement) {
+    title = titleElement.textContent?.trim() || '';
+  }
+  
+  // For chord sheet pages, try to get artist from h2.t3 a first (CifraClub specific)
+  const artistElement = document.querySelector('h2.t3 a');
+  if (artistElement) {
+    artist = artistElement.textContent?.trim() || '';
+  }
+  
+  // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
+  // Only use this if we didn't find title from h1.t1 or artist from h2.t3 a
+  if (!title || !artist) {
+    const pageTitle = document.title;
+    if (pageTitle) {
+      // Remove "- Cifra Club" suffix first
+      const cleanTitle = pageTitle.replace(/ - Cifra Club$/, '').trim();
+      
+      // Split by " - " to separate song and artist
+      const parts = cleanTitle.split(' - ');
+      if (parts.length >= 2) {
+        // Format: "Song Title - Artist Name"
+        if (!title) {
+          title = parts.slice(0, -1).join(' - ').trim();
+        }
+        if (!artist) {
+          artist = parts[parts.length - 1].trim();
+        }
+      } else if (!title) {
+        title = cleanTitle;
+      }
+    }
+  }
+  
+  // Fallback: extract artist from URL if not found in title
+  if (!artist) {
+    const pathname = window.location.pathname;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    if (pathSegments.length >= 2) {
+      // For song URLs like "/oasis/wonderwall/", artist is first segment
+      artist = pathSegments[0]
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+  }
+  
+  // Extract song title from URL if not found in page title
+  if (!title) {
+    const pathname = window.location.pathname;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    if (pathSegments.length >= 2) {
+      // For song URLs like "/oasis/wonderwall/", song is second segment
+      title = pathSegments[1]
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+  }
+  
+  // Extract key, tuning, and capo information
+  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  let songKey = '';
+  const keyElement = document.querySelector('span#cifra_tom a');
+  if (keyElement) {
+    songKey = keyElement.textContent?.trim() || '';
+  }
+  
+  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  let guitarCapo = 0;
+  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  if (capoElement) {
+    const capoText = capoElement.textContent?.trim() || '';
+    // Extract number from text like "1ª casa", "2ª casa", etc.
+    const capoMatch = capoText.match(/(\d+)/);
+    if (capoMatch) {
+      guitarCapo = parseInt(capoMatch[1], 10);
+    }
+  }
+  
+  const guitarTuning = ['E', 'A', 'D', 'G', 'B', 'E']; // Standard tuning default
+  
+  return {
+    songChords,
+    songKey,
+    guitarTuning,
+    guitarCapo,
+    title: title || '',
+    artist: artist || 'Unknown Artist'
+  };
+}
+
+/**
+ * Extracts song key from CifraClub page DOM
+ * @returns {string} - Song key (e.g., 'C', 'G', 'Am', 'D#m', etc.) or empty string if not found
+ */
+export function extractSongKey() {
+  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  const keyElement = document.querySelector('span#cifra_tom a');
+  if (keyElement) {
+    const key = keyElement.textContent?.trim() || '';
+    return key;
+  }
+  
+  return '';
+}
+
+/**
+ * Extracts guitar capo position from CifraClub page DOM
+ * Looks for span[data-cy="song-capo"] and extracts the number from the anchor text
+ * @returns {number} - Capo position (e.g., 1, 2, 3, etc.) or 0 if not found
+ */
+export function extractGuitarCapo() {
+  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  if (capoElement) {
+    const capoText = capoElement.textContent?.trim() || '';
+    // Extract number from text like "1ª casa", "2ª casa", etc.
+    const capoMatch = capoText.match(/(\d+)/);
+    if (capoMatch) {
+      return parseInt(capoMatch[1], 10);
+    }
+  }
+  
+  return 0;
 }

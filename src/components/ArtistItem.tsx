@@ -22,7 +22,7 @@ const ArtistItem: React.FC<ArtistItemProps> = ({ item, style, onArtistSelect }) 
         icon="user"
         title={item.displayName}
         onView={handleViewArtist}
-        idOrUrl={item.path}
+        path={item.path}
         viewButtonIcon="none" // Use the "none" option to hide the view button
         isDeletable={false}
         compact

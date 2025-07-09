@@ -3,6 +3,7 @@ import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
 import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
+import { isAccentInsensitiveMatch } from "@/utils/accent-insensitive-search";
 
 /**
  * Custom hook to handle search results fetching and filtering
@@ -56,7 +57,7 @@ export function useSearchResults(
       setLoading(true);
       setError(null);
 
-      // Check cache first
+      // Check API cache first
       const cachedResults = getCachedSearchResults(artist || null, song || null);
       if (cachedResults) {
         console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
@@ -97,7 +98,7 @@ export function useSearchResults(
           if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
           const contentType = res.headers.get('content-type');
           const text = await res.text();
-          if (!contentType || !contentType.includes('application/json')) {
+          if (!contentType?.includes('application/json')) {
             throw new Error('Invalid response from backend (not JSON)');
           }
           const data = JSON.parse(text);
@@ -158,9 +159,9 @@ export function useSearchResults(
         console.log('[useSearchResults] Setting songs (no filter):', allSongs);
         setSongs(allSongs);
       } else {
-        // Filter songs by title - Song has title property
+        // Filter songs by title using accent-insensitive matching
         const filtered = allSongs.filter(song => 
-          song.title.toLowerCase().includes(filterSong.toLowerCase())
+          isAccentInsensitiveMatch(filterSong, song.title)
         );
         console.log('[useSearchResults] Setting filtered songs:', filtered);
         setSongs(filtered);

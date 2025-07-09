@@ -6,6 +6,7 @@ import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
 import { ListChildComponentProps } from 'react-window';
 import { CARD_HEIGHTS } from '@/constants/ui-constants';
 import SearchResultsSection from '../SearchResultsSection';
+import { cyAttr } from '@/utils/test-utils';
 import '@/components/custom-scrollbar.css';
 
 interface SongsViewProps {
@@ -44,22 +45,23 @@ export const SongsView: React.FC<SongsViewProps> = ({
           icon="music"
           title={item.title}
           subtitle={item.artist}
-          onView={() => onView(item)}
+          onView={(path) => onView(item)} // ResultCard passes path, but we still call onView with song
           onDelete={() => onAdd(item.path)}
-          idOrUrl={item.path}
+          path={item.path}
           deleteButtonIcon="plus"
           deleteButtonLabel={`Add ${item.title}`}
           viewButtonIcon="external"
           viewButtonLabel="View Chords"
           isDeletable={true}
           compact
+          song={item} // Pass the song object for enhanced navigation
         />
       </div>
     );
   }, [onView, onAdd, displaySongs]);
 
   return (
-    <SearchResultsSection title={title}>
+    <SearchResultsSection title={title} {...cyAttr("songs-view")}>
       {displaySongs.length === 0 && filterSong && (
         <p className="mb-4 text-muted-foreground">No songs matching "{filterSong}"</p>
       )}

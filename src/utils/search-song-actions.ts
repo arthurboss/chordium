@@ -1,18 +1,38 @@
 import { useCallback } from 'react';
 import { Song } from '@/types/song';
+import { useNavigate } from 'react-router-dom';
+import { useEnhancedSongSelection } from './enhanced-song-selection';
 
 export interface UseSongActionsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   memoizedSongs: Song[];
+  setActiveTab?: (tab: string) => void;
+  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
+  // New prop for My Chord Sheets to enable deduplication
+  myChordSheets?: Song[];
 }
 
-export const useSongActions = ({ setMySongs, memoizedSongs }: UseSongActionsProps) => {
+export const useSongActions = ({ 
+  setMySongs, 
+  memoizedSongs, 
+  setActiveTab, 
+  setSelectedSong,
+  myChordSheets = []
+}: UseSongActionsProps) => {
+  const navigate = useNavigate();
+  
+  // Use the enhanced song selection hook for deduplication
+  const { handleSongSelection } = useEnhancedSongSelection({
+    navigate,
+    setSelectedSong,
+    setActiveTab,
+    myChordSheets
+  });
+
   const handleView = useCallback((songData: Song) => {
-    // Handle Song with path
-    if (songData.path) {
-      window.open(songData.path, '_blank');
-    }
-  }, []);
+    console.log('[handleView] Called with enhanced song selection:', songData);
+    handleSongSelection(songData);
+  }, [handleSongSelection]);
 
   const handleAdd = useCallback((songId: string) => {
     if (!setMySongs) return;
@@ -20,7 +40,18 @@ export const useSongActions = ({ setMySongs, memoizedSongs }: UseSongActionsProp
       song.path === songId || song.title === songId
     );
     if (item) {
-      setMySongs(prev => [...prev, item]);
+      // Check if song already exists in My Chord Sheets by path (much cleaner!)
+      setMySongs(prev => {
+        const existing = prev.find(existingSong => existingSong.path === item.path);
+        
+        if (existing) {
+          console.log('[handleAdd] Song already exists in My Chord Sheets:', item.title, 'by', item.artist);
+          return prev; // Don't add duplicate
+        }
+        
+        console.log('[handleAdd] Adding new song to My Chord Sheets:', item.title, 'by', item.artist);
+        return [...prev, item];
+      });
     }
   }, [setMySongs, memoizedSongs]);
 

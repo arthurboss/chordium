@@ -2,6 +2,7 @@ import SEARCH_TYPES from '../constants/searchTypes.js';
 import cifraClubService from '../services/cifraclub.service.js';
 import { s3StorageService as S3StorageService } from '../services/s3-storage.service.js';
 import logger from '../utils/logger.js';
+import { normalizeArtistResults } from '../utils/response-normalizers.js';
 
 import config from '../config/config.js';
 import { createClient } from '@supabase/supabase-js';
@@ -44,7 +45,9 @@ class SearchController {
             
           if (!error && artists && artists.length > 0) {
             logger.info(`Found ${artists.length} artists in Supabase`);
-            return res.json(artists);
+            // Normalize Supabase results to match CifraClub format
+            const normalizedResults = normalizeArtistResults(artists, 'supabase');
+            return res.json(normalizedResults);
           }
           
           if (error) {
@@ -123,19 +126,33 @@ class SearchController {
       const { url } = req.query;
       
       if (!url) {
+        logger.error('❌ getChordSheet: Missing song URL parameter');
         return res.status(400).json({ error: 'Missing song URL' });
       }
 
-      logger.info(`Fetching chord sheet: ${url}`);
-      const content = await cifraClubService.getChordSheet(url);
+      logger.info(`🎵 CHORD SHEET FETCH START: ${url}`);
+      logger.info(`📊 Flow Step 1: Backend received chord sheet request`);
+      logger.info(`📋 Request Details:`, { 
+        url,
+        timestamp: new Date().toISOString() 
+      });
       
-      if (!content) {
+      const chordSheet = await cifraClubService.getChordSheet(url);
+      
+      if (!chordSheet?.songChords) {
+        logger.error(`❌ Flow Step 2: No chord sheet data returned from CifraClub service for ${url}`);
         return res.status(404).json({ error: 'Chord sheet not found' });
       }
 
-      res.json({ content });
+      logger.info(`✅ Flow Step 2: Chord sheet data extracted successfully`);
+      logger.info(`📏 Chords length: ${chordSheet.songChords.length} characters`);
+      logger.info(`📝 Title: "${chordSheet.title}", Artist: "${chordSheet.artist}"`);
+      logger.info(`🎵 Metadata - Key: ${chordSheet.songKey || 'none'}, Capo: ${chordSheet.guitarCapo || 'none'}, Tuning: ${chordSheet.guitarTuning ? JSON.stringify(chordSheet.guitarTuning) : 'none'}`);
+      logger.info(`📤 Flow Step 3: Sending ChordSheet response to frontend`);
+
+      res.json(chordSheet);
     } catch (error) {
-      logger.error('Error fetching chord sheet:', error);
+      logger.error('❌ Error fetching chord sheet:', error);
       res.status(500).json({ error: 'Failed to fetch chord sheet', details: error.message });
     }
   }
@@ -158,7 +175,9 @@ class SearchController {
 
         if (!error && artists && artists.length > 0) {
           logger.info(`Found ${artists.length} artists in Supabase`);
-          return res.json(artists);
+          // Normalize Supabase results to match CifraClub format
+          const normalizedResults = normalizeArtistResults(artists, 'supabase');
+          return res.json(normalizedResults);
         }
 
         if (error) {

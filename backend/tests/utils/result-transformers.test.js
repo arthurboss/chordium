@@ -20,8 +20,8 @@ describe('Result Transformers', () => {
   describe('transformToArtistResults', () => {
     it('should transform results to artist objects', () => {
       const results = [
-        { title: 'Oasis - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Radiohead - Cifra Club', url: 'https://www.cifraclub.com.br/radiohead/' }
+        { title: 'Oasis - Cifra Club', path: 'oasis', artist: 'Oasis' },
+        { title: 'Radiohead - Cifra Club', path: 'radiohead', artist: 'Radiohead' }
       ];
 
       const transformed = transformToArtistResults(results);
@@ -34,8 +34,8 @@ describe('Result Transformers', () => {
 
     it('should filter out results with invalid paths', () => {
       const results = [
-        { title: 'Oasis - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Invalid - Cifra Club', url: 'invalid-url' }
+        { title: 'Oasis - Cifra Club', path: 'oasis', artist: 'Oasis' },
+        { title: 'Invalid - Cifra Club', path: '', artist: 'Invalid' }
       ];
 
       const transformed = transformToArtistResults(results);
@@ -51,11 +51,13 @@ describe('Result Transformers', () => {
       const results = [
         { 
           title: 'Wonderwall - Oasis - Cifra Club', 
-          url: 'https://www.cifraclub.com.br/oasis/wonderwall/' 
+          path: 'oasis/wonderwall',
+          artist: 'Oasis'
         },
         { 
           title: 'Creep - Radiohead - Cifra Club', 
-          url: 'https://www.cifraclub.com.br/radiohead/creep/' 
+          path: 'radiohead/creep',
+          artist: 'Radiohead'
         }
       ];
 
@@ -67,11 +69,10 @@ describe('Result Transformers', () => {
       ]);
     });
 
-    it('should strip url field from final API response', () => {
+    it('should preserve path field in final API response', () => {
       const results = [
         { 
           title: 'Wonderwall - Oasis - Cifra Club', 
-          url: 'https://www.cifraclub.com.br/oasis/wonderwall/',
           path: 'oasis/wonderwall',
           artist: 'Oasis'
         }
@@ -79,8 +80,8 @@ describe('Result Transformers', () => {
 
       const transformed = transformToSongResults(results);
 
-      // Verify that url field is not included in final response
-      expect(transformed[0]).not.toHaveProperty('url');
+      // Verify that path field is included in final response
+      expect(transformed[0]).toHaveProperty('path');
       expect(transformed).toEqual([
         { title: 'Wonderwall', path: 'oasis/wonderwall', artist: 'Oasis' }
       ]);
@@ -90,7 +91,8 @@ describe('Result Transformers', () => {
       const results = [
         { 
           title: 'Wonderwall - Cifra Club', 
-          url: 'https://www.cifraclub.com.br/oasis/wonderwall/' 
+          path: 'oasis/wonderwall',
+          artist: ''
         }
       ];
 

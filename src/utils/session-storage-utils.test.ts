@@ -18,15 +18,13 @@ describe('Session Storage Utilities', () => {
     expect(getChordUrl(artistSlug, songSlug)).toBe(url);
   });
   
-  test('should clean up old entries when limit is reached', async () => {
-    // Store more than the limit with slight delays to ensure different timestamps
+  test('should clean up old entries when limit is reached', () => {
+    // Store more than the limit  
     const limit = 20; // This should match MAX_CHORD_URLS in the implementation
     
-    // Create more than the limit
+    // Create more than the limit (without async delays to avoid timeout)
     for (let i = 0; i < limit + 5; i++) {
       storeChordUrl(`artist-${i}`, `song-${i}`, `https://example.com/artist-${i}/song-${i}`);
-      // Add a small delay to ensure different timestamps
-      await new Promise(resolve => setTimeout(resolve, 1));
     }
     
     // Check that we only have the limit number of chord URLs

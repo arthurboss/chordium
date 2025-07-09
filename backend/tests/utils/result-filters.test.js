@@ -6,8 +6,8 @@ describe('Result Filters', () => {
   describe('filterResults', () => {
     it('should filter and transform artist results', () => {
       const results = [
-        { title: 'Oasis - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Radiohead - Cifra Club', url: 'https://www.cifraclub.com.br/radiohead/' }
+        { title: 'Oasis - Cifra Club', path: 'oasis', artist: 'Oasis' },
+        { title: 'Radiohead - Cifra Club', path: 'radiohead', artist: 'Radiohead' }
       ];
 
       const filtered = filterResults(results, SEARCH_TYPES.ARTIST);
@@ -20,8 +20,8 @@ describe('Result Filters', () => {
 
     it('should filter and transform song results', () => {
       const results = [
-        { title: 'Wonderwall - Oasis - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/wonderwall/' },
-        { title: 'Creep - Radiohead - Cifra Club', url: 'https://www.cifraclub.com.br/radiohead/creep/' }
+        { title: 'Wonderwall - Oasis - Cifra Club', path: 'oasis/wonderwall', artist: 'Oasis' },
+        { title: 'Creep - Radiohead - Cifra Club', path: 'radiohead/creep', artist: 'Radiohead' }
       ];
 
       const filtered = filterResults(results, SEARCH_TYPES.SONG);
@@ -33,13 +33,13 @@ describe('Result Filters', () => {
     });
 
     it('should use generic transformation for unknown search types', () => {
-      // Test with ARTIST URLs (single path segment) since unknown types fall back to default case
+      // Test with ARTIST paths (single path segment) since unknown types fall back to default case
       const results = [
-        { title: 'Some Result - Cifra Club', url: 'https://www.cifraclub.com.br/some-artist/' },
-        { title: 'Another Result - Cifra Club', url: 'https://www.cifraclub.com.br/another-artist/' }
+        { title: 'Some Result - Cifra Club', path: 'some-artist', artist: 'Some Artist' },
+        { title: 'Another Result - Cifra Club', path: 'another-artist', artist: 'Another Artist' }
       ];
 
-      // Use ARTIST search type to ensure URL validation passes, then verify generic transformation
+      // Use ARTIST search type to ensure path validation passes, then verify generic transformation
       const filtered = filterResults(results, SEARCH_TYPES.ARTIST);
 
       expect(filtered.length).toBeGreaterThan(0);
@@ -50,8 +50,8 @@ describe('Result Filters', () => {
 
     it('should return empty array for unknown search types due to validation', () => {
       const results = [
-        { title: 'Some Result - Cifra Club', url: 'https://www.cifraclub.com.br/some/' },
-        { title: 'Another Result - Cifra Club', url: 'https://www.cifraclub.com.br/another/' }
+        { title: 'Some Result - Cifra Club', path: 'some', artist: 'Some' },
+        { title: 'Another Result - Cifra Club', path: 'another', artist: 'Another' }
       ];
 
       // Unknown search types return false from isValidResult, so no results pass through
@@ -62,8 +62,8 @@ describe('Result Filters', () => {
 
     it('should filter out invalid results', () => {
       const results = [
-        { title: 'Valid Artist - Cifra Club', url: 'https://www.cifraclub.com.br/oasis/' },
-        { title: 'Invalid - Cifra Club', url: 'https://www.cifraclub.com.br/invalid.html' }
+        { title: 'Valid Artist - Cifra Club', path: 'oasis', artist: 'Oasis' },
+        { title: 'Invalid - Cifra Club', path: 'invalid.html', artist: 'Invalid' }
       ];
 
       const filtered = filterResults(results, SEARCH_TYPES.ARTIST);
