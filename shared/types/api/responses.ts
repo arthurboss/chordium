@@ -7,6 +7,20 @@ import type { Song } from '../domain/song.js';
 import type { ChordSheet } from '../domain/chord-sheet.js';
 import type { SearchType } from '../search.js';
 
+// Generic response wrapper
+export interface ApiResponse<T = unknown> {
+  data?: T;
+  message?: string;
+  success?: boolean;
+}
+
+// Error response
+export interface ErrorResponse {
+  error: string;
+  details?: string;
+  stack?: string;
+}
+
 export interface SearchResponse {
   songs?: Song[];
   artists?: Artist[];
