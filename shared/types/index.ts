@@ -3,4 +3,19 @@
  * This ensures type consistency across the entire application
  */
 
-export * from './api.js';
+// Domain types
+export * from './domain/artist.js';
+export * from './domain/song.js';
+export * from './domain/chord-sheet.js';
+
+// Metadata types
+export * from './metadata/note.js';
+export * from './metadata/guitar-tuning.js';
+
+// Search types
+export * from './search.js';
+
+// API types
+export * from './api/requests.js';
+export * from './api/responses.js';
+export * from './errors.js';
