@@ -1,15 +1,18 @@
-import { useState, useReducer } from "react";
+
+import { useState, useReducer, useEffect } from "react";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
-import { Song } from "@/types/song";
-import { Artist } from "@/types/artist";
+import type { Song } from "@/types/song";
+import type { Artist } from "@/types/artist";
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
   myChordSheets: Song[];
+  tabState: SearchFormState;
+  setTabState: (state: SearchFormState) => void;
 }
 
 // Define the search form state
@@ -80,20 +83,28 @@ function searchFormReducer(state: SearchFormState, action: SearchFormAction): Se
   }
 }
 
-const SearchTab = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }: SearchTabProps) => {
-  // Use our form reducer
-  const [state, dispatch] = useReducer(searchFormReducer, initialState);
-  
+
+const SearchTab = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets, tabState, setTabState }: SearchTabProps) => {
+  // Use reducer, but initialize from tabState if present
+  const [state, dispatch] = useReducer(searchFormReducer, tabState || initialState);
   // Local loading state just for the search bar
   const [loading, setLoading] = useState(false);
 
+
+  // Persist state to parent only on unmount/tab switch
+  useEffect(() => {
+    return () => {
+      setTabState(state);
+    };
+    // Only run on unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleInputChange = (artistValue: string, songValue: string) => {
-    console.log('[SearchTab] handleInputChange', { artistValue, songValue });
     dispatch({ type: 'UPDATE_INPUT', artistValue, songValue });
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
-    console.log('[SearchTab] handleSearchSubmit', { artistValue, songValue });
     setLoading(true);
     dispatch({ type: 'SUBMIT_SEARCH', artistValue, songValue });
     setLoading(false);

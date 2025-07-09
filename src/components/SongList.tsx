@@ -1,4 +1,4 @@
-import { Song } from "../types/song";
+import type { Song } from "../types/song";
 import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 
@@ -7,11 +7,22 @@ interface SongListProps {
   onSongSelect: (song: Song) => void;
   onDeleteSong: (songPath: string) => void;
   onUploadClick: () => void;
+  tabState?: { scroll: number };
+  setTabState?: (state: { scroll: number }) => void;
 }
 
-const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongListProps) => {
+
+import { useRef } from "react";
+import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
+
+const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, setTabState }: SongListProps) => {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useRestoreScrollPosition(listRef, tabState?.scroll);
+  usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
+
   return (
-    <div>
+    <div ref={listRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
       {songs.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {[...songs].reverse().map((song, index) => (
@@ -20,11 +31,11 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick }: SongList
               icon="music"
               title={song.title}
               subtitle={song.artist}
-              onView={(path) => onSongSelect(song)} // Still call onSongSelect with song object
+              onView={(path) => onSongSelect(song)}
               onDelete={onDeleteSong}
               path={song.path}
               isDeletable={true}
-              song={song} // Pass song object for enhanced navigation
+              song={song}
             />
           ))}
         </div>
