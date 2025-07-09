@@ -1,10 +1,11 @@
 import app from './app.js';
 import logger from './utils/logger.js';
+import type { Server } from 'http';
 
-let server;
+let server: Server | undefined;
 
 // Start the server
-const startServer = async () => {
+const startServer = async (): Promise<void> => {
   try {
     server = await app.start();
   } catch (error) {
@@ -14,10 +15,10 @@ const startServer = async () => {
 };
 
 // Graceful shutdown function
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = (signal: string): void => {
   logger.info(`Received ${signal}. Shutting down gracefully...`);
   
-  if (server && server.close) {
+  if (server?.close) {
     server.close(() => {
       logger.info('Server closed.');
       process.exit(0);
@@ -34,13 +35,13 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));  // Ctrl+C
 process.on('SIGHUP', () => gracefulShutdown('SIGHUP'));  // Terminal closed
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   gracefulShutdown('unhandledRejection');
 });
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', (error: Error) => {
   logger.error('Uncaught Exception:', error);
   gracefulShutdown('uncaughtException');
 });

@@ -1,6 +1,7 @@
 import logger from '../utils/logger.js';
+import type { ErrorHandler, NotFoundHandler } from '../types/express.types.js';
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler: ErrorHandler = (err, req, res, next) => {
   logger.error('Unhandled error:', err);
   
   // Default error status and message
@@ -17,7 +18,7 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-const notFoundHandler = (req, res) => {
+const notFoundHandler: NotFoundHandler = (req, res) => {
   res.status(404).json({
     error: {
       status: 404,

@@ -1,6 +1,7 @@
-import express from 'express';
-const router = express.Router();
+import express, { type Router } from 'express';
 import searchController from '../controllers/search.controller.js';
+
+const router: Router = express.Router();
 
 // songs by an artist endpoint
 router.get('/artist-songs', (req, res) => searchController.getArtistSongs(req, res));

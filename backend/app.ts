@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { type Application } from 'express';
 import cors from 'cors';
+import type { Server } from 'http';
 import config from './config/config.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import apiRoutes from './routes/api.js';
@@ -7,6 +8,9 @@ import logger from './utils/logger.js';
 import puppeteerService from './services/puppeteer.service.js';
 
 class App {
+  public app: Application;
+  private server: Server | undefined;
+
   constructor() {
     this.app = express();
     this.setupMiddlewares();
@@ -15,13 +19,13 @@ class App {
     this.setupProcessHandlers();
   }
 
-  setupMiddlewares() {
+  private setupMiddlewares(): void {
     this.app.use(cors(config.cors));
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
   }
 
-  setupRoutes() {
+  private setupRoutes(): void {
     // API routes
     this.app.use('/api', apiRoutes);
 
@@ -31,7 +35,7 @@ class App {
     });
   }
 
-  setupErrorHandling() {
+  private setupErrorHandling(): void {
     // 404 handler
     this.app.use(notFoundHandler);
     
@@ -39,9 +43,9 @@ class App {
     this.app.use(errorHandler);
   }
 
-  setupProcessHandlers() {
+  private setupProcessHandlers(): void {
     // Handle graceful shutdown
-    const shutdown = async () => {
+    const shutdown = async (): Promise<void> => {
       logger.info('Shutting down server...');
       
       try {
@@ -65,18 +69,18 @@ class App {
     process.on('SIGINT', shutdown);
     
     // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', (error: Error) => {
       logger.error('Uncaught Exception:', error);
-      shutdown();
+      void shutdown();
     });
     
     // Handle unhandled promise rejections
-    process.on('unhandledRejection', (reason, promise) => {
+    process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
       logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
     });
   }
 
-  async start() {
+  public async start(): Promise<Server> {
     try {
       // Initialize Puppeteer service
       await puppeteerService.init();

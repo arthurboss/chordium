@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "fe": "vite",
-    "be": "node backend/server.js",
+    "be": "cd backend && npm run dev",
     "dev": "npm run wait 'be' http://localhost:3001/health 'fe'",
     
     "wait": "./scripts/start-servers-and-test.sh \"$@\"",

@@ -1,15 +1,16 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { Config } from '../types/config.types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const config = {
+const config: Config = {
   // Server configuration
   server: {
-    port: process.env.PORT || 3001
+    port: Number(process.env.PORT) || 3001
   },
 
   // CORS configuration
