@@ -22,7 +22,7 @@ const mockListObjectsV2Command = jest.fn((params) => ({ input: params }));
 const mockHeadBucketCommand = jest.fn((params) => ({ input: params }));
 
 // Set up the mocks at module level
-jest.unstable_mockModule("../../../../utils/logger.js", () => ({ default: mockLogger }));
+jest.unstable_mockModule("../../../../utils/logger.ts", () => ({ default: mockLogger }));
 
 jest.unstable_mockModule("@aws-sdk/client-s3", () => ({
   S3Client: mockS3Client,

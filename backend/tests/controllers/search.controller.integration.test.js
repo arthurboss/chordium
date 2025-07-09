@@ -39,11 +39,11 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: () => mockSupabase
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
   default: mockCifraClubService
 }));
 
-jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
   s3StorageService: mockS3StorageService
 }));
 
@@ -52,7 +52,7 @@ let searchRouter;
 
 beforeAll(async () => {
   // Import the router after setting up the mocks
-  const module = await import('../../routes/api.js');
+  const module = await import('../../routes/api.ts');
   searchRouter = module.default;
 });
 

@@ -49,7 +49,7 @@ jest.unstable_mockModule("@aws-sdk/client-s3", () => ({
   HeadBucketCommand: mockHeadBucketCommand,
 }));
 
-jest.unstable_mockModule("../../../utils/logger.js", () => ({
+jest.unstable_mockModule("../../../utils/logger.ts", () => ({
   default: mockLogger,
 }));
 

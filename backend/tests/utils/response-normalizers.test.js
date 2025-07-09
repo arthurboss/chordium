@@ -4,7 +4,7 @@ import {
   normalizeSongResults, 
   normalizeArtist, 
   normalizeSong 
-} from '../../utils/response-normalizers.js';
+} from '../../utils/response-normalizers.ts';
 
 describe('Response Normalizers', () => {
   describe('normalizeArtistResults', () => {

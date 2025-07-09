@@ -9,21 +9,21 @@ const mockExtractArtistSlug = jest.fn();
 const mockExtractArtistSongs = jest.fn();
 
 // Mock modules
-jest.unstable_mockModule("../../../services/puppeteer.service.js", () => ({
+jest.unstable_mockModule("../../../services/puppeteer.service.ts", () => ({
   default: mockPuppeteerService,
 }));
 
-jest.unstable_mockModule("../../../utils/url-utils.js", () => ({
+jest.unstable_mockModule("../../../utils/url-utils.ts", () => ({
   extractArtistSlug: mockExtractArtistSlug,
 }));
 
-jest.unstable_mockModule("../../../utils/dom-extractors.js", () => ({
+jest.unstable_mockModule("../../../utils/dom-extractors.ts", () => ({
   extractArtistSongs: mockExtractArtistSongs,
 }));
 
 // Import the module after mocking
 const { fetchArtistSongs } = await import(
-  "../../../services/cifraclub/artist-songs-handler.js"
+  "../../../services/cifraclub/artist-songs-handler.ts"
 );
 
 const mockPage = {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { filterResults } from '../../utils/result-filters.js';
-import SEARCH_TYPES from '../../constants/searchTypes.js';
+import { filterResults } from '../../utils/result-filters.ts';
+import SEARCH_TYPES from '../../constants/searchTypes.ts';
 
 describe('Result Filters', () => {
   describe('filterResults', () => {

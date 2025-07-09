@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { extractSearchResults, extractArtistSongs } from '../../utils/dom-extractors.js';
-import { transformToSongResults } from '../../utils/result-transformers.js';
+import { extractSearchResults, extractArtistSongs } from '../../utils/dom-extractors.ts';
+import { transformToSongResults } from '../../utils/result-transformers.ts';
 
 /**
  * Integration tests for the complete data transformation pipeline.

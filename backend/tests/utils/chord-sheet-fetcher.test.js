@@ -8,16 +8,16 @@ const mockPuppeteerService = {
 const mockExtractChordSheet = jest.fn();
 
 // Mock modules
-jest.unstable_mockModule("../../services/puppeteer.service.js", () => ({
+jest.unstable_mockModule("../../services/puppeteer.service.ts", () => ({
   default: mockPuppeteerService,
 }));
 
-jest.unstable_mockModule("../../utils/dom-extractors.js", () => ({
+jest.unstable_mockModule("../../utils/dom-extractors.ts", () => ({
   extractChordSheet: mockExtractChordSheet,
 }));
 
 // Import the module after mocking
-const { fetchChordSheet } = await import("../../utils/chord-sheet-fetcher.js");
+const { fetchChordSheet } = await import("../../utils/chord-sheet-fetcher.ts");
 
 const mockPage = {
   goto: jest.fn(),

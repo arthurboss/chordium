@@ -44,6 +44,14 @@ export function isValidResult(result: ResultWithPath, searchType: SearchType): b
 
     const pathSegments = path.split('/').filter(segment => segment.length > 0);
 
+    // Reject paths ending with .html, .htm, or other file extensions
+    // We only want chord sheet paths, not HTML/file pages
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    if (lastSegment && (lastSegment.endsWith('.html') || lastSegment.endsWith('.htm') || lastSegment.includes('.'))) {
+      logger.debug(`URL validation failed: ${URL_VALIDATION_ERRORS.INVALID_URL_FORMAT}`, { path, reason: 'HTML or file extension detected' });
+      return false;
+    }
+
     // Validate path structure based on search type
     switch (searchType) {
       case SEARCH_TYPES.ARTIST:

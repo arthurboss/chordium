@@ -5,7 +5,7 @@ import {
   extractChordSheet,
   extractSongKey,
   extractGuitarCapo
-} from '../../utils/dom-extractors.js';
+} from '../../utils/dom-extractors.ts';
 
 /**
  * Tests for DOM extractors that parse raw HTML and return unprocessed data.

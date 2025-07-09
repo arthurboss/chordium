@@ -9,21 +9,21 @@ const mockFilterResults = jest.fn();
 const mockExtractSearchResults = jest.fn();
 
 // Mock modules
-jest.unstable_mockModule("../../../services/puppeteer.service.js", () => ({
+jest.unstable_mockModule("../../../services/puppeteer.service.ts", () => ({
   default: mockPuppeteerService,
 }));
 
-jest.unstable_mockModule("../../../utils/result-filters.js", () => ({
+jest.unstable_mockModule("../../../utils/result-filters.ts", () => ({
   filterResults: mockFilterResults,
 }));
 
-jest.unstable_mockModule("../../../utils/dom-extractors.js", () => ({
+jest.unstable_mockModule("../../../utils/dom-extractors.ts", () => ({
   extractSearchResults: mockExtractSearchResults,
 }));
 
 // Import the module after mocking
 const { performSearch } = await import(
-  "../../../services/cifraclub/search-handler.js"
+  "../../../services/cifraclub/search-handler.ts"
 );
 
 const mockPage = {

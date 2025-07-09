@@ -3,7 +3,7 @@ import {
   transformToArtistResults, 
   transformToSongResults, 
   transformToGenericResults 
-} from '../../utils/result-transformers.js';
+} from '../../utils/result-transformers.ts';
 
 /**
  * Tests for result transformers that convert raw DOM extraction data 
