@@ -6,22 +6,23 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleSongs } from "@/hooks/use-sample-songs";
+// import { useSampleSongs } from "@/hooks/use-sample-songs"; // ARCHIVED: sample songs now loaded via IndexedDB
 import { useSearchRedirect } from "@/hooks/use-search-redirect";
 
-// Function to determine initial tab based on path
-const getInitialTab = (pathname: string): string => {
-  if (pathname.startsWith("/search")) return "search";
-  if (pathname.startsWith("/upload")) return "upload";
-  return "my-chord-sheets"; // Default
-};
+
+import { getInitialTab } from "@/utils/get-initial-tab";
 
 const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [demoSong, setDemoSong] = useState<Song | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { sampleSongs, myChordSheets, setMySongs, refreshMySongs } = useSampleSongs();
+  // TODO: Replace with IndexedDB-based sample song and chord sheet loading
+  // const { sampleSongs, myChordSheets, setMySongs, refreshMySongs } = useSampleSongs(); // ARCHIVED
+  const sampleSongs: Song[] = []; // Placeholder until IndexedDB implementation
+  const myChordSheets: Song[] = [];
+  const setMySongs = () => {};
+  const refreshMySongs = () => {};
   useSearchRedirect();
 
   // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
