@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express';
 import { buildSearchQuery, determineSearchType } from '../../utils/search.utils.js';
 import { searchArtistsInSupabase } from '../../services/supabase-artist.service.js';
 import cifraClubService from '../../services/cifraclub.service.js';
@@ -8,29 +9,30 @@ import { normalizeArtistResults } from '../../utils/response-normalizers.js';
 /**
  * Handles search requests for artists or songs.
  * Tries Supabase for artists, otherwise falls back to CifraClub.
- *
- * @param {import('express').Request} req - Express request object
- * @param {import('express').Response} res - Express response object
  */
-async function searchHandler(req, res) {
-  // Handles a search request for artists or songs.
+export async function searchHandler(req: Request, res: Response): Promise<Response | undefined> {
   try {
     const { artist, song } = req.query;
-    const query = buildSearchQuery(artist, song);
-    const searchType = determineSearchType(artist, song, SEARCH_TYPES);
+    const query = buildSearchQuery(artist as string, song as string);
+    const searchType = determineSearchType(artist as string, song as string, SEARCH_TYPES);
+    
     if (!query || !searchType) {
       return res.status(400).json({ error: 'Missing or invalid search query' });
     }
+    
     logger.info(`Search request - query: "${query}", type: ${searchType}`);
+    
     if (searchType === SEARCH_TYPES.ARTIST) {
       try {
         logger.info('Attempting to fetch artists from Supabase...');
         const { data: artists, error } = await searchArtistsInSupabase(query);
+        
         if (!error && artists && artists.length > 0) {
           logger.info(`Found ${artists.length} artists in Supabase`);
           const normalizedResults = normalizeArtistResults(artists, 'supabase');
           return res.json(normalizedResults);
         }
+        
         if (error) {
           logger.warn('Supabase query failed, falling back to CifraClub:', error);
         } else {
@@ -40,13 +42,16 @@ async function searchHandler(req, res) {
         logger.warn('Error querying Supabase, falling back to CifraClub:', dbError);
       }
     }
+    
     logger.info('Fetching from CifraClub...');
     const results = await cifraClubService.search(query, searchType);
-    res.json(results);
+    return res.json(results);
   } catch (error) {
     logger.error('Search error:', error);
-    res.status(500).json({ error: 'Search failed', details: error.message, stack: process.env.NODE_ENV === 'development' ? error.stack : undefined });
+    return res.status(500).json({ 
+      error: 'Search failed', 
+      details: (error as Error).message, 
+      stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined 
+    });
   }
 }
-
-export { searchHandler };

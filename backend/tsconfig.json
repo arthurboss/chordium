@@ -11,10 +11,11 @@
     "resolveJsonModule": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./",
-    "baseUrl": "./",
+    "rootDir": "../",
+    "baseUrl": "../",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/types/*"]
     },
     "types": ["node", "jest"],
     "allowImportingTsExtensions": false,
@@ -24,7 +25,8 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.js"
+    "**/*.js",
+    "../shared/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
