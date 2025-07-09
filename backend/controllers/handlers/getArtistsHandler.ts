@@ -8,9 +8,7 @@ import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { Artist } from '../../../shared/types/domain/artist.js';
 import type { Song } from '../../../shared/types/domain/song.js';
 
-interface GetArtistsQuery {
-  artist?: string;
-}
+import type { GetArtistsQuery } from '../../types/controller.types.js';
 
 async function getArtistsHandler(
   req: Request<{}, Artist[] | Song[] | ErrorResponse, {}, GetArtistsQuery>,

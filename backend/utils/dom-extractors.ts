@@ -9,11 +9,7 @@ import type { ChordSheet } from '../../shared/types/domain/chord-sheet.js';
 /**
  * Search result from DOM extraction
  */
-interface DOMSearchResult {
-  title: string;
-  path: string;
-  artist: string;
-}
+import type { DOMSearchResult } from '../types/dom.types.js';
 
 /**
  * Extracts search results from CifraClub search page DOM

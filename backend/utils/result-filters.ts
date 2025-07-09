@@ -7,14 +7,7 @@ import {
 import type { SearchType } from '../../shared/types/search.js';
 import type { Artist } from '../../shared/types/domain/artist.js';
 import type { Song } from '../../shared/types/domain/song.js';
-
-/**
- * Basic data structure with path for validation
- */
-interface ResultWithPath {
-  path: string;
-  [key: string]: unknown;
-}
+import type { ResultWithPath } from '../types/result.types.js';
 
 /**
  * Filters and transforms search results based on search type

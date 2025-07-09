@@ -4,11 +4,7 @@ import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
 /**
  * Basic search result structure from DOM extraction
  */
-interface BasicSearchResult {
-  title?: string;
-  path: string;
-  [key: string]: unknown;
-}
+import type { BasicSearchResult } from '../types/result.types.js';
 
 /**
  * Transforms raw search results into artist objects

@@ -3,10 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import config from '../config/config.js';
 import type { Artist } from '../../shared/types/domain/artist.js';
 
-interface SupabaseResponse<T> {
-  data: T[] | null;
-  error: any;
-}
+import type { SupabaseResponse } from '../types/supabase.types.js';
 
 let supabase: SupabaseClient | null = null;
 

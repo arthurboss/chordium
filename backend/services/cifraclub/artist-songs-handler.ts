@@ -5,12 +5,7 @@ import { extractArtistSongs } from "../../utils/dom-extractors.js";
 import type { Song } from "../../../shared/types/domain/song.js";
 import type { Page } from 'puppeteer';
 
-interface LoadStrategy {
-  name: string;
-  waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
-  timeout: number;
-  waitAfter: number;
-}
+import type { LoadStrategy } from '../../types/cifraclub.types.js';
 
 /**
  * Handles fetching songs for a specific artist from CifraClub

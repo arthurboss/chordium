@@ -4,15 +4,7 @@ import logger from '../../utils/logger.js';
 import { removeSongFromArtist } from '../../services/s3-artist-cache.service.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 
-interface RemoveSongFromArtistBody {
-  artistName?: string;
-  songPath?: string;
-}
-
-interface SuccessResponse {
-  success: boolean;
-  message: string;
-}
+import type { RemoveSongFromArtistBody, SuccessResponse } from '../../types/controller.types.js';
 
 /**
  * Handles requests to remove a song from an artist's cached song list.

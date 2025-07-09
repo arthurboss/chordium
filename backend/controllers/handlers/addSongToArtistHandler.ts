@@ -3,17 +3,8 @@ import { normalizeArtistPath } from '../../utils/url-utils.js';
 import logger from '../../utils/logger.js';
 import { addSongToArtist } from '../../services/s3-artist-cache.service.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
-import type { Song } from '../../../shared/types/domain/song.js';
 
-interface AddSongToArtistBody {
-  artistName?: string;
-  song?: Song;
-}
-
-interface SuccessResponse {
-  success: boolean;
-  message: string;
-}
+import type { AddSongToArtistBody, SuccessResponse } from '../../types/controller.types.js';
 
 /**
  * Handles requests to add a song to an artist's cached song list.

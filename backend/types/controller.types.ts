@@ -1,3 +1,31 @@
+// Centralized controller handler types and request/response bodies
+
+export interface RemoveSongFromArtistBody {
+  artistName?: string;
+  songPath?: string;
+}
+
+export interface AddSongToArtistBody {
+  artistName?: string;
+  song?: any; // Use Song from shared types in actual usage
+}
+
+export interface SuccessResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface GetArtistsQuery {
+  artist?: string;
+}
+
+export interface GetArtistSongsQuery {
+  artistPath?: string;
+}
+
+export interface GetChordSheetQuery {
+  url?: string;
+}
 import type { Request, Response } from 'express';
 
 // Import specific types from modular shared types

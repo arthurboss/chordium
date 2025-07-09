@@ -4,10 +4,7 @@ import logger from '../logger.js';
 import type { SearchType } from '../../../shared/types/search.js';
 import { URL_VALIDATION_ERRORS } from './validation-errors.js';
 
-interface ResultWithPath {
-  path: string;
-  [key: string]: any;
-}
+import type { ResultWithPath } from '../../types/result.types.js';
 
 /**
  * Validates if a result path is valid for the given search type

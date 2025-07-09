@@ -6,9 +6,7 @@ import { getCachedArtistSongs, storeArtistSongs } from '../../services/s3-artist
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { Song } from '../../../shared/types/domain/song.js';
 
-interface GetArtistSongsQuery {
-  artistPath?: string;
-}
+import type { GetArtistSongsQuery } from '../../types/controller.types.js';
 
 /**
  * Handles requests to fetch all songs for a given artist, using cache if available.

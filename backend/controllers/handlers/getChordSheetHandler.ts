@@ -5,9 +5,7 @@ import { isValidChordSheetUrl } from '../../utils/url-utils.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { ChordSheet } from '../../../shared/types/domain/chord-sheet.js';
 
-interface GetChordSheetQuery {
-  url?: string;
-}
+import type { GetChordSheetQuery } from '../../types/controller.types.js';
 
 /**
  * Handles requests to fetch a chord sheet for a given song URL.

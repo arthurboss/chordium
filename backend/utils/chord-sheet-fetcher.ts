@@ -4,12 +4,7 @@ import { extractChordSheet } from "./dom-extractors.js";
 import type { ChordSheet } from "../../shared/types/domain/chord-sheet.js";
 import type { Page } from 'puppeteer';
 
-interface LoadStrategy {
-  name: string;
-  waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
-  timeout: number;
-  waitAfter: number;
-}
+import type { LoadStrategy } from '../types/cifraclub.types.js';
 
 /**
  * Simple delay function to replace page.waitForTimeout
