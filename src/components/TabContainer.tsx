@@ -8,7 +8,6 @@ import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 
@@ -84,15 +83,21 @@ const TabContainer = ({
   };
   
   const handleSaveUploadedChordSheet = (content: string, title: string) => {
-    handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
+    // TODO: Replace with IndexedDB storage implementation
+    // handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
+    console.warn('Save chord sheet not implemented - needs IndexedDB replacement');
   };
   
   const handleChordSheetUpdate = (content: string) => {
-    handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
+    // TODO: Replace with IndexedDB storage implementation
+    // handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
+    console.warn('Update chord sheet not implemented - needs IndexedDB replacement');
   };
   
   const handleChordSheetDelete = (songPath: string) => {
-    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
+    // TODO: Replace with IndexedDB storage implementation
+    // handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
+    console.warn('Delete chord sheet not implemented - needs IndexedDB replacement');
   };
 
   // Handle keyboard navigation for the tabs

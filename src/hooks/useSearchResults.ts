@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
-import { cacheSearchResults, getCachedSearchResults } from "@/cache/implementations/search-cache";
 import { isAccentInsensitiveMatch } from "@/utils/accent-insensitive-search";
 
 /**
@@ -57,8 +56,9 @@ export function useSearchResults(
       setLoading(true);
       setError(null);
 
-      // Check API cache first
-      const cachedResults = getCachedSearchResults(artist || null, song || null);
+      // TODO: Replace with IndexedDB cache implementation
+      // const cachedResults = getCachedSearchResults(artist || null, song || null);
+      const cachedResults = null; // TODO: Implement IndexedDB cache lookup
       if (cachedResults) {
         console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
         // Process cached results
@@ -107,9 +107,10 @@ export function useSearchResults(
         .then((data) => {
           console.log('[useSearchResults] Response received:', data);
           
-          // Cache the results
-          console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
-          cacheSearchResults(artist || null, song || null, data);
+          // TODO: Replace with IndexedDB cache implementation
+          // console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
+          // cacheSearchResults(artist || null, song || null, data);
+          console.log('💾 SEARCH CACHING: Caching disabled - needs IndexedDB replacement');
           
           if (!artist && song) {
             // Song-only search - data should be song results

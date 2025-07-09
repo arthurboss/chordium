@@ -1,6 +1,5 @@
 // Utility functions for artist-related logic
 import { Song } from "@/types/song";
-import { cacheArtistSongs, getCachedArtistSongs } from "@/cache/implementations/artist-cache";
 
 export function extractArtistSlug(artistUrl: string): string | null {
   try {
@@ -18,8 +17,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     throw new Error('Invalid artist path');
   }
 
-  // Try to get cached results first
-  const cachedSongs = getCachedArtistSongs(artistPath);
+  // TODO: Replace with IndexedDB cache implementation
+  // const cachedSongs = getCachedArtistSongs(artistPath);
+  const cachedSongs = null; // TODO: Implement IndexedDB cache lookup
   if (cachedSongs) {
     console.log(`🎯 CACHE HIT: Using cached songs for artist: ${artistPath} (${cachedSongs.length} songs)`);
     return cachedSongs;
@@ -41,9 +41,10 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     const data: Song[] = await resp.json();
     console.log(`Received ${data.length} songs for artist ${artistPath}`);
     
-    // Cache the results for future use
-    console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
-    cacheArtistSongs(artistPath, data);
+    // TODO: Replace with IndexedDB cache implementation
+    // console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
+    // cacheArtistSongs(artistPath, data);
+    console.log(`💾 CACHING: Caching disabled - needs IndexedDB replacement`);
     
     // Return the data as-is (Song objects with title and path)
     return data;

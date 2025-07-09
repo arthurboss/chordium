@@ -83,6 +83,45 @@ Test files related to cache and storage:
 - `shared/` - Shared test utilities
   - `test-setup.ts` - localStorage mocking and test setup utilities
 
+### Hooks (`/archive/hooks/`)
+React hooks that used localStorage-based cache and storage:
+
+- `useAddToMyChordSheets.ts` - Hook for adding chord sheets to My Chord Sheets storage
+- `use-sample-songs.ts` - Hook for loading sample songs and managing My Chord Sheets state
+- `useChordSheet.ts` - Main chord sheet loading hook with cache coordination
+- `useChordSheet/` - Complete useChordSheet hook implementation directory
+  - `background-refresh-handler.ts` - Background refresh coordination
+  - `cache-coordinator-modules.ts` - Cache coordinator module exports
+  - `cache-coordinator.ts` - Main cache coordination class
+  - `data-handlers.ts` - Data handling and state management
+  - `index.ts` - Hook module exports
+  - `url-determination-strategy.ts` - URL determination logic
+  - `coordinators/` - Coordinator implementations
+    - `clear-expired-cache.ts` - Cache expiration handling
+    - `fetch-chord-sheet-from-backend.ts` - Backend fetching logic
+    - `get-chord-sheet-data.ts` - Data retrieval coordination
+    - `__tests__/` - Coordinator tests
+      - `clear-expired-cache.test.ts`
+      - `fetch-chord-sheet-from-backend.test.ts`
+      - `get-chord-sheet-data.test.ts`
+  - `utils/` - Hook utilities
+    - `convert-response-to-chord-sheet.ts` - Response conversion utilities
+    - `parse-storage-key.ts` - Storage key parsing utilities
+    - `__tests__/` - Utility tests
+      - `convert-response-to-chord-sheet.test.ts`
+      - `parse-storage-key.test.ts`
+  - `__tests__/` - Hook tests
+    - `background-refresh-handler.test.ts`
+    - `cache-coordinator-comprehensive.test.ts`
+    - `cache-coordinator.test.ts`
+    - `data-handlers.test.ts`
+
+### Utilities (`/archive/utils/`)
+Utility functions that used localStorage-based storage:
+
+- `chord-data-builder.ts` - Chord sheet data building utilities
+- `chord-data-builder.test.ts` - Tests for chord data builder
+
 ### Documentation (`/archive/cache-architecture.md`)
 - Complete cache architecture documentation
 - System design and implementation details
@@ -99,8 +138,9 @@ Test files related to cache and storage:
 
 ### Hooks
 - `src/hooks/useSearchResults.ts` - Uses search cache
-- `src/hooks/use-sample-songs.ts` - Uses unified chord sheet cache
-- `src/hooks/useAddToMyChordSheets.ts` - Uses chord-sheet-storage
+- ~~`src/hooks/use-sample-songs.ts` - Uses unified chord sheet cache~~ (ARCHIVED)
+- ~~`src/hooks/useAddToMyChordSheets.ts` - Uses chord-sheet-storage~~ (ARCHIVED)
+- ~~`src/hooks/useChordSheet.ts` - Main chord sheet loading hook with cache coordination~~ (ARCHIVED)
 
 ### Utilities
 - `src/utils/artist-utils.ts` - Uses artist cache
@@ -184,6 +224,16 @@ cp -r archive/cache/ src/
 cp -r archive/storage/chord-sheet-storage/ src/utils/
 cp archive/storage/session-storage-utils.ts src/utils/
 cp archive/storage/local-chord-sheet-finder.ts src/utils/
+
+# Restore hooks
+cp archive/hooks/useAddToMyChordSheets.ts src/hooks/
+cp archive/hooks/use-sample-songs.ts src/hooks/
+cp archive/hooks/useChordSheet.ts src/hooks/
+cp -r archive/hooks/useChordSheet/ src/hooks/
+
+# Restore utilities
+cp archive/utils/chord-data-builder.ts src/utils/
+cp archive/utils/chord-data-builder.test.ts src/utils/
 
 # Restore tests
 cp archive/tests/session-storage-utils.test.ts src/utils/
