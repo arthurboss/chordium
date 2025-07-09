@@ -8,7 +8,7 @@ import {
 
 // Import after mocking
 const { s3StorageService } = await import(
-  "../../../services/s3-storage.service.js"
+  "../../../services/s3-storage.service.ts"
 );
 
 /**

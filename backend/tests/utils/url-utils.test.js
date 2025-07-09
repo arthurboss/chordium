@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { isValidResult, extractArtistSlug, extractPathFromUrl, extractFullPathFromUrl, normalizeArtistPath } from '../../utils/url-utils.js';
-import SEARCH_TYPES from '../../constants/searchTypes.js';
+import { isValidResult, extractArtistSlug, extractFullPathFromUrl, normalizeArtistPath } from '../../utils/url-utils.ts';
+import SEARCH_TYPES from '../../constants/searchTypes.ts';
 
 describe('URL Utils', () => {
   describe('isValidResult - Legacy URL-based tests (deprecated)', () => {
@@ -62,25 +62,25 @@ describe('URL Utils', () => {
     });
   });
 
-  describe('extractPathFromUrl', () => {
+  describe('extractArtistSlug (formerly extractPathFromUrl)', () => {
     it('should extract first path segment', () => {
       const url = 'https://www.cifraclub.com.br/oasis/wonderwall/';
-      expect(extractPathFromUrl(url)).toBe('oasis');
+      expect(extractArtistSlug(url)).toBe('oasis');
     });
 
     it('should handle URLs without trailing slash', () => {
       const url = 'https://www.cifraclub.com.br/oasis';
-      expect(extractPathFromUrl(url)).toBe('oasis');
+      expect(extractArtistSlug(url)).toBe('oasis');
     });
 
     it('should return null for invalid URL', () => {
       const url = 'not-a-valid-url';
-      expect(extractPathFromUrl(url)).toBe(null);
+      expect(extractArtistSlug(url)).toBe(null);
     });
 
     it('should handle root path', () => {
       const url = 'https://www.cifraclub.com.br/';
-      expect(extractPathFromUrl(url)).toBe('');
+      expect(extractArtistSlug(url)).toBe(null);
     });
   });
 

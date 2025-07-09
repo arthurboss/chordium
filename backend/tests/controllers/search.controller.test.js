@@ -39,12 +39,12 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient)
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
   __esModule: true,
   default: mockCifraClubService
 }));
 
-jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
   s3StorageService: mockS3StorageService
 }));
 
@@ -57,10 +57,10 @@ let server;
 // We'll import these after setting up the mocks
 beforeAll(async () => {
   // Import the modules after setting up the mocks
-  const searchControllerModule = await import('../../controllers/search.controller.js');
+  const searchControllerModule = await import('../../controllers/search.controller.ts');
   SearchController = searchControllerModule.default;
   
-  const routerModule = await import('../../routes/api.js');
+  const routerModule = await import('../../routes/api.ts');
   searchRouter = routerModule.default;
   
   // Setup Express app after importing the router

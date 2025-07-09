@@ -24,15 +24,15 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
   default: mockCifraClubService,
 }));
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule('../../utils/logger.ts', () => ({
   default: mockLogger,
 }));
 
@@ -41,7 +41,7 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({})),
 }));
 
-const { default: searchController } = await import('../../controllers/search.controller.js');
+const { default: searchController } = await import('../../controllers/search.controller.ts');
 
 describe('Search Controller - S3 Caching Integration', () => {
   let app;

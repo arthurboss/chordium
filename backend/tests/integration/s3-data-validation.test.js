@@ -14,7 +14,7 @@ const mockLogger = {
 // are not used in backend, these are frontend utilities
 // Mocking them here for potential future use
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule('../../utils/logger.ts', () => ({
   default: mockLogger,
 }));
 
@@ -29,12 +29,12 @@ const mockS3StorageService = {
   testConnection: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
 // Import the service after mocking dependencies
-const { s3StorageService } = await import('../../services/s3-storage.service.js');
+const { s3StorageService } = await import('../../services/s3-storage.service.ts');
 
 /**
  * Tests for data validation, edge cases, and utility integration in S3 storage

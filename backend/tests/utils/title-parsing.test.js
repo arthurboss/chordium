@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { cleanCifraClubTitle, extractTitleAndArtist } from '../../utils/title-parsing.js';
+import { cleanCifraClubTitle, extractTitleAndArtist } from '../../utils/title-parsing.ts';
 
 describe('Title Parsing Utilities', () => {
   describe('cleanCifraClubTitle', () => {

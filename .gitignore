@@ -33,3 +33,5 @@ test-results/
 
 # Ignore environment variable files
 .env
+
+archive/
