@@ -27,7 +27,13 @@ export function isValidResult(result: ResultWithPath, searchType: SearchType): b
       return false;
     }
 
-    const path = result.path.trim().replace(/(^\/+|\/+$)/g, ''); // Remove leading/trailing slashes
+    let path = result.path.trim();
+    // Remove everything after a ? or # (query/hash)
+    path = path.split('?')[0].split('#')[0];
+    // Remove leading/trailing slashes
+    // Remove leading/trailing slashes (correct regex)
+    // Remove leading and trailing slashes (fully correct and explicit)
+    path = path.replace(/^(\/)+/, '').replace(/(\/)+$/, '');
 
     // Parse URL to validate format
     try {
@@ -40,6 +46,7 @@ export function isValidResult(result: ResultWithPath, searchType: SearchType): b
     }
 
     const pathSegments = path.split('/').filter(segment => segment.length > 0);
+    logger.debug('[isValidResult] Normalized path and segments', { path, pathSegments });
 
     // Reject paths ending with .html, .htm, or other file extensions
     // We only want chord sheet paths, not HTML/file pages
@@ -74,6 +81,11 @@ export function isValidResult(result: ResultWithPath, searchType: SearchType): b
             expected: 2, 
             actual: pathSegments.length 
           });
+          return false;
+        }
+        // Exclude URLs where the last segment is 'letra' (lyrics, not chord sheet)
+        if (pathSegments[1].toLowerCase() === 'letra') {
+          logger.debug(`Chord sheet URL validation failed: Last segment is 'letra'`, { path, pathSegments });
           return false;
         }
         break;

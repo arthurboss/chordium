@@ -22,24 +22,24 @@ export function extractSearchResults(): DOMSearchResult[] {
       return parent && parent.className === 'gs-title';
     })
     .map(link => {
-      const url = (link as HTMLAnchorElement).href.startsWith('http') 
-        ? (link as HTMLAnchorElement).href 
+      const url = (link as HTMLAnchorElement).href.startsWith('http')
+        ? (link as HTMLAnchorElement).href
         : `${window.location.origin}${(link as HTMLAnchorElement).href}`;
       // Extract path from URL (e.g., "https://www.cifraclub.com.br/oasis/wonderwall/" -> "oasis/wonderwall")
       const pathMatch = url.match(/cifraclub\.com\.br\/(.+?)\/?$/);
       const path = pathMatch ? pathMatch[1] : url;
-      
+
       const rawTitle = link.textContent?.trim() || '';
-      
+
       // Extract artist information from title or URL
       let artist = '';
       let title = rawTitle;
-      
+
       // First try to extract from title (format: "Song Title - Artist Name - Cifra Club" or "Artist Name - Cifra Club")
       if (rawTitle.includes(' - ')) {
         // Remove "- Cifra Club" suffix first
         const cleanTitle = rawTitle.replace(/ - Cifra Club$/, '').trim();
-        
+
         // Split by " - " to separate song and artist
         const parts = cleanTitle.split(' - ');
         if (parts.length >= 2) {
@@ -57,7 +57,7 @@ export function extractSearchResults(): DOMSearchResult[] {
           }
         }
       }
-      
+
       // Fallback: extract artist from URL if not found in title
       if (!artist) {
         const pathSegments = path.split('/').filter(Boolean);
@@ -69,14 +69,24 @@ export function extractSearchResults(): DOMSearchResult[] {
             .join(' ');
         }
       }
-      
+
       return {
         title,
         path,
         artist: artist || ''
       };
     })
-    .filter(r => r.title && r.path);
+    .filter(r => {
+      if (!r.title || !r.path) return false;
+      const segments = r.path.split('/').filter(Boolean);
+      // Only allow exactly 2 segments (artist/song)
+      if (segments.length !== 2) return false;
+      // Exclude if last segment is "letra"
+      if (segments[1].toLowerCase() === 'letra') return false;
+      // Exclude if second segment is numeric (e.g., /artist/12345)
+      if (/^\d+$/.test(segments[1])) return false;
+      return true;
+    });
 }
 
 /**
@@ -118,7 +128,11 @@ export function extractArtistSongs(): Song[] {
         // Extract path from URL (e.g., "https://www.cifraclub.com.br/oasis/wonderwall/" -> "oasis/wonderwall")
         const pathMatch = url.match(/cifraclub\.com\.br\/(.+?)\/?$/);
         const path = pathMatch ? pathMatch[1] : url;
-        
+
+        // Debug: log each candidate song link and path
+        // eslint-disable-next-line no-console
+        console.log('[DEBUG][SCRAPE] Candidate:', { title, url, path });
+
         songMap.set(url, {
           title: title.replace(/\s+/g, ' ').trim(),
           path,
@@ -126,11 +140,34 @@ export function extractArtistSongs(): Song[] {
         });
       }
     } catch (e) {
-      console.error('Error processing song:', e);
+      // eslint-disable-next-line no-console
+      console.error('[DEBUG][SCRAPE] Error processing song:', e);
     }
   });
 
-  return Array.from(songMap.values());
+  // Debug: log all collected songs before filtering
+  // eslint-disable-next-line no-console
+  console.log('[DEBUG][SCRAPE] All collected songs:', Array.from(songMap.values()));
+
+  // Filtering step: only allow valid song paths (2 segments, not numeric, not letra, etc)
+  const filtered = Array.from(songMap.values()).filter(song => {
+    if (!song.title || !song.path) return false;
+    const segments = song.path.split('/').filter(Boolean);
+    // Only allow exactly 2 segments (artist/song)
+    if (segments.length !== 2) return false;
+    // Exclude if last segment is "letra"
+    if (segments[1].toLowerCase() === 'letra') return false;
+    // Exclude if second segment is numeric (e.g., /artist/12345)
+    if (/^\d+$/.test(segments[1])) return false;
+    // Debug: log filtering decision
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG][SCRAPE][FILTER]', song, { segments });
+    return true;
+  });
+  // Debug: log final filtered songs
+  // eslint-disable-next-line no-console
+  console.log('[DEBUG][SCRAPE] Filtered songs:', filtered);
+  return filtered;
 }
 
 /**

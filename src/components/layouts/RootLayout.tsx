@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { SearchStateProvider } from "@/context/SearchStateContext";
 
 /**
  * Root layout component that wraps all routes
@@ -8,11 +9,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
  */
 const RootLayout = () => {
   return (
-    <>
+    <SearchStateProvider>
       <Toaster />
       <Sonner />
       <Outlet />
-    </>
+    </SearchStateProvider>
   );
 };
 

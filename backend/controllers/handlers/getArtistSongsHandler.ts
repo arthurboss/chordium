@@ -31,6 +31,7 @@ async function getArtistSongsHandler(
       const cachedSongs = await getCachedArtistSongs(normalizedArtistPath);
       if (cachedSongs && cachedSongs.length > 0) {
         logger.info(`Found ${cachedSongs.length} cached songs for artist ${normalizedArtistPath} in S3`);
+        logger.info(`[DATA SOURCE] S3`);
         res.json(cachedSongs);
         return;
       }
@@ -39,12 +40,13 @@ async function getArtistSongsHandler(
       logger.warn(`Failed to retrieve cached songs for ${normalizedArtistPath} from S3:`, errorMessage);
     }
 
+    logger.info(`[DATA SOURCE] Scraping (CifraClub)`);
     logger.info(`No cached data for ${normalizedArtistPath}, fetching from CifraClub...`);
     const artistUrl = `${cifraClubService.baseUrl}/${normalizedArtistPath}/`;
     const songs = await cifraClubService.getArtistSongs(artistUrl);
-    
+    logger.info(`[SCRAPED ELEMENTS] ${JSON.stringify(songs)}`);
     logger.info(`Found ${songs.length} songs for artist ${normalizedArtistPath} from CifraClub`);
-    
+
     if (songs && songs.length > 0) {
       try {
         await storeArtistSongs(normalizedArtistPath, songs);
@@ -54,7 +56,7 @@ async function getArtistSongsHandler(
         logger.warn(`Failed to cache songs for ${normalizedArtistPath} in S3:`, errorMessage);
       }
     }
-    
+
     res.json(songs);
   } catch (error) {
     logger.error('Error fetching artist songs:', error);
