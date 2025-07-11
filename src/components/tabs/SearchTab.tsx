@@ -26,38 +26,61 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
   const [hasSearched, setHasSearched] = useState(false); // TDD: force to false for initial load
-  const [searchKey, setSearchKey] = useState(0); // Used to force remount SearchResults
-  const [artistInput, setArtistInput] = useState(searchState.artist || '');
-  const [songInput, setSongInput] = useState(searchState.song || '');
+  const [artistInput, setArtistInput] = useState('');
+  const [songInput, setSongInput] = useState('');
+  const [prevArtistInput, setPrevArtistInput] = useState('');
+  const [prevSongInput, setPrevSongInput] = useState('');
+  const [submittedArtist, setSubmittedArtist] = useState('');
+  const [submittedSong, setSubmittedSong] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
   // Debug: log hasSearched and searchState on every render
   console.log('[SearchTab] hasSearched:', hasSearched, 'searchState:', searchState);
 
+
+
   // Handlers for search form
   const handleInputChange = (artistValue: string, songValue: string) => {
     setArtistInput(artistValue);
     setSongInput(songValue);
-    // Update the URL to match the current input values (remove empty params)
-    const params = new URLSearchParams();
-    if (artistValue) params.set('artist', toSlug(artistValue));
-    if (songValue) params.set('song', toSlug(songValue));
-    navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+    
+    // Only update URL when an input is cleared (goes from non-empty to empty)
+    const artistCleared = prevArtistInput && !artistValue;
+    const songCleared = prevSongInput && !songValue;
+    
+    if (artistCleared || songCleared) {
+      const params = new URLSearchParams();
+      if (artistValue) params.set('artist', toSlug(artistValue));
+      if (songValue) params.set('song', toSlug(songValue));
+      navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+    }
+    
+    // Update previous values for next comparison
+    setPrevArtistInput(artistValue);
+    setPrevSongInput(songValue);
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
+    // Clear artist/song selection state before new search
+    setActiveArtist(null);
+    setSelectedSongLocal(null);
     setLoading(true);
+    setSubmittedArtist(artistValue);
+    setSubmittedSong(songValue);
     updateSearchState({ artist: artistValue, song: songValue, results: [] });
     setLastSearchQuery(artistValue, songValue);
     setHasSearched(true);
-    setSearchKey(prev => prev + 1); // Force remount SearchResults
     // Update the URL with the search query
     const params = new URLSearchParams();
     if (artistValue) params.set('artist', toSlug(artistValue));
     if (songValue) params.set('song', toSlug(songValue));
     navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: location.pathname.startsWith('/search') });
-    setLoading(false);
+  };
+
+  // Handler for loading state changes from SearchResults
+  const handleLoadingChange = (isLoading: boolean) => {
+    setLoading(isLoading);
   };
 
   // Handler for selecting a song from search results
@@ -109,19 +132,19 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
           </FormContainer>
           <div {...cyAttr('search-results-area')}>
             <SearchResults
-              key={searchKey}
               setMySongs={setMySongs}
               setActiveTab={setActiveTab}
               setSelectedSong={handleSongSelect}
               myChordSheets={myChordSheets}
-              artist={searchState.artist}
-              song={searchState.song}
-              filterArtist={artistInput}
+              artist={hasSearched ? submittedArtist : searchState.artist}
+              song={hasSearched ? submittedSong : searchState.song}
+              filterArtist={activeArtist ? searchState.artist : artistInput}
               filterSong={songInput}
               activeArtist={activeArtist}
               onArtistSelect={handleArtistSelect}
               hasSearched={hasSearched}
               shouldFetch={hasSearched}
+              onLoadingChange={handleLoadingChange}
             />
           </div>
         </>

@@ -78,6 +78,10 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         artists: action.artists,
         songs: action.songs,
         hasSearched: true,
+        // Clear artist-related state when a new search is performed
+        activeArtist: null,
+        artistSongs: [],
+        filteredArtistSongs: [],
       };
 
     case 'SEARCH_ERROR':
@@ -171,6 +175,15 @@ export function determineUIState(state: SearchResultsState) {
       artistSongs: state.artistSongs,
       searchType: 'artist' as const,
       hasSongs: true 
+    };
+  }
+  
+  // Handle case where artist is selected but has no songs
+  if (state.activeArtist && !state.artistSongsLoading && state.artistSongs.length === 0) {
+    console.log('[determineUIState] UI state: artist-songs-empty', state.activeArtist);
+    return { 
+      state: 'artist-songs-empty' as const, 
+      activeArtist: state.activeArtist
     };
   }
   

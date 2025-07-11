@@ -23,6 +23,7 @@ interface SearchResultsStateHandlerProps {
   songs: Song[];
   filteredSongs: Song[];
   filterSong: string;
+  filterArtist?: string; // <-- add this
   onView: (songData: Song) => void;
   onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
@@ -34,6 +35,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
   songs,
   filteredSongs,
   filterSong,
+  filterArtist = '', // <-- default
   onView,
   onAdd,
   onArtistSelect
@@ -51,7 +53,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     case 'artist-songs-empty':
       return <div style={{ padding: 32, textAlign: 'center' }}><h3>No songs found for {stateData.activeArtist?.displayName || 'this artist'}.</h3><p>Try searching for another artist or song.</p></div>;
     case 'songs-view':
-      return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} filterArtist={stateData.searchType === 'song' ? filterArtist : ''} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
     case 'hasSearched':
       return <div data-cy="search-results-layout-wrapper"><SearchResultsLayout artists={artists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
     case 'default':

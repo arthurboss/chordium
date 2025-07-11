@@ -50,7 +50,7 @@ export const useSearchEffects = ({
       // For ARTIST_SONGS_ERROR, keep as string (reducer expects string)
       console.log('[useSearchEffects] Dispatching ARTIST_SONGS_ERROR', artistSongsError);
       dispatch({ type: 'ARTIST_SONGS_ERROR', error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message });
-    } else if (artistSongs && artistSongs !== state.artistSongs) {
+    } else if (artistSongs !== undefined && artistSongs !== state.artistSongs) {
       if (JSON.stringify(artistSongs) !== JSON.stringify(state.artistSongs)) {
         console.log('[useSearchEffects] Dispatching ARTIST_SONGS_SUCCESS', artistSongs);
         dispatch({ type: 'ARTIST_SONGS_SUCCESS', songs: artistSongs });

@@ -16,6 +16,7 @@ interface SongsViewProps {
   // For song-only searches
   songs?: Song[];
   filterSong: string;
+  filterArtist?: string; // <-- add this
   onView: (songData: Song) => void;
   onAdd: (songId: string) => void;
   searchType?: 'artist' | 'song';
@@ -26,14 +27,22 @@ export const SongsView: React.FC<SongsViewProps> = ({
   filteredSongs = [],
   songs = [],
   filterSong,
+  filterArtist = '', // <-- default
   onView,
   onAdd,
   searchType = 'artist'
 }) => {
   // Determine which data source to use
   const isArtistSearch = searchType === 'artist' && activeArtist;
-  const displaySongs: Song[] = isArtistSearch ? filteredSongs : songs;
+  let displaySongs: Song[] = isArtistSearch ? filteredSongs : songs;
   const title = isArtistSearch ? activeArtist?.displayName : 'Search Results';
+
+  // Local filter by artist for song-only search
+  if (searchType === 'song' && filterArtist) {
+    displaySongs = displaySongs.filter(song =>
+      song.artist.toLowerCase().includes(filterArtist.toLowerCase())
+    );
+  }
 
   // Render a song item for the virtualized list
   const renderSongItem = useCallback(({ index, style }: ListChildComponentProps) => {

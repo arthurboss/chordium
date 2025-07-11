@@ -57,18 +57,35 @@ export function useSearchResults(
 
   // Only trigger fetch if artist or song input changes, not filterSong
   const shouldTriggerFetch = useMemo(() => {
-    return shouldFetch && (artist !== lastSearchParams.current.artist || song !== lastSearchParams.current.song);
+    const shouldTrigger = shouldFetch && (artist !== lastSearchParams.current.artist || song !== lastSearchParams.current.song);
+    console.log('[useSearchResults] shouldTriggerFetch calculation:', {
+      shouldFetch,
+      artist,
+      song,
+      lastArtist: lastSearchParams.current.artist,
+      lastSong: lastSearchParams.current.song,
+      shouldTrigger
+    });
+    return shouldTrigger;
   }, [artist, song, shouldFetch]);
 
   // Fetch artists or songs from backend when shouldFetch is true
   useEffect(() => {
     console.log('[useSearchResults] Fetch effect triggered. shouldContinueFetching:', shouldContinueFetching, 'artist:', artist, 'song:', song);
     console.log('[useSearchResults] lastFetchedArtist.current:', lastFetchedArtist.current, 'artist+song:', artist + '|' + song);
+    console.log('[useSearchResults] shouldTriggerFetch:', shouldTriggerFetch);
     if (!shouldContinueFetching) {
+      console.log('[useSearchResults] Early return: shouldContinueFetching is false');
       return;
     }
-    if (!shouldTriggerFetch) return;
-    if (!artist && !song) return;
+    if (!shouldTriggerFetch) {
+      console.log('[useSearchResults] Early return: shouldTriggerFetch is false');
+      return;
+    }
+    if (!artist && !song) {
+      console.log('[useSearchResults] Early return: no artist or song');
+      return;
+    }
     setLoading(true);
     setError(null);
     let isArtistSearch = false;
@@ -121,7 +138,7 @@ export function useSearchResults(
           setHasFetched(true);
         });
     }
-  }, [shouldTriggerFetch, artist, song, shouldFetch]);
+  }, [shouldTriggerFetch, artist, song, shouldFetch, shouldContinueFetching]);
 
   // Only allow local filtering if we have a valid response
   useEffect(() => {
