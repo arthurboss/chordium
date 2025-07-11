@@ -31,16 +31,18 @@ export const useSearchEffects = ({
   // Handle search results changes - only dispatch when there's an actual change
   useEffect(() => {
     if (loading && !state.loading) {
+      console.log('[useSearchEffects] Dispatching SEARCH_START', { loading, state });
       dispatch({ type: 'SEARCH_START' });
-    } else if (!loading && !error) {
-      // Always dispatch SEARCH_SUCCESS when loading is false and not error (even if results are empty)
+    } else if (!loading && !error && hasSearched) {
+      console.log('[useSearchEffects] Dispatching SEARCH_SUCCESS', { artists, songs, loading, error, state });
       dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
-    } else if (!loading && error && error !== state.error) {
+    } else if (!loading && error && error !== state.error && hasSearched) {
       // Ensure error is always an Error object
       const errorObj = typeof error === 'string' ? new Error(error) : error;
+      console.log('[useSearchEffects] Dispatching SEARCH_ERROR', { error, loading, state });
       dispatch({ type: 'SEARCH_ERROR', error: errorObj });
     }
-  }, [loading, error, artists, songs, state.loading, state.error, dispatch]);
+  }, [loading, error, artists, songs, state.loading, state.error, dispatch, hasSearched]);
 
   // Handle artist songs changes - only dispatch when there's an actual change
   useEffect(() => {

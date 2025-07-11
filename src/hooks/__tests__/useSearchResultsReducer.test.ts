@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { searchResultsReducer, SearchResultsState, SearchResultsAction, initialState } from '../useSearchResultsReducer';
+import { searchResultsReducer, SearchResultsState, SearchResultsAction, initialState, determineUIState } from '../useSearchResultsReducer';
 import { Artist } from '@/types/artist';
 import { Song } from '@/types/song';
 import { getArtistSearchResult, getSongSearchResult } from '../../../fixtures/index.js';
@@ -259,5 +259,49 @@ describe('useSearchResultsReducer', () => {
       expect(newState.songs).toEqual([testSong]);
       expect(newState.filteredArtistSongs).toEqual([testSong]);
     });
+  });
+});
+
+describe('determineUIState', () => {
+  it('should return default state before any search', () => {
+    const state = { ...initialState };
+    const uiState = determineUIState(state);
+    expect(uiState.state).toBe('default');
+  });
+
+  it('should return hasSearched state after a search with no results', () => {
+    const state = { ...initialState, hasSearched: true, songs: [], artists: [] };
+    const uiState = determineUIState(state);
+    expect(uiState.state).toBe('hasSearched');
+    expect(uiState.hasSongs).toBe(false);
+  });
+
+  it('should return songs-view state after a search with results', () => {
+    const testSong = getTestSong();
+    const state = { ...initialState, hasSearched: true, songs: [testSong], artists: [] };
+    const uiState = determineUIState(state);
+    expect(uiState.state).toBe('songs-view');
+    expect(uiState.hasSongs).toBe(true);
+  });
+});
+
+describe('hasSearched flag', () => {
+  it('should be false in the initial state', () => {
+    expect(initialState.hasSearched).toBe(false);
+  });
+
+  it('should only be set to true on SEARCH_SUCCESS or SEARCH_ERROR', () => {
+    let state = { ...initialState };
+    // Unrelated action
+    state = searchResultsReducer(state, { type: 'ARTIST_SONGS_START', artist: { path: 'test', displayName: 'Test', songCount: 0 } });
+    expect(state.hasSearched).toBe(false);
+    // SEARCH_SUCCESS
+    state = searchResultsReducer(state, { type: 'SEARCH_SUCCESS', artists: [], songs: [] });
+    expect(state.hasSearched).toBe(true);
+    // Reset
+    state = { ...initialState };
+    // SEARCH_ERROR
+    state = searchResultsReducer(state, { type: 'SEARCH_ERROR', error: new Error('fail') });
+    expect(state.hasSearched).toBe(true);
   });
 });

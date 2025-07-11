@@ -9,6 +9,7 @@ import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
 import { toSlug } from '@/utils/url-slug-utils';
+import { cyAttr } from '@/utils/test-utils/cy-attr';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -24,13 +25,13 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const [loading, setLoading] = useState(false);
   const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
-  const [hasSearched, setHasSearched] = useState(() => {
-    // Hydrate hasSearched if there is a query in context (e.g. after navigation)
-    return Boolean(searchState.artist || searchState.song);
-  });
+  const [hasSearched, setHasSearched] = useState(false); // TDD: force to false for initial load
   const [searchKey, setSearchKey] = useState(0); // Used to force remount SearchResults
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Debug: log hasSearched and searchState on every render
+  console.log('[SearchTab] hasSearched:', hasSearched, 'searchState:', searchState);
 
   // Handlers for search form
   const handleInputChange = (artistValue: string, songValue: string) => {
@@ -92,21 +93,23 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               isSearchDisabled={!searchState.artist && !searchState.song}
             />
           </FormContainer>
-          <SearchResults
-            key={searchKey}
-            setMySongs={setMySongs}
-            setActiveTab={setActiveTab}
-            setSelectedSong={handleSongSelect}
-            myChordSheets={myChordSheets}
-            artist={searchState.artist}
-            song={searchState.song}
-            filterArtist={searchState.artist}
-            filterSong={searchState.song}
-            activeArtist={activeArtist}
-            onArtistSelect={handleArtistSelect}
-            hasSearched={hasSearched}
-            shouldFetch={hasSearched}
-          />
+          <div {...cyAttr('search-results-area')}>
+            <SearchResults
+              key={searchKey}
+              setMySongs={setMySongs}
+              setActiveTab={setActiveTab}
+              setSelectedSong={handleSongSelect}
+              myChordSheets={myChordSheets}
+              artist={searchState.artist}
+              song={searchState.song}
+              filterArtist={searchState.artist}
+              filterSong={searchState.song}
+              activeArtist={activeArtist}
+              onArtistSelect={handleArtistSelect}
+              hasSearched={hasSearched}
+              shouldFetch={hasSearched}
+            />
+          </div>
         </>
       )}
     </div>

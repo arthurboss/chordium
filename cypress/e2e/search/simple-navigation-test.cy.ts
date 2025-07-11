@@ -38,4 +38,27 @@ describe('Search to Song Navigation - Simple Test', () => {
     cy.get('.animate-fade-in').should('be.visible'); // SongViewer has this class
     cy.contains('button', 'Back to My Chord Sheets').should('be.visible');
   });
+
+  it('should not show "No Chord Sheets were found." before any search, and should show it after a search with no results', () => {
+    cy.visit('/');
+    cy.get('[data-cy="tab-search"]').should('be.visible').click();
+
+    // Before any search, the message should NOT be visible in the search results area
+    cy.get('[data-cy="search-results-area"]').should('exist').within(() => {
+      cy.get('[data-cy="search-no-chord-sheets-found"]').should('not.exist');
+    });
+
+    // Mock the search API to return empty results
+    cy.intercept('GET', '/api/cifraclub-search*', []).as('emptySearch');
+
+    // Perform a song search with no results
+    cy.get('#song-search-input').type('nonexistentsongname12345');
+    cy.get('button[type="submit"]').click();
+    cy.wait('@emptySearch');
+
+    // After search, the message should be visible in the search results area
+    cy.get('[data-cy="search-results-area"]').within(() => {
+      cy.get('[data-cy="search-no-chord-sheets-found"]').should('be.visible');
+    });
+  });
 });
