@@ -71,6 +71,11 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     setSelectedSongLocal(null);
   };
 
+  // Handler for going back to artist list from artist songs view
+  const handleBackToArtistList = () => {
+    setActiveArtist(null);
+  };
+
   return (
     <div className="space-y-4">
       {selectedSong ? (
@@ -92,8 +97,10 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               onInputChange={handleInputChange}
               onSearchSubmit={handleSearchSubmit}
               loading={loading}
-              showBackButton={false}
+              showBackButton={!!activeArtist}
+              onBackClick={activeArtist ? handleBackToArtistList : undefined}
               isSearchDisabled={!artistInput && !songInput}
+              artistLoading={loading} // ensure disables back button when loading
             />
           </FormContainer>
           <div {...cyAttr('search-results-area')}>
