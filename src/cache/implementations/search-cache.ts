@@ -67,6 +67,7 @@ export const generateCacheKey = (artist: string | null, song: string | null, ext
       key += `|${k}:${clean(v)}`;
     });
   }
+  debugLog('[generateCacheKey] Generated key:', { artist, song, key });
   return key;
 };
 
@@ -213,25 +214,42 @@ export const cacheSearchResults = (
  */
 export const getCachedSearchResults = (artist: string | null, song: string | null, extra?: Record<string, string | null>): Song[] | null => {
   const key = generateCacheKey(artist, song, extra);
+  debugLog('[getCachedSearchResults] Checking cache for:', { artist, song, key });
 
   // Try in-memory cache first
   if (inMemoryCache.has(key)) {
+    debugLog('[getCachedSearchResults] Found in in-memory cache');
     const item = inMemoryCache.get(key)!;
     // Check expiry
     if (Date.now() - item.timestamp > CACHE_EXPIRATION_TIME) {
+      debugLog('[getCachedSearchResults] In-memory cache expired');
       inMemoryCache.delete(key);
       return null;
     }
     item.timestamp = Date.now();
     item.accessCount++;
+    debugLog('[getCachedSearchResults] Returning from in-memory cache:', { resultsLength: item.results.length });
     return item.results;
   }
 
+  debugLog('[getCachedSearchResults] Not in in-memory cache, checking localStorage');
   // Fallback to persistent cache
   const cache = initializeCache();
+  debugLog('[getCachedSearchResults] Cache initialized, items count:', cache.items.length);
+  
   const cacheItem = cache.items.find(item => item.key === key);
   
-  if (!cacheItem) return null;
+  if (!cacheItem) {
+    debugLog('[getCachedSearchResults] No cache item found for key:', key);
+    return null;
+  }
+  
+  debugLog('[getCachedSearchResults] Found cache item:', { 
+    key: cacheItem.key, 
+    resultsLength: cacheItem.results.length,
+    timestamp: cacheItem.timestamp,
+    query: cacheItem.query
+  });
   
   // Verify that the cache item actually matches the current search query
   // We use a less strict comparison now as the cache key should be enough
@@ -241,6 +259,15 @@ export const getCachedSearchResults = (artist: string | null, song: string | nul
     
   const artistMatches = normalizeForCompare(cacheItem.query.artist) === normalizeForCompare(artist);
   const songMatches = normalizeForCompare(cacheItem.query.song) === normalizeForCompare(song);
+  
+  debugLog('[getCachedSearchResults] Query comparison:', {
+    cacheArtist: cacheItem.query.artist,
+    requestArtist: artist,
+    artistMatches,
+    cacheSong: cacheItem.query.song,
+    requestSong: song,
+    songMatches
+  });
   
   if (!artistMatches || !songMatches) {
     debugLog('Cache key matches but search parameters differ, returning null');
@@ -267,6 +294,7 @@ export const getCachedSearchResults = (artist: string | null, song: string | nul
   cacheItem.accessCount = (cacheItem.accessCount || 0) + 1;
   saveCache(cache);
   
+  debugLog('[getCachedSearchResults] Returning cached results:', { resultsLength: cacheItem.results.length });
   return cacheItem.results;
 };
 
@@ -510,3 +538,11 @@ export const inspectSearchCache = () => {
     resultsCount: item.results.length
   }));
 };
+
+// Make inspectSearchCache available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).inspectSearchCache = inspectSearchCache;
+  (window as any).clearSearchCache = clearSearchCache;
+  (window as any).generateCacheKey = generateCacheKey;
+  (window as any).getCachedSearchResults = getCachedSearchResults;
+}

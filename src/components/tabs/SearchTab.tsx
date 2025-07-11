@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
@@ -8,7 +8,8 @@ import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
-import { toSlug } from '@/utils/url-slug-utils';
+import { getCachedSearchResults } from '@/cache/implementations/search-cache';
+import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 
 interface SearchTabProps {
@@ -25,20 +26,47 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const [loading, setLoading] = useState(false);
   const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
-  const [hasSearched, setHasSearched] = useState(false); // TDD: force to false for initial load
+  const [hasSearched, setHasSearched] = useState(false);
   const [artistInput, setArtistInput] = useState('');
   const [songInput, setSongInput] = useState('');
   const [prevArtistInput, setPrevArtistInput] = useState('');
   const [prevSongInput, setPrevSongInput] = useState('');
   const [submittedArtist, setSubmittedArtist] = useState('');
   const [submittedSong, setSubmittedSong] = useState('');
+  const [shouldFetch, setShouldFetch] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   // Debug: log hasSearched and searchState on every render
   console.log('[SearchTab] hasSearched:', hasSearched, 'searchState:', searchState);
 
+  // Initialize input fields and search state from URL on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const artistParam = searchParams.get('artist');
+    const songParam = searchParams.get('song');
 
+    if (artistParam || songParam) {
+      const artist = artistParam ? fromSlug(artistParam) : '';
+      const song = songParam ? fromSlug(songParam) : '';
+      
+      console.log('[SearchTab] Initializing from URL params:', { artist, song });
+      
+      // Set input fields
+      setArtistInput(artist);
+      setSongInput(song);
+      setPrevArtistInput(artist);
+      setPrevSongInput(song);
+      setSubmittedArtist(artist);
+      setSubmittedSong(song);
+
+      // Set search state and let useSearchResults handle cache checking
+      updateSearchState({ artist, song, results: [] });
+      setLastSearchQuery(artist, song);
+      setHasSearched(true);
+      setShouldFetch(true);
+    }
+  }, [location.search, updateSearchState]);
 
   // Handlers for search form
   const handleInputChange = (artistValue: string, songValue: string) => {
@@ -71,6 +99,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     updateSearchState({ artist: artistValue, song: songValue, results: [] });
     setLastSearchQuery(artistValue, songValue);
     setHasSearched(true);
+    setShouldFetch(true);
     // Update the URL with the search query
     const params = new URLSearchParams();
     if (artistValue) params.set('artist', toSlug(artistValue));
@@ -143,7 +172,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               activeArtist={activeArtist}
               onArtistSelect={handleArtistSelect}
               hasSearched={hasSearched}
-              shouldFetch={hasSearched}
+              shouldFetch={shouldFetch}
               onLoadingChange={handleLoadingChange}
             />
           </div>

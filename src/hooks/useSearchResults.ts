@@ -86,6 +86,35 @@ export function useSearchResults(
       console.log('[useSearchResults] Early return: no artist or song');
       return;
     }
+
+    // Check cache first
+    const cachedResults = getCachedSearchResults(artist, song);
+    if (cachedResults && cachedResults.length > 0) {
+      console.log('[useSearchResults] Using cached results:', cachedResults.length);
+      // Determine if cached results are artists or songs based on search type
+      const isArtistSearch = artist && !song;
+      const isSongSearch = !artist && song;
+      
+      if (isArtistSearch) {
+        // Cached results are artists
+        setArtists(cachedResults as unknown as Artist[]);
+        setAllArtists(cachedResults as unknown as Artist[]);
+        setSongs([]);
+        setAllSongs([]);
+      } else {
+        // Cached results are songs
+        setSongs(cachedResults as unknown as Song[]);
+        setAllSongs(cachedResults as unknown as Song[]);
+        setArtists([]);
+        setAllArtists([]);
+      }
+      setLoading(false);
+      setError(null);
+      setHasFetched(true);
+      lastSearchParams.current = { artist, song };
+      return; // Don't fetch from API
+    }
+
     setLoading(true);
     setError(null);
     let isArtistSearch = false;
@@ -101,6 +130,7 @@ export function useSearchResults(
           setSongs(data);
           setAllSongs(data); // <-- Store all fetched songs for local filtering
           setArtists([]);
+          cacheSearchResults(artist, song, data);
           setLoading(false);
           lastSearchParams.current = { artist, song };
           setHasFetched(true);
@@ -125,6 +155,7 @@ export function useSearchResults(
           setArtists(data);
           setAllArtists(data); // <-- Store all fetched artists for local filtering
           setSongs([]);
+          cacheSearchResults(artist, song, data);
           setLoading(false);
           lastSearchParams.current = { artist, song };
           setHasFetched(true);
