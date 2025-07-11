@@ -27,6 +27,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
   const [hasSearched, setHasSearched] = useState(false); // TDD: force to false for initial load
   const [searchKey, setSearchKey] = useState(0); // Used to force remount SearchResults
+  const [artistInput, setArtistInput] = useState(searchState.artist || '');
+  const [songInput, setSongInput] = useState(searchState.song || '');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,8 +37,9 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
 
   // Handlers for search form
   const handleInputChange = (artistValue: string, songValue: string) => {
-    updateSearchState({ artist: artistValue, song: songValue });
-    // Do NOT set hasSearched here!
+    setArtistInput(artistValue);
+    setSongInput(songValue);
+    // Do NOT set hasSearched or update global search state here!
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
@@ -84,13 +87,13 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
         <>
           <FormContainer>
             <SearchBar
-              artistValue={searchState.artist}
-              songValue={searchState.song}
+              artistValue={artistInput}
+              songValue={songInput}
               onInputChange={handleInputChange}
               onSearchSubmit={handleSearchSubmit}
               loading={loading}
               showBackButton={false}
-              isSearchDisabled={!searchState.artist && !searchState.song}
+              isSearchDisabled={!artistInput && !songInput}
             />
           </FormContainer>
           <div {...cyAttr('search-results-area')}>
@@ -102,8 +105,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               myChordSheets={myChordSheets}
               artist={searchState.artist}
               song={searchState.song}
-              filterArtist={searchState.artist}
-              filterSong={searchState.song}
+              filterArtist={artistInput}
+              filterSong={songInput}
               activeArtist={activeArtist}
               onArtistSelect={handleArtistSelect}
               hasSearched={hasSearched}

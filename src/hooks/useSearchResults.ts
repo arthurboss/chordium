@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Artist } from "@/types/artist";
 import { Song } from "@/types/song";
 import { filterArtistsByNameOrPath } from "@/utils/artist-filter-utils";
@@ -30,6 +30,8 @@ export function useSearchResults(
   const [error, setError] = useState<Error | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
   const lastFetchedArtist = useRef<string>("");
+  const lastFetchedSong = useRef<string>("");
+  const lastSearchParams = useRef({ artist: '', song: '' });
   // Track if we should continue to fetch (this will reset after a successful fetch)
   const [shouldContinueFetching, setShouldContinueFetching] = useState(shouldFetch);
 
@@ -39,7 +41,7 @@ export function useSearchResults(
   useEffect(() => {
     console.log('[useSearchResults] shouldFetch:', shouldFetch, 'artist:', artist, 'song:', song);
     setShouldContinueFetching(shouldFetch);
-    if (shouldFetch) {
+    if (shouldFetch && (artist || song)) {
       // Reset all results and loading state on new search
       setArtists([]);
       setAllArtists([]);
@@ -49,8 +51,14 @@ export function useSearchResults(
       setError(null);
       setHasFetched(false);
       lastFetchedArtist.current = "";
+      lastFetchedSong.current = "";
     }
   }, [shouldFetch, artist, song]);
+
+  // Only trigger fetch if artist or song input changes, not filterSong
+  const shouldTriggerFetch = useMemo(() => {
+    return shouldFetch && (artist !== lastSearchParams.current.artist || song !== lastSearchParams.current.song);
+  }, [artist, song, shouldFetch]);
 
   // Fetch artists or songs from backend when shouldFetch is true
   useEffect(() => {
@@ -59,114 +67,61 @@ export function useSearchResults(
     if (!shouldContinueFetching) {
       return;
     }
-    // Allow fetch if either artist or song is present
-    const shouldTriggerFetch =
-      (artist || song) &&
-      (lastFetchedArtist.current !== artist + '|' + song) &&
-      ((artist && artist.trim() !== '') || (song && song.trim() !== ''));
-    console.log('[useSearchResults] shouldTriggerFetch:', shouldTriggerFetch);
-    if (shouldTriggerFetch) {
-      console.log('[useSearchResults] About to start fetch for:', { artist, song });
-      setLoading(true);
-      setError(null);
-      setArtists([]);
-      setAllArtists([]);
-      setSongs([]);
-      setAllSongs([]);
-      setHasFetched(false);
-      const cachedResults = getCachedSearchResults(artist || null, song || null);
-      if (cachedResults) {
-        console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
-        // Always set loading/hasFetched, even for empty results
-        if (Array.isArray(cachedResults) && cachedResults.length > 0) {
-          if ((!artist && song) || cachedResults[0]?.title) {
-            setAllSongs(cachedResults);
-            setSongs(cachedResults);
-            setAllArtists([]);
-            setArtists([]);
-          } else if (cachedResults[0]?.displayName || cachedResults[0]?.name) {
-            setAllArtists(cachedResults as unknown as Artist[]);
-            setArtists(cachedResults as unknown as Artist[]);
-            setAllSongs([]);
-            setSongs([]);
-          }
-        } else {
-          setAllArtists([]);
-          setArtists([]);
-          setAllSongs([]);
-          setSongs([]);
-        }
-        setLoading(false);
-        setHasFetched(true);
-        lastFetchedArtist.current = artist + '|' + song;
-        setShouldContinueFetching(false);
-        return;
-      }
-
-      // Choose endpoint based on search type
-      let url;
-      if (!artist && song) {
-        // Song only search
-        url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
-      } else {
-        // Artist only or artist+song search
-        url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
-      }
-      console.log('[useSearchResults] Fetching:', url);
+    if (!shouldTriggerFetch) return;
+    if (!artist && !song) return;
+    setLoading(true);
+    setError(null);
+    let isArtistSearch = false;
+    if (!artist && song) {
+      // Song only search
+      const url = `/api/cifraclub-search?artist=&song=${encodeURIComponent(song)}`;
+      isArtistSearch = false;
       fetch(url)
         .then(async res => {
           if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
-          const contentType = res.headers.get('content-type');
           const text = await res.text();
-          if (!contentType?.includes('application/json')) {
-            throw new Error('Invalid response from backend (not JSON)');
-          }
-          const data = JSON.parse(text);
-          return data;
-        })
-        .then((data) => {
-          console.log('[useSearchResults] Response received:', data);
-          // Cache the results
-          console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
-          cacheSearchResults(artist || null, song || null, data);
-          // Always set loading/hasFetched, even for empty results
-          if (Array.isArray(data)) {
-            if (data.length > 0) {
-              if ((!artist && song) || data[0]?.title) {
-                // Song-only search or song results
-                setAllSongs(data);
-                setSongs(data);
-                setAllArtists([]);
-                setArtists([]);
-              } else if (data[0]?.displayName || data[0]?.name) {
-                // Artist search or artist results
-                setAllArtists(data);
-                setArtists(data);
-                setAllSongs([]);
-                setSongs([]);
-              }
-            } else {
-              // Empty array: no results for artist or song
-              setAllArtists([]);
-              setArtists([]);
-              setAllSongs([]);
-              setSongs([]);
-            }
-            setLoading(false);
-            setHasFetched(true);
-            lastFetchedArtist.current = artist + '|' + song;
-            setShouldContinueFetching(false);
-            console.log('[useSearchResults] Fetch effect completed for:', { artist, song });
-            return;
-          }
+          const data = text ? JSON.parse(text) : [];
+          setSongs(data);
+          setAllSongs(data); // <-- Store all fetched songs for local filtering
+          setArtists([]);
+          setLoading(false);
+          lastSearchParams.current = { artist, song };
+          setHasFetched(true);
         })
         .catch(err => {
-          setError(err instanceof Error ? err : new Error('Failed to fetch search results'));
+          setError(err);
+          setSongs([]);
+          setArtists([]);
           setLoading(false);
-          setHasFetched(true); // Mark as fetched even on error to allow UI to show empty/error state
+          lastSearchParams.current = { artist, song };
+          setHasFetched(true);
+        });
+    } else if (artist || song) {
+      // Artist only or artist+song search
+      const url = `/api/artists?artist=${encodeURIComponent(artist)}&song=${encodeURIComponent(song)}`;
+      isArtistSearch = true;
+      fetch(url)
+        .then(async res => {
+          if (!res.ok) throw new Error(`Failed to fetch search results: ${res.status}`);
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : [];
+          setArtists(data);
+          setAllArtists(data); // <-- Store all fetched artists for local filtering
+          setSongs([]);
+          setLoading(false);
+          lastSearchParams.current = { artist, song };
+          setHasFetched(true);
+        })
+        .catch(err => {
+          setError(err);
+          setSongs([]);
+          setArtists([]);
+          setLoading(false);
+          lastSearchParams.current = { artist, song };
+          setHasFetched(true);
         });
     }
-  }, [artist, song, shouldContinueFetching]);
+  }, [shouldTriggerFetch, artist, song, shouldFetch]);
 
   // Only allow local filtering if we have a valid response
   useEffect(() => {
@@ -183,6 +138,7 @@ export function useSearchResults(
 
   // Filter songs if we have song results
   useEffect(() => {
+    if (!shouldFetch) setLoading(false);
     console.log('[useSearchResults] Song filter effect:', { hasFetched, allSongsLength: allSongs.length, filterSong });
     if (hasFetched && allSongs.length > 0) {
       if (!filterSong) {
@@ -197,7 +153,14 @@ export function useSearchResults(
         setSongs(filtered);
       }
     }
-  }, [filterSong, allSongs, hasFetched]);
+  }, [filterSong, allSongs, hasFetched, shouldFetch]);
+
+  // Ensure loading is false when filterSong changes and shouldFetch is false
+  useEffect(() => {
+    if (!shouldFetch) {
+      setLoading(false);
+    }
+  }, [filterSong, shouldFetch]);
 
   return {
     artists,

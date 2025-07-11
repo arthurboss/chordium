@@ -263,3 +263,46 @@ describe('useSearchResults - Search Behavior', () => {
     expect(result.current.songs).toEqual(apiResponse);
   });
 });
+
+describe('useSearchResults - Filter/Clear UX', () => {
+  it('should show all last-fetched results and not trigger loading or API call when filter is cleared', async () => {
+    // Arrange: Mock API response for initial search
+    const apiResults = [
+      { artist: 'Oasis', title: 'Wonderwall', path: '/oasis/wonderwall/', url: 'https://example.com/oasis-wonderwall' },
+      { artist: 'Radiohead', title: 'Creep', path: '/radiohead/creep/', url: 'https://example.com/radiohead-creep' }
+    ];
+    mockFetch.mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      text: () => Promise.resolve(JSON.stringify(apiResults))
+    });
+    global.fetch = mockFetch as typeof global.fetch;
+
+    // Act: Perform a search with a filter ("Wonderwall")
+    let filter = 'Wonderwall';
+    const { result, rerender } = renderHook(({ filterSong }) =>
+      useSearchResults('', filterSong, '', filterSong, true),
+      { initialProps: { filterSong: filter } }
+    );
+
+    // Wait for search to complete
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+    expect(result.current.songs).toHaveLength(2);
+    const callCountAfterSearch = mockFetch.mock.calls.length;
+
+    // Simulate user clearing the filter input
+    filter = '';
+    global.fetch = mockFetch as typeof global.fetch; // Ensure fetch is still mocked
+    rerender({ filterSong: filter, shouldFetch: false });
+
+    // Wait for loading to become false
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    // Assert: Should show all last-fetched results, not trigger loading or new API call
+    expect(result.current.songs).toHaveLength(2);
+    expect(result.current.songs).toEqual(apiResults);
+    expect(mockFetch.mock.calls.length).toBe(callCountAfterSearch); // No new API call
+  });
+});

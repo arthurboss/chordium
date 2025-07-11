@@ -62,3 +62,23 @@ describe('Search to Song Navigation - Simple Test', () => {
     });
   });
 });
+
+describe('Search input clear UX', () => {
+  it('shows all last-fetched results and does not show loading when input is cleared', () => {
+    cy.visit('/');
+    // Type a search term and submit
+    cy.get('#song-search-input').type('Wonderwall');
+    cy.get('[data-cy="search-submit-button"]').click();
+    // Wait for results
+    cy.get('[data-cy="search-results-layout-wrapper"]').should('exist');
+    cy.get('.grid [data-cy^="song-item-"]').should('have.length.greaterThan', 0);
+    // Now clear the input
+    cy.get('#song-search-input').clear();
+    // Should show all last-fetched results (not filtered, not empty)
+    cy.get('.grid [data-cy^="song-item-"]').should('have.length.greaterThan', 0);
+    // Should not show loading spinner
+    cy.get('[data-cy="search-loading-spinner"]').should('not.exist');
+    // Should not show no-results message
+    cy.get('[data-cy="search-no-chord-sheets-found"]').should('not.exist');
+  });
+});
