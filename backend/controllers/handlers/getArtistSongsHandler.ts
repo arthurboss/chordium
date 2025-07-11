@@ -43,21 +43,28 @@ async function getArtistSongsHandler(
     logger.info(`[DATA SOURCE] Scraping (CifraClub)`);
     logger.info(`No cached data for ${normalizedArtistPath}, fetching from CifraClub...`);
     const artistUrl = `${cifraClubService.baseUrl}/${normalizedArtistPath}/`;
-    const songs = await cifraClubService.getArtistSongs(artistUrl);
-    logger.info(`[SCRAPED ELEMENTS] ${JSON.stringify(songs)}`);
-    logger.info(`Found ${songs.length} songs for artist ${normalizedArtistPath} from CifraClub`);
+    let songs: Song[] = [];
+    try {
+      songs = await cifraClubService.getArtistSongs(artistUrl);
+      logger.info(`[SCRAPED ELEMENTS] ${JSON.stringify(songs)}`);
+      logger.info(`Found ${songs.length} songs for artist ${normalizedArtistPath} from CifraClub`);
 
-    if (songs && songs.length > 0) {
-      try {
-        await storeArtistSongs(normalizedArtistPath, songs);
-        logger.info(`Cached ${songs.length} songs for artist ${normalizedArtistPath} in S3`);
-      } catch (cacheError) {
-        const errorMessage = cacheError instanceof Error ? cacheError.message : 'Unknown cache error';
-        logger.warn(`Failed to cache songs for ${normalizedArtistPath} in S3:`, errorMessage);
+      if (songs && songs.length > 0) {
+        try {
+          await storeArtistSongs(normalizedArtistPath, songs);
+          logger.info(`Cached ${songs.length} songs for artist ${normalizedArtistPath} in S3`);
+        } catch (cacheError) {
+          const errorMessage = cacheError instanceof Error ? cacheError.message : 'Unknown cache error';
+          logger.warn(`Failed to cache songs for ${normalizedArtistPath} in S3:`, errorMessage);
+        }
       }
+      res.json(songs);
+    } catch (scrapeError) {
+      // If Puppeteer navigation failed, return empty array with 200
+      const errMsg = scrapeError instanceof Error ? scrapeError.message : String(scrapeError);
+      logger.warn(`Scraping failed for ${normalizedArtistPath}: ${errMsg}`);
+      res.json([]);
     }
-
-    res.json(songs);
   } catch (error) {
     logger.error('Error fetching artist songs:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

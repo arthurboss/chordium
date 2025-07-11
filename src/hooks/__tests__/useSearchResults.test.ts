@@ -9,7 +9,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 import { useSearchResults } from '../useSearchResults';
 import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
@@ -20,21 +20,30 @@ vi.mock('@/cache/implementations/search-cache', () => ({
   cacheSearchResults: vi.fn(),
 }));
 
-// Mock fetch to track API calls
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+
+let originalFetch: typeof global.fetch | undefined;
+const mockFetch = vi.fn().mockResolvedValue({
+  ok: true,
+  headers: { get: () => 'application/json' },
+  text: async () => '[]',
+});
 
 describe('useSearchResults - Search Behavior', () => {
+  beforeAll(() => {
+    originalFetch = global.fetch;
+    global.fetch = mockFetch as typeof global.fetch;
+  });
   beforeEach(() => {
     // Clear all mocks and local storage before each test
     vi.clearAllMocks();
     unifiedChordSheetCache.clearAllCache();
     mockFetch.mockClear();
+    global.fetch = mockFetch as typeof global.fetch;
   });
 
-  afterEach(() => {
-    unifiedChordSheetCache.clearAllCache();
-    vi.restoreAllMocks();
+
+  afterAll(() => {
+    global.fetch = originalFetch;
   });
 
   it('should always make API calls when searching, even if songs exist locally', async () => {
@@ -67,7 +76,7 @@ describe('useSearchResults - Search Behavior', () => {
       }
     ];
 
-    mockFetch.mockResolvedValueOnce({
+    mockFetch.mockResolvedValue({
       ok: true,
       headers: { get: () => 'application/json' },
       text: () => Promise.resolve(JSON.stringify(apiResults))
@@ -122,7 +131,7 @@ describe('useSearchResults - Search Behavior', () => {
       { name: 'Oasis Cover Band', songCount: 5, path: '/oasis-cover-band' }
     ];
 
-    mockFetch.mockResolvedValueOnce({
+    mockFetch.mockResolvedValue({
       ok: true,
       headers: { get: () => 'application/json' },
       text: () => Promise.resolve(JSON.stringify(apiResults))
@@ -169,7 +178,7 @@ describe('useSearchResults - Search Behavior', () => {
       }
     ];
     
-    mockFetch.mockResolvedValueOnce({
+    mockFetch.mockResolvedValue({
       ok: true,
       headers: { get: () => 'application/json' },
       text: () => Promise.resolve(JSON.stringify(apiResponse))
@@ -230,7 +239,7 @@ describe('useSearchResults - Search Behavior', () => {
       }
     ];
 
-    mockFetch.mockResolvedValueOnce({
+    mockFetch.mockResolvedValue({
       ok: true,
       headers: { get: () => 'application/json' },
       text: () => Promise.resolve(JSON.stringify(apiResponse))

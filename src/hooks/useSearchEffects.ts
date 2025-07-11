@@ -32,24 +32,28 @@ export const useSearchEffects = ({
   useEffect(() => {
     if (loading && !state.loading) {
       dispatch({ type: 'SEARCH_START' });
-    } else if (error && error !== state.error) {
+    } else if (!loading && !error) {
+      // Always dispatch SEARCH_SUCCESS when loading is false and not error (even if results are empty)
+      dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
+    } else if (!loading && error && error !== state.error) {
       // Ensure error is always an Error object
       const errorObj = typeof error === 'string' ? new Error(error) : error;
       dispatch({ type: 'SEARCH_ERROR', error: errorObj });
-    } else if ((artists && artists !== state.artists) || (songs && songs !== state.songs)) {
-      // Dispatch when either artists or songs change
-      dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
     }
-  }, [loading, error, artists, songs, state.loading, state.error, state.artists, state.songs, dispatch]);
+  }, [loading, error, artists, songs, state.loading, state.error, dispatch]);
 
   // Handle artist songs changes - only dispatch when there's an actual change
   useEffect(() => {
     if (artistSongsError && artistSongsError !== state.artistSongsError) {
       // For ARTIST_SONGS_ERROR, keep as string (reducer expects string)
+      console.log('[useSearchEffects] Dispatching ARTIST_SONGS_ERROR', artistSongsError);
       dispatch({ type: 'ARTIST_SONGS_ERROR', error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message });
     } else if (artistSongs && artistSongs !== state.artistSongs) {
       if (JSON.stringify(artistSongs) !== JSON.stringify(state.artistSongs)) {
+        console.log('[useSearchEffects] Dispatching ARTIST_SONGS_SUCCESS', artistSongs);
         dispatch({ type: 'ARTIST_SONGS_SUCCESS', songs: artistSongs });
+      } else {
+        console.log('[useSearchEffects] artistSongs unchanged, not dispatching ARTIST_SONGS_SUCCESS');
       }
     }
   }, [artistSongs, artistSongsError, state.artistSongs, state.artistSongsError, dispatch]);
@@ -65,10 +69,5 @@ export const useSearchEffects = ({
     }
   }, [activeArtist, state.activeArtist, dispatch]);
   
-  // Handle hasSearched flag - only update when it changes
-  useEffect(() => {
-    if (hasSearched !== undefined && hasSearched !== state.hasSearched) {
-      dispatch({ type: 'SET_HAS_SEARCHED', value: hasSearched });
-    }
-  }, [hasSearched, state.hasSearched, dispatch]);
+  // Remove hasSearched effect, now handled by reducer
 };

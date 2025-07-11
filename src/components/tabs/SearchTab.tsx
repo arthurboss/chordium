@@ -28,6 +28,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     // Hydrate hasSearched if there is a query in context (e.g. after navigation)
     return Boolean(searchState.artist || searchState.song);
   });
+  const [searchKey, setSearchKey] = useState(0); // Used to force remount SearchResults
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,6 +43,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     updateSearchState({ artist: artistValue, song: songValue, results: [] });
     setLastSearchQuery(artistValue, songValue);
     setHasSearched(true);
+    setSearchKey(prev => prev + 1); // Force remount SearchResults
     // Update the URL with the search query
     const params = new URLSearchParams();
     if (artistValue) params.set('artist', toSlug(artistValue));
@@ -91,6 +93,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
             />
           </FormContainer>
           <SearchResults
+            key={searchKey}
             setMySongs={setMySongs}
             setActiveTab={setActiveTab}
             setSelectedSong={handleSongSelect}

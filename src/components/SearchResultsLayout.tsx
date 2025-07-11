@@ -27,7 +27,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   if (!hasArtists && !hasSongs) {
     return (
       <div className="p-8 text-center text-gray-500">
-        No results found. Try a different search term.
+        No Chord Sheets were found.
       </div>
     );
   }

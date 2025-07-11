@@ -12,6 +12,7 @@ type UIState =
   | { state: 'error'; error: Error }
   | { state: 'artist-songs-loading'; activeArtist: Artist | null }
   | { state: 'artist-songs-error'; artistSongsError: string; activeArtist: Artist | null }
+  | { state: 'artist-songs-empty'; activeArtist: Artist }
   | { state: 'songs-view'; activeArtist?: Artist; artistSongs?: Song[]; songs?: Song[]; searchType: 'artist' | 'song'; hasSongs: boolean }
   | { state: 'hasSearched'; hasSongs: boolean }
   | { state: 'default' };
@@ -37,20 +38,34 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
   onAdd,
   onArtistSelect
 }) => {
+  console.log('[SearchResultsStateHandler] Rendering state:', stateData);
   switch (stateData.state) {
     case 'loading':
+      console.log('[SearchResultsStateHandler] UI: loading');
       return <SearchLoadingState />;
     
     case 'error':
+      console.log('[SearchResultsStateHandler] UI: error', stateData.error);
       return <SearchErrorState error={stateData.error!} />;
     
     case 'artist-songs-loading':
+      console.log('[SearchResultsStateHandler] UI: artist-songs-loading');
       return <SearchLoadingState />;
     
     case 'artist-songs-error':
+      console.log('[SearchResultsStateHandler] UI: artist-songs-error', stateData.artistSongsError);
       return <SearchErrorState error={new Error(stateData.artistSongsError!)} />;
     
+    case 'artist-songs-empty':
+      console.log('[SearchResultsStateHandler] UI: artist-songs-empty', stateData.activeArtist);
+      return (
+        <div style={{ padding: 32, textAlign: 'center' }}>
+          <h3>No songs found for {stateData.activeArtist?.displayName || 'this artist'}.</h3>
+          <p>Try searching for another artist or song.</p>
+        </div>
+      );
     case 'songs-view':
+      console.log('[SearchResultsStateHandler] UI: songs-view', stateData);
       return (
         <SongsView
           activeArtist={stateData.activeArtist}
@@ -64,6 +79,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
       );
     
     case 'hasSearched':
+      console.log('[SearchResultsStateHandler] UI: hasSearched, no songs');
       return (
         <SearchResultsLayout
           artists={artists}
@@ -76,6 +92,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     
     case 'default':
     default:
+      console.log('[SearchResultsStateHandler] UI: default');
       return null;
   }
 };

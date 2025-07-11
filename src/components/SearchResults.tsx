@@ -23,6 +23,7 @@ interface SearchResultsProps {
   onArtistSelect: (artist: Artist) => void;
   hasSearched?: boolean;
   shouldFetch?: boolean;
+  onFetchComplete?: () => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
@@ -38,6 +39,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onArtistSelect,
   hasSearched,
   shouldFetch,
+  onFetchComplete,
 }) => {
   // Initialize our reducer with myChordSheets for deduplication
   const {
@@ -56,6 +58,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     filterSong,
     shouldFetch || false // Only fetch when explicitly requested to do so
   );
+
+  // Call onFetchComplete after fetch completes (when loading goes from true to false)
+  const prevLoadingRef = React.useRef(loading);
+  React.useEffect(() => {
+    if (shouldFetch && prevLoadingRef.current && !loading) {
+      if (onFetchComplete) {
+        onFetchComplete();
+      }
+    }
+    prevLoadingRef.current = loading;
+  }, [loading, shouldFetch, onFetchComplete]);
 
   // Fetch artist songs when activeArtist changes
   const { songs: artistSongs, error: artistSongsError } = useArtistSongs(state.activeArtist);

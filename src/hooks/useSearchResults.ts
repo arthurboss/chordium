@@ -39,40 +39,60 @@ export function useSearchResults(
   useEffect(() => {
     console.log('[useSearchResults] shouldFetch:', shouldFetch, 'artist:', artist, 'song:', song);
     setShouldContinueFetching(shouldFetch);
+    if (shouldFetch) {
+      // Reset all results and loading state on new search
+      setArtists([]);
+      setAllArtists([]);
+      setSongs([]);
+      setAllSongs([]);
+      setLoading(true);
+      setError(null);
+      setHasFetched(false);
+      lastFetchedArtist.current = "";
+    }
   }, [shouldFetch, artist, song]);
 
   // Fetch artists or songs from backend when shouldFetch is true
   useEffect(() => {
     console.log('[useSearchResults] Fetch effect triggered. shouldContinueFetching:', shouldContinueFetching, 'artist:', artist, 'song:', song);
+    console.log('[useSearchResults] lastFetchedArtist.current:', lastFetchedArtist.current, 'artist+song:', artist + '|' + song);
     if (!shouldContinueFetching) {
       return;
     }
     // Allow fetch if either artist or song is present
-    if (
+    const shouldTriggerFetch =
       (artist || song) &&
-      !loading &&
       (lastFetchedArtist.current !== artist + '|' + song) &&
-      ((artist && artist.trim() !== '') || (song && song.trim() !== ''))
-    ) {
+      ((artist && artist.trim() !== '') || (song && song.trim() !== ''));
+    console.log('[useSearchResults] shouldTriggerFetch:', shouldTriggerFetch);
+    if (shouldTriggerFetch) {
+      console.log('[useSearchResults] About to start fetch for:', { artist, song });
       setLoading(true);
       setError(null);
-
-      // Check API cache first
+      setArtists([]);
+      setAllArtists([]);
+      setSongs([]);
+      setAllSongs([]);
+      setHasFetched(false);
       const cachedResults = getCachedSearchResults(artist || null, song || null);
       if (cachedResults) {
         console.log('🎯 SEARCH CACHE HIT: Using cached results:', cachedResults.length);
-        // Process cached results
-        if (!artist && song) {
-          // Song-only search
-          setAllSongs(cachedResults);
-          setSongs(cachedResults);
+        // Always set loading/hasFetched, even for empty results
+        if (Array.isArray(cachedResults) && cachedResults.length > 0) {
+          if ((!artist && song) || cachedResults[0]?.title) {
+            setAllSongs(cachedResults);
+            setSongs(cachedResults);
+            setAllArtists([]);
+            setArtists([]);
+          } else if (cachedResults[0]?.displayName || cachedResults[0]?.name) {
+            setAllArtists(cachedResults as unknown as Artist[]);
+            setArtists(cachedResults as unknown as Artist[]);
+            setAllSongs([]);
+            setSongs([]);
+          }
+        } else {
           setAllArtists([]);
           setArtists([]);
-        } else {
-          // Artist search - cached results are Artist objects
-          const artistResults = cachedResults as unknown as Artist[];
-          setAllArtists(artistResults);
-          setArtists(artistResults);
           setAllSongs([]);
           setSongs([]);
         }
@@ -106,37 +126,47 @@ export function useSearchResults(
         })
         .then((data) => {
           console.log('[useSearchResults] Response received:', data);
-          
           // Cache the results
           console.log('💾 SEARCH CACHING: Saving search results for artist:', artist || 'null', 'song:', song || 'null');
           cacheSearchResults(artist || null, song || null, data);
-          
-          if (!artist && song) {
-            // Song-only search - data should be song results
-            console.log('[useSearchResults] Processing song-only search, setting songs:', data);
-            setAllSongs(data);
-            setSongs(data);
-            setAllArtists([]);
-            setArtists([]);
-          } else {
-            // Artist search - data should be artist results
-            console.log('[useSearchResults] Processing artist search, setting artists:', data);
-            setAllArtists(data);
-            setArtists(data);
-            setAllSongs([]);
-            setSongs([]);
+          // Always set loading/hasFetched, even for empty results
+          if (Array.isArray(data)) {
+            if (data.length > 0) {
+              if ((!artist && song) || data[0]?.title) {
+                // Song-only search or song results
+                setAllSongs(data);
+                setSongs(data);
+                setAllArtists([]);
+                setArtists([]);
+              } else if (data[0]?.displayName || data[0]?.name) {
+                // Artist search or artist results
+                setAllArtists(data);
+                setArtists(data);
+                setAllSongs([]);
+                setSongs([]);
+              }
+            } else {
+              // Empty array: no results for artist or song
+              setAllArtists([]);
+              setArtists([]);
+              setAllSongs([]);
+              setSongs([]);
+            }
+            setLoading(false);
+            setHasFetched(true);
+            lastFetchedArtist.current = artist + '|' + song;
+            setShouldContinueFetching(false);
+            console.log('[useSearchResults] Fetch effect completed for:', { artist, song });
+            return;
           }
-          setLoading(false);
-          setHasFetched(true);
-          lastFetchedArtist.current = artist + '|' + song;
-          setShouldContinueFetching(false);
         })
         .catch(err => {
           setError(err instanceof Error ? err : new Error('Failed to fetch search results'));
           setLoading(false);
+          setHasFetched(true); // Mark as fetched even on error to allow UI to show empty/error state
         });
     }
-  }, [artist, song, loading, shouldContinueFetching]);
+  }, [artist, song, shouldContinueFetching]);
 
   // Only allow local filtering if we have a valid response
   useEffect(() => {
