@@ -39,7 +39,11 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const handleInputChange = (artistValue: string, songValue: string) => {
     setArtistInput(artistValue);
     setSongInput(songValue);
-    // Do NOT set hasSearched or update global search state here!
+    // Update the URL to match the current input values (remove empty params)
+    const params = new URLSearchParams();
+    if (artistValue) params.set('artist', toSlug(artistValue));
+    if (songValue) params.set('song', toSlug(songValue));
+    navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
   };
 
   const handleSearchSubmit = (artistValue: string, songValue: string) => {
