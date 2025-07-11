@@ -1,13 +1,14 @@
 import React from 'react';
-import { Music, Music2, Music3 } from 'lucide-react';
+import { Guitar, Music, Music2, Music3 } from 'lucide-react';
 
 export const SearchLoadingState: React.FC = () => (
   <div className="p-8 text-center">
     <div className="flex items-center justify-center gap-2">
       {[
+        { Icon: Guitar, size: 32 },
+        { Icon: Music3, size: 24 },
         { Icon: Music, size: 24 },
-        { Icon: Music2, size: 28 },
-        { Icon: Music3, size: 22 }
+        { Icon: Music2, size: 24 },
       ].map(({ Icon, size }, index) => (
         <div
           key={index}
