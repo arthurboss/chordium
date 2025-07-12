@@ -80,7 +80,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   }, [loading, onLoadingChange]);
 
   // Fetch artist songs when activeArtist changes
-  const { songs: artistSongs, error: artistSongsError } = useArtistSongs(state.activeArtist);
+  const { artistSongs, error: artistSongsError, loading: artistSongsLoading } = useArtistSongs(state.activeArtist);
 
   // Use custom hooks for effects and handlers
   useSearchEffects({
@@ -90,6 +90,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     songs, // Add songs from search results
     artistSongs,
     artistSongsError,
+    artistSongsLoading,
     activeArtist,
     hasSearched,
     state,

@@ -19,7 +19,7 @@ export interface SearchResultsState {
   artistSongsLoading: boolean;
   artistSongsError: string | null;
   activeArtist: Artist | null;
-  artistSongs: Song[];
+  artistSongs: Song[] | null; // Updated to handle null
   artists: Artist[];
   songs: Song[]; // Changed from SearchResultItem[] to Song[]
   filteredArtistSongs: Song[];
@@ -45,7 +45,7 @@ export const initialState: SearchResultsState = {
   artistSongsLoading: false,
   artistSongsError: null,
   activeArtist: null,
-  artistSongs: [],
+  artistSongs: null, // Changed from [] to null
   artists: [],
   songs: [],
   filteredArtistSongs: []
@@ -80,7 +80,7 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         hasSearched: true,
         // Clear artist-related state when a new search is performed
         activeArtist: null,
-        artistSongs: [],
+        artistSongs: null, // Changed from [] to null
         filteredArtistSongs: [],
       };
 
@@ -92,7 +92,7 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         error: action.error,
         artists: [],
         songs: [],
-        artistSongs: [],
+        artistSongs: null, // Changed from [] to null
         filteredArtistSongs: [],
         hasSearched: true,
       };
@@ -124,7 +124,7 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
       return {
         ...state,
         activeArtist: null,
-        artistSongs: [],
+        artistSongs: null, // Changed from [] to null
         filteredArtistSongs: [],
         artistSongsError: null
       };
@@ -132,7 +132,7 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
     case 'FILTER_ARTIST_SONGS':
       return {
         ...state,
-        filteredArtistSongs: filterArtistSongsByTitle(state.artistSongs, action.filter)
+        filteredArtistSongs: filterArtistSongsByTitle(state.artistSongs || [], action.filter)
       };
 
     default:
@@ -167,7 +167,7 @@ export function determineUIState(state: SearchResultsState) {
     };
   }
   
-  if (state.activeArtist && state.artistSongs.length > 0) {
+  if (state.activeArtist && state.artistSongs && state.artistSongs.length > 0) {
     console.log('[determineUIState] UI state: songs-view (artist)', state.activeArtist);
     return { 
       state: 'songs-view' as const, 
@@ -179,7 +179,7 @@ export function determineUIState(state: SearchResultsState) {
   }
   
   // Handle case where artist is selected but has no songs
-  if (state.activeArtist && !state.artistSongsLoading && state.artistSongs.length === 0) {
+  if (state.activeArtist && !state.artistSongsLoading && state.artistSongs && state.artistSongs.length === 0) {
     console.log('[determineUIState] UI state: artist-songs-empty', state.activeArtist);
     return { 
       state: 'artist-songs-empty' as const, 
@@ -226,7 +226,7 @@ export function useSearchResultsReducer(
   // Generate songs array for the song actions
   const memoizedSongs = useMemo(() => {
     if (state.activeArtist) {
-      return state.artistSongs;
+      return state.artistSongs || [];
     } else {
       return state.songs;
     }
@@ -249,7 +249,7 @@ export function useSearchResultsReducer(
   
   // Handle filter changes in a memoized effect
   useEffect(() => {
-    if (state.artistSongs.length > 0 && filterSong !== undefined) {
+    if (state.artistSongs && state.artistSongs.length > 0 && filterSong !== undefined) {
       stableDispatch({ type: 'FILTER_ARTIST_SONGS', filter: filterSong });
     }
   }, [filterSong, state.artistSongs, stableDispatch]);

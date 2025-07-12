@@ -218,7 +218,7 @@ describe('useSearchResultsReducer', () => {
 
       // 3. Verify that artist-related state is cleared
       expect(state.activeArtist).toBeNull();
-      expect(state.artistSongs).toEqual([]);
+      expect(state.artistSongs).toBeNull();
       expect(state.filteredArtistSongs).toEqual([]);
       expect(state.artists).toEqual([secondArtist]);
       expect(state.songs).toEqual([]);
@@ -259,7 +259,7 @@ describe('useSearchResultsReducer', () => {
       const newState = searchResultsReducer(stateWithArtist, action);
 
       expect(newState.activeArtist).toBeNull();
-      expect(newState.artistSongs).toEqual([]);
+      expect(newState.artistSongs).toBeNull();
       expect(newState.filteredArtistSongs).toEqual([]);
       expect(newState.artistSongsError).toBeNull();
     });

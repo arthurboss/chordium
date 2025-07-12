@@ -347,5 +347,65 @@ describe('Search Controller', () => {
         'https://www.cifraclub.com.br/test-artist/'
       );
     });
+
+    it('should not cache empty artist song results', async () => {
+      const artistPath = 'empty-artist';
+      
+      // Mock empty results
+      mockCifraClubService.getArtistSongs.mockResolvedValue([]);
+
+      const response = await global.agent
+        .get('/api/artist-songs')
+        .query({ artistPath });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+      
+      // Verify that S3 caching was not called for empty results
+      expect(mockS3StorageService.storeArtistSongs).not.toHaveBeenCalled();
+    });
+
+    it('should not cache when scraping fails with errors', async () => {
+      const artistPath = 'error-artist';
+      
+      // Mock scraping error
+      mockCifraClubService.getArtistSongs.mockRejectedValue(new Error('Scraping failed'));
+
+      const response = await global.agent
+        .get('/api/artist-songs')
+        .query({ artistPath });
+
+      expect(response.status).toBe(502);
+      expect(response.body.error).toBe('Bad Gateway');
+      
+      // Verify that S3 caching was not called for scraping errors
+      expect(mockS3StorageService.storeArtistSongs).not.toHaveBeenCalled();
+    });
+
+    it('should return 502 when scraping fails with a generic error', async () => {
+      const artistPath = 'fail-artist';
+      mockCifraClubService.getArtistSongs.mockRejectedValueOnce(new Error('Scraping failed for some reason'));
+
+      const response = await global.agent
+        .get('/api/artist-songs')
+        .query({ artistPath });
+
+      expect(response.status).toBe(502);
+      expect(response.body.error).toBe('Bad Gateway');
+      expect(response.body.details).toMatch(/Scraping failed for some reason/);
+    });
+
+    it('should return 504 when scraping fails with a timeout error', async () => {
+      const artistPath = 'timeout-artist';
+      mockCifraClubService.getArtistSongs.mockRejectedValueOnce(new Error('Navigation timeout of 30000 ms exceeded'));
+
+      const response = await global.agent
+        .get('/api/artist-songs')
+        .query({ artistPath });
+
+      expect(response.status).toBe(504);
+      expect(response.body.error).toBe('Gateway Timeout');
+      expect(response.body.details).toMatch(/timeout/i);
+    });
   });
 });

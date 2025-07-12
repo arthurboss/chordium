@@ -49,6 +49,7 @@ async function getArtistSongsHandler(
       logger.info(`[SCRAPED ELEMENTS] ${JSON.stringify(songs)}`);
       logger.info(`Found ${songs.length} songs for artist ${normalizedArtistPath} from CifraClub`);
 
+      // Only cache if we have songs (don't cache empty results)
       if (songs && songs.length > 0) {
         try {
           await storeArtistSongs(normalizedArtistPath, songs);
@@ -57,13 +58,27 @@ async function getArtistSongsHandler(
           const errorMessage = cacheError instanceof Error ? cacheError.message : 'Unknown cache error';
           logger.warn(`Failed to cache songs for ${normalizedArtistPath} in S3:`, errorMessage);
         }
+      } else {
+        logger.info(`Not caching empty results for artist ${normalizedArtistPath} (0 songs found)`);
       }
       res.json(songs);
     } catch (scrapeError) {
-      // If Puppeteer navigation failed, return empty array with 200
+      // If scraping fails, return appropriate error status
       const errMsg = scrapeError instanceof Error ? scrapeError.message : String(scrapeError);
       logger.warn(`Scraping failed for ${normalizedArtistPath}: ${errMsg}`);
-      res.json([]);
+      
+      // Check if it's a timeout error
+      if (errMsg.toLowerCase().includes('timeout')) {
+        res.status(504).json({ 
+          error: 'Gateway Timeout', 
+          details: errMsg 
+        });
+      } else {
+        res.status(502).json({ 
+          error: 'Bad Gateway', 
+          details: errMsg 
+        });
+      }
     }
   } catch (error) {
     logger.error('Error fetching artist songs:', error);
