@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
@@ -36,9 +36,18 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const [shouldFetch, setShouldFetch] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isInitialized = useRef(false);
 
-  // Debug: log hasSearched and searchState on every render
-  console.log('[SearchTab] hasSearched:', hasSearched, 'searchState:', searchState);
+  console.log('[SearchTab] RENDER:', { 
+    hasSearched, 
+    artistInput, 
+    songInput, 
+    submittedArtist, 
+    submittedSong, 
+    shouldFetch,
+    activeArtist: activeArtist?.displayName,
+    selectedSong: selectedSong?.title
+  });
 
   // Initialize input fields and search state from URL on mount
   useEffect(() => {
@@ -46,11 +55,11 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     const artistParam = searchParams.get('artist');
     const songParam = searchParams.get('song');
 
-    if (artistParam || songParam) {
+    if ((artistParam || songParam) && !isInitialized.current) {
       const artist = artistParam ? fromSlug(artistParam) : '';
       const song = songParam ? fromSlug(songParam) : '';
       
-      console.log('[SearchTab] Initializing from URL params:', { artist, song });
+      console.log('[SearchTab] INITIALIZING FROM URL:', { artist, song });
       
       // Set input fields
       setArtistInput(artist);
@@ -65,11 +74,13 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
       setLastSearchQuery(artist, song);
       setHasSearched(true);
       setShouldFetch(true);
+      isInitialized.current = true;
     }
   }, [location.search, updateSearchState]);
 
-  // Handlers for search form
-  const handleInputChange = (artistValue: string, songValue: string) => {
+  // Handlers for search form - memoized to prevent re-renders
+  const handleInputChange = useCallback((artistValue: string, songValue: string) => {
+    console.log('[SearchTab] INPUT CHANGE:', { artistValue, songValue });
     setArtistInput(artistValue);
     setSongInput(songValue);
     
@@ -78,6 +89,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     const songCleared = prevSongInput && !songValue;
     
     if (artistCleared || songCleared) {
+      console.log('[SearchTab] INPUT CLEARED - Updating URL');
       const params = new URLSearchParams();
       if (artistValue) params.set('artist', toSlug(artistValue));
       if (songValue) params.set('song', toSlug(songValue));
@@ -87,9 +99,11 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     // Update previous values for next comparison
     setPrevArtistInput(artistValue);
     setPrevSongInput(songValue);
-  };
+  }, [prevArtistInput, prevSongInput, navigate]);
 
-  const handleSearchSubmit = (artistValue: string, songValue: string) => {
+  const handleSearchSubmit = useCallback((artistValue: string, songValue: string) => {
+    console.log('[SearchTab] SEARCH SUBMIT:', { artistValue, songValue });
+    
     // Clear artist/song selection state before new search
     setActiveArtist(null);
     setSelectedSongLocal(null);
@@ -105,32 +119,65 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     if (artistValue) params.set('artist', toSlug(artistValue));
     if (songValue) params.set('song', toSlug(songValue));
     navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: location.pathname.startsWith('/search') });
-  };
+  }, [updateSearchState, navigate, location.pathname]);
 
   // Handler for loading state changes from SearchResults
-  const handleLoadingChange = (isLoading: boolean) => {
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
+    console.log('[SearchTab] LOADING CHANGE:', isLoading);
     setLoading(isLoading);
-  };
+  }, []);
 
   // Handler for selecting a song from search results
-  const handleSongSelect = (song: Song) => {
+  const handleSongSelect = useCallback((song: Song) => {
+    console.log('[SearchTab] SONG SELECTED:', song.title);
     setSelectedSongLocal(song);
-  };
+  }, []);
 
   // Handler for selecting an artist from search results
-  const handleArtistSelect = (artist: Artist) => {
+  const handleArtistSelect = useCallback((artist: Artist) => {
+    console.log('[SearchTab] ARTIST SELECTED:', artist.displayName);
     setActiveArtist(artist);
-  };
+  }, []);
 
   // Handler for going back to search from SongViewer
-  const handleBackToSearch = () => {
+  const handleBackToSearch = useCallback(() => {
+    console.log('[SearchTab] BACK TO SEARCH');
     setSelectedSongLocal(null);
-  };
+  }, []);
 
   // Handler for going back to artist list from artist songs view
-  const handleBackToArtistList = () => {
+  const handleBackToArtistList = useCallback(() => {
+    console.log('[SearchTab] BACK TO ARTIST LIST');
     setActiveArtist(null);
-  };
+  }, []);
+
+  // Handler for Clear Search button
+  const handleClearSearch = useCallback(() => {
+    setArtistInput('');
+    setSongInput('');
+    setPrevArtistInput('');
+    setPrevSongInput('');
+    setSubmittedArtist('');
+    setSubmittedSong('');
+    setHasSearched(false);
+    setShouldFetch(false);
+    setActiveArtist(null);
+    setSelectedSongLocal(null);
+    setLoading(false);
+    updateSearchState({ artist: '', song: '', results: [] });
+    navigate('/search', { replace: true });
+  }, [updateSearchState, navigate]);
+
+  // Disable clear if both fields are empty and no search performed
+  const clearDisabled = !artistInput && !songInput && !hasSearched;
+
+  console.log('[SearchTab] FINAL STATE:', { 
+    hasSearched, 
+    shouldFetch, 
+    loading, 
+    activeArtist: activeArtist?.displayName,
+    selectedSong: selectedSong?.title
+  });
 
   return (
     <div className="space-y-4">
@@ -157,25 +204,29 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               onBackClick={activeArtist ? handleBackToArtistList : undefined}
               isSearchDisabled={!artistInput && !songInput}
               artistLoading={loading} // ensure disables back button when loading
+              onClearSearch={handleClearSearch}
+              clearDisabled={clearDisabled}
             />
           </FormContainer>
-          <div {...cyAttr('search-results-area')}>
-            <SearchResults
-              setMySongs={setMySongs}
-              setActiveTab={setActiveTab}
-              setSelectedSong={handleSongSelect}
-              myChordSheets={myChordSheets}
-              artist={hasSearched ? submittedArtist : searchState.artist}
-              song={hasSearched ? submittedSong : searchState.song}
-              filterArtist={activeArtist ? searchState.artist : artistInput}
-              filterSong={songInput}
-              activeArtist={activeArtist}
-              onArtistSelect={handleArtistSelect}
-              hasSearched={hasSearched}
-              shouldFetch={shouldFetch}
-              onLoadingChange={handleLoadingChange}
-            />
-          </div>
+          {hasSearched && (
+            <div {...cyAttr('search-results-area')}>
+              <SearchResults
+                setMySongs={setMySongs}
+                setActiveTab={setActiveTab}
+                setSelectedSong={handleSongSelect}
+                myChordSheets={myChordSheets}
+                artist={hasSearched ? submittedArtist : searchState.artist}
+                song={hasSearched ? submittedSong : searchState.song}
+                filterArtist={artistInput}
+                filterSong={songInput}
+                activeArtist={activeArtist}
+                onArtistSelect={handleArtistSelect}
+                hasSearched={hasSearched}
+                shouldFetch={shouldFetch}
+                onLoadingChange={handleLoadingChange}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

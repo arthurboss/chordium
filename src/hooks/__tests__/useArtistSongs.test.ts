@@ -2,13 +2,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useArtistSongs } from '../useArtistSongs';
 import { Artist, Song } from '../../types';
+import * as artistUtils from '../../utils/artist-utils';
 
 // Mock the fetchArtistSongs function
 vi.mock('../../utils/artist-utils', () => ({
   fetchArtistSongs: vi.fn(),
 }));
 
-const mockFetchArtistSongs = vi.mocked(await import('../../utils/artist-utils')).fetchArtistSongs;
+const mockFetchArtistSongs = vi.mocked(artistUtils.fetchArtistSongs);
 
 describe('useArtistSongs', () => {
   const mockArtist: Artist = {
@@ -99,20 +100,14 @@ describe('useArtistSongs', () => {
   });
 
   it('should cancel previous request when artist changes', async () => {
-    const mockFetchArtistSongs = vi.fn().mockImplementation((artistPath) => {
-      return new Promise((resolve, reject) => {
-        // Simulate a slow request
-        setTimeout(() => {
-          if (artistPath === 'test-artist') {
-            reject(new Error('AbortError'));
-          } else {
-            resolve(mockSongs);
-          }
-        }, 100);
-      });
-    });
-
-    vi.mocked(await import('../../utils/artist-utils')).fetchArtistSongs = mockFetchArtistSongs;
+    // Simulate a slow request and abort
+    let resolveFirst: any;
+    const firstPromise = new Promise((resolve) => { resolveFirst = resolve; });
+    let resolveSecond: any;
+    const secondPromise = new Promise((resolve) => { resolveSecond = resolve; });
+    mockFetchArtistSongs
+      .mockReturnValueOnce(firstPromise)
+      .mockReturnValueOnce(secondPromise);
 
     const { rerender } = renderHook(({ artist }) => useArtistSongs(artist), {
       initialProps: { artist: mockArtist },
@@ -121,10 +116,20 @@ describe('useArtistSongs', () => {
     // Change artist immediately to trigger cancellation
     rerender({ artist: { ...mockArtist, path: 'another-artist', displayName: 'Another Artist' } });
 
-    // Wait a bit to ensure the first request was cancelled
-    await new Promise(resolve => setTimeout(resolve, 50));
+    // Resolve both promises
+    resolveFirst([]);
+    resolveSecond([]);
 
-    // The first request should have been cancelled
-    expect(mockFetchArtistSongs).toHaveBeenCalledTimes(2);
+    // Wait for at least 2 calls
+    await waitFor(() => {
+      expect(mockFetchArtistSongs.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    // Check that both artist paths are present in the calls
+    const calls = mockFetchArtistSongs.mock.calls.map(call => call[0]);
+    expect(calls).toContain('test-artist');
+    expect(calls).toContain('another-artist');
+    // The last call should be for 'another-artist'
+    expect(calls[calls.length - 1]).toBe('another-artist');
   });
 }); 

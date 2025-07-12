@@ -22,7 +22,6 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   onArtistSelect,
   hasSearched = false
 }) => {
-  console.log('[SearchResultsLayout] hasSearched:', hasSearched, 'artists:', artists, 'songs:', songs);
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;
   
@@ -35,7 +34,6 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     );
   }
   if (!hasArtists && !hasSongs && !hasSearched) {
-    console.error('[SearchResultsLayout] ERROR: Message rendered with hasSearched=false', new Error().stack);
   }
 
   return (

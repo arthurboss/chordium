@@ -34,15 +34,12 @@ export const useSearchEffects = ({
   // Handle search results changes - only dispatch when there's an actual change
   useEffect(() => {
     if (loading && !state.loading) {
-      console.log('[useSearchEffects] Dispatching SEARCH_START', { loading, state });
       dispatch({ type: 'SEARCH_START' });
     } else if (!loading && !error && (hasSearched || artists.length > 0 || songs.length > 0)) {
-      console.log('[useSearchEffects] Dispatching SEARCH_SUCCESS', { artists, songs, loading, error, state });
       dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
     } else if (!loading && error && error !== state.error) {
       // Ensure error is always an Error object
       const errorObj = typeof error === 'string' ? new Error(error) : error;
-      console.log('[useSearchEffects] Dispatching SEARCH_ERROR', { error, loading, state });
       dispatch({ type: 'SEARCH_ERROR', error: errorObj });
     }
   }, [loading, error, artists, songs, state.loading, state.error, dispatch, hasSearched]);
@@ -51,14 +48,11 @@ export const useSearchEffects = ({
   useEffect(() => {
     if (artistSongsError && artistSongsError !== state.artistSongsError) {
       // For ARTIST_SONGS_ERROR, keep as string (reducer expects string)
-      console.log('[useSearchEffects] Dispatching ARTIST_SONGS_ERROR', artistSongsError);
       dispatch({ type: 'ARTIST_SONGS_ERROR', error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message });
     } else if (!artistSongsLoading && artistSongs !== null) {
       // Dispatch success when we have any result (including empty array) and are not loading
-      console.log('[useSearchEffects] Dispatching ARTIST_SONGS_SUCCESS', artistSongs);
       dispatch({ type: 'ARTIST_SONGS_SUCCESS', songs: artistSongs });
     } else {
-      console.log('[useSearchEffects] artistSongs unchanged, not dispatching ARTIST_SONGS_SUCCESS');
     }
   }, [artistSongs, artistSongsError, artistSongsLoading, state.artistSongs, state.artistSongsError, state.artistSongsLoading, dispatch]);
 

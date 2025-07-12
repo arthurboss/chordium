@@ -37,7 +37,13 @@ describe('useSearchResults - empty results and cache cases', () => {
 
   it('should handle empty API response (no results)', async () => {
     const { result } = renderHook(() =>
-      useSearchResults('no-such-artist', '', 'no-such-artist', '', true)
+      useSearchResults({
+        artist: 'no-such-artist',
+        song: '',
+        filterArtist: 'no-such-artist',
+        filterSong: '',
+        shouldFetch: true
+      })
     );
     let last;
     await waitFor(() => {
@@ -54,7 +60,13 @@ describe('useSearchResults - empty results and cache cases', () => {
   it('should handle empty cache hit (no results)', async () => {
     (searchCache.getCachedSearchResults as Mock).mockReturnValueOnce([]);
     const { result } = renderHook(() =>
-      useSearchResults('cached-artist', '', 'cached-artist', '', true)
+      useSearchResults({
+        artist: 'cached-artist',
+        song: '',
+        filterArtist: 'cached-artist',
+        filterSong: '',
+        shouldFetch: true
+      })
     );
     expect(result.current.loading).toBe(false);
     expect(result.current.artists.length).toBe(0);

@@ -43,6 +43,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onFetchComplete,
   onLoadingChange,
 }) => {
+  console.log('[SearchResults] RENDER:', { 
+    artist, 
+    song, 
+    filterArtist, 
+    filterSong, 
+    activeArtist: activeArtist?.displayName,
+    hasSearched, 
+    shouldFetch,
+    myChordSheetsLength: myChordSheets.length
+  });
+
   // Initialize our reducer with myChordSheets for deduplication
   const {
     state,
@@ -52,19 +63,36 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     handleAdd
   } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong, myChordSheets);
 
+  console.log('[SearchResults] REDUCER STATE:', { 
+    stateType: stateData.state, 
+    loading: state.loading, 
+    hasSearched: state.hasSearched,
+    artistsCount: state.artists.length,
+    songsCount: state.songs.length,
+    activeArtist: state.activeArtist?.displayName
+  });
+
   // Fetch search results from API - only when shouldFetch is true (form submitted)
-  const { artists, songs, loading, error } = useSearchResults(
+  const { artists, songs, loading, error } = useSearchResults({
     artist, 
     song, 
     filterArtist, 
     filterSong,
-    shouldFetch || false // Only fetch when explicitly requested to do so
-  );
+    shouldFetch: shouldFetch || false // Only fetch when explicitly requested to do so
+  });
+
+  console.log('[SearchResults] SEARCH RESULTS:', { 
+    artistsCount: artists.length, 
+    songsCount: songs.length, 
+    loading, 
+    error 
+  });
 
   // Call onFetchComplete after fetch completes (when loading goes from true to false)
   const prevLoadingRef = React.useRef(loading);
   React.useEffect(() => {
     if (shouldFetch && prevLoadingRef.current && !loading) {
+      console.log('[SearchResults] FETCH COMPLETE - Calling onFetchComplete');
       if (onFetchComplete) {
         onFetchComplete();
       }
@@ -75,12 +103,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   // Notify parent component of loading state changes
   React.useEffect(() => {
     if (onLoadingChange) {
+      console.log('[SearchResults] LOADING STATE CHANGE:', loading);
       onLoadingChange(loading);
     }
   }, [loading, onLoadingChange]);
 
   // Fetch artist songs when activeArtist changes
   const { artistSongs, error: artistSongsError, loading: artistSongsLoading } = useArtistSongs(state.activeArtist);
+
+  console.log('[SearchResults] ARTIST SONGS:', { 
+    artistSongsCount: artistSongs?.length, 
+    artistSongsError, 
+    artistSongsLoading 
+  });
 
   // Use custom hooks for effects and handlers
   useSearchEffects({
@@ -99,6 +134,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   const { handleArtistSelect } = useArtistSelection({ dispatch, onArtistSelect });
 
+  console.log('[SearchResults] FINAL STATE DATA:', stateData);
+
   return (
     <SearchResultsStateHandler
       stateData={stateData}
@@ -106,7 +143,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       songs={state.songs}
       filteredSongs={state.filteredArtistSongs}
       filterSong={filterSong}
-      filterArtist={filterArtist} // <-- add this
+      filterArtist={filterArtist}
       onView={handleView}
       onAdd={handleAdd}
       onArtistSelect={handleArtistSelect}

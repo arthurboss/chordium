@@ -66,7 +66,7 @@ vi.mock('../SearchResults', () => ({
 
 // Mock the SearchBar component
 vi.mock('../SearchBar', () => ({
-  default: vi.fn(({ artistValue, songValue, onInputChange, onSearchSubmit, showBackButton, onBackClick }) => (
+  default: vi.fn(({ artistValue, songValue, onInputChange, onSearchSubmit, showBackButton, onBackClick, onClearSearch, clearDisabled }) => (
     <div data-testid="search-bar">
       <input 
         data-testid="artist-input"
@@ -87,6 +87,14 @@ vi.mock('../SearchBar', () => ({
         disabled={!showBackButton || !onBackClick}
       >
         Back
+      </button>
+      <button
+        type="button"
+        data-testid="clear-search-button"
+        onClick={onClearSearch}
+        disabled={!!clearDisabled}
+      >
+        🗑️
       </button>
       <button data-testid="search-submit" onClick={() => onSearchSubmit(artistValue, songValue)}>Search</button>
     </div>
@@ -245,5 +253,84 @@ describe('SearchTab - Filtering Behavior', () => {
       // Song filtering should still work
       expect(filterSong?.textContent).toBe('Filter Song');
     });
+  });
+}); 
+
+describe('Clear Search Button', () => {
+  it('should clear both input fields, results, and URL when clicked', async () => {
+    render(
+      <BrowserRouter>
+        <SearchStateProvider>
+          <SearchTab myChordSheets={[]} />
+        </SearchStateProvider>
+      </BrowserRouter>
+    );
+
+    // Fill artist and song, perform search
+    const artistInput = screen.getByTestId('artist-input');
+    const songInput = screen.getByTestId('song-input');
+    const searchSubmit = screen.getByTestId('search-submit');
+    fireEvent.change(artistInput, { target: { value: 'Test Artist' } });
+    fireEvent.change(songInput, { target: { value: 'Test Song' } });
+    fireEvent.click(searchSubmit);
+
+    // Simulate results present (hasSearched=true)
+    await waitFor(() => {
+      expect(screen.getByTestId('has-searched')).toHaveTextContent('true');
+    });
+
+    // Click Clear Search
+    const clearButton = screen.getByTestId('clear-search-button');
+    fireEvent.click(clearButton);
+
+    // Inputs should be cleared
+    expect(artistInput).toHaveValue('');
+    expect(songInput).toHaveValue('');
+    // Results should be cleared
+    expect(screen.getByTestId('has-searched')).toHaveTextContent('false');
+    // URL should be reset
+    expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: true });
+  });
+
+  it('should remove all results from the UI when Clear Search is clicked', async () => {
+    render(
+      <BrowserRouter>
+        <SearchStateProvider>
+          <SearchTab myChordSheets={[]} />
+        </SearchStateProvider>
+      </BrowserRouter>
+    );
+
+    // Fill artist and song, perform search
+    const artistInput = screen.getByTestId('artist-input');
+    const songInput = screen.getByTestId('song-input');
+    const searchSubmit = screen.getByTestId('search-submit');
+    fireEvent.change(artistInput, { target: { value: 'Test Artist' } });
+    fireEvent.change(songInput, { target: { value: 'Test Song' } });
+    fireEvent.click(searchSubmit);
+
+    // Wait for results to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('has-searched')).toHaveTextContent('true');
+    });
+
+    // Click Clear Search
+    const clearButton = screen.getByTestId('clear-search-button');
+    fireEvent.click(clearButton);
+
+    // Results area should be empty (no search-results)
+    expect(screen.queryByTestId('search-results')).toBeNull();
+  });
+
+  it('should disable Clear Search button if both fields are empty and no search performed', () => {
+    render(
+      <BrowserRouter>
+        <SearchStateProvider>
+          <SearchTab myChordSheets={[]} />
+        </SearchStateProvider>
+      </BrowserRouter>
+    );
+    const clearButton = screen.getByTestId('clear-search-button');
+    expect(clearButton).toBeDisabled();
   });
 }); 

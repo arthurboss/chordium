@@ -56,10 +56,8 @@ export const initialState: SearchResultsState = {
 // to ensure that error states from previous searches or artist selections don't persist
 // when a new search is initiated or completes successfully.
 export function searchResultsReducer(state: SearchResultsState, action: SearchResultsAction): SearchResultsState {
-  console.log('[Reducer] Action:', action.type, action);
   switch (action.type) {
     case 'SEARCH_START':
-      console.log('[Reducer] SEARCH_START');
       return {
         ...state,
         loading: true,
@@ -69,7 +67,6 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
       };
 
     case 'SEARCH_SUCCESS':
-      console.log('[Reducer] SEARCH_SUCCESS', { artists: action.artists, songs: action.songs });
       return {
         ...state,
         loading: false,
@@ -85,7 +82,6 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
       };
 
     case 'SEARCH_ERROR':
-      console.log('[Reducer] SEARCH_ERROR', action.error);
       return {
         ...state,
         loading: false,
@@ -142,24 +138,19 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
 
 // Determine UI state from the reducer state
 export function determineUIState(state: SearchResultsState) {
-  console.log('[determineUIState] State:', state);
   if (state.loading) {
-    console.log('[determineUIState] UI state: loading');
     return { state: 'loading' as const };
   }
   
   if (state.error) {
-    console.log('[determineUIState] UI state: error', state.error);
     return { state: 'error' as const, error: state.error };
   }
   
   if (state.artistSongsLoading) {
-    console.log('[determineUIState] UI state: artist-songs-loading');
     return { state: 'artist-songs-loading' as const, activeArtist: state.activeArtist };
   }
   
   if (state.artistSongsError) {
-    console.log('[determineUIState] UI state: artist-songs-error', state.artistSongsError);
     return { 
       state: 'artist-songs-error' as const, 
       artistSongsError: state.artistSongsError, 
@@ -168,7 +159,6 @@ export function determineUIState(state: SearchResultsState) {
   }
   
   if (state.activeArtist && state.artistSongs && state.artistSongs.length > 0) {
-    console.log('[determineUIState] UI state: songs-view (artist)', state.activeArtist);
     return { 
       state: 'songs-view' as const, 
       activeArtist: state.activeArtist,
@@ -180,7 +170,6 @@ export function determineUIState(state: SearchResultsState) {
   
   // Handle case where artist is selected but has no songs
   if (state.activeArtist && !state.artistSongsLoading && state.artistSongs && state.artistSongs.length === 0) {
-    console.log('[determineUIState] UI state: artist-songs-empty', state.activeArtist);
     return { 
       state: 'artist-songs-empty' as const, 
       activeArtist: state.activeArtist
@@ -189,7 +178,6 @@ export function determineUIState(state: SearchResultsState) {
   
   // New state for song-only search results
   if (state.hasSearched && state.songs.length > 0) {
-    console.log('[determineUIState] UI state: songs-view (song)', state.songs);
     return { 
       state: 'songs-view' as const, 
       songs: state.songs,
@@ -199,11 +187,9 @@ export function determineUIState(state: SearchResultsState) {
   }
   
   if (state.hasSearched) {
-    console.log('[determineUIState] UI state: hasSearched, no songs');
     return { state: 'hasSearched' as const, hasSongs: false };
   }
   
-  console.log('[determineUIState] UI state: default');
   return { state: 'default' as const };
 }
 

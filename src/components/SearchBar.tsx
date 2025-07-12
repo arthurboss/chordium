@@ -1,4 +1,4 @@
-import { User, Music, ArrowLeft, Search } from "lucide-react";
+import { User, Music, ArrowLeft, Search, Trash2 } from "lucide-react";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,9 @@ interface SearchBarProps {
   onBackClick?: () => void;
   // Whether the search button should be disabled
   isSearchDisabled?: boolean;
+  // Add clear search props
+  onClearSearch?: () => void;
+  clearDisabled?: boolean;
 }
 
 const SearchBar = ({ 
@@ -33,23 +36,22 @@ const SearchBar = ({
   onSearchSubmit,
   showBackButton = false,
   onBackClick,
-  isSearchDisabled = false
+  isSearchDisabled = false,
+  onClearSearch,
+  clearDisabled = false
 }: SearchBarProps) => {
   // Handle input changes and propagate to parent component
   // No local state is maintained - this component uses the parent's state
   const handleArtistChange = (value: string) => {
-    console.log('[SearchBar] handleArtistChange', value);
     onInputChange(value, songValue);
   };
   
   const handleSongChange = (value: string) => {
-    console.log('[SearchBar] handleSongChange', value);
     onInputChange(artistValue, value);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('[SearchBar] handleSubmit', { artistValue, songValue });
     onSearchSubmit(artistValue, songValue);
   };
 
@@ -84,7 +86,7 @@ const SearchBar = ({
         
         <Separator className="my-2" />
         
-        <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
           <Button 
             type="button"
             variant="outline"
@@ -96,12 +98,24 @@ const SearchBar = ({
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          
+          <div className="flex-grow" />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClearSearch}
+            data-testid="clear-search-button"
+            disabled={clearDisabled}
+            className="w-12"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
           <Button 
             type="submit"
-            className="ml-auto w-24"
+            className="w-24"
             size="sm"
             disabled={!!(loading || artistLoading || isSearchDisabled)}
+            data-testid="search-submit"
           >
             <Search className="h-4 w-4" />
             Search
