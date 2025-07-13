@@ -13,7 +13,6 @@ interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  // Add myChordSheets for deduplication
   myChordSheets?: Song[];
   artist: string;
   song: string;
@@ -23,6 +22,8 @@ interface SearchResultsProps {
   onArtistSelect: (artist: Artist) => void;
   hasSearched?: boolean;
   shouldFetch?: boolean;
+  onFetchComplete?: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
@@ -38,8 +39,20 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onArtistSelect,
   hasSearched,
   shouldFetch,
+  onFetchComplete,
+  onLoadingChange,
 }) => {
-  // Initialize our reducer with myChordSheets for deduplication
+  console.log('[SearchResults] RENDER:', { 
+    artist, 
+    song, 
+    filterArtist, 
+    filterSong, 
+    activeArtist: activeArtist?.displayName,
+    hasSearched, 
+    shouldFetch,
+    myChordSheetsLength: myChordSheets.length
+  });
+
   const {
     state,
     dispatch,
@@ -48,26 +61,58 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     handleAdd
   } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong, myChordSheets);
 
+  console.log('[SearchResults] REDUCER STATE:', { 
+    stateType: stateData.state, 
+    loading: state.loading, 
+    hasSearched: state.hasSearched,
+    artistsCount: state.artists.length,
+    songsCount: state.songs.length,
+    activeArtist: state.activeArtist?.displayName
+  });
+
   // Fetch search results from API - only when shouldFetch is true (form submitted)
-  const { artists, songs, loading, error } = useSearchResults(
+  const { artists, songs, loading, error } = useSearchResults({
     artist, 
     song, 
     filterArtist, 
     filterSong,
-    shouldFetch || false // Only fetch when explicitly requested to do so
-  );
+    shouldFetch: shouldFetch || false,
+    onFetchComplete
+  });
+
+  console.log('[SearchResults] SEARCH RESULTS:', { 
+    artistsCount: artists.length, 
+    songsCount: songs.length, 
+    loading, 
+    error 
+  });
+
+  // Use useLayoutEffect for loading state changes - prevents UI flashing
+  React.useLayoutEffect(() => {
+    if (onLoadingChange) {
+      console.log('[SearchResults] LOADING STATE CHANGE:', loading);
+      onLoadingChange(loading);
+    }
+  }, [loading, onLoadingChange]);
 
   // Fetch artist songs when activeArtist changes
-  const { songs: artistSongs, error: artistSongsError } = useArtistSongs(state.activeArtist);
+  const { artistSongs, error: artistSongsError, loading: artistSongsLoading } = useArtistSongs(state.activeArtist);
+
+  console.log('[SearchResults] ARTIST SONGS:', { 
+    artistSongsCount: artistSongs?.length, 
+    artistSongsError, 
+    artistSongsLoading 
+  });
 
   // Use custom hooks for effects and handlers
   useSearchEffects({
     loading,
     error,
     artists,
-    songs, // Add songs from search results
+    songs,
     artistSongs,
     artistSongsError,
+    artistSongsLoading,
     activeArtist,
     hasSearched,
     state,
@@ -76,6 +121,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   const { handleArtistSelect } = useArtistSelection({ dispatch, onArtistSelect });
 
+  console.log('[SearchResults] FINAL STATE DATA:', stateData);
+
   return (
     <SearchResultsStateHandler
       stateData={stateData}
@@ -83,6 +130,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       songs={state.songs}
       filteredSongs={state.filteredArtistSongs}
       filterSong={filterSong}
+      filterArtist={filterArtist}
       onView={handleView}
       onAdd={handleAdd}
       onArtistSelect={handleArtistSelect}

@@ -21,13 +21,10 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   // Try to get cached results first
   const cachedSongs = getCachedArtistSongs(artistPath);
   if (cachedSongs) {
-    console.log(`🎯 CACHE HIT: Using cached songs for artist: ${artistPath} (${cachedSongs.length} songs)`);
     return cachedSongs;
   }
 
-  console.log(`🌐 CACHE MISS: Fetching songs for artist path: ${artistPath}`);
   const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
-  console.log(`API URL: ${apiUrl}`);
   
   try {
     const resp = await fetch(apiUrl);
@@ -39,10 +36,8 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     }
     
     const data: Song[] = await resp.json();
-    console.log(`Received ${data.length} songs for artist ${artistPath}`);
     
     // Cache the results for future use
-    console.log(`💾 CACHING: Saving ${data.length} songs for artist: ${artistPath}`);
     cacheArtistSongs(artistPath, data);
     
     // Return the data as-is (Song objects with title and path)

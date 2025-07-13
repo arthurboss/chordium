@@ -34,7 +34,7 @@ describe('useSearchEffects - Error Clearing Integration', () => {
         error: null,
         artists: [],
         songs: [],
-        artistSongs: [],
+        artistSongs: null,
         artistSongsError: null,
         activeArtist: null,
         hasSearched: false,
@@ -58,7 +58,7 @@ describe('useSearchEffects - Error Clearing Integration', () => {
       error,
       artists: [],
       songs: [],
-      artistSongs: [],
+      artistSongs: null,
       artistSongsError: null,
       activeArtist: null,
       hasSearched: false,
@@ -81,7 +81,7 @@ describe('useSearchEffects - Error Clearing Integration', () => {
       error: null,
       artists,
       songs,
-      artistSongs: [],
+      artistSongs: null,
       artistSongsError: null,
       activeArtist: null,
       hasSearched: false,
@@ -104,7 +104,7 @@ describe('useSearchEffects - Error Clearing Integration', () => {
       error: null,
       artists: [],
       songs: [],
-      artistSongs: [],
+      artistSongs: null,
       artistSongsError: errorMessage,
       activeArtist: mockArtist,
       hasSearched: false,
@@ -115,6 +115,104 @@ describe('useSearchEffects - Error Clearing Integration', () => {
     expect(dispatch).toHaveBeenCalledWith({ 
       type: 'ARTIST_SONGS_ERROR', 
       error: errorMessage 
+    });
+  });
+
+  describe('Artist Songs Loading State Management', () => {
+    it('should not dispatch ARTIST_SONGS_SUCCESS when artistSongs is null (no data yet)', () => {
+      renderHook(() => useSearchEffects({
+        loading: false,
+        error: null,
+        artists: [],
+        songs: [],
+        artistSongs: null, // No data yet
+        artistSongsError: null,
+        artistSongsLoading: false,
+        activeArtist: mockArtist,
+        hasSearched: false,
+        state: { ...state, artistSongs: null },
+        dispatch,
+      }));
+
+      // Should not dispatch success when artistSongs is null
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'ARTIST_SONGS_SUCCESS' })
+      );
+    });
+
+    it('should dispatch ARTIST_SONGS_SUCCESS when artistSongs changes from null to empty array (fetch completed with no results)', () => {
+      const { rerender } = renderHook(
+        ({ artistSongs }) => useSearchEffects({
+          loading: false,
+          error: null,
+          artists: [],
+          songs: [],
+          artistSongs,
+          artistSongsError: null,
+          artistSongsLoading: false,
+          activeArtist: mockArtist,
+          hasSearched: false,
+          state: { ...state, artistSongs: null },
+          dispatch,
+        }),
+        { initialProps: { artistSongs: null } }
+      );
+
+      // Change to empty array (fetch completed with no results)
+      rerender({ artistSongs: [] });
+
+      expect(dispatch).toHaveBeenCalledWith({ 
+        type: 'ARTIST_SONGS_SUCCESS', 
+        songs: [] 
+      });
+    });
+
+    it('should dispatch ARTIST_SONGS_SUCCESS when artistSongs changes from null to songs array (fetch completed with results)', () => {
+      const { rerender } = renderHook(
+        ({ artistSongs }) => useSearchEffects({
+          loading: false,
+          error: null,
+          artists: [],
+          songs: [],
+          artistSongs,
+          artistSongsError: null,
+          artistSongsLoading: false,
+          activeArtist: mockArtist,
+          hasSearched: false,
+          state: { ...state, artistSongs: null },
+          dispatch,
+        }),
+        { initialProps: { artistSongs: null } }
+      );
+
+      // Change to songs array (fetch completed with results)
+      rerender({ artistSongs: [mockSong] });
+
+      expect(dispatch).toHaveBeenCalledWith({ 
+        type: 'ARTIST_SONGS_SUCCESS', 
+        songs: [mockSong] 
+      });
+    });
+
+    it('should not dispatch ARTIST_SONGS_SUCCESS when artistSongsLoading is true', () => {
+      renderHook(() => useSearchEffects({
+        loading: false,
+        error: null,
+        artists: [],
+        songs: [],
+        artistSongs: [mockSong],
+        artistSongsError: null,
+        artistSongsLoading: true, // Still loading
+        activeArtist: mockArtist,
+        hasSearched: false,
+        state: { ...state, artistSongs: null },
+        dispatch,
+      }));
+
+      // Should not dispatch success when still loading
+      expect(dispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'ARTIST_SONGS_SUCCESS' })
+      );
     });
   });
 
@@ -212,7 +310,7 @@ describe('useSearchEffects - Error Clearing Integration', () => {
           error,
           artists, // Use same array reference
           songs,   // Use same array reference
-          artistSongs: [],
+          artistSongs: null,
           artistSongsError: null,
           activeArtist: null,
           hasSearched: false,

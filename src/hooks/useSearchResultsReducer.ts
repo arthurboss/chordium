@@ -19,7 +19,7 @@ export interface SearchResultsState {
   artistSongsLoading: boolean;
   artistSongsError: string | null;
   activeArtist: Artist | null;
-  artistSongs: Song[];
+  artistSongs: Song[] | null; // Updated to handle null
   artists: Artist[];
   songs: Song[]; // Changed from SearchResultItem[] to Song[]
   filteredArtistSongs: Song[];
@@ -30,7 +30,7 @@ export type SearchResultsAction =
   | { type: 'SEARCH_START' }
   | { type: 'SEARCH_SUCCESS'; artists: Artist[]; songs: Song[] }
   | { type: 'SEARCH_ERROR'; error: Error }
-  | { type: 'SET_HAS_SEARCHED'; value: boolean }
+  // Removed SET_HAS_SEARCHED, handled by SEARCH_SUCCESS/ERROR
   | { type: 'ARTIST_SONGS_START'; artist: Artist }
   | { type: 'ARTIST_SONGS_SUCCESS'; songs: Song[] }
   | { type: 'ARTIST_SONGS_ERROR'; error: string }
@@ -45,7 +45,7 @@ export const initialState: SearchResultsState = {
   artistSongsLoading: false,
   artistSongsError: null,
   activeArtist: null,
-  artistSongs: [],
+  artistSongs: null, // Changed from [] to null
   artists: [],
   songs: [],
   filteredArtistSongs: []
@@ -62,9 +62,10 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         ...state,
         loading: true,
         error: null,
-        artistSongsError: null
+        artistSongsError: null,
+        // Do not reset hasSearched or clear other state fields
       };
-    
+
     case 'SEARCH_SUCCESS':
       return {
         ...state,
@@ -72,22 +73,26 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         error: null,
         artistSongsError: null,
         artists: action.artists,
-        songs: action.songs
+        songs: action.songs,
+        hasSearched: true,
+        // Clear artist-related state when a new search is performed
+        activeArtist: null,
+        artistSongs: null, // Changed from [] to null
+        filteredArtistSongs: [],
       };
-    
+
     case 'SEARCH_ERROR':
       return {
         ...state,
         loading: false,
-        error: action.error
+        error: action.error,
+        artists: [],
+        songs: [],
+        artistSongs: null, // Changed from [] to null
+        filteredArtistSongs: [],
+        hasSearched: true,
       };
-    
-    case 'SET_HAS_SEARCHED':
-      return {
-        ...state,
-        hasSearched: action.value
-      };
-    
+
     case 'ARTIST_SONGS_START':
       return {
         ...state,
@@ -95,7 +100,7 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         artistSongsError: null,
         activeArtist: action.artist
       };
-    
+
     case 'ARTIST_SONGS_SUCCESS':
       return {
         ...state,
@@ -103,27 +108,27 @@ export function searchResultsReducer(state: SearchResultsState, action: SearchRe
         artistSongs: action.songs,
         filteredArtistSongs: action.songs
       };
-    
+
     case 'ARTIST_SONGS_ERROR':
       return {
         ...state,
         artistSongsLoading: false,
         artistSongsError: action.error
       };
-    
+
     case 'CLEAR_ARTIST':
       return {
         ...state,
         activeArtist: null,
-        artistSongs: [],
+        artistSongs: null, // Changed from [] to null
         filteredArtistSongs: [],
         artistSongsError: null
       };
-    
+
     case 'FILTER_ARTIST_SONGS':
       return {
         ...state,
-        filteredArtistSongs: filterArtistSongsByTitle(state.artistSongs, action.filter)
+        filteredArtistSongs: filterArtistSongsByTitle(state.artistSongs || [], action.filter)
       };
 
     default:
@@ -153,13 +158,21 @@ export function determineUIState(state: SearchResultsState) {
     };
   }
   
-  if (state.activeArtist && state.artistSongs.length > 0) {
+  if (state.activeArtist && state.artistSongs && state.artistSongs.length > 0) {
     return { 
       state: 'songs-view' as const, 
       activeArtist: state.activeArtist,
       artistSongs: state.artistSongs,
       searchType: 'artist' as const,
       hasSongs: true 
+    };
+  }
+  
+  // Handle case where artist is selected but has no songs
+  if (state.activeArtist && !state.artistSongsLoading && state.artistSongs && state.artistSongs.length === 0) {
+    return { 
+      state: 'artist-songs-empty' as const, 
+      activeArtist: state.activeArtist
     };
   }
   
@@ -199,7 +212,7 @@ export function useSearchResultsReducer(
   // Generate songs array for the song actions
   const memoizedSongs = useMemo(() => {
     if (state.activeArtist) {
-      return state.artistSongs;
+      return state.artistSongs || [];
     } else {
       return state.songs;
     }
@@ -222,7 +235,7 @@ export function useSearchResultsReducer(
   
   // Handle filter changes in a memoized effect
   useEffect(() => {
-    if (state.artistSongs.length > 0 && filterSong !== undefined) {
+    if (state.artistSongs && state.artistSongs.length > 0 && filterSong !== undefined) {
       stableDispatch({ type: 'FILTER_ARTIST_SONGS', filter: filterSong });
     }
   }, [filterSong, state.artistSongs, stableDispatch]);

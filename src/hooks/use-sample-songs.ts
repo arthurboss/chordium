@@ -14,7 +14,6 @@ export function useSampleSongs() {
     const chordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
     const songs = chordSheets.map(chordSheetToSong);
     
-    console.log('🔄 Refreshing My Chord Sheets from cache:', songs.length, 'songs');
     setMySongs(songs);
   }, []);
 

@@ -11,6 +11,7 @@ interface SearchResultsLayoutProps {
   onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   onArtistSelect?: (artist: Artist) => void;
+  hasSearched?: boolean;
 }
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
@@ -18,18 +19,21 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   songs = [],
   onView,
   onDelete,
-  onArtistSelect
+  onArtistSelect,
+  hasSearched = false
 }) => {
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;
   
   // Handle empty results
-  if (!hasArtists && !hasSongs) {
+  if (!hasArtists && !hasSongs && hasSearched) {
     return (
-      <div className="p-8 text-center text-gray-500">
-        No results found. Try a different search term.
+      <div className="p-8 text-center text-gray-500" data-cy="search-no-chord-sheets-found">
+        No Chord Sheets were found.
       </div>
     );
+  }
+  if (!hasArtists && !hasSongs && !hasSearched) {
   }
 
   return (

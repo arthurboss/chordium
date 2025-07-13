@@ -8,7 +8,6 @@ type UseArtistSelectionProps = {
 
 export const useArtistSelection = ({ dispatch, onArtistSelect }: UseArtistSelectionProps) => {
   const handleArtistSelect = (artist: Artist) => {
-    dispatch({ type: 'ARTIST_SONGS_START', artist });
     onArtistSelect(artist);
   };
 

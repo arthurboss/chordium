@@ -1,10 +1,28 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useSearchState } from "@/context/SearchStateContext";
+import { fromSlug } from "@/utils/url-slug-utils";
 
-// Redirects to /search without query parameters if the user lands directly on /search with any query string.
+// Restores search state from URL parameters on mount
 export function useSearchRedirect() {
+  const location = useLocation();
+  const { updateSearchState } = useSearchState();
+
   useEffect(() => {
-    if (window.location.pathname === "/search" && window.location.search) {
-      window.location.replace("/search");
+    // Only handle search routes
+    if (location.pathname === "/search") {
+      const searchParams = new URLSearchParams(location.search);
+      const artistParam = searchParams.get('artist');
+      const songParam = searchParams.get('song');
+
+      // If URL has search parameters, restore the search state
+      if (artistParam || songParam) {
+        const artist = artistParam ? fromSlug(artistParam) : '';
+        const song = songParam ? fromSlug(songParam) : '';
+        
+        console.log('[useSearchRedirect] Restoring search state from URL:', { artist, song });
+        updateSearchState({ artist, song, results: [] });
+      }
     }
-  }, []);
+  }, [location.search, location.pathname, updateSearchState]);
 }

@@ -1,9 +1,17 @@
-import { useState, useReducer } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from 'react-router-dom';
+import type { Song } from "@/types/song";
+import type { Artist } from "@/types/artist";
+import { useSearchState } from "@/context/SearchStateContext";
+import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
-import { Song } from "@/types/song";
-import { Artist } from "@/types/artist";
+import { setLastSearchQuery } from '@/cache/implementations/search-cache';
+import { getCachedSearchResults } from '@/cache/implementations/search-cache';
+import { toSlug, fromSlug } from '@/utils/url-slug-utils';
+import { cyAttr } from '@/utils/test-utils/cy-attr';
+import { useArtistNavigation } from '@/hooks/useArtistNavigation';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -12,129 +20,255 @@ interface SearchTabProps {
   myChordSheets: Song[];
 }
 
-// Define the search form state
-interface SearchFormState {
-  artistQuery: string;         // Current artist input field value
-  songQuery: string;           // Current song input field value
-  selectedArtist: Artist | null; // The selected artist (if any)
-  searchedArtist: string;      // Last submitted artist search term
-  searchedSong: string;        // Last submitted song search term
-  hasSearched: boolean;        // Whether a search has been performed
-  shouldFetch: boolean;        // Whether to trigger API fetch
-}
+// Local state for selectedSong (for viewing a song from search results)
 
-// Define actions
-type SearchFormAction = 
-  | { type: 'UPDATE_INPUT'; artistValue: string; songValue: string }
-  | { type: 'SUBMIT_SEARCH'; artistValue: string; songValue: string }
-  | { type: 'SELECT_ARTIST'; artist: Artist }
-  | { type: 'BACK_TO_SEARCH' };
-
-// Initial state
-const initialState: SearchFormState = {
-  artistQuery: "",
-  songQuery: "",
-  selectedArtist: null,
-  searchedArtist: "",
-  searchedSong: "",
-  hasSearched: false,
-  shouldFetch: false
-};
-
-// Reducer function
-function searchFormReducer(state: SearchFormState, action: SearchFormAction): SearchFormState {
-  switch (action.type) {
-    case 'UPDATE_INPUT':
-      return {
-        ...state,
-        artistQuery: action.artistValue,
-        songQuery: action.songValue,
-        shouldFetch: false // Reset shouldFetch on input changes
-      };
-    
-    case 'SUBMIT_SEARCH':
-      return {
-        ...state,
-        selectedArtist: null,
-        searchedArtist: action.artistValue,
-        searchedSong: action.songValue,
-        hasSearched: true,
-        shouldFetch: true // Set to true only when submitting search
-      };
-    
-    case 'SELECT_ARTIST':
-      return {
-        ...state,
-        selectedArtist: action.artist
-      };
-    
-    case 'BACK_TO_SEARCH':
-      return {
-        ...state,
-        selectedArtist: null,
-        searchedSong: ""
-      };
-      
-    default:
-      return state;
-  }
-}
-
-const SearchTab = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }: SearchTabProps) => {
-  // Use our form reducer
-  const [state, dispatch] = useReducer(searchFormReducer, initialState);
-  
-  // Local loading state just for the search bar
+const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }) => {
+  const { searchState, updateSearchState } = useSearchState();
   const [loading, setLoading] = useState(false);
+  const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
+  const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [artistInput, setArtistInput] = useState('');
+  const [songInput, setSongInput] = useState('');
+  const [prevArtistInput, setPrevArtistInput] = useState('');
+  const [prevSongInput, setPrevSongInput] = useState('');
+  const [submittedArtist, setSubmittedArtist] = useState('');
+  const [submittedSong, setSubmittedSong] = useState('');
+  const [shouldFetch, setShouldFetch] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isInitialized = useRef(false);
 
-  const handleInputChange = (artistValue: string, songValue: string) => {
-    console.log('[SearchTab] handleInputChange', { artistValue, songValue });
-    dispatch({ type: 'UPDATE_INPUT', artistValue, songValue });
-  };
+  console.log('[SearchTab] RENDER:', { 
+    hasSearched, 
+    artistInput, 
+    songInput, 
+    submittedArtist, 
+    submittedSong, 
+    shouldFetch,
+    activeArtist: activeArtist?.displayName,
+    selectedSong: selectedSong?.title
+  });
 
-  const handleSearchSubmit = (artistValue: string, songValue: string) => {
-    console.log('[SearchTab] handleSearchSubmit', { artistValue, songValue });
+  // Initialize input fields and search state from URL on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const artistParam = searchParams.get('artist');
+    const songParam = searchParams.get('song');
+
+    if ((artistParam || songParam) && !isInitialized.current) {
+      const artist = artistParam ? fromSlug(artistParam) : '';
+      const song = songParam ? fromSlug(songParam) : '';
+      
+      console.log('[SearchTab] INITIALIZING FROM URL:', { artist, song });
+      
+      // Set input fields
+      setArtistInput(artist);
+      setSongInput(song);
+      setPrevArtistInput(artist);
+      setPrevSongInput(song);
+      setSubmittedArtist(artist);
+      setSubmittedSong(song);
+
+      // Set search state and let useSearchResults handle cache checking
+      updateSearchState({ artist, song, results: [] });
+      setLastSearchQuery(artist, song);
+      setHasSearched(true);
+      setShouldFetch(true);
+      isInitialized.current = true;
+    }
+  }, [location.search, updateSearchState]);
+
+  // Handlers for search form - memoized to prevent re-renders
+  const handleInputChange = useCallback((artistValue: string, songValue: string) => {
+    console.log('[SearchTab] INPUT CHANGE:', { artistValue, songValue, activeArtist: activeArtist?.displayName });
+    
+    // Always update the input fields so the UI shows what user types
+    setArtistInput(artistValue);
+    setSongInput(songValue);
+    
+    // Only update URL when an input is cleared (goes from non-empty to empty)
+    const artistCleared = prevArtistInput && !artistValue;
+    const songCleared = prevSongInput && !songValue;
+    
+    if (artistCleared || songCleared) {
+      console.log('[SearchTab] INPUT CLEARED - Updating URL');
+      const params = new URLSearchParams();
+      if (artistValue) params.set('artist', toSlug(artistValue));
+      if (songValue) params.set('song', toSlug(songValue));
+      navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+    }
+    
+    // Update previous values for next comparison
+    setPrevArtistInput(artistValue);
+    setPrevSongInput(songValue);
+    // --- FIX: Reset shouldFetch to false on input change ---
+    setShouldFetch(false);
+  }, [prevArtistInput, prevSongInput, navigate]);
+
+  const handleSearchSubmit = useCallback((artistValue: string, songValue: string) => {
+    console.log('[SearchTab] SEARCH SUBMIT:', { artistValue, songValue });
+    
+    // Clear artist/song selection state before new search
+    setActiveArtist(null);
+    setSelectedSongLocal(null);
     setLoading(true);
-    dispatch({ type: 'SUBMIT_SEARCH', artistValue, songValue });
+    setSubmittedArtist(artistValue);
+    setSubmittedSong(songValue);
+    updateSearchState({ artist: artistValue, song: songValue, results: [] });
+    setLastSearchQuery(artistValue, songValue);
+    setHasSearched(true);
+    setShouldFetch(true);
+    // Update the URL with the search query
+    const params = new URLSearchParams();
+    if (artistValue) params.set('artist', toSlug(artistValue));
+    if (songValue) params.set('song', toSlug(songValue));
+    navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: location.pathname.startsWith('/search') });
+  }, [updateSearchState, navigate, location.pathname]);
+
+  // Handler for loading state changes from SearchResults
+  const handleLoadingChange = useCallback((isLoading: boolean) => {
+    console.log('[SearchTab] LOADING CHANGE:', isLoading);
+    setLoading(isLoading);
+  }, []);
+
+  // Handler for selecting a song from search results
+  const handleSongSelect = useCallback((song: Song) => {
+    console.log('[SearchTab] SONG SELECTED:', song.title);
+    setSelectedSongLocal(song);
+  }, []);
+
+  // Import the artist navigation hook
+  const { navigateToArtist, navigateBackToSearch, isOnArtistPage, getCurrentArtistPath } = useArtistNavigation();
+
+  // Handle direct artist URL access (e.g., /jeremy-camp)
+  useEffect(() => {
+    if (isOnArtistPage() && !isInitialized.current) {
+      const artistPath = getCurrentArtistPath();
+      if (artistPath) {
+        const artistName = fromSlug(artistPath);
+        console.log('[SearchTab] INITIALIZING FROM ARTIST URL:', { artistPath, artistName });
+        
+        // Set up the artist as if it was selected from search results
+        const artist: Artist = {
+          displayName: artistName,
+          path: artistPath,
+          songCount: null
+        };
+        
+        setActiveArtist(artist);
+        setArtistInput(artistName);
+        setPrevArtistInput(artistName);
+        setSubmittedArtist(artistName);
+        setHasSearched(true);
+        setShouldFetch(true);
+        isInitialized.current = true;
+      }
+    }
+  }, [location.pathname, isOnArtistPage, getCurrentArtistPath]);
+
+  // Handler for selecting an artist from search results
+  const handleArtistSelect = useCallback((artist: Artist) => {
+    console.log('[SearchTab] ARTIST SELECTED:', artist.displayName);
+    setActiveArtist(artist);
+    // Navigate to artist page
+    navigateToArtist(artist);
+  }, [navigateToArtist]);
+
+  // Handler for going back to search from SongViewer
+  const handleBackToSearch = useCallback(() => {
+    console.log('[SearchTab] BACK TO SEARCH');
+    setSelectedSongLocal(null);
+  }, []);
+
+  // Handler for going back to artist list from artist songs view
+  const handleBackToArtistList = useCallback(() => {
+    console.log('[SearchTab] BACK TO ARTIST LIST');
+    setActiveArtist(null);
+    // Navigate back to search results
+    navigateBackToSearch();
+  }, [navigateBackToSearch]);
+
+  // Handler for Clear Search button
+  const handleClearSearch = useCallback(() => {
+    setArtistInput('');
+    setSongInput('');
+    setPrevArtistInput('');
+    setPrevSongInput('');
+    setSubmittedArtist('');
+    setSubmittedSong('');
+    setHasSearched(false);
+    setShouldFetch(false);
+    setActiveArtist(null);
+    setSelectedSongLocal(null);
     setLoading(false);
-  };
+    updateSearchState({ artist: '', song: '', results: [] });
+    navigate('/search', { replace: true });
+  }, [updateSearchState, navigate]);
 
-  const handleArtistSelect = (artist: Artist) => {
-    dispatch({ type: 'SELECT_ARTIST', artist });
-  };
+  // Disable clear if both fields are empty and no search performed
+  const clearDisabled = !artistInput && !songInput && !hasSearched;
 
-  const handleBackToSearch = () => {
-    dispatch({ type: 'BACK_TO_SEARCH' });
-  };
+  console.log('[SearchTab] FINAL STATE:', { 
+    hasSearched, 
+    shouldFetch, 
+    loading, 
+    activeArtist: activeArtist?.displayName,
+    selectedSong: selectedSong?.title
+  });
 
   return (
     <div className="space-y-4">
-      <FormContainer>
-        <SearchBar
-          artistValue={state.artistQuery}
-          songValue={state.songQuery}
-          onInputChange={handleInputChange}
-          onSearchSubmit={handleSearchSubmit}
-          loading={loading}
-          showBackButton={state.selectedArtist !== null}
-          onBackClick={handleBackToSearch}
-          isSearchDisabled={!state.artistQuery && !state.songQuery} // Disable search if both fields are empty
+      {selectedSong ? (
+        <SongViewer
+          song={selectedSong}
+          chordDisplayRef={null}
+          onBack={handleBackToSearch}
+          onDelete={() => {}}
+          onUpdate={() => {}}
+          backButtonLabel="Back to Search"
+          hideDeleteButton={true}
         />
-      </FormContainer>
-      <SearchResults
-        setMySongs={setMySongs}
-        setActiveTab={setActiveTab}
-        setSelectedSong={setSelectedSong}
-        myChordSheets={myChordSheets}
-        artist={state.searchedArtist} // Always use searchedArtist
-        song={state.searchedSong}    // Always use searchedSong
-        filterArtist={state.artistQuery}
-        filterSong={state.songQuery}
-        activeArtist={state.selectedArtist}
-        onArtistSelect={handleArtistSelect}
-        hasSearched={state.hasSearched}
-        shouldFetch={state.shouldFetch}
-      />
+      ) : (
+        <>
+          <FormContainer>
+            <SearchBar
+              artistValue={artistInput}
+              songValue={songInput}
+              onInputChange={handleInputChange}
+              onSearchSubmit={handleSearchSubmit}
+              loading={loading}
+              showBackButton={!!activeArtist}
+              onBackClick={activeArtist ? handleBackToArtistList : undefined}
+              isSearchDisabled={!artistInput && !songInput}
+              artistLoading={loading} // ensure disables back button when loading
+              onClearSearch={handleClearSearch}
+              clearDisabled={clearDisabled}
+              artistDisabled={!!activeArtist}
+            />
+          </FormContainer>
+          {hasSearched && (
+            <div {...cyAttr('search-results-area')}>
+              <SearchResults
+                setMySongs={setMySongs}
+                setActiveTab={setActiveTab}
+                setSelectedSong={handleSongSelect}
+                myChordSheets={myChordSheets}
+                artist={hasSearched ? submittedArtist : searchState.artist}
+                song={hasSearched ? submittedSong : searchState.song}
+                filterArtist={activeArtist ? submittedArtist : artistInput}
+                filterSong={songInput}
+                activeArtist={activeArtist}
+                onArtistSelect={handleArtistSelect}
+                hasSearched={hasSearched}
+                shouldFetch={shouldFetch}
+                onLoadingChange={handleLoadingChange}
+                onFetchComplete={() => setShouldFetch(false)}
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

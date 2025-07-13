@@ -18,7 +18,7 @@ interface FormFieldProps {
 const FormField: React.FC<FormFieldProps> = ({
   id,
   label,
-  value,
+  value = "",
   onChange,
   placeholder,
   required = false,
