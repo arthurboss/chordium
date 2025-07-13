@@ -24,6 +24,8 @@ interface SearchBarProps {
   // Add clear search props
   onClearSearch?: () => void;
   clearDisabled?: boolean;
+  // Whether the artist input should be disabled (when an artist is selected)
+  artistDisabled?: boolean;
 }
 
 const SearchBar = ({ 
@@ -38,7 +40,8 @@ const SearchBar = ({
   onBackClick,
   isSearchDisabled = false,
   onClearSearch,
-  clearDisabled = false
+  clearDisabled = false,
+  artistDisabled = false
 }: SearchBarProps) => {
   // Handle input changes and propagate to parent component
   // No local state is maintained - this component uses the parent's state
@@ -60,11 +63,11 @@ const SearchBar = ({
       <div className="flex flex-col gap-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
-            <FormField
+                        <FormField
               id="artist-search-input"
               value={artistValue}
               onChange={handleArtistChange}
-              disabled={loading || artistLoading}
+              disabled={loading || artistLoading || artistDisabled}
               placeholder="Search for an artist"
               leftIcon={<User className="h-4 w-4" />}
             />

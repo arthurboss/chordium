@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useRef, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useInsertionEffect } from 'react';
 import { Artist } from '@/types/artist';
 import { Song } from '@/types/song';
 import { SearchResultsState, SearchResultsAction } from '@/hooks/useSearchResultsReducer';
@@ -8,8 +7,8 @@ type SearchEffectsProps = {
   loading: boolean;
   error: Error | string | null;
   artists: Artist[];
-  songs: Song[]; // Changed from SearchResultItem[] to Song[]
-  artistSongs: Song[] | null; // Updated to handle null
+  songs: Song[];
+  artistSongs: Song[] | null;
   artistSongsError: Error | string | null;
   artistSongsLoading: boolean;
   activeArtist: Artist | null;
@@ -22,7 +21,7 @@ export const useSearchEffects = ({
   loading,
   error,
   artists,
-  songs, // Add songs parameter
+  songs,
   artistSongs,
   artistSongsError,
   artistSongsLoading,
@@ -31,33 +30,38 @@ export const useSearchEffects = ({
   state,
   dispatch,
 }: SearchEffectsProps) => {
-  // Handle search results changes - only dispatch when there's an actual change
-  useEffect(() => {
+  // Use useInsertionEffect for initialization - runs before DOM mutations
+  useInsertionEffect(() => {
+    // Initialize state if needed - no dispatch needed here
+    // The state will be initialized by the other effects
+  }, []);
+
+  // Use useLayoutEffect for search state changes - prevents UI flashing
+  useLayoutEffect(() => {
     if (loading && !state.loading) {
       dispatch({ type: 'SEARCH_START' });
     } else if (!loading && !error && (hasSearched || artists.length > 0 || songs.length > 0)) {
       dispatch({ type: 'SEARCH_SUCCESS', artists, songs });
     } else if (!loading && error && error !== state.error) {
-      // Ensure error is always an Error object
       const errorObj = typeof error === 'string' ? new Error(error) : error;
       dispatch({ type: 'SEARCH_ERROR', error: errorObj });
     }
   }, [loading, error, artists, songs, state.loading, state.error, dispatch, hasSearched]);
 
-  // Handle artist songs changes - dispatch success when we have songs and are not loading
-  useEffect(() => {
+  // Use useLayoutEffect for artist songs changes - prevents UI flashing
+  useLayoutEffect(() => {
     if (artistSongsError && artistSongsError !== state.artistSongsError) {
-      // For ARTIST_SONGS_ERROR, keep as string (reducer expects string)
-      dispatch({ type: 'ARTIST_SONGS_ERROR', error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message });
+      dispatch({ 
+        type: 'ARTIST_SONGS_ERROR', 
+        error: typeof artistSongsError === 'string' ? artistSongsError : artistSongsError.message 
+      });
     } else if (!artistSongsLoading && artistSongs !== null) {
-      // Dispatch success when we have any result (including empty array) and are not loading
       dispatch({ type: 'ARTIST_SONGS_SUCCESS', songs: artistSongs });
-    } else {
     }
   }, [artistSongs, artistSongsError, artistSongsLoading, state.artistSongs, state.artistSongsError, state.artistSongsLoading, dispatch]);
 
-  // Handle artist selection - only dispatch when there's an actual change
-  useEffect(() => {
+  // Use useLayoutEffect for artist selection - prevents UI flashing
+  useLayoutEffect(() => {
     if (activeArtist !== state.activeArtist) {
       if (activeArtist) {
         dispatch({ type: 'ARTIST_SONGS_START', artist: activeArtist });
@@ -66,6 +70,4 @@ export const useSearchEffects = ({
       }
     }
   }, [activeArtist, state.activeArtist, dispatch]);
-  
-  // Remove hasSearched effect, now handled by reducer
 };

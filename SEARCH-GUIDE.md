@@ -40,13 +40,15 @@ Type in the artist field to filter through artists who recorded that song
 ### After an Artist-Song Search 🎼
 Type in either field to refine your search within the current results
 
+> 🧹 **Clear Button**: Clicking the Clear button or clearing both fields will remove all results from the page, giving you a fresh start!
+
 ---
 
 ## 🌐 URL Behavior
 
 🔗 **Smart URLs**: The web address updates when you submit a search
 
-🧹 **Clean Slate**: When you clear the search fields, the web address clears too
+🧹 **Clean Slate**: When you clear the search fields (or use the Clear button), all results are removed from the page and the web address clears too
 
 📌 **Bookmark Friendly**: Your search stays saved in the web address so you can bookmark or share it
 

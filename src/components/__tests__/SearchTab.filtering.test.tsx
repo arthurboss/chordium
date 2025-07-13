@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import SearchTab from '../tabs/SearchTab';
 import { SearchStateProvider } from '@/context/SearchStateContext';
@@ -36,7 +36,6 @@ vi.mock('@/utils/test-utils/cy-attr', () => ({
   cyAttr: vi.fn(() => ({})),
 }));
 
-// Mock the SearchResults component
 vi.mock('../SearchResults', () => ({
   default: vi.fn(({ filterArtist, filterSong, activeArtist, hasSearched, onArtistSelect }) => (
     <div data-testid="search-results">
@@ -47,7 +46,6 @@ vi.mock('../SearchResults', () => ({
       <button 
         data-testid="select-artist" 
         onClick={() => {
-          // Simulate artist selection by calling the onArtistSelect prop
           if (onArtistSelect) {
             onArtistSelect({ 
               id: 'test-artist', 
@@ -64,7 +62,6 @@ vi.mock('../SearchResults', () => ({
   )),
 }));
 
-// Mock the SearchBar component
 vi.mock('../SearchBar', () => ({
   default: vi.fn(({ artistValue, songValue, onInputChange, onSearchSubmit, showBackButton, onBackClick, onClearSearch, clearDisabled }) => (
     <div data-testid="search-bar">
@@ -114,6 +111,7 @@ vi.mock('react-router-dom', async () => {
 describe('SearchTab - Filtering Behavior', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock functions
     // Mock window.location
     Object.defineProperty(window, 'location', {
       value: {
@@ -122,6 +120,11 @@ describe('SearchTab - Filtering Behavior', () => {
       },
       writable: true,
     });
+  });
+
+  afterEach(() => {
+    // Clean up any remaining components
+    cleanup();
   });
 
   it('should disable artist filtering when an artist is selected', async () => {
@@ -257,6 +260,23 @@ describe('SearchTab - Filtering Behavior', () => {
 }); 
 
 describe('Clear Search Button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Mock window.location
+    Object.defineProperty(window, 'location', {
+      value: {
+        pathname: '/search',
+        search: '',
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    // Clean up any remaining components
+    cleanup();
+  });
+
   it('should clear both input fields, results, and URL when clicked', async () => {
     render(
       <BrowserRouter>
@@ -286,8 +306,8 @@ describe('Clear Search Button', () => {
     // Inputs should be cleared
     expect(artistInput).toHaveValue('');
     expect(songInput).toHaveValue('');
-    // Results should be cleared
-    expect(screen.getByTestId('has-searched')).toHaveTextContent('false');
+    // Results area should be removed
+    expect(screen.queryByTestId('search-results')).toBeNull();
     // URL should be reset
     expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: true });
   });

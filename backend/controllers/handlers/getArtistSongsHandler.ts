@@ -65,8 +65,20 @@ async function getArtistSongsHandler(
     } catch (scrapeError) {
       // If scraping fails, return appropriate error status
       const errMsg = scrapeError instanceof Error ? scrapeError.message : String(scrapeError);
+      const errStack = scrapeError instanceof Error && scrapeError.stack ? scrapeError.stack : undefined;
       logger.warn(`Scraping failed for ${normalizedArtistPath}: ${errMsg}`);
-      
+      if (errStack) {
+        logger.warn(`Scraping error stack for ${normalizedArtistPath}:\n${errStack}`);
+      }
+      // Special handling for Puppeteer protocol errors
+      if (errMsg.includes('Protocol error: Connection closed.')) {
+        logger.error(`Puppeteer Protocol error for ${normalizedArtistPath}: Connection closed. This may be due to the target site blocking scraping, browser crash, or resource exhaustion.`);
+        res.status(502).json({
+          error: 'Bad Gateway',
+          details: 'The scraping browser was unexpectedly closed. This may be due to the target site blocking scraping, a browser crash, or server resource exhaustion. Please try again later or check backend logs for details.'
+        });
+        return;
+      }
       // Check if it's a timeout error
       if (errMsg.toLowerCase().includes('timeout')) {
         res.status(504).json({ 

@@ -13,7 +13,6 @@ interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  // Add myChordSheets for deduplication
   myChordSheets?: Song[];
   artist: string;
   song: string;
@@ -54,7 +53,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     myChordSheetsLength: myChordSheets.length
   });
 
-  // Initialize our reducer with myChordSheets for deduplication
   const {
     state,
     dispatch,
@@ -78,7 +76,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     song, 
     filterArtist, 
     filterSong,
-    shouldFetch: shouldFetch || false // Only fetch when explicitly requested to do so
+    shouldFetch: shouldFetch || false,
+    onFetchComplete
   });
 
   console.log('[SearchResults] SEARCH RESULTS:', { 
@@ -88,20 +87,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     error 
   });
 
-  // Call onFetchComplete after fetch completes (when loading goes from true to false)
-  const prevLoadingRef = React.useRef(loading);
-  React.useEffect(() => {
-    if (shouldFetch && prevLoadingRef.current && !loading) {
-      console.log('[SearchResults] FETCH COMPLETE - Calling onFetchComplete');
-      if (onFetchComplete) {
-        onFetchComplete();
-      }
-    }
-    prevLoadingRef.current = loading;
-  }, [loading, shouldFetch, onFetchComplete]);
-
-  // Notify parent component of loading state changes
-  React.useEffect(() => {
+  // Use useLayoutEffect for loading state changes - prevents UI flashing
+  React.useLayoutEffect(() => {
     if (onLoadingChange) {
       console.log('[SearchResults] LOADING STATE CHANGE:', loading);
       onLoadingChange(loading);
@@ -122,7 +109,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     loading,
     error,
     artists,
-    songs, // Add songs from search results
+    songs,
     artistSongs,
     artistSongsError,
     artistSongsLoading,

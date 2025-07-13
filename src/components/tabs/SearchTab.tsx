@@ -80,7 +80,9 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
 
   // Handlers for search form - memoized to prevent re-renders
   const handleInputChange = useCallback((artistValue: string, songValue: string) => {
-    console.log('[SearchTab] INPUT CHANGE:', { artistValue, songValue });
+    console.log('[SearchTab] INPUT CHANGE:', { artistValue, songValue, activeArtist: activeArtist?.displayName });
+    
+    // Always update the input fields so the UI shows what user types
     setArtistInput(artistValue);
     setSongInput(songValue);
     
@@ -99,6 +101,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     // Update previous values for next comparison
     setPrevArtistInput(artistValue);
     setPrevSongInput(songValue);
+    // --- FIX: Reset shouldFetch to false on input change ---
+    setShouldFetch(false);
   }, [prevArtistInput, prevSongInput, navigate]);
 
   const handleSearchSubmit = useCallback((artistValue: string, songValue: string) => {
@@ -206,6 +210,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
               artistLoading={loading} // ensure disables back button when loading
               onClearSearch={handleClearSearch}
               clearDisabled={clearDisabled}
+              artistDisabled={!!activeArtist}
             />
           </FormContainer>
           {hasSearched && (
@@ -217,13 +222,14 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
                 myChordSheets={myChordSheets}
                 artist={hasSearched ? submittedArtist : searchState.artist}
                 song={hasSearched ? submittedSong : searchState.song}
-                filterArtist={artistInput}
+                filterArtist={activeArtist ? submittedArtist : artistInput}
                 filterSong={songInput}
                 activeArtist={activeArtist}
                 onArtistSelect={handleArtistSelect}
                 hasSearched={hasSearched}
                 shouldFetch={shouldFetch}
                 onLoadingChange={handleLoadingChange}
+                onFetchComplete={() => setShouldFetch(false)}
               />
             </div>
           )}

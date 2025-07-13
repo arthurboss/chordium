@@ -10,6 +10,7 @@ export interface UseSearchResultsOptions {
   filterArtist: string;
   filterSong: string;
   shouldFetch?: boolean;
+  onFetchComplete?: () => void;
 }
 
 /**
@@ -23,6 +24,7 @@ export function useSearchResults({
   filterArtist,
   filterSong,
   shouldFetch = false,
+  onFetchComplete,
 }: UseSearchResultsOptions) {
   // State for currently displayed results
   const [allArtists, setAllArtists] = useState<Artist[]>([]);
@@ -53,8 +55,14 @@ export function useSearchResults({
       setAllSongs(songs || []);
       lastArtistsRef.current = artists || [];
       lastSongsRef.current = songs || [];
+      
+      // Notify parent that fetch completed successfully
+      if (onFetchComplete) {
+        console.log('[useSearchResults] FETCH COMPLETE - Calling onFetchComplete');
+        onFetchComplete();
+      }
     }
-  }, [hasFetched, artists, songs]);
+  }, [hasFetched, artists, songs, onFetchComplete]);
 
   // On filter clear, reset state from refs and increment version
   useEffect(() => {

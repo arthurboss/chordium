@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAbortController } from './useAbortController';
 
 interface UseAsyncFetchState<T> {
   data: T | null;
@@ -29,9 +28,6 @@ export function useAsyncFetch<T>(
   const [error, setError] = useState<string | null>(null);
   const currentRequestId = useRef<number>(0);
 
-  // Create abort controller with dependencies
-  const abortController = useAbortController(dependencies);
-
   useEffect(() => {
     if (!enabled) {
       setData(null);
@@ -40,23 +36,21 @@ export function useAsyncFetch<T>(
       return;
     }
 
+    const abortController = new AbortController();
     const requestId = ++currentRequestId.current;
-    
+    let didCancel = false;
+
     const executeFetch = async () => {
       try {
         setLoading(true);
         setError(null);
-        
         const result = await fetchFn(abortController.signal);
-        
-        // Only update state if this is still the current request (prevent race conditions)
-        if (currentRequestId.current === requestId) {
+        if (!didCancel && currentRequestId.current === requestId) {
           setData(result);
           setLoading(false);
         }
       } catch (err) {
-        // Only update state if this is still the current request and it's not an abort error
-        if (currentRequestId.current === requestId && err instanceof Error && err.name !== 'AbortError') {
+        if (!didCancel && currentRequestId.current === requestId && err instanceof Error && err.name !== 'AbortError') {
           setError(err.message);
           setLoading(false);
         }
@@ -64,7 +58,11 @@ export function useAsyncFetch<T>(
     };
 
     executeFetch();
-  }, [enabled, abortController]);
+    return () => {
+      didCancel = true;
+      abortController.abort();
+    };
+  }, [enabled, ...dependencies]);
 
   return { data, loading, error };
 } 
