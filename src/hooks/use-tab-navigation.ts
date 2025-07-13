@@ -40,6 +40,13 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       return "my-chord-sheets";
     
     default:
+      // Handle artist routes: /artist-name (single segment paths)
+      const pathSegments = path.split('/').filter(segment => segment.length > 0);
+      if (pathSegments.length === 1 && pathSegments[0] !== '') {
+        // This is likely an artist page, show search tab with artist selected
+        return "search";
+      }
+      
       // Handle search context based on query parameters only for non-specific paths
       if (getSearchParamsType(queryParams)) {
         return "search";

@@ -11,6 +11,7 @@ import { setLastSearchQuery } from '@/cache/implementations/search-cache';
 import { getCachedSearchResults } from '@/cache/implementations/search-cache';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
+import { useArtistNavigation } from '@/hooks/useArtistNavigation';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -137,11 +138,42 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     setSelectedSongLocal(song);
   }, []);
 
+  // Import the artist navigation hook
+  const { navigateToArtist, navigateBackToSearch, isOnArtistPage, getCurrentArtistPath } = useArtistNavigation();
+
+  // Handle direct artist URL access (e.g., /jeremy-camp)
+  useEffect(() => {
+    if (isOnArtistPage() && !isInitialized.current) {
+      const artistPath = getCurrentArtistPath();
+      if (artistPath) {
+        const artistName = fromSlug(artistPath);
+        console.log('[SearchTab] INITIALIZING FROM ARTIST URL:', { artistPath, artistName });
+        
+        // Set up the artist as if it was selected from search results
+        const artist: Artist = {
+          displayName: artistName,
+          path: artistPath,
+          songCount: null
+        };
+        
+        setActiveArtist(artist);
+        setArtistInput(artistName);
+        setPrevArtistInput(artistName);
+        setSubmittedArtist(artistName);
+        setHasSearched(true);
+        setShouldFetch(true);
+        isInitialized.current = true;
+      }
+    }
+  }, [location.pathname, isOnArtistPage, getCurrentArtistPath]);
+
   // Handler for selecting an artist from search results
   const handleArtistSelect = useCallback((artist: Artist) => {
     console.log('[SearchTab] ARTIST SELECTED:', artist.displayName);
     setActiveArtist(artist);
-  }, []);
+    // Navigate to artist page
+    navigateToArtist(artist);
+  }, [navigateToArtist]);
 
   // Handler for going back to search from SongViewer
   const handleBackToSearch = useCallback(() => {
@@ -153,7 +185,9 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const handleBackToArtistList = useCallback(() => {
     console.log('[SearchTab] BACK TO ARTIST LIST');
     setActiveArtist(null);
-  }, []);
+    // Navigate back to search results
+    navigateBackToSearch();
+  }, [navigateBackToSearch]);
 
   // Handler for Clear Search button
   const handleClearSearch = useCallback(() => {

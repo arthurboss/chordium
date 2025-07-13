@@ -13,6 +13,16 @@ import { useSearchRedirect } from "@/hooks/use-search-redirect";
 const getInitialTab = (pathname: string): string => {
   if (pathname.startsWith("/search")) return "search";
   if (pathname.startsWith("/upload")) return "upload";
+  if (pathname.startsWith("/my-chord-sheets")) return "my-chord-sheets";
+  
+  // Handle artist routes: /artist-name
+  // Check if it's a direct artist path (not a song path like /artist/song)
+  const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
+  if (pathSegments.length === 1 && pathSegments[0] !== '') {
+    // This is likely an artist page, show search tab with artist selected
+    return "search";
+  }
+  
   return "my-chord-sheets"; // Default
 };
 
