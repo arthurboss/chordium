@@ -67,6 +67,12 @@ export function extractSearchResults(): DOMSearchResult[] {
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+        } else if (pathSegments.length === 1) {
+          // For artist URLs like "oasis", artist is the single segment
+          artist = pathSegments[0]
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
         }
       }
 
@@ -79,12 +85,12 @@ export function extractSearchResults(): DOMSearchResult[] {
     .filter(r => {
       if (!r.title || !r.path) return false;
       const segments = r.path.split('/').filter(Boolean);
-      // Only allow exactly 2 segments (artist/song)
-      if (segments.length !== 2) return false;
-      // Exclude if last segment is "letra"
-      if (segments[1].toLowerCase() === 'letra') return false;
-      // Exclude if second segment is numeric (e.g., /artist/12345)
-      if (/^\d+$/.test(segments[1])) return false;
+      // Allow 1 segment (artist page) or 2 segments (song page)
+      if (segments.length !== 1 && segments.length !== 2) return false;
+      // For 2-segment paths, exclude if last segment is "letra"
+      if (segments.length === 2 && segments[1].toLowerCase() === 'letra') return false;
+      // For 2-segment paths, exclude if second segment is numeric (e.g., /artist/12345)
+      if (segments.length === 2 && /^\d+$/.test(segments[1])) return false;
       return true;
     });
 }
