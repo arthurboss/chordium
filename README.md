@@ -1,6 +1,8 @@
-<h1>
-  <img src="./public/favicon-180.png" alt="Chordium Logo" width="48" style="vertical-align: middle; margin-right: 8px;" />Chordium
-</h1>
+<p align="center">
+  <img src="./public/favicon-180.png" alt="Chordium Logo" height="128">
+</p>
+
+<h1 align="center">Chordium</h1>
 
 A modern, minimalist chord viewer app for beginner guitar players and hobbyists. 
 
