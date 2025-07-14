@@ -5,6 +5,7 @@ export interface ServerConfig {
 export interface CorsConfig {
   origin: string;
   methods: string[];
+  credentials?: boolean;
 }
 
 export interface PuppeteerConfig {

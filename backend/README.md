@@ -10,6 +10,19 @@ npm run dev  # Start development server
 npm test     # Run all tests
 ```
 
+## 🚀 Deployment
+
+This backend is configured for deployment on [Render](https://render.com):
+
+- **Production**: Automatically deployed from GitHub
+- **Environment**: Node.js with Puppeteer support
+- **Database**: Supabase integration
+- **Caching**: AWS S3 for performance
+
+For deployment configuration, see:
+- [render.yaml](../render.yaml) - Render deployment config
+- [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
+
 ## Tests
 
 ```bash
