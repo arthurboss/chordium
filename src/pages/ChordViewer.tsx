@@ -3,7 +3,6 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
-import SongChordDetails from "@/components/SongChordDetails";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
 import { useChordSheet } from "@/hooks/useChordSheet";
@@ -109,7 +108,6 @@ const ChordViewer = () => {
               songKey = cachedChordSheet.songKey;
               guitarCapo = cachedChordSheet.guitarCapo || 0;
               guitarTuning = cachedChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
-            } else {
             }
 
             const localData: LocalSongData = {
@@ -298,13 +296,8 @@ const ChordViewer = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-        <SongChordDetails
-          songKey={currentChordData.songKey}
-          tuning={Array.isArray(currentChordData.guitarTuning) ? currentChordData.guitarTuning.join('-') : 'Standard'}
-          capo={currentChordData.guitarCapo !== undefined ? currentChordData.guitarCapo.toString() : '0'}
-        />
         <SongViewer
-          song={songData.song}
+          song={songData}
           chordContent={currentChordData.songChords}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}

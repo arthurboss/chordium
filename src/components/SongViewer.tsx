@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
-import { Song } from "../types/song";
+import type { Song } from "../types/song";
+import type { ChordSheet } from "@/types/chordSheet";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { Card } from "./ui/card";
 import { ArrowLeft, Trash2 } from "lucide-react";
 
 interface SongViewerProps {
-  song: Song;
+  song: { song: Song; chordSheet: ChordSheet };
   chordContent?: string; // Direct chord content (for search results)
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
@@ -28,6 +29,7 @@ const SongViewer = ({
   deleteButtonLabel = "Delete Song",
   hideDeleteButton = false
 }: SongViewerProps) => {
+  const { song: songObj, chordSheet } = song;
 
   // Load chord sheet content - use direct content if provided, otherwise load from cache
   const chordContent = useMemo(() => {
@@ -37,15 +39,15 @@ const SongViewer = ({
     }
 
     // Validate song object to prevent cache key generation errors
-    if (!song.artist || !song.title) {
+    if (!songObj.artist || !songObj.title) {
       return '';
     }
 
     // Try to get from cache using artist and title
-    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(song.artist, song.title);
+    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(songObj.artist, songObj.title);
 
     return cachedChordSheet?.songChords ?? '';
-  }, [song, directChordContent]);
+  }, [songObj, directChordContent]);
 
   return (
     <div className="animate-fade-in">
@@ -68,7 +70,7 @@ const SongViewer = ({
             onClick={(e) => {
               e.stopPropagation();
               if (onDelete) {
-                onDelete(song.path);
+                onDelete(songObj.path);
               }
             }}
             tabIndex={0}
@@ -82,8 +84,7 @@ const SongViewer = ({
       <div className="mt-6">
         <ChordDisplay
           ref={chordDisplayRef}
-          title={song.title}
-          artist={song.artist}
+          chordSheet={chordSheet}
           content={chordContent}
           onSave={onUpdate}
         />
