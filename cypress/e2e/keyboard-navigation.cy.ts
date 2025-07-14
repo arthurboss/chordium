@@ -25,31 +25,31 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
   });
 
   it('should allow keyboard activation of tabs', () => {
-    // Focus on My Songs tab
-    cy.get('button[role="tab"]').contains('My Songs').focus();
+    // Focus on My Chord Sheets tab
+    cy.get('button[role="tab"]').contains('My Chord Sheets').focus();
     
     // Activate with Enter key
     cy.focused().type('{enter}');
-    cy.get('[data-state="active"]').should('contain.text', 'My Songs');
+    cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Focus on Search tab
     cy.get('button[role="tab"]').contains('Search').focus();
     
     // Activate with Space key
     cy.focused().type(' ');
-    cy.get('[data-state="active"]').should('contain.text', 'Search');
+    cy.get('[data-cy="tab-search"][data-state="active"]').should('contain.text', 'Search');
     
     // Focus on Upload tab
     cy.get('button[role="tab"]').contains('Upload').focus();
     
     // Activate with Enter key
     cy.focused().type('{enter}');
-    cy.get('[data-state="active"]').should('contain.text', 'Upload');
+    cy.get('[data-cy="tab-upload"][data-state="active"]').should('contain.text', 'Upload');
   });
 
   it('should make song card buttons focusable with keyboard', () => {
-    // Navigate to My Songs tab
-    cy.get('button[role="tab"]').contains('My Songs').click();
+    // Navigate to My Chord Sheets tab
+    cy.get('button[role="tab"]').contains('My Chord Sheets').click();
     
     // Check "View Chords" buttons for tabindex
     cy.contains('button', 'View Chords').each(($btn) => {
@@ -67,8 +67,8 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
   });
 
   it('should allow keyboard activation of song card actions', () => {
-    // Navigate to My Songs tab
-    cy.get('button[role="tab"]').contains('My Songs').click();
+    // Navigate to My Chord Sheets tab
+    cy.get('button[role="tab"]').contains('My Chord Sheets').click();
     
     // Wait for songs to be visible
     cy.contains('Wonderwall').should('be.visible');
@@ -80,7 +80,7 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
       .click();
     
     // Should have navigated to song view
-    cy.get('button[aria-label="Back to My Songs"]')
+    cy.get('button[aria-label="Back to My Chord Sheets"]')
       .should('be.visible');
   });
   
@@ -104,14 +104,14 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
   });
 
   it('should make Back button accessible in song view', () => {
-    // Navigate to My Songs tab and open a song
-    cy.get('button[role="tab"]').contains('My Songs').click();
+    // Navigate to My Chord Sheets tab and open a song
+    cy.get('button[role="tab"]').contains('My Chord Sheets').click();
     cy.contains('button', 'View Chords').first().click();
     
     // Check back button has proper attributes
-    cy.contains('button', 'Back to My Songs')
+    cy.contains('button', 'Back to My Chord Sheets')
       .should('have.attr', 'tabindex', '0')
-      .should('have.attr', 'aria-label', 'Back to My Songs');
+      .should('have.attr', 'aria-label', 'Back to My Chord Sheets');
       
     // Check delete button has proper attributes
     cy.contains('button', 'Delete Song')
@@ -143,6 +143,6 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
     
     // Focusing the first tab (would be next in tab order)
     cy.get('button[role="tab"]').first().focus();
-    cy.focused().should('contain', 'My Songs');
+    cy.focused().should('contain', 'My Chord Sheets');
   });
 });

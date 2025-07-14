@@ -1,0 +1,75 @@
+{
+  "userFlows": {
+    "basicSearch": {
+      "description": "User performs a basic song search",
+      "steps": [
+        {
+          "action": "visit",
+          "target": "/"
+        },
+        {
+          "action": "type",
+          "target": "[data-testid='search-input']",
+          "value": "wonderwall"
+        },
+        {
+          "action": "click",
+          "target": "[data-testid='search-button']"
+        },
+        {
+          "action": "wait",
+          "target": "@songSearchAPI"
+        }
+      ],
+      "expectations": [
+        {
+          "type": "url",
+          "value": "/?query=wonderwall"
+        },
+        {
+          "type": "visible",
+          "target": "[data-testid='song-result']"
+        }
+      ]
+    },
+    "artistSearch": {
+      "description": "User searches for an artist",
+      "steps": [
+        {
+          "action": "visit",
+          "target": "/"
+        },
+        {
+          "action": "type",
+          "target": "[data-testid='search-input']",
+          "value": "radiohead"
+        },
+        {
+          "action": "click",
+          "target": "[data-testid='artist-tab']"
+        },
+        {
+          "action": "click",
+          "target": "[data-testid='search-button']"
+        }
+      ],
+      "expectations": [
+        {
+          "type": "visible",
+          "target": "[data-testid='artist-result']"
+        }
+      ]
+    }
+  },
+  "commonInteractions": {
+    "themeToggle": {
+      "action": "click",
+      "target": "[data-testid='theme-toggle']"
+    },
+    "keyboardNavigation": {
+      "searchFocus": "Tab",
+      "resultNavigation": "ArrowDown",
+      "resultSelection": "Enter"
+    }
+  }
+}

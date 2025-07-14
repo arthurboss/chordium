@@ -3,7 +3,13 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
-const Tabs = TabsPrimitive.Root
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ value, ...props }, ref) => {
+  return <TabsPrimitive.Root ref={ref} value={value} {...props} />;
+});
+Tabs.displayName = TabsPrimitive.Root.displayName;
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -43,7 +49,9 @@ const TabsList = React.forwardRef<
           opacity: 1,
         });
       } else {
-        setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+        // If no active trigger is found initially, keep it hidden or default
+        // This might happen briefly on the very first render
+        setIndicatorStyle(prev => ({ ...prev, opacity: 0, left: 0, width: 0 })); // Ensure it's reset if no active tab
       }
     };
 

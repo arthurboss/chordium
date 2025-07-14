@@ -5,17 +5,38 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "fe": "vite",
+    "be": "cd backend && npm run dev",
+    "dev": "npm run wait 'be' http://localhost:3001/health 'fe'",
+    
+    "wait": "./scripts/start-servers-and-test.sh \"$@\"",
+    
+    "kill": "./scripts/kill-servers.sh",
+    "kill:fe": "./scripts/kill-servers.sh fe",
+    "kill:be": "./scripts/kill-servers.sh be",
+
     "build": "vite build --mode production",
     "build:dev": "vite build --mode development",
+    "preview": "vite preview",
+
     "analyze-bundle": "vite build --mode production && open dist/stats.html",
     "validate-optimizations": "./scripts/validate-build-optimizations.sh",
+    
     "lint": "eslint .",
-    "preview": "vite preview",
+    
+    "test": "vitest run",
+
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
-    "test:e2e": "start-server-and-test dev http://localhost:8080 cy:run",
-    "test:unit": "vitest"
+
+    "test:e2e": "npm run wait 'dev' http://localhost:8080 'cy:run'",
+    "test:e2e:spec": "npm run wait 'dev' http://localhost:8080 'cy:run -- --spec'",
+    "test:e2e:fast": "npm run wait 'fe' http://localhost:8080 'cy:run'",
+    "test:all": "npm run kill:be && npm run wait 'be' http://localhost:3001/health 'test:e2e'",
+    
+    "tree": "scripts/git-tree/index.sh",
+    "tree:help": "scripts/git-tree/index.sh --help",
+    "tree:main": "scripts/git-tree/index.sh --base main"
   },
   "dependencies": {
     "@hookform/resolvers": "5.0.1",
@@ -60,6 +81,8 @@
     "react-hook-form": "7.56.3",
     "react-resizable-panels": "^2.1.8",
     "react-router-dom": "7.6.0",
+    "react-virtualized-auto-sizer": "1.0.26",
+    "react-window": "1.8.11",
     "recharts": "^2.15.3",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.2.0",
@@ -73,9 +96,11 @@
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
     "@types/node": "^22.14.1",
     "@types/react": "19.1.3",
     "@types/react-dom": "19.1.3",
+    "@types/react-virtualized-auto-sizer": "1.0.4",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "autoprefixer": "^10.4.21",
     "cypress": "14.3.3",
@@ -83,9 +108,9 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
+    "jsdom": "26.1.0",
     "postcss": "^8.5.3",
     "rollup-plugin-visualizer": "5.14.0",
-    "start-server-and-test": "2.0.11",
     "tailwindcss": "^3.4.17",
     "terser": "5.39.0",
     "typescript": "^5.8.3",

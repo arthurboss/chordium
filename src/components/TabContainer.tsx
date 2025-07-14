@@ -1,30 +1,32 @@
 import { useRef, useEffect } from "react";
+import { useTabStatePersistence } from "../hooks/useTabStatePersistence";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { SongData } from "../types/song";
+import { Song } from "../types/song";
 import SongList from "./SongList";
 import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleSaveNewSong, handleUpdateSong, handleDeleteSong } from "../utils/song-actions";
+import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { cyAttr } from "@/utils/test-utils";
+import { toSlug } from "@/utils/url-slug-utils";
 
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  mySongs: SongData[];
-  setMySongs: React.Dispatch<React.SetStateAction<SongData[]>>;
-  selectedSong: SongData | null;
-  setSelectedSong: React.Dispatch<React.SetStateAction<SongData | null>>;
-  demoSong: SongData | null;
+  myChordSheets: Song[];
+  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
+  selectedSong: Song | null;
+  setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
+  demoSong: Song | null;
 }
 
 const TabContainer = ({ 
   activeTab, 
   setActiveTab, 
-  mySongs, 
+  myChordSheets, 
   setMySongs,
   selectedSong,
   setSelectedSong,
@@ -32,7 +34,16 @@ const TabContainer = ({
 }: TabContainerProps) => {
   const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  
+  const { getTabState, setTabState } = useTabStatePersistence();
+
+  // Example: Persist search state
+  const searchTabState = getTabState<{ query: string; results: Song[] }>("search", { query: "", results: [] });
+  const setSearchTabState = (state: { query: string; results: Song[] }) => setTabState("search", state);
+
+  // Example: Persist myChordSheets state (e.g., scroll position)
+  const myChordSheetsTabState = getTabState<{ scroll: number }>("my-chord-sheets", { scroll: 0 });
+  const setMyChordSheetsTabState = (state: { scroll: number }) => setTabState("my-chord-sheets", state);
+
   // Scroll to chord display when needed
   useEffect(() => {
     if (selectedSong || demoSong) {
@@ -48,26 +59,47 @@ const TabContainer = ({
       navigate("/upload");
     } else if (value === "search") {
       navigate("/search");
-    } else if (value === "my-songs") {
-      navigate("/my-songs");
+    } else if (value === "my-chord-sheets") {
+      navigate("/my-chord-sheets");
     }
   };
   
-  const handleSongSelect = (song: SongData) => {
-    setSelectedSong(song);
-    navigate(`/my-songs?song=${song.id}`);
+  const handleSongSelect = (song: Song) => {
+    
+    // For My Chord Sheets: Navigate to /my-chord-sheets/:artist/:song and pass Song object as state
+    if (song.artist && song.title) {
+      // Create URL-friendly slugs using Unicode-aware function
+      const artistSlug = toSlug(song.artist);
+      const songSlug = toSlug(song.title);
+      
+      const targetUrl = `/my-chord-sheets/${artistSlug}/${songSlug}`;
+      // Pass the Song object as navigation state so ChordViewer can use it directly
+      navigate(targetUrl, {
+        state: {
+          song: song
+        }
+      });
+    } else {
+      // Fallback for songs without proper artist/title structure
+      setSelectedSong(song);
+      navigate(`/my-chord-sheets?song=${encodeURIComponent(song.path)}`, {
+        state: {
+          song: song
+        }
+      });
+    }
   };
   
-  const handleSaveUploadedSong = (content: string, title: string) => {
-    handleSaveNewSong(content, title, setMySongs, navigate, setActiveTab);
+  const handleSaveUploadedChordSheet = (content: string, title: string) => {
+    handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
   };
   
-  const handleSongUpdate = (content: string) => {
-    handleUpdateSong(content, selectedSong, mySongs, setMySongs, setSelectedSong);
+  const handleChordSheetUpdate = (content: string) => {
+    handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
   };
   
-  const handleSongDelete = (songId: string) => {
-    handleDeleteSong(songId, mySongs, setMySongs, selectedSong, setSelectedSong);
+  const handleChordSheetDelete = (songPath: string) => {
+    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
   };
 
   // Handle keyboard navigation for the tabs
@@ -86,18 +118,16 @@ const TabContainer = ({
         {...cyAttr("tabs-list")}
       >
         <TabsTrigger 
-          value="my-songs" 
+          value="my-chord-sheets" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "my-songs"}
-          onKeyDown={(e) => handleKeyDown(e, "my-songs")}
-          {...cyAttr("tab-my-songs")}
+          onKeyDown={(e) => handleKeyDown(e, "my-chord-sheets")}
+          {...cyAttr("tab-my-chord-sheets")}
         >
-          My Songs
+          My Chord Sheets
         </TabsTrigger>
         <TabsTrigger 
           value="search" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "search"}
           onKeyDown={(e) => handleKeyDown(e, "search")}
           {...cyAttr("tab-search")}
         >
@@ -106,7 +136,6 @@ const TabContainer = ({
         <TabsTrigger 
           value="upload" 
           className="text-xs sm:text-sm" 
-          aria-selected={activeTab === "upload"}
           onKeyDown={(e) => handleKeyDown(e, "upload")}
           {...cyAttr("tab-upload")}
         >
@@ -115,35 +144,43 @@ const TabContainer = ({
       </TabsList>
       
       <div className="mt-4 sm:mt-6">
-        <TabsContent value="search" className="focus-visible:outline-none focus-visible:ring-0">
-          <SearchTab />
-        </TabsContent>
-        
-        <TabsContent value="upload" className="focus-visible:outline-none focus-visible:ring-0">
-          <UploadTab 
+      {/* Always render all tab contents, hide inactive with CSS for persistence */}
+      <div style={{ display: activeTab === "search" ? "block" : "none" }}>
+        <SearchTab
+          setMySongs={setMySongs}
+          setActiveTab={setActiveTab}
+          setSelectedSong={setSelectedSong}
+          myChordSheets={myChordSheets}
+          tabState={searchTabState}
+          setTabState={setSearchTabState}
+        />
+      </div>
+      <div style={{ display: activeTab === "upload" ? "block" : "none" }}>
+        <UploadTab
+          chordDisplayRef={chordDisplayRef}
+          onSaveUploadedSong={handleSaveUploadedChordSheet}
+        />
+      </div>
+      <div style={{ display: activeTab === "my-chord-sheets" ? "block" : "none" }}>
+        {selectedSong ? (
+          <SongViewer
+            song={selectedSong}
             chordDisplayRef={chordDisplayRef}
-            onSaveUploadedSong={handleSaveUploadedSong}
+            onBack={() => setSelectedSong(null)}
+            onDelete={handleChordSheetDelete}
+            onUpdate={handleChordSheetUpdate}
           />
-        </TabsContent>
-        
-        <TabsContent value="my-songs" className="focus-visible:outline-none focus-visible:ring-0">
-          {selectedSong ? (
-            <SongViewer 
-              song={selectedSong}
-              chordDisplayRef={chordDisplayRef}
-              onBack={() => setSelectedSong(null)}
-              onDelete={handleSongDelete}
-              onUpdate={handleSongUpdate}
-            />
-          ) : (
-            <SongList 
-              songs={mySongs}
-              onSongSelect={handleSongSelect}
-              onDeleteSong={handleSongDelete}
-              onUploadClick={() => handleTabChange("upload")}
-            />
-          )}
-        </TabsContent>
+        ) : (
+          <SongList
+            songs={myChordSheets}
+            onSongSelect={handleSongSelect}
+            onDeleteSong={handleChordSheetDelete}
+            onUploadClick={() => handleTabChange("upload")}
+            tabState={myChordSheetsTabState}
+            setTabState={setMyChordSheetsTabState}
+          />
+        )}
+      </div>
       </div>
     </Tabs>
   );

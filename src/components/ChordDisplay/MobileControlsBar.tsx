@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Settings, Music, Text, AlignLeft } from 'lucide-react';
@@ -6,6 +6,8 @@ import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';
 import { ChordSheetControlsProps } from './types';
+import StickyBottomContainer from '../StickyBottomContainer';
+import { useStickyAtBottom } from '@/hooks/use-sticky-at-bottom';
 
 function TextPreferences({
   fontSize,
@@ -89,8 +91,6 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   setViewMode,
   hideGuitarTabs,
   setHideGuitarTabs,
-  setIsEditing,
-  handleDownload,
   autoScroll,
   setAutoScroll,
   scrollSpeed,
@@ -102,22 +102,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   fontStyle,
   setFontStyle,
 }) => {
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const threshold = 100; // pixels from bottom to trigger the change
-
-      setIsAtBottom(scrollPosition >= documentHeight - threshold);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Check initial position
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const isAtBottom = useStickyAtBottom(60);
 
   // Only TextPreferences button remains
   const MenuButtons = (
@@ -135,11 +120,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   );
 
   return (
-    <div
-      className={
-        `sm:hidden sticky bottom-2 m-2 mt-0 z-40 bg-background/70 backdrop-blur-sm flex items-center p-2 border rounded-lg transition-all duration-200 ${isAtBottom ? 'mx-0' : 'mx-4'} ${!autoScroll && 'w-fit ml-auto'}`
-      }
-    >
+    <StickyBottomContainer isAtBottom={isAtBottom} mobileOnly className={!autoScroll ? 'w-fit ml-auto' : ''}>
       {/* When not playing, TextPreferences and Play on the right */}
       {!autoScroll && (
         <div className="flex items-center ml-auto">
@@ -150,15 +131,15 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
       {/* When playing, TextPreferences on far left, SpeedControl, Play on far right */}
       {autoScroll && (
         <>
-          <div className="flex items-center mr-auto" style={{ marginLeft: 0, paddingLeft: 0 }}>{MenuButtons}</div>
+          <div className="flex items-center mr-auto ml-0 pl-0">{MenuButtons}</div>
           <div className="transition-all duration-200 animate-in slide-in-from-right-16 flex-1 flex items-center justify-center px-2">
             <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
           </div>
           <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
         </>
       )}
-    </div>
+    </StickyBottomContainer>
   );
 };
 
-export default MobileControlsBar; 
+export default MobileControlsBar;

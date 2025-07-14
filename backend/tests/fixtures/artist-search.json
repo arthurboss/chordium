@@ -1,0 +1,31 @@
+{
+  "radiohead": [
+    {
+      "path": "radiohead/",
+      "displayName": "Radiohead",
+      "songCount": null
+    }
+  ],
+  "oasis": [
+    {
+      "path": "oasis/",
+      "displayName": "Oasis",
+      "songCount": null
+    }
+  ],
+  "coldplay": [
+    {
+      "path": "coldplay/",
+      "displayName": "Coldplay",
+      "songCount": null
+    }
+  ],
+  "empty": [],
+  "fallback": [
+    {
+      "displayName": "Unknown Artist",
+      "path": "unknown-artist",
+      "songCount": null
+    }
+  ]
+}

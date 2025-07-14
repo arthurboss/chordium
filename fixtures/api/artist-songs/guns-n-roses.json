@@ -1,0 +1,52 @@
+[
+    {
+        "title": "Sweet Child O' Mine",
+        "path": "sweet-child-o-mine",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "November Rain",
+        "path": "november-rain",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Welcome to the Jungle",
+        "path": "welcome-to-the-jungle",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Paradise City",
+        "path": "paradise-city",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Knockin' on Heaven's Door",
+        "path": "knockin-on-heavens-door",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Don't Cry",
+        "path": "dont-cry",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Civil War",
+        "path": "civil-war",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Patience",
+        "path": "patience",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "You Could Be Mine",
+        "path": "you-could-be-mine",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Estranged",
+        "path": "estranged",
+        "artist": "Guns N' Roses"
+    }
+]

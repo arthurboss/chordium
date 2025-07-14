@@ -1,4 +1,5 @@
 import { forwardRef, useEffect } from 'react';
+import type { ChordSheet } from '@/types/chordSheet';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
@@ -9,15 +10,16 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
 import { downloadTextFile } from '@/utils/download-utils';
+import { cyAttr } from '@/utils/test-utils';
 
 interface ChordDisplayProps {
-  title?: string;
-  artist?: string;
+  chordSheet: ChordSheet;
   content: string;
   onSave?: (content: string) => void;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, artist, content, onSave }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave }, ref) => {
+  
   // Use custom hooks for different concerns
   const { 
     autoScroll, 
@@ -64,7 +66,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   
   // Handle download of chord sheet
   const handleDownload = () => {
-    const result = downloadTextFile(content, title || "chord-sheet");
+    const result = downloadTextFile(content, chordSheet.title || "chord-sheet");
     toast(result);
   };
   
@@ -80,8 +82,14 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ title, art
   }
 
   return (
-    <div ref={ref} id="chord-display">
-      <ChordHeader title={title} artist={artist} />
+    <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
+      <ChordHeader 
+        title={chordSheet.title}
+        artist={chordSheet.artist}
+        songKey={chordSheet.songKey}
+        tuning={Array.isArray(chordSheet.guitarTuning) ? chordSheet.guitarTuning.join('-') : chordSheet.guitarTuning}
+        capo={chordSheet.guitarCapo !== undefined ? chordSheet.guitarCapo.toString() : undefined}
+      />
       <ChordContent
         processedContent={processedContent}
         fontSize={fontSize}

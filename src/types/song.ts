@@ -1,6 +1,5 @@
-export interface SongData {
-  id: string;
+export interface Song {
+  path: string; // Internal path for navigation/identification
   title: string;
-  artist?: string;
-  path: string;
+  artist: string; // Optional since search results may not always have artist
 }

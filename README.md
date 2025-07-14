@@ -1,6 +1,12 @@
-# Chordium 🎸
+<p align="center">
+  <img src="./public/favicon-180.png" alt="Chordium Logo" height="128">
+</p>
 
-A modern, minimalist chord viewer app for beginner guitar players and hobbyists. Chordium focuses on providing a distraction-free experience for learning and practicing guitar chords.
+<h1 align="center">Chordium</h1>
+
+A modern, minimalist chord viewer app for beginner guitar players and hobbyists. 
+
+Chordium focuses on providing a distraction-free experience for learning and practicing guitar chords.
 
 ## 🎯 About
 
@@ -12,12 +18,21 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - Speed control for practice at your own pace
 - Mobile-friendly design for on-the-go learning
 - Smart metadata extraction from uploaded chord sheets
+- [Smart search functionality](./SEARCH-GUIDE.md) with instant filtering and intelligent caching
 
 ## 💻 Tech Stack
 
 This project is built with modern web technologies:
 
+### Frontend
 - **React** - UI library
+
+### Backend
+- **Node.js/Express** - API server
+- **Supabase** - Database
+- **Puppeteer** - Web scraping
+
+For detailed backend documentation, see the [Backend README](./backend/README.md).
 - **TypeScript** - Type-safe JavaScript
 - **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
@@ -63,6 +78,30 @@ yarn dev
 ```
 
 The app will be available at http://localhost:8080.
+
+## 🧪 Testing
+
+### Running Tests
+
+```sh
+# Run unit tests (backend)
+npm run test
+
+# Run all e2e tests locally 
+npm run test:e2e
+
+# Run specific e2e test (including scraping-dependent tests)
+npm run test:e2e -- --spec "cypress/e2e/search/song-search.cy.ts"
+
+# Run cache-specific e2e tests
+npm run test:e2e -- --spec "cypress/e2e/cache/**/*.cy.ts"
+```
+
+### Important Notes
+
+- **Song Search Tests**: The `cypress/e2e/search/song-search.cy.ts` tests are excluded from GitHub Actions because they use real web scraping from external sites. These should only be run locally to avoid unnecessary load on external services.
+- **Cache Tests**: Cache-specific e2e tests are run separately in CI to isolate their concerns.
+- **GitHub Actions**: Only non-scraping, non-cache tests run automatically on GitHub to keep CI fast and avoid external dependencies.
 
 ## 🏗️ Project Structure
 
