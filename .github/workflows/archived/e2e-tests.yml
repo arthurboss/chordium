@@ -49,6 +49,7 @@ jobs:
           browser: chrome
           config-file: cypress.config.cjs
           record: false
+          install: false
           spec: 'cypress/e2e/browser-navigation.cy.ts,cypress/e2e/home.cy.ts,cypress/e2e/keyboard-navigation.cy.ts,cypress/e2e/lazy-loading.cy.ts,cypress/e2e/song-card-keyboard.cy.ts,cypress/e2e/song-card.cy.ts,cypress/e2e/tab-navigation.cy.ts,cypress/e2e/theme.cy.ts,cypress/e2e/artist-search/**/*.cy.ts'
         env:
           NODE_OPTIONS: "--experimental-vm-modules"
