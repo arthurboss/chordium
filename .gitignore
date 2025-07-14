@@ -30,6 +30,7 @@ cypress/downloads/
 
 # Test results
 test-results/
+coverage/
 
 # Ignore environment variable files
 .env
