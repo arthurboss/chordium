@@ -111,7 +111,7 @@ const SearchBar = ({
             disabled={clearDisabled}
             className="w-12"
           >
-            <Trash2 className="h-4 w-4" color="red" />
+            <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
           </Button>
           <Button 
             type="submit"

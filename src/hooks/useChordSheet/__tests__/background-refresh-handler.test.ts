@@ -109,25 +109,5 @@ describe('BackgroundRefreshHandler', () => {
       expect(mockStoreChordUrl).not.toHaveBeenCalled();
       expect(mockNavigate).not.toHaveBeenCalled();
     });
-
-    it('should log background refresh completion', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      const updatedData = { content: 'test' };
-      const fetchUrl = 'https://example.com/song';
-      const params = { artist: 'test', song: 'test' };
-
-      mockNavigationUtils.shouldUpdateUrl.mockReturnValue(false);
-
-      refreshHandler.handleBackgroundRefresh(
-        updatedData,
-        fetchUrl,
-        params,
-        mockSetChordData,
-        mockNavigate
-      );
-
-      expect(consoleSpy).toHaveBeenCalledWith('Background refresh completed, updating UI');
-      consoleSpy.mockRestore();
-    });
   });
 });

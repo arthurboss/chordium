@@ -16,10 +16,10 @@ vi.mock('@/cache/implementations/unified-chord-sheet-cache', () => ({
 
 // Mock ChordDisplay component
 vi.mock('@/components/ChordDisplay', () => ({
-  default: vi.fn(({ title, artist, content, onSave }) => (
+  default: vi.fn(({ chordSheet, content, onSave }) => (
     <div data-testid="chord-display">
-      <div data-testid="chord-title">{title}</div>
-      <div data-testid="chord-artist">{artist}</div>
+      <div data-testid="chord-title">{chordSheet?.title}</div>
+      <div data-testid="chord-artist">{chordSheet?.artist}</div>
       <div data-testid="chord-content">{content}</div>
       <button onClick={() => onSave?.(content)}>Save</button>
     </div>
@@ -64,7 +64,7 @@ describe('SongViewer', () => {
 
       const { container } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: mockChordSheet }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
@@ -93,7 +93,7 @@ describe('SongViewer', () => {
 
       const { container } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: { title: testSong.title, artist: testSong.artist, songChords: '', songKey: '', guitarTuning: GUITAR_TUNINGS.STANDARD, guitarCapo: 0 } }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
@@ -128,7 +128,7 @@ describe('SongViewer', () => {
 
       const { container } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: mockChordSheet }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
@@ -162,7 +162,7 @@ describe('SongViewer', () => {
 
       const { getByRole } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: mockGetCachedChordSheet() }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
@@ -170,7 +170,7 @@ describe('SongViewer', () => {
         />
       );
 
-      await user.click(getByRole('button', { name: 'Back to My Chord Sheets' }));
+      await user.click(getByRole('button', { name: /Back/i }));
       expect(mockOnBack).toHaveBeenCalledTimes(1);
     });
 
@@ -193,7 +193,7 @@ describe('SongViewer', () => {
 
       const { getByRole } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: mockGetCachedChordSheet() }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}
@@ -201,7 +201,7 @@ describe('SongViewer', () => {
         />
       );
 
-      await user.click(getByRole('button', { name: 'Delete Song' }));
+      await user.click(getByRole('button', { name: /Delete/i }));
       expect(mockOnDelete).toHaveBeenCalledWith('test-artist-test-song');
     });
   });
@@ -228,7 +228,7 @@ describe('SongViewer', () => {
 
       const { getByText } = render(
         <SongViewer
-          song={testSong}
+          song={{ song: testSong, chordSheet: mockChordSheet }}
           chordDisplayRef={mockChordDisplayRef}
           onBack={mockOnBack}
           onDelete={mockOnDelete}

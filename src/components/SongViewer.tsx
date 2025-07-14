@@ -76,7 +76,7 @@ const SongViewer = ({
             tabIndex={0}
             aria-label="delete chord sheet"
           >
-            <Trash2 className="h-4 w-4" color="red" />
+            <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
             Delete
           </Button>
         )}
