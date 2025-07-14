@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchChordSheetFromBackend } from '../fetch-chord-sheet-from-backend';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { getApiBaseUrl } from '@/utils/api-base-url';
 
 // Mock the convert function
 vi.mock('../../utils/convert-response-to-chord-sheet', () => ({
@@ -13,7 +14,6 @@ const mockConvertResponseToChordSheet = vi.mocked(convertResponseToChordSheet);
 
 // Mock fetch
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
 
 // Mock setTimeout and clearTimeout
 const mockSetTimeout = vi.fn();
@@ -22,11 +22,13 @@ vi.stubGlobal('setTimeout', mockSetTimeout);
 vi.stubGlobal('clearTimeout', mockClearTimeout);
 
 describe('fetchChordSheetFromBackend', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
-    // Reset environment variables
-    import.meta.env.VITE_API_URL = 'http://localhost:3001';
-    
+    // Mock getApiBaseUrl to return a test URL
+    const apiBaseUrlModule = await vi.importActual<{ getApiBaseUrl: () => string }>("@/utils/api-base-url");
+    vi.spyOn(apiBaseUrlModule, 'getApiBaseUrl').mockReturnValue('http://localhost:3001');
+    // Ensure fetch is always mocked
+    global.fetch = mockFetch;
     // Setup default timeout behavior
     mockSetTimeout.mockImplementation((callback, delay) => {
       return 123; // Return a mock timeout ID
@@ -66,7 +68,7 @@ describe('fetchChordSheetFromBackend', () => {
 
     expect(result).toEqual(mockChordSheet);
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
+      `${getApiBaseUrl()}/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F`,
       expect.objectContaining({
         method: 'GET',
         headers: {
@@ -186,7 +188,7 @@ describe('fetchChordSheetFromBackend', () => {
     );
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F',
+      `${getApiBaseUrl()}/api/cifraclub-chord-sheet?url=https%3A%2F%2Fcifraclub.com.br%2Feagles%2Fhotel-california%2F`,
       expect.anything()
     );
     

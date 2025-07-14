@@ -1,4 +1,5 @@
 import { Song } from "@/types/song";
+import { getApiBaseUrl } from '@/utils/api-base-url';
 
 // Environment-based logging utility to prevent memory leaks in tests
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
@@ -448,7 +449,7 @@ export const getSearchResultsWithRefresh = async (
         // Add a timestamp to bust any potential browser cache
         backendUrlParams.append('_t', Date.now().toString());
         
-        const backendUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-search?${backendUrlParams.toString()}`;
+        const backendUrl = `${getApiBaseUrl()}/api/cifraclub-search?${backendUrlParams.toString()}`;
         
         debugLog(`Making API request to: ${backendUrl}`);
         
@@ -501,8 +502,8 @@ export const getSearchResultsWithRefresh = async (
         resolve(resultArray);
       } catch (error) {
         debugError("Error in background refresh:", error);
-        debugLog("VITE_API_URL:", import.meta.env.VITE_API_URL);
-        debugLog("URL used:", `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/cifraclub-search?${artist ? `artist=${encodeURIComponent(artist)}` : ''}${song ? `&song=${encodeURIComponent(song)}` : ''}`);
+        debugLog("VITE_API_URL:", getApiBaseUrl());
+        debugLog("URL used:", `${getApiBaseUrl()}/api/cifraclub-search?${artist ? `artist=${encodeURIComponent(artist)}` : ''}${song ? `&song=${encodeURIComponent(song)}` : ''}`);
         
         // For explicit errors, don't return cached data
         if (error.name !== 'AbortError') {

@@ -1,5 +1,6 @@
 import { ChordSheet } from '@/types/chordSheet';
 import { convertResponseToChordSheet } from '../utils/convert-response-to-chord-sheet';
+import { getApiBaseUrl } from '@/utils/api-base-url';
 
 /**
  * Fetch chord sheet from backend API
@@ -17,7 +18,7 @@ export async function fetchChordSheetFromBackend(
   try {
     
     // Build API URL (backend now scrapes title and artist from the source page)
-    const apiUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:3001'}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
+    const apiUrl = `${getApiBaseUrl()}/api/cifraclub-chord-sheet?url=${encodeURIComponent(fetchUrl)}`;
     
     
     // Use AbortController to implement timeout

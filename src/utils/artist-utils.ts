@@ -1,6 +1,7 @@
 // Utility functions for artist-related logic
 import { Song } from "@/types/song";
 import { cacheArtistSongs, getCachedArtistSongs } from "@/cache/implementations/artist-cache";
+import { getApiBaseUrl } from './api-base-url';
 
 export function extractArtistSlug(artistUrl: string): string | null {
   try {
@@ -24,7 +25,7 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     return cachedSongs;
   }
 
-  const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
+  const apiUrl = `${getApiBaseUrl()}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
   
   try {
     const resp = await fetch(apiUrl);
