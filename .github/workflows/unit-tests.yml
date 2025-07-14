@@ -37,7 +37,7 @@ jobs:
           npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
 
       - name: Run frontend unit tests
-        run: npm run test:unit -- --exclude "**/backend/**"
+        run: npm run test -- --exclude "**/backend/**"
 
       - name: Upload frontend test coverage
         uses: actions/upload-artifact@v4.6.2

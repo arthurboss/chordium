@@ -28,11 +28,11 @@ __tests__/
 
 ```bash
 # Run minimal cache tests
-npm run test:unit -- __tests__/cache
+npm run test -- __tests__/cache
 
 # Run specific test files
-npm run test:unit -- __tests__/cache/minimal-cache.test.ts
-npm run test:unit -- __tests__/cache/safe-cache.test.ts
+npm run test -- __tests__/cache/minimal-cache.test.ts
+npm run test -- __tests__/cache/safe-cache.test.ts
 ```
 
 ## Full Cache Testing

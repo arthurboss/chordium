@@ -99,7 +99,7 @@ Unicode property escapes are supported in:
 ### Running Tests
 ```bash
 # Frontend tests (Vitest)
-npm run test:unit -- --exclude "**/backend/**"
+npm run test -- --exclude "**/backend/**"
 
 # Backend tests (Jest)
 cd backend && npm test
