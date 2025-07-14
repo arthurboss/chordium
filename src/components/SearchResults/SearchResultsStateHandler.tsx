@@ -40,7 +40,6 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
   onAdd,
   onArtistSelect
 }) => {
-  console.log('[SearchResultsStateHandler] Rendering state:', stateData, 'artists:', artists, 'songs:', songs);
   switch (stateData.state) {
     case 'loading':
       return <SearchLoadingState />;
