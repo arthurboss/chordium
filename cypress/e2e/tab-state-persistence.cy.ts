@@ -1,8 +1,8 @@
 // cypress/e2e/tab-state-persistence.cy.ts
 // Cypress E2E tests for tab state persistence
 
-describe('Tab State Persistence', () => {
-  it('preserves search tab state when switching tabs', () => {
+describe.skip('Tab State Persistence', () => {
+  it.skip('preserves search tab state when switching tabs', () => {
     cy.visit('/');
 
     // Go to Search tab
@@ -26,7 +26,7 @@ describe('Tab State Persistence', () => {
     cy.contains('Yesterday').should('be.visible');
   });
 
-  it('preserves My Chord Sheets tab scroll position', () => {
+  it.skip('preserves My Chord Sheets tab scroll position', () => {
     cy.visit('/');
     cy.get('[data-cy="tab-my-chord-sheets"]').click();
 

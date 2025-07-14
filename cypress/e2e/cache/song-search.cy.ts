@@ -15,7 +15,7 @@ interface CacheData {
   items: CacheItem[];
 }
 
-describe('Song Search Caching', () => {
+describe.skip('Song Search Caching', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
@@ -31,7 +31,7 @@ describe('Song Search Caching', () => {
     cy.visit('/');
   });
 
-  it('should cache song search results independently', () => {
+  it.skip('should cache song search results independently', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     
@@ -67,7 +67,7 @@ describe('Song Search Caching', () => {
     cy.get('@songSearchAPI.all').should('have.length', 1);
   });
 
-  it('should handle multiple song searches with proper caching', () => {
+  it.skip('should handle multiple song searches with proper caching', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     

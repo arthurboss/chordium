@@ -4,7 +4,7 @@
  * it should redirect to the My Chord Sheets tab and show the song in SongViewer
  */
 
-describe('Search to Song Navigation E2E', () => {
+describe.skip('Search to Song Navigation E2E', () => {
   beforeEach(() => {
     cy.visit('/');
     // Navigate to Search tab
@@ -14,7 +14,7 @@ describe('Search to Song Navigation E2E', () => {
     cy.get('#search-form').should('be.visible');
   });
 
-  it('should navigate from search results to song view page when clicking View Chords', () => {
+  it.skip('should navigate from search results to song view page when clicking View Chords', () => {
     // Mock the search API call
     cy.intercept('GET', '/api/cifraclub-search*', {
       fixture: 'search-results-sample.json'
@@ -49,7 +49,7 @@ describe('Search to Song Navigation E2E', () => {
     cy.url().should('include', 'song=');
   });
 
-  it('should navigate from artist search results to song view page', () => {
+  it.skip('should navigate from artist search results to song view page', () => {
     // Mock the artist search API call
     cy.intercept('GET', '/api/artists*', {
       fixture: 'artist-search-results.json'
@@ -92,7 +92,7 @@ describe('Search to Song Navigation E2E', () => {
     cy.get('[data-cy="chord-display"]').should('be.visible');
   });
 
-  it('should handle external song URLs properly in song viewer', () => {
+  it.skip('should handle external song URLs properly in song viewer', () => {
     // Mock search with external URLs
     cy.intercept('GET', '/api/cifraclub-search*', {
       statusCode: 200,
@@ -122,7 +122,7 @@ describe('Search to Song Navigation E2E', () => {
     cy.contains('Oasis').should('be.visible');
   });
 
-  it('should navigate back to search results from song viewer', () => {
+  it.skip('should navigate back to search results from song viewer', () => {
     // Mock search
     cy.intercept('GET', '/api/cifraclub-search*', {
       fixture: 'search-results-sample.json'

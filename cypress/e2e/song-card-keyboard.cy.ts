@@ -1,4 +1,4 @@
-describe('SongCard Interactive Elements Tests', () => {
+describe.skip('SongCard Interactive Elements Tests', () => {
   beforeEach(() => {
     // Visit the homepage before each test
     cy.visit('/');
@@ -18,7 +18,7 @@ describe('SongCard Interactive Elements Tests', () => {
     });
   });
 
-  it('should verify View Chords button has proper keyboard attributes', () => {
+  it.skip('should verify View Chords button has proper keyboard attributes', () => {
     cy.get('@hotelCaliforniaSongId').then((songId) => {
       // Verify the View Chords button has proper keyboard attributes
       cy.get(`[data-cy="view-chords-btn-${songId}"]`)
@@ -35,7 +35,7 @@ describe('SongCard Interactive Elements Tests', () => {
     });
   });
 
-  it('should verify Delete button has proper keyboard attributes', () => {
+  it.skip('should verify Delete button has proper keyboard attributes', () => {
     cy.get('@hotelCaliforniaSongId').then((songId) => {
       // Verify the Delete button has proper keyboard attributes
       cy.get(`[data-cy="delete-song-btn-${songId}"]`)

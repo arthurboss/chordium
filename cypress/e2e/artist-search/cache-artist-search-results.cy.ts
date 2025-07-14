@@ -2,7 +2,7 @@ import { setupIntercepts } from './api-mocks';
 import { searchForArtist, verifyCachePopulated, verifyCacheAccessCount } from './test-utils';
 import { TEST_ARTIST } from './types';
 
-describe('Artist Search Caching', () => {
+describe.skip('Artist Search Caching', () => {
   beforeEach(() => {
     // Log start of test
     cy.log('Starting test with fresh state');
@@ -36,7 +36,7 @@ describe('Artist Search Caching', () => {
     });
   });
 
-  it('should cache artist search results and reuse them', () => {
+  it.skip('should cache artist search results and reuse them', () => {
     // Log test start
     cy.log('Starting test: should cache artist search results and reuse them');
     

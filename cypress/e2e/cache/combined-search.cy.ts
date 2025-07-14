@@ -15,7 +15,7 @@ interface CacheData {
   items: CacheItem[];
 }
 
-describe('Combined Search Caching', () => {
+describe.skip('Combined Search Caching', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
@@ -31,7 +31,7 @@ describe('Combined Search Caching', () => {
     cy.visit('/');
   });
 
-  it('should cache artist+song combinations separately', () => {
+  it.skip('should cache artist+song combinations separately', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     

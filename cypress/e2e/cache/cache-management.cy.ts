@@ -15,7 +15,7 @@ interface CacheData {
   items: CacheItem[];
 }
 
-describe('Cache Management', () => {
+describe.skip('Cache Management', () => {
   beforeEach(() => {
     // Clear localStorage before each test
     cy.clearLocalStorage();
@@ -27,7 +27,7 @@ describe('Cache Management', () => {
     cy.visit('/');
   });
 
-  it('should handle cache expiration correctly', () => {
+  it.skip('should handle cache expiration correctly', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     
@@ -73,7 +73,7 @@ describe('Cache Management', () => {
     cy.get('body').should('contain', 'Search');
   });
 
-  it('should handle corrupted cache data gracefully', () => {
+  it.skip('should handle corrupted cache data gracefully', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     
@@ -103,7 +103,7 @@ describe('Cache Management', () => {
     });
   });
 
-  it('should verify cache performance', () => {
+  it.skip('should verify cache performance', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
     

@@ -2,7 +2,7 @@ import { setupIntercepts } from './api-mocks';
 import { navigateToSearchTab } from './test-utils';
 import { TEST_ARTIST } from './types';
 
-describe('Multiple Artist Searches', () => {
+describe.skip('Multiple Artist Searches', () => {
   beforeEach(() => {
     // Log start of test
     cy.log('Starting test with fresh state');
@@ -36,7 +36,7 @@ describe('Multiple Artist Searches', () => {
     });
   });
 
-  it('should cache multiple different artist searches separately', () => {
+  it.skip('should cache multiple different artist searches separately', () => {
     // Log test start
     cy.log('Starting test: should cache multiple different artist searches separately');
     

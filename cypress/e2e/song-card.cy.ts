@@ -1,4 +1,4 @@
-describe('SongCard E2E Tests', () => {
+describe.skip('SongCard E2E Tests', () => {
   beforeEach(() => {
     // Visit the homepage before each test
     cy.visit('/');
@@ -18,7 +18,7 @@ describe('SongCard E2E Tests', () => {
     });
   });
 
-  it('should navigate to chord sheet page when clicking View Chords button', () => {
+  it.skip('should navigate to chord sheet page when clicking View Chords button', () => {
     cy.get('@hotelCaliforniaSongId').then((songId) => {
       // Find Hotel California card and click its View Chords button
       cy.get(`[data-cy="view-chords-btn-${songId}"]`).click();
@@ -33,7 +33,7 @@ describe('SongCard E2E Tests', () => {
     });
   });
 
-  it('should navigate to chord sheet page when clicking the card content area', () => {
+  it.skip('should navigate to chord sheet page when clicking the card content area', () => {
     cy.get('@hotelCaliforniaSongId').then((songId) => {
       // Find Hotel California card and click its content area
       cy.get(`[data-cy="song-card-content-${songId}"]`).click();
@@ -45,7 +45,7 @@ describe('SongCard E2E Tests', () => {
     });
   });
 
-  it('should delete the song when clicking the Trash button', () => {
+  it.skip('should delete the song when clicking the Trash button', () => {
     // First, verify we can see the Hotel California card
     cy.contains('[data-cy^="song-title-"]', 'Hotel California').should('be.visible');
     

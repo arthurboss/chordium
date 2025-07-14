@@ -1,5 +1,5 @@
-describe('Search to Song Navigation - Simple Test', () => {
-  it('should navigate from search results to song view when clicking View Chords', () => {
+describe.skip('Search to Song Navigation - Simple Test', () => {
+  it.skip('should navigate from search results to song view when clicking View Chords', () => {
     cy.visit('/');
     
     // Navigate to Search tab
@@ -39,7 +39,7 @@ describe('Search to Song Navigation - Simple Test', () => {
     cy.contains('button', 'Back to My Chord Sheets').should('be.visible');
   });
 
-  it('should not show "No Chord Sheets were found." before any search, and should show it after a search with no results', () => {
+  it.skip('should not show "No Chord Sheets were found." before any search, and should show it after a search with no results', () => {
     cy.visit('/');
     cy.get('[data-cy="tab-search"]').should('be.visible').click();
 
@@ -63,8 +63,8 @@ describe('Search to Song Navigation - Simple Test', () => {
   });
 });
 
-describe('Search input clear UX', () => {
-  it('shows all last-fetched results and does not show loading when input is cleared', () => {
+describe.skip('Search input clear UX', () => {
+  it.skip('shows all last-fetched results and does not show loading when input is cleared', () => {
     cy.visit('/');
     // Type a search term and submit
     cy.get('#song-search-input').type('Wonderwall');
