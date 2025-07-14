@@ -99,8 +99,8 @@ export class BackendFixtureLoader {
         return null;
       }
 
-      // Load from public/data/songs/ directory
-      const songFilePath = path.join(__dirname, '../../public/data/songs/', fileName);
+      // Load from fixtures/api/chord-sheet/ directory
+      const songFilePath = path.join(__dirname, '../../fixtures/api/chord-sheet/', fileName);
       const fileContent = fs.readFileSync(songFilePath, 'utf8');
       const songData = JSON.parse(fileContent);
 

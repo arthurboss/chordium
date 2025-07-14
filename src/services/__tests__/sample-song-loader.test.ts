@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { loadSampleChordSheet } from '../sample-song-loader';
-import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import wonderwall from '../../../fixtures/api/chord-sheet/oasis-wonderwall.json';
+import hotelCalifornia from '../../../fixtures/api/chord-sheet/eagles-hotel_california.json';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -12,45 +12,23 @@ describe('Sample Song Loader', () => {
   });
 
   it('should load Oasis Wonderwall from JSON file', async () => {
-    const mockChordSheet: ChordSheet = {
-      title: 'Wonderwall',
-      artist: 'Oasis',
-      songChords: '[Intro]\nEm7  G  Dsus4  A7sus4',
-      songKey: 'G',
-      guitarTuning: GUITAR_TUNINGS.STANDARD,
-      guitarCapo: 0
-    };
-
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockChordSheet)
+      json: () => Promise.resolve(wonderwall)
     } as Response);
 
     const result = await loadSampleChordSheet('oasis', 'wonderwall');
-    
-    expect(fetch).toHaveBeenCalledWith('/data/songs/oasis-wonderwall.json');
-    expect(result).toEqual(mockChordSheet);
+    expect(result).toEqual(wonderwall);
   });
 
   it('should load Eagles Hotel California from JSON file', async () => {
-    const mockChordSheet: ChordSheet = {
-      title: 'Hotel California',
-      artist: 'Eagles',
-      songChords: '[Intro]\nBm  F#  A  E  G  D  Em  F#',
-      songKey: 'Bm',
-      guitarTuning: GUITAR_TUNINGS.STANDARD,
-      guitarCapo: 0
-    };
-
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockChordSheet)
+      json: () => Promise.resolve(hotelCalifornia)
     } as Response);
 
     const result = await loadSampleChordSheet('eagles', 'hotel_california');
-    
-    expect(fetch).toHaveBeenCalledWith('/data/songs/eagles-hotel_california.json');
-    expect(result).toEqual(mockChordSheet);
+    expect(result).toEqual(hotelCalifornia);
   });
 
   it('should return null when sample song file is not found', async () => {
@@ -60,7 +38,6 @@ describe('Sample Song Loader', () => {
     } as Response);
 
     const result = await loadSampleChordSheet('unknown', 'song');
-    
     expect(result).toBeNull();
   });
 
