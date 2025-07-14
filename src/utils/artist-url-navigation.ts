@@ -1,4 +1,4 @@
-import { Artist } from '@/shared/types/domain/artist';
+import { Artist } from "@/types/artist";
 
 /**
  * Artist URL Navigation Service
