@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom";
-import { Guitar, Search, MusicIcon } from "lucide-react";
+import { Guitar, Search } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => (
@@ -23,12 +21,6 @@ const Header = () => (
       
       <div className="flex items-center gap-2">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <MusicIcon className="h-4 w-4 mr-2" />
-              Tools
-            </Button>
-          </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link to="/search" className="w-full cursor-pointer">
