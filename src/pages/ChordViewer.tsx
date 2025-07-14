@@ -310,7 +310,6 @@ const ChordViewer = () => {
           onBack={handleBack}
           onDelete={isFromMyChordSheets ? handleDeleteSong : handleSaveChordSheet}
           onUpdate={() => { }}
-          backButtonLabel={isFromMyChordSheets ? "Back to My Chord Sheets" : "Back to Search"}
           deleteButtonLabel={isFromMyChordSheets ? "Remove from My Chord Sheets" : "Add to My Chord Sheets"}
           deleteButtonVariant={isFromMyChordSheets ? "destructive" : "default"}
           hideDeleteButton={false}

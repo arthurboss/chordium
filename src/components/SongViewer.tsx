@@ -3,6 +3,8 @@ import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import { Song } from "../types/song";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+import { Card } from "./ui/card";
+import { ArrowLeft, Trash2 } from "lucide-react";
 
 interface SongViewerProps {
   song: Song;
@@ -11,7 +13,6 @@ interface SongViewerProps {
   onBack: () => void;
   onDelete: (songPath: string) => void;
   onUpdate: (content: string) => void;
-  backButtonLabel?: string;
   deleteButtonLabel?: string;
   deleteButtonVariant?: "outline" | "destructive" | "default";
   hideDeleteButton?: boolean;
@@ -24,9 +25,7 @@ const SongViewer = ({
   onBack,
   onDelete,
   onUpdate,
-  backButtonLabel = "Back to My Chord Sheets",
   deleteButtonLabel = "Delete Song",
-  deleteButtonVariant = "destructive",
   hideDeleteButton = false
 }: SongViewerProps) => {
 
@@ -50,21 +49,22 @@ const SongViewer = ({
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center mb-6">
+      <Card className="flex flex-row p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm">
         <Button
           variant="outline"
           size="sm"
           onClick={onBack}
           className="mr-2"
           tabIndex={0}
-          aria-label={backButtonLabel}
+          aria-label="back-button"
         >
-          {backButtonLabel}
+            <ArrowLeft className="h-4 w-4" />
+            Back
         </Button>
         {!hideDeleteButton && (
           <Button
             size="sm"
-            variant={deleteButtonVariant}
+            variant="outline"
             onClick={(e) => {
               e.stopPropagation();
               if (onDelete) {
@@ -72,12 +72,13 @@ const SongViewer = ({
               }
             }}
             tabIndex={0}
-            aria-label={deleteButtonLabel || `Delete ${song.title}`}
+            aria-label="delete chord sheet"
           >
-            {deleteButtonLabel || "Delete Song"}
+            <Trash2 className="h-4 w-4" color="red" />
+            Delete
           </Button>
         )}
-      </div>
+      </Card>
       <div className="mt-6">
         <ChordDisplay
           ref={chordDisplayRef}
