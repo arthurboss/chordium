@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { Song } from '@/types/song';
 import { createDefaultChordSheetWithUIState } from '@/types/chordSheetWithUIState';
 
 // Mock dependencies before importing the hook
 const mockGetMyChordSheetsAsSongs = vi.fn();
 const mockIsMyChordSheetsRoute = vi.fn();
+const mockUseParams = vi.fn();
+const mockUseNavigate = vi.fn();
 
-// Mock chord-sheet-storage to provide test data
 vi.mock('@/utils/chord-sheet-storage', () => ({
   getMyChordSheetsAsSongs: mockGetMyChordSheetsAsSongs
 }));
@@ -16,15 +17,11 @@ vi.mock('@/utils/route-context-detector', () => ({
   isMyChordSheetsRoute: mockIsMyChordSheetsRoute
 }));
 
-const mockUseParams = vi.fn();
-const mockUseNavigate = vi.fn();
-
 vi.mock('react-router-dom', () => ({
   useParams: () => mockUseParams(),
   useNavigate: () => mockUseNavigate()
 }));
 
-// Top-level mock for ChordSheetLoadingStrategy as a class/constructor
 vi.mock('@/utils/chord-sheet-loading-strategy', () => ({
   ChordSheetLoadingStrategy: class {
     shouldLoadLocal = vi.fn().mockImplementation((artist, song) => {
@@ -50,46 +47,11 @@ vi.mock('@/utils/chord-sheet-loading-strategy', () => ({
   }
 }));
 
-vi.mock('@/hooks/useChordSheet/url-determination-strategy', () => ({
-  URLDeterminationStrategy: vi.fn().mockImplementation(() => ({
-    determineFetchUrl: vi.fn()
-  }))
-}));
-
-vi.mock('@/utils/navigation-utils', () => ({
-  NavigationUtils: vi.fn().mockImplementation(() => ({
-    performUrlUpdate: vi.fn()
-  }))
-}));
-
-vi.mock('@/hooks/useChordSheet/background-refresh-handler', () => ({
-  BackgroundRefreshHandler: vi.fn().mockImplementation(() => ({
-    handleBackgroundRefresh: vi.fn()
-  }))
-}));
-
-vi.mock('@/hooks/useChordSheet/cache-coordinator', () => ({
-  CacheCoordinator: vi.fn().mockImplementation(() => ({
-    clearExpiredCache: vi.fn(),
-    getChordSheetWithRefresh: vi.fn()
-  }))
-}));
-
-vi.mock('@/utils/fetch-error-handler', () => ({
-  FetchErrorHandler: vi.fn().mockImplementation(() => ({
-    formatFetchError: vi.fn()
-  }))
-}));
-
-vi.mock('@/utils/url-validator', () => ({
-  validateURL: vi.fn()
-}));
-
-// Import useChordSheet after all mocks are set up
 import { useChordSheet } from '@/hooks/useChordSheet';
 
-describe('Add to My Chord Sheets - Navigation Integration', () => {
+describe('Add to My Chord Sheets - Navigation Integration (Load Only)', () => {
   beforeEach(() => {
+    vi.resetModules();
     vi.clearAllMocks();
     mockUseParams.mockReturnValue({ artist: 'oasis', song: 'wonderwall' });
     mockUseNavigate.mockReturnValue(vi.fn());
@@ -104,33 +66,28 @@ describe('Add to My Chord Sheets - Navigation Integration', () => {
     path: 'oasis/wonderwall'
   };
 
-  it.skip('should handle the complete workflow: add song, then navigate to it', async () => {
-    // Simulate the complete workflow
-    
-    // Step 1: Song gets added to My Chord Sheets (this would happen via useAddToMyChordSheets)
+  it.skip('should successfully load songs from My Chord Sheets without navigation issues', async () => {
+    // Setup: Song exists in My Chord Sheets and can be found locally
     mockGetMyChordSheetsAsSongs.mockReturnValue([testSong]);
-    
-    // Step 2: User clicks on the song in My Chord Sheets page
-    // The route context should be detected as My Chord Sheets
-    mockIsMyChordSheetsRoute.mockReturnValue(true);
-    
-    // Act: Simulate the chord sheet loading
+
+    // Act: Render the hook (simulating clicking on a song in My Chord Sheets)
     const { result } = renderHook(() => useChordSheet());
 
     // Log params for debugging
     // eslint-disable-next-line no-console
     console.log('DEBUG params:', mockUseParams.mock.results);
 
+    // Wait for async operations to complete
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    // Assert: Verify the final state only (global mock is used)
-    // Debug log for result.current
-    // eslint-disable-next-line no-console
-    console.log('DEBUG result.current:', result.current);
+    // Assert: Verify the song loads successfully without errors
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.title).toBe('Wonderwall');
+    expect(result.current.artist).toBe('Oasis');
+    // Verify that local loading was attempted and succeeded
+    // The global mock is used, so we can't check the local mock's calls here
   }, 30000);
-});
+}); 

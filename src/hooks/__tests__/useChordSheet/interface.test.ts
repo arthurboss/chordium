@@ -13,7 +13,14 @@ import React from 'react';
 vi.mock('../../useChordSheet/cache-coordinator', () => ({
   CacheCoordinator: vi.fn().mockImplementation(() => ({
     clearExpiredCache: vi.fn(),
-    getChordSheetData: vi.fn()
+    getChordSheetData: vi.fn().mockResolvedValue({
+      title: 'Test Song',
+      artist: 'Test Artist',
+      songChords: 'C G Am F',
+      songKey: 'C',
+      guitarTuning: GUITAR_TUNINGS.STANDARD,
+      guitarCapo: 0
+    })
   }))
 }));
 
