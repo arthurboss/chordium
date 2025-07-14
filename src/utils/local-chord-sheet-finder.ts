@@ -31,9 +31,6 @@ export async function findLocalSong(
     const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
     const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
     
-    console.log(`Looking for song: "${songName}" by "${artistName}"`);
-    console.log('Available songs:', myChordSheets.map(song => `"${song.title}" by "${song.artist}"`));
-    
     // Search in My Chord Sheets
     const foundSong = myChordSheets.find((song: Song) => {
       const songArtist = song.artist?.toLowerCase() ?? '';
@@ -46,13 +43,11 @@ export async function findLocalSong(
     });
     
     if (foundSong) {
-      console.log('Found song in local storage:', foundSong.title);
       
       // Try to get the chord sheet from cache using the artist and title
       const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
       
       if (!cachedChordSheet) {
-        console.log('❌ Song found but no cached chord sheet available');
         return null;
       }
       
@@ -68,7 +63,6 @@ export async function findLocalSong(
       };
     }
     
-    console.log('Song not found in local storage');
     return null;
   } catch (error) {
     console.error('Error loading local songs:', error);

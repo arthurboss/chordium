@@ -30,30 +30,15 @@ const SongViewer = ({
   hideDeleteButton = false
 }: SongViewerProps) => {
 
-  console.log('🎵 SONG VIEWER DEBUG:');
-  console.log('Received song prop:', song);
-  console.log('Song title:', song.title);
-  console.log('Song artist:', song.artist);
-  console.log('Song path:', song.path);
-  console.log('Direct chord content provided:', !!directChordContent);
-
   // Load chord sheet content - use direct content if provided, otherwise load from cache
   const chordContent = useMemo(() => {
-    console.log('🔍 LOADING CHORD CONTENT:');
 
     if (directChordContent) {
-      console.log('✅ Using direct chord content (search result)');
-      console.log('Direct content preview:', directChordContent.substring(0, 100) + '...');
       return directChordContent;
     }
 
-    console.log('🏪 Loading from cache (My Chord Sheets)');
-    console.log('Song object:', song);
-    console.log('Song path (might be CifraClub format):', song.path);
-
     // Validate song object to prevent cache key generation errors
     if (!song.artist || !song.title) {
-      console.warn('⚠️ SongViewer received invalid song object:', song);
       return '';
     }
 
@@ -82,11 +67,8 @@ const SongViewer = ({
             variant={deleteButtonVariant}
             onClick={(e) => {
               e.stopPropagation();
-              console.log('Delete button clicked, calling onDelete with path:', song.path);
               if (onDelete) {
                 onDelete(song.path);
-              } else {
-                console.error('onDelete is not provided!');
               }
             }}
             tabIndex={0}

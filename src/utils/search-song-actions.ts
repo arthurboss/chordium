@@ -30,7 +30,6 @@ export const useSongActions = ({
   });
 
   const handleView = useCallback((songData: Song) => {
-    console.log('[handleView] Called with enhanced song selection:', songData);
     handleSongSelection(songData);
   }, [handleSongSelection]);
 
@@ -45,11 +44,9 @@ export const useSongActions = ({
         const existing = prev.find(existingSong => existingSong.path === item.path);
         
         if (existing) {
-          console.log('[handleAdd] Song already exists in My Chord Sheets:', item.title, 'by', item.artist);
           return prev; // Don't add duplicate
         }
         
-        console.log('[handleAdd] Adding new song to My Chord Sheets:', item.title, 'by', item.artist);
         return [...prev, item];
       });
     }

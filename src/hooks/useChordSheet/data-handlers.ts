@@ -19,7 +19,6 @@ export class DataHandlers {
     refreshPromise: Promise<ChordSheet | null>,
     setChordData: (data: ChordSheetWithUIState) => void
   ): void {
-    console.log('Showing cached chord sheet data');
     
     setChordData(toChordSheetWithUIState(immediateData));
 

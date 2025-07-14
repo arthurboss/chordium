@@ -27,7 +27,6 @@ export function useEnhancedSongSelection({
 }: EnhancedSongSelectionProps): EnhancedSongSelectionReturn {
   
   const navigateToExistingSong = useCallback((existingSong: Song) => {
-    console.log('[Enhanced Song Selection] Found existing song in My Chord Sheets:', existingSong);
     
     if (navigate) {
       const artistSlug = toSlug(existingSong.artist || '');
@@ -45,18 +44,15 @@ export function useEnhancedSongSelection({
   }, [navigate, setSelectedSong, setActiveTab]);
 
   const navigateToNewSong = useCallback((song: Song) => {
-    console.log('[Enhanced Song Selection] Song not found in My Chord Sheets, proceeding with normal navigation');
     
     if (song.artist && song.title && navigate) {
       const artistSlug = toSlug(song.artist);
       const songSlug = toSlug(song.title);
       
-      console.log('[Enhanced Song Selection] Navigating to song:', `/${artistSlug}/${songSlug}`, 'with song data:', song);
       navigate(`/${artistSlug}/${songSlug}`, { 
         state: { song: song } 
       });
     } else if (song.path && navigate) {
-      console.log('[Enhanced Song Selection] Using fallback approach - opening song path');
       navigate(`/song/${encodeURIComponent(song.path)}`, {
         state: { song: song }
       });
@@ -64,7 +60,6 @@ export function useEnhancedSongSelection({
   }, [navigate]);
   
   const handleSongSelection = useCallback((song: Song) => {
-    console.log('[Enhanced Song Selection] Processing song:', song);
     
     // Check if the song already exists in My Chord Sheets
     if (song.artist && song.title) {

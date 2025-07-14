@@ -15,7 +15,6 @@ export class ArtistUrlNavigation {
    */
   static navigateToArtist(artist: Artist, navigate: (path: string, options?: { replace?: boolean }) => void): void {
     const artistPath = `/${artist.path}`;
-    console.log('[ArtistUrlNavigation] Navigating to artist:', artistPath);
     navigate(artistPath, { replace: true });
   }
 
@@ -34,7 +33,6 @@ export class ArtistUrlNavigation {
     if (searchParams.song) params.set('song', searchParams.song);
     
     const searchUrl = `/search${params.toString() ? `?${params.toString()}` : ''}`;
-    console.log('[ArtistUrlNavigation] Navigating back to search:', searchUrl);
     navigate(searchUrl, { replace: true });
   }
 

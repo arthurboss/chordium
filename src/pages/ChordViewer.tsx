@@ -39,10 +39,6 @@ const ChordViewer = () => {
   // Get Song object from navigation state (if passed from search results)
   const navigationSong = location.state?.song as Song | undefined;
 
-  console.log('🚀 CHORD VIEWER INITIALIZATION:');
-  console.log('URL params - artist:', artist, 'song:', song, 'id:', id);
-  console.log('Navigation state song:', navigationSong);
-
   // Determine if this song is actually in "My Chord Sheets" by checking storage
   const [isFromMyChordSheets, setIsFromMyChordSheets] = useState(false);
 
@@ -53,18 +49,12 @@ const ChordViewer = () => {
     const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const isInMySongs = songs.some(s => s.path === songPath);
     setIsFromMyChordSheets(isInMySongs);
-
-    console.log('📋 Checking if song is in My Chord Sheets:');
-    console.log('Song path:', songPath);
-    console.log('Is in My Chord Sheets:', isInMySongs);
-    console.log('My Chord Sheets count:', songs.length);
   }, [navigationSong?.path, artist, song]);
 
   // Get chord data from server (for search results only)
   // Skip server fetch for My Chord Sheets context
   // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
   const originalSongPath = navigationSong?.path;
-  console.log('🔗 Original song path from navigation state:', originalSongPath);
   const chordData = useChordSheet(undefined, originalSongPath);
 
   // Load song from My Chord Sheets if this is a My Chord Sheets route
@@ -93,18 +83,11 @@ const ChordViewer = () => {
           });
 
           if (foundSong) {
-            console.log('🔍 FOUND SONG IN MY CHORD SHEETS:');
-            console.log('Found song object:', foundSong);
-            console.log('Song path (CifraClub format):', foundSong.path);
-
             // Generate the proper cache key from artist and title
             const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
-            console.log('Generated cache key:', cacheKey);
 
             // Try to get the chord content from the cache using artist and title
-            console.log('🏪 Trying to get cached chord sheet...');
             const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
-            console.log('Cached chord sheet result:', cachedChordSheet);
 
             let songChords = '';
             let songKey = '';
@@ -113,25 +96,20 @@ const ChordViewer = () => {
 
             // First, check if this is a sample song and load it directly from files
             if (isSampleSong(foundSong.artist, foundSong.title)) {
-              console.log('📁 Loading sample song from files...');
               const sampleChordSheet = await loadSampleChordSheet(foundSong.artist, foundSong.title);
               if (sampleChordSheet) {
-                console.log('✅ Loaded sample song from files');
                 songChords = sampleChordSheet.songChords;
                 songKey = sampleChordSheet.songKey;
                 guitarCapo = sampleChordSheet.guitarCapo || 0;
                 guitarTuning = sampleChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
               }
             } else if (cachedChordSheet) {
-              console.log('✅ Using cached chord sheet data');
               // Use cached chord sheet data
               songChords = cachedChordSheet.songChords;
               songKey = cachedChordSheet.songKey;
               guitarCapo = cachedChordSheet.guitarCapo || 0;
               guitarTuning = cachedChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
-              console.log('Content from cache:', songChords?.substring(0, 100) + '...');
             } else {
-              console.log('❌ No cached chord sheet found for:', foundSong.artist, foundSong.title);
             }
 
             const localData: LocalSongData = {
@@ -145,7 +123,6 @@ const ChordViewer = () => {
               error: null
             };
 
-            console.log('📋 Setting local song data:', localData);
             setLocalSongData(localData);
           } else {
             setLocalSongData({
@@ -200,12 +177,6 @@ const ChordViewer = () => {
 
   const currentChordData = getCurrentChordData();
 
-  console.log('🔄 CURRENT CHORD DATA SELECTION:');
-  console.log('isFromMyChordSheets:', isFromMyChordSheets);
-  console.log('localSongData:', localSongData);
-  console.log('chordData (from server):', chordData);
-  console.log('selectedCurrentChordData:', currentChordData);
-
   // Handle back navigation
   const handleBack = () => {
     if (isFromMyChordSheets) {
@@ -247,28 +218,16 @@ const ChordViewer = () => {
 
   // Create song data object from chord sheet data
   const createSongData = () => {
-    console.log('🎼 CREATE SONG DATA DEBUG:');
-    console.log('currentChordData:', currentChordData);
-    console.log('isFromMyChordSheets:', isFromMyChordSheets);
-    console.log('navigationSong (from search result):', navigationSong);
-    console.log('URL params - artist:', artist, 'songParam:', song, 'id:', id);
-
     // Use navigation Song object as primary source, fallback to URL/chord data
     const songTitle = navigationSong?.title || getSongTitle();
     const artistName = navigationSong?.artist || getArtistName();
     const cacheKey = artist && song ? generateChordSheetId(artist, song) : id || 'unknown';
-
-    console.log('🏷️ Final song title (prioritizing navigation state):', songTitle);
-    console.log('🎤 Final artist name (prioritizing navigation state):', artistName);
-    console.log('🔑 Cache key for chord content:', cacheKey);
 
     const songObj: Song = {
       title: songTitle, // Use navigation Song object as primary source
       artist: artistName, // Use navigation Song object as primary source
       path: cacheKey // Use cache key, not chord content
     };
-
-    console.log('💾 Created Song object:', songObj);
 
     const chordSheet: ChordSheet = {
       title: songTitle, // Use URL params - the song title from search result
@@ -278,8 +237,6 @@ const ChordViewer = () => {
       guitarTuning: GUITAR_TUNINGS.STANDARD,
       guitarCapo: currentChordData.guitarCapo ?? 0
     };
-
-    console.log('🎸 Created ChordSheet object:', chordSheet);
 
     return {
       song: songObj,
@@ -297,8 +254,6 @@ const ChordViewer = () => {
   const handleDeleteSong = () => {
     const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
     const songTitle = navigationSong?.title || getSongTitle();
-
-    console.log('🗑️ Deleting chord sheet from My Chord Sheets:', songPath);
 
     // Delete from storage
     deleteChordSheetByPath(songPath);

@@ -14,29 +14,20 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
   const isDev = import.meta.env.DEV;
 
   if (!isDev) {
-    console.log('🏭 Production mode: Skipping sample song population');
     return;
   }
-
-  console.log('🔧 Development mode detected, checking My Chord Sheets cache...');
 
   // Check if My Chord Sheets is already populated
   const existingSongs = unifiedChordSheetCache.getAllSavedChordSheets();
   if (existingSongs.length > 0) {
-    console.log('📚 My Chord Sheets already populated, skipping sample song initialization');
     return;
   }
 
-  console.log('🔧 Development mode: Populating My Chord Sheets with sample chord sheets...');
-  
   // Add each sample chord sheet to My Chord Sheets
   sampleChordSheets.forEach((chordSheet) => {
     unifiedChordSheetCache.cacheChordSheet(chordSheet.artist, chordSheet.title, chordSheet);
     unifiedChordSheetCache.setSavedStatus(chordSheet.artist, chordSheet.title, true);
-    console.log(`➕ Added "${chordSheet.title}" by ${chordSheet.artist} to My Chord Sheets`);
   });
-
-  console.log(`✅ Successfully populated My Chord Sheets with ${sampleChordSheets.length} sample songs`);
 }
 
 /**
@@ -47,8 +38,6 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
  */
 export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
   try {
-    console.log('📖 Loading sample chord sheets from JSON files...');
-
     // Load the chord sheet data from JSON files using the renamed files
     const [wonderwallResponse, hotelCaliforniaResponse] = await Promise.all([
       fetch('/data/songs/oasis-wonderwall.json'),
@@ -64,7 +53,6 @@ export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
       hotelCaliforniaResponse.json() as Promise<ChordSheet>
     ]);
 
-    console.log('✅ Successfully loaded sample chord sheets');
     return [wonderwallChordSheet, hotelCaliforniaChordSheet];
   } catch (error) {
     console.error('❌ Failed to load sample chord sheets:', error);

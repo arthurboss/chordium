@@ -21,7 +21,6 @@ export async function getChordSheetData(
   const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(artist, title);
   
   if (cachedChordSheet) {
-    console.log('Using cached chord sheet');
     return cachedChordSheet;
   }
 
@@ -29,10 +28,8 @@ export async function getChordSheetData(
   const chordSheet = await fetchChordSheetFromBackend(fetchUrl, artist, title);
   
   if (chordSheet) {
-    console.log('✅ Flow Step 8: Caching chord sheet data');
     // Cache the chord sheet using the parsed artist and title
     unifiedChordSheetCache.cacheChordSheet(artist, title, chordSheet);
-    console.log('✅ Flow Step 9: Chord sheet cached successfully');
   }
   
   return chordSheet;

@@ -19,17 +19,13 @@ export async function loadSampleChordSheet(artist: string, title: string): Promi
     const filename = generateCacheKey(artist, title);
     const filePath = `/data/songs/${filename}.json`;
     
-    console.log(`🎵 Loading sample song: ${filePath}`);
-    
     const response = await fetch(filePath);
     
     if (!response.ok) {
-      console.log(`📭 Sample song not found: ${filePath}`);
       return null;
     }
     
     const chordSheet: ChordSheet = await response.json();
-    console.log(`✅ Loaded sample song: "${chordSheet.title}" by ${chordSheet.artist}`);
     
     return chordSheet;
   } catch (error) {

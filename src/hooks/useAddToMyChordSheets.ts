@@ -33,8 +33,6 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
       
       // Save chord sheet using the API cache (already cached from fetch)
       
-      console.log('💾 Flow Step 13: Saving chord sheet metadata (separate from chord content)');
-      
       if (setMySongs && setActiveTab) {
         // User is on home page with state
         handleSaveNewChordSheetFromUI(

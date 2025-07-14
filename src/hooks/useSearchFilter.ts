@@ -17,23 +17,8 @@ export function useSearchFilter(
   shouldFetch: boolean,
   filterVersion?: number
 ): SearchFilterState {
-  console.log('[useSearchFilter] RENDER:', { 
-    allArtistsLength: allArtists.length, 
-    allSongsLength: allSongs.length,
-    filterArtist, 
-    filterSong, 
-    hasFetched, 
-    shouldFetch, 
-    filterVersion 
-  });
-
   const filteredArtists = useArtistFilter(allArtists, filterArtist, hasFetched, filterVersion);
   const filteredSongs = useSongFilter(allSongs, filterSong, hasFetched, filterVersion);
-
-  console.log('[useSearchFilter] FILTERED RESULTS:', { 
-    filteredArtistsLength: filteredArtists.length, 
-    filteredSongsLength: filteredSongs.length 
-  });
 
   return {
     filteredArtists,

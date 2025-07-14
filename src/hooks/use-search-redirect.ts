@@ -20,7 +20,6 @@ export function useSearchRedirect() {
         const artist = artistParam ? fromSlug(artistParam) : '';
         const song = songParam ? fromSlug(songParam) : '';
         
-        console.log('[useSearchRedirect] Restoring search state from URL:', { artist, song });
         updateSearchState({ artist, song, results: [] });
       }
     }

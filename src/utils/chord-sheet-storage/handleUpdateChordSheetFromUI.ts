@@ -22,14 +22,17 @@ export const handleUpdateChordSheetFromUI = (
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   if (!selectedSong) {
-    console.warn('No chord sheet selected for update');
+    toast({
+      title: "Update failed",
+      description: "No chord sheet selected for update",
+      variant: "destructive"
+    });
     return;
   }
   
   // Parse the cache key (song.path) to get artist and title
   const dashIndex = selectedSong.path.lastIndexOf('-');
   if (dashIndex === -1) {
-    console.error('Invalid song path format for update:', selectedSong.path);
     toast({
       title: "Update failed",
       description: "Invalid chord sheet format",
@@ -48,7 +51,6 @@ export const handleUpdateChordSheetFromUI = (
   // Get the existing ChordSheet
   const existingChordSheet = unifiedChordSheetCache.getCachedChordSheet(artist, title);
   if (!existingChordSheet) {
-    console.error('ChordSheet not found in cache:', { artist, title });
     toast({
       title: "Update failed", 
       description: "Chord sheet not found in storage",

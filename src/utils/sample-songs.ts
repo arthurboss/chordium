@@ -11,8 +11,6 @@ let cachedSongs: Song[] | null = null;
  * @returns Array of ChordSheet objects with full metadata
  */
 export const loadSampleChordSheets = async (): Promise<ChordSheet[]> => {
-  console.log('Loading sample chord sheets');
-  
   // Load the chord sheet data from JSON files using corrected filenames
   const hotelCaliforniaResponse = await fetch('/data/songs/eagles-hotel_california.json');
   const hotelCaliforniaChordSheet: ChordSheet = await hotelCaliforniaResponse.json();
@@ -29,8 +27,6 @@ export const loadSampleSongs = async (): Promise<Song[]> => {
     return cachedSongs;
   }
 
-  console.log('Loading sample songs (first time)');
-  
   // Load the chord sheet data from JSON files using the renamed files
   const hotelCaliforniaResponse = await fetch('/data/songs/eagles-hotel_california.json');
   const hotelCaliforniaChordSheet: ChordSheet = await hotelCaliforniaResponse.json();

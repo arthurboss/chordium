@@ -24,7 +24,6 @@ export class BackgroundRefreshHandler {
     setChordData: (data: any) => void,
     navigate: (path: string, options?: { replace?: boolean }) => void
   ): void {
-    console.log('Background refresh completed, updating UI');
     
     // Update URL if needed
     this.updateUrlIfNeeded(updatedData, fetchUrl, params, navigate);

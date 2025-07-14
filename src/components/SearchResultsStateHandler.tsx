@@ -2,7 +2,6 @@ import React from 'react';
 import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
 import SearchResultsLayout from './SearchResultsLayout';
-import ArtistSongsView from './ArtistSongsView';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 
@@ -38,64 +37,49 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
   onAdd,
   onArtistSelect,
 }) => {
-  console.log('[SearchResultsStateHandler] RENDER:', { 
-    state: stateData.state, 
-    artistsLength: artists.length, 
-    songsLength: songs.length,
-    filteredSongsLength: filteredSongs.length,
-    activeArtist: stateData.activeArtist?.displayName,
-    searchType: stateData.searchType
-  });
-
   switch (stateData.state) {
     case 'loading':
-      console.log('[SearchResultsStateHandler] RENDERING LOADING STATE');
-      return <LoadingState />;
+      return <LoadingState message="Loading results..." />;
 
     case 'error':
-      console.log('[SearchResultsStateHandler] RENDERING ERROR STATE:', stateData.error);
-      return <ErrorState error={stateData.error} />;
+      return <ErrorState error={stateData.error?.message || 'Unknown error'} />;
 
     case 'artist-songs-loading':
-      console.log('[SearchResultsStateHandler] RENDERING ARTIST SONGS LOADING');
-      return <LoadingState />;
+      return <LoadingState message="Loading artist songs..." />;
 
     case 'artist-songs-error':
-      console.log('[SearchResultsStateHandler] RENDERING ARTIST SONGS ERROR:', stateData.artistSongsError);
-      return <ErrorState error={new Error(stateData.artistSongsError)} />;
+      return <ErrorState error={stateData.artistSongsError || 'Unknown error'} />;
 
     case 'songs-view':
       if (stateData.searchType === 'artist' && stateData.activeArtist && stateData.artistSongs) {
-        console.log('[SearchResultsStateHandler] RENDERING ARTIST SONGS VIEW');
         return (
-          <ArtistSongsView
-            artist={stateData.activeArtist}
+          <SearchResultsLayout
+            artists={[]}
             songs={stateData.artistSongs}
             onView={onView}
-            onAdd={onAdd}
-            filterSong={filterSong}
+            onDelete={(_songId: string) => {}}
+            onArtistSelect={onArtistSelect}
+            hasSearched={true}
           />
         );
       } else if (stateData.searchType === 'song' && stateData.songs) {
-        console.log('[SearchResultsStateHandler] RENDERING SONG SEARCH RESULTS');
         return (
           <SearchResultsLayout
             artists={[]}
             songs={stateData.songs}
             onView={onView}
-            onDelete={() => {}}
+            onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
         );
       } else {
-        console.log('[SearchResultsStateHandler] RENDERING DEFAULT SEARCH RESULTS');
         return (
           <SearchResultsLayout
             artists={artists}
             songs={songs}
             onView={onView}
-            onDelete={() => {}}
+            onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
@@ -103,7 +87,6 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       }
 
     case 'artist-songs-empty':
-      console.log('[SearchResultsStateHandler] RENDERING EMPTY ARTIST SONGS');
       return (
         <div className="p-8 text-center text-gray-500">
           No songs found for {stateData.activeArtist?.displayName}.
@@ -111,7 +94,6 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       );
 
     case 'hasSearched':
-      console.log('[SearchResultsStateHandler] RENDERING NO RESULTS');
       return (
         <div className="p-8 text-center text-gray-500">
           No results found. Try adjusting your search terms.
@@ -119,7 +101,6 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       );
 
     default:
-      console.log('[SearchResultsStateHandler] RENDERING DEFAULT STATE');
       return null;
   }
 };

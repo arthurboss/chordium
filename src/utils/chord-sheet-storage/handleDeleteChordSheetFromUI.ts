@@ -19,13 +19,7 @@ export const handleDeleteChordSheetFromUI = (
   selectedSong: Song | null,
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
-  console.log("🗑️ handleDeleteChordSheetFromUI called");
-  console.log("songPath:", songPath);
-  console.log("myChordSheets count:", myChordSheets.length);
-  console.log("selectedSong:", selectedSong);
-
   const songToDelete = myChordSheets.find((song) => song.path === songPath);
-  console.log("songToDelete:", songToDelete);
 
   if (!songToDelete) {
     console.error("Chord sheet not found in myChordSheets!");
@@ -34,7 +28,6 @@ export const handleDeleteChordSheetFromUI = (
 
   // Remove from UI state
   const updatedSongs = myChordSheets.filter((song) => song.path !== songPath);
-  console.log("updatedSongs count:", updatedSongs.length);
 
   setMySongs(updatedSongs);
 
@@ -43,7 +36,6 @@ export const handleDeleteChordSheetFromUI = (
 
   // Clear selection if the deleted song was selected
   if (selectedSong?.path === songPath) {
-    console.log("Clearing selectedSong");
     setSelectedSong(null);
   }
 
@@ -51,6 +43,4 @@ export const handleDeleteChordSheetFromUI = (
     title: "Chord sheet deleted",
     description: `"${songToDelete.title}" has been removed from My Chord Sheets`,
   });
-
-  console.log("Chord sheet deletion completed");
 };

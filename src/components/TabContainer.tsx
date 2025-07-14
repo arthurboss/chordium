@@ -65,7 +65,6 @@ const TabContainer = ({
   };
   
   const handleSongSelect = (song: Song) => {
-    console.log('🎵 [TabContainer] handleSongSelect called with:', song);
     
     // For My Chord Sheets: Navigate to /my-chord-sheets/:artist/:song and pass Song object as state
     if (song.artist && song.title) {
@@ -74,7 +73,6 @@ const TabContainer = ({
       const songSlug = toSlug(song.title);
       
       const targetUrl = `/my-chord-sheets/${artistSlug}/${songSlug}`;
-      console.log('🎯 [TabContainer] Navigating to:', targetUrl, 'with song data:', song);
       // Pass the Song object as navigation state so ChordViewer can use it directly
       navigate(targetUrl, {
         state: {
@@ -83,7 +81,6 @@ const TabContainer = ({
       });
     } else {
       // Fallback for songs without proper artist/title structure
-      console.log('🔄 [TabContainer] Using fallback navigation for:', song.path);
       setSelectedSong(song);
       navigate(`/my-chord-sheets?song=${encodeURIComponent(song.path)}`, {
         state: {

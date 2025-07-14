@@ -32,11 +32,9 @@ export class ChordSheetLoadingStrategy {
    */
   async loadLocal(artist: string, song: string): Promise<ChordSheetWithUIState | null> {
     try {
-      console.log('Loading from My Chord Sheets locally...');
       const localSong = await findLocalSong(artist, song);
       
       if (localSong) {
-        console.log('Found song in local storage:', localSong.title);
         return buildChordSheetData(localSong);
       }
       

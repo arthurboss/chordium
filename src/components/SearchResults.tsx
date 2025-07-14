@@ -42,17 +42,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onFetchComplete,
   onLoadingChange,
 }) => {
-  console.log('[SearchResults] RENDER:', { 
-    artist, 
-    song, 
-    filterArtist, 
-    filterSong, 
-    activeArtist: activeArtist?.displayName,
-    hasSearched, 
-    shouldFetch,
-    myChordSheetsLength: myChordSheets.length
-  });
-
   const {
     state,
     dispatch,
@@ -60,15 +49,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     handleView,
     handleAdd
   } = useSearchResultsReducer(filterSong, setMySongs, setActiveTab, setSelectedSong, myChordSheets);
-
-  console.log('[SearchResults] REDUCER STATE:', { 
-    stateType: stateData.state, 
-    loading: state.loading, 
-    hasSearched: state.hasSearched,
-    artistsCount: state.artists.length,
-    songsCount: state.songs.length,
-    activeArtist: state.activeArtist?.displayName
-  });
 
   // Fetch search results from API - only when shouldFetch is true (form submitted)
   const { artists, songs, loading, error } = useSearchResults({
@@ -80,29 +60,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     onFetchComplete
   });
 
-  console.log('[SearchResults] SEARCH RESULTS:', { 
-    artistsCount: artists.length, 
-    songsCount: songs.length, 
-    loading, 
-    error 
-  });
-
   // Use useLayoutEffect for loading state changes - prevents UI flashing
   React.useLayoutEffect(() => {
     if (onLoadingChange) {
-      console.log('[SearchResults] LOADING STATE CHANGE:', loading);
       onLoadingChange(loading);
     }
   }, [loading, onLoadingChange]);
 
   // Fetch artist songs when activeArtist changes
   const { artistSongs, error: artistSongsError, loading: artistSongsLoading } = useArtistSongs(state.activeArtist);
-
-  console.log('[SearchResults] ARTIST SONGS:', { 
-    artistSongsCount: artistSongs?.length, 
-    artistSongsError, 
-    artistSongsLoading 
-  });
 
   // Use custom hooks for effects and handlers
   useSearchEffects({
@@ -120,8 +86,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   });
 
   const { handleArtistSelect } = useArtistSelection({ dispatch, onArtistSelect });
-
-  console.log('[SearchResults] FINAL STATE DATA:', stateData);
 
   return (
     <SearchResultsStateHandler
