@@ -24,7 +24,7 @@
     
     "lint": "eslint .",
     
-    "test:unit": "vitest run",
+    "test": "vitest run",
 
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
     "cy:run": "./run-cypress.sh",
