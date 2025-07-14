@@ -342,7 +342,7 @@ const ChordViewer = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 container py-8 px-4 overflow-x-hidden max-w-3xl mx-auto">
+      <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
         <SongChordDetails
           songKey={currentChordData.songKey}
           tuning={Array.isArray(currentChordData.guitarTuning) ? currentChordData.guitarTuning.join('-') : 'Standard'}
