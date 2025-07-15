@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==> Entering backend directory..."
-cd backend
-
 echo "==> Installing dependencies..."
 npm install
 
