@@ -30,12 +30,6 @@ export const useSearchEffects = ({
   state,
   dispatch,
 }: SearchEffectsProps) => {
-  // Use useInsertionEffect for initialization - runs before DOM mutations
-  useInsertionEffect(() => {
-    // Initialize state if needed - no dispatch needed here
-    // The state will be initialized by the other effects
-  }, []);
-
   // Use useLayoutEffect for search state changes - prevents UI flashing
   useLayoutEffect(() => {
     if (loading && !state.loading) {
