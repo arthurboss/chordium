@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "postinstall": "puppeteer install",
     "start": "node dist/backend/server.js",
     "start:render": "NODE_ENV=production node dist/backend/server.js",
     "dev": "tsx server.ts",

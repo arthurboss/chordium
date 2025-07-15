@@ -9,7 +9,8 @@ class PuppeteerService {
     if (!this.browser) {
       this.browser = await puppeteer.launch({
         headless: config.puppeteer.headless,
-        args: config.puppeteer.args
+        args: config.puppeteer.args,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
       });
       logger.info('Puppeteer browser instance created');
     }
