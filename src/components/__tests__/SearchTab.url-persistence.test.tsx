@@ -236,6 +236,59 @@ describe('SearchTab - URL Persistence Behavior', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/search', { replace: true });
   });
 
+  it('should preserve search query params in the URL when navigating away and back to /search', async () => {
+    // Mock URL with search parameters
+    Object.defineProperty(window, 'location', {
+      value: {
+        pathname: '/search',
+        search: '?artist=leonardo',
+      },
+      writable: true,
+    });
+
+    render(
+      <BrowserRouter>
+        <SearchStateProvider>
+          <SearchTab myChordSheets={[]} />
+        </SearchStateProvider>
+      </BrowserRouter>
+    );
+
+    // Simulate navigating away (e.g., to /my-chord-sheets)
+    Object.defineProperty(window, 'location', {
+      value: {
+        pathname: '/my-chord-sheets',
+        search: '',
+      },
+      writable: true,
+    });
+
+    // Simulate navigating back to /search
+    Object.defineProperty(window, 'location', {
+      value: {
+        pathname: '/search',
+        search: '', // This is the bug: the query is lost
+      },
+      writable: true,
+    });
+
+    // The app should restore the previous search query in the URL
+    // (simulate the logic that should restore the query params)
+    // In a real app, this would be handled by navigation logic or a custom hook
+    // For this test, we expect the UI to update the URL to include the original query
+    // (simulate a popstate event or similar if needed)
+
+    // Wait for the UI to attempt to restore the URL
+    await waitFor(() => {
+      // The test expects the URL to be restored to /search?artist=leonardo
+      // This can be checked by asserting that mockNavigate is called with the correct params
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/search?artist=leonardo',
+        { replace: true }
+      );
+    });
+  });
+
   test('should show cached results immediately on refresh if cache exists for URL params', async () => {
     // Mock cached results
     const mockCachedResults = [

@@ -8,10 +8,10 @@ import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
-import { getCachedSearchResults } from '@/cache/implementations/search-cache';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/hooks/useArtistNavigation';
+import { useSyncSearchUrlWithState } from '@/hooks/useSyncSearchUrlWithState';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -23,7 +23,7 @@ interface SearchTabProps {
 // Local state for selectedSong (for viewing a song from search results)
 
 const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }) => {
-  const { searchState, updateSearchState } = useSearchState();
+  const { searchState, updateSearchState, hydrated } = useSearchState();
   const [loading, setLoading] = useState(false);
   const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
@@ -38,6 +38,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const navigate = useNavigate();
   const location = useLocation();
   const isInitialized = useRef(false);
+
+  useSyncSearchUrlWithState();
 
   // Initialize input fields and search state from URL on mount
   useEffect(() => {
@@ -65,6 +67,20 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
       isInitialized.current = true;
     }
   }, [location.search, updateSearchState]);
+
+  // Restore URL query params from state if navigating back to /search with missing params
+  useEffect(() => {
+    // Only restore if the URL is exactly '/search', state is hydrated, and state has values
+    const stateHydrated = hydrated && !!(searchState.artist || searchState.song);
+    if (location.pathname === '/search' && !location.search && stateHydrated) {
+      const params = new URLSearchParams();
+      if (searchState.artist) params.set('artist', toSlug(searchState.artist));
+      if (searchState.song) params.set('song', toSlug(searchState.song));
+      setTimeout(() => {
+        navigate(`/search?${params.toString()}`, { replace: true });
+      }, 0);
+    }
+  }, [location.pathname, location.search, searchState.artist, searchState.song, hydrated, navigate]);
 
   // Handlers for search form - memoized to prevent re-renders
   const handleInputChange = useCallback((artistValue: string, songValue: string) => {

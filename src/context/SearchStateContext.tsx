@@ -18,23 +18,30 @@ const SearchStateContext = createContext<{
   searchState: SearchState;
   setSearchState: (s: SearchState) => void;
   updateSearchState: (patch: Partial<SearchState>) => void;
+  hydrated: boolean;
 } | undefined>(undefined);
 
 export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Hydrate from localStorage on first load, but keep all state in memory after
-  const [searchState, setSearchState] = useState<SearchState>(() => {
+  const [searchState, setSearchState] = useState<SearchState>(defaultState);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Hydrate from localStorage on first load
+  useEffect(() => {
     try {
       const cached = localStorage.getItem("chordium-search-cache");
-      return cached ? JSON.parse(cached) : defaultState;
-    } catch {
-      return defaultState;
-    }
-  });
+      if (cached) {
+        setSearchState(JSON.parse(cached));
+      }
+    } catch { /* ignore JSON parse/localStorage errors */ }
+    setHydrated(true);
+  }, []);
 
   // Persist to localStorage only when searchState changes
   useEffect(() => {
-    localStorage.setItem("chordium-search-cache", JSON.stringify(searchState));
-  }, [searchState]);
+    if (hydrated) {
+      localStorage.setItem("chordium-search-cache", JSON.stringify(searchState));
+    }
+  }, [searchState, hydrated]);
 
   // Helper for partial updates (like setState)
   const updateSearchState = useCallback((patch: Partial<SearchState>) => {
@@ -46,7 +53,8 @@ export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     searchState,
     setSearchState,
     updateSearchState,
-  }), [searchState, updateSearchState]);
+    hydrated,
+  }), [searchState, updateSearchState, hydrated]);
 
   return (
     <SearchStateContext.Provider value={contextValue}>
