@@ -180,3 +180,18 @@ Contributions are welcome! Feel free to open an issue or submit a pull request.
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Shared Chord Sheet Fixtures
+
+The canonical test chord sheets for both frontend and backend live in [`shared/fixtures/chord-sheet/`](./shared/fixtures/chord-sheet/).
+
+- **Usage:**
+  - All tests (frontend and backend) must import chord sheet fixtures from this directory.
+  - Do not duplicate or maintain separate chord sheet fixtures elsewhere in the repo.
+- **Updating:**
+  - To add or update a test chord sheet, edit or add a file in `shared/fixtures/chord-sheet/`.
+  - Ensure changes are compatible with all tests that use these fixtures.
+- **Why:**
+  - This ensures consistency and prevents test drift or outdated data.
+
+If you find chord sheet fixtures elsewhere, please delete them and use the shared source of truth.
