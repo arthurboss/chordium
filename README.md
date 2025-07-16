@@ -66,8 +66,8 @@ git clone https://github.com/arthurboss/chordium.git
 # Navigate to the project directory
 cd chordium
 
-# Install all dependencies (frontend + backend)
-npm run install:all
+# Install all dependencies (npm workspaces handle this automatically)
+npm install
 
 # Start both frontend and backend development servers
 npm run dev
@@ -93,8 +93,17 @@ npm run build
 # Run tests for both
 npm run test
 
+# Run tests in watch mode
+npm run test:watch
+
 # Lint both frontend and backend
 npm run lint
+
+# Auto-fix linting issues
+npm run lint:fix
+
+# Check for duplicate fixtures
+npm run check:fixtures
 ```
 
 ## 🚀 Deployment
@@ -158,24 +167,64 @@ chordium/
 │   ├── src/           # Frontend source code
 │   ├── public/        # Static assets
 │   ├── dist/          # Build output
-│   └── vercel.json    # Vercel configuration
+│   └── cypress/       # E2E tests
 ├── backend/           # Node.js/Express backend API
-│   ├── src/           # Backend source code
-│   ├── routes/        # API routes
-│   └── services/      # Business logic
-├── shared/            # Shared types and utilities
-└── docs/              # Documentation
+│   ├── controllers/   # API route handlers
+│   ├── services/      # Business logic services
+│   ├── utils/         # Backend utilities
+│   └── tests/         # Backend tests
+├── shared/            # Shared code between workspaces
+│   ├── types/         # Shared TypeScript types
+│   └── fixtures/      # Shared test fixtures
+├── docs/              # Project documentation
+└── scripts/           # Build and utility scripts
+```
+
+For detailed information about the monorepo architecture, see [MONOREPO.md](./MONOREPO.md).
+
+## ⚡ Quick Reference
+
+### Common Commands
+```bash
+# Development
+npm run dev              # Start both frontend and backend
+npm run dev:fe           # Start only frontend
+npm run dev:be           # Start only backend
+
+# Testing
+npm run test             # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:fe          # Run only frontend tests
+npm run test:be          # Run only backend tests
+
+# Code Quality
+npm run lint             # Lint all code
+npm run lint:fix         # Auto-fix linting issues
+npm run check:fixtures   # Check for duplicate fixtures
+
+# Building
+npm run build            # Build both frontend and backend
+npm run build:fe         # Build only frontend
+npm run build:be         # Build only backend
 ```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to open an issue or submit a pull request.
+Contributions are welcome! Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) guide for detailed information about:
 
+- Development setup and workflow
+- Code style and guidelines
+- Testing requirements
+- Pull request process
+- Issue reporting
+
+For quick reference:
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Run tests: `npm run test`
+4. Run linting: `npm run lint`
+5. Commit your changes with conventional commit messages
+6. Push to the branch and open a Pull Request
 
 ## 📄 License
 
