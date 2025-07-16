@@ -19,7 +19,7 @@ export function getSearchParamsType(params: URLSearchParams): SearchParamType {
 // This function uses CifraClub-compatible slug conversion (removes diacritics)
 export function formatSearchUrl(artist?: string, song?: string): string {
   const parts: string[] = [];
-  if (artist) parts.push(`artist=${encodeURIComponent(toSlug(artist.trim()))}`);
-  if (song) parts.push(`song=${encodeURIComponent(toSlug(song.trim()))}`);
+  if (artist) parts.push(`artist=${toSlug(artist.trim())}`);
+  if (song) parts.push(`song=${toSlug(song.trim())}`);
   return `/search${parts.length ? '?' + parts.join('&') : ''}`;
 }

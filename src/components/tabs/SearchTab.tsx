@@ -9,6 +9,7 @@ import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
+import { formatSearchUrl } from '@/utils/search-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/hooks/useArtistNavigation';
 import { useSyncSearchUrlWithState } from '@/hooks/useSyncSearchUrlWithState';
@@ -73,11 +74,9 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     // Only restore if the URL is exactly '/search', state is hydrated, and state has values
     const stateHydrated = hydrated && !!(searchState.artist || searchState.song);
     if (location.pathname === '/search' && !location.search && stateHydrated) {
-      const params = new URLSearchParams();
-      if (searchState.artist) params.set('artist', toSlug(searchState.artist));
-      if (searchState.song) params.set('song', toSlug(searchState.song));
+      const url = formatSearchUrl(searchState.artist, searchState.song);
       setTimeout(() => {
-        navigate(`/search?${params.toString()}`, { replace: true });
+        navigate(url, { replace: true });
       }, 0);
     }
   }, [location.pathname, location.search, searchState.artist, searchState.song, hydrated, navigate]);

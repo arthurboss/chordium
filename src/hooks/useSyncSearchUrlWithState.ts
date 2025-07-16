@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSearchState } from '@/context/SearchStateContext';
+import { formatSearchUrl } from '@/utils/search-utils';
 
 /**
  * Keeps the /search URL query params in sync with the current search state.
@@ -16,10 +17,8 @@ export function useSyncSearchUrlWithState() {
   useEffect(() => {
     if (!location.pathname.startsWith('/search')) return;
 
-    const params = new URLSearchParams();
-    if (artist) params.set('artist', artist);
-    if (song) params.set('song', song);
-    const expected = params.toString();
+    const expectedUrl = formatSearchUrl(artist, song);
+    const expected = expectedUrl.replace(/^\/search\??/, '');
     const current = location.search.replace(/^\?/, '');
 
     if (typeof window !== 'undefined') {
@@ -29,7 +28,7 @@ export function useSyncSearchUrlWithState() {
 
     // If state has values but URL does not, always restore the query params
     if ((artist || song) && expected !== current) {
-      const newUrl = `/search${expected ? `?${expected}` : ''}`;
+      const newUrl = expectedUrl;
       if (typeof window !== 'undefined') {
         // eslint-disable-next-line no-console
         console.debug('[useSyncSearchUrlWithState] Restoring URL to', newUrl);
