@@ -40,8 +40,8 @@ export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
   try {
     // Load the chord sheet data from JSON files using the renamed files
     const [wonderwallResponse, hotelCaliforniaResponse] = await Promise.all([
-      fetch('/data/songs/oasis-wonderwall.json'),
-      fetch('/data/songs/eagles-hotel_california.json')
+      fetch('/shared/fixtures/chord-sheet/oasis-wonderwall.json'),
+      fetch('/shared/fixtures/chord-sheet/eagles-hotel_california.json')
     ]);
 
     if (!wonderwallResponse.ok || !hotelCaliforniaResponse.ok) {

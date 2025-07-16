@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "dev": "npm run dev:fe & npm run dev:be",
-    "dev:fe": "cd frontend && npm run fe",
+    "dev:fe": "cd frontend && npm run dev",
     "dev:be": "cd backend && npm run dev",
     "build": "npm run build:fe && npm run build:be",
     "build:fe": "cd frontend && npm run build",
@@ -22,7 +22,10 @@
     "lint:fe": "cd frontend && npm run lint",
     "lint:be": "cd backend && npm run lint",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "clean": "rm -rf frontend/node_modules backend/node_modules frontend/dist backend/dist frontend/coverage backend/coverage"
+    "clean": "rm -rf frontend/node_modules backend/node_modules frontend/dist backend/dist frontend/coverage backend/coverage",
+    "kill": "./scripts/kill-servers.sh",
+    "kill:fe": "./scripts/kill-servers.sh fe",
+    "kill:be": "./scripts/kill-servers.sh be"
   },
   "devDependencies": {
     "@types/node": "^22.14.1"

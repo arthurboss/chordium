@@ -12,10 +12,10 @@ let cachedSongs: Song[] | null = null;
  */
 export const loadSampleChordSheets = async (): Promise<ChordSheet[]> => {
   // Load the chord sheet data from JSON files using corrected filenames
-  const hotelCaliforniaResponse = await fetch('/data/songs/eagles-hotel_california.json');
+  const hotelCaliforniaResponse = await fetch('/shared/fixtures/chord-sheet/eagles-hotel_california.json');
   const hotelCaliforniaChordSheet: ChordSheet = await hotelCaliforniaResponse.json();
   
-  const wonderwallResponse = await fetch('/data/songs/oasis-wonderwall.json');
+  const wonderwallResponse = await fetch('/shared/fixtures/chord-sheet/oasis-wonderwall.json');
   const wonderwallChordSheet: ChordSheet = await wonderwallResponse.json();
   
   return [wonderwallChordSheet, hotelCaliforniaChordSheet];
@@ -28,10 +28,10 @@ export const loadSampleSongs = async (): Promise<Song[]> => {
   }
 
   // Load the chord sheet data from JSON files using the renamed files
-  const hotelCaliforniaResponse = await fetch('/data/songs/eagles-hotel_california.json');
+  const hotelCaliforniaResponse = await fetch('/shared/fixtures/chord-sheet/eagles-hotel_california.json');
   const hotelCaliforniaChordSheet: ChordSheet = await hotelCaliforniaResponse.json();
   
-  const wonderwallResponse = await fetch('/data/songs/oasis-wonderwall.json');
+  const wonderwallResponse = await fetch('/shared/fixtures/chord-sheet/oasis-wonderwall.json');
   const wonderwallChordSheet: ChordSheet = await wonderwallResponse.json();
   
   // Initialize dev mode sample songs in My Chord Sheets (only in dev mode)

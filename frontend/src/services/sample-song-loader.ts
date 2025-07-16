@@ -17,7 +17,7 @@ export async function loadSampleChordSheet(artist: string, title: string): Promi
   try {
     // Generate the filename using the same logic as our normalized files
     const filename = generateCacheKey(artist, title);
-    const filePath = `/data/songs/${filename}.json`;
+    const filePath = `/shared/fixtures/chord-sheet/${filename}.json`;
     
     const response = await fetch(filePath);
     
