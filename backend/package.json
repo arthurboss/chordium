@@ -14,6 +14,7 @@
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
     "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
     "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
     "lint:ts": "tsc --noEmit",
     "test:s3-config": "node --experimental-vm-modules ./node_modules/.bin/jest tests/services/s3/configuration.test.js --verbose"
   },
