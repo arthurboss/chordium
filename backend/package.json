@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "postinstall": "npx puppeteer browsers install chrome",
+    "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "start:render": "NODE_ENV=production node dist/backend/server.js",
     "dev": "tsx server.ts",
