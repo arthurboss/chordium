@@ -1,15 +1,19 @@
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 import config from '../config/config.js';
 import logger from '../utils/logger.js';
+import fs from 'fs';
 
 class PuppeteerService {
   private browser: Browser | null = null;
 
   async init(): Promise<Browser> {
     if (!this.browser) {
+      console.log('Launching Puppeteer from:', process.env.PUPPETEER_EXECUTABLE_PATH);
+      console.log('Exists?', fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH || ''));
       this.browser = await puppeteer.launch({
         headless: config.puppeteer.headless,
-        args: config.puppeteer.args
+        args: config.puppeteer.args,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
       });
       logger.info('Puppeteer browser instance created');
     }
