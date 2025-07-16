@@ -3,8 +3,8 @@ services:
     name: chordium-backend
     env: node
     plan: free
-    buildCommand: cd backend && ./render-build.sh
-    startCommand: cd backend && npm start
+    buildCommand: ./render-build.sh
+    startCommand: npm start
     rootDir: backend
     envVars:
       - key: NODE_ENV
