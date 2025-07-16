@@ -35,7 +35,6 @@ const productionConfig: Partial<Config> = {
       '--disable-sync',
       '--no-first-run',
       '--no-default-browser-check',
-      '--single-process',
       '--no-zygote'
     ]
   }
