@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "cy:open": "NODE_OPTIONS='--experimental-vm-modules' cypress open",
-    "cy:run": "./run-cypress.sh",
+    "cy:run": "./scripts/run-cypress.sh",
     "test:e2e": "npm run dev & wait-on http://localhost:8080 && npm run cy:run",
     "test:e2e:fast": "npm run dev & wait-on http://localhost:8080 && npm run cy:run"
   },

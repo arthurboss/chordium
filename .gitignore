@@ -27,6 +27,21 @@ dist-ssr
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+cypress/screenshots/**/*.png
+cypress/screenshots/**/*.jpg
+cypress/screenshots/**/*.jpeg
+cypress/videos/**/*.mp4
+cypress/videos/**/*.webm
+cypress/downloads/**/*
+**/cypress/videos/
+**/cypress/screenshots/
+**/cypress/downloads/
+**/cypress/screenshots/**/*.png
+**/cypress/screenshots/**/*.jpg
+**/cypress/screenshots/**/*.jpeg
+**/cypress/videos/**/*.mp4
+**/cypress/videos/**/*.webm
+**/cypress/downloads/**/*
 
 # Test results
 test-results/
