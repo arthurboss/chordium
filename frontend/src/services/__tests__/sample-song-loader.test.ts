@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { loadSampleChordSheet } from '../sample-song-loader';
-import wonderwall from '../../../fixtures/api/chord-sheet/oasis-wonderwall.json';
-import hotelCalifornia from '../../../fixtures/api/chord-sheet/eagles-hotel_california.json';
+import wonderwall from '../../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
+import hotelCalifornia from '../../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
 
 // Mock fetch
 global.fetch = vi.fn();

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/types/guitarTuning';
-import wonderwall from '../../fixtures/api/chord-sheet/oasis-wonderwall.json';
-import hotelCalifornia from '../../fixtures/api/chord-sheet/eagles-hotel_california.json';
+import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
+import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
 import { GuitarTuning } from '../types/guitarTuning';
 
 // Mock fetch to load real sample songs
@@ -22,9 +22,9 @@ describe('ChordSheet Interface Consistency', () => {
     expect(chordSheet).toHaveProperty('title', 'Wonderwall');
     expect(chordSheet).toHaveProperty('guitarCapo', 2);
     expect(chordSheet.songChords).toContain('[Intro]');
-    expect(chordSheet.songChords).toContain('[Primeira Parte]');
-    expect(chordSheet.songChords).toContain('Em7           G');
-    expect(chordSheet.songChords).toContain('C9      D         Em7');
+    expect(chordSheet.songChords).toContain('[Verse 1]');
+    expect(chordSheet.songChords).toContain('Em7          G');
+    expect(chordSheet.songChords).toContain('C        D       G      Em7');
   });
 
   it('should validate real Eagles Hotel California chord sheet', async () => {

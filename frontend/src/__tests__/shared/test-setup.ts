@@ -1,6 +1,6 @@
 /**
  * Shared test setup utilities for cache and storage tests
- * Uses the actual sample songs from fixtures/api/chord-sheet/ to ensure tests work with real data
+ * Uses the actual sample songs from shared/fixtures/chord-sheet/ to ensure tests work with real data
  */
 import { vi } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
@@ -28,7 +28,7 @@ export const mockLocalStorage = (() => {
 })();
 
 /**
- * Test songs based on the actual sample songs in fixtures/api/chord-sheet/
+ * Test songs based on the actual sample songs in shared/fixtures/chord-sheet/
  * These mirror the real songs to ensure tests work with actual data
  */
 export const TEST_SONGS: ChordSheet[] = [
