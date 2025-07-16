@@ -11,5 +11,7 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /opt/render/.cache/puppeteer/chrome/linux-138.0.7204.94/chrome-linux64/chrome
     healthCheckPath: /health
     autoDeploy: true 
