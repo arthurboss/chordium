@@ -33,6 +33,11 @@ class App {
     this.app.get('/health', (req, res) => {
       res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
+
+    // Friendly root route
+    this.app.get('/', (req, res) => {
+      res.json({ message: 'Chordium backend is running. See /health for status.' });
+    });
   }
 
   private setupErrorHandling(): void {

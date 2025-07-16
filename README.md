@@ -79,6 +79,25 @@ yarn dev
 
 The app will be available at http://localhost:8080.
 
+## 🚀 Deployment
+
+### Production Deployment
+
+This project is configured for deployment on:
+
+- ~~**Frontend**: [Vercel](https://vercel.com) (React app with PWA support)~~ *(not yet implemented)*
+- **Backend**: [Render](https://render.com) (Node.js API with Puppeteer scraping)
+- **Database**: [Supabase](https://supabase.com) (PostgreSQL database)
+- **Storage**: [AWS S3](https://aws.amazon.com/s3/) (File caching)
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+### Architecture
+
+```
+Frontend (Vercel) → Backend (Render) → Database (Supabase) + Storage (AWS S3)
+```
+
 ## 🧪 Testing
 
 ### Running Tests
