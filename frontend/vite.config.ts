@@ -8,6 +8,8 @@ import viteCompression from 'vite-plugin-compression';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+  const isVercel = process.env.VERCEL === '1';
+  
   return {
     server: {
       host: "::",
@@ -108,6 +110,11 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    define: {
+      // Ensure environment variables are available at build time
+      'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
+      'process.env.VERCEL': JSON.stringify(process.env.VERCEL),
     },
     test: {
       globals: true,

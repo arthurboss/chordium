@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./public/favicon-180.png" alt="Chordium Logo" height="128">
+  <img src="./frontend/public/favicon-180.png" alt="Chordium Logo" height="128">
 </p>
 
 <h1 align="center">Chordium</h1>
@@ -26,6 +26,11 @@ This project is built with modern web technologies:
 
 ### Frontend
 - **React** - UI library
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Accessible UI components
+- **React Router** - Client-side routing
 
 ### Backend
 - **Node.js/Express** - API server
@@ -33,11 +38,6 @@ This project is built with modern web technologies:
 - **Puppeteer** - Web scraping
 
 For detailed backend documentation, see the [Backend README](./backend/README.md).
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Accessible UI components
-- **React Router** - Client-side routing
 
 ## 🔧 Build Optimizations
 
@@ -55,7 +55,7 @@ For more details, see the [build optimization docs](./docs/build-optimizations.m
 ### Prerequisites
 
 - Node.js (v16+)
-- npm or yarn
+- npm
 
 ### Installation
 
@@ -66,31 +66,59 @@ git clone https://github.com/arthurboss/chordium.git
 # Navigate to the project directory
 cd chordium
 
-# Install dependencies
-npm install
-# or
-yarn install
+# Install all dependencies (frontend + backend)
+npm run install:all
 
-# Start the development server
+# Start both frontend and backend development servers
 npm run dev
-# or
-yarn dev
 ```
 
-The app will be available at http://localhost:8080.
+The frontend will be available at http://localhost:8080 and the backend at http://localhost:3001.
+
+### Development Commands
+
+```sh
+# Start both frontend and backend
+npm run dev
+
+# Start only frontend
+npm run dev:fe
+
+# Start only backend
+npm run dev:be
+
+# Build both frontend and backend
+npm run build
+
+# Run tests for both
+npm run test
+
+# Lint both frontend and backend
+npm run lint
+```
 
 ## 🚀 Deployment
 
-### Production Deployment
+### Frontend Deployment (Vercel)
 
-This project is configured for deployment on:
+The frontend is configured for deployment on Vercel:
 
-- ~~**Frontend**: [Vercel](https://vercel.com) (React app with PWA support)~~ *(not yet implemented)*
-- **Backend**: [Render](https://render.com) (Node.js API with Puppeteer scraping)
-- **Database**: [Supabase](https://supabase.com) (PostgreSQL database)
-- **Storage**: [AWS S3](https://aws.amazon.com/s3/) (File caching)
+- **Framework**: Vite/React
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Root Directory**: `frontend`
 
-For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+For detailed frontend deployment instructions, see [frontend/DEPLOYMENT.md](./frontend/DEPLOYMENT.md).
+
+### Backend Deployment (Render)
+
+The backend is configured for deployment on Render:
+
+- **Runtime**: Node.js
+- **Build Command**: `npm run build`
+- **Start Command**: `npm start`
+
+For detailed backend deployment instructions, see [backend/README.md](./backend/README.md).
 
 ### Architecture
 
@@ -103,17 +131,17 @@ Frontend (Vercel) → Backend (Render) → Database (Supabase) + Storage (AWS S3
 ### Running Tests
 
 ```sh
-# Run unit tests (backend)
+# Run all tests (frontend + backend)
 npm run test
 
-# Run all e2e tests locally 
-npm run test:e2e
+# Run only frontend tests
+npm run test:fe
 
-# Run specific e2e test (including scraping-dependent tests)
-npm run test:e2e -- --spec "cypress/e2e/search/song-search.cy.ts"
+# Run only backend tests
+npm run test:be
 
-# Run cache-specific e2e tests
-npm run test:e2e -- --spec "cypress/e2e/cache/**/*.cy.ts"
+# Run e2e tests
+cd frontend && npm run test:e2e
 ```
 
 ### Important Notes
@@ -124,11 +152,20 @@ npm run test:e2e -- --spec "cypress/e2e/cache/**/*.cy.ts"
 
 ## 🏗️ Project Structure
 
-- `src/components` - UI components, including chord diagrams
-- `src/pages` - Main application pages
-- `src/data` - Song chord sheets and data
-- `src/utils` - Helper functions for chord processing
-- `src/hooks` - Custom React hooks
+```
+chordium/
+├── frontend/           # React/Vite frontend application
+│   ├── src/           # Frontend source code
+│   ├── public/        # Static assets
+│   ├── dist/          # Build output
+│   └── vercel.json    # Vercel configuration
+├── backend/           # Node.js/Express backend API
+│   ├── src/           # Backend source code
+│   ├── routes/        # API routes
+│   └── services/      # Business logic
+├── shared/            # Shared types and utilities
+└── docs/              # Documentation
+```
 
 ## 🤝 Contributing
 

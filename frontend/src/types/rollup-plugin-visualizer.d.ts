@@ -7,10 +7,8 @@ declare module 'rollup-plugin-visualizer' {
     brotliSize?: boolean;
     template?: 'sunburst' | 'treemap' | 'network' | 'raw-data';
     sourcemap?: boolean;
-    emitFile?: boolean;
   }
 
   import { Plugin } from 'rollup';
-
   export function visualizer(options?: VisualizerOptions): Plugin;
 }
