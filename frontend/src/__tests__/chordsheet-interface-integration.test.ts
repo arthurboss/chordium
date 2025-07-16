@@ -61,13 +61,10 @@ describe('ChordSheet Interface Integration', () => {
     expect(savedSheets[0].songChords).toContain('[Verse]');
     
     // 3. Test sample song loading
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve(mockChordSheet)
-    } as Response);
-    
-    const sampleSheet = await loadSampleChordSheet('test_artist', 'test_song');
-    expect(sampleSheet).toEqual(mockChordSheet);
+    const sampleSheet = await loadSampleChordSheet('oasis', 'wonderwall');
+    expect(sampleSheet).toBeTruthy();
+    expect(sampleSheet?.title).toBe('Wonderwall');
+    expect(sampleSheet?.artist).toBe('Oasis');
   });
 
   it('should handle empty cache keys correctly', () => {
