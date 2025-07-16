@@ -18,7 +18,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - Speed control for practice at your own pace
 - Mobile-friendly design for on-the-go learning
 - Smart metadata extraction from uploaded chord sheets
-- [Smart search functionality](./SEARCH-GUIDE.md) with instant filtering and intelligent caching
+- [Smart search functionality](./docs/search-guide.md) with instant filtering and intelligent caching
 
 ## 💻 Tech Stack
 
@@ -108,7 +108,7 @@ The frontend is configured for deployment on Vercel:
 - **Output Directory**: `dist`
 - **Root Directory**: `frontend`
 
-For detailed frontend deployment instructions, see [frontend/DEPLOYMENT.md](./frontend/DEPLOYMENT.md).
+For detailed deployment instructions, see [docs/deployment.md](./docs/deployment.md).
 
 ### Backend Deployment (Render)
 
