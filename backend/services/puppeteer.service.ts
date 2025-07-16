@@ -1,8 +1,6 @@
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 import config from '../config/config.js';
 import logger from '../utils/logger.js';
-import fs from 'fs';
-import path from 'path';
 
 class PuppeteerService {
   private browser: Browser | null = null;
