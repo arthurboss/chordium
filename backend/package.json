@@ -8,7 +8,6 @@
     "build": "tsc",
     "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
-    "start:render": "NODE_ENV=production node dist/backend/server.js",
     "dev": "tsx server.ts",
     "dev:watch": "nodemon",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
