@@ -3,7 +3,7 @@
 
 set -e
 
-duplicates=$(find . \( -path ./shared/fixtures/chord-sheet -prune \) -o -type f -name 'eagles-hotel_california.json' -o -name 'oasis-wonderwall.json' -o -name 'radiohead-creep.json' | grep -v '^./shared/fixtures/chord-sheet/')
+duplicates=$(find . -type f \( -name 'eagles-hotel_california.json' -o -name 'oasis-wonderwall.json' -o -name 'radiohead-creep.json' \) | grep -v '^./shared/fixtures/chord-sheet/')
 
 if [ -n "$duplicates" ]; then
   echo "Error: Duplicate chord sheet fixture files found outside shared/fixtures/chord-sheet/:"

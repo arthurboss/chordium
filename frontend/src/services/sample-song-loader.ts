@@ -1,11 +1,21 @@
 import { ChordSheet } from '../types/chordSheet';
 import { generateCacheKey } from '../cache/core/cache-key-generator';
+import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
+import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
+import creep from '../../../shared/fixtures/chord-sheet/radiohead-creep.json';
 
 /**
  * Sample Song Loader Service
  * SRP: Single responsibility for loading sample songs from local JSON files
  * DRY: Centralized logic for sample song loading without duplicating cache logic
  */
+
+// Map of available sample songs
+const SAMPLE_SONGS: Record<string, ChordSheet> = {
+  'oasis-wonderwall': wonderwall,
+  'eagles-hotel_california': hotelCalifornia,
+  'radiohead-creep': creep,
+};
 
 /**
  * Load a specific sample chord sheet from local JSON files
@@ -17,17 +27,14 @@ export async function loadSampleChordSheet(artist: string, title: string): Promi
   try {
     // Generate the filename using the same logic as our normalized files
     const filename = generateCacheKey(artist, title);
-    const filePath = `/shared/fixtures/chord-sheet/${filename}.json`;
     
-    const response = await fetch(filePath);
-    
-    if (!response.ok) {
-      return null;
+    // Return the sample song if available
+    const sampleSong = SAMPLE_SONGS[filename];
+    if (sampleSong) {
+      return sampleSong;
     }
     
-    const chordSheet: ChordSheet = await response.json();
-    
-    return chordSheet;
+    return null;
   } catch (error) {
     console.error(`❌ Failed to load sample song for ${artist}-${title}:`, error);
     return null;

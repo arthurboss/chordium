@@ -1,8 +1,0 @@
-{
-  "title": "Wonderwall",
-  "artist": "Oasis",
-  "songChords": "[Intro]\nEm7  G  D  C  (x2)\n\n[Verse 1]\nEm7          G\nTest verse line one\nD                 C\nTest verse line two\nEm7            G\nTest verse line three\nD               C\nTest verse line four\n\n[Pre-Chorus]\nC        D           Em7\nTest pre-chorus line\nC         D        G\nTest pre-chorus end\n\n[Chorus]\nC        D       G      Em7\nTest chorus line one\nC        D       G      Em7\nTest chorus line two\nC        D       G      Em7\nTest chorus line three\nC        D       G\nTest chorus end\n\n[Verse 2]\nEm7          G\nTest verse two line one\nD                 C\nTest verse two line two\nEm7            G\nTest verse two line three\nD               C\nTest verse two line four",
-  "songKey": "G",
-  "guitarTuning": ["E", "A", "D", "G", "B", "E"],
-  "guitarCapo": 2
-}

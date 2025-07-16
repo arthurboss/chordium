@@ -1,5 +1,7 @@
 import { ChordSheet } from '@/types/chordSheet';
 import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
+import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
+import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
 
 /**
  * Populates My Chord Sheets with sample songs in development mode only
@@ -38,22 +40,8 @@ export async function populateDevModeSampleSongs(sampleChordSheets: ChordSheet[]
  */
 export async function loadSampleChordSheets(): Promise<ChordSheet[]> {
   try {
-    // Load the chord sheet data from JSON files using the renamed files
-    const [wonderwallResponse, hotelCaliforniaResponse] = await Promise.all([
-      fetch('/shared/fixtures/chord-sheet/oasis-wonderwall.json'),
-      fetch('/shared/fixtures/chord-sheet/eagles-hotel_california.json')
-    ]);
-
-    if (!wonderwallResponse.ok || !hotelCaliforniaResponse.ok) {
-      throw new Error('Failed to fetch sample song files');
-    }
-
-    const [wonderwallChordSheet, hotelCaliforniaChordSheet] = await Promise.all([
-      wonderwallResponse.json() as Promise<ChordSheet>,
-      hotelCaliforniaResponse.json() as Promise<ChordSheet>
-    ]);
-
-    return [wonderwallChordSheet, hotelCaliforniaChordSheet];
+    // Return the imported chord sheets directly
+    return [wonderwall, hotelCalifornia];
   } catch (error) {
     console.error('❌ Failed to load sample chord sheets:', error);
     return [];
