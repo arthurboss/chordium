@@ -9,43 +9,9 @@ class PuppeteerService {
 
   async init(): Promise<Browser> {
     if (!this.browser) {
-      const executablePath =
-        process.env.PUPPETEER_EXECUTABLE_PATH ||
-        '/opt/render/.cache/puppeteer/chrome/linux-138.0.7204.94/chrome-linux64/chrome';
-
-      // Debug logs
-      console.log('=== Puppeteer Debug Info ===');
-      console.log('Current working directory:', process.cwd());
-      console.log('Node version:', process.version);
-      console.log('Environment variables (filtered):', {
-        PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH,
-        PATH: process.env.PATH,
-        NODE_ENV: process.env.NODE_ENV,
-      });
-      console.log('Launching Puppeteer from:', executablePath);
-      console.log('Exists?', fs.existsSync(executablePath));
-      try {
-        const dir = path.dirname(executablePath);
-        if (fs.existsSync(dir)) {
-          console.log('Contents of Chrome directory:', fs.readdirSync(dir));
-        } else {
-          console.log('Chrome directory does not exist:', dir);
-        }
-        const cacheDir = '/opt/render/.cache/puppeteer';
-        if (fs.existsSync(cacheDir)) {
-          console.log('Contents of Puppeteer cache directory:', fs.readdirSync(cacheDir));
-        } else {
-          console.log('Puppeteer cache directory does not exist:', cacheDir);
-        }
-      } catch (err) {
-        console.log('Error reading directories:', err);
-      }
-      console.log('============================');
-
       this.browser = await puppeteer.launch({
         headless: config.puppeteer.headless,
-        args: config.puppeteer.args,
-        executablePath,
+        args: config.puppeteer.args
       });
       logger.info('Puppeteer browser instance created');
     }
