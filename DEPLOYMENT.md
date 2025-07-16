@@ -36,8 +36,8 @@
 2. **Configure Service**
    - **Name**: `chordium-backend`
    - **Environment**: `Node`
-   - **Build Command**: `cd backend && npm install && npm run build`
-   - **Start Command**: `cd backend && npm start`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
    - **Root Directory**: `backend`
 
 3. **Set Environment Variables**
