@@ -62,6 +62,8 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 | [📖 Backend API](./backend/README.md) | Backend documentation and API reference |
 | [🔍 Search Guide](./docs/search-guide.md) | Smart search functionality details |
 | [🏢 Monorepo](./docs/MONOREPO.md) | Monorepo architecture and workspace management |
+| [🗄️ Cache Architecture](./docs/cache-architecture.md) | Frontend caching system design and implementation |
+| [⚡ Build Optimizations](./docs/build-optimizations.md) | Performance optimizations and bundle configuration |
 
 ## 🚀 Quick Start
 
