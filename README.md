@@ -210,7 +210,28 @@ npm run build:be         # Build only backend
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) guide for detailed information about:
+Chordium welcomes community contributions while maintaining its competitive edge in core functionality.
+
+### ✅ **Open for Contributions**
+
+- **Frontend components** - UI/UX improvements, accessibility enhancements
+- **Documentation** - Guides, examples, API documentation
+- **Testing** - Additional test cases, chord sheet fixtures
+- **Developer tooling** - Build scripts, linting rules, CI/CD improvements
+- **Shared utilities** - Non-core backend utilities
+- **Bug fixes** - Non-core functionality issues
+- **Internationalization** - Translations, locale support
+
+### 🔒 **Proprietary Areas**
+
+- **Web scraping services** - Core data extraction algorithms
+- **Business logic** - Proprietary processing methods
+- **API rate limiting** - Anti-abuse mechanisms
+- **Performance optimizations** - Competitive advantages
+
+### 📋 **Contribution Guidelines**
+
+Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) guide for detailed information about:
 
 - Development setup and workflow
 - Code style and guidelines
@@ -219,6 +240,7 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](./CONTRIBUTING.md) 
 - Issue reporting
 
 For quick reference:
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Run tests: `npm run test`
@@ -226,9 +248,21 @@ For quick reference:
 5. Commit your changes with conventional commit messages
 6. Push to the branch and open a Pull Request
 
+**Note**: Core scraping and data processing services remain proprietary to maintain the project's competitive advantage and ensure responsible data extraction practices.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+### 📋 Contributor License Agreement
+
+By contributing to Chordium, you agree that:
+
+- You grant the project maintainers perpetual rights to use your contributions
+- Your contributions may be included in both open source and commercial versions
+- You retain copyright to your contributions under the project's MIT license
+
+This ensures the project can evolve commercially while maintaining open source benefits.
 
 ## Shared Chord Sheet Fixtures
 

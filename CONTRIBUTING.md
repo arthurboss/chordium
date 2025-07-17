@@ -2,6 +2,37 @@
 
 Thank you for your interest in contributing to Chordium! This document provides guidelines for contributing to this monorepo project.
 
+## 🎯 Contribution Scope
+
+Chordium welcomes community contributions while maintaining its competitive edge in core functionality.
+
+### ✅ **Open for Contributions**
+
+- **Frontend components** - UI/UX improvements, accessibility enhancements
+- **Documentation** - Guides, examples, API documentation
+- **Testing** - Additional test cases, chord sheet fixtures
+- **Developer tooling** - Build scripts, linting rules, CI/CD improvements
+- **Shared utilities** - Non-core backend utilities
+- **Bug fixes** - Non-core functionality issues
+- **Internationalization** - Translations, locale support
+
+### 🔒 **Proprietary Areas**
+
+- **Web scraping services** - Core data extraction algorithms
+- **Business logic** - Proprietary processing methods
+- **API rate limiting** - Anti-abuse mechanisms
+- **Performance optimizations** - Competitive advantages
+
+### 📋 **Contributor License Agreement**
+
+By contributing to Chordium, you agree that:
+
+- You grant the project maintainers perpetual rights to use your contributions
+- Your contributions may be included in both open source and commercial versions
+- You retain copyright to your contributions under the project's MIT license
+
+This ensures the project can evolve commercially while maintaining open source benefits.
+
 ## 🏗️ Project Structure
 
 Chordium is a monorepo with the following structure:
