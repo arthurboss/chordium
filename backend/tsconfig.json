@@ -18,7 +18,7 @@
       "@/*": ["./*"],
       "@shared/*": ["../shared/*"]
     },
-    // "types": ["node", "jest"],
+    "types": ["node", "express", "cors", "jest"],
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "allowJs": true,
