@@ -41,8 +41,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --verbose
-        env:
-          NODE_ENV: production
 
       - name: Debug Jest and ts-jest versions
         run: |
