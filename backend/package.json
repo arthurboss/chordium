@@ -24,10 +24,8 @@
     "extensionsToTreatAsEsm": [
       ".ts"
     ],
-    "globals": {
-      "ts-jest": {
-        "useESM": true
-      }
+    "transform": {
+      "^.+\\.ts$": ["ts-jest", { "useESM": true }]
     },
     "testMatch": [
       "**/tests/**/*.test.js",
@@ -61,7 +59,7 @@
     "@jest/globals": "^29.7.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.11",
     "@types/node": "^24.0.12",
     "@types/puppeteer": "^5.4.7",
     "@types/supertest": "^6.0.3",
