@@ -180,7 +180,7 @@ chordium/
 └── scripts/           # Build and utility scripts
 ```
 
-For detailed information about the monorepo architecture, see [MONOREPO.md](./MONOREPO.md).
+For detailed information about the monorepo architecture, see [MONOREPO.md](./docs/MONOREPO.md).
 
 ## ⚡ Quick Reference
 
