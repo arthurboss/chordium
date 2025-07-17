@@ -2,7 +2,7 @@
  * API request types
  */
 
-import { Song } from '@shared/domain/song.js';
+import { Song } from '../domain/song';
 import type { SearchType } from '../search.js';
 
 export interface SearchRequest {
