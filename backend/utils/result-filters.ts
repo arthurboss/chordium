@@ -7,7 +7,7 @@ import {
 import type { SearchType } from '../../shared/types/search.js';
 import type { Artist } from '../../shared/types/domain/artist.js';
 import type { Song } from '../../shared/types/domain/song.js';
-import type { ResultWithPath } from '../types/result.types.js';
+import type { ResultWithPath } from '../../shared/types/internal/search-result.js';
 
 /**
  * Filters and transforms search results based on search type

@@ -4,8 +4,7 @@ import logger from '../../utils/logger.js';
 import { isValidChordSheetUrl } from '../../utils/url-utils.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { ChordSheet } from '../../../shared/types/domain/chord-sheet.js';
-
-import type { GetChordSheetQuery } from '../../types/controller.types.js';
+import type { GetChordSheetQuery } from '../../../shared/types/api/requests.js';
 
 /**
  * Handles requests to fetch a chord sheet for a given song URL.
