@@ -1,4 +1,6 @@
 name: Build & Lint
+# Builds and lints both frontend and backend in a monorepo setup
+# Uses workspace commands: npm run build:fe, npm run build:be, npm run lint
 on:
   push:
     branches: ['*']
@@ -23,9 +25,13 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --verbose
         env:
           NODE_ENV: production
 

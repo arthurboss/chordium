@@ -10,13 +10,13 @@
     "start": "node dist/backend/server.js",
     "dev": "tsx server.ts",
     "dev:watch": "nodemon",
-    "test": "npx --node-options='--experimental-vm-modules' jest",
-    "test:watch": "npx --node-options='--experimental-vm-modules' jest --watch",
-    "test:coverage": "npx --node-options='--experimental-vm-modules' jest --coverage",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "eslint . --ext .js,.ts --fix",
     "lint:ts": "tsc --noEmit",
-    "test:s3-config": "npx --node-options='--experimental-vm-modules' jest tests/services/s3/configuration.test.js --verbose"
+    "test:s3-config": "NODE_OPTIONS='--experimental-vm-modules' jest tests/services/s3/configuration.test.js --verbose"
   },
   "jest": {
     "testEnvironment": "node",
