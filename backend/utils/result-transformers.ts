@@ -1,10 +1,5 @@
-import type { Artist, Song } from '../../shared/types/index.js';
+import type { Artist, Song, BasicSearchResult } from '@chordium/types';
 import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
-
-/**
- * Basic search result structure from DOM extraction
- */
-import type { BasicSearchResult } from '../../shared/types/internal/search-result.js';
 
 /**
  * Transforms raw search results into artist objects

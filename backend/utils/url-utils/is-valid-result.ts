@@ -1,10 +1,8 @@
 import { URL } from 'url';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../logger.js';
-import type { SearchType } from '../../../shared/types/search.js';
+import type { SearchType, ResultWithPath } from '@chordium/types';
 import { URL_VALIDATION_ERRORS } from './validation-errors.js';
-
-import type { ResultWithPath } from '../../../shared/types/internal/search-result.js';
 
 /**
  * Validates if a result path is valid for the given search type

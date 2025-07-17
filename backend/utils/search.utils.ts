@@ -1,5 +1,4 @@
-import type { SearchType } from '../../shared/types/index.js';
-import type { SearchTypes } from '../../shared/types/internal/search-types.js';
+import type { SearchType, SearchTypes } from '@chordium/types';
 
 /**
  * Utility functions for search controller

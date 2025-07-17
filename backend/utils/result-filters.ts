@@ -4,10 +4,7 @@ import {
   transformToArtistResults, 
   transformToSongResults
 } from './result-transformers.js';
-import type { SearchType } from '../../shared/types/search.js';
-import type { Artist } from '../../shared/types/domain/artist.js';
-import type { Song } from '../../shared/types/domain/song.js';
-import type { ResultWithPath } from '../../shared/types/internal/search-result.js';
+import type { SearchType, Artist, Song, ResultWithPath } from '@chordium/types';
 
 /**
  * Filters and transforms search results based on search type

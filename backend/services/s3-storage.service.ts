@@ -6,7 +6,7 @@ import {
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 import logger from "../utils/logger.js";
-import type { Song } from "../../shared/types/domain/song.js";
+import type { Song } from '@chordium/types';
 
 class S3StorageService {
   private s3: S3Client | null = null;

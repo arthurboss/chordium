@@ -1,5 +1,4 @@
-import type { Artist, Song } from '../../shared/types/index.js';
-import type { DataSource } from '../../shared/types/internal/index.js';
+import type { Artist, Song, DataSource } from '@chordium/types';
 
 /**
  * Response normalizers to ensure consistent API response formats

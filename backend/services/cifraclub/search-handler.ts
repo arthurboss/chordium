@@ -2,9 +2,7 @@ import puppeteerService from "../puppeteer.service.js";
 import logger from "../../utils/logger.js";
 import { filterResults } from "../../utils/result-filters.js";
 import { extractSearchResults } from "../../utils/dom-extractors.js";
-import type { Artist } from "../../../shared/types/domain/artist.js";
-import type { Song } from "../../../shared/types/domain/song.js";
-import type { SearchType } from "../../../shared/types/search.js";
+import type { Artist, Song, SearchType } from '@chordium/types';
 import type { Page } from 'puppeteer';
 
 /**
