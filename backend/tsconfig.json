@@ -17,7 +17,7 @@
       "@/*": ["./*"],
       "@shared/*": ["../shared/*"]
     },
-    "types": ["node", "jest"],
+    // "types": ["node", "jest"],
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "allowJs": true,
