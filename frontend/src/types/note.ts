@@ -1,1 +1,2 @@
-export type Note = 'C' | 'C#' | 'Db' | 'D' | 'D#' | 'Eb' | 'E' | 'F' | 'F#' | 'Gb' | 'G' | 'G#' | 'Ab' | 'A' | 'A#' | 'Bb' | 'B';
+// This file is now deprecated - use @shared/metadata/note instead
+export * from '@shared/metadata/note';

@@ -23,13 +23,15 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/types/*"]
     }
   },
   "include": [
     "src",
     "cypress",
     "cypress/**/*.ts",
-    "cypress/support/cypress.d.ts"
+    "cypress/support/cypress.d.ts",
+    "../shared/types/**/*.ts"
   ]
 }
