@@ -1,0 +1,17 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./backend" },
+    { "path": "./frontend" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@shared/*": ["shared/*"]
+    },
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
