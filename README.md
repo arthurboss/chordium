@@ -35,17 +35,30 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 This project is built with modern web technologies:
 
 ### Frontend
-- **React** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Vite** - Fast build tool and dev server
+
+- **React** - UI library with hooks and functional components
+- **TypeScript** - Type-safe JavaScript development
+- **Vite** - Fast build tool and development server
 - **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Accessible UI components
-- **React Router** - Client-side routing
+- **shadcn/ui** - Accessible UI components built on Radix UI
+- **React Router** - Client-side routing and navigation
+- **@tanstack/react-query** - Data fetching and state management
 
 ### Backend
-- **Node.js/Express** - API server
-- **Supabase** - Database
-- **Puppeteer** - Web scraping
+
+- **Node.js/Express** - RESTful API server
+- **TypeScript** - Type-safe backend development
+- **Supabase** - PostgreSQL database and authentication
+- **AWS S3** - Cloud storage for cached chord sheets and data
+- **Puppeteer** - Headless browser for web scraping
+- **Cheerio** - Server-side HTML parsing and manipulation
+
+### Development & Testing
+
+- **npm Workspaces** - Monorepo package management
+- **Vitest** - Frontend unit testing
+- **Jest** - Backend unit testing
+- **Cypress** - End-to-end testing
 
 For detailed backend documentation, see the [Backend README](./backend/README.md).
 
