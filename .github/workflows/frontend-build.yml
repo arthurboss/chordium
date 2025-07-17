@@ -5,18 +5,20 @@ on:
     branches: ["*"]
     paths:
       - 'frontend/**'
+      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/frontend-build.yml'
-      - 'shared/**'
+      - 'shared/fixtures/**'
   pull_request:
     branches: ["*"]
     paths:
       - 'frontend/**'
+      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/frontend-build.yml'
-      - 'shared/**'
+      - 'shared/fixtures/**'
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -40,6 +42,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --verbose
+
+      - name: Build types package
+        run: npm run build:types
 
       - name: Rebuild native modules & install required platform-specific packages
         run: |
