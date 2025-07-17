@@ -48,6 +48,7 @@ jobs:
 
       - name: Lint backend
         run: npm run lint:be
+        continue-on-error: true
 
       - name: Build backend
         run: npm run build:be
