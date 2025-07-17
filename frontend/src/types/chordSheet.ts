@@ -1,2 +1,2 @@
-// This file is now deprecated - use @shared/domain/chord-sheet instead
-export * from '@shared/domain/chord-sheet';
+// Re-export ChordSheet types from @chordium/types
+export * from '@chordium/types';
