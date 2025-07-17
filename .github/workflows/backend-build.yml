@@ -41,16 +41,17 @@ jobs:
             frontend/package-lock.json
             backend/package-lock.json
 
-      - name: Debug TypeScript Types
-        run: |
-          echo "node_modules/@types contents:" && ls -l backend/node_modules/@types || ls -l node_modules/@types
-          echo "node_modules/express contents:" && ls -l backend/node_modules/express || ls -l node_modules/express
-          echo "node_modules/cors contents:" && ls -l backend/node_modules/cors || ls -l node_modules/cors
 
       - name: Install dependencies
         run: npm ci --verbose
         env:
           NODE_ENV: production
+
+      - name: Debug TypeScript Types
+        run: |
+          echo "node_modules/@types contents:" && ls -l backend/node_modules/@types || ls -l node_modules/@types
+          echo "node_modules/express contents:" && ls -l backend/node_modules/express || ls -l node_modules/express
+          echo "node_modules/cors contents:" && ls -l backend/node_modules/cors || ls -l node_modules/cors
 
       - name: Lint backend
         run: npm run lint:be
