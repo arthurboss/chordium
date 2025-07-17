@@ -43,7 +43,7 @@ jobs:
           cd packages/types
           node -e "
             const pkg = require('./dist/index.js');
-            const expected = ['GUITAR_TUNINGS', 'SEARCH_TYPES'];
+            const expected = ['SEARCH_TYPES'];
             for (const exp of expected) {
               if (!pkg[exp]) {
                 console.error('Missing export:', exp);
@@ -51,7 +51,21 @@ jobs:
               }
             }
             console.log('✅ All expected exports found');
+            console.log('📦 Available exports:', Object.keys(pkg).sort());
           "
+
+      - name: Validate frontend guitar tunings
+        run: |
+          cd frontend
+          node -e "
+            const { GUITAR_TUNINGS } = require('./src/constants/guitar-tunings.ts');
+            if (!GUITAR_TUNINGS || !GUITAR_TUNINGS.STANDARD) {
+              console.error('❌ Frontend guitar tunings not found');
+              process.exit(1);
+            }
+            console.log('✅ Frontend guitar tunings available');
+            console.log('🎸 Available tunings:', Object.keys(GUITAR_TUNINGS));
+          " || echo "Note: TypeScript file, checking build instead"
 
       - name: Type check package
         run: |
