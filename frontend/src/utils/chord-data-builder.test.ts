@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildChordSheetData } from './chord-data-builder';
 import { LocalSongResult } from './local-chord-sheet-finder';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 
 describe('buildChordSheetData', () => {
   it('should build chord sheet data from local song result', () => {

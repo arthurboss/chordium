@@ -183,8 +183,9 @@ chordium/
 │   ├── services/      # Business logic services
 │   ├── utils/         # Backend utilities
 │   └── tests/         # Backend tests
-├── shared/            # Shared code between workspaces
-│   ├── types/         # Shared TypeScript types
+├── packages/          # Shared packages (npm workspaces)
+│   └── types/         # @chordium/types - Shared TypeScript types package
+├── shared/            # Shared resources
 │   └── fixtures/      # Shared test fixtures
 ├── docs/              # Project documentation
 └── scripts/           # Build and utility scripts

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getChordSheetData } from '../get-chord-sheet-data';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { ChordSheet } from '@/types/chordSheet';
 
 // Mock the cache functions

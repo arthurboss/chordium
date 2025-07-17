@@ -4,10 +4,7 @@ import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
-import type { ErrorResponse } from '../../../shared/types/api/responses.js';
-import type { Artist } from '../../../shared/types/domain/artist.js';
-import type { Song } from '../../../shared/types/domain/song.js';
-import type { GetArtistsQuery } from '../../../shared/types/api/requests.js';
+import type { ErrorResponse, Artist, Song, GetArtistsQuery } from '@chordium/types';
 
 async function getArtistsHandler(
   req: Request<{}, Artist[] | Song[] | ErrorResponse, {}, GetArtistsQuery>,

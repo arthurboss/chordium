@@ -1,5 +1,5 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS, GuitarTuning, KnownTuning } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS, GuitarTuning } from '@/constants/guitar-tunings';
 
 /**
  * Legacy ChordSheet format for backwards compatibility

@@ -19,3 +19,6 @@ export * from './search.js';
 export * from './api/requests.js';
 export * from './api/responses.js';
 export * from './errors.js';
+
+// Internal types
+export * from './internal/index.js';

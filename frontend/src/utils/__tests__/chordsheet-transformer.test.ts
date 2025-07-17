@@ -6,7 +6,7 @@ import {
   validateChordSheet,
   LegacyChordSheet
 } from '../chordsheet-transformer';
-import { GUITAR_TUNINGS } from '../../types/guitarTuning';
+import { GUITAR_TUNINGS } from '../../constants/guitar-tunings';
 import { ChordSheet } from '../../types/chordSheet';
 
 describe('ChordSheet Transformer (TDD)', () => {

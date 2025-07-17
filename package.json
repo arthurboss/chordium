@@ -6,13 +6,15 @@
   "type": "module",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "packages/types"
   ],
   "scripts": {
     "dev": "npm run dev:fe & npm run dev:be",
     "dev:fe": "cd frontend && npm run dev",
     "dev:be": "cd backend && npm run dev",
-    "build": "npm run build:fe && npm run build:be",
+    "build": "npm run build:types && npm run build:fe && npm run build:be",
+    "build:types": "cd packages/types && npm run build",
     "build:fe": "cd frontend && npm run build",
     "build:be": "cd backend && npm run build",
     "test": "npm run test:fe && npm run test:be",
@@ -27,7 +29,7 @@
     "lint:fix": "npm run lint:fe:fix && npm run lint:be:fix",
     "lint:fe:fix": "cd frontend && npm run lint:fix",
     "lint:be:fix": "cd backend && npm run lint:fix",
-    "clean": "rm -rf frontend/node_modules backend/node_modules frontend/dist backend/dist frontend/coverage backend/coverage",
+    "clean": "rm -rf frontend/node_modules backend/node_modules packages/types/node_modules frontend/dist backend/dist packages/types/dist frontend/coverage backend/coverage",
     "clean:install": "npm run clean && npm install",
     "kill": "./scripts/kill-servers.sh",
     "kill:fe": "./scripts/kill-servers.sh fe",

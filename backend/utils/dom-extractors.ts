@@ -3,8 +3,7 @@
  * These functions run in the browser context via Puppeteer's page.evaluate()
  */
 
-import type { Song } from '../../shared/types/domain/song.js';
-import type { ChordSheet } from '../../shared/types/domain/chord-sheet.js';
+import type { Song, ChordSheet } from '@chordium/types';
 
 /**
  * Search result from DOM extraction

@@ -5,16 +5,20 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "coverage", "node_modules", "frontend/dist", "backend/dist"] },
+  { ignores: ["dist", "coverage", "node_modules", "frontend/dist", "backend/dist", "*.config.*"] },
   // Base configuration for all files
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ["**/*.{ts,tsx,js,jsx}"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
       globals: {
         ...globals.node,
         ...globals.browser,
+      },
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
@@ -51,6 +55,18 @@ export default tseslint.config(
     files: ["backend/**/*.{ts,js}"],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  // JavaScript files configuration
+  {
+    files: ["**/*.{js,jsx}"],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
     },
   }
 );

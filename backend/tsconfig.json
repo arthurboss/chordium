@@ -15,8 +15,7 @@
     "rootDir": "../",
     "baseUrl": "../",
     "paths": {
-      "@/*": ["backend/*"],
-      "@shared/*": ["shared/*"]
+      "@/*": ["backend/*"]
     },
     "types": ["node", "express", "cors", "jest"],
     "allowImportingTsExtensions": false,
@@ -26,8 +25,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.js",
-    "../shared/types/**/*.ts"
+    "**/*.js"
   ],
   "exclude": [
     "node_modules",

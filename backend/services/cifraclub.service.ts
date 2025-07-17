@@ -2,10 +2,7 @@ import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
 import { fetchChordSheet } from "../utils/chord-sheet-fetcher.js";
-import type { Artist } from "../../shared/types/domain/artist.js";
-import type { Song } from "../../shared/types/domain/song.js";
-import type { ChordSheet } from "../../shared/types/domain/chord-sheet.js";
-import type { SearchType } from "../../shared/types/search.js";
+import type { Artist, Song, ChordSheet, SearchType } from '@chordium/types';
 
 class CifraClubService {
   public readonly baseUrl: string;

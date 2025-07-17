@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ChordSheet } from '../chordSheet';
-import { GUITAR_TUNINGS } from '../guitarTuning';
+import { GUITAR_TUNINGS } from '../../constants/guitar-tunings';
 
 describe('ChordSheet Interface - New Structure', () => {
   describe('Required Properties', () => {

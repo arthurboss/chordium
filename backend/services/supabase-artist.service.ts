@@ -1,7 +1,7 @@
 // Supabase artist search service
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import config from '../config/config.js';
-import type { Artist } from '../../shared/types/domain/artist.js';
+import type { Artist } from '@chordium/types';
 
 import type { SupabaseResponse } from '../types/supabase.types.js';
 

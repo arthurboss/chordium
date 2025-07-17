@@ -62,4 +62,5 @@ You can verify the path filtering is working by:
 | `package.json` | All jobs | Root package.json changes |
 | `package-lock.json` | All jobs | Root lockfile changes |
 | `.github/workflows/**` | All jobs | Workflow changes |
-| `shared/**` | All jobs | Shared code/types |
+| `packages/types/**` | All jobs | Shared types package |
+| `shared/fixtures/**` | All jobs | Shared test fixtures |

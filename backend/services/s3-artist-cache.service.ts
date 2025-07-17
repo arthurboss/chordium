@@ -1,6 +1,6 @@
 // S3 artist song cache service
 import { s3StorageService as S3StorageService } from './s3-storage.service.js';
-import type { Song } from '../../shared/types/domain/song.js';
+import type { Song } from '@chordium/types';
 
 async function getCachedArtistSongs(artistPath: string): Promise<Song[] | null> {
   return await S3StorageService.getArtistSongs(artistPath);

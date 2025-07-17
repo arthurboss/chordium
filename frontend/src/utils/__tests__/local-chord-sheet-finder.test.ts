@@ -3,7 +3,7 @@ import { findLocalSong } from '../local-chord-sheet-finder';
 import { getMyChordSheetsAsSongs } from '../chord-sheet-storage';
 import { unifiedChordSheetCache } from '../../cache/implementations/unified-chord-sheet-cache';
 import { extractSongMetadata } from '../metadata-extraction';
-import { GUITAR_TUNINGS } from '../../types/guitarTuning';
+import { GUITAR_TUNINGS } from '../../constants/guitar-tunings';
 
 // Mock dependencies
 vi.mock('../chord-sheet-storage');

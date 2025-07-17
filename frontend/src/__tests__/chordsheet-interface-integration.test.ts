@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 import { loadSampleChordSheet } from '@/services/sample-song-loader';
 

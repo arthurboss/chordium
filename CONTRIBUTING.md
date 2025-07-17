@@ -41,7 +41,10 @@ Chordium is a monorepo with the following structure:
 chordium/
 ├── frontend/          # React + Vite frontend application
 ├── backend/           # Node.js + Express backend API
-├── shared/            # Shared types and fixtures
+├── packages/          # Shared packages (npm workspaces)
+│   └── types/         # @chordium/types - Shared TypeScript types package
+├── shared/            # Shared resources
+│   └── fixtures/      # Shared test fixtures
 ├── docs/              # Project documentation
 ├── scripts/           # Build and utility scripts
 └── cypress/           # End-to-end tests
@@ -170,8 +173,10 @@ npm run build:be
    - Write tests in `backend/tests/`
 
 3. **Shared Types:**
-   - Add shared types in `shared/types/`
-   - Update both frontend and backend to use shared types
+   - Add shared types in `packages/types/src/`
+   - Update the `@chordium/types` package with proper exports
+   - Import from `@chordium/types` in both frontend and backend
+   - Run `npm run build:types` to build the types package
 
 ### Testing Guidelines
 

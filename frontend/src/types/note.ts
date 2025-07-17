@@ -1,2 +1,2 @@
-// This file is now deprecated - use @shared/metadata/note instead
-export * from '@shared/metadata/note';
+// Re-export Note types from @chordium/types
+export * from '@chordium/types';

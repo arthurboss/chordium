@@ -2,14 +2,13 @@ import { Request, Response } from 'express';
 import { normalizeArtistPath } from '../../utils/url-utils.js';
 import logger from '../../utils/logger.js';
 import { removeSongFromArtist } from '../../services/s3-artist-cache.service.js';
-import type { ErrorResponse } from '../../../shared/types/api/responses.js';
-import type { RemoveSongFromArtistBody, SuccessResponse } from '../../../shared/types/api/requests.js';
+import type { ErrorResponse, RemoveSongFromArtistBody, SuccessResponse } from '@chordium/types';
 
 /**
  * Handles requests to remove a song from an artist's cached song list.
  */
 async function removeSongFromArtistHandler(
-  req: Request<{}, SuccessResponse | ErrorResponse, RemoveSongFromArtistBody>,
+  req: Request<Record<string, never>, SuccessResponse | ErrorResponse, RemoveSongFromArtistBody>,
   res: Response<SuccessResponse | ErrorResponse>
 ): Promise<void> {
   // Removes a song from the cached list for a given artist.

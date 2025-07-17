@@ -8,7 +8,7 @@ import ErrorState from "@/components/ErrorState";
 import { useChordSheet } from "@/hooks/useChordSheet";
 import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
-import { GUITAR_TUNINGS, GuitarTuning } from "@/types/guitarTuning";
+import { GUITAR_TUNINGS, GuitarTuning } from "@/constants/guitar-tunings";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";

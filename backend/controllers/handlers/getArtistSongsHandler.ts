@@ -3,9 +3,7 @@ import { normalizeArtistPath } from '../../utils/url-utils.js';
 import logger from '../../utils/logger.js';
 import cifraClubService from '../../services/cifraclub.service.js';
 import { getCachedArtistSongs, storeArtistSongs } from '../../services/s3-artist-cache.service.js';
-import type { ErrorResponse } from '../../../shared/types/api/responses.js';
-import type { Song } from '../../../shared/types/domain/song.js';
-import type { GetArtistSongsQuery } from '../../../shared/types/api/requests.js';
+import type { ErrorResponse, Song, GetArtistSongsQuery } from '@chordium/types';
 
 /**
  * Handles requests to fetch all songs for a given artist, using cache if available.

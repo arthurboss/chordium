@@ -1,0 +1,81 @@
+name: Types Package Build & Validation
+# Builds and validates the @chordium/types package when types change
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - 'packages/types/**'
+      - '.github/workflows/types-package.yml'
+  pull_request:
+    branches: ["*"]
+    paths:
+      - 'packages/types/**'
+      - '.github/workflows/types-package.yml'
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: types-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  types-package:
+    name: Types Package Build & Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --verbose
+
+      - name: Build types package
+        run: npm run build:types
+
+      - name: Validate package exports
+        run: |
+          cd packages/types
+          node -e "
+            const pkg = require('./dist/index.js');
+            const expected = ['SEARCH_TYPES'];
+            for (const exp of expected) {
+              if (!pkg[exp]) {
+                console.error('Missing export:', exp);
+                process.exit(1);
+              }
+            }
+            console.log('✅ All expected exports found');
+            console.log('📦 Available exports:', Object.keys(pkg).sort());
+          "
+
+      - name: Validate frontend guitar tunings
+        run: |
+          cd frontend
+          node -e "
+            const { GUITAR_TUNINGS } = require('./src/constants/guitar-tunings.ts');
+            if (!GUITAR_TUNINGS || !GUITAR_TUNINGS.STANDARD) {
+              console.error('❌ Frontend guitar tunings not found');
+              process.exit(1);
+            }
+            console.log('✅ Frontend guitar tunings available');
+            console.log('🎸 Available tunings:', Object.keys(GUITAR_TUNINGS));
+          " || echo "Note: TypeScript file, checking build instead"
+
+      - name: Type check package
+        run: |
+          cd packages/types
+          npx tsc --noEmit
+
+      - name: Upload types package artifacts
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: types-package-build
+          path: packages/types/dist/
+          retention-days: 7

@@ -2,7 +2,7 @@ import puppeteerService from "../puppeteer.service.js";
 import logger from "../../utils/logger.js";
 import { extractArtistSlug } from "../../utils/url-utils.js";
 import { extractArtistSongs } from "../../utils/dom-extractors.js";
-import type { Song } from "../../../shared/types/domain/song.js";
+import type { Song } from '@chordium/types';
 import type { Page } from 'puppeteer';
 
 import type { LoadStrategy } from '../../types/cifraclub.types.js';

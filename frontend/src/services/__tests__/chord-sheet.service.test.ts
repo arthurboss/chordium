@@ -10,7 +10,7 @@ import {
   getMetadata
 } from '../chord-sheet.service';
 import { ChordSheet } from '../../types/chordSheet';
-import { GUITAR_TUNINGS } from '../../types/guitarTuning';
+import { GUITAR_TUNINGS } from '../../constants/guitar-tunings';
 
 // Mock the cache module
 vi.mock('../../cache/implementations/unified-chord-sheet-cache', () => ({
