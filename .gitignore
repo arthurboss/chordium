@@ -72,3 +72,6 @@ frontend/dist/
 ci-logs.txt
 
 archive/
+
+# Design notes and brainstorming (not part of official documentation)
+docs/ideas/
