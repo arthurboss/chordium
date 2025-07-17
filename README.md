@@ -4,11 +4,19 @@
 
 <h1 align="center">Chordium</h1>
 
-A modern, minimalist chord viewer app for beginner guitar players and hobbyists. 
+A modern, minimalist chord viewer app for beginner guitar players and hobbyists.
 
 Chordium focuses on providing a distraction-free experience for learning and practicing guitar chords.
 
-## 🎯 About
+## � Demo
+
+<p align="center">
+  <img src="./assets/chordium-demo.gif" alt="Chordium Demo" width="600">
+</p>
+
+*Experience Chordium's clean interface, smart search, and intuitive chord display in action.*
+
+## �🎯 About
 
 Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter. The app features:
 
