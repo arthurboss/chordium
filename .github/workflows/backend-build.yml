@@ -36,10 +36,7 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: |
-            package-lock.json
-            frontend/package-lock.json
-            backend/package-lock.json
+          cache-dependency-path: package-lock.json
 
 
       - name: Install dependencies
@@ -47,11 +44,22 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Debug TypeScript Types
+      - name: Debug Dependencies and Workspaces
         run: |
-          echo "node_modules/@types contents:" && ls -l backend/node_modules/@types || ls -l node_modules/@types
-          echo "node_modules/express contents:" && ls -l backend/node_modules/express || ls -l node_modules/express
-          echo "node_modules/cors contents:" && ls -l backend/node_modules/cors || ls -l node_modules/cors
+          echo "=== Root package.json workspaces ==="
+          cat package.json | grep -A 5 "workspaces"
+          echo ""
+          echo "=== Checking workspace dependency resolution ==="
+          npm ls jest ts-jest @types/express @types/cors @types/jest || echo "Some packages not found in root"
+          echo ""
+          echo "=== Backend workspace dependency check ==="
+          cd backend && npm ls jest ts-jest @types/express @types/cors @types/jest || echo "Some packages not found in backend"
+          echo ""
+          echo "=== Node modules structure ==="
+          echo "Root node_modules/@types:" && ls -l node_modules/@types 2>/dev/null || echo "Not found"
+          echo "Backend node_modules/@types:" && ls -l backend/node_modules/@types 2>/dev/null || echo "Not found"
+          echo "Root node_modules/jest:" && ls -l node_modules/jest/package.json 2>/dev/null || echo "Not found"
+          echo "Backend node_modules/jest:" && ls -l backend/node_modules/jest/package.json 2>/dev/null || echo "Not found"
 
       - name: Lint backend
         run: npm run lint:be

@@ -60,4 +60,15 @@ coverage/
 # Ignore environment variable files
 .env
 
+# TypeScript build artifacts
+*.d.ts
+*.js
+shared/**/*.d.ts
+shared/**/*.js
+backend/dist/
+frontend/dist/
+
+# Temporary files
+ci-logs.txt
+
 archive/

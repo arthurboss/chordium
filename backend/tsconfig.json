@@ -15,8 +15,8 @@
     "rootDir": "../",
     "baseUrl": "../",
     "paths": {
-      "@/*": ["./*"],
-      "@shared/*": ["../shared/*"]
+      "@/*": ["backend/*"],
+      "@shared/*": ["shared/*"]
     },
     "types": ["node", "express", "cors", "jest"],
     "allowImportingTsExtensions": false,
@@ -33,7 +33,10 @@
     "node_modules",
     "dist",
     "coverage",
-    "tests/**/*.js"
+    "tests/**/*.js",
+    "../frontend",
+    "../frontend/**/*",
+    "../node_modules"
   ],
   "ts-node": {
     "esm": true,
