@@ -10,11 +10,13 @@ Chordium focuses on providing a distraction-free experience for learning and pra
 
 ## 🎬 Demo
 
-<p align="center">
-  <img src="./assets/chordium-demo.gif" alt="Chordium Demo" width="720">
-</p>
+![Chordium Demo](./assets/chordium-demo.gif)
 
 *Experience Chordium's clean interface, smart search, and intuitive chord display in action.*
+
+> ⚠️ Frontend deployment in progress  
+> ✅ Backend is live at [chordium-backend.onrender.com](https://chordium-backend.onrender.com)
+
 
 ## 🎯 About
 
