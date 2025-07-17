@@ -36,15 +36,10 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: |
-            package-lock.json
-            frontend/package-lock.json
-            backend/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci --verbose
-        env:
-          NODE_ENV: production
 
       - name: Rebuild native modules & install required platform-specific packages
         run: |

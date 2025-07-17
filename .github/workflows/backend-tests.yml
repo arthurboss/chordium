@@ -42,13 +42,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --verbose
 
-      - name: Debug Jest and ts-jest versions
-        run: |
-          npx jest --version || echo "jest not found"
-          npx ts-jest --version || echo "ts-jest not found"
-          ls -l backend/node_modules/jest* || ls -l node_modules/jest* || echo "jest not found in node_modules"
-          ls -l backend/node_modules/ts-jest* || ls -l node_modules/ts-jest* || echo "ts-jest not found in node_modules"
-
       - name: Run backend unit tests
         run: npm run test:be
         env:

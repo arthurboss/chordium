@@ -42,23 +42,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --verbose
 
-      - name: Debug Dependencies and Workspaces
-        run: |
-          echo "=== Root package.json workspaces ==="
-          cat package.json | grep -A 5 "workspaces"
-          echo ""
-          echo "=== Checking workspace dependency resolution ==="
-          npm ls jest ts-jest @types/express @types/cors @types/jest || echo "Some packages not found in root"
-          echo ""
-          echo "=== Backend workspace dependency check ==="
-          cd backend && npm ls jest ts-jest @types/express @types/cors @types/jest || echo "Some packages not found in backend"
-          echo ""
-          echo "=== Node modules structure ==="
-          echo "Root node_modules/@types:" && ls -l node_modules/@types 2>/dev/null || echo "Not found"
-          echo "Backend node_modules/@types:" && ls -l backend/node_modules/@types 2>/dev/null || echo "Not found"
-          echo "Root node_modules/jest:" && ls -l node_modules/jest/package.json 2>/dev/null || echo "Not found"
-          echo "Backend node_modules/jest:" && ls -l backend/node_modules/jest/package.json 2>/dev/null || echo "Not found"
-
       - name: Lint backend
         run: npm run lint:be
         continue-on-error: true
