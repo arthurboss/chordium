@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 5% 96%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 270 84% 75%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 270 84% 75%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 3.7% 15.9%;
+    --foreground: 0 0% 98%;
+
+    --card: rgb(30, 30, 33);
+    --card-foreground: 0 0% 98%;
+
+    --chord-content-bg-dark: hsl(240, 3.7%, 12%);
+
+    --popover: 240 3.7% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 270 84% 75%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 25%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 20%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 25%;
+    --input: 240 3.7% 25%;
+    --ring: 270 84% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  a:focus-visible {
+    @apply outline-none ring-1 ring-ring ring-offset-2;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    -webkit-text-fill-color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: hsl(var(--foreground));
+  }
+
+  /* Ensure the clear button inside the input matches the autofill border */
+  input:-webkit-autofill ~ button[aria-label="Clear input"] {
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
+  }
+}
+
+@layer components {
+  .chord {
+    @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
+  }
+
+  .chord-line {
+    @apply font-mono whitespace-normal mb-1 break-words;
+  }
+
+  .lyrics-line {
+    @apply mb-3 break-words;
+  }
+
+  .section-header {
+    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .chord-line {
+    @apply text-sm mb-0.5 break-all;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+
+  .chord {
+    @apply text-xs px-1 py-0.5;
+    word-break: keep-all;
+  }
+
+  .lyrics-line {
+    @apply mb-2 break-words;
+    max-width: 100%;
+  }
+
+  .section-header {
+    @apply text-base mt-3 mb-1;
+  }
+
+  pre {
+    @apply whitespace-pre-wrap break-all text-[10px];
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+html,
+body {
+  max-width: 100%;
+}
+
+pre,
+code,
+.chord-line,
+.lyrics-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+a:focus-visible {
+  box-shadow: 0 0 0 1px hsl(var(--ring));
+  border-radius: var(--radius);
+}
+
+/* Theme transition animation */
+html {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+[role="menuitem"] {
+  cursor: pointer;
+}
+
+/* Theme toggle animation */
+.theme-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle-icon:hover {
+  transform: rotate(15deg);
+}

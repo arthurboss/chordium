@@ -7,8 +7,7 @@ import { normalizeArtistResults } from '../../utils/response-normalizers.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { Artist } from '../../../shared/types/domain/artist.js';
 import type { Song } from '../../../shared/types/domain/song.js';
-
-import type { GetArtistsQuery } from '../../types/controller.types.js';
+import type { GetArtistsQuery } from '../../../shared/types/api/requests.js';
 
 async function getArtistsHandler(
   req: Request<{}, Artist[] | Song[] | ErrorResponse, {}, GetArtistsQuery>,

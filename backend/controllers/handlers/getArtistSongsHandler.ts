@@ -5,8 +5,7 @@ import cifraClubService from '../../services/cifraclub.service.js';
 import { getCachedArtistSongs, storeArtistSongs } from '../../services/s3-artist-cache.service.js';
 import type { ErrorResponse } from '../../../shared/types/api/responses.js';
 import type { Song } from '../../../shared/types/domain/song.js';
-
-import type { GetArtistSongsQuery } from '../../types/controller.types.js';
+import type { GetArtistSongsQuery } from '../../../shared/types/api/requests.js';
 
 /**
  * Handles requests to fetch all songs for a given artist, using cache if available.

@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Wonderwall",
+    "path": "oasis/wonderwall",
+    "artist": "Oasis"
+  },
+  {
+    "title": "Imagine",
+    "path": "john-lennon/imagine", 
+    "artist": "John Lennon"
+  },
+  {
+    "title": "Hey Jude",
+    "path": "the-beatles/hey-jude",
+    "artist": "The Beatles"
+  }
+]

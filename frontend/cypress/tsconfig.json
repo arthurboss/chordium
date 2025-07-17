@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "es6"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "types": ["cypress"]
+  },
+  "include": [
+    "**/*.ts",
+    "support/cypress.d.ts"
+  ],
+  "exclude": ["node_modules"]
+}

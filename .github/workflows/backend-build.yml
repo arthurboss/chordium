@@ -1,0 +1,58 @@
+name: Backend Build & Lint
+# Builds and lints backend when backend files or shared dependencies change
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/backend-build.yml'
+      - 'shared/**'
+  pull_request:
+    branches: ["*"]
+    paths:
+      - 'backend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/backend-build.yml'
+      - 'shared/**'
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: backend-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-build:
+    name: Backend Build & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+
+      - name: Install dependencies
+        run: npm ci --verbose
+
+      - name: Lint backend
+        run: npm run lint:be
+        continue-on-error: true
+
+      - name: Build backend
+        run: npm run build:be
+
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: backend-build
+          path: backend/dist/
+          retention-days: 7

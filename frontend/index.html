@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>chordium</title>
+    <meta name="description" content="View guitar chords without visual distractions." />
+    <meta name="author" content="arthurboss" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
+
+    <script>
+      // Helper function to apply theme based on system preference
+      function getSystemThemePreference() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      
+      // Apply theme on page load
+      (function() {
+        // Clear theme from localStorage on first load to start fresh
+        // Use a flag to ensure we only do this once
+        const hasRunInitialThemeSetup = localStorage.getItem('hasRunInitialThemeSetup');
+        if (!hasRunInitialThemeSetup) {
+          localStorage.removeItem('theme');
+          localStorage.setItem('hasRunInitialThemeSetup', 'true');
+        }
+        
+        // Get current theme from localStorage or system preference
+        const savedTheme = localStorage.theme;
+        const systemPreference = getSystemThemePreference();
+        const theme = savedTheme || systemPreference;
+        
+        // Apply theme
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        
+        // Setup listener for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', (e) => {
+          // Only apply system theme if user hasn't manually set a preference
+          if (!localStorage.theme) {
+            if (e.matches) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          }
+        });
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
