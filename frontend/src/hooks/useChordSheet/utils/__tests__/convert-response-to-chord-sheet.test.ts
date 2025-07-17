@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { convertResponseToChordSheet } from '../convert-response-to-chord-sheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 
 describe('convertResponseToChordSheet', () => {
   it('should convert a complete backend response to ChordSheet format', () => {

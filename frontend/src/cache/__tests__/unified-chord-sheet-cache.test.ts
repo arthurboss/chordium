@@ -4,7 +4,7 @@ import {
   unifiedChordSheetCache
 } from '../implementations/unified-chord-sheet-cache';
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { setupLocalStorageMock } from '@/__tests__/shared/test-setup';
 
 describe('UnifiedChordSheetCache', () => {

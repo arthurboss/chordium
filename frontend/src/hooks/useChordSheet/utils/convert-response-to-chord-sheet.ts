@@ -1,5 +1,5 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 
 /**
  * Convert response from backend to ChordSheet format

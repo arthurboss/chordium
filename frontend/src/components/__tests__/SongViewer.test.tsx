@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import SongViewer from '../SongViewer';
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@chordium/types';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 // Mock chord sheet cache

@@ -1,5 +1,5 @@
 import { ChordSheet } from '../../types/chordSheet';
-import { GUITAR_TUNINGS } from '@chordium/types';
+import { GUITAR_TUNINGS } from '../../constants/guitar-tunings';
 
 /**
  * Creates a new chord sheet with default values and validation

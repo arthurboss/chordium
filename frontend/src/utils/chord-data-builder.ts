@@ -1,5 +1,6 @@
 import { ChordSheetWithUIState, toChordSheetWithUIState } from '@/types/chordSheetWithUIState';
-import { ChordSheet, GUITAR_TUNINGS } from '@chordium/types';
+import { ChordSheet } from '@chordium/types';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { LocalSongResult } from './local-chord-sheet-finder';
 
 /**

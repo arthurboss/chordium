@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
-import { GUITAR_TUNINGS } from '@/types/guitarTuning';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
 import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
 import { GuitarTuning } from '../types/guitarTuning';
