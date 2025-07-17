@@ -8,7 +8,7 @@ import type { ErrorResponse, RemoveSongFromArtistBody, SuccessResponse } from '@
  * Handles requests to remove a song from an artist's cached song list.
  */
 async function removeSongFromArtistHandler(
-  req: Request<{}, SuccessResponse | ErrorResponse, RemoveSongFromArtistBody>,
+  req: Request<Record<string, never>, SuccessResponse | ErrorResponse, RemoveSongFromArtistBody>,
   res: Response<SuccessResponse | ErrorResponse>
 ): Promise<void> {
   // Removes a song from the cached list for a given artist.
