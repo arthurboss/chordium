@@ -1,6 +1,6 @@
 /**
  * Shared test setup utilities for cache and storage tests
- * Uses the actual sample songs from shared/fixtures/chord-sheet/ to ensure tests work with real data
+ * Uses test data modeled after real songs from shared/fixtures/chord-sheet/ to ensure tests work with realistic data
  */
 import { vi } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
