@@ -1,0 +1,67 @@
+name: Frontend Build & Lint
+# Builds and lints frontend when frontend files or shared dependencies change
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - 'frontend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/frontend-build.yml'
+      - 'shared/**'
+  pull_request:
+    branches: ["*"]
+    paths:
+      - 'frontend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/frontend-build.yml'
+      - 'shared/**'
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: frontend-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-build:
+    name: Frontend Build & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --verbose
+        env:
+          NODE_ENV: production
+
+      - name: Rebuild native modules & install required platform-specific packages
+        run: |
+          npm rebuild
+          npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
+          npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
+
+      - name: Lint frontend
+        run: npm run lint:fe
+
+      - name: Build frontend
+        run: npm run build:fe
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4.6.2
+        if: always()
+        with:
+          name: frontend-build
+          path: frontend/dist/
+          retention-days: 7
