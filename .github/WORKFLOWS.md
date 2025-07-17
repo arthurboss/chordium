@@ -48,7 +48,7 @@ Each workflow uses GitHub's native `paths` filtering to only run when relevant f
 | `frontend/src/App.tsx` | ✅ | ✅ | ❌ | ❌ |
 | `backend/server.ts` | ❌ | ❌ | ✅ | ✅ |
 | `package.json` | ✅ | ✅ | ✅ | ✅ |
-| `shared/types/song.ts` | ✅ | ✅ | ✅ | ✅ |
+| `packages/types/src/domain/song.ts` | ✅ | ✅ | ✅ | ✅ |
 | `frontend/package.json` | ✅ | ✅ | ❌ | ❌ |
 | `backend/package.json` | ❌ | ❌ | ✅ | ✅ |
 | `README.md` | ❌ | ❌ | ❌ | ❌ |

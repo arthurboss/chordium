@@ -30,8 +30,9 @@ chordium/
 │   ├── utils/                 # Backend utilities
 │   ├── tests/                 # Backend tests
 │   └── types/                 # Backend-specific types
-├── shared/                     # Shared code between workspaces
-│   ├── types/                 # Shared TypeScript types
+├── packages/                   # Shared packages (npm workspaces)
+│   └── types/                 # @chordium/types - Shared TypeScript types package
+├── shared/                     # Shared resources
 │   └── fixtures/              # Shared test fixtures
 ├── docs/                       # Project documentation
 ├── scripts/                    # Build and utility scripts
@@ -45,7 +46,8 @@ chordium/
 {
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "packages/types"
   ]
 }
 ```
@@ -76,21 +78,27 @@ Root scripts orchestrate workspace commands:
 ### 1. Shared Types Strategy
 
 **Problem:** Frontend and backend need consistent type definitions
-**Solution:** Shared types in `shared/types/`
+**Solution:** Dedicated `@chordium/types` npm package in `packages/types/`
 
 ```typescript
-// shared/types/api/responses.ts
+// packages/types/src/domain/chord-sheet.ts
 export interface ChordSheet {
   title: string;
   artist: string;
   songChords: string;
-  // ... other fields
+  guitarTuning: GuitarTuning;
+  guitarCapo: number;
 }
+
+// Usage in frontend/backend
+import { ChordSheet, GUITAR_TUNINGS } from '@chordium/types';
 ```
 
 **Benefits:**
 - Type safety across the entire stack
 - Single source of truth for data structures
+- Proper npm package with versioning
+- Built distribution with CommonJS/ESM support
 - Automatic type checking in both environments
 
 ### 2. Shared Fixtures Strategy
