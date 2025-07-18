@@ -48,6 +48,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 ### Development
 
 - **npm Workspaces** - Monorepo management
+- **@chordium/types** - Shared TypeScript types published to npm
 - **Vitest** + **Jest** + **Cypress** - Comprehensive testing
 
 ## 📚 Documentation
