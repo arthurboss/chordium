@@ -40,6 +40,7 @@
     "start:be": "cd backend && npm run start"
   },
   "devDependencies": {
+    "@chordium/types": "^0.1.0",
     "@eslint/js": "^9.31.0",
     "@types/node": "^24.0.14",
     "eslint": "^9.31.0",
