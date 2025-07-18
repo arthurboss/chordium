@@ -11,5 +11,7 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: CI
+        value: "true"
     healthCheckPath: /health
     autoDeploy: true 

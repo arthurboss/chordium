@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Check if there are any changes to packages/types in this commit
+if git diff --cached --name-only | grep -q "^packages/types/"; then
+    echo "🔄 Types package changed - converting workspace dependencies to npm versions..."
+    USE_NPM=true node scripts/sync-chordium-types-version.js
+    
+    # Stage the updated package.json files
+    git add frontend/package.json backend/package.json
+    
+    echo "✅ Dependencies synchronized for commit"
+else
+    echo "ℹ️  No changes to types package - skipping dependency sync"
+fi

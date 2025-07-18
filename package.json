@@ -10,7 +10,6 @@
     "packages/types"
   ],
   "scripts": {
-    "preinstall": "node scripts/sync-chordium-types-version.js",
     "use-workspace": "node scripts/sync-chordium-types-version.js",
     "use-npm": "USE_NPM=true node scripts/sync-chordium-types-version.js",
     "dev": "npm run dev:fe & npm run dev:be",
