@@ -2,7 +2,7 @@
   "name": "chordium-monorepo",
   "description": "A modern, minimalist chord viewer for beginner guitarists and hobbyists. View guitar chords without visual distractions.",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "workspaces": [
     "frontend",
