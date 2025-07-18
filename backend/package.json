@@ -25,7 +25,12 @@
       ".ts"
     ],
     "transform": {
-      "^.+\\.ts$": ["ts-jest", { "useESM": true }]
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
     },
     "testMatch": [
       "**/tests/**/*.test.js",
@@ -45,6 +50,7 @@
     }
   },
   "dependencies": {
+    "@chordium/types": "workspace:*",
     "@aws-sdk/client-s3": "^3.826.0",
     "@supabase/supabase-js": "^2.49.7",
     "axios": "^1.6.0",
