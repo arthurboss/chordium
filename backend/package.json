@@ -50,7 +50,7 @@
     }
   },
   "dependencies": {
-    "@chordium/types": "workspace:*",
+    "@chordium/types": "^0.1.0",
     "@aws-sdk/client-s3": "^3.826.0",
     "@supabase/supabase-js": "^2.49.7",
     "axios": "^1.6.0",

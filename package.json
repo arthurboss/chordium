@@ -10,8 +10,8 @@
     "packages/types"
   ],
   "scripts": {
-    "use-workspace": "node scripts/sync-chordium-types-version.js",
-    "use-npm": "USE_NPM=true node scripts/sync-chordium-types-version.js",
+    "use-workspace": "node scripts/toggle-workspace-deps.js",
+    "use-npm": "USE_NPM=true node scripts/toggle-workspace-deps.js",
     "dev": "npm run dev:fe & npm run dev:be",
     "dev:fe": "cd frontend && npm run dev",
     "dev:be": "cd backend && npm run dev",
