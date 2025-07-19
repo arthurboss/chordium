@@ -15,7 +15,7 @@ export async function searchHandler(req: Request, res: Response): Promise<void> 
   try {
     const { artist, song } = req.query;
     const query = buildSearchQuery(artist as string, song as string);
-    const searchType = determineSearchType(artist as string, song as string, SEARCH_TYPES);
+    const searchType = determineSearchType(artist as string, song as string);
     
     if (!query || !searchType) {
       res.status(400).json({ error: 'Missing or invalid search query' });

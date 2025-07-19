@@ -1,4 +1,4 @@
-import type { SearchType, SearchTypes } from '@chordium/types';
+import { SearchType, SearchResult, SEARCH_TYPES } from '../../packages/types';
 
 /**
  * Utility functions for search controller
@@ -17,11 +17,8 @@ export function buildSearchQuery(artist?: string, song?: string): string {
  */
 export function determineSearchType(
   artist?: string, 
-  song?: string, 
-  SEARCH_TYPES?: SearchTypes
+  song?: string
 ): SearchType | null {
-  if (!SEARCH_TYPES) return null;
-  
   if (artist && !song) return SEARCH_TYPES.ARTIST;
   if (song && !artist) return SEARCH_TYPES.SONG;
   if (artist && song) return SEARCH_TYPES.SONG;
