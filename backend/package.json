@@ -1,11 +1,12 @@
 {
   "name": "chordium-backend",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "dist/backend/server.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "prebuild": "npm install @chordium/types",
     "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsx server.ts",
