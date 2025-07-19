@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "prebuild": "npm install @chordium/types && npm list @chordium/types && echo 'Checking node_modules locations:' && find . -name '@chordium' -type d 2>/dev/null && find .. -name '@chordium' -type d 2>/dev/null || echo 'Types package location check complete'",
     "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsx server.ts",
@@ -51,8 +50,8 @@
     }
   },
   "dependencies": {
-    "@chordium/types": "^0.1.0",
     "@aws-sdk/client-s3": "^3.826.0",
+    "@chordium/types": "^0.1.0",
     "@supabase/supabase-js": "^2.49.7",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",

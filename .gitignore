@@ -79,3 +79,13 @@ archive/
 # Design notes and brainstorming (not part of official documentation)
 docs/ideas/
 
+# Turborepo
+.turbo/
+out/
+.turbo
+
+# Deployment artifacts
+*-deployment/
+backend-deployment/
+frontend-deployment/
+

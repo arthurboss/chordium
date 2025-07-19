@@ -39,11 +39,14 @@ jobs:
           cache: "npm"
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci --verbose
 
+      - name: Build backend using Turborepo
+        run: npx turbo build --filter=chordium-backend
+
       - name: Run backend unit tests
-        run: npm run test:be
+        run: npx turbo test --filter=chordium-backend
         env:
           SUPABASE_URL: "http://localhost:54321/mock"
           SUPABASE_SERVICE_ROLE_KEY: "dummy-key"
@@ -58,5 +61,5 @@ jobs:
         if: always()
         with:
           name: backend-test-coverage
-          path: backend/coverage/
+          path: ./backend/coverage/
           retention-days: 7

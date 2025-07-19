@@ -38,26 +38,20 @@ jobs:
           cache: "npm"
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci --verbose
 
-      - name: Rebuild native modules & install required platform-specific packages
-        run: |
-          npm rebuild
-          npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
-          npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
+      - name: Build frontend using Turborepo
+        run: npx turbo build --filter=chordium-frontend
 
-      - name: Lint frontend
-        run: npm run lint:fe
+      - name: Lint frontend using Turborepo
+        run: npx turbo lint --filter=chordium-frontend
         continue-on-error: true
-
-      - name: Build frontend
-        run: npm run build:fe
 
       - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
           name: frontend-build
-          path: frontend/dist/
+          path: ./frontend/dist/
           retention-days: 7

@@ -39,22 +39,22 @@ jobs:
           cache: "npm"
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci --verbose
+        working-directory: ./
 
-      - name: Rebuild native modules & install required platform-specific packages
-        run: |
-          npm rebuild
-          npm ls @rollup/rollup-linux-x64-gnu || npm install @rollup/rollup-linux-x64-gnu
-          npm ls @swc/core-linux-x64-gnu || npm install @swc/core-linux-x64-gnu
+      - name: Build frontend using Turborepo
+        run: npx turbo build --filter=chordium-frontend
+        working-directory: ./
 
       - name: Run frontend unit tests
-        run: npm run test:fe
+        run: npm run test
+        working-directory: ./frontend
 
       - name: Upload frontend test coverage
         uses: actions/upload-artifact@v4.6.2
         if: always()
         with:
           name: frontend-test-coverage
-          path: frontend/coverage/
+          path: ./frontend/coverage/
           retention-days: 7
