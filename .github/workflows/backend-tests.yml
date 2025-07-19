@@ -6,7 +6,6 @@ on:
     branches: ["*"]
     paths:
       - 'backend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/backend-tests.yml'
@@ -15,7 +14,6 @@ on:
     branches: ["*"]
     paths:
       - 'backend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/backend-tests.yml'
@@ -43,9 +41,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --verbose
-
-      - name: Build types package
-        run: npm run build:types
 
       - name: Run backend unit tests
         run: npm run test:be

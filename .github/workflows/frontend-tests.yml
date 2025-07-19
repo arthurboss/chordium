@@ -6,7 +6,6 @@ on:
     branches: ["*"]
     paths:
       - 'frontend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/frontend-tests.yml'
@@ -15,7 +14,6 @@ on:
     branches: ["*"]
     paths:
       - 'frontend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/frontend-tests.yml'
@@ -43,9 +41,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --verbose
-
-      - name: Build types package
-        run: npm run build:types
 
       - name: Rebuild native modules & install required platform-specific packages
         run: |

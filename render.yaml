@@ -1,7 +1,7 @@
 services:
   - type: web
     name: chordium-backend
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
@@ -11,5 +11,9 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: CI
+        value: "true"
+      - key: NODE_VERSION
+        value: "20"
     healthCheckPath: /health
     autoDeploy: true 
