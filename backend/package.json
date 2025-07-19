@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "prebuild": "npm install @chordium/types",
+    "prebuild": "npm install @chordium/types && npm list @chordium/types && echo 'Checking node_modules locations:' && find . -name '@chordium' -type d 2>/dev/null && find .. -name '@chordium' -type d 2>/dev/null || echo 'Types package location check complete'",
     "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsx server.ts",
