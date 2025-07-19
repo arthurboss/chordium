@@ -1,7 +1,7 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
 import { extractChordSheet } from "./dom-extractors.js";
-import type { ChordSheet } from '@chordium/types';
+import type { ChordSheet } from '../../packages/types';
 import type { Page } from 'puppeteer';
 
 import type { LoadStrategy } from '../types/cifraclub.types.js';

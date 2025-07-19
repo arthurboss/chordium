@@ -1,4 +1,4 @@
-import type { Artist, Song, DataSource } from '@chordium/types';
+import type { Artist, Song, DataSource } from '../../packages/types';
 
 /**
  * Response normalizers to ensure consistent API response formats

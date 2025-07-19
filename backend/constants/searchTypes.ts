@@ -1,3 +1,3 @@
-import { SEARCH_TYPES } from '@chordium/types';
+import { SEARCH_TYPES } from '../../packages/types';
 
 export default SEARCH_TYPES;

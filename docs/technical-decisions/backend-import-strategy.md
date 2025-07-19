@@ -32,7 +32,7 @@ After creating the `@chordium/types` npm package, backend deployment began faili
 
 ### Option 2: Relative Imports (Chosen)
 
-- Import directly from `../packages/types/src`
+- Import directly from `../packages/types`
 - Simple `npm ci && npm run build` deployment
 - No complex preparation required
 
@@ -54,7 +54,7 @@ After creating the `@chordium/types` npm package, backend deployment began faili
 import { SearchResult } from '@chordium/types';
 
 // Use:
-import { SearchResult } from '../packages/types/src/index.js';
+import { SearchResult } from '../packages/types';
 ```
 
 ## Benefits

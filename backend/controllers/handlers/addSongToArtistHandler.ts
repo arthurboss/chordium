@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { normalizeArtistPath } from '../../utils/url-utils.js';
 import logger from '../../utils/logger.js';
 import { addSongToArtist } from '../../services/s3-artist-cache.service.js';
-import type { ErrorResponse, AddSongToArtistBody, SuccessResponse } from '@chordium/types';
+import type { ErrorResponse, AddSongToArtistBody, SuccessResponse } from '../../../packages/types';
 
 /**
  * Handles requests to add a song to an artist's cached song list.

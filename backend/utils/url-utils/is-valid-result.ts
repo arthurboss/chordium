@@ -1,7 +1,7 @@
 import { URL } from 'url';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../logger.js';
-import type { SearchType, ResultWithPath } from '@chordium/types';
+import type { SearchType, ResultWithPath } from '../../../packages/types';
 import { URL_VALIDATION_ERRORS } from './validation-errors.js';
 
 /**

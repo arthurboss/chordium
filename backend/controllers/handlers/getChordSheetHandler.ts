@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import cifraClubService from '../../services/cifraclub.service.js';
 import logger from '../../utils/logger.js';
 import { isValidChordSheetUrl } from '../../utils/url-utils.js';
-import type { ErrorResponse, ChordSheet, GetChordSheetQuery } from '@chordium/types';
+import type { ErrorResponse, ChordSheet, GetChordSheetQuery } from '../../../packages/types';
 
 /**
  * Handles requests to fetch a chord sheet for a given song URL.
