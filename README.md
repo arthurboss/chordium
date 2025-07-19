@@ -65,6 +65,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 | [🏢 Monorepo](./docs/MONOREPO.md) | Monorepo architecture and workspace management |
 | [🗄️ Cache Architecture](./docs/cache-architecture.md) | Frontend caching system design and implementation |
 | [⚡ Build Optimizations](./docs/build-optimizations.md) | Performance optimizations and bundle configuration |
+| [🧠 Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale |
 
 ## 🚀 Quick Start
 

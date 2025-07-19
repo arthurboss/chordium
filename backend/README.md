@@ -2,6 +2,10 @@
 
 Backend service for searching and retrieving chord sheets with optional S3 caching.
 
+## Architecture Notes
+
+This backend uses relative imports for shared types (`../packages/types`) for deployment simplicity. See [Backend Import Strategy](../docs/technical-decisions/backend-import-strategy.md) for the technical decision rationale.
+
 ## Quick Start
 
 ```bash
@@ -20,6 +24,7 @@ This backend is configured for deployment on [Render](https://render.com):
 - **Caching**: AWS S3 for performance
 
 For deployment configuration, see:
+
 - [render.yaml](../render.yaml) - Render deployment config
 - [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
 
