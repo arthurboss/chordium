@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
-        run: npm ci --verbose
+        run: npm ci
 
       - name: Build backend using Turborepo
         run: npx turbo build --filter=chordium-backend

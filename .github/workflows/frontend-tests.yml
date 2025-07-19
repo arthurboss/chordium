@@ -40,7 +40,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
-        run: npm ci --verbose
+        run: npm ci
         working-directory: ./
 
       - name: Build frontend using Turborepo
