@@ -8,6 +8,7 @@ on:
       - 'backend/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/backend-tests.yml'
       - 'shared/**'
   pull_request:
@@ -16,6 +17,7 @@ on:
       - 'backend/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/backend-tests.yml'
       - 'shared/**'
     types: [opened, synchronize, reopened]

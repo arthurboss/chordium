@@ -5,11 +5,13 @@ on:
     branches: ["*"]
     paths:
       - 'packages/types/**'
+      - 'turbo.json'
       - '.github/workflows/types-package.yml'
   pull_request:
     branches: ["*"]
     paths:
       - 'packages/types/**'
+      - 'turbo.json'
       - '.github/workflows/types-package.yml'
     types: [opened, synchronize, reopened]
 

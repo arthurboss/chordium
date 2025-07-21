@@ -5,19 +5,22 @@ on:
     branches: ["*"]
     paths:
       - 'frontend/**'
+      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/frontend-build.yml'
       - 'shared/fixtures/**'
   pull_request:
     branches: ["*"]
     paths:
       - 'frontend/**'
+      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/frontend-build.yml'
       - 'shared/fixtures/**'
-    types: [opened, synchronize, reopened]
 
 concurrency:
   group: frontend-build-${{ github.ref }}
