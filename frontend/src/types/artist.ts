@@ -1,2 +1,2 @@
-// Re-export Artist types from @chordium/types
-export * from '@chordium/types';
+// Re-export Artist types from shared/types
+export * from '../../../shared/types/index.js';

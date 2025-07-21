@@ -41,6 +41,11 @@ jobs:
       - name: Install root dependencies
         run: npm ci --silent
 
+      - name: Ensure frontend dependencies are properly installed
+        run: |
+          cd frontend
+          npm ci --silent --force
+        
       - name: Build frontend using Turborepo
         run: npx turbo build --filter=chordium-frontend
 
