@@ -41,10 +41,13 @@ jobs:
       - name: Install root dependencies
         run: npm ci --silent
 
-      - name: Ensure frontend dependencies are properly installed
+      - name: Clean and reinstall frontend dependencies with platform-specific packages
         run: |
           cd frontend
-          npm ci --silent --force
+          rm -rf node_modules package-lock.json
+          npm install --silent
+          # Force install platform-specific Rollup binaries
+          npm install @rollup/rollup-linux-x64-gnu --save-dev --silent || true
         
       - name: Build frontend using Turborepo
         run: npx turbo build --filter=chordium-frontend

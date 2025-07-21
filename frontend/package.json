@@ -20,7 +20,6 @@
     "test:e2e:fast": "npm run dev & wait-on http://localhost:8080 && npm run cy:run"
   },
   "dependencies": {
-    "@chordium/types": "^0.1.0",
     "@hookform/resolvers": "5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",

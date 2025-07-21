@@ -43,8 +43,12 @@ jobs:
         run: npm ci --silent
         working-directory: ./
 
-      - name: Ensure frontend dependencies are properly installed
-        run: npm ci --silent --force
+      - name: Clean and reinstall frontend dependencies with platform-specific packages
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --silent
+          # Force install platform-specific Rollup binaries
+          npm install @rollup/rollup-linux-x64-gnu --save-dev --silent || true
         working-directory: ./frontend
         
       - name: Build frontend using Turborepo
