@@ -12,7 +12,7 @@ Chordium focuses on providing a distraction-free experience for learning and pra
 
 ![Chordium Demo](./assets/chordium-demo.gif)
 
-*Experience Chordium's clean interface, smart search, and intuitive chord display in action.*
+_Experience Chordium's clean interface, smart search, and intuitive chord display in action._
 
 > ⚠️ Frontend deployment in progress  
 > ✅ Backend is live at [chordium-backend.onrender.com](https://chordium-backend.onrender.com)
@@ -47,25 +47,26 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 ### Development
 
-- **npm Workspaces** - Monorepo management
+- **Turborepo** - High-performance build system for monorepos
+- **npm Workspaces** - Monorepo dependency management
 - **@chordium/types** - Shared TypeScript types published to npm
 - **Vitest** + **Jest** + **Cypress** - Comprehensive testing
 
 ## 📚 Documentation
 
-| Topic | Description |
-|-------|-------------|
-| [🚀 Getting Started](./docs/getting-started.md) | Installation, setup, and development commands |
-| [🧪 Testing](./docs/testing.md) | Testing frameworks, running tests, and guidelines |
-| [🏗️ Project Structure](./docs/project-structure.md) | Codebase organization and architecture |
-| [🚀 Deployment](./docs/deployment.md) | Frontend and backend deployment guides |
-| [🤝 Contributing](./CONTRIBUTING.md) | How to contribute to the project |
-| [📖 Backend API](./backend/README.md) | Backend documentation and API reference |
-| [🔍 Search Guide](./docs/search-guide.md) | Smart search functionality details |
-| [🏢 Monorepo](./docs/MONOREPO.md) | Monorepo architecture and workspace management |
-| [🗄️ Cache Architecture](./docs/cache-architecture.md) | Frontend caching system design and implementation |
-| [⚡ Build Optimizations](./docs/build-optimizations.md) | Performance optimizations and bundle configuration |
-| [🧠 Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale |
+| Topic                                                          | Description                                        |
+| -------------------------------------------------------------- | -------------------------------------------------- |
+| [🚀 Getting Started](./docs/getting-started.md)                | Installation, setup, and development commands      |
+| [🧪 Testing](./docs/testing.md)                                | Testing frameworks, running tests, and guidelines  |
+| [🏗️ Project Structure](./docs/project-structure.md)            | Codebase organization and architecture             |
+| [🚀 Deployment](./docs/deployment.md)                          | Frontend and backend deployment guides             |
+| [🤝 Contributing](./CONTRIBUTING.md)                           | How to contribute to the project                   |
+| [📖 Backend API](./backend/README.md)                          | Backend documentation and API reference            |
+| [🔍 Search Guide](./docs/search-guide.md)                      | Smart search functionality details                 |
+| [🏢 Monorepo](./docs/MONOREPO.md)                              | Monorepo architecture and workspace management     |
+| [🗄️ Cache Architecture](./docs/cache-architecture.md)          | Frontend caching system design and implementation  |
+| [⚡ Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
+| [🧠 Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
 
 ## 🚀 Quick Start
 
@@ -81,6 +82,25 @@ npm run dev
 
 Visit `http://localhost:8080` for the frontend and `http://localhost:3001` for the backend API.
 
-## 📄 License
+## 📦 @chordium/types Package
+
+Chordium publishes a shared TypeScript types package to npm for type safety across the entire monorepo:
+
+- **Package**: [`@chordium/types`](https://www.npmjs.com/package/@chordium/types)
+- **Purpose**: Shared type definitions for API contracts, data models, and interfaces
+- **Usage**: Currently used by frontend; backend still uses local types due to Render deployment constraints
+- **Build**: Automatically built and versioned with Turborepo dependency management
+
+```sh
+# Install in your project
+npm install @chordium/types
+```
+
+```typescript
+// Import shared types
+import { Song, Artist, ChordSheet } from "@chordium/types";
+```
+
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
