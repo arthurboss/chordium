@@ -1,11 +1,11 @@
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { buildSearchQuery, determineSearchType } from '../../utils/search.utils.js';
 import { searchArtistsInSupabase } from '../../services/supabase-artist.service.js';
 import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
-import type { SearchType } from '../../../packages/types/dist';
+import type { SearchType } from "@packages/types/dist";
 
 /**
  * Handles search requests for artists or songs.

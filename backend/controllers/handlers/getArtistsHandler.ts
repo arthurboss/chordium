@@ -4,7 +4,7 @@ import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
-import { SearchResult, Artist, Song, ErrorResponse, GetArtistsQuery } from '../../../packages/types/dist';
+import { SearchResult, Artist, Song, ErrorResponse, GetArtistsQuery } from "@packages/types/dist";
 
 async function getArtistsHandler(
   req: Request<{}, Artist[] | Song[] | ErrorResponse, {}, GetArtistsQuery>,
