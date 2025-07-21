@@ -36,7 +36,7 @@ jobs:
         run: npm ci --silent
 
       - name: Build types package
-        run: npx turbo build --filter=@chordium/types --silent
+        run: npx turbo build --filter=@chordium/types
 
       - name: Validate package exports
         run: |

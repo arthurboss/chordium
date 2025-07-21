@@ -44,7 +44,7 @@ jobs:
         working-directory: ./
 
       - name: Build frontend using Turborepo
-        run: npx turbo build --filter=chordium-frontend --silent
+        run: npx turbo build --filter=chordium-frontend
         working-directory: ./
 
       - name: Run frontend unit tests

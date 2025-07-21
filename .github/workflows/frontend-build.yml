@@ -42,7 +42,7 @@ jobs:
         run: npm ci --silent
 
       - name: Build frontend using Turborepo
-        run: npx turbo build --filter=chordium-frontend --silent
+        run: npx turbo build --filter=chordium-frontend
 
       - name: Lint frontend using Turborepo
         run: npx turbo lint --filter=chordium-frontend --silent

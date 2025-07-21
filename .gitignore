@@ -89,3 +89,6 @@ out/
 backend-deployment/
 frontend-deployment/
 
+# debug log files
+*-logs.txt
+
