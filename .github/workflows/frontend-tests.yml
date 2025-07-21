@@ -40,11 +40,11 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm ci --silent
         working-directory: ./
 
       - name: Build frontend using Turborepo
-        run: npx turbo build --filter=chordium-frontend
+        run: npx turbo build --filter=chordium-frontend --silent
         working-directory: ./
 
       - name: Run frontend unit tests

@@ -41,13 +41,13 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm ci --silent
 
       - name: Build backend using Turborepo
-        run: npx turbo build --filter=chordium-backend
+        run: npx turbo build --filter=chordium-backend --silent
 
       - name: Lint backend using Turborepo
-        run: npx turbo lint --filter=chordium-backend
+        run: npx turbo lint --filter=chordium-backend --silent
         continue-on-error: true
 
       - name: Upload backend build artifacts

@@ -40,13 +40,13 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install root dependencies
-        run: npm ci
+        run: npm ci --silent
 
       - name: Build backend using Turborepo
-        run: npx turbo build --filter=chordium-backend
+        run: npx turbo build --filter=chordium-backend --silent
 
       - name: Run backend unit tests
-        run: npx turbo test --filter=chordium-backend
+        run: npx turbo test --filter=chordium-backend --silent
         env:
           SUPABASE_URL: "http://localhost:54321/mock"
           SUPABASE_SERVICE_ROLE_KEY: "dummy-key"
