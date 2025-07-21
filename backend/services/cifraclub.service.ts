@@ -2,7 +2,7 @@ import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
 import { fetchChordSheet } from "../utils/chord-sheet-fetcher.js";
-import type { Artist, Song, ChordSheet, SearchType } from '../../packages/types';
+import type { Artist, Song, ChordSheet, SearchType } from '../../packages/types/dist';
 
 class CifraClubService {
   public readonly baseUrl: string;

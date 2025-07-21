@@ -3,7 +3,7 @@ import { normalizeArtistPath } from '../../utils/url-utils.js';
 import logger from '../../utils/logger.js';
 import cifraClubService from '../../services/cifraclub.service.js';
 import { getCachedArtistSongs, storeArtistSongs } from '../../services/s3-artist-cache.service.js';
-import type { ErrorResponse, Song, GetArtistSongsQuery } from '../../../packages/types';
+import type { ErrorResponse, Song, GetArtistSongsQuery } from '../../../packages/types/dist';
 
 /**
  * Handles requests to fetch all songs for a given artist, using cache if available.

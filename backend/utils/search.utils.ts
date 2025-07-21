@@ -1,4 +1,4 @@
-import { SearchType, SearchResult, SEARCH_TYPES } from '../../packages/types';
+import { SearchType, SearchResult, SEARCH_TYPES } from '../../packages/types/dist';
 
 /**
  * Utility functions for search controller

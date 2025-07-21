@@ -1,7 +1,7 @@
 // Centralized controller handler types and request/response bodies
 
 import type { Request, Response } from "express";
-import { ChordSheetRequest, ChordSheetResponse, ErrorResponse, SuccessResponse, RemoveSongFromArtistBody } from '../../packages/types';
+import { ChordSheetRequest, ChordSheetResponse, ErrorResponse, SuccessResponse, RemoveSongFromArtistBody } from '../../packages/types/dist';
 
 // Handler function types - these match the actual JavaScript handler signatures
 export type SearchHandler = (req: Request, res: Response) => Promise<void>;

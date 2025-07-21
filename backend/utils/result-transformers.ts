@@ -1,4 +1,4 @@
-import type { Artist, Song, BasicSearchResult } from '../../packages/types';
+import type { Artist, Song, BasicSearchResult } from '../../packages/types/dist';
 import { cleanCifraClubTitle, extractTitleAndArtist } from './title-parsing.js';
 
 /**

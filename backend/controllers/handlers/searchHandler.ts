@@ -5,7 +5,7 @@ import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
-import type { SearchType } from '../../../packages/types';
+import type { SearchType } from '../../../packages/types/dist';
 
 /**
  * Handles search requests for artists or songs.
