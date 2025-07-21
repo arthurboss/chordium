@@ -49,14 +49,6 @@ jobs:
       - name: Build types package first
         run: npx turbo build --filter=@chordium/types
         working-directory: ./
-
-      - name: Fix Rollup optional dependencies in CI
-        run: |
-          # Try to install the missing platform-specific rollup binary
-          npm install @rollup/rollup-linux-x64-gnu --no-save --silent || true
-          # Alternative: force reinstall rollup entirely
-          npm install rollup --force --silent || true
-        working-directory: ./frontend
         
       - name: Build frontend using Turborepo
         run: npx turbo build --filter=chordium-frontend
