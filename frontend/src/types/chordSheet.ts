@@ -1,2 +1,2 @@
-// Re-export ChordSheet types from @chordium/types
+// Re-export ChordSheet types from shared/types
 export * from '@chordium/types';

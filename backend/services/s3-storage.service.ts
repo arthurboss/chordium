@@ -6,7 +6,7 @@ import {
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 import logger from "../utils/logger.js";
-import type { Song } from '@chordium/types';
+import type { Song } from "../../shared/types/index.js";
 
 class S3StorageService {
   private s3: S3Client | null = null;
@@ -89,10 +89,10 @@ class S3StorageService {
 
     try {
       // Optimize storage by only keeping essential fields
-      const optimizedSongs = songs.map(song => ({
+      const optimizedSongs = songs.map((song) => ({
         title: song.title,
         path: song.path,
-        artist: song.artist
+        artist: song.artist,
       }));
 
       const key = `artist-songs/${artistPath}.json`;
@@ -109,10 +109,15 @@ class S3StorageService {
       });
 
       await this.s3!.send(command);
-      logger.info(`Stored ${songs.length} songs for ${artistPath} in S3 (optimized schema)`);
+      logger.info(
+        `Stored ${songs.length} songs for ${artistPath} in S3 (optimized schema)`
+      );
       return true;
     } catch (error: any) {
-      logger.error(`Error storing songs to S3 for ${artistPath}:`, error.message);
+      logger.error(
+        `Error storing songs to S3 for ${artistPath}:`,
+        error.message
+      );
       return false;
     }
   }
@@ -127,21 +132,21 @@ class S3StorageService {
 
     try {
       // First, get existing songs
-      const existingSongs = await this.getArtistSongs(artistPath) || [];
-      
+      const existingSongs = (await this.getArtistSongs(artistPath)) || [];
+
       // Check if song already exists
-      const songExists = existingSongs.some(existingSong => 
-        existingSong.path === song.path
+      const songExists = existingSongs.some(
+        (existingSong) => existingSong.path === song.path
       );
-      
+
       if (songExists) {
         logger.info(`Song "${song.title}" already exists for ${artistPath}`);
         return false;
       }
-      
+
       // Add the new song
       const updatedSongs = [...existingSongs, song];
-      
+
       // Store the updated list
       const success = await this.storeArtistSongs(artistPath, updatedSongs);
       if (success) {
@@ -157,7 +162,10 @@ class S3StorageService {
   /**
    * Remove a song from an artist's cached song list
    */
-  async removeSongFromArtist(artistPath: string, songPath: string): Promise<boolean> {
+  async removeSongFromArtist(
+    artistPath: string,
+    songPath: string
+  ): Promise<boolean> {
     if (!this._checkEnabled()) {
       return false;
     }
@@ -165,20 +173,22 @@ class S3StorageService {
     try {
       // First, get existing songs
       const existingSongs = await this.getArtistSongs(artistPath);
-      
+
       if (!existingSongs) {
         logger.warn(`No songs found for artist ${artistPath}`);
         return false;
       }
-      
+
       // Filter out the song to remove
-      const updatedSongs = existingSongs.filter(song => song.path !== songPath);
-      
+      const updatedSongs = existingSongs.filter(
+        (song) => song.path !== songPath
+      );
+
       if (updatedSongs.length === existingSongs.length) {
         logger.info(`Song with path "${songPath}" not found in ${artistPath}`);
         return false;
       }
-      
+
       // Store the updated list
       const success = await this.storeArtistSongs(artistPath, updatedSongs);
       if (success) {
@@ -186,7 +196,10 @@ class S3StorageService {
       }
       return success;
     } catch (error: any) {
-      logger.error(`Error removing song from artist ${artistPath}:`, error.message);
+      logger.error(
+        `Error removing song from artist ${artistPath}:`,
+        error.message
+      );
       return false;
     }
   }

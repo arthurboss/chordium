@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     
     /* Type Definitions */
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["vite.config.ts", "src/types/*.d.ts"]
+  "include": ["vite.config.ts"]
 }

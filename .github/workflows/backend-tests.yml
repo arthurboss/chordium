@@ -6,20 +6,20 @@ on:
     branches: ["*"]
     paths:
       - 'backend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/backend-tests.yml'
-      - 'shared/fixtures/**'
+      - 'shared/**'
   pull_request:
     branches: ["*"]
     paths:
       - 'backend/**'
-      - 'packages/types/**'
       - 'package.json'
       - 'package-lock.json'
+      - 'turbo.json'
       - '.github/workflows/backend-tests.yml'
-      - 'shared/fixtures/**'
+      - 'shared/**'
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -41,14 +41,14 @@ jobs:
           cache: "npm"
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: npm ci --verbose
+      - name: Install root dependencies
+        run: npm ci --silent
 
-      - name: Build types package
-        run: npm run build:types
+      - name: Build backend using Turborepo
+        run: npx turbo build --filter=chordium-backend
 
       - name: Run backend unit tests
-        run: npm run test:be
+        run: npx turbo test --filter=chordium-backend
         env:
           SUPABASE_URL: "http://localhost:54321/mock"
           SUPABASE_SERVICE_ROLE_KEY: "dummy-key"

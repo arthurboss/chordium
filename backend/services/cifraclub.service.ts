@@ -2,7 +2,7 @@ import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
 import { fetchChordSheet } from "../utils/chord-sheet-fetcher.js";
-import type { Artist, Song, ChordSheet, SearchType } from '@chordium/types';
+import type { Artist, Song, ChordSheet, SearchType } from "../../shared/types/index.js";
 
 class CifraClubService {
   public readonly baseUrl: string;
@@ -11,7 +11,10 @@ class CifraClubService {
     this.baseUrl = config.cifraClub.baseUrl;
   }
 
-  async search(query: string, searchType: SearchType): Promise<Artist[] | Song[]> {
+  async search(
+    query: string,
+    searchType: SearchType
+  ): Promise<Artist[] | Song[]> {
     return performSearch(this.baseUrl, query, searchType);
   }
 

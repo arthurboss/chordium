@@ -1,11 +1,11 @@
-import type { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { buildSearchQuery, determineSearchType } from '../../utils/search.utils.js';
 import { searchArtistsInSupabase } from '../../services/supabase-artist.service.js';
 import cifraClubService from '../../services/cifraclub.service.js';
 import SEARCH_TYPES from '../../constants/searchTypes.js';
 import logger from '../../utils/logger.js';
 import { normalizeArtistResults } from '../../utils/response-normalizers.js';
-import type { SearchType } from '@chordium/types';
+import type { SearchType } from "../../../shared/types/index.js";
 
 /**
  * Handles search requests for artists or songs.
@@ -15,7 +15,7 @@ export async function searchHandler(req: Request, res: Response): Promise<void> 
   try {
     const { artist, song } = req.query;
     const query = buildSearchQuery(artist as string, song as string);
-    const searchType = determineSearchType(artist as string, song as string, SEARCH_TYPES);
+    const searchType = determineSearchType(artist as string, song as string);
     
     if (!query || !searchType) {
       res.status(400).json({ error: 'Missing or invalid search query' });

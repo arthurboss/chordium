@@ -1,8 +1,12 @@
-import { Request, Response } from 'express';
-import { normalizeArtistPath } from '../../utils/url-utils.js';
-import logger from '../../utils/logger.js';
-import { addSongToArtist } from '../../services/s3-artist-cache.service.js';
-import type { ErrorResponse, AddSongToArtistBody, SuccessResponse } from '@chordium/types';
+import { Request, Response } from "express";
+import { normalizeArtistPath } from "../../utils/url-utils.js";
+import logger from "../../utils/logger.js";
+import { addSongToArtist } from "../../services/s3-artist-cache.service.js";
+import type {
+  ErrorResponse,
+  AddSongToArtistBody,
+  SuccessResponse,
+} from "../../../shared/types/index.js";
 
 /**
  * Handles requests to add a song to an artist's cached song list.
@@ -15,30 +19,39 @@ async function addSongToArtistHandler(
   try {
     const { artistName, song } = req.body;
     if (!artistName || !song) {
-      res.status(400).json({ error: 'Missing artistName or song data' });
+      res.status(400).json({ error: "Missing artistName or song data" });
       return;
     }
-    
+
     if (!song.title || !song.path) {
-      res.status(400).json({ error: 'Song must have title and path properties' });
+      res
+        .status(400)
+        .json({ error: "Song must have title and path properties" });
       return;
     }
 
     const normalizedArtistName = normalizeArtistPath(artistName);
-    logger.info(`Adding song "${song.title}" to artist "${normalizedArtistName}"`);
-    
+    logger.info(
+      `Adding song "${song.title}" to artist "${normalizedArtistName}"`
+    );
+
     const success = await addSongToArtist(normalizedArtistName, song);
-    
+
     if (success) {
-      logger.info(`Successfully added song "${song.title}" to artist "${normalizedArtistName}"`);
-      res.json({ success: true, message: 'Song added successfully' });
+      logger.info(
+        `Successfully added song "${song.title}" to artist "${normalizedArtistName}"`
+      );
+      res.json({ success: true, message: "Song added successfully" });
     } else {
-      res.status(500).json({ error: 'Failed to add song to artist' });
+      res.status(500).json({ error: "Failed to add song to artist" });
     }
   } catch (error) {
-    logger.error('Error adding song to artist:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.status(500).json({ error: 'Failed to add song to artist', details: errorMessage });
+    logger.error("Error adding song to artist:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    res
+      .status(500)
+      .json({ error: "Failed to add song to artist", details: errorMessage });
   }
 }
 

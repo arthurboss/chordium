@@ -62,7 +62,10 @@ coverage/
 
 # TypeScript build artifacts
 *.d.ts
-*.js
+dist/*.js
+build/*.js
+**/dist/*.js
+**/build/*.js
 shared/**/*.d.ts
 shared/**/*.js
 backend/dist/
@@ -75,3 +78,17 @@ archive/
 
 # Design notes and brainstorming (not part of official documentation)
 docs/ideas/
+
+# Turborepo
+.turbo/
+out/
+.turbo
+
+# Deployment artifacts
+*-deployment/
+backend-deployment/
+frontend-deployment/
+
+# debug log files
+*-logs.txt
+
