@@ -39,6 +39,16 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: () => mockSupabase
 }));
 
+jest.unstable_mockModule('../../config/config.ts', () => ({
+  __esModule: true,
+  default: {
+    supabase: {
+      url: 'http://localhost:54321/mock',
+      serviceRoleKey: 'dummy-key'
+    }
+  }
+}));
+
 jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
   default: mockCifraClubService
 }));
