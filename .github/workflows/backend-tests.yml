@@ -9,7 +9,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/backend-tests.yml'
-      - 'shared/fixtures/**'
+      - 'shared/**'
   pull_request:
     branches: ["*"]
     paths:
@@ -17,7 +17,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/backend-tests.yml'
-      - 'shared/fixtures/**'
+      - 'shared/**'
     types: [opened, synchronize, reopened]
 
 concurrency:
@@ -61,5 +61,5 @@ jobs:
         if: always()
         with:
           name: backend-test-coverage
-          path: ./backend/coverage/
+          path: backend/coverage/
           retention-days: 7
