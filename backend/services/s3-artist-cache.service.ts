@@ -1,6 +1,6 @@
 // S3 artist song cache service
 import { s3StorageService as S3StorageService } from "./s3-storage.service.js";
-import type { Song } from "@packages/types/dist";
+import type { Song } from "../../shared/types/index.js";
 
 async function getCachedArtistSongs(
   artistPath: string

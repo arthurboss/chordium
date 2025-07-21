@@ -6,7 +6,7 @@ import {
   getCachedArtistSongs,
   storeArtistSongs,
 } from "../../services/s3-artist-cache.service.js";
-import type { ErrorResponse, Song, GetArtistSongsQuery } from "@packages/types/dist";
+import { ErrorResponse, GetArtistSongsQuery, Song } from "../../../shared/types/index.js";
 
 /**
  * Handles requests to fetch all songs for a given artist, using cache if available.

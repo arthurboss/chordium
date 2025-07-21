@@ -3,7 +3,7 @@
  * These functions run in the browser context via Puppeteer's page.evaluate()
  */
 
-import type { Song, ChordSheet } from "@packages/types/dist";
+import type { Song, ChordSheet } from "../../shared/types/index.js";
 
 /**
  * Search result from DOM extraction

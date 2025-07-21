@@ -6,7 +6,7 @@ import type {
   ErrorResponse,
   AddSongToArtistBody,
   SuccessResponse,
-} from "@packages/types/dist";
+} from "../../../shared/types/index.js";
 
 /**
  * Handles requests to add a song to an artist's cached song list.

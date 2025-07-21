@@ -4,7 +4,7 @@ import {
   transformToArtistResults,
   transformToSongResults,
 } from "./result-transformers.js";
-import type { SearchType, Artist, Song, ResultWithPath } from "@packages/types/dist";
+import type { SearchType, Artist, Song, ResultWithPath } from "../../shared/types/index.js";
 
 /**
  * Filters and transforms search results based on search type

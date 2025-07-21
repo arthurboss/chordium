@@ -6,7 +6,7 @@ import type {
   ErrorResponse,
   RemoveSongFromArtistBody,
   SuccessResponse,
-} from "@packages/types/dist";
+} from "../../../shared/types/index.js";
 
 /**
  * Handles requests to remove a song from an artist's cached song list.

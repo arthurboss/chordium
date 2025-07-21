@@ -1,4 +1,4 @@
-import { SearchType, SearchResult, SEARCH_TYPES } from "@packages/types/dist";
+import { SearchType, SearchResult, SEARCH_TYPES } from "../../shared/types/index.js";
 
 /**
  * Utility functions for search controller

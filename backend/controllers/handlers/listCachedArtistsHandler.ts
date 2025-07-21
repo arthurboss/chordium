@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import logger from "../../utils/logger.js";
 import { listArtists } from "../../services/s3-artist-cache.service.js";
-import type { ErrorResponse, CachedArtistsResponse } from "@packages/types/dist";
+import type { ErrorResponse, CachedArtistsResponse } from "../../../shared/types/index.js";
 
 /**
  * Handles requests to list all cached artists from S3.

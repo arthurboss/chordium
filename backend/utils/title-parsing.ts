@@ -1,4 +1,4 @@
-import type { TitleArtistResult } from "@packages/types/dist";
+import type { TitleArtistResult } from "../../shared/types/index.js";
 
 /**
  * Utility functions for parsing titles and extracting artist information from CifraClub results

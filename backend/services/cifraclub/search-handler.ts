@@ -2,7 +2,7 @@ import puppeteerService from "../puppeteer.service.js";
 import logger from "../../utils/logger.js";
 import { filterResults } from "../../utils/result-filters.js";
 import { extractSearchResults } from "../../utils/dom-extractors.js";
-import type { Artist, Song, SearchType } from "@packages/types/dist";
+import type { Artist, Song, SearchType } from "../../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
 /**

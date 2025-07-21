@@ -1,4 +1,4 @@
-import type { Artist, Song, DataSource } from "@packages/types/dist";
+import type { Artist, Song, DataSource } from "../../shared/types/index.js";
 
 /**
  * Response normalizers to ensure consistent API response formats

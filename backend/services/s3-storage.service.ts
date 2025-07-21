@@ -6,7 +6,7 @@ import {
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 import logger from "../utils/logger.js";
-import type { Song } from "@packages/types/dist";
+import type { Song } from "../../shared/types/index.js";
 
 class S3StorageService {
   private s3: S3Client | null = null;

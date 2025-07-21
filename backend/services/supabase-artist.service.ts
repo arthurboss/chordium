@@ -1,7 +1,7 @@
 // Supabase artist search service
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import config from "../config/config.js";
-import type { Artist } from "@packages/types/dist";
+import type { Artist } from "../../shared/types/index.js";
 
 import type { SupabaseResponse } from "../types/supabase.types.js";
 
