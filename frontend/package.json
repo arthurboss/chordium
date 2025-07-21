@@ -74,7 +74,8 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.40.2",
-    "@esbuild/linux-x64": "^0.25.4"
+    "@esbuild/linux-x64": "^0.25.4",
+    "@swc/core-linux-x64-gnu": "1.11.24"
   },
   "devDependencies": {
     "@cypress/github-action": "6.9.0",
