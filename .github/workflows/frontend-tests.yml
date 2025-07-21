@@ -43,13 +43,9 @@ jobs:
         run: npm ci --silent
         working-directory: ./
 
-      - name: Clean and reinstall frontend dependencies with platform-specific packages
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install --silent
-          # Force install platform-specific Rollup binaries
-          npm install @rollup/rollup-linux-x64-gnu --save-dev --silent || true
-        working-directory: ./frontend
+      - name: Build types package first
+        run: npx turbo build --filter=@chordium/types
+        working-directory: ./
         
       - name: Build frontend using Turborepo
         run: npx turbo build --filter=chordium-frontend

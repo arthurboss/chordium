@@ -3,13 +3,14 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**"]
+      "outputs": ["dist/**", "build/**", ".next/**", "coverage/**"]
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
     "lint": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "dev": {
