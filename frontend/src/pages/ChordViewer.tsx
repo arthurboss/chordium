@@ -14,7 +14,7 @@ import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import { loadSampleSongs } from "@/utils/sample-songs";
+import { loadSampleSongs } from "@/hooks/use-sample-songs";
 import { toast } from "@/hooks/use-toast";
 
 // UI state interface for local song data with loading and error states  
