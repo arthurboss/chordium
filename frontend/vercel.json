@@ -1,5 +1,5 @@
 {
-  "outputDirectory": "frontend/dist",
+  "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
     {
