@@ -1,0 +1,20 @@
+{
+  "name": "@chordium/e2e-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "End-to-end tests for Chordium application",
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:headed": "cypress run --headed",
+    "test:ci": "cypress run --record",
+    "test:dev": "cypress run --config baseUrl=http://localhost:8080"
+  },
+  "dependencies": {
+    "cypress": "14.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.14",
+    "typescript": "^5.8.3"
+  }
+}
