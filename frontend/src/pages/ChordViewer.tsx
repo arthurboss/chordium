@@ -14,8 +14,6 @@ import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import { loadSampleSongs } from "@/utils/sample-songs";
-import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
 import { toast } from "@/hooks/use-toast";
 
 // UI state interface for local song data with loading and error states  
@@ -63,18 +61,14 @@ const ChordViewer = () => {
 
       const loadSongFromMyChordSheets = async () => {
         try {
-          // Get all chord sheets using unified storage
+          // Get all saved chord sheets from unified cache (includes sample chord sheets in dev mode)
           const allSongs = getMyChordSheetsAsSongs();
-          const sampleSongs = await loadSampleSongs();
-
-          // Combine sample songs and user songs
-          const songs = [...sampleSongs, ...allSongs];
 
           const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
           const songName = decodeURIComponent(song.replace(/-/g, ' '));
 
           // Find the song in My Chord Sheets by matching artist and title
-          const foundSong = songs.find(s => {
+          const foundSong = allSongs.find(s => {
             const songArtist = s.artist?.toLowerCase() ?? '';
             const songTitle = s.title?.toLowerCase() ?? '';
             return songArtist.includes(artistName.toLowerCase()) || songTitle.includes(songName.toLowerCase()) ||
@@ -82,9 +76,6 @@ const ChordViewer = () => {
           });
 
           if (foundSong) {
-            // Generate the proper cache key from artist and title
-            const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
-
             // Try to get the chord content from the cache using artist and title
             const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
 
@@ -93,17 +84,8 @@ const ChordViewer = () => {
             let guitarCapo = 0;
             let guitarTuning: GuitarTuning = GUITAR_TUNINGS.STANDARD;
 
-            // First, check if this is a sample song and load it directly from files
-            if (isSampleSong(foundSong.artist, foundSong.title)) {
-              const sampleChordSheet = await loadSampleChordSheet(foundSong.artist, foundSong.title);
-              if (sampleChordSheet) {
-                songChords = sampleChordSheet.songChords;
-                songKey = sampleChordSheet.songKey;
-                guitarCapo = sampleChordSheet.guitarCapo || 0;
-                guitarTuning = sampleChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
-              }
-            } else if (cachedChordSheet) {
-              // Use cached chord sheet data
+            if (cachedChordSheet) {
+              // Use cached chord sheet data (this includes sample songs that were pre-cached)
               songChords = cachedChordSheet.songChords;
               songKey = cachedChordSheet.songKey;
               guitarCapo = cachedChordSheet.guitarCapo || 0;

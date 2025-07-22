@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
 import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
-import { loadSampleChordSheet } from '@/services/sample-song-loader';
 
 // Mock localStorage
 const mockLocalStorage: { [key: string]: string } = {};
@@ -60,11 +59,11 @@ describe('ChordSheet Interface Integration', () => {
     expect(savedSheets[0]).toEqual(mockChordSheet);
     expect(savedSheets[0].songChords).toContain('[Verse]');
     
-    // 3. Test sample song loading
-    const sampleSheet = await loadSampleChordSheet('oasis', 'wonderwall');
-    expect(sampleSheet).toBeTruthy();
-    expect(sampleSheet?.title).toBe('Wonderwall');
-    expect(sampleSheet?.artist).toBe('Oasis');
+    // 3. Test that cache retrieval works consistently
+    const retrievedSheet = unifiedChordSheetCache.getCachedChordSheet('Test Artist', 'Test Song');
+    expect(retrievedSheet).toBeTruthy();
+    expect(retrievedSheet?.title).toBe('Test Song');
+    expect(retrievedSheet?.artist).toBe('Test Artist');
   });
 
   it('should handle empty cache keys correctly', () => {

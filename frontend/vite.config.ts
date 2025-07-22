@@ -8,7 +8,6 @@ import viteCompression from 'vite-plugin-compression';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
-  const isVercel = process.env.VERCEL === '1';
   
   return {
     server: {
@@ -41,6 +40,7 @@ export default defineConfig(({ mode }) => {
         threshold: 10240, // Only compress files larger than 10kb
         algorithm: 'brotliCompress',
         ext: '.br',
+        deleteOriginFile: false,
       }),
       // Optionally, keep Gzip for wider compatibility or if specific CDNs prefer it as a fallback
       // isProduction && viteCompression({

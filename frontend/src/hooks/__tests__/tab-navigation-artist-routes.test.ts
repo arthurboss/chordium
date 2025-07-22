@@ -25,7 +25,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       // Root path defaults to my-chord-sheets
       return "my-chord-sheets";
     
-    default:
+    default: {
       // Handle artist routes: /artist-name (single segment paths)
       const pathSegments = path.split('/').filter(segment => segment.length > 0);
       if (pathSegments.length === 1 && pathSegments[0] !== '') {
@@ -43,6 +43,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       
       // Fallback for unknown paths, default to "my-chord-sheets"
       return "my-chord-sheets";
+    }
   }
 };
 

@@ -3,11 +3,28 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "coverage/**"]
+      "outputs": ["dist/**", "build/**", ".next/**", "coverage/**"],
+      "env": ["VITE_API_URL", "NODE_ENV", "VERCEL"]
     },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
+    },
+    "test:open": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:headed": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:dev": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:ci": {
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "lint": {
       "dependsOn": ["^build"],
