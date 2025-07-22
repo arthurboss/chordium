@@ -12,6 +12,8 @@ import { scrollToElement } from "../utils/scroll-utils";
 import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
+import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
   activeTab: string;
@@ -20,7 +22,6 @@ interface TabContainerProps {
   setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
   selectedSong: Song | null;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
-  demoSong: Song | null;
 }
 
 const TabContainer = ({ 
@@ -29,16 +30,11 @@ const TabContainer = ({
   myChordSheets, 
   setMySongs,
   selectedSong,
-  setSelectedSong,
-  demoSong
+  setSelectedSong
 }: TabContainerProps) => {
   const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const { getTabState, setTabState } = useTabStatePersistence();
-
-  // Example: Persist search state
-  const searchTabState = getTabState<{ query: string; results: Song[] }>("search", { query: "", results: [] });
-  const setSearchTabState = (state: { query: string; results: Song[] }) => setTabState("search", state);
 
   // Example: Persist myChordSheets state (e.g., scroll position)
   const myChordSheetsTabState = getTabState<{ scroll: number }>("my-chord-sheets", { scroll: 0 });
@@ -46,10 +42,10 @@ const TabContainer = ({
 
   // Scroll to chord display when needed
   useEffect(() => {
-    if (selectedSong || demoSong) {
+    if (selectedSong) {
       scrollToElement(chordDisplayRef.current);
     }
-  }, [selectedSong, demoSong]);
+  }, [selectedSong]);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -151,8 +147,6 @@ const TabContainer = ({
           setActiveTab={setActiveTab}
           setSelectedSong={setSelectedSong}
           myChordSheets={myChordSheets}
-          tabState={searchTabState}
-          setTabState={setSearchTabState}
         />
       </div>
       <div style={{ display: activeTab === "upload" ? "block" : "none" }}>
@@ -164,7 +158,17 @@ const TabContainer = ({
       <div style={{ display: activeTab === "my-chord-sheets" ? "block" : "none" }}>
         {selectedSong ? (
           <SongViewer
-            song={selectedSong}
+            song={{
+              song: selectedSong,
+              chordSheet: unifiedChordSheetCache.getCachedChordSheet(selectedSong.artist, selectedSong.title) || {
+                title: selectedSong.title,
+                artist: selectedSong.artist,
+                songChords: '',
+                songKey: '',
+                guitarTuning: GUITAR_TUNINGS.STANDARD,
+                guitarCapo: 0
+              }
+            }}
             chordDisplayRef={chordDisplayRef}
             onBack={() => setSelectedSong(null)}
             onDelete={handleChordSheetDelete}

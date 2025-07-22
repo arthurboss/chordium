@@ -4,11 +4,9 @@ import { useEffect } from "react";
 import { getSearchParamsType } from "@/utils/search-utils";
 
 interface TabNavigationProps {
-  sampleSongs: Song[];
   myChordSheets: Song[];
   setActiveTab: (tab: string) => void;
   activeTab: string; // Added: current activeTab from Home's state
-  setDemoSong: React.Dispatch<React.SetStateAction<Song | null>>;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
 }
 
@@ -39,7 +37,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       // Root path defaults to my-chord-sheets
       return "my-chord-sheets";
     
-    default:
+    default: {
       // Handle artist routes: /artist-name (single segment paths)
       const pathSegments = path.split('/').filter(segment => segment.length > 0);
       if (pathSegments.length === 1 && pathSegments[0] !== '') {
@@ -54,6 +52,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       
       // Fallback for unknown paths, default to "my-chord-sheets"
       return "my-chord-sheets";
+    }
   }
 };
 
@@ -63,9 +62,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
 const handleSongSelection = (
   songIdFromQuery: string,
   determinedTab: string,
-  sampleSongs: Song[],
   myChordSheets: Song[],
-  setDemoSong: React.Dispatch<React.SetStateAction<Song | null>>,
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   // Only handle song selection if we're in my-chord-sheets tab
@@ -73,37 +70,23 @@ const handleSongSelection = (
     return;
   }
 
-  // Check sample songs first
-  if (sampleSongs?.length > 0) {
-    const foundDemo = sampleSongs.find((song) => song.path === songIdFromQuery);
-    if (foundDemo) {
-      setDemoSong({ ...foundDemo } as Song);
-      setSelectedSong(null);
-      return;
-    }
-  }
-
-  // Check user's songs if not found in sample songs
+  // Check user's songs (includes sample songs in dev mode)
   if (myChordSheets?.length > 0) {
     const foundMySong = myChordSheets.find(song => song.path === songIdFromQuery);
     if (foundMySong) {
       setSelectedSong(foundMySong);
-      setDemoSong(null);
       return;
     }
   }
 
-  // Song not found - could clear selections here if needed
-  // setDemoSong(null);
-  // setSelectedSong(null);
+  // Song not found - clear selection
+  setSelectedSong(null);
 };
 
 export const useTabNavigation = ({
-  sampleSongs,
   myChordSheets,
   setActiveTab,
   activeTab, // Consumed here
-  setDemoSong,
   setSelectedSong
 }: TabNavigationProps): void => {
   const location = useLocation();
@@ -126,11 +109,9 @@ export const useTabNavigation = ({
       handleSongSelection(
         songIdFromQuery,
         determinedTab,
-        sampleSongs,
         myChordSheets,
-        setDemoSong,
         setSelectedSong
       );
     }
-  }, [location, sampleSongs, myChordSheets, setActiveTab, activeTab, setDemoSong, setSelectedSong]);
+  }, [location, myChordSheets, setActiveTab, activeTab, setSelectedSong]);
 };
