@@ -29,9 +29,8 @@ const getInitialTab = (pathname: string): string => {
 const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
-  const [demoSong, setDemoSong] = useState<Song | null>(null);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { sampleSongs, myChordSheets, setMySongs, refreshMySongs } = useSampleSongs();
+  const { myChordSheets, setMySongs, refreshMySongs } = useSampleSongs();
   useSearchRedirect();
 
   // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
@@ -43,11 +42,9 @@ const Home = () => {
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
-    sampleSongs,
     myChordSheets,
     setActiveTab,
     activeTab, // Pass current activeTab state to the hook
-    setDemoSong,
     setSelectedSong
   });
 
@@ -63,7 +60,6 @@ const Home = () => {
           setMySongs={setMySongs}
           selectedSong={selectedSong}
           setSelectedSong={setSelectedSong}
-          demoSong={demoSong}
         />
       </main>
       

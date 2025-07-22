@@ -4,30 +4,28 @@ import { loadSampleSongs } from "@/utils/sample-songs";
 import { chordSheetToSong } from "@/utils/chord-sheet-storage";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 
-// Custom hook to load sample songs and initialize user songs from storage.
+// Custom hook to initialize My Chord Sheets (includes sample songs in dev mode)
 export function useSampleSongs() {
-  const [sampleSongs, setSampleSongs] = useState<Song[]>([]);
-  const [myChordSheets, setMySongs] = useState<Song[]>([]);
+  const [myChordSheets, setMyChordSheets] = useState<Song[]>([]);
 
   const refreshMySongs = useCallback(() => {
     // Get My Chord Sheets from the cache (this includes both user-added and dev-mode sample songs)
     const chordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
     const songs = chordSheets.map(chordSheetToSong);
     
-    setMySongs(songs);
+    setMyChordSheets(songs);
   }, []);
 
   useEffect(() => {
     const initializeSongs = async () => {
-      // Load sample songs for the search interface
-      const samples = await loadSampleSongs();
-      setSampleSongs(samples);
+      // Load sample songs in dev mode only - this populates the cache via populateDevModeSampleSongs()
+      await loadSampleSongs();
       
-      // Initial load of My Chord Sheets
+      // Load My Chord Sheets (now includes sample songs in dev mode)
       refreshMySongs();
     };
     initializeSongs();
   }, [refreshMySongs]);
 
-  return { sampleSongs, setSampleSongs, myChordSheets, setMySongs, refreshMySongs };
+  return { myChordSheets, setMySongs: setMyChordSheets, refreshMySongs };
 }
