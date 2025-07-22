@@ -8,7 +8,8 @@
   "workspaces": [
     "frontend",
     "backend",
-    "packages/types"
+    "packages/types",
+    "packages/e2e-tests"
   ],
   "scripts": {
     "use-workspace": "node scripts/toggle-workspace-deps.js",
@@ -32,7 +33,11 @@
     "lint:fix": "turbo run lint:fix",
     "lint:fe:fix": "turbo run lint:fix --filter=chordium-frontend",
     "lint:be:fix": "turbo run lint:fix --filter=chordium-backend",
-    "clean": "turbo clean && rm -rf node_modules frontend/node_modules backend/node_modules packages/types/node_modules",
+    "test:e2e": "turbo run test --filter=@chordium/e2e-tests",
+    "test:e2e:open": "turbo run test:open --filter=@chordium/e2e-tests",
+    "test:e2e:headed": "turbo run test:headed --filter=@chordium/e2e-tests",
+    "test:e2e:dev": "turbo run test:dev --filter=@chordium/e2e-tests",
+    "clean": "turbo clean && rm -rf node_modules frontend/node_modules backend/node_modules packages/types/node_modules packages/e2e-tests/node_modules",
     "clean:install": "npm run clean && npm install",
     "kill": "./scripts/kill-servers.sh",
     "kill:fe": "./scripts/kill-servers.sh fe",
