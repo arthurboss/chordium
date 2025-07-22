@@ -6,7 +6,7 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleSongs } from "@/hooks/use-sample-songs";
+import { useSampleChordSheets } from "@/hooks/use-sample-chord-sheets";
 import { useSearchRedirect } from "@/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -30,15 +30,15 @@ const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { myChordSheets, setMySongs, refreshMySongs } = useSampleSongs();
+  const { myChordSheets, setMyChordSheets, refreshMyChordSheets } = useSampleChordSheets();
   useSearchRedirect();
 
   // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
   useEffect(() => {
     if (activeTab === 'my-chord-sheets') {
-      refreshMySongs();
+      refreshMyChordSheets();
     }
-  }, [activeTab, refreshMySongs]);
+  }, [activeTab, refreshMyChordSheets]);
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
@@ -57,7 +57,7 @@ const Home = () => {
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
           myChordSheets={myChordSheets}
-          setMySongs={setMySongs}
+          setMySongs={setMyChordSheets}
           selectedSong={selectedSong}
           setSelectedSong={setSelectedSong}
         />

@@ -14,7 +14,6 @@ import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
 import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import { loadSampleSongs } from "@/hooks/use-sample-songs";
 import { toast } from "@/hooks/use-toast";
 
 // UI state interface for local song data with loading and error states  
@@ -62,18 +61,14 @@ const ChordViewer = () => {
 
       const loadSongFromMyChordSheets = async () => {
         try {
-          // Get all chord sheets using unified storage
+          // Get all saved chord sheets from unified cache (includes sample chord sheets in dev mode)
           const allSongs = getMyChordSheetsAsSongs();
-          const sampleSongs = await loadSampleSongs();
-
-          // Combine sample songs and user songs
-          const songs = [...sampleSongs, ...allSongs];
 
           const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
           const songName = decodeURIComponent(song.replace(/-/g, ' '));
 
           // Find the song in My Chord Sheets by matching artist and title
-          const foundSong = songs.find(s => {
+          const foundSong = allSongs.find(s => {
             const songArtist = s.artist?.toLowerCase() ?? '';
             const songTitle = s.title?.toLowerCase() ?? '';
             return songArtist.includes(artistName.toLowerCase()) || songTitle.includes(songName.toLowerCase()) ||
