@@ -23,8 +23,8 @@ const loadSampleChordSheets = async (): Promise<void> => {
   try {
     // Dynamic imports only in development mode to prevent bundling in production
     const [wonderwallModule, hotelCaliforniaModule] = await Promise.all([
-      import('../../../shared/fixtures/chord-sheet/oasis-wonderwall.json'),
-      import('../../../shared/fixtures/chord-sheet/eagles-hotel_california.json')
+      import('./sample-chord-sheets/oasis-wonderwall.json'),
+      import('./sample-chord-sheets/eagles-hotel_california.json')
     ]);
 
     const sampleChordSheets = [wonderwallModule.default, hotelCaliforniaModule.default] as ChordSheet[];
