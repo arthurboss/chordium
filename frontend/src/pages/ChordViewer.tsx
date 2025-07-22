@@ -15,7 +15,6 @@ import { getMyChordSheetsAsSongs, deleteChordSheetByPath } from "@/utils/chord-s
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { loadSampleSongs } from "@/utils/sample-songs";
-import { loadSampleChordSheet, isSampleSong } from "@/services/sample-song-loader";
 import { toast } from "@/hooks/use-toast";
 
 // UI state interface for local song data with loading and error states  
@@ -82,9 +81,6 @@ const ChordViewer = () => {
           });
 
           if (foundSong) {
-            // Generate the proper cache key from artist and title
-            const cacheKey = generateChordSheetId(foundSong.artist, foundSong.title);
-
             // Try to get the chord content from the cache using artist and title
             const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
 
@@ -93,17 +89,8 @@ const ChordViewer = () => {
             let guitarCapo = 0;
             let guitarTuning: GuitarTuning = GUITAR_TUNINGS.STANDARD;
 
-            // First, check if this is a sample song and load it directly from files
-            if (isSampleSong(foundSong.artist, foundSong.title)) {
-              const sampleChordSheet = await loadSampleChordSheet(foundSong.artist, foundSong.title);
-              if (sampleChordSheet) {
-                songChords = sampleChordSheet.songChords;
-                songKey = sampleChordSheet.songKey;
-                guitarCapo = sampleChordSheet.guitarCapo || 0;
-                guitarTuning = sampleChordSheet.guitarTuning || GUITAR_TUNINGS.STANDARD;
-              }
-            } else if (cachedChordSheet) {
-              // Use cached chord sheet data
+            if (cachedChordSheet) {
+              // Use cached chord sheet data (this includes sample songs that were pre-cached)
               songChords = cachedChordSheet.songChords;
               songKey = cachedChordSheet.songKey;
               guitarCapo = cachedChordSheet.guitarCapo || 0;
