@@ -77,7 +77,7 @@ packages/e2e-tests/
 
 - **Base URL**: Configured in `cypress.config.ts`
 - **Test patterns**: `cypress/e2e/**/*.cy.{js,jsx,ts,tsx}`
-- **Fixtures**: Uses shared fixtures from `../../../shared/fixtures/api`
+- **Fixtures**: Uses API fixtures from `../../frontend/fixtures/api`
 - **TypeScript**: Full TypeScript support enabled
 
 ## Best Practices
