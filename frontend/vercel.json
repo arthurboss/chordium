@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "CYPRESS_INSTALL_BINARY=0 npm install && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
