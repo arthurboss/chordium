@@ -9,7 +9,7 @@ export const useSongActions = ({
   memoizedSongs,
   setActiveTab,
   setSelectedSong,
-  myChordSheets
+  myChordSheets = []
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
   
