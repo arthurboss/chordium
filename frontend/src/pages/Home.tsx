@@ -53,6 +53,10 @@ const Home = () => {
       <Header />
 
       <main className="w-full max-w-3xl mx-auto flex-1 container px-3 py-4 sm:px-4 sm:py-6">
+        {/* Development Banner */}
+        <div className="text-center bg-purple-100 border-l-4 border-purple-400 text-purple-900 p-3 mb-4 rounded shadow">
+          <strong>Note:</strong> This app is in development. Some features may not work as expected.
+        </div>
         <TabContainer
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
