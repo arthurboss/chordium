@@ -14,6 +14,7 @@ describe('Route Validation', () => {
       '/null',
       '/favicon.ico',
       '/test.php',
+      '/chord/admin', // moved here, as 'admin' is not a valid artist name
     ];
 
     test.each(invalidRoutes)('should redirect %s to home', (path) => {
@@ -36,7 +37,6 @@ describe('Route Validation', () => {
       // Chord routes
       { path: '/chord/beatles/hey-jude', description: 'valid chord route' },
       { path: '/chord/abc123xyz', description: 'potential chord route' },
-      { path: '/chord/admin', description: 'admin as artist name in chord route' },
       
       // App routes
       { path: '/search', description: 'search page' },
@@ -71,5 +71,25 @@ describe('Route Validation', () => {
       const result = validateRoute('/admin');
       expect(result.routeType).toBe('invalid');
     });
+  });
+});
+
+describe('WordPress pattern specificity', () => {
+  test('should redirect WordPress patterns in chord routes', () => {
+    expect(validateRoute('/chord/wp-admin').shouldRedirectHome).toBe(true);
+    expect(validateRoute('/chord/wp-content').shouldRedirectHome).toBe(true);
+    expect(validateRoute('/chord/wp-includes').shouldRedirectHome).toBe(true);
+    expect(validateRoute('/chord/wordpress').shouldRedirectHome).toBe(true);
+  });
+
+  test('should allow legitimate wp- patterns in chord routes', () => {
+    expect(validateRoute('/chord/wp-40').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wps-office').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wp-administer').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wp-contention').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wp-included').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wp-admins').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wp-content-manager').shouldRedirectHome).toBe(false);
+    expect(validateRoute('/chord/wordpressing').shouldRedirectHome).toBe(false);
   });
 });

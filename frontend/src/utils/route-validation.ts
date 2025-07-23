@@ -15,10 +15,12 @@ export interface RouteValidationResult {
  * These are patterns that are definitely NOT music-related searches
  */
 const INVALID_URL_PATTERNS = [
-  // Admin/system paths
-  /^(admin|api|config|system|debug|wp-admin|wp-|wordpress)/, 
+  // Admin/system paths (exact match)
+  /^(admin|api|config|system|debug)$/,
+  // WordPress admin/content/includes/wordpress (exact match)
+  /^(wp-admin|wp-content|wp-includes|wordpress)$/,
   // File extensions
-  /\.(php|asp|jsp|cgi|exe|zip|pdf|doc)$/, 
+  /\.(php|asp|jsp|cgi|exe|zip|pdf|doc)$/,
   // Obviously technical patterns
   /^(null|undefined|NaN|favicon\.ico)$/i,
   // Very short or clearly invalid
@@ -109,14 +111,16 @@ function validateChordRoute(second: string, third: string): RouteValidationResul
         errorMessage: `Chord sheet not found for "${third}" by ${second}`
       };
     }
-  } else if (second.length > 3 && !/^\d+-\d+$/.test(second)) {
-    // /chord/:id - could be valid ID format
-    return { 
-      isValid: true, 
-      routeType: 'chord', 
-      shouldRedirectHome: false,
-      errorMessage: `Chord sheet not found`
-    };
+  } else if (second.length > 3 && !/^[0-9]+-[0-9]+$/.test(second)) {
+    // /chord/:artist - check if artist is valid
+    if (isValidMusicName(second)) {
+      return { 
+        isValid: true, 
+        routeType: 'chord', 
+        shouldRedirectHome: false,
+        errorMessage: `Chord sheet not found`
+      };
+    }
   }
   
   return { 
