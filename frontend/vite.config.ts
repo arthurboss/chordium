@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import * as os from "os";
 import { visualizer } from 'rollup-plugin-visualizer';
 import stripTestAttributes from "./src/utils/vite-strip-test-attributes";
 import viteCompression from 'vite-plugin-compression';
@@ -142,12 +143,12 @@ export default defineConfig(({ mode }) => {
       teardownTimeout: 5000,
       // Improve test isolation and memory management
       isolate: true,
-      // Limit memory usage - run tests sequentially to prevent memory issues
-      maxConcurrency: 1,
+      // Optimize concurrency based on available CPU cores
+      maxConcurrency: Math.max(1, Math.floor(os.cpus().length / 2)),
       // Prevent hanging tests
-      fileParallelism: false,
-      // Additional memory optimization
-      maxWorkers: 1,
+      fileParallelism: true,
+      // CPU-aware worker allocation for performance
+      maxWorkers: Math.max(1, os.cpus().length - 1),
       // Silent console logs during tests to reduce memory usage
       silent: false,
       // Enable garbage collection between test files
