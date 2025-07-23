@@ -4,33 +4,33 @@
  */
 
 // Core search types
-export type { SearchState } from './searchState.js';
-export type { SearchQuery } from './searchQuery.js';
-export type { SearchFilters } from './searchFilters.js';
-export type { SearchParamType } from './searchParamType.js';
+export type { SearchState } from './searchState';
+export type { SearchQuery } from './searchQuery';
+export type { SearchFilters } from './searchFilters';
+export type { SearchParamType } from './searchParamType';
 
 // Search results reducer types
-export type { SearchResultsState } from './searchResultsState.js';
-export type { SearchResultsAction } from './searchResultsAction.js';
+export type { SearchResultsState } from './searchResultsState';
+export type { SearchResultsAction } from './searchResultsAction';
 
 // Hook types
-export type { UseSearchResultsOptions } from './useSearchResultsOptions.js';
-export type { SearchFilterState } from './searchFilterState.js';
-export type { UseSearchFetchState } from './useSearchFetchState.js';
-export type { UseSearchFetchOptions } from './useSearchFetchOptions.js';
-export type { SearchEffectsProps } from './searchEffectsProps.js';
-export type { UseSongActionsProps } from './useSongActionsProps.js';
+export type { UseSearchResultsOptions } from './useSearchResultsOptions';
+export type { SearchFilterState } from './searchFilterState';
+export type { UseSearchFetchState } from './useSearchFetchState';
+export type { UseSearchFetchOptions } from './useSearchFetchOptions';
+export type { SearchEffectsProps } from './searchEffectsProps';
+export type { UseSongActionsProps } from './useSongActionsProps';
 
 // Cache types
-export type { CacheItem } from './cacheItem.js';
-export type { SearchCache } from './searchCache.js';
+export type { CacheItem } from './cacheItem';
+export type { SearchCache } from './searchCache';
 
 // Component prop types
-export type { SearchBarProps } from './searchBarProps.js';
-export type { SearchResultsProps } from './searchResultsProps.js';
-export type { SearchResultsStateHandlerProps } from './searchResultsStateHandlerProps.js';
-export type { SearchResultsLayoutProps } from './searchResultsLayoutProps.js';
-export type { SearchResultsSectionProps } from './searchResultsSectionProps.js';
+export type { SearchBarProps } from './searchBarProps';
+export type { SearchResultsProps } from './searchResultsProps';
+export type { SearchResultsStateHandlerProps } from './searchResultsStateHandlerProps';
+export type { SearchResultsLayoutProps } from './searchResultsLayoutProps';
+export type { SearchResultsSectionProps } from './searchResultsSectionProps';
 
 // Re-export shared types from @chordium/types for convenience
 export type { Artist, Song, SearchType, SearchResponse } from '@chordium/types';
