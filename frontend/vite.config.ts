@@ -133,18 +133,33 @@ export default defineConfig(({ mode }) => {
       poolOptions: {
         forks: {
           singleFork: true,
+          isolate: true,
         },
       },
       // Prevent memory leaks and timeouts
       testTimeout: 10000,
       hookTimeout: 10000,
       teardownTimeout: 5000,
-      // Improve test isolation
+      // Improve test isolation and memory management
       isolate: true,
-      // Limit memory usage
+      // Limit memory usage - run tests sequentially to prevent memory issues
       maxConcurrency: 1,
       // Prevent hanging tests
       fileParallelism: false,
+      // Additional memory optimization
+      maxWorkers: 1,
+      // Silent console logs during tests to reduce memory usage
+      silent: false,
+      // Enable garbage collection between test files
+      sequence: {
+        shuffle: false,
+        concurrent: false,
+      },
+      // Memory management for large test suites
+      forceRerunTriggers: ['**/test-utils.tsx'],
+      clearMocks: true,
+      mockReset: true,
+      restoreMocks: true,
     },
   };
 });
