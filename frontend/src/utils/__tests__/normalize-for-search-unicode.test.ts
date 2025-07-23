@@ -1,4 +1,4 @@
-import { normalizeForSearchUnicode } from '../normalize-for-search';
+import { normalizeForSearchUnicode } from '@/search/utils';
 
 describe('normalizeForSearchUnicode (TDD)', () => {
   describe('Unicode character preservation', () => {

@@ -1,7 +1,12 @@
 import { useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Artist } from '@/types/artist';
-import { ArtistUrlNavigation } from '@/utils/artist-url-navigation';
+import { Artist } from '@chordium/types';
+import { 
+  navigateToArtist as navigateToArtistUtil, 
+  navigateBackToSearch as navigateBackToSearchUtil, 
+  isArtistPage, 
+  extractArtistFromUrl 
+} from '@/search/utils';
 
 /**
  * Hook to manage artist navigation state and logic
@@ -27,28 +32,28 @@ export const useArtistNavigation = () => {
       song: searchParams.get('song') || undefined,
     };
     
-    ArtistUrlNavigation.navigateToArtist(artist, navigate);
+    navigateToArtistUtil(artist, navigate);
   }, [navigate, location.search]);
 
   /**
    * Navigate back to search results
    */
   const navigateBackToSearch = useCallback(() => {
-    ArtistUrlNavigation.navigateBackToSearch(originalSearchParams.current, navigate);
+    navigateBackToSearchUtil(originalSearchParams.current, navigate);
   }, [navigate]);
 
   /**
    * Check if currently on an artist page
    */
   const isOnArtistPage = useCallback(() => {
-    return ArtistUrlNavigation.isArtistPage(location.pathname);
+    return isArtistPage(location.pathname);
   }, [location.pathname]);
 
   /**
    * Get current artist path from URL
    */
   const getCurrentArtistPath = useCallback(() => {
-    return ArtistUrlNavigation.extractArtistFromUrl(location.pathname);
+    return extractArtistFromUrl(location.pathname);
   }, [location.pathname]);
 
   return {

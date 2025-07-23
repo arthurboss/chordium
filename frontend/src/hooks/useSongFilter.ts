@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Song } from '@/types/song';
-import { isAccentInsensitiveMatch } from '@/utils/accent-insensitive-search';
+import { Song } from '@chordium/types';
+import { isAccentInsensitiveMatch } from '@/search/utils';
 
 /**
  * Custom hook for filtering songs based on search input

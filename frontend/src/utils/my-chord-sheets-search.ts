@@ -1,7 +1,6 @@
 import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
-import { ChordSheet } from '@/types/chordSheet';
-import { Song } from '@/types/song';
-import { isAccentInsensitiveMatch } from './accent-insensitive-search';
+import { ChordSheet, Song } from '@chordium/types';
+import { isAccentInsensitiveMatch } from '@/search/utils';
 
 /**
  * Converts a ChordSheet to a Song object for search results
