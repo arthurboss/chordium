@@ -683,6 +683,12 @@ frontend/_archive/
 - ✅ **Identified unused functions**: `formatSearchUrl`, `filterSongsByTitle`, `formatArtistResult`
 - ✅ **All types actively used**: 24 type files verified as required
 - ✅ **Documentation preserved**: Keeping progress tracking in temp docs
+- ✅ **Archive recovery**: Recovered missing `search-utils.ts`, `get-query-display-text.ts`, `search-results-utils.ts` from git history
+
+**📁 Archive Status:**
+- ✅ **Complete archive**: All 7 migrated utility files properly archived in `_archive/src/utils/`
+- ✅ **Git recovery**: Retrieved original implementations from commit `0c4a7b3~1` 
+- ✅ **Documentation updated**: Archive README reflects current status and recovery process
 
 **📊 Search Module Status:**
 - **Self-Contained**: ✅ Zero external `/utils/` dependencies
