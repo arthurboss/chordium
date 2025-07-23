@@ -24,7 +24,8 @@ describe('ErrorBoundary - GitHub Issue Reporting', () => {
 
     expect(window.open).toHaveBeenCalledWith(
       expect.stringContaining('https://github.com/arthurboss/chordium/issues/new'),
-      '_blank'
+      '_blank',
+      'noopener,noreferrer'
     );
 
     // Check if the URL contains proper query parameters

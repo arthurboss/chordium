@@ -155,7 +155,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
     githubIssueUrl.searchParams.set('body', body);
     githubIssueUrl.searchParams.set('labels', 'bug');
     
-    window.open(githubIssueUrl.toString(), '_blank');
+    window.open(githubIssueUrl.toString(), '_blank', 'noopener,noreferrer');
   };
 
   render() {
