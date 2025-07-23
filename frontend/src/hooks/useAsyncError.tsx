@@ -15,6 +15,65 @@ interface UseAsyncErrorOptions {
   onError?: (error: AsyncError) => void;
 }
 
+// Singleton class to manage global error listeners
+class GlobalErrorManager {
+  private static instance: GlobalErrorManager | null = null;
+  private listeners: Set<(error: Error, context?: string) => void> = new Set();
+  private isInitialized = false;
+
+  static getInstance(): GlobalErrorManager {
+    if (!GlobalErrorManager.instance) {
+      GlobalErrorManager.instance = new GlobalErrorManager();
+    }
+    return GlobalErrorManager.instance;
+  }
+
+  private constructor() {}
+
+  private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    const error = new Error(event.reason);
+    this.notifyListeners(error, 'unhandled-promise-rejection');
+  };
+
+  private handleError = (event: ErrorEvent) => {
+    const error = new Error(event.error);
+    this.notifyListeners(error, 'global-error');
+  };
+
+  private notifyListeners(error: Error, context?: string) {
+    this.listeners.forEach(listener => {
+      try {
+        listener(error, context);
+      } catch (err) {
+        console.error('Error in global error listener:', err);
+      }
+    });
+  }
+
+  subscribe(listener: (error: Error, context?: string) => void): () => void {
+    this.listeners.add(listener);
+    
+    // Initialize global listeners only once
+    if (!this.isInitialized) {
+      window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
+      window.addEventListener('error', this.handleError);
+      this.isInitialized = true;
+    }
+
+    // Return unsubscribe function
+    return () => {
+      this.listeners.delete(listener);
+      
+      // Clean up global listeners if no more subscribers
+      if (this.listeners.size === 0 && this.isInitialized) {
+        window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+        window.removeEventListener('error', this.handleError);
+        this.isInitialized = false;
+      }
+    };
+  }
+}
+
 /**
  * Hook for handling async errors that can't be caught by ErrorBoundary
  * These include: event handlers, timers, promises, async/await
@@ -99,6 +158,7 @@ export const useAsyncError = (options: UseAsyncErrorOptions = {}) => {
 
 /**
  * Higher-order component for wrapping components with async error handling
+ * Uses singleton pattern to avoid duplicate global event listeners
  */
 export const withAsyncErrorHandling = <P extends object>(
   Component: React.ComponentType<P>,
@@ -107,23 +167,15 @@ export const withAsyncErrorHandling = <P extends object>(
   return function WrappedComponent(props: P) {
     const { captureError } = useAsyncError(options);
 
-    // Add global error handling for this component's scope
+    // Subscribe to global errors using singleton pattern
     useEffect(() => {
-      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        captureError(new Error(event.reason), 'unhandled-promise-rejection');
-      };
+      const globalErrorManager = GlobalErrorManager.getInstance();
+      
+      const unsubscribe = globalErrorManager.subscribe((error, context) => {
+        captureError(error, context);
+      });
 
-      const handleError = (event: ErrorEvent) => {
-        captureError(new Error(event.error), 'global-error');
-      };
-
-      window.addEventListener('unhandledrejection', handleUnhandledRejection);
-      window.addEventListener('error', handleError);
-
-      return () => {
-        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-        window.removeEventListener('error', handleError);
-      };
+      return unsubscribe;
     }, [captureError]);
 
     return <Component {...props} />;
