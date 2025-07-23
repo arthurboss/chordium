@@ -95,6 +95,8 @@ frontend/src/search/types/
 - ✅ Maintained 100% backward compatibility through re-export wrappers
 - ✅ Build verification: All 467 tests passing ✅
 - ✅ Zero breaking changes with comprehensive import updates
+- ✅ **Code duplication cleanup**: Properly archived original implementations to `_archive/` folder
+- ✅ **Converted duplicate utilities**: All original files now serve as re-export wrappers pointing to modular structure
 
 #### Modular Structure Created
 
@@ -543,6 +545,56 @@ interface Artist { name: string; path: string; } // This exists in @chordium/typ
    - ✅ Eliminated inconsistent local type imports
    - ✅ Improved type consistency between frontend and backend
    - ✅ Maintained 100% backward compatibility
+
+3. **✅ Code Duplication Cleanup & Proper Archival**
+   - ✅ Created `frontend/_archive/` folder with structured backup system
+   - ✅ Implemented path-preserving archive format: `_archive/src/utils/filename.ts.backup`
+   - ✅ Archived duplicate utility functions: `accent-insensitive-search.ts`, `format-search-result.ts`, `format-artist-result.ts`, `normalize-for-search.ts`
+   - ✅ Added `_archive/` to `.gitignore` to prevent repository clutter
+   - ✅ Documented archive format and restoration process in `_archive/README.md`
+   - ✅ Converted all original utility files to re-export wrappers pointing to modular structure
+   - ✅ Eliminated code duplication between original and modular implementations
+   - ✅ Verified build success and test compatibility (467 tests passing)
+
+**Status**: Phase 2 is now completely finished with clean, deduplicated codebase ready for Phase 3 component modularization.
+
+## 📁 Archive Documentation
+
+### Archive Structure & Format
+
+**Location**: `frontend/_archive/`  
+**Purpose**: Systematic backup of original implementations before modularization  
+**Git Status**: Excluded via `.gitignore` to prevent repository clutter
+
+#### Archive Directory Structure
+
+```text
+frontend/_archive/
+├── README.md                           # Archive documentation & restoration guide
+└── src/
+    └── utils/                          # Original utility implementations
+        ├── accent-insensitive-search.ts.backup
+        ├── format-artist-result.ts.backup
+        ├── format-search-result.ts.backup
+        └── normalize-for-search.ts.backup
+```
+
+#### Archive Format Convention
+
+- **Path Structure**: Mirrors exact `src/` directory structure for easy restoration
+- **File Naming**: `original-filename.ts.backup` format
+- **Content**: Complete original implementation before modularization
+- **Documentation**: Each archive includes restoration instructions
+
+#### Restoration Process
+
+1. Navigate to `frontend/_archive/src/utils/`
+2. Copy desired `.backup` file to original location
+3. Remove `.backup` extension
+4. Update any import dependencies as needed
+5. Run tests to verify functionality
+
+**Detailed Instructions**: See `frontend/_archive/README.md`
 
 ### Future Phases
 
