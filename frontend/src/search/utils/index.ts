@@ -1,6 +1,6 @@
 /**
  * Search utilities - Central re-exports
- * Organized by functional category following SRP
+ * Organized by functional category for easy imports
  */
 
 // Core search utilities

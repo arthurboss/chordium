@@ -1,6 +1,8 @@
 /**
  * Analyzes URL search parameters to determine the search type
- * Single responsibility: URL parameter type detection
+ * 
+ * @param params - URLSearchParams object containing search parameters
+ * @returns The detected search type ('artist', 'song', 'artist-song', or null)
  */
 import type { SearchParamType } from '@/search/types';
 

@@ -1,6 +1,11 @@
 /**
- * Formats search result items for consistent display
- * Single responsibility: Search result data formatting
+ * Formats search result items for consistent display.
+ * 
+ * Extracts cleaner titles by removing artist information when present,
+ * typically from titles formatted as "Title - Artist".
+ * 
+ * @param item - The song object to format
+ * @returns The formatted song object with cleaned title
  */
 import { Song } from "@chordium/types";
 

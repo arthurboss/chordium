@@ -1,6 +1,11 @@
 /**
- * Generates display text for search query parameters
- * Single responsibility: Query parameter display formatting
+ * Generates display text for search query parameters.
+ * 
+ * Creates human-readable text that describes the current search
+ * based on the provided URL search parameters.
+ * 
+ * @param params - URLSearchParams containing search parameters
+ * @returns Formatted display text describing the search query
  */
 import { getSearchParamsType } from './getSearchParamsType';
 

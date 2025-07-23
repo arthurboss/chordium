@@ -1,15 +1,17 @@
 /**
- * Normalizes text for search with Unicode awareness by:
- * 1. Converting to lowercase
- * 2. Removing special characters but preserving Unicode letters and numbers
- * 3. Normalizing Unicode characters for consistency
- * 4. Handling separators (slashes, dashes) by converting to spaces
- * 5. Removing extra spaces
+ * Normalizes text for search with Unicode awareness.
  * 
- * This function uses Unicode property escapes to preserve accented characters
- * like "Hänni", "José", "Café", etc. while still removing punctuation.
+ * Performs the following transformations:
+ * 1. Converts to lowercase
+ * 2. Normalizes Unicode characters for consistency
+ * 3. Converts separators (slashes, dashes) to spaces
+ * 4. Removes special characters while preserving Unicode letters and numbers
+ * 5. Normalizes whitespace
  * 
- * Single responsibility: Unicode-aware text normalization for search
+ * Preserves accented characters like "Hänni", "José", "Café", etc.
+ * 
+ * @param text - The text to normalize
+ * @returns The normalized text suitable for search matching
  */
 export function normalizeForSearch(text: string): string {
   if (!text) return '';

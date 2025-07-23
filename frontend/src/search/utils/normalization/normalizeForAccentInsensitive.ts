@@ -1,15 +1,18 @@
 /**
- * Normalizes text for accent-insensitive search by:
- * 1. Converting to lowercase
- * 2. Removing diacritics/accents (á -> a, é -> e, etc.)
- * 3. Normalizing Unicode characters
- * 4. Removing special characters
- * 5. Normalizing whitespace
+ * Normalizes text for accent-insensitive search.
+ * 
+ * Performs the following transformations:
+ * 1. Converts to lowercase
+ * 2. Removes diacritics/accents (á -> a, é -> e, etc.)
+ * 3. Normalizes Unicode characters
+ * 4. Removes special characters
+ * 5. Normalizes whitespace
  * 
  * This allows users to search for "cafe" and match "Café" or 
  * search for "do lado de ca" and match "Do Lado de Cá".
  * 
- * Single responsibility: Text normalization for accent-insensitive search
+ * @param text - The text to normalize
+ * @returns The normalized text with accents removed
  */
 export function normalizeForAccentInsensitiveSearch(text: string): string {
   if (!text) return '';

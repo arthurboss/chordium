@@ -1,6 +1,8 @@
 /**
- * Navigate to artist page when artist is selected from search results
- * Single responsibility: Artist page navigation
+ * Navigate to artist page when artist is selected from search results.
+ * 
+ * @param artist - The artist object containing navigation path
+ * @param navigate - React Router navigate function for programmatic navigation
  */
 import { Artist } from "@chordium/types";
 

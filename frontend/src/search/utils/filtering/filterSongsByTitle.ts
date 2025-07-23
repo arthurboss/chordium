@@ -1,6 +1,12 @@
 /**
- * Filters songs by title, path, or artist name
- * Single responsibility: Song filtering by multiple criteria
+ * Filters songs by title, path, or artist name.
+ * 
+ * Searches across multiple song properties using normalized text comparison
+ * for flexible and accurate filtering results.
+ * 
+ * @param songs - Array of song objects to filter
+ * @param filter - Search term to filter by
+ * @returns Filtered array of songs matching the search term
  */
 import { Song } from '@chordium/types';
 import { normalizeForSearch } from '../normalization/normalizeForSearch';

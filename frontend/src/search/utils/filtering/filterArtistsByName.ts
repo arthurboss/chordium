@@ -1,7 +1,12 @@
 /**
- * Filters a list of artists based on a search term
- * Checks both the displayName and the path (after normalization)
- * Single responsibility: Artist filtering by name or path
+ * Filters a list of artists based on a search term.
+ * 
+ * Matches against both the artist's display name and path using
+ * normalized text comparison for better search results.
+ * 
+ * @param artists - Array of artist objects to filter
+ * @param filter - Search term to filter by
+ * @returns Filtered array of artists matching the search term
  */
 import { Artist } from '@chordium/types';
 import { normalizeForSearch } from '../normalization/normalizeForSearch';

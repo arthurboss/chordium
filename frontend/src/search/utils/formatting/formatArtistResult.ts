@@ -1,6 +1,11 @@
 /**
- * Formats artist result items for consistent display
- * Single responsibility: Artist result data formatting
+ * Formats artist result items for consistent display.
+ * 
+ * Enhances artist data by extracting better display names from paths
+ * when the default display name is missing or inadequate.
+ * 
+ * @param item - The artist object to format
+ * @returns The formatted artist object with improved display name
  */
 import { Artist } from "@chordium/types";
 

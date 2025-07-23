@@ -1,6 +1,11 @@
 /**
- * Navigate back to search results from artist page
- * Single responsibility: Search results navigation
+ * Navigate back to search results from artist page.
+ * 
+ * Constructs the appropriate search URL with preserved search parameters
+ * and navigates back to the search results page.
+ * 
+ * @param searchParams - Object containing artist and/or song search parameters
+ * @param navigate - React Router navigate function for programmatic navigation
  */
 export function navigateBackToSearch(
   searchParams: { artist?: string; song?: string },
