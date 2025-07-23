@@ -1,7 +1,6 @@
 // Utility functions for search parameter handling
 import { toSlug } from './url-slug-utils';
-
-export type SearchParamType = 'artist-song' | 'artist' | 'song' | null;
+import type { SearchParamType } from '@/search/types';
 
 export function getSearchParamsType(params: URLSearchParams): SearchParamType {
   const artist = params.get('artist');

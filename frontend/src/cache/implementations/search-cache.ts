@@ -1,7 +1,10 @@
-import { Song } from "@/types/song";
+import { Song } from '@chordium/types';
 import { getApiBaseUrl } from '@/utils/api-base-url';
 
 // Environment-based logging utility to prevent memory leaks in tests
+import type { CacheItem } from "@/search/types/cacheItem";
+import type { SearchCache } from "@/search/types/searchCache";
+
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 const isVitestRunning = typeof process !== 'undefined' && process.env.VITEST === 'true';
 const shouldLog = !isTestEnvironment && !isVitestRunning;
@@ -33,28 +36,6 @@ const MAX_CACHE_SIZE_BYTES = 4 * 1024 * 1024;
 
 // In-memory LRU cache for fast access (optional, fallback to localStorage)
 const inMemoryCache = new Map<string, CacheItem>();
-
-// Interface for cache items
-interface CacheItem {
-  key: string;
-  results: Song[];
-  timestamp: number;
-  accessCount: number;
-  query: {
-    artist: string | null;
-    song: string | null;
-    [key: string]: string | null;
-  };
-}
-
-// Interface for the entire cache
-interface SearchCache {
-  items: CacheItem[];
-  lastQuery?: {
-    artist: string | null;
-    song: string | null;
-  };
-}
 
 /**
  * Generate a cache key based on search params (artist, song, and future filters)

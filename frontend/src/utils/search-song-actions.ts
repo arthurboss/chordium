@@ -2,22 +2,14 @@ import { useCallback } from 'react';
 import { Song } from '@/types/song';
 import { useNavigate } from 'react-router-dom';
 import { useEnhancedSongSelection } from './enhanced-song-selection';
-
-export interface UseSongActionsProps {
-  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
-  memoizedSongs: Song[];
-  setActiveTab?: (tab: string) => void;
-  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  // New prop for My Chord Sheets to enable deduplication
-  myChordSheets?: Song[];
-}
+import type { UseSongActionsProps } from '@/search/types';
 
 export const useSongActions = ({ 
-  setMySongs, 
-  memoizedSongs, 
-  setActiveTab, 
+  setMySongs,
+  memoizedSongs,
+  setActiveTab,
   setSelectedSong,
-  myChordSheets = []
+  myChordSheets
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
   
