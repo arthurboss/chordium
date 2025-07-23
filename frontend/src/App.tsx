@@ -9,7 +9,7 @@ import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
 const ChordViewer = lazy(() => import("./pages/ChordViewer"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
 const queryClient = createQueryClientWithErrorHandling();
 
@@ -147,7 +147,7 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <Suspense fallback={<Loading />}>
-              <NotFound />
+              <SmartRouteHandler />
             </Suspense>
           </RouteErrorBoundary>
         )
