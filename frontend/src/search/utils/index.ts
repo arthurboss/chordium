@@ -5,7 +5,6 @@
 
 // Core search utilities
 export { getSearchParamsType } from './core/getSearchParamsType';
-export { formatSearchUrl } from './core/formatSearchUrl';
 export { getQueryDisplayText } from './core/getQueryDisplayText';
 
 // Text normalization utilities
@@ -15,11 +14,9 @@ export { isAccentInsensitiveMatch } from './normalization/accentInsensitiveMatch
 
 // Filtering utilities
 export { filterArtistsByNameOrPath } from './filtering/filterArtistsByName';
-export { filterSongsByTitle } from './filtering/filterSongsByTitle';
 
 // Formatting utilities
 export { formatSearchResult } from './formatting/formatSearchResult';
-export { formatArtistResult } from './formatting/formatArtistResult';
 
 // Navigation utilities
 export { navigateToArtist } from './navigation/navigateToArtist';
