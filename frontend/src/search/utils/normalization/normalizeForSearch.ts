@@ -11,7 +11,7 @@
  * 
  * Single responsibility: Unicode-aware text normalization for search
  */
-export function normalizeForSearchUnicode(text: string): string {
+export function normalizeForSearch(text: string): string {
   if (!text) return '';
   return text
     .toLowerCase()

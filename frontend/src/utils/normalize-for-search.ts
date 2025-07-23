@@ -1,2 +1,2 @@
-// Re-export from modular search utils
-export { normalizeForSearchUnicode } from '@/search/utils';
+// Re-export wrapper for backward compatibility
+export { normalizeForSearch as normalizeForSearchUnicode } from '@/search/utils';

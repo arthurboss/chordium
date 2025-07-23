@@ -3,18 +3,18 @@
  * Single responsibility: Song filtering by multiple criteria
  */
 import { Song } from '@chordium/types';
-import { normalizeForSearchUnicode } from '../normalization/normalizeForSearch';
+import { normalizeForSearch } from '../normalization/normalizeForSearch';
 import { normalizePathForComparison } from '@/utils/normalize-path-for-comparison';
 
 export function filterSongsByTitle(songs: Song[], filter: string): Song[] {
   if (!filter) return songs;
   
   // Normalize the user's filter text (remove special chars, etc.)
-  const normalizedFilter = normalizeForSearchUnicode(filter);
+  const normalizedFilter = normalizeForSearch(filter);
   
   return songs.filter(song => {
     // Check if normalized title includes the normalized filter
-    const titleMatch = normalizeForSearchUnicode(song.title).includes(normalizedFilter);
+    const titleMatch = normalizeForSearch(song.title).includes(normalizedFilter);
     
     // For path matching, first remove all hyphens from the path then compare
     // This way "acdc" will match a path value of "ac-dc"
@@ -23,7 +23,7 @@ export function filterSongsByTitle(songs: Song[], filter: string): Song[] {
     
     // Also check if artist name matches when available
     const artistMatch = song.artist && 
-                       normalizeForSearchUnicode(song.artist).includes(normalizedFilter);
+                       normalizeForSearch(song.artist).includes(normalizedFilter);
     
     return titleMatch || pathMatch || artistMatch;
   });
