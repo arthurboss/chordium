@@ -14,7 +14,7 @@ const getInitialTab = (pathname: string): string => {
   if (pathname.startsWith("/search")) return "search";
   if (pathname.startsWith("/upload")) return "upload";
   if (pathname.startsWith("/my-chord-sheets")) return "my-chord-sheets";
-  
+
   // Handle artist routes: /artist-name
   // Check if it's a direct artist path (not a song path like /artist/song)
   const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
@@ -22,7 +22,7 @@ const getInitialTab = (pathname: string): string => {
     // This is likely an artist page, show search tab with artist selected
     return "search";
   }
-  
+
   return "my-chord-sheets"; // Default
 };
 
@@ -51,9 +51,9 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="w-full max-w-3xl mx-auto flex-1 container px-3 py-4 sm:px-4 sm:py-6">
-        <TabContainer 
+        <TabContainer
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
           myChordSheets={myChordSheets}
@@ -62,14 +62,14 @@ const Home = () => {
           setSelectedSong={setSelectedSong}
         />
       </main>
-      
+
       {/* Include test component for build optimization testing */}
       {process.env.NODE_ENV === 'development' && (
         <div className="hidden">
           <TestComponent />
         </div>
       )}
-      
+
       <Footer />
     </div>
   );

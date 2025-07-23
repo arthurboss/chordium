@@ -1,18 +1,25 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { lazy, Suspense } from 'react';
 import RootLayout from "@/components/layouts/RootLayout";
+import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
+import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
 const ChordViewer = lazy(() => import("./pages/ChordViewer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = createQueryClientWithErrorHandling();
 
-// Loading component for Suspense
-const Loading = () => <div className="flex justify-center items-center h-screen">Loading...</div>;
+// Enhanced loading component for Suspense
+const Loading = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <span className="ml-2">Loading...</span>
+  </div>
+);
 
 const router = createBrowserRouter([
   {
@@ -21,11 +28,27 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Suspense fallback={<Loading />}><Home /></Suspense> // Default to Home, which can handle /search
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         path: "search",
-        element: <Suspense fallback={<Loading />}><Home /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         path: "search-refresh",
@@ -33,50 +56,114 @@ const router = createBrowserRouter([
       },
       {
         path: "upload",
-        element: <Suspense fallback={<Loading />}><Home /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         path: "my-chord-sheets",
-        element: <Suspense fallback={<Loading />}><Home /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         // Route for artist pages: /artist
         path: ":artist",
-        element: <Suspense fallback={<Loading />}><Home /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         // Route for songs from My Chord Sheets: /my-chord-sheets/artist/song
         path: "my-chord-sheets/:artist/:song", 
-        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <ChordViewer />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         // Route for songs from search results: /artist/song
         path: ":artist/:song",
-        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <ChordViewer />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         path: "chord/:artist/:song",
-        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <ChordViewer />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         path: "chord/:id",
-        element: <Suspense fallback={<Loading />}><ChordViewer /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <ChordViewer />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
       },
       {
         // Catch-all route for 404
         path: "*",
-        element: <Suspense fallback={<Loading />}><NotFound /></Suspense>
+        element: (
+          <RouteErrorBoundary>
+            <Suspense fallback={<Loading />}>
+              <NotFound />
+            </Suspense>
+          </RouteErrorBoundary>
+        )
       }
     ]
   }
 ]);
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <RouterProvider router={router} />
-    </TooltipProvider>
-  </QueryClientProvider>
+  <GlobalErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <RouterProvider router={router} />
+      </TooltipProvider>
+    </QueryClientProvider>
+  </GlobalErrorBoundary>
 );
 
 
