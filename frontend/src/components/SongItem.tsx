@@ -1,7 +1,7 @@
 import React from 'react';
 import ResultCard from "@/components/ResultCard";
-import { Song } from "@/types/song";
-import { formatSearchResult } from "@/utils/format-search-result";
+import { Song } from "@chordium/types";
+import { formatSearchResult } from "@/search/utils";
 
 interface SongItemProps {
   item: Song;

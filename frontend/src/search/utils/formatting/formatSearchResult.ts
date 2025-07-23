@@ -1,7 +1,14 @@
-import { Song } from "@/types/song";
+/**
+ * Formats search result items for consistent display.
+ * 
+ * Extracts cleaner titles by removing artist information when present,
+ * typically from titles formatted as "Title - Artist".
+ * 
+ * @param item - The song object to format
+ * @returns The formatted song object with cleaned title
+ */
+import { Song } from "@chordium/types";
 
-// Since the backend now returns unified Song objects, this function
-// primarily ensures consistent formatting but no longer needs conversion
 export function formatSearchResult(item: Song): Song {
   let title = item.title;
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeForAccentInsensitiveSearch, isAccentInsensitiveMatch } from '../accent-insensitive-search';
+import { normalizeForAccentInsensitiveSearch, isAccentInsensitiveMatch } from '@/search/utils';
 
 describe('accent-insensitive search utilities', () => {
   describe('normalizeForAccentInsensitiveSearch', () => {

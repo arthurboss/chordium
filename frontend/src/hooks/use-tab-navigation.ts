@@ -1,7 +1,7 @@
-import { Song } from "../types/song";
+import { Song } from "@chordium/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { getSearchParamsType } from "@/utils/search-utils";
+import { getSearchParamsType } from "@/search/utils";
 
 interface TabNavigationProps {
   myChordSheets: Song[];
