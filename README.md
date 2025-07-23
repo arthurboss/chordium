@@ -14,8 +14,7 @@ Chordium focuses on providing a distraction-free experience for learning and pra
 
 _Experience Chordium's clean interface, smart search, and intuitive chord display in action._
 
-> ⚠️ Frontend deployment in progress  
-> ✅ Backend is live at [chordium-backend.onrender.com](https://chordium-backend.onrender.com)
+🟢 Try it live: [chordium.vercel.app](https://chordium.vercel.app)
 
 ## 🎯 Features
 
