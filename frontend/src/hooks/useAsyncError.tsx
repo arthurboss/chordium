@@ -6,6 +6,7 @@ interface AsyncError {
   code?: string;
   timestamp: number;
   context?: string;
+  stack?: string;
 }
 
 interface UseAsyncErrorOptions {
@@ -24,10 +25,11 @@ export const useAsyncError = (options: UseAsyncErrorOptions = {}) => {
 
   const captureError = useCallback((error: Error | string, context?: string) => {
     const asyncError: AsyncError = {
-      message: typeof error === 'string' ? error : error.message,
+      message: typeof error === 'string' ? error : error?.message || 'Unknown error',
       code: error instanceof Error ? error.name : undefined,
       timestamp: Date.now(),
-      context
+      context,
+      stack: error instanceof Error ? error.stack : undefined,
     };
 
     setError(asyncError);

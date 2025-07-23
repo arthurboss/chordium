@@ -34,6 +34,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     );
   }
   if (!hasArtists && !hasSongs && !hasSearched) {
+    return null;
   }
 
   return (
