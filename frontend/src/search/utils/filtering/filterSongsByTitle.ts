@@ -10,7 +10,7 @@
  */
 import { Song } from '@chordium/types';
 import { normalizeForSearch } from '../normalization/normalizeForSearch';
-import { normalizePathForComparison } from '@/utils/normalize-path-for-comparison';
+import { normalizePathForComparison } from '../normalizePathForComparison';
 
 export function filterSongsByTitle(songs: Song[], filter: string): Song[] {
   if (!filter) return songs;
