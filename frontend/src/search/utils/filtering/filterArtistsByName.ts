@@ -10,7 +10,7 @@
  */
 import { Artist } from '@chordium/types';
 import { normalizeForSearch } from '../normalization/normalizeForSearch';
-import { normalizePathForComparison } from '../normalizePathForComparison';
+import { normalizePathForComparison } from '../normalization/normalizePathForComparison';
 
 export function filterArtistsByNameOrPath(artists: Artist[], filter: string): Artist[] {
   if (!filter) return artists;

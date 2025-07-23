@@ -11,6 +11,7 @@ export { getQueryDisplayText } from './core/getQueryDisplayText';
 export { normalizeForSearch } from './normalization/normalizeForSearch';
 export { normalizeForAccentInsensitiveSearch } from './normalization/normalizeForAccentInsensitive';
 export { isAccentInsensitiveMatch } from './normalization/accentInsensitiveMatch';
+export { normalizePathForComparison } from './normalization/normalizePathForComparison';
 
 // Filtering utilities
 export { filterArtistsByNameOrPath } from './filtering/filterArtistsByName';
