@@ -10,7 +10,6 @@ export { getQueryDisplayText } from './core/getQueryDisplayText';
 
 // Text normalization utilities
 export { normalizeForSearch } from './normalization/normalizeForSearch';
-export { normalizeForSearch as normalizeForSearchUnicode } from './normalization/normalizeForSearch'; // Backward compatibility
 export { normalizeForAccentInsensitiveSearch } from './normalization/normalizeForAccentInsensitive';
 export { isAccentInsensitiveMatch } from './normalization/accentInsensitiveMatch';
 

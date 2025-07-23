@@ -17,6 +17,7 @@ The search feature in Chordium is a comprehensive system that allows users to fi
 - **🧩 Maximum Modularization**: Avoid multiple exports or functions per file when possible
 - **📦 Type Consistency**: Leverage `@chordium/types` package for shared types
 - **✅ Test-Driven Development (TDD)**: Maintain test coverage throughout refactoring
+- **🚫 No Backward Compatibility Tech Debt**: Avoid re-export wrappers and deprecated code paths that create maintenance overhead
 
 ### Quality Assurance Protocol
 
@@ -92,11 +93,10 @@ frontend/src/search/types/
 - ✅ Updated **25+ dependent files** to use new modular import structure
 - ✅ Implemented central re-export system via `index.ts` for clean imports
 - ✅ Optimized **@chordium/types** imports across all staged files
-- ✅ Maintained 100% backward compatibility through re-export wrappers
+- ✅ **Eliminated backward compatibility tech debt**: Removed all re-export wrappers for clean architecture
 - ✅ Build verification: All 467 tests passing ✅
 - ✅ Zero breaking changes with comprehensive import updates
 - ✅ **Code duplication cleanup**: Properly archived original implementations to `_archive/` folder
-- ✅ **Converted duplicate utilities**: All original files now serve as re-export wrappers pointing to modular structure
 
 #### Modular Structure Created
 
@@ -133,11 +133,11 @@ frontend/src/search/utils/
 
 #### Files Successfully Refactored
 
-**Original Utility Files (now re-export wrappers):**
-- ✅ `search-utils.ts` → re-exports `getSearchParamsType`, `formatSearchUrl`
-- ✅ `search-results-utils.ts` → re-exports formatting utilities
-- ✅ `get-query-display-text.ts` → re-exports `getQueryDisplayText`
-- ✅ `accent-insensitive-search.ts` → moved to modular structure
+**Utility Files (moved to modular structure):**
+- ✅ `search-utils.ts` → functions moved to `@/search/utils/core/` (wrapper removed)
+- ✅ `search-results-utils.ts` → functions moved to `@/search/utils/formatting/` (wrapper removed)
+- ✅ `get-query-display-text.ts` → moved to `@/search/utils/core/` (wrapper removed)
+- ✅ `accent-insensitive-search.ts` → moved to `@/search/utils/normalization/` (wrapper removed)
 
 **Component/Hook Files Updated:**
 - ✅ `useSongFilter.ts` → uses `@chordium/types` + modular utils
@@ -546,14 +546,14 @@ interface Artist { name: string; path: string; } // This exists in @chordium/typ
    - ✅ Improved type consistency between frontend and backend
    - ✅ Maintained 100% backward compatibility
 
-3. **✅ Code Duplication Cleanup & Proper Archival**
+3. **✅ Code Duplication Cleanup & Re-export Wrapper Elimination**
    - ✅ Created `frontend/_archive/` folder with structured backup system
    - ✅ Implemented path-preserving archive format: `_archive/src/utils/filename.ts.backup`
    - ✅ Archived duplicate utility functions: `accent-insensitive-search.ts`, `format-search-result.ts`, `format-artist-result.ts`, `normalize-for-search.ts`
    - ✅ Added `_archive/` to `.gitignore` to prevent repository clutter
    - ✅ Documented archive format and restoration process in `_archive/README.md`
-   - ✅ Converted all original utility files to re-export wrappers pointing to modular structure
-   - ✅ Eliminated code duplication between original and modular implementations
+   - ✅ **Eliminated all re-export wrappers**: Removed tech debt from backward compatibility wrappers
+   - ✅ **Direct imports**: Updated all imports to use `@/search/utils` directly
    - ✅ Verified build success and test compatibility (467 tests passing)
 
 **Status**: Phase 2 is now completely finished with clean, deduplicated codebase ready for Phase 3 component modularization.
@@ -692,14 +692,14 @@ The foundation is now solid for Phase 3 component refactoring with:
 - `useSearchResultsReducer.test.ts` ✅ (types extracted)
 
 **Utility Modularization Files:**
-- `search-utils.ts` ✅ (modularized → re-export wrapper)
-- `search-results-utils.ts` ✅ (modularized → re-export wrapper)
-- `get-query-display-text.ts` ✅ (modularized → re-export wrapper)
-- `accent-insensitive-search.ts` ✅ (modularized → moved to search/utils)
-- `normalize-for-search.ts` ✅ (modularized → moved to search/utils)
+- `search-utils.ts` ✅ (modularized → **wrapper removed**, imports from `@/search/utils`)
+- `search-results-utils.ts` ✅ (modularized → **wrapper removed**, imports from `@/search/utils`)
+- `get-query-display-text.ts` ✅ (modularized → **wrapper removed**, imports from `@/search/utils`)
+- `accent-insensitive-search.ts` ✅ (modularized → **wrapper removed**, moved to search/utils)
+- `normalize-for-search.ts` ✅ (modularized → **wrapper removed**, moved to search/utils)
 - `artist-url-navigation.ts` ✅ (modularized → functions extracted)
-- `format-search-result.ts` ✅ (modularized → moved to search/utils)
-- `format-artist-result.ts` ✅ (modularized → moved to search/utils)
+- `format-search-result.ts` ✅ (modularized → **wrapper removed**, moved to search/utils)
+- `format-artist-result.ts` ✅ (modularized → **wrapper removed**, moved to search/utils)
 
 **Component/Hook Files with Updated Imports:**
 - `useSongFilter.ts` ✅ (@chordium/types + modular utils)

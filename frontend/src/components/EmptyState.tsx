@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { getQueryDisplayText } from "@/utils/search-results-utils";
+import { getQueryDisplayText } from "@/search/utils";
 
 const EmptyState = ({ searchParams }: { searchParams: any }) => (
   <Card className="p-6 text-center">
