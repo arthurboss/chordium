@@ -12,8 +12,8 @@
     "analyze-bundle": "vite build --mode production && open dist/stats.html",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest run",
+    "test:watch": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest"
   },
   "dependencies": {
     "@chordium/types": "^0.1.0",

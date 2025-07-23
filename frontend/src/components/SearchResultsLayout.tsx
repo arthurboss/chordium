@@ -33,7 +33,9 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       </div>
     );
   }
+  // If there are no artists or songs and the user hasn't searched yet, render nothing.
   if (!hasArtists && !hasSongs && !hasSearched) {
+    return null;
   }
 
   return (

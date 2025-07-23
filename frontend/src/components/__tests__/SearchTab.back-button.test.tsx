@@ -34,7 +34,9 @@ vi.mock('../SearchResults', () => ({
         data-testid="select-artist-button"
         onClick={() => {
           testActiveArtist = { path: 'test-artist', displayName: 'Test Artist', songCount: 5 };
-          onArtistSelect && onArtistSelect(testActiveArtist);
+          if (onArtistSelect) {
+            onArtistSelect(testActiveArtist);
+          }
         }}
       >
         Select Artist
