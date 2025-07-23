@@ -78,7 +78,20 @@ export const createQueryClientWithErrorHandling = () => {
 };
 
 // Error type detection helpers
+function hasErrorCode(error: unknown): error is { code: string } {
+  return typeof error === 'object' && error !== null && 'code' in error && typeof (error as { code?: unknown }).code === 'string';
+}
+
 const isNetworkError = (error: Error): boolean => {
+  if (hasErrorCode(error)) {
+    const networkErrorCodes = ['ECONNABORTED', 'ENOTFOUND', 'ETIMEDOUT'];
+    if (networkErrorCodes.includes(error.code)) {
+      return true;
+    }
+  }
+  if ('cause' in error && error.cause instanceof Error) {
+    return isNetworkError(error.cause);
+  }
   return error.message.includes('Network Error') || 
          error.message.includes('fetch') ||
          error.name === 'NetworkError';
