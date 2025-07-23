@@ -58,6 +58,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 | -------------------------------------------------------------- | -------------------------------------------------- |
 | [🚀 Getting Started](./docs/getting-started.md)                | Installation, setup, and development commands      |
 | [🧪 Testing](./docs/testing.md)                                | Testing frameworks, running tests, and guidelines  |
+| [🛡️ Error Handling](./docs/error-handling.md)                  | Error recovery and user-friendly error messages    |
 | [🏗️ Project Structure](./docs/project-structure.md)            | Codebase organization and architecture             |
 | [🚀 Deployment](./docs/deployment.md)                          | Frontend and backend deployment guides             |
 | [🤝 Contributing](./CONTRIBUTING.md)                           | How to contribute to the project                   |
