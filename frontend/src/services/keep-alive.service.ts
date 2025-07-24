@@ -73,7 +73,7 @@ export class KeepAliveService {
     console.log('[KeepAlive] Initializing backend ping...');
     
     // Fire and forget - don't block app startup
-    this.pingBackend()
+    void this.pingBackend()
       .then((success) => {
         const message = success 
           ? '[KeepAlive] Initial backend ping completed successfully'
