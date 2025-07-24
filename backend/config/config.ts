@@ -1,15 +1,19 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import type { Config } from '../types/config.types.js';
 import productionConfig from './production.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// For both source and compiled versions, resolve .env from backend directory
-const envPath = __dirname.includes('dist') 
-  ? path.resolve(__dirname, '../../../.env')  // From dist/backend/config/ to backend/.env
-  : path.resolve(__dirname, '../.env');       // From config/ to backend/.env
+
+// Determine the correct .env path by checking file existence
+const possibleEnvPaths = [
+  path.resolve(__dirname, '../../../.env'), // From dist/backend/config/ to backend/.env
+  path.resolve(__dirname, '../.env')       // From config/ to backend/.env
+];
+const envPath = possibleEnvPaths.find(fs.existsSync) || possibleEnvPaths[1];
 dotenv.config({ path: envPath });
 
 const baseConfig: Config = {
