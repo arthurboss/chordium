@@ -86,8 +86,6 @@ export const useSearchFetch = ({
           // Song only search
           const baseUrl = getApiBaseUrl();
           const url = `${baseUrl}/api/cifraclub-search?artist=&song=${encodeURIComponent(songParam)}`;
-          console.log('[useSearchFetch] Song search URL:', url);
-          console.log('[useSearchFetch] Base URL:', baseUrl);
           
           const response = await fetch(url);
           if (!response.ok)
@@ -128,8 +126,6 @@ export const useSearchFetch = ({
           // Artist only or artist+song search
           const baseUrl = getApiBaseUrl();
           const url = `${baseUrl}/api/artists?artist=${encodeURIComponent(artistParam)}&song=${encodeURIComponent(songParam)}`;
-          console.log('[useSearchFetch] Artist search URL:', url);
-          console.log('[useSearchFetch] Base URL:', baseUrl);
           
           const response = await fetch(url);
           if (!response.ok)
