@@ -160,6 +160,15 @@ const router = createBrowserRouter([
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
+    // Debug logging for environment variables (always log this)
+    console.log('[AppInitializer] Environment Debug:', {
+      NODE_ENV: import.meta.env.NODE_ENV,
+      PROD: import.meta.env.PROD,
+      DEV: import.meta.env.DEV,
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      'All env vars': Object.keys(import.meta.env)
+    });
+    
     // Only initialize keep-alive service in production
     if (import.meta.env.PROD) {
       KeepAliveService.initializeOnAppStart();
