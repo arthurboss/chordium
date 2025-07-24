@@ -162,7 +162,49 @@ npm run build
 - Endpoint: `/health`
 - Expected response: `{"status":"ok","timestamp":"..."}`
 
+### Cold Start Mitigation
+
+**Problem**: Render's free tier puts services to sleep after 15 minutes of inactivity, causing "cold starts" when users visit your app.
+
+**Solution**: Chordium implements an automatic keep-alive system that pings the backend when users load the frontend.
+
+#### How It Works
+
+1. **Frontend Keep-Alive Service** (`src/services/keep-alive.service.ts`):
+   - Automatically pings the backend `/health` endpoint when the app loads
+   - Only runs in production (skipped in development)
+   - Uses a fire-and-forget approach that won't block app startup
+   - Includes timeout protection and graceful error handling
+
+2. **App Integration** (`src/App.tsx`):
+   - `AppInitializer` component triggers the keep-alive on app mount
+   - Conditional execution based on environment (production only)
+
+#### Benefits
+
+- **Faster User Experience**: Backend is pre-warmed when users visit your site
+- **Invisible to Users**: Happens in the background during app initialization
+- **Development Friendly**: Automatically disabled in local development
+- **Robust**: Graceful failure handling ensures app stability
+
+#### Configuration
+
+The keep-alive service uses your existing configuration:
+
+- **Backend URL**: Automatically determined via `getApiBaseUrl()` utility
+- **Environment Detection**: Uses Vite's `import.meta.env.PROD` flag
+- **Timeout**: 10-second timeout prevents hanging requests
+
+#### Future Enhancements
+
+For more aggressive cold start prevention, consider:
+
+- **GitHub Actions Cron Job**: Scheduled pings every 10-12 minutes
+- **Uptime Monitoring**: Services like UptimeRobot or Pingdom
+- **Render Paid Tier**: Eliminates cold starts entirely
+
 ### Troubleshooting Backend
+
 - Check Render logs for build errors
 - Verify environment variables are set correctly
 - Ensure Supabase and AWS credentials are valid
