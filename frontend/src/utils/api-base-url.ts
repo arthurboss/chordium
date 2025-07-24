@@ -8,6 +8,15 @@ export function getApiBaseUrl(): string {
     // Use relative URLs in dev so Vite proxy works
     return '';
   }
-  // In production, use VITE_API_URL if set, else relative
-  return import.meta.env.VITE_API_URL || '';
+  
+  // In production, use VITE_API_URL if set
+  const apiUrl = import.meta.env.VITE_API_URL;
+  
+  // Debug logging to help diagnose issues
+  if (!apiUrl && import.meta.env.PROD) {
+    console.error('[API] VITE_API_URL not set in production! API calls will fail.');
+    console.error('[API] Available env vars:', Object.keys(import.meta.env));
+  }
+  
+  return apiUrl || '';
 } 

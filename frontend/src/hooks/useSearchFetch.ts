@@ -103,8 +103,32 @@ export const useSearchFetch = ({
             throw new Error(
               `Failed to fetch search results: ${response.status}`
             );
+          
+          // Validate response content type and structure for artist search too
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error(
+              `Backend returned invalid content type: ${contentType}. Expected JSON but got HTML/other.`
+            );
+          }
+          
           const text = await response.text();
-          const data = text ? JSON.parse(text) : [];
+          let data;
+          try {
+            data = text ? JSON.parse(text) : [];
+          } catch (parseError) {
+            throw new Error(
+              `Backend returned invalid JSON. This might indicate a backend configuration issue.`
+            );
+          }
+          
+          // Validate that data is an array of artists
+          if (!Array.isArray(data)) {
+            throw new Error(
+              `Backend returned invalid data format. Expected array but got: ${typeof data}`
+            );
+          }
+          
           setArtists(data);
           setSongs(null);
           cacheSearchResults(artistParam, songParam, data);
