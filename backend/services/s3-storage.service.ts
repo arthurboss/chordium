@@ -6,6 +6,7 @@ import {
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
 import logger from "../utils/logger.js";
+import config from "../config/config.js";
 import type { Song } from "../../shared/types/index.js";
 
 class S3StorageService {
@@ -17,7 +18,7 @@ class S3StorageService {
     if (this.enabled !== null) return; // Already initialized
 
     // Check if AWS credentials are available
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    if (!config.aws.accessKeyId || !config.aws.secretAccessKey) {
       logger.warn("AWS credentials not found. S3 storage will be disabled.");
       this.enabled = false;
       return;
@@ -25,15 +26,15 @@ class S3StorageService {
 
     this.s3 = new S3Client({
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        ...(process.env.AWS_SESSION_TOKEN && {
-          sessionToken: process.env.AWS_SESSION_TOKEN,
+        accessKeyId: config.aws.accessKeyId,
+        secretAccessKey: config.aws.secretAccessKey,
+        ...(config.aws.sessionToken && {
+          sessionToken: config.aws.sessionToken,
         }),
       },
-      region: process.env.AWS_REGION || "eu-central-1",
+      region: config.aws.region,
     });
-    this.bucketName = process.env.S3_BUCKET_NAME || "chordium";
+    this.bucketName = config.aws.bucketName || "chordium";
     this.enabled = true;
   }
 
