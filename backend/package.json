@@ -9,7 +9,7 @@
     "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsc && node dist/backend/server.js",
-    "dev:watch": "nodemon",
+    "dev:watch": "tsc --watch & sleep 2 && nodemon --delay 1 dist/backend/server.js",
     "dev:source": "tsx server.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' npx jest",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' npx jest --watch",
