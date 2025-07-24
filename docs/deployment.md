@@ -199,9 +199,39 @@ The keep-alive service uses your existing configuration:
 
 For more aggressive cold start prevention, consider:
 
-- **GitHub Actions Cron Job**: Scheduled pings every 10-12 minutes
+- **GitHub Actions Cron Job**: Berlin-timezone optimized pings
+  - **Peak hours** (6 PM Berlin - 7 AM Berlin): Every 13 minutes 
+  - **Off-peak hours** (7 AM Berlin - 6 PM Berlin): Every 30 minutes
+  - **Extended Coverage**: São Paulo users covered until 3 AM local time
+  - **Monthly usage**: ~246 hours from cron job pings
+  - **Setup**: Add `BACKEND_URL` secret in GitHub repository settings
+
+#### Render Usage for Alpha Version
+
+| Component | Monthly Hours | Details |
+|-----------|---------------|---------|
+| **Cron Job Keep-Alive** | ~246 hours | Enhanced: 13-min peak, 30-min off-peak |
+| **Alpha Users** (~10) | ~15-30 hours | Light testing usage |
+| **Total Usage** | **~261-276 hours** | **35-37% of free tier** ✅ |
+
+**Enhanced Time Window Strategy**:
+
+- **Peak** (13 hours): 6 PM Berlin - 7 AM Berlin → Every 13 minutes
+- **Off-Peak** (11 hours): 7 AM Berlin - 6 PM Berlin → Every 30 minutes  
+- **Coverage**: São Paulo 2 PM - 3 AM, Berlin 6 PM - 7 AM
+- **Benefit**: Better off-peak responsiveness while staying within free tier
+- **Total Pings**: 82 per day (60 peak + 22 off-peak)
+
+#### Usage Progression for Planning
+
+| Phase | Users | Monthly Hours | Free Tier % | Recommendation |
+|-------|-------|---------------|-------------|----------------|
+| **Alpha** | ~10 | ~261-276 hours | 35-37% | ✅ Perfect on free tier |
+| **Beta** | ~100 | ~350-400 hours | 47-53% | ✅ Still good on free tier |
+| **Production** | ~500+ | ~500-800+ hours | 67-107% | ⚠️ Consider paid tier ($7/month) |
+
 - **Uptime Monitoring**: Services like UptimeRobot or Pingdom
-- **Render Paid Tier**: Eliminates cold starts entirely
+- **Render Paid Tier**: Eliminates cold starts entirely ($7/month)
 
 ### Troubleshooting Backend
 
