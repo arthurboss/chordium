@@ -106,7 +106,7 @@ export const useSearchFetch = ({
           
           // Validate response content type and structure for artist search too
           const contentType = response.headers.get("content-type");
-          if (!contentType || !contentType.includes("application/json")) {
+          if (!contentType?.includes("application/json")) {
             throw new Error(
               `Backend returned invalid content type: ${contentType}. Expected JSON but got HTML/other.`
             );
