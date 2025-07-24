@@ -10,16 +10,13 @@
 import { Song } from "@chordium/types";
 
 export function formatSearchResult(item: Song): Song {
-  let title = item.title;
-
   // Extract cleaner title if it contains " - " (remove artist part)
-  if (item.title.includes(" - ")) {
-    const parts = item.title.split(" - ");
-    title = parts[0].trim();
-  }
+  const title = item.title.includes(" - ") 
+    ? item.title.split(" - ")[0].trim()
+    : item.title;
 
   return {
-    title: title,
+    title,
     path: item.path,
     artist: item.artist,
   };
