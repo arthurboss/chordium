@@ -6,7 +6,11 @@ import productionConfig from './production.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// For both source and compiled versions, resolve .env from backend directory
+const envPath = __dirname.includes('dist') 
+  ? path.resolve(__dirname, '../../../.env')  // From dist/backend/config/ to backend/.env
+  : path.resolve(__dirname, '../.env');       // From config/ to backend/.env
+dotenv.config({ path: envPath });
 
 const baseConfig: Config = {
   // Server configuration
