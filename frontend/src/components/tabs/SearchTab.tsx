@@ -6,7 +6,7 @@ import { useSearchState } from "@/context/SearchStateContext";
 import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
-import SearchResults from "@/components/SearchResults";
+import SearchResults from "@/search/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
 import { getCachedSearchResults } from '@/cache/implementations/search-cache';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';

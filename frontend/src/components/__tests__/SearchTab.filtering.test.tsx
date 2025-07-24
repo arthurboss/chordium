@@ -27,6 +27,12 @@ import { SearchStateProvider } from '@/context/SearchStateContext';
 // Mock the search cache
 vi.mock('@/cache/implementations/search-cache', () => ({
   setLastSearchQuery: vi.fn(),
+  getCachedSearchResults: vi.fn().mockReturnValue(null),
+  cacheSearchResults: vi.fn(),
+  getLastSearchQuery: vi.fn().mockReturnValue(undefined),
+  clearExpiredSearchCache: vi.fn().mockReturnValue(0),
+  clearSearchCache: vi.fn(),
+  generateCacheKey: vi.fn().mockReturnValue('test-key'),
 }));
 
 // Mock the URL slug utils
@@ -39,7 +45,7 @@ vi.mock('@/utils/test-utils/cy-attr', () => ({
   cyAttr: vi.fn(() => ({})),
 }));
 
-vi.mock('../SearchResults', () => ({
+vi.mock('@/search/components/SearchResults', () => ({
   default: vi.fn(({ filterArtist, filterSong, activeArtist, hasSearched, onArtistSelect }) => (
     <div data-testid="search-results">
       <div data-testid="filter-artist">{filterArtist || 'none'}</div>

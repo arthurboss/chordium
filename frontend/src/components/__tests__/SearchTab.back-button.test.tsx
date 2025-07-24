@@ -6,7 +6,15 @@ import { SearchStateProvider } from '@/context/SearchStateContext';
 
 // Mock the search cache
 vi.mock('@/cache/implementations/search-cache', () => ({
-  setLastSearchQuery: vi.fn(),
+  getCachedSearchResults: vi.fn(() => Promise.resolve(null)),
+  cacheSearchResults: vi.fn(() => Promise.resolve()),
+  setLastSearchQuery: vi.fn(() => Promise.resolve()),
+  getLastSearchQuery: vi.fn(() => Promise.resolve('')),
+  clearExpiredSearchCache: vi.fn(() => Promise.resolve()),
+  clearSearchCache: vi.fn(() => Promise.resolve()),
+  generateCacheKey: vi.fn((query) => `cache-key-${query}`),
+  getSearchResultsWithRefresh: vi.fn(() => Promise.resolve([])),
+  inspectSearchCache: vi.fn(() => Promise.resolve({})),
 }));
 
 // Mock the URL slug utils
@@ -25,7 +33,7 @@ let testActiveArtist = null;
 let testShowBackButton = false;
 
 // Mock the SearchResults component
-vi.mock('../SearchResults', () => ({
+vi.mock('@/search/components/SearchResults', () => ({
   default: vi.fn(({ onArtistSelect, results }) => (
     <div data-testid="search-results">
       <div data-testid="active-artist">{testActiveArtist ? testActiveArtist.displayName : 'none'}</div>

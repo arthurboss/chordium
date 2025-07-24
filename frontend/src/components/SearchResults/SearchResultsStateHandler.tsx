@@ -5,6 +5,7 @@ import SearchResultsLayout from '@/components/SearchResultsLayout';
 import SearchLoadingState from './SearchLoadingState';
 import SearchErrorState from './SearchErrorState';
 import SongsView from './SongsView';
+import { testAttr } from '@/utils/test-utils';
 
 // Define our UI state type based on the determineUIState function output
 type UIState = 
@@ -54,7 +55,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     case 'songs-view':
       return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} filterArtist={stateData.searchType === 'song' ? filterArtist : ''} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
     case 'hasSearched':
-      return <div data-cy="search-results-layout-wrapper"><SearchResultsLayout artists={artists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
+      return <div data-cy="search-results-layout-wrapper" {...testAttr("search-results")}><SearchResultsLayout artists={artists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
     case 'default':
     default:
       return <div data-cy="search-results-default-null" />;

@@ -7,7 +7,7 @@ export interface SearchResultsLayoutProps {
   artists: Artist[];
   songs: Song[];
   onView: (song: Song) => void;
-  onDelete: (songId: string) => void;
+  onAdd: (songPath: Song['path']) => void;
   onArtistSelect?: (artist: Artist) => void;
   hasSearched?: boolean;
 }
