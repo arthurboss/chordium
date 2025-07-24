@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Artist } from '@/types/artist';
-import { filterArtistsByNameOrPath } from '@/utils/artist-filter-utils';
+import { Artist } from '@chordium/types';
+import { filterArtistsByNameOrPath } from '@/search/utils';
 
 /**
  * Custom hook for filtering artists based on search input

@@ -27,9 +27,15 @@ import * as searchCache from '@/cache/implementations/search-cache';
 
 // Mock the cache module
 vi.mock('@/cache/implementations/search-cache', () => ({
-  getCachedSearchResults: vi.fn(),
-  setLastSearchQuery: vi.fn(),
-  cacheSearchResults: vi.fn(),
+  getCachedSearchResults: vi.fn(() => Promise.resolve(null)),
+  cacheSearchResults: vi.fn(() => Promise.resolve()),
+  setLastSearchQuery: vi.fn(() => Promise.resolve()),
+  getLastSearchQuery: vi.fn(() => Promise.resolve('')),
+  clearExpiredSearchCache: vi.fn(() => Promise.resolve()),
+  clearSearchCache: vi.fn(() => Promise.resolve()),
+  generateCacheKey: vi.fn((query) => `cache-key-${query}`),
+  getSearchResultsWithRefresh: vi.fn(() => Promise.resolve([])),
+  inspectSearchCache: vi.fn(() => Promise.resolve({})),
 }));
 
 // Mock the URL slug utils
@@ -44,7 +50,7 @@ vi.mock('@/utils/test-utils/cy-attr', () => ({
 }));
 
 // Mock the SearchResults component
-vi.mock('../SearchResults', () => ({
+vi.mock('@/search/components/SearchResults', () => ({
   default: vi.fn(({ artist, song, hasSearched, shouldFetch }) => (
     <div data-testid="search-results">
       <div data-testid="artist-param">{artist || 'none'}</div>

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { searchResultsReducer, SearchResultsState, SearchResultsAction, initialState, determineUIState } from '../useSearchResultsReducer';
+import { searchResultsReducer, initialState, determineUIState } from '../useSearchResultsReducer';
+import type { SearchResultsState, SearchResultsAction } from '@/search/types';
 import { Artist } from '@/types/artist';
 import { Song } from '@/types/song';
 import { getArtistSearchResult, getSongSearchResult } from '../../../fixtures/index.js';

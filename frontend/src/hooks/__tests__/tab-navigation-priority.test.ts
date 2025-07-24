@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the search-utils module
-vi.mock('@/utils/search-utils', () => ({
+vi.mock('@/search/utils', () => ({
   getSearchParamsType: vi.fn()
 }));
 
@@ -10,7 +10,7 @@ vi.mock('react-router-dom', () => ({
   useLocation: vi.fn()
 }));
 
-import { getSearchParamsType } from '@/utils/search-utils';
+import { getSearchParamsType } from '@/search/utils';
 
 // Import the determineActiveTab function by recreating it for testing
 const determineActiveTab = (path: string, queryParams: URLSearchParams): string => {

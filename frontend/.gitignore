@@ -1,1 +1,5 @@
 .vercel
+
+# Archive folder for refactoring backups - not tracked in git
+# Contains original implementations before modularization
+_archive/

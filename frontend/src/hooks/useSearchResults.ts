@@ -1,21 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Artist } from "@/types/artist";
-import { Song } from "@/types/song";
+import { Artist, Song } from "@chordium/types";
 import { useSearchFetch } from "./useSearchFetch";
 import { useSearchFilter } from "./useSearchFilter";
-
-export interface UseSearchResultsOptions {
-  artist: string;
-  song: string;
-  filterArtist: string;
-  filterSong: string;
-  shouldFetch?: boolean;
-  onFetchComplete?: () => void;
-}
+import type { UseSearchResultsOptions } from "@/search/types/useSearchResultsOptions";
 
 /**
  * Custom hook to handle search results fetching and filtering
- * 
+ *
  * @param options - Options object for search and filtering
  */
 export function useSearchResults({
@@ -34,13 +25,16 @@ export function useSearchResults({
   const lastSongsRef = useRef<Song[]>([]);
   // Version counter to force filter recompute
   const [filterVersion, setFilterVersion] = useState(0);
-  const prevFiltersRef = useRef<{ artist: string; song: string }>({ artist: '', song: '' });
+  const prevFiltersRef = useRef<{ artist: string; song: string }>({
+    artist: "",
+    song: "",
+  });
 
   // Fetch data using the dedicated fetch hook
   const { artists, songs, loading, error, hasFetched } = useSearchFetch({
-    artist, 
-    song, 
-    shouldFetch
+    artist,
+    song,
+    shouldFetch,
   });
 
   // On fetch, update both state and refs
@@ -50,7 +44,7 @@ export function useSearchResults({
       setAllSongs(songs || []);
       lastArtistsRef.current = artists || [];
       lastSongsRef.current = songs || [];
-      
+
       // Notify parent that fetch completed successfully
       if (onFetchComplete) {
         onFetchComplete();
@@ -62,17 +56,19 @@ export function useSearchResults({
   useEffect(() => {
     const currentFilters = { artist: filterArtist, song: filterSong };
     const prevFilters = prevFiltersRef.current;
-    
+
     // Only update if filters actually changed and both are now empty
-    if (hasFetched && 
-        !currentFilters.artist && 
-        !currentFilters.song && 
-        (prevFilters.artist || prevFilters.song)) {
+    if (
+      hasFetched &&
+      !currentFilters.artist &&
+      !currentFilters.song &&
+      (prevFilters.artist || prevFilters.song)
+    ) {
       setAllArtists(lastArtistsRef.current);
       setAllSongs(lastSongsRef.current);
-      setFilterVersion(v => v + 1);
+      setFilterVersion((v) => v + 1);
     }
-    
+
     prevFiltersRef.current = currentFilters;
   }, [filterArtist, filterSong, hasFetched]);
 
@@ -91,6 +87,6 @@ export function useSearchResults({
     artists: filteredArtists,
     songs: filteredSongs,
     loading,
-    error
+    error,
   };
 }
