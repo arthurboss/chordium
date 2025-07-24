@@ -1,4 +1,4 @@
-import { Song } from "@chordium/types";
+import type { Song } from "@chordium/types";
 
 /**
  * Filter songs by title with case-insensitive matching

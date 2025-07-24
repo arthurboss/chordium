@@ -4,7 +4,7 @@
  * @param artist - The artist object containing navigation path
  * @param navigate - React Router navigate function for programmatic navigation
  */
-import { Artist } from "@chordium/types";
+import type { Artist } from "@chordium/types";
 
 export function navigateToArtist(
   artist: Artist, 

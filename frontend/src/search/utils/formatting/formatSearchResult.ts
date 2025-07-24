@@ -7,7 +7,7 @@
  * @param item - The song object to format
  * @returns The formatted song object with cleaned title
  */
-import { Song } from "@chordium/types";
+import type { Song } from "@chordium/types";
 
 export function formatSearchResult(item: Song): Song {
   // Extract cleaner title if it contains " - " (remove artist part)

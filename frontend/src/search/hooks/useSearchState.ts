@@ -1,5 +1,5 @@
 import { useReducer, useEffect, useState, useCallback, useMemo } from "react";
-import { Artist } from "@chordium/types";
+import type { Artist } from "@chordium/types";
 import { useSongActions } from "@/utils/search-song-actions";
 import { initialSearchState } from "./useSearchState/core/initialSearchState";
 import { searchStateReducer } from "./useSearchState/core/searchStateReducer";

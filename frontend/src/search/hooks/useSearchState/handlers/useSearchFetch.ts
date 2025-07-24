@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { Artist, Song } from "@chordium/types";
+import type { Artist, Song } from "@chordium/types";
 import { 
   cacheSearchResults, 
   getCachedSearchResults 

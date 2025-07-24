@@ -1,4 +1,4 @@
-import { Artist, Song } from "@chordium/types";
+import type { Artist, Song } from "@chordium/types";
 
 /**
  * Options interface for useSearchState hook
