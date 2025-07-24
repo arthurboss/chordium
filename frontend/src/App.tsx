@@ -1,10 +1,11 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
+import { KeepAliveService } from "@/services/keep-alive.service";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -156,11 +157,34 @@ const router = createBrowserRouter([
   }
 ]);
 
+// Component to handle app initialization
+const AppInitializer = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    // Debug logging for environment variables (always log this)
+    console.log('[AppInitializer] Environment Debug:', {
+      NODE_ENV: import.meta.env.NODE_ENV,
+      PROD: import.meta.env.PROD,
+      DEV: import.meta.env.DEV,
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      'All env vars': Object.keys(import.meta.env)
+    });
+    
+    // Only initialize keep-alive service in production
+    if (import.meta.env.PROD) {
+      KeepAliveService.initializeOnAppStart();
+    }
+  }, []);
+
+  return <>{children}</>;
+};
+
 const App = () => (
   <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <RouterProvider router={router} />
+        <AppInitializer>
+          <RouterProvider router={router} />
+        </AppInitializer>
       </TooltipProvider>
     </QueryClientProvider>
   </GlobalErrorBoundary>

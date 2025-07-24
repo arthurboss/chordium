@@ -162,7 +162,79 @@ npm run build
 - Endpoint: `/health`
 - Expected response: `{"status":"ok","timestamp":"..."}`
 
+### Cold Start Mitigation
+
+**Problem**: Render's free tier puts services to sleep after 15 minutes of inactivity, causing "cold starts" when users visit your app.
+
+**Solution**: Chordium implements an automatic keep-alive system that pings the backend when users load the frontend.
+
+#### How It Works
+
+1. **Frontend Keep-Alive Service** (`src/services/keep-alive.service.ts`):
+   - Automatically pings the backend `/health` endpoint when the app loads
+   - Only runs in production (skipped in development)
+   - Uses a fire-and-forget approach that won't block app startup
+   - Includes timeout protection and graceful error handling
+
+2. **App Integration** (`src/App.tsx`):
+   - `AppInitializer` component triggers the keep-alive on app mount
+   - Conditional execution based on environment (production only)
+
+#### Benefits
+
+- **Faster User Experience**: Backend is pre-warmed when users visit your site
+- **Invisible to Users**: Happens in the background during app initialization
+- **Development Friendly**: Automatically disabled in local development
+- **Robust**: Graceful failure handling ensures app stability
+
+#### Configuration
+
+The keep-alive service uses your existing configuration:
+
+- **Backend URL**: Automatically determined via `getApiBaseUrl()` utility
+- **Environment Detection**: Uses Vite's `import.meta.env.PROD` flag
+- **Timeout**: 10-second timeout prevents hanging requests
+
+#### Future Enhancements
+
+For more aggressive cold start prevention, consider:
+
+- **GitHub Actions Cron Job**: Berlin-timezone optimized pings
+  - **Peak hours** (6 PM Berlin - 7 AM Berlin): Every 13 minutes 
+  - **Off-peak hours** (7 AM Berlin - 6 PM Berlin): Every 30 minutes
+  - **Extended Coverage**: São Paulo users covered until 3 AM local time
+  - **Monthly usage**: ~246 hours from cron job pings
+  - **Setup**: Add `BACKEND_URL` secret in GitHub repository settings
+
+#### Render Usage for Alpha Version
+
+| Component | Monthly Hours | Details |
+|-----------|---------------|---------|
+| **Cron Job Keep-Alive** | ~246 hours | Enhanced: 13-min peak, 30-min off-peak |
+| **Alpha Users** (~10) | ~15-30 hours | Light testing usage |
+| **Total Usage** | **~261-276 hours** | **35-37% of free tier** ✅ |
+
+**Enhanced Time Window Strategy**:
+
+- **Peak** (13 hours): 6 PM Berlin - 7 AM Berlin → Every 13 minutes
+- **Off-Peak** (11 hours): 7 AM Berlin - 6 PM Berlin → Every 30 minutes  
+- **Coverage**: São Paulo 2 PM - 3 AM, Berlin 6 PM - 7 AM
+- **Benefit**: Better off-peak responsiveness while staying within free tier
+- **Total Pings**: 82 per day (60 peak + 22 off-peak)
+
+#### Usage Progression for Planning
+
+| Phase | Users | Monthly Hours | Free Tier % | Recommendation |
+|-------|-------|---------------|-------------|----------------|
+| **Alpha** | ~10 | ~261-276 hours | 35-37% | ✅ Perfect on free tier |
+| **Beta** | ~100 | ~350-400 hours | 47-53% | ✅ Still good on free tier |
+| **Production** | ~500+ | ~500-800+ hours | 67-107% | ⚠️ Consider paid tier ($7/month) |
+
+- **Uptime Monitoring**: Services like UptimeRobot or Pingdom
+- **Render Paid Tier**: Eliminates cold starts entirely ($7/month)
+
 ### Troubleshooting Backend
+
 - Check Render logs for build errors
 - Verify environment variables are set correctly
 - Ensure Supabase and AWS credentials are valid

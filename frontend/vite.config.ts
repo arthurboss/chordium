@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       // Add historyApiFallback for SPA routing
       cors: true,
-      proxy: {
+      proxy: isProduction ? undefined : {
         '/api': {
           target: process.env.VITE_API_URL || 'http://localhost:3001',
           changeOrigin: true,
@@ -52,6 +52,12 @@ export default defineConfig(({ mode }) => {
       //   ext: '.gz',
       // }),
     ].filter(Boolean),
+    preview: {
+      port: 4173,
+      host: "::",
+      // Ensure no proxy in preview mode
+      proxy: undefined,
+    },
     build: {
       // Enable tree shaking
       minify: 'terser',
