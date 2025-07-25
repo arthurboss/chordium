@@ -1,4 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import type { ChordSheet } from "../../../shared/types/index.js";
 
 // Mock the dependencies before importing the module under test
 const mockPuppeteerService = {
@@ -8,16 +9,16 @@ const mockPuppeteerService = {
 const mockExtractChordSheet = jest.fn();
 
 // Mock modules
-jest.unstable_mockModule("../../services/puppeteer.service.ts", () => ({
+jest.unstable_mockModule("../../services/puppeteer.service.js", () => ({
   default: mockPuppeteerService,
 }));
 
-jest.unstable_mockModule("../../utils/dom-extractors.ts", () => ({
+jest.unstable_mockModule("../../utils/dom-extractors.js", () => ({
   extractChordSheet: mockExtractChordSheet,
 }));
 
 // Import the module after mocking
-const { fetchChordSheet } = await import("../../utils/chord-sheet-fetcher.ts");
+const { fetchChordSheet } = await import("../../utils/chord-sheet-fetcher.js");
 
 const mockPage = {
   goto: jest.fn(),
@@ -27,7 +28,8 @@ const mockPage = {
 describe("Chord Sheet Fetcher", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPuppeteerService.withPage.mockImplementation(async (callback) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockPuppeteerService.withPage as any).mockImplementation(async (callback: any) => {
       return callback(mockPage);
     });
   });
@@ -35,14 +37,17 @@ describe("Chord Sheet Fetcher", () => {
   describe("fetchChordSheet", () => {
     it.skip("should fetch chord sheet content successfully", async () => {
       const songUrl = "https://www.cifraclub.com.br/oasis/wonderwall/";
-      const expectedChordSheet = {
+      const expectedChordSheet: ChordSheet = {
+        title: "Wonderwall",
+        artist: "Oasis",
         songChords: "[C] Today is gonna be the [G] day that they're gonna [Am] throw it back to [F] you",
         songKey: "",
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0
       };
 
-      mockPage.evaluate.mockResolvedValue(expectedChordSheet);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPage.evaluate as any).mockResolvedValue(expectedChordSheet);
 
       const result = await fetchChordSheet(songUrl);
 
@@ -59,14 +64,17 @@ describe("Chord Sheet Fetcher", () => {
 
     it.skip("should handle empty chord sheet", async () => {
       const songUrl = "https://www.cifraclub.com.br/empty/song/";
-      const emptyChordSheet = {
+      const emptyChordSheet: ChordSheet = {
+        title: "Empty Song",
+        artist: "Unknown Artist",
         songChords: "",
         songKey: "",
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0
       };
 
-      mockPage.evaluate.mockResolvedValue(emptyChordSheet);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPage.evaluate as any).mockResolvedValue(emptyChordSheet);
 
       const result = await fetchChordSheet(songUrl);
 
@@ -76,14 +84,17 @@ describe("Chord Sheet Fetcher", () => {
     it.skip("should handle URLs from different domains", async () => {
       const songUrl =
         "https://ultimate-guitar.com/tab/oasis/wonderwall-chords-1234";
-      const expectedChordSheet = {
+      const expectedChordSheet: ChordSheet = {
+        title: "Wonderwall",
+        artist: "Oasis",
         songChords: "Chord sheet from different site",
         songKey: "",
         guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
         guitarCapo: 0
       };
 
-      mockPage.evaluate.mockResolvedValue(expectedChordSheet);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPage.evaluate as any).mockResolvedValue(expectedChordSheet);
 
       const result = await fetchChordSheet(songUrl);
 
@@ -96,7 +107,8 @@ describe("Chord Sheet Fetcher", () => {
     it("should handle puppeteer errors", async () => {
       const songUrl = "https://www.cifraclub.com.br/oasis/wonderwall/";
 
-      mockPuppeteerService.withPage.mockRejectedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPuppeteerService.withPage as any).mockRejectedValue(
         new Error("Network timeout")
       );
 
@@ -106,7 +118,8 @@ describe("Chord Sheet Fetcher", () => {
     it.skip("should handle page evaluation errors", async () => {
       const songUrl = "https://www.cifraclub.com.br/oasis/wonderwall/";
 
-      mockPage.evaluate.mockRejectedValue(new Error("Element not found"));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPage.evaluate as any).mockRejectedValue(new Error("Element not found"));
 
       await expect(fetchChordSheet(songUrl)).rejects.toThrow(
         "Element not found"
@@ -115,7 +128,9 @@ describe("Chord Sheet Fetcher", () => {
 
     it.skip("should work with complex chord sheet content", async () => {
       const songUrl = "https://www.cifraclub.com.br/complex/song/";
-      const complexChordSheet = {
+      const complexChordSheet: ChordSheet = {
+        title: "Complex Song",
+        artist: "Test Artist",
         songChords: `[Intro]
 [C] [G] [Am] [F]
 
@@ -133,7 +148,8 @@ The way I [Am] do about you [F] now`,
         guitarCapo: 0
       };
 
-      mockPage.evaluate.mockResolvedValue(complexChordSheet);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPage.evaluate as any).mockResolvedValue(complexChordSheet);
 
       const result = await fetchChordSheet(songUrl);
 

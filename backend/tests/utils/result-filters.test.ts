@@ -1,6 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
-import { filterResults } from '../../utils/result-filters.ts';
-import SEARCH_TYPES from '../../constants/searchTypes.ts';
+import { filterResults } from '../../utils/result-filters.js';
+import SEARCH_TYPES from '../../constants/searchTypes.js';
+import type { SearchType } from '../../../shared/types/index.js';
 
 describe('Result Filters', () => {
   describe('filterResults', () => {
@@ -55,7 +56,7 @@ describe('Result Filters', () => {
       ];
 
       // Unknown search types return false from isValidResult, so no results pass through
-      const filtered = filterResults(results, 'UNKNOWN_TYPE');
+      const filtered = filterResults(results, 'UNKNOWN_TYPE' as SearchType);
 
       expect(filtered).toEqual([]);
     });
