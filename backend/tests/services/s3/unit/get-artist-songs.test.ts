@@ -15,8 +15,9 @@ import { resetS3ServiceState, createMockS3Error } from "../helpers/service-setup
  * Tests for S3 getArtistSongs operation
  */
 describe("S3 Get Artist Songs", () => {
-  let s3StorageService;
-  let originalEnv;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s3StorageService: any;
+  let originalEnv: NodeJS.ProcessEnv;
 
   beforeAll(async () => {
     // Import after mocking
@@ -42,13 +43,16 @@ describe("S3 Get Artist Songs", () => {
 
     const mockResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue(JSON.stringify(mockSongs)),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        transformToString: (jest.fn() as any).mockResolvedValue(JSON.stringify(mockSongs)),
       },
     };
 
-    mockS3Send.mockResolvedValue(mockResponse);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockResolvedValue(mockResponse);
 
-    const result = await s3StorageService.getArtistSongs("test-artist");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await s3StorageService.getArtistSongs("test-artist");
 
     expect(result).toEqual(mockSongs);
     expect(mockGetObjectCommand).toHaveBeenCalledWith({
@@ -62,10 +66,12 @@ describe("S3 Get Artist Songs", () => {
   });
 
   test("should return null when artist songs not found", async () => {
-    const error = createMockS3Error("NoSuchKey", "The specified key does not exist.");
-    mockS3Send.mockRejectedValue(error);
+    const error: Error = createMockS3Error("NoSuchKey", "The specified key does not exist.");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockRejectedValue(error);
 
-    const result = await s3StorageService.getArtistSongs("nonexistent-artist");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await s3StorageService.getArtistSongs("nonexistent-artist");
 
     expect(result).toBeNull();
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -76,13 +82,16 @@ describe("S3 Get Artist Songs", () => {
   test("should handle malformed JSON data gracefully", async () => {
     const mockResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue("invalid json"),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        transformToString: (jest.fn() as any).mockResolvedValue("invalid json"),
       },
     };
 
-    mockS3Send.mockResolvedValue(mockResponse);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockResolvedValue(mockResponse);
 
-    const result = await s3StorageService.getArtistSongs("test-artist");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await s3StorageService.getArtistSongs("test-artist");
 
     expect(result).toBeNull();
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -92,10 +101,12 @@ describe("S3 Get Artist Songs", () => {
   });
 
   test("should handle other S3 errors gracefully", async () => {
-    const error = createMockS3Error("AccessDenied", "Access denied");
-    mockS3Send.mockRejectedValue(error);
+    const error: Error = createMockS3Error("AccessDenied", "Access denied");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockRejectedValue(error);
 
-    const result = await s3StorageService.getArtistSongs("test-artist");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await s3StorageService.getArtistSongs("test-artist");
 
     expect(result).toBeNull();
     expect(mockLogger.error).toHaveBeenCalledWith(

@@ -1,4 +1,3 @@
-
 // Setup mocks before any other imports
 import {
   mockS3Send,
@@ -14,8 +13,9 @@ import { resetS3ServiceState, createMockS3Error } from "../helpers/service-setup
  * Tests for S3 listArtists operation
  */
 describe("S3 List Artists", () => {
-  let s3StorageService;
-  let originalEnv;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s3StorageService: any;
+  let originalEnv: NodeJS.ProcessEnv;
 
   beforeAll(async () => {
     // Import after mocking
@@ -42,9 +42,10 @@ describe("S3 List Artists", () => {
       ],
     };
 
-    mockS3Send.mockResolvedValue(mockS3Objects);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as jest.Mock).mockResolvedValue(mockS3Objects as any);
 
-    const result = await s3StorageService.listArtists();
+    const result: string[] = await s3StorageService.listArtists();
 
     expect(result).toEqual(["artist-1", "artist-2", "hillsong-united"]);
     expect(mockListObjectsV2Command).toHaveBeenCalledWith({
@@ -58,9 +59,10 @@ describe("S3 List Artists", () => {
 
   test("should handle empty S3 bucket", async () => {
     const mockS3Objects = { Contents: [] };
-    mockS3Send.mockResolvedValue(mockS3Objects);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as jest.Mock).mockResolvedValue(mockS3Objects as any);
 
-    const result = await s3StorageService.listArtists();
+    const result: string[] = await s3StorageService.listArtists();
 
     expect(result).toEqual([]);
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -70,9 +72,10 @@ describe("S3 List Artists", () => {
 
   test("should handle missing Contents property", async () => {
     const mockS3Objects = {}; // No Contents property
-    mockS3Send.mockResolvedValue(mockS3Objects);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as jest.Mock).mockResolvedValue(mockS3Objects as any);
 
-    const result = await s3StorageService.listArtists();
+    const result: string[] = await s3StorageService.listArtists();
 
     expect(result).toEqual([]);
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -81,8 +84,9 @@ describe("S3 List Artists", () => {
   });
 
   test("should handle S3 list operation failure", async () => {
-    const error = createMockS3Error("AccessDenied", "List operation failed");
-    mockS3Send.mockRejectedValue(error);
+    const error: Error = createMockS3Error("AccessDenied", "List operation failed");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as jest.Mock).mockRejectedValue(error as any);
 
     await expect(s3StorageService.listArtists()).rejects.toThrow("List operation failed");
     expect(mockLogger.error).toHaveBeenCalledWith(

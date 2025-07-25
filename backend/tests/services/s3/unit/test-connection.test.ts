@@ -1,4 +1,3 @@
-
 // Setup mocks before any other imports
 import {
   mockS3Send,
@@ -14,8 +13,9 @@ import { resetS3ServiceState, createMockS3Error } from "../helpers/service-setup
  * Tests for S3 testConnection operation
  */
 describe("S3 Test Connection", () => {
-  let s3StorageService;
-  let originalEnv;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s3StorageService: any;
+  let originalEnv: NodeJS.ProcessEnv | null;
 
   beforeAll(async () => {
     // Import after mocking
@@ -36,9 +36,9 @@ describe("S3 Test Connection", () => {
 
   test("should successfully test S3 connection", async () => {
     originalEnv = setupTestEnvironment(createTestEnvironment());
-    mockS3Send.mockResolvedValue({});
+    (mockS3Send as jest.Mock).mockResolvedValue({});
 
-    const result = await s3StorageService.testConnection();
+    const result: boolean = await s3StorageService.testConnection();
 
     expect(result).toBe(true);
     expect(mockHeadBucketCommand).toHaveBeenCalledWith({
@@ -51,10 +51,10 @@ describe("S3 Test Connection", () => {
 
   test("should handle S3 connection failure", async () => {
     originalEnv = setupTestEnvironment(createTestEnvironment());
-    const error = createMockS3Error("AccessDenied", "Bucket not accessible");
-    mockS3Send.mockRejectedValue(error);
+    const error: Error = createMockS3Error("AccessDenied", "Bucket not accessible");
+    (mockS3Send as jest.Mock).mockRejectedValue(error);
 
-    const result = await s3StorageService.testConnection();
+    const result: boolean = await s3StorageService.testConnection();
 
     expect(result).toBe(false);
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -65,7 +65,7 @@ describe("S3 Test Connection", () => {
   test("should return false when S3 is disabled", async () => {
     originalEnv = setupTestEnvironment(createDisabledEnvironment());
 
-    const result = await s3StorageService.testConnection();
+    const result: boolean = await s3StorageService.testConnection();
 
     expect(result).toBe(false);
     expect(mockS3Send).not.toHaveBeenCalled();

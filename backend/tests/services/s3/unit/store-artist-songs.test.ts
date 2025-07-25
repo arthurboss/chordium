@@ -1,5 +1,3 @@
-
-
 // Setup mocks before any other imports
 import {
   mockS3Send,
@@ -15,8 +13,10 @@ import { resetS3ServiceState } from "../helpers/service-setup.js";
  * Tests for S3 storeArtistSongs operation
  */
 describe("S3 Store Artist Songs", () => {
-  let s3StorageService;
-  let originalEnv;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s3StorageService: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let originalEnv: any;
 
   beforeAll(async () => {
     // Import after mocking
@@ -39,19 +39,21 @@ describe("S3 Store Artist Songs", () => {
       {
         title: "Song 1",
         path: "song-1",
-        url: "https://example.com/song-1", // This should be removed
+        url: "https://example.com/song-1",
+        extraField: "should-be-removed",
         artist: "Test Artist",
-        extraField: "should-be-removed", // This should be removed
       },
       {
         title: "Song 2",
         path: "song-2",
-        url: "https://example.com/song-2", // This should be removed
+        url: "https://example.com/song-2",
+        extraField: "should-be-removed",
         artist: "Test Artist",
       },
     ];
 
-    mockS3Send.mockResolvedValue({});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockResolvedValue({});
 
     const result = await s3StorageService.storeArtistSongs("test-artist", inputSongs);
 
@@ -69,7 +71,8 @@ describe("S3 Store Artist Songs", () => {
     });
 
     // Verify the stored data is optimized (URLs and extra fields removed)
-    const callArgs = mockPutObjectCommand.mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callArgs = (mockPutObjectCommand as any).mock.calls[0][0];
     const storedData = JSON.parse(callArgs.Body);
     
     expect(storedData).toEqual([
@@ -78,7 +81,8 @@ describe("S3 Store Artist Songs", () => {
     ]);
 
     // Verify URLs and extra fields were removed
-    storedData.forEach(song => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    storedData.forEach((song: any) => {
       expect(song).not.toHaveProperty("url");
       expect(song).not.toHaveProperty("extraField");
     });
@@ -89,7 +93,8 @@ describe("S3 Store Artist Songs", () => {
   });
 
   test("should handle empty song arrays", async () => {
-    mockS3Send.mockResolvedValue({});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockResolvedValue({});
 
     const result = await s3StorageService.storeArtistSongs("empty-artist", []);
 
@@ -110,7 +115,8 @@ describe("S3 Store Artist Songs", () => {
   test("should handle S3 storage errors gracefully", async () => {
     const songs = [{ title: "Song 1", path: "song-1", artist: "Test Artist" }];
     const error = new Error("S3 storage failed");
-    mockS3Send.mockRejectedValue(error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockS3Send as any).mockRejectedValue(error);
 
     const result = await s3StorageService.storeArtistSongs("test-artist", songs);
 
