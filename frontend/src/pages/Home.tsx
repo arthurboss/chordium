@@ -7,7 +7,7 @@ import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
 import { useSampleChordSheets } from "@/hooks/use-sample-chord-sheets";
-import { useSearchRedirect } from "@/hooks/use-search-redirect";
+import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
 const getInitialTab = (pathname: string): string => {

@@ -1,6 +1,6 @@
 # Search Feature Analysis
 
-**Date:** July 24, 2025  
+**Date:** July 25, 2025  
 **Scope:** Frontend search functionality analysis and refactoring progress  
 **Status:** 🎉 **PHASE 4 COMPLETED** - Unified search state architecture successfully implemented ✅
 
@@ -57,6 +57,27 @@ export interface SomeType {}
 ### Phase 4: Unified Search State Architecture ✅ COMPLETED
 
 **Current Status**: All core search refactoring phases completed successfully. The search feature now has a unified, modular architecture with no loading state synchronization issues.
+
+### Recent Updates (July 25, 2025)
+
+**🐛 Critical Artist Filtering Bug Fix:**
+- **Issue**: Artist input filtering not working when viewing search results artist list
+- **Root Cause**: `SearchResultsStateHandler.tsx` in the `'hasSearched'` case was passing unfiltered `artists` array to `SearchResultsLayout`
+- **Solution**: Added proper artist filtering logic using `filterArtist` parameter before passing to `SearchResultsLayout`
+- **Impact**: Artist filtering now works correctly in all search scenarios (both general search and artist-specific searches)
+
+**🧹 Unused Filtering Hooks Cleanup:**
+- **Archived**: `useArtistFilter.ts`, `useSongFilter.ts`, `useSearchFilter.ts` to `frontend/_archive/hooks/`
+- **Rationale**: These hooks were designed for modular filtering but were never actually used in the application
+- **Current Implementation**: Filtering is handled directly in components (`SearchResultsStateHandler`, `SongsView`) for better performance
+- **Testing**: All builds and tests pass after removal, confirming these were truly unused
+- **Documentation**: Updated archive README with proper restoration instructions
+
+**Architecture Status:**
+- ✅ **Artist filtering bug resolved**: Input filtering works across all search modes
+- ✅ **Unused code eliminated**: No dead filtering hooks cluttering the codebase  
+- ✅ **Build verification**: All tests passing, production builds successful
+- ✅ **Import cleanup**: Removed unused exports from search hooks index
 
 **Objective**: Extract all search-related types into individual, modular files
 
