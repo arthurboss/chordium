@@ -67,7 +67,7 @@ export interface SomeType {}
 - **Impact**: Artist filtering now works correctly in all search scenarios (both general search and artist-specific searches)
 
 **🧹 Unused Filtering Hooks Cleanup:**
-- **Archived**: `useArtistFilter.ts`, `useSongFilter.ts`, `useSearchFilter.ts` to `frontend/_archive/hooks/`
+- **Archived**: `useArtistFilter.ts`, `useSongFilter.ts`, `useSearchFilter.ts` to `frontend/_archive/src/search/hooks/`
 - **Rationale**: These hooks were designed for modular filtering but were never actually used in the application
 - **Current Implementation**: Filtering is handled directly in components (`SearchResultsStateHandler`, `SongsView`) for better performance
 - **Testing**: All builds and tests pass after removal, confirming these were truly unused
