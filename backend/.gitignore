@@ -126,3 +126,5 @@ dist/
 *.backup
 *.old
 *.orig
+
+_archive/
