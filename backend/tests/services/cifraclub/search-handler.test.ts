@@ -1,4 +1,13 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import SEARCH_TYPES from "../../../constants/searchTypes.js";
+
+// Mock interfaces for TypeScript typing
+interface MockPage {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  goto: jest.MockedFunction<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  evaluate: jest.MockedFunction<any>;
+}
 
 // Mock the dependencies before importing the module under test
 const mockPuppeteerService = {
@@ -9,24 +18,24 @@ const mockFilterResults = jest.fn();
 const mockExtractSearchResults = jest.fn();
 
 // Mock modules
-jest.unstable_mockModule("../../../services/puppeteer.service.ts", () => ({
+jest.unstable_mockModule("../../../services/puppeteer.service.js", () => ({
   default: mockPuppeteerService,
 }));
 
-jest.unstable_mockModule("../../../utils/result-filters.ts", () => ({
+jest.unstable_mockModule("../../../utils/result-filters.js", () => ({
   filterResults: mockFilterResults,
 }));
 
-jest.unstable_mockModule("../../../utils/dom-extractors.ts", () => ({
+jest.unstable_mockModule("../../../utils/dom-extractors.js", () => ({
   extractSearchResults: mockExtractSearchResults,
 }));
 
 // Import the module after mocking
 const { performSearch } = await import(
-  "../../../services/cifraclub/search-handler.ts"
+  "../../../services/cifraclub/search-handler.js"
 );
 
-const mockPage = {
+const mockPage: MockPage = {
   goto: jest.fn(),
   evaluate: jest.fn(),
 };
@@ -34,7 +43,8 @@ const mockPage = {
 describe("CifraClub Search Handler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPuppeteerService.withPage.mockImplementation(async (callback) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockPuppeteerService.withPage.mockImplementation(async (callback: any) => {
       return callback(mockPage);
     });
   });
@@ -43,7 +53,7 @@ describe("CifraClub Search Handler", () => {
     it("should perform search and return filtered results", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const query = "oasis";
-      const searchType = "ARTIST";
+      const searchType = SEARCH_TYPES.ARTIST;
 
       const mockRawResults = [
         {
@@ -75,7 +85,7 @@ describe("CifraClub Search Handler", () => {
     it("should encode special characters in query", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const query = "guns n' roses";
-      const searchType = "ARTIST";
+      const searchType = SEARCH_TYPES.ARTIST;
 
       mockPage.evaluate.mockResolvedValue([]);
       mockFilterResults.mockReturnValue([]);
@@ -91,7 +101,7 @@ describe("CifraClub Search Handler", () => {
     it("should handle empty search results", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const query = "nonexistent";
-      const searchType = "ARTIST";
+      const searchType = SEARCH_TYPES.ARTIST;
 
       mockPage.evaluate.mockResolvedValue([]);
       mockFilterResults.mockReturnValue([]);
@@ -105,9 +115,10 @@ describe("CifraClub Search Handler", () => {
     it("should handle puppeteer errors", async () => {
       const baseUrl = "https://www.cifraclub.com.br";
       const query = "test";
-      const searchType = "ARTIST";
+      const searchType = SEARCH_TYPES.ARTIST;
 
-      mockPuppeteerService.withPage.mockRejectedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPuppeteerService.withPage as any).mockRejectedValue(
         new Error("Navigation failed")
       );
 

@@ -1,16 +1,39 @@
-import { removeSongFromArtistHandler } from '../removeSongFromArtistHandler.js';
+import { jest } from '@jest/globals';
+import { Request, Response } from 'express';
+import type { RemoveSongFromArtistBody, SuccessResponse, ErrorResponse } from '../../../../shared/types/index.js';
 
-const mockRemoveSongFromArtist = jest.fn();
-jest.mock('../../../services/s3-artist-cache.service.js', () => ({
-  removeSongFromArtist: (...args) => mockRemoveSongFromArtist(...args),
+// Setup mocks using unstable_mockModule for ES modules
+const mockRemoveSongFromArtist = jest.fn() as jest.MockedFunction<
+  (artistName: string, songPath: string) => Promise<boolean>
+>;
+const mockLogger = { info: jest.fn(), error: jest.fn() };
+
+jest.unstable_mockModule('../../../services/s3-artist-cache.service.js', () => ({
+  removeSongFromArtist: mockRemoveSongFromArtist,
 }));
 
-const mockLogger = { info: jest.fn(), error: jest.fn() };
-jest.mock('../../../utils/logger.js', () => mockLogger);
+jest.unstable_mockModule('../../../utils/logger.js', () => ({
+  default: mockLogger,
+}));
 
-const mockReqRes = (body = {}) => {
-  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-  return [{ body }, res];
+// Import the handler after setting up mocks
+const { removeSongFromArtistHandler } = await import('../../../controllers/handlers/removeSongFromArtistHandler.js');
+
+const mockReqRes = (body: Partial<RemoveSongFromArtistBody> = {}) => {
+  const res = { 
+    status: jest.fn().mockReturnThis(), 
+    json: jest.fn() 
+  } as unknown as Response<SuccessResponse | ErrorResponse>;
+  
+  const req = { 
+    body 
+  } as unknown as Request<
+    Record<string, never>,
+    SuccessResponse | ErrorResponse,
+    RemoveSongFromArtistBody
+  >;
+  
+  return [req, res] as const;
 };
 
 describe('removeSongFromArtistHandler', () => {

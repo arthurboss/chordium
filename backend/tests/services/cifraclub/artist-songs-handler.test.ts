@@ -23,10 +23,15 @@ jest.unstable_mockModule("../../../utils/dom-extractors.ts", () => ({
 
 // Import the module after mocking
 const { fetchArtistSongs } = await import(
-  "../../../services/cifraclub/artist-songs-handler.ts"
+  "../../../services/cifraclub/artist-songs-handler.js"
 );
 
-const mockPage = {
+interface MockPage {
+  goto: jest.Mock;
+  evaluate: jest.Mock;
+}
+
+const mockPage: MockPage = {
   goto: jest.fn(),
   evaluate: jest.fn(),
 };
@@ -34,8 +39,8 @@ const mockPage = {
 describe("CifraClub Artist Songs Handler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPuppeteerService.withPage.mockImplementation(async (callback) => {
-      return callback(mockPage);
+    mockPuppeteerService.withPage.mockImplementation(async (callback: unknown) => {
+      return (callback as (page: MockPage) => Promise<unknown>)(mockPage);
     });
   });
 
@@ -71,7 +76,9 @@ describe("CifraClub Artist Songs Handler", () => {
       const artistUrl = "https://www.cifraclub.com.br/oasis/";
 
       mockExtractArtistSlug.mockReturnValue("oasis");
-      mockPuppeteerService.withPage.mockRejectedValue(
+      // Use eslint-disable to bypass TypeScript strictness for this mock
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockPuppeteerService.withPage as any).mockRejectedValue(
         new Error("Page load failed")
       );
 
