@@ -1,4 +1,3 @@
-
 // Setup mocks before any other imports
 import {
   mockS3Client,
@@ -13,8 +12,9 @@ import { resetS3ServiceState } from "../helpers/service-setup.js";
  * Tests for S3 service initialization and configuration
  */
 describe("S3 Service Initialization", () => {
-  let s3StorageService;
-  let originalEnv;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let s3StorageService: any;
+  let originalEnv: NodeJS.ProcessEnv | null;
 
   beforeAll(async () => {
     // Import after mocking is set up
@@ -37,7 +37,7 @@ describe("S3 Service Initialization", () => {
   test("should initialize with valid AWS credentials", () => {
     originalEnv = setupTestEnvironment(createTestEnvironment());
 
-    const result = s3StorageService._checkEnabled();
+    const result: boolean = s3StorageService._checkEnabled();
 
     expect(result).toBe(true);
     expect(s3StorageService.enabled).toBe(true);
@@ -52,7 +52,7 @@ describe("S3 Service Initialization", () => {
   });
 
   test("should use default region when AWS_REGION is not set", () => {
-    const env = createTestEnvironment();
+    const env: NodeJS.ProcessEnv = createTestEnvironment();
     delete env.AWS_REGION;
     originalEnv = setupTestEnvironment(env);
 
