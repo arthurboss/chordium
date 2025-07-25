@@ -6,7 +6,35 @@ const productionConfig: Partial<Config> = {
   },
   
   cors: {
-    origin: process.env.FRONTEND_URL || '*',
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // List of allowed origins
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'https://chordium.vercel.app',
+        'http://localhost:8080', // Local development
+        'http://localhost:4173'  // Local preview
+      ].filter((url): url is string => Boolean(url)); // Type-safe filter
+      
+      // Vercel preview deployment patterns
+      const vercelPreviewPatterns = [
+        /^https:\/\/chordium-git-.+\.vercel\.app$/, // Git branch deployments
+        /^https:\/\/app-.+-chordium\.vercel\.app$/, // PR/commit deployments
+        /^https:\/\/chordium-.+\.vercel\.app$/      // Other preview patterns
+      ];
+      
+      // Check if the origin is in the allowed list or matches Vercel preview pattern
+      const isAllowed = allowedOrigins.includes(origin) || 
+        vercelPreviewPatterns.some(pattern => pattern.test(origin));
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   },

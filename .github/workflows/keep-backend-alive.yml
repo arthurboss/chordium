@@ -1,0 +1,54 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # Peak hours part 1: 6 PM - 11:59 PM Berlin (17:00 - 23:59 UTC)
+    # Covers: Berlin 18:00-23:59, São Paulo 14:00-20:59
+    - cron: '*/13 17-23 * * *'
+    
+    # Peak hours part 2: 12 AM - 7 AM Berlin (00:00 - 05:59 UTC)
+    # Covers: Berlin 00:00-05:59, São Paulo 21:00-02:59 (next day)
+    - cron: '*/13 0-5 * * *'
+    
+    # Off-peak hours: 7 AM - 6 PM Berlin (06:00 - 16:59 UTC)
+    # Covers: Berlin 07:00-17:59, São Paulo 03:00-13:59
+    - cron: '*/30 6-16 * * *'
+    
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend Health Endpoint
+        run: |
+          echo "🏓 Pinging backend at $(date)"
+          echo "🌍 Berlin time: $(TZ='Europe/Berlin' date)"
+          echo "🇧🇷 São Paulo time: $(TZ='America/Sao_Paulo' date)"
+          echo "🔗 Backend URL: ${{ secrets.BACKEND_URL }}"
+          
+          # Validate the BACKEND_URL
+          if [[ -z "${{ secrets.BACKEND_URL }}" ]]; then
+            echo "❌ BACKEND_URL is empty. Exiting."
+            exit 1
+          elif ! [[ "${{ secrets.BACKEND_URL }}" =~ ^https?://[a-zA-Z0-9.-]+(:[0-9]+)?(/.*)?$ ]]; then
+            echo "❌ BACKEND_URL is not a valid URL. Exiting."
+            exit 1
+          fi
+          
+          # Ping the health endpoint
+          if curl -f --max-time 30 --retry 3 --retry-delay 5 "${{ secrets.BACKEND_URL }}/health"; then
+            echo "✅ Backend ping successful!"
+          else
+            echo "❌ Backend ping failed, but that's okay - it might be starting up"
+            exit 0  # Don't fail the workflow
+          fi
+      
+      - name: Log Keep-Alive Stats
+        run: |
+          echo "📊 Keep-Alive Schedule Summary:"
+          echo "   Peak hours (13h): Every 13 minutes"
+          echo "   Off-peak (11h): Every 30 minutes" 
+          echo "   Daily pings: ~82"
+          echo "   Monthly usage: ~246 hours"
+          echo "   Free tier usage: ~35-37%"

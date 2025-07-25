@@ -26,6 +26,12 @@ class App {
   }
 
   private setupRoutes(): void {
+    // Middleware to ensure API routes always return JSON
+    this.app.use('/api', (req, res, next) => {
+      res.setHeader('Content-Type', 'application/json');
+      next();
+    });
+
     // API routes
     this.app.use('/api', apiRoutes);
 

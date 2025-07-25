@@ -3,7 +3,7 @@ export interface ServerConfig {
 }
 
 export interface CorsConfig {
-  origin: string;
+  origin: string | string[] | ((origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void);
   methods: string[];
   credentials?: boolean;
 }

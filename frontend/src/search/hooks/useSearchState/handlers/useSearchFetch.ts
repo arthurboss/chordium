@@ -5,6 +5,7 @@ import {
   getCachedSearchResults 
 } from "@/cache/implementations/search-cache";
 import type { SearchResultsAction } from "@/search/types/searchResultsAction";
+import { getApiBaseUrl } from "@/utils/api-base-url";
 
 interface UseSearchFetchOptions {
   dispatch: React.Dispatch<SearchResultsAction>;
@@ -71,13 +72,14 @@ export const useSearchFetch = ({
       }
 
       // Make API call based on search type
+      const baseUrl = getApiBaseUrl();
       let apiUrl: string;
       if (!artistParam && songParam) {
         // Song only search
-        apiUrl = `/api/cifraclub-search?artist=&song=${encodeURIComponent(songParam)}`;
+        apiUrl = `${baseUrl}/api/cifraclub-search?artist=&song=${encodeURIComponent(songParam)}`;
       } else {
         // Artist search or artist+song search
-        apiUrl = `/api/artists?artist=${encodeURIComponent(artistParam)}&song=${encodeURIComponent(songParam)}`;
+        apiUrl = `${baseUrl}/api/artists?artist=${encodeURIComponent(artistParam)}&song=${encodeURIComponent(songParam)}`;
       }
 
       const response = await fetch(apiUrl);
