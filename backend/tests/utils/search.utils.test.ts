@@ -1,4 +1,5 @@
-import { buildSearchQuery, determineSearchType } from '../search.utils.js';
+import { buildSearchQuery, determineSearchType } from '../../utils/search.utils.js';
+import { SEARCH_TYPES } from '../../../shared/types/index.js';
 
 describe('buildSearchQuery', () => {
   it('returns artist and song concatenated if both are provided', () => {
@@ -16,17 +17,16 @@ describe('buildSearchQuery', () => {
 });
 
 describe('determineSearchType', () => {
-  const SEARCH_TYPES = { ARTIST: 'ARTIST', SONG: 'SONG' };
   it('returns ARTIST if only artist is provided', () => {
-    expect(determineSearchType('Adele', '', SEARCH_TYPES)).toBe('ARTIST');
+    expect(determineSearchType('Adele', '')).toBe(SEARCH_TYPES.ARTIST);
   });
   it('returns SONG if only song is provided', () => {
-    expect(determineSearchType('', 'Hello', SEARCH_TYPES)).toBe('SONG');
+    expect(determineSearchType('', 'Hello')).toBe(SEARCH_TYPES.SONG);
   });
   it('returns SONG if both artist and song are provided', () => {
-    expect(determineSearchType('Adele', 'Hello', SEARCH_TYPES)).toBe('SONG');
+    expect(determineSearchType('Adele', 'Hello')).toBe(SEARCH_TYPES.SONG);
   });
   it('returns null if neither is provided', () => {
-    expect(determineSearchType('', '', SEARCH_TYPES)).toBeNull();
+    expect(determineSearchType('', '')).toBeNull();
   });
 });
