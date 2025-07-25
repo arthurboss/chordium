@@ -1,7 +1,8 @@
 import { useRef, useEffect } from "react";
 import { useTabStatePersistence } from "../hooks/useTabStatePersistence";
-import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchState } from "@/context/SearchStateContext";
 
 import { Song } from "../types/song";
 import SongList from "./SongList";
@@ -33,6 +34,8 @@ const TabContainer = ({
   setSelectedSong
 }: TabContainerProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { searchState } = useSearchState();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const { getTabState, setTabState } = useTabStatePersistence();
 
@@ -54,7 +57,23 @@ const TabContainer = ({
     if (value === "upload") {
       navigate("/upload");
     } else if (value === "search") {
-      navigate("/search");
+      // Preserve search parameters when switching to search tab
+      // Use both current URL params and search state to reconstruct the search URL
+      let searchPath = "/search";
+      
+      // First try to get params from current URL if we're already on a search route
+      if (location.pathname.startsWith("/search") && location.search) {
+        searchPath = `/search${location.search}`;
+      } 
+      // Otherwise, check if there's search state that should be reflected in URL
+      else if (searchState.artist || searchState.song) {
+        const params = new URLSearchParams();
+        if (searchState.artist) params.set('artist', toSlug(searchState.artist));
+        if (searchState.song) params.set('song', toSlug(searchState.song));
+        searchPath = `/search?${params.toString()}`;
+      }
+      
+      navigate(searchPath);
     } else if (value === "my-chord-sheets") {
       navigate("/my-chord-sheets");
     }
