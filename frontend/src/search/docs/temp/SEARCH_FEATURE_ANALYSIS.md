@@ -257,8 +257,9 @@ frontend/src/search/utils/
 The unified search state architecture successfully resolves the core loading state synchronization issue while implementing proper modular structure. The search feature now has a single, reliable source of truth for all state management.
 
 **🗂️ Legacy Hook Cleanup Completed:**
-- ✅ **Archived deprecated hooks**: `useSearchFetch.ts`, `useSearchResults.ts` moved to `frontend/_archive/src/hooks/`
-- ✅ **Removed deprecated test files**: `useSearchResults.test.ts` archived and removed
+
+- ✅ **Archived deprecated hooks**: `useSearchFetch.ts`, `useSearchResults.ts`, `useSearchResultsReducer.ts`, `useSearchEffects.ts`, `useArtistSongs.ts`, `useArtistSelection.ts` moved to `frontend/_archive/src/hooks/`
+- ✅ **Removed deprecated test files**: `useSearchResults.test.ts`, `useSearchResultsReducer.test.ts`, `useSearchEffects.error-clearing.test.ts` archived and removed
 - ✅ **Verified no active usage**: All components now use unified `useSearchState` hook
 - ✅ **Build verification**: Production builds successful after cleanup
 - ✅ **Following archive guidelines**: Proper backup format with `.backup` extension
