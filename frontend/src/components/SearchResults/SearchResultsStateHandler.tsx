@@ -53,9 +53,17 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     case 'artist-songs-empty':
       return <div style={{ padding: 32, textAlign: 'center' }}><h3>No songs found for {stateData.activeArtist?.displayName || 'this artist'}.</h3><p>Try searching for another artist or song.</p></div>;
     case 'songs-view':
-      return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} filterArtist={stateData.searchType === 'song' ? filterArtist : ''} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
-    case 'hasSearched':
-      return <div data-cy="search-results-layout-wrapper" {...testAttr("search-results")}><SearchResultsLayout artists={artists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
+      return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+    case 'hasSearched': {
+      // Filter artists by the artist filter input
+      const filteredArtists = filterArtist 
+        ? artists.filter(artist => 
+            artist.displayName.toLowerCase().includes(filterArtist.toLowerCase())
+          )
+        : artists;
+      
+      return <div data-cy="search-results-layout-wrapper" {...testAttr("search-results")}><SearchResultsLayout artists={filteredArtists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
+    }
     case 'default':
     default:
       return <div data-cy="search-results-default-null" />;
