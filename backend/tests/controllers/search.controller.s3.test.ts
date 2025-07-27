@@ -1,6 +1,21 @@
-import request from 'supertest';
 import express from 'express';
 import { jest } from '@jest/globals';
+
+// Helper function to create mock request  
+function createMockRequest(body?: Record<string, unknown>, query?: Record<string, unknown>) {
+  return {
+    body: body || {},
+    query: query || {},
+  } as any;
+}
+
+// Helper function to create mock response
+function createMockResponse() {
+  const res = {} as any;
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res;
+}
 
 // Mock S3 Storage Service
 const mockS3StorageService = {
@@ -24,15 +39,15 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
   default: mockCifraClubService,
 }));
 
-jest.unstable_mockModule('../../utils/logger.ts', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   default: mockLogger,
 }));
 
@@ -41,10 +56,10 @@ jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({})),
 }));
 
-const { default: searchController } = await import('../../controllers/search.controller.ts');
+const { default: searchController } = await import('../../controllers/search.controller.js');
 
 describe('Search Controller - S3 Caching Integration', () => {
-  let app;
+  let app: express.Application;
 
   beforeEach(() => {
     app = express();
@@ -53,27 +68,16 @@ describe('Search Controller - S3 Caching Integration', () => {
   });
 
   describe('getArtistSongs - S3 Caching Behavior', () => {
-    const mockRequest = (artistPath) => ({
-      query: { artistPath },
-    });
-
-    const mockResponse = () => {
-      const res = {};
-      res.status = jest.fn().mockReturnValue(res);
-      res.json = jest.fn().mockReturnValue(res);
-      return res;
-    };
-
     test('should return cached songs from S3 when available', async () => {
       const cachedSongs = [
         { title: 'Cached Song 1', path: 'cached-song-1', artist: 'Test Artist' },
         { title: 'Cached Song 2', path: 'cached-song-2', artist: 'Test Artist' },
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(cachedSongs);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(cachedSongs);
 
-      const req = mockRequest('test-artist');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'test-artist' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -92,12 +96,12 @@ describe('Search Controller - S3 Caching Integration', () => {
       ];
 
       // Cache miss
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
-      mockCifraClubService.getArtistSongs.mockResolvedValue(scrapedSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
+      (mockCifraClubService.getArtistSongs as any).mockResolvedValue(scrapedSongs);
+      (mockS3StorageService.storeArtistSongs as any).mockResolvedValue(true);
 
-      const req = mockRequest('new-artist');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'new-artist' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -118,12 +122,12 @@ describe('Search Controller - S3 Caching Integration', () => {
       ];
 
       // S3 error
-      mockS3StorageService.getArtistSongs.mockRejectedValue(new Error('S3 connection failed'));
-      mockCifraClubService.getArtistSongs.mockResolvedValue(scrapedSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockS3StorageService.getArtistSongs as any).mockRejectedValue(new Error('S3 connection failed'));
+      (mockCifraClubService.getArtistSongs as any).mockResolvedValue(scrapedSongs);
+      (mockS3StorageService.storeArtistSongs as any).mockResolvedValue(true);
 
-      const req = mockRequest('error-artist');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'error-artist' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -140,12 +144,12 @@ describe('Search Controller - S3 Caching Integration', () => {
         { title: 'New Song', path: 'new-song', artist: 'New Artist' },
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
-      mockCifraClubService.getArtistSongs.mockResolvedValue(scrapedSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
+      (mockCifraClubService.getArtistSongs as any).mockResolvedValue(scrapedSongs);
+      (mockS3StorageService.storeArtistSongs as any).mockResolvedValue(true);
 
-      const req = mockRequest('cache-test');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'cache-test' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -160,12 +164,12 @@ describe('Search Controller - S3 Caching Integration', () => {
         { title: 'Song', path: 'song', artist: 'Artist' },
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
-      mockCifraClubService.getArtistSongs.mockResolvedValue(scrapedSongs);
-      mockS3StorageService.storeArtistSongs.mockRejectedValue(new Error('Cache storage failed'));
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
+      (mockCifraClubService.getArtistSongs as any).mockResolvedValue(scrapedSongs);
+      (mockS3StorageService.storeArtistSongs as any).mockRejectedValue(new Error('Cache storage failed'));
 
-      const req = mockRequest('cache-fail');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'cache-fail' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -178,10 +182,10 @@ describe('Search Controller - S3 Caching Integration', () => {
 
     test('should handle artistPath with trailing slash', async () => {
       const cachedSongs = [{ title: 'Song', path: 'song', artist: 'Artist' }];
-      mockS3StorageService.getArtistSongs.mockResolvedValue(cachedSongs);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(cachedSongs);
 
-      const req = mockRequest('test-artist/');
-      const res = mockResponse();
+      const req = createMockRequest(undefined, { artistPath: 'test-artist/' });
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -190,8 +194,8 @@ describe('Search Controller - S3 Caching Integration', () => {
     });
 
     test('should return 400 when artistPath is missing', async () => {
-      const req = { query: {} };
-      const res = mockResponse();
+      const req = { query: {} } as any;
+      const res = createMockResponse();
 
       await searchController.getArtistSongs(req, res);
 
@@ -202,14 +206,6 @@ describe('Search Controller - S3 Caching Integration', () => {
   });
 
   describe('Cache Management Endpoints', () => {
-    const mockRequest = (body) => ({ body });
-    const mockResponse = () => {
-      const res = {};
-      res.status = jest.fn().mockReturnValue(res);
-      res.json = jest.fn().mockReturnValue(res);
-      return res;
-    };
-
     describe('addSongToArtist', () => {
       test('should successfully add song to artist', async () => {
         const newSong = {
@@ -218,10 +214,10 @@ describe('Search Controller - S3 Caching Integration', () => {
           artist: 'Test Artist',
         };
 
-        mockS3StorageService.addSongToArtist.mockResolvedValue(true);
+        (mockS3StorageService.addSongToArtist as any).mockResolvedValue(true);
 
-        const req = mockRequest({ artistName: 'test-artist', song: newSong });
-        const res = mockResponse();
+        const req = createMockRequest({ artistName: 'test-artist', song: newSong });
+        const res = createMockResponse();
 
         await searchController.addSongToArtist(req, res);
 
@@ -231,8 +227,8 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should return 400 when artistName is missing', async () => {
-        const req = mockRequest({ song: { title: 'Song', path: 'song' } });
-        const res = mockResponse();
+        const req = createMockRequest({ song: { title: 'Song', path: 'song' } });
+        const res = createMockResponse();
 
         await searchController.addSongToArtist(req, res);
 
@@ -241,8 +237,8 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should return 400 when song is missing required fields', async () => {
-        const req = mockRequest({ artistName: 'test-artist', song: { title: 'Song' } });
-        const res = mockResponse();
+        const req = createMockRequest({ artistName: 'test-artist', song: { title: 'Song' } });
+        const res = createMockResponse();
 
         await searchController.addSongToArtist(req, res);
 
@@ -251,13 +247,13 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should return 500 when add operation fails', async () => {
-        mockS3StorageService.addSongToArtist.mockResolvedValue(false);
+        (mockS3StorageService.addSongToArtist as any).mockResolvedValue(false);
 
-        const req = mockRequest({
+        const req = createMockRequest({
           artistName: 'test-artist',
           song: { title: 'Song', path: 'song' },
         });
-        const res = mockResponse();
+        const res = createMockResponse();
 
         await searchController.addSongToArtist(req, res);
 
@@ -268,10 +264,10 @@ describe('Search Controller - S3 Caching Integration', () => {
 
     describe('removeSongFromArtist', () => {
       test('should successfully remove song from artist', async () => {
-        mockS3StorageService.removeSongFromArtist.mockResolvedValue(true);
+        (mockS3StorageService.removeSongFromArtist as any).mockResolvedValue(true);
 
-        const req = mockRequest({ artistName: 'test-artist', songPath: 'test-song' });
-        const res = mockResponse();
+        const req = createMockRequest({ artistName: 'test-artist', songPath: 'test-song' });
+        const res = createMockResponse();
 
         await searchController.removeSongFromArtist(req, res);
 
@@ -280,10 +276,10 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should return 404 when song not found', async () => {
-        mockS3StorageService.removeSongFromArtist.mockResolvedValue(false);
+        (mockS3StorageService.removeSongFromArtist as any).mockResolvedValue(false);
 
-        const req = mockRequest({ artistName: 'test-artist', songPath: 'non-existent' });
-        const res = mockResponse();
+        const req = createMockRequest({ artistName: 'test-artist', songPath: 'non-existent' });
+        const res = createMockResponse();
 
         await searchController.removeSongFromArtist(req, res);
 
@@ -292,8 +288,8 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should return 400 when required parameters are missing', async () => {
-        const req = mockRequest({ artistName: 'test-artist' });
-        const res = mockResponse();
+        const req = createMockRequest({ artistName: 'test-artist' });
+        const res = createMockResponse();
 
         await searchController.removeSongFromArtist(req, res);
 
@@ -305,10 +301,10 @@ describe('Search Controller - S3 Caching Integration', () => {
     describe('listCachedArtists', () => {
       test('should return list of cached artists', async () => {
         const cachedArtists = ['hillsong-united', 'bethel-music', 'elevation-worship'];
-        mockS3StorageService.listArtists.mockResolvedValue(cachedArtists);
+        (mockS3StorageService.listArtists as any).mockResolvedValue(cachedArtists);
 
-        const req = {};
-        const res = mockResponse();
+        const req = {} as any;
+        const res = createMockResponse();
 
         await searchController.listCachedArtists(req, res);
 
@@ -318,10 +314,10 @@ describe('Search Controller - S3 Caching Integration', () => {
       });
 
       test('should handle error when listing artists fails', async () => {
-        mockS3StorageService.listArtists.mockRejectedValue(new Error('S3 error'));
+        (mockS3StorageService.listArtists as any).mockRejectedValue(new Error('S3 error'));
 
-        const req = {};
-        const res = mockResponse();
+        const req = {} as any;
+        const res = createMockResponse();
 
         await searchController.listCachedArtists(req, res);
 

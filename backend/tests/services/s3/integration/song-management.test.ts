@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { jest } from "@jest/globals";
 
 // Setup mocks before any other imports
@@ -14,8 +15,8 @@ import { resetS3ServiceState } from "../helpers/service-setup.js";
  * Integration tests for S3 add/remove song operations
  */
 describe("S3 Song Management Integration", () => {
-  let s3StorageService;
-  let originalEnv;
+  let s3StorageService: any;
+  let originalEnv: any;
 
   beforeAll(async () => {
     // Import after mocking
@@ -41,12 +42,12 @@ describe("S3 Song Management Integration", () => {
     // Mock getArtistSongs to return existing songs
     const mockGetResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue(JSON.stringify(existingSongs)),
+        transformToString: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(existingSongs)),
       },
     };
 
     // Mock storeArtistSongs to succeed
-    mockS3Send
+    (mockS3Send as any)
       .mockResolvedValueOnce(mockGetResponse) // First call for getArtistSongs
       .mockResolvedValueOnce({}); // Second call for storeArtistSongs
 
@@ -72,11 +73,11 @@ describe("S3 Song Management Integration", () => {
 
     const mockGetResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue(JSON.stringify(existingSongs)),
+        transformToString: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(existingSongs)),
       },
     };
 
-    mockS3Send.mockResolvedValue(mockGetResponse);
+    (mockS3Send as any).mockResolvedValue(mockGetResponse);
 
     // Try to add the same song
     const duplicateSong = {
@@ -102,11 +103,11 @@ describe("S3 Song Management Integration", () => {
 
     const mockGetResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue(JSON.stringify(existingSongs)),
+        transformToString: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(existingSongs)),
       },
     };
 
-    mockS3Send
+    (mockS3Send as any)
       .mockResolvedValueOnce(mockGetResponse) // getArtistSongs
       .mockResolvedValueOnce({}); // storeArtistSongs
 
@@ -126,11 +127,11 @@ describe("S3 Song Management Integration", () => {
 
     const mockGetResponse = {
       Body: {
-        transformToString: jest.fn().mockResolvedValue(JSON.stringify(existingSongs)),
+        transformToString: jest.fn<() => Promise<string>>().mockResolvedValue(JSON.stringify(existingSongs)),
       },
     };
 
-    mockS3Send.mockResolvedValue(mockGetResponse);
+    (mockS3Send as any).mockResolvedValue(mockGetResponse);
 
     const result = await s3StorageService.removeSongFromArtist("test-artist", "non-existent");
 

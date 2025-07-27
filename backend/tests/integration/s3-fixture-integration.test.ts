@@ -29,15 +29,15 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service.js', () => ({
   default: mockCifraClubService,
 }));
 
-jest.unstable_mockModule('../../utils/logger.ts', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   default: mockLogger,
 }));
 
@@ -45,20 +45,41 @@ jest.unstable_mockModule('../../utils/logger.ts', () => ({
 const mockSupabase = {
   from: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
-  ilike: jest.fn().mockResolvedValue({ data: [], error: null }),
+  ilike: jest.fn(),
 };
+
+// Set the default return value after declaration
+(mockSupabase.ilike as jest.MockedFunction<any>).mockResolvedValue({ data: [], error: null });
 
 jest.unstable_mockModule('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabase),
 }));
 
-const { default: searchController } = await import('../../controllers/search.controller.ts');
+const { default: searchController } = await import('../../controllers/search.controller.js');
 
 /**
  * Integration tests using real fixture data to test S3 caching workflow
  * Tests the complete flow: cache miss -> scraping -> caching -> cache hit
  * Uses realistic data from fixtures to ensure end-to-end functionality
  */
+
+// Helper function to create mock response object
+const createResponse = () => ({
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn().mockReturnThis(),
+});
+
+// Helper function to calculate storage savings
+const calculateStorageSavings = (songsWithUrls: any[]): { sizeDifference: number; percentageSaved: number } => {
+  const withUrls = JSON.stringify(songsWithUrls);
+  const withoutUrls = JSON.stringify(songsWithUrls.map(({ url, ...song }) => song));
+  
+  const sizeDifference = withUrls.length - withoutUrls.length;
+  const percentageSaved = (sizeDifference / withUrls.length) * 100;
+  
+  return { sizeDifference, percentageSaved };
+};
+
 describe('S3 Caching with Real Fixture Data Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,22 +90,18 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const radioheadSongs = getArtistSongs('radiohead');
       
       // Simulate cache miss -> scraping -> caching -> cache hit flow
-      mockS3StorageService.getArtistSongs
+      (mockS3StorageService.getArtistSongs as jest.MockedFunction<any>)
         .mockResolvedValueOnce(null) // First call: cache miss
         .mockResolvedValueOnce(radioheadSongs); // Second call: cache hit
 
-      mockCifraClubService.getArtistSongs.mockResolvedValue(radioheadSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockCifraClubService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(radioheadSongs);
+      (mockS3StorageService.storeArtistSongs as jest.MockedFunction<any>).mockResolvedValue(true);
 
       const req = { query: { artistPath: 'radiohead' } };
-      const createResponse = () => ({
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
-      });
 
       // First request - should trigger scraping and caching
       const res1 = createResponse();
-      await searchController.getArtistSongs(req, res1);
+      await (searchController as any).getArtistSongs(req, res1);
 
       expect(mockS3StorageService.getArtistSongs).toHaveBeenCalledWith('radiohead');
       expect(mockCifraClubService.getArtistSongs).toHaveBeenCalledWith(
@@ -102,7 +119,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
 
       // Second request - should use cache
       const res2 = createResponse();
-      await searchController.getArtistSongs(req, res2);
+      await (searchController as any).getArtistSongs(req, res2);
 
       expect(res2.json).toHaveBeenCalledWith(radioheadSongs);
       expect(mockCifraClubService.getArtistSongs).toHaveBeenCalledTimes(1); // Only called once
@@ -114,9 +131,9 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
     test('should cache and retrieve Oasis songs using fixture data', async () => {
       const oasisSongs = getArtistSongs('oasis');
       
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
-      mockCifraClubService.getArtistSongs.mockResolvedValue(oasisSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockS3StorageService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(null);
+      (mockCifraClubService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(oasisSongs);
+      (mockS3StorageService.storeArtistSongs as jest.MockedFunction<any>).mockResolvedValue(true);
 
       const req = { query: { artistPath: 'oasis' } };
       const res = {
@@ -124,12 +141,12 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.getArtistSongs(req, res);
+      await (searchController as any).getArtistSongs(req, res);
 
       // Verify Oasis fixture data
       expect(oasisSongs).toHaveLength(12);
-      expect(oasisSongs.some(song => song.title === 'Wonderwall')).toBe(true);
-      expect(oasisSongs.some(song => song.title === 'Don\'t Look Back in Anger')).toBe(true);
+      expect(oasisSongs.some((song: any) => song.title === 'Wonderwall')).toBe(true);
+      expect(oasisSongs.some((song: any) => song.title === 'Don\'t Look Back in Anger')).toBe(true);
 
       expect(res.json).toHaveBeenCalledWith(oasisSongs);
       expect(mockS3StorageService.storeArtistSongs).toHaveBeenCalledWith('oasis', oasisSongs);
@@ -141,14 +158,13 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
 
   describe('Cache Management with Realistic Data', () => {
     test('should add new song to existing Radiohead cache', async () => {
-      const existingRadioheadSongs = getArtistSongs('radiohead');
       const newSong = {
         title: 'Fake Plastic Trees',
         path: 'radiohead/fake-plastic-trees',
         artist: 'Radiohead',
       };
 
-      mockS3StorageService.addSongToArtist.mockResolvedValue(true);
+      (mockS3StorageService.addSongToArtist as jest.MockedFunction<any>).mockResolvedValue(true);
 
       const req = { body: { artistName: 'radiohead', song: newSong } };
       const res = {
@@ -156,7 +172,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.addSongToArtist(req, res);
+      await (searchController as any).addSongToArtist(req, res);
 
       expect(mockS3StorageService.addSongToArtist).toHaveBeenCalledWith('radiohead', newSong);
       expect(res.json).toHaveBeenCalledWith({ 
@@ -169,7 +185,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
     });
 
     test('should remove song from Oasis cache', async () => {
-      mockS3StorageService.removeSongFromArtist.mockResolvedValue(true);
+      (mockS3StorageService.removeSongFromArtist as jest.MockedFunction<any>).mockResolvedValue(true);
 
       const req = { body: { artistName: 'oasis', songPath: 'wonderwall' } };
       const res = {
@@ -177,7 +193,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.removeSongFromArtist(req, res);
+      await (searchController as any).removeSongFromArtist(req, res);
 
       expect(mockS3StorageService.removeSongFromArtist).toHaveBeenCalledWith('oasis', 'wonderwall');
       expect(res.json).toHaveBeenCalledWith({ 
@@ -188,7 +204,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
 
     test('should list cached artists with realistic names', async () => {
       const cachedArtists = ['radiohead', 'oasis', 'coldplay', 'u2', 'the-beatles'];
-      mockS3StorageService.listArtists.mockResolvedValue(cachedArtists);
+      (mockS3StorageService.listArtists as jest.MockedFunction<any>).mockResolvedValue(cachedArtists);
 
       const req = {};
       const res = {
@@ -196,7 +212,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.listCachedArtists(req, res);
+      await (searchController as any).listCachedArtists(req, res);
 
       expect(res.json).toHaveBeenCalledWith({ artists: cachedArtists });
       expect(mockLogger.info).toHaveBeenCalledWith('Found 5 cached artists in S3');
@@ -208,7 +224,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const wonderwallResults = getSongSearchResult('wonderwall');
       
       // Mock the search functionality (this doesn't directly use S3 but shows integration)
-      mockCifraClubService.search.mockResolvedValue(wonderwallResults);
+      (mockCifraClubService.search as jest.MockedFunction<any>).mockResolvedValue(wonderwallResults);
 
       const req = { query: { song: 'wonderwall' } };
       const res = {
@@ -216,7 +232,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.search(req, res);
+      await (searchController as any).search(req, res);
 
       expect(res.json).toHaveBeenCalledWith(wonderwallResults);
       
@@ -233,8 +249,8 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const radioheadArtistResult = getArtistSearchResult('radiohead');
       
       // Mock Supabase failure -> CifraClub search
-      mockSupabase.ilike.mockResolvedValue({ data: [], error: null });
-      mockCifraClubService.search.mockResolvedValue(radioheadArtistResult);
+      (mockSupabase.ilike as jest.MockedFunction<any>).mockResolvedValue({ data: [], error: null });
+      (mockCifraClubService.search as jest.MockedFunction<any>).mockResolvedValue(radioheadArtistResult);
 
       const req = { query: { artist: 'radiohead' } };
       const res = {
@@ -242,7 +258,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.search(req, res);
+      await (searchController as any).search(req, res);
 
       expect(res.json).toHaveBeenCalledWith(radioheadArtistResult);
       expect(radioheadArtistResult[0]).toEqual({
@@ -259,7 +275,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const oasisSongs = getArtistSongs('oasis');
 
       // Validate structure consistency
-      [...radioheadSongs, ...oasisSongs].forEach(song => {
+      [...radioheadSongs, ...oasisSongs].forEach((song: any) => {
         expect(song).toHaveProperty('title');
         expect(song).toHaveProperty('url');
         expect(typeof song.title).toBe('string');
@@ -272,7 +288,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const radioheadSongs = getArtistSongs('radiohead');
       
       // Test URL reconstruction logic (songs stored without URLs)
-      const cachedSongs = radioheadSongs.map(song => {
+      const cachedSongs = radioheadSongs.map((song: any) => {
         const { url, ...cachedSong } = song;
         return {
           ...cachedSong,
@@ -281,7 +297,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         };
       });
 
-      cachedSongs.forEach(song => {
+      cachedSongs.forEach((song: any) => {
         expect(song).not.toHaveProperty('url');
         expect(song).toHaveProperty('reconstructedUrl');
         expect(song.reconstructedUrl).toMatch(/^https:\/\/www\.cifraclub\.com\.br\/radiohead\//);
@@ -289,8 +305,8 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
     });
 
     test('should validate chord sheet data integration potential', () => {
-      const wonderwallChordSheet = getChordSheet('wonderwall');
-      const creepChordSheet = getChordSheet('creep');
+      const wonderwallChordSheet = getChordSheet('wonderwall') as any;
+      const creepChordSheet = getChordSheet('creep') as any;
 
       expect(wonderwallChordSheet).toHaveProperty('path');
       expect(wonderwallChordSheet).toHaveProperty('content');
@@ -323,12 +339,8 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         ...getArtistSongs('oasis'),
       ];
 
-      // Calculate potential storage savings by removing URLs
-      const withUrls = JSON.stringify(allSongs);
-      const withoutUrls = JSON.stringify(allSongs.map(({ url, ...song }) => song));
-
-      const sizeDifference = withUrls.length - withoutUrls.length;
-      const percentageSaved = (sizeDifference / withUrls.length) * 100;
+      // Use helper function to calculate storage savings
+      const { sizeDifference, percentageSaved } = calculateStorageSavings(allSongs);
 
       // Should demonstrate meaningful storage savings
       expect(percentageSaved).toBeGreaterThan(30); // At least 30% savings
@@ -343,11 +355,11 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
       const radioheadSongs = getArtistSongs('radiohead');
       
       // Simulate corrupted cache return
-      mockS3StorageService.getArtistSongs.mockRejectedValueOnce(
+      (mockS3StorageService.getArtistSongs as jest.MockedFunction<any>).mockRejectedValueOnce(
         new SyntaxError('Unexpected token in JSON at position 42')
       );
-      mockCifraClubService.getArtistSongs.mockResolvedValue(radioheadSongs);
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockCifraClubService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(radioheadSongs);
+      (mockS3StorageService.storeArtistSongs as jest.MockedFunction<any>).mockResolvedValue(true);
 
       const req = { query: { artistPath: 'radiohead' } };
       const res = {
@@ -355,7 +367,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.getArtistSongs(req, res);
+      await (searchController as any).getArtistSongs(req, res);
 
       // Should fallback to scraping and return real data
       expect(res.json).toHaveBeenCalledWith(radioheadSongs);
@@ -367,8 +379,8 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
     });
 
     test('should handle artist not found scenarios', async () => {
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
-      mockCifraClubService.getArtistSongs.mockResolvedValue([]);
+      (mockS3StorageService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(null);
+      (mockCifraClubService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue([]);
 
       const req = { query: { artistPath: 'non-existent-artist' } };
       const res = {
@@ -376,7 +388,7 @@ describe('S3 Caching with Real Fixture Data Integration', () => {
         json: jest.fn().mockReturnThis(),
       };
 
-      await searchController.getArtistSongs(req, res);
+      await (searchController as any).getArtistSongs(req, res);
 
       expect(res.json).toHaveBeenCalledWith([]);
       expect(mockS3StorageService.storeArtistSongs).not.toHaveBeenCalled(); // Don't cache empty results

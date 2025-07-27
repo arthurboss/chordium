@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals';
 
 // Mock utilities first
-const mockNormalizeForSearch = jest.fn((text) => text.toLowerCase().trim());
-const mockNormalizePathForComparison = jest.fn((path) => path.replace(/[^a-z0-9]/gi, '').toLowerCase());
+const mockNormalizeForSearch = jest.fn((text: string) => text.toLowerCase().trim());
+const mockNormalizePathForComparison = jest.fn((path: string) => path.replace(/[^a-z0-9]/gi, '').toLowerCase());
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
@@ -14,7 +14,7 @@ const mockLogger = {
 // are not used in backend, these are frontend utilities
 // Mocking them here for potential future use
 
-jest.unstable_mockModule('../../utils/logger.ts', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   default: mockLogger,
 }));
 
@@ -29,17 +29,41 @@ const mockS3StorageService = {
   testConnection: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service.js', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
 // Import the service after mocking dependencies
-const { s3StorageService } = await import('../../services/s3-storage.service.ts');
+const { s3StorageService } = await import('../../services/s3-storage.service.js');
 
 /**
  * Tests for data validation, edge cases, and utility integration in S3 storage
  * Focuses on data integrity, path normalization, and business logic validation
  */
+
+// Helper function to check for duplicate songs
+const checkDuplicateSong = (existingSongs: any[], newSong: any): boolean => {
+  return existingSongs.some(existing => 
+    existing.title.toLowerCase() === newSong.title.toLowerCase() ||
+    existing.path === newSong.path
+  );
+};
+
+// Helper function to remove URLs from songs
+const removeUrlsFromSongs = (songs: any[]): any[] => {
+  return songs.map(song => {
+    const { url, ...songWithoutUrl } = song;
+    return songWithoutUrl;
+  });
+};
+
+// Helper function to validate stored songs don't have URLs
+const validateNoUrls = (songs: any[]): void => {
+  songs.forEach(song => {
+    expect(song).not.toHaveProperty('url');
+  });
+};
+
 describe('S3 Storage Data Validation and Edge Cases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -61,10 +85,10 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
       ];
 
       const mockSongs = [{ title: 'Test Song', path: 'test-song', artist: 'Test Artist' }];
-      mockS3StorageService.getArtistSongs.mockResolvedValue(mockSongs);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(mockSongs);
 
       for (const artistPath of testCases) {
-        const result = await mockS3StorageService.getArtistSongs(artistPath);
+        const result = await (mockS3StorageService as any).getArtistSongs(artistPath);
         expect(result).toEqual(mockSongs);
         
         // Note: The actual service doesn't use normalization functions
@@ -77,19 +101,19 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
     test('should handle empty and invalid artist paths', async () => {
       const invalidPaths = ['', null, undefined, '   ', '\t\n'];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
 
       for (const path of invalidPaths) {
-        const result = await mockS3StorageService.getArtistSongs(path);
+        const result = await (mockS3StorageService as any).getArtistSongs(path);
         expect(result).toBeNull();
       }
     });
 
     test('should handle extremely long artist paths', async () => {
       const longPath = 'a'.repeat(1000); // Very long artist name
-      mockS3StorageService.getArtistSongs.mockResolvedValue([]);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue([]);
 
-      const result = await mockS3StorageService.getArtistSongs(longPath);
+      const result = await (mockS3StorageService as any).getArtistSongs(longPath);
       
       expect(mockS3StorageService.getArtistSongs).toHaveBeenCalledWith(longPath);
       expect(result).toEqual([]);
@@ -105,10 +129,10 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
       };
 
       // The actual service validates song structure, so we test the mock behavior
-      mockS3StorageService.addSongToArtist.mockResolvedValue(true);
+      (mockS3StorageService.addSongToArtist as any).mockResolvedValue(true);
 
       // Valid song should succeed
-      const validResult = await mockS3StorageService.addSongToArtist('test-artist', validSong);
+      const validResult = await (mockS3StorageService as any).addSongToArtist('test-artist', validSong);
       expect(validResult).toBe(true);
 
       // Invalid songs should fail - service handles validation internally
@@ -122,10 +146,10 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
       ];
 
       // Mock the service to return false for invalid songs
-      mockS3StorageService.addSongToArtist.mockResolvedValue(true); // Service accepts all for this test
+      (mockS3StorageService.addSongToArtist as any).mockResolvedValue(true); // Service accepts all for this test
 
       for (const invalidSong of invalidSongs) {
-        const result = await mockS3StorageService.addSongToArtist('test-artist', invalidSong);
+        const result = await (mockS3StorageService as any).addSongToArtist('test-artist', invalidSong);
         expect(result).toBe(true); // Service doesn't validate in current implementation
       }
     });
@@ -141,9 +165,9 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         { title: 'Song with /forward/slashes/', path: 'song-slashes', artist: 'Artist' },
       ];
 
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
+      (mockS3StorageService.storeArtistSongs as any).mockResolvedValue(true);
 
-      const result = await s3StorageService.storeArtistSongs('special-artist', specialTitleSongs);
+      const result = await (s3StorageService as any).storeArtistSongs('special-artist', specialTitleSongs);
       
       expect(result).toBe(true);
       expect(mockS3StorageService.storeArtistSongs).toHaveBeenCalledWith('special-artist', specialTitleSongs);
@@ -162,18 +186,14 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         { title: 'Different Title', path: 'existing-song', artist: 'Artist' }, // Same path, different title
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(existingSongs);
-      mockS3StorageService.addSongToArtist.mockImplementation((artistName, newSong) => {
-        // Simulate duplicate detection logic
-        const exists = existingSongs.some(existing => 
-          existing.title.toLowerCase() === newSong.title.toLowerCase() ||
-          existing.path === newSong.path
-        );
-        return !exists;
+      (mockS3StorageService.getArtistSongs as jest.MockedFunction<any>).mockResolvedValue(existingSongs);
+      (mockS3StorageService.addSongToArtist as jest.MockedFunction<any>).mockImplementation((artistName: string, newSong: any) => {
+        // Use helper function to avoid nesting
+        return !checkDuplicateSong(existingSongs, newSong);
       });
 
       for (const scenario of duplicateScenarios) {
-        const result = await s3StorageService.addSongToArtist('test-artist', scenario);
+        const result = await (s3StorageService as any).addSongToArtist('test-artist', scenario);
         expect(result).toBe(false); // All should be detected as duplicates
       }
     });
@@ -182,39 +202,39 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
   describe('Error Handling and Resilience', () => {
     test('should handle malformed JSON data gracefully', async () => {
       // Mock S3 returning error instead of throwing in test
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
 
-      const result = await mockS3StorageService.getArtistSongs('test-artist');
+      const result = await (mockS3StorageService as any).getArtistSongs('test-artist');
       expect(result).toBeNull();
     });
 
     test('should handle network timeouts and retries', async () => {
       const timeoutError = new Error('Request timeout');
-      timeoutError.code = 'ETIMEDOUT';
+      (timeoutError as any).code = 'ETIMEDOUT';
 
-      mockS3StorageService.getArtistSongs
+      (mockS3StorageService.getArtistSongs as any)
         .mockRejectedValueOnce(timeoutError) // First attempt fails
         .mockResolvedValueOnce([{ title: 'Song', path: 'song', artist: 'Artist' }]); // Second succeeds
 
       // First call should handle timeout
       try {
-        await mockS3StorageService.getArtistSongs('timeout-artist');
+        await (mockS3StorageService as any).getArtistSongs('timeout-artist');
       } catch (error) {
         expect(error).toBe(timeoutError);
       }
 
       // Second call should succeed
-      const result = await mockS3StorageService.getArtistSongs('timeout-artist');
+      const result = await (mockS3StorageService as any).getArtistSongs('timeout-artist');
       expect(result).toEqual([{ title: 'Song', path: 'song', artist: 'Artist' }]);
     });
 
     test('should handle S3 bucket permission errors', async () => {
       const permissionError = new Error('Access Denied');
-      permissionError.code = 'AccessDenied';
+      (permissionError as any).code = 'AccessDenied';
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(null);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(null);
 
-      const result = await mockS3StorageService.getArtistSongs('test-artist');
+      const result = await (mockS3StorageService as any).getArtistSongs('test-artist');
       expect(result).toBeNull();
     });
   });
@@ -236,22 +256,15 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         },
       ];
 
-      mockS3StorageService.storeArtistSongs.mockImplementation((artistName, songs) => {
-        // Verify URLs are removed in stored data
-        const storedSongs = songs.map(song => {
-          const { url, ...songWithoutUrl } = song;
-          return songWithoutUrl;
-        });
-        
-        // Check that URLs were removed
-        storedSongs.forEach(song => {
-          expect(song).not.toHaveProperty('url');
-        });
+      (mockS3StorageService.storeArtistSongs as jest.MockedFunction<any>).mockImplementation((artistName: string, songs: any[]) => {
+        // Use helper function to remove URLs and validate
+        const storedSongs = removeUrlsFromSongs(songs);
+        validateNoUrls(storedSongs);
         
         return true;
       });
 
-      const result = await s3StorageService.storeArtistSongs('optimization-test', songsWithUrls);
+      const result = await (s3StorageService as any).storeArtistSongs('optimization-test', songsWithUrls);
       expect(result).toBe(true);
     });
 
@@ -262,15 +275,15 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         artist: 'Prolific Artist',
       }));
 
-      mockS3StorageService.storeArtistSongs.mockResolvedValue(true);
-      mockS3StorageService.getArtistSongs.mockResolvedValue(largeSongList);
+      (mockS3StorageService.storeArtistSongs as any).mockResolvedValue(true);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(largeSongList);
 
       // Test storing large dataset
-      const storeResult = await s3StorageService.storeArtistSongs('prolific-artist', largeSongList);
+      const storeResult = await (s3StorageService as any).storeArtistSongs('prolific-artist', largeSongList);
       expect(storeResult).toBe(true);
 
       // Test retrieving large dataset
-      const retrieveResult = await s3StorageService.getArtistSongs('prolific-artist');
+      const retrieveResult = await (s3StorageService as any).getArtistSongs('prolific-artist');
       expect(retrieveResult).toEqual(largeSongList);
       expect(Array.isArray(retrieveResult)).toBe(true);
       expect(retrieveResult.length).toBe(1000);
@@ -280,10 +293,8 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
       const songs = [
         { title: 'Versioned Song', path: 'versioned-song', artist: 'Artist' },
       ];
-
-      const currentDate = new Date().toISOString();
       
-      mockS3StorageService.storeArtistSongs.mockImplementation((artistName, songList) => {
+      (mockS3StorageService.storeArtistSongs as jest.MockedFunction<any>).mockImplementation((artistName: string, songList: any[]) => {
         // Verify metadata is included
         expect(artistName).toBe('versioned-artist');
         expect(Array.isArray(songList)).toBe(true);
@@ -297,7 +308,7 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         return true;
       });
 
-      const result = await s3StorageService.storeArtistSongs('versioned-artist', songs);
+      const result = await (s3StorageService as any).storeArtistSongs('versioned-artist', songs);
       expect(result).toBe(true);
     });
   });
@@ -312,10 +323,10 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         '  Hillsong United  ',
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue([]);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue([]);
 
       for (const term of searchTerms) {
-        await mockS3StorageService.getArtistSongs(term);
+        await (mockS3StorageService as any).getArtistSongs(term);
       }
 
       // Verify all searches were called
@@ -329,9 +340,9 @@ describe('S3 Storage Data Validation and Edge Cases', () => {
         { title: 'Champagne Supernova', path: 'champagne-supernova', artist: 'Oasis' },
       ];
 
-      mockS3StorageService.getArtistSongs.mockResolvedValue(songs);
+      (mockS3StorageService.getArtistSongs as any).mockResolvedValue(songs);
 
-      const result = await mockS3StorageService.getArtistSongs('oasis');
+      const result = await (mockS3StorageService as any).getArtistSongs('oasis');
       
       expect(result).toEqual(songs);
       expect(mockS3StorageService.getArtistSongs).toHaveBeenCalledWith('oasis');
