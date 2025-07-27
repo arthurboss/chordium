@@ -3,7 +3,7 @@ import express from 'express';
 import { jest } from '@jest/globals';
 
 // Import fixtures
-import { BackendFixtureLoader } from '../fixture-loader.js';
+import { BackendFixtureLoader } from '../fixture-loader';
 
 // Initialize fixture loader
 const fixtureLoader = new BackendFixtureLoader();

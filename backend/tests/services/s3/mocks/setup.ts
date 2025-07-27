@@ -6,23 +6,30 @@ import { jest } from "@jest/globals";
  */
 
 // Mock implementations
-const mockLogger = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockLogger: any = {
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
   debug: jest.fn(),
 };
 
-const mockS3Send = jest.fn();
-const mockS3Client = jest.fn(() => ({ send: mockS3Send }));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockS3Send: any = jest.fn();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockS3Client: any = jest.fn(() => ({ send: mockS3Send }));
 
-const mockGetObjectCommand = jest.fn((params) => ({ input: params }));
-const mockPutObjectCommand = jest.fn((params) => ({ input: params }));
-const mockListObjectsV2Command = jest.fn((params) => ({ input: params }));
-const mockHeadBucketCommand = jest.fn((params) => ({ input: params }));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockGetObjectCommand: any = jest.fn((params) => ({ input: params }));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockPutObjectCommand: any = jest.fn((params) => ({ input: params }));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockListObjectsV2Command: any = jest.fn((params) => ({ input: params }));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockHeadBucketCommand: any = jest.fn((params) => ({ input: params }));
 
 // Set up the mocks at module level
-jest.unstable_mockModule("../../../../utils/logger.ts", () => ({ default: mockLogger }));
+jest.unstable_mockModule("../../../../utils/logger.js", () => ({ default: mockLogger }));
 
 jest.unstable_mockModule("@aws-sdk/client-s3", () => ({
   S3Client: mockS3Client,
@@ -46,8 +53,9 @@ export {
 /**
  * Reset all mocks
  */
-export function resetAllMocks() {
-  Object.values(mockLogger).forEach(mock => mock.mockReset());
+export function resetAllMocks(): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Object.values(mockLogger).forEach((mock: any) => mock.mockReset());
   mockS3Send.mockReset();
   mockS3Client.mockClear();
   mockGetObjectCommand.mockClear();
@@ -57,16 +65,24 @@ export function resetAllMocks() {
 }
 
 /**
+ * Interface for command with input property
+ */
+interface CommandWithInput {
+  constructor: { name: string };
+  input: { Key?: string };
+}
+
+/**
  * Configure default mock responses
  */
-export function setupDefaultMockResponses() {
+export function setupDefaultMockResponses(): void {
   // Setup default S3 responses
-  mockS3Send.mockImplementation((command) => {
+  mockS3Send.mockImplementation((command: CommandWithInput) => {
     const commandName = command.constructor.name;
     
     switch (commandName) {
       case 'GetObjectCommand':
-        if (command.input.Key.includes('nonexistent') || command.input.Key.includes('not-found')) {
+        if (command.input.Key?.includes('nonexistent') || command.input.Key?.includes('not-found')) {
           const error = new Error('NoSuchKey');
           error.name = 'NoSuchKey';
           return Promise.reject(error);

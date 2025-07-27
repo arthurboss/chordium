@@ -4,9 +4,21 @@
  */
 
 /**
+ * Interface for test environment configuration
+ * Extends ProcessEnv to be compatible with Node.js environment variables
+ */
+interface TestEnvironment extends NodeJS.ProcessEnv {
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  AWS_REGION?: string;
+  S3_BUCKET_NAME?: string;
+  AWS_SESSION_TOKEN?: string;
+}
+
+/**
  * Create a test environment with AWS credentials
  */
-export function createTestEnvironment(customEnv = {}) {
+export function createTestEnvironment(customEnv: Partial<TestEnvironment> = {}): TestEnvironment {
   return {
     AWS_ACCESS_KEY_ID: "test-access-key",
     AWS_SECRET_ACCESS_KEY: "test-secret-key",
@@ -19,7 +31,7 @@ export function createTestEnvironment(customEnv = {}) {
 /**
  * Create a disabled S3 environment (no credentials)
  */
-export function createDisabledEnvironment() {
+export function createDisabledEnvironment(): TestEnvironment {
   return {
     AWS_ACCESS_KEY_ID: undefined,
     AWS_SECRET_ACCESS_KEY: undefined,
@@ -31,7 +43,7 @@ export function createDisabledEnvironment() {
 /**
  * Set up environment variables for test
  */
-export function setupTestEnvironment(env) {
+export function setupTestEnvironment(env: TestEnvironment): NodeJS.ProcessEnv {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
@@ -43,6 +55,6 @@ export function setupTestEnvironment(env) {
 /**
  * Restore original environment
  */
-export function restoreEnvironment(originalEnv) {
+export function restoreEnvironment(originalEnv: NodeJS.ProcessEnv): void {
   process.env = originalEnv;
 }

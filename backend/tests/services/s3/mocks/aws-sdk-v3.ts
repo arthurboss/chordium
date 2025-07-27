@@ -5,39 +5,60 @@ import { jest } from "@jest/globals";
  * Provides comprehensive mocking for all AWS SDK v3 components
  */
 
-// Create a mock S3 client instance with send method
-const createMockS3Client = () => {
-  const mockSend = jest.fn();
-  const mockInstance = {
+/**
+ * Interface for mock S3 client instance
+ */
+interface MockS3ClientInstance {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  send: any;
+}
+
+/**
+ * Create a mock S3 client instance with send method
+ */
+const createMockS3Client = (): { 
+  mockInstance: MockS3ClientInstance; 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockSend: any 
+} => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockSend: any = jest.fn();
+  const mockInstance: MockS3ClientInstance = {
     send: mockSend,
   };
   return { mockInstance, mockSend };
 };
 
 // Global mock instances that will be reused
-let globalMockS3Send;
-let globalMockS3Instance;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let globalMockS3Send: any;
+let globalMockS3Instance: MockS3ClientInstance | undefined;
 
 // Mock AWS SDK v3 Commands
-export const mockGetObjectCommand = jest.fn((params) => ({ 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockGetObjectCommand: any = jest.fn((params) => ({ 
   input: params,
   $metadata: {},
 }));
-export const mockPutObjectCommand = jest.fn((params) => ({ 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockPutObjectCommand: any = jest.fn((params) => ({ 
   input: params,
   $metadata: {},
 }));
-export const mockListObjectsV2Command = jest.fn((params) => ({ 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockListObjectsV2Command: any = jest.fn((params) => ({ 
   input: params,
   $metadata: {},
 }));
-export const mockHeadBucketCommand = jest.fn((params) => ({ 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockHeadBucketCommand: any = jest.fn((params) => ({ 
   input: params,
   $metadata: {},
 }));
 
 // Mock S3 Client constructor
-export const mockS3Client = jest.fn((config) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockS3Client: any = jest.fn((config) => {
   if (!globalMockS3Instance || !globalMockS3Send) {
     const { mockInstance, mockSend } = createMockS3Client();
     globalMockS3Instance = mockInstance;
@@ -47,12 +68,13 @@ export const mockS3Client = jest.fn((config) => {
 });
 
 // Export the send method for test access
-export const getMockS3Send = () => globalMockS3Send;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getMockS3Send = (): any => globalMockS3Send;
 
 /**
  * Reset all AWS SDK mocks
  */
-export function resetAwsMocks() {
+export function resetAwsMocks(): void {
   if (globalMockS3Send) {
     globalMockS3Send.mockReset();
   }
@@ -66,10 +88,11 @@ export function resetAwsMocks() {
 /**
  * Configure mock responses for common AWS operations
  */
-export function configureMockResponses() {
+export function configureMockResponses(): void {
   if (globalMockS3Send) {
     // Default successful responses
-    globalMockS3Send.mockImplementation((command) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    globalMockS3Send.mockImplementation((command: any) => {
       if (command.input?.Key?.includes('artist-songs/')) {
         if (command.constructor.name === 'GetObjectCommand') {
           return Promise.resolve({

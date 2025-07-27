@@ -4,7 +4,7 @@ import {
   getArtistSearchResult, 
   getArtistSongs, 
   getChordSheet 
-} from '../fixture-loader.js';
+} from '../fixture-loader';
 
 // Mock S3 Storage Service with fixture integration
 const mockS3StorageService = {

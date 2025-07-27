@@ -8,6 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import type { Song, Artist } from '../../shared/types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,30 +17,55 @@ const __dirname = path.dirname(__filename);
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
 /**
+ * Interface for chord sheet fixture data
+ */
+interface ChordSheetFixture {
+  path: string;
+  content: string;
+  title: string;
+  artist: string;
+}
+
+/**
+ * Interface for cache statistics
+ */
+interface CacheStats {
+  size: number;
+  keys: string[];
+}
+
+/**
+ * Type for fixture data (can be any JSON-serializable data)
+ */
+type FixtureData = Record<string, unknown> | unknown[] | string | number | boolean | null;
+
+/**
  * Backend Fixture Loader Class
  * Loads and caches fixtures for consistent test data across backend tests
  */
 export class BackendFixtureLoader {
+  private readonly cache: Map<string, FixtureData>;
+
   constructor() {
     this.cache = new Map();
   }
 
   /**
    * Load a fixture file from the fixtures directory
-   * @param {string} filename - The fixture filename (without .json extension)
-   * @returns {Object} The parsed fixture data
+   * @param filename - The fixture filename (without .json extension)
+   * @returns The parsed fixture data
    */
-  loadFixture(filename) {
+  loadFixture(filename: string): FixtureData {
     const cacheKey = filename;
     
     if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
+      return this.cache.get(cacheKey)!;
     }
 
     try {
       const filePath = path.join(FIXTURES_DIR, `${filename}.json`);
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      const data = JSON.parse(fileContent);
+      const data = JSON.parse(fileContent) as FixtureData;
       
       this.cache.set(cacheKey, data);
       return data;
@@ -51,43 +77,43 @@ export class BackendFixtureLoader {
 
   /**
    * Get song search fixture data
-   * @param {string} query - The search query key
-   * @returns {Array} Song search results
+   * @param query - The search query key
+   * @returns Song search results
    */
-  getSongSearchResult(query) {
-    const fixtures = this.loadFixture('song-search');
+  getSongSearchResult(query: string): Song[] {
+    const fixtures = this.loadFixture('song-search') as Record<string, Song[]> | null;
     return fixtures?.[query] || [];
   }
 
   /**
    * Get artist search fixture data
-   * @param {string} query - The search query key
-   * @returns {Array} Artist search results
+   * @param query - The search query key
+   * @returns Artist search results
    */
-  getArtistSearchResult(query) {
-    const fixtures = this.loadFixture('artist-search');
+  getArtistSearchResult(query: string): Artist[] {
+    const fixtures = this.loadFixture('artist-search') as Record<string, Artist[]> | null;
     return fixtures?.[query] || [];
   }
 
   /**
    * Get artist songs fixture data
-   * @param {string} artistPath - The artist path key
-   * @returns {Array} Artist songs list
+   * @param artistPath - The artist path key
+   * @returns Artist songs list
    */
-  getArtistSongs(artistPath) {
-    const fixtures = this.loadFixture('artist-songs');
+  getArtistSongs(artistPath: string): Song[] {
+    const fixtures = this.loadFixture('artist-songs') as Record<string, Song[]> | null;
     return fixtures?.[artistPath] || [];
   }
 
   /**
    * Get chord sheet fixture data from actual song files
-   * @param {string} songKey - The song identifier key (e.g., 'wonderwall', 'creep', 'hotel_california')
-   * @returns {Object} Chord sheet content with path and chords
+   * @param songKey - The song identifier key (e.g., 'wonderwall', 'creep', 'hotel_california')
+   * @returns Chord sheet content with path and chords
    */
-  getChordSheet(songKey) {
+  getChordSheet(songKey: string): ChordSheetFixture | null {
     try {
       // Map song keys to actual file names
-      const songFileMap = {
+      const songFileMap: Record<string, string> = {
         'wonderwall': 'oasis-wonderwall.json',
         'creep': 'radiohead-creep.json',
         'hotel_california': 'eagles-hotel_california.json'
@@ -124,32 +150,34 @@ export class BackendFixtureLoader {
 
   /**
    * Get CifraClub search results (raw scraped data format)
-   * @returns {Array} Raw search results as they come from scraping
+   * @returns Raw search results as they come from scraping
    */
-  getCifraClubSearchResults() {
-    return this.loadFixture('cifraclub-search') || [];
+  getCifraClubSearchResults(): unknown[] {
+    const fixtures = this.loadFixture('cifraclub-search');
+    return Array.isArray(fixtures) ? fixtures : [];
   }
 
   /**
    * Get artists list
-   * @returns {Array} Artists list
+   * @returns Artists list
    */
-  getArtists() {
-    return this.loadFixture('artists') || [];
+  getArtists(): Artist[] {
+    const fixtures = this.loadFixture('artists');
+    return Array.isArray(fixtures) ? fixtures as Artist[] : [];
   }
 
   /**
    * Clear the fixture cache
    */
-  clearCache() {
+  clearCache(): void {
     this.cache.clear();
   }
 
   /**
    * Get cache statistics
-   * @returns {Object} Cache information
+   * @returns Cache information
    */
-  getCacheStats() {
+  getCacheStats(): CacheStats {
     return {
       size: this.cache.size,
       keys: Array.from(this.cache.keys())
@@ -161,12 +189,12 @@ export class BackendFixtureLoader {
 const backendFixtureLoader = new BackendFixtureLoader();
 
 // Export convenience functions for direct access
-export const getSongSearchResult = (query) => backendFixtureLoader.getSongSearchResult(query);
-export const getArtistSearchResult = (query) => backendFixtureLoader.getArtistSearchResult(query);
-export const getArtistSongs = (artistPath) => backendFixtureLoader.getArtistSongs(artistPath);
-export const getChordSheet = (songKey) => backendFixtureLoader.getChordSheet(songKey);
-export const getCifraClubSearchResults = () => backendFixtureLoader.getCifraClubSearchResults();
-export const getArtists = () => backendFixtureLoader.getArtists();
+export const getSongSearchResult = (query: string): Song[] => backendFixtureLoader.getSongSearchResult(query);
+export const getArtistSearchResult = (query: string): Artist[] => backendFixtureLoader.getArtistSearchResult(query);
+export const getArtistSongs = (artistPath: string): Song[] => backendFixtureLoader.getArtistSongs(artistPath);
+export const getChordSheet = (songKey: string): ChordSheetFixture | null => backendFixtureLoader.getChordSheet(songKey);
+export const getCifraClubSearchResults = (): unknown[] => backendFixtureLoader.getCifraClubSearchResults();
+export const getArtists = (): Artist[] => backendFixtureLoader.getArtists();
 
 // Export the instance as default
 export default backendFixtureLoader;
