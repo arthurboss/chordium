@@ -6,7 +6,7 @@
  * and external dependencies in the main test suite.
  * 
  * To run these tests specifically:
- * npm test -- tests/integration/cifraclub-puppeteer.integration.test.js
+ * npm test -- tests/integration/cifraclub-puppeteer.integration.test.ts
  * 
  * Note: These tests are skipped by default because they:
  * 1. Require actual browser automation (slow)
@@ -14,44 +14,44 @@
  * 3. Depend on external site availability and structure
  */
 
-import { jest } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 describe('CifraClub Service - Puppeteer Integration Tests', () => {
   describe.skip('Real Browser Tests (Puppeteer)', () => {
     describe('Artist Songs Handler', () => {
-      it.skip("should fetch artist songs successfully", async () => {
+      it.skip('should fetch artist songs successfully', async () => {
         // Test actual scraping of artist pages
         // This requires browser automation and external network calls
       });
 
-      it.skip("should handle empty artist songs", async () => {
+      it.skip('should handle empty artist songs', async () => {
         // Test handling of artists with no songs
       });
 
-      it.skip("should construct correct page URL with trailing slash", async () => {
+      it.skip('should construct correct page URL with trailing slash', async () => {
         // Test URL construction for artist pages
       });
     });
 
     describe('Chord Sheet Fetcher', () => {
-      it.skip("should fetch chord sheet content successfully", async () => {
+      it.skip('should fetch chord sheet content successfully', async () => {
         // Test actual fetching of chord sheets from URLs
         // This requires browser automation and external network calls
       });
 
-      it.skip("should handle empty chord sheet", async () => {
+      it.skip('should handle empty chord sheet', async () => {
         // Test handling of pages without chord content
       });
 
-      it.skip("should handle URLs from different domains", async () => {
+      it.skip('should handle URLs from different domains', async () => {
         // Test handling of non-CifraClub URLs
       });
 
-      it.skip("should handle page evaluation errors", async () => {
+      it.skip('should handle page evaluation errors', async () => {
         // Test error handling during page evaluation
       });
 
-      it.skip("should work with complex chord sheet content", async () => {
+      it.skip('should work with complex chord sheet content', async () => {
         // Test extraction of complex chord sheet content
       });
     });
