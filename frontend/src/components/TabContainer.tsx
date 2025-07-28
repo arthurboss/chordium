@@ -192,6 +192,9 @@ const TabContainer = ({
             onBack={() => setSelectedSong(null)}
             onDelete={handleChordSheetDelete}
             onUpdate={handleChordSheetUpdate}
+            hideDeleteButton={false}
+            hideSaveButton={true}
+            isFromMyChordSheets={true}
           />
         ) : (
           <SongList
