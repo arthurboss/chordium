@@ -37,6 +37,10 @@
       "**/tests/**/*.test.js",
       "**/tests/**/*.test.ts"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/_archive/"
+    ],
     "collectCoverageFrom": [
       "utils/**/*.js",
       "utils/**/*.ts",

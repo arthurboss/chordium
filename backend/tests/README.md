@@ -1,10 +1,22 @@
-# Backend Utils Test Suite
+# Backend Test Suite
 
-This document provides an overview of the comprehensive unit test suite for the backend utility functions.
+This document provides an overview of the comprehensive test suite for backend components including utility functions and API controllers.
 
 ## Test Structure
 
-The tests are organized in the `backend/tests/utils/` directory, with each utility function having its own test file:
+### Controllers (`backend/tests/controllers/`)
+
+Controller integration tests for API endpoints, migrated to TypeScript:
+
+- `search.controller.artists.test.ts` - Tests for `/api/artists` endpoint (3 tests)
+- `search.controller.cifraclub.test.ts` - Tests for `/api/cifraclub-search` endpoint (2 tests)
+- `search.controller.artist-songs.test.ts` - Tests for `/api/artist-songs` endpoint (2 tests)
+
+**Migration Notes**: The original `search.controller.integration.test.js` (225 lines) was split into 3 focused TypeScript files (~85 lines each) and archived to `tests/_archive/` for reference.
+
+### Utilities (`backend/tests/utils/`)
+
+Unit tests for utility functions:
 
 - `logger.test.js` - Tests for the logging utility
 - `normalize-for-search.test.js` - Tests for text normalization for search
@@ -61,6 +73,44 @@ All utilities have **100% code coverage** including:
 - **Functions**: 100%
 - **Lines**: 100%
 
+## Controller Tests (TypeScript)
+
+The controller integration tests were migrated from JavaScript to TypeScript and split for better maintainability:
+
+### Original File Migration
+- **Original**: `search.controller.integration.test.js` (225 lines, 7 tests)
+- **Archived to**: `tests/_archive/search.controller.integration.test.js`
+- **Split into**: 3 focused TypeScript files (~85 lines each)
+
+### Current TypeScript Tests
+
+#### 1. Artists Endpoint (`search.controller.artists.test.ts`)
+- **Endpoint**: `/api/artists`
+- **Tests**: 3 integration tests
+- **Features**: Supabase database queries, CifraClub fallback, error handling
+
+#### 2. CifraClub Search (`search.controller.cifraclub.test.ts`)
+- **Endpoint**: `/api/cifraclub-search`
+- **Tests**: 2 integration tests  
+- **Features**: Artist search with Supabase fallback, direct song search
+
+#### 3. Artist Songs (`search.controller.artist-songs.test.ts`)
+- **Endpoint**: `/api/artist-songs`
+- **Tests**: 2 integration tests
+- **Features**: S3 caching, CifraClub scraping, error handling
+
+### TypeScript Migration Benefits
+- **Type Safety**: Proper typing for Express request/response objects
+- **Better IDE Support**: IntelliSense and error detection
+- **Mock Type Safety**: Jest mocks with proper TypeScript support
+- **Maintainability**: Smaller, focused test files easier to understand and modify
+
+### Test Patterns Used
+- **Jest Mock Casting**: `(mockFunction as jest.Mock).mockImplementation()`
+- **ESLint Suppressions**: `@typescript-eslint/no-explicit-any` for test infrastructure
+- **Module Mocking**: `jest.unstable_mockModule()` for ES module mocking
+- **Async Testing**: Proper handling of Promise-based controller logic
+
 ## Test Categories
 
 Each utility test file includes comprehensive test categories:
@@ -107,8 +157,19 @@ Each utility test file includes comprehensive test categories:
 ## Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (utilities + controllers)
 npm test
+
+# Run only controller integration tests
+npm test -- tests/controllers/
+
+# Run specific controller test files
+npm test -- tests/controllers/search.controller.artists.test.ts
+npm test -- tests/controllers/search.controller.cifraclub.test.ts  
+npm test -- tests/controllers/search.controller.artist-songs.test.ts
+
+# Run only utility tests
+npm test -- tests/utils/
 
 # Run tests in watch mode
 npm run test:watch
@@ -122,8 +183,9 @@ npm run test:coverage
 The test suite uses Jest with the following configuration:
 - **Environment**: Node.js
 - **Transform**: Babel for ES modules support
-- **Pattern**: `**/tests/**/*.test.js`
-- **Coverage**: Focuses on `utils/**/*.js` files
+- **Pattern**: `**/tests/**/*.test.{js,ts}` (supports both JavaScript and TypeScript)
+- **Coverage**: Focuses on `utils/**/*.js` and `controllers/**/*.ts` files
+- **TypeScript**: ES module imports with `jest.unstable_mockModule()` for controller tests
 
 ## Key Testing Patterns
 
