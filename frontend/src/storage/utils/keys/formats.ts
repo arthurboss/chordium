@@ -2,17 +2,19 @@
  * Key format definitions for consistent storage keys
  */
 
+import type { Artist, Song } from '@chordium/types';
+
 /**
  * Key format utilities for consistency
  * All keys follow the domain object path patterns
  */
 export const KEY_FORMATS = {
-  /** Chord sheet: "artist-path/song-path" (from Song.path) */
-  chordSheet: (songPath: string) => songPath,
+  /** Chord sheet: uses Song.path directly */
+  chordSheet: (path: Song['path']) => path,
   
-  /** Artist search: "artist-path" (from Artist.path) */
-  artistSearch: (artistPath: string) => artistPath,
+  /** Artist search: uses Artist.path directly */
+  artistSearch: (path: Artist['path']) => path,
   
-  /** Song search: "artist-path/song-path" (from Song.path) */
-  songSearch: (songPath: string) => songPath,
+  /** Song search: uses Song.path directly */
+  songSearch: (path: Song['path']) => path,
 } as const;
