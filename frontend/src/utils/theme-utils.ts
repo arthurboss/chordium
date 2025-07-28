@@ -13,7 +13,7 @@ export const isDarkModeActive = (): boolean => {
  * Checks if theme is set to system preference (no localStorage theme)
  */
 export const isSystemThemeActive = (): boolean => {
-  return !localStorage.theme;
+  return !localStorage.getItem('chordium-theme');
 };
 
 /**
@@ -23,14 +23,14 @@ export const applyTheme = (theme: Theme): void => {
   switch (theme) {
     case 'light':
       document.documentElement.classList.remove('dark');
-      localStorage.theme = 'light';
+      localStorage.setItem('chordium-theme', 'light');
       break;
     case 'dark':
       document.documentElement.classList.add('dark');
-      localStorage.theme = 'dark';
+      localStorage.setItem('chordium-theme', 'dark');
       break;
     case 'system':
-      localStorage.removeItem('theme');
+      localStorage.removeItem('chordium-theme');
       applySystemTheme();
       break;
   }
@@ -59,8 +59,9 @@ export const applySystemTheme = (): void => {
  * Gets the currently active theme
  */
 export const getActiveTheme = (): Theme => {
-  if (localStorage.theme === 'light') return 'light';
-  if (localStorage.theme === 'dark') return 'dark';
+  const theme = localStorage.getItem('chordium-theme');
+  if (theme === 'light') return 'light';
+  if (theme === 'dark') return 'dark';
   return 'system';
 };
 
@@ -79,9 +80,10 @@ export const useTheme = () => {
     };
     
     // Initial theme setup on component mount
-    if (localStorage.theme === 'dark') {
+    const savedTheme = localStorage.getItem('chordium-theme');
+    if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
-    } else if (localStorage.theme === 'light') {
+    } else if (savedTheme === 'light') {
       document.documentElement.classList.remove('dark');
     } else {
       applySystemTheme();
