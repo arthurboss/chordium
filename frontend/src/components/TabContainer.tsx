@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTabStatePersistence } from "../hooks/useTabStatePersistence";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,10 +38,26 @@ const TabContainer = ({
   const { searchState } = useSearchState();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const { getTabState, setTabState } = useTabStatePersistence();
+  
+  // Local state to track the last search URL for tab switching
+  const [lastSearchUrl, setLastSearchUrl] = useState<string | null>(null);
 
   // Example: Persist myChordSheets state (e.g., scroll position)
   const myChordSheetsTabState = getTabState<{ scroll: number }>("my-chord-sheets", { scroll: 0 });
   const setMyChordSheetsTabState = (state: { scroll: number }) => setTabState("my-chord-sheets", state);
+
+  // Track when we're on a search-related page and store the URL
+  useEffect(() => {
+    const currentPath = location.pathname + location.search;
+    
+    // Store URL if it's a search page or an artist page (not basic app tabs)
+    if (location.pathname === '/search' || 
+        (!location.pathname.startsWith('/my-chord-sheets') && 
+         !location.pathname.startsWith('/upload') && 
+         location.pathname !== '/')) {
+      setLastSearchUrl(currentPath);
+    }
+  }, [location.pathname, location.search]);
 
   // Scroll to chord display when needed
   useEffect(() => {
@@ -50,6 +66,28 @@ const TabContainer = ({
     }
   }, [selectedSong]);
   
+  const navigateToSearch = () => {
+    // First priority: use the stored search URL from local state
+    if (lastSearchUrl) {
+      navigate(lastSearchUrl);
+      return;
+    }
+    
+    // Fallback: construct from current search state
+    if (searchState.artist || searchState.song) {
+      const params = new URLSearchParams();
+      if (searchState.artist) params.set('artist', toSlug(searchState.artist));
+      if (searchState.song) params.set('song', toSlug(searchState.song));
+      
+      const searchUrl = `/search?${params.toString()}`;
+      navigate(searchUrl);
+      return;
+    }
+    
+    // Final fallback: go to basic search page
+    navigate("/search");
+  };
+
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setSelectedSong(null);
@@ -57,23 +95,7 @@ const TabContainer = ({
     if (value === "upload") {
       navigate("/upload");
     } else if (value === "search") {
-      // Preserve search parameters when switching to search tab
-      // Use both current URL params and search state to reconstruct the search URL
-      let searchPath = "/search";
-      
-      // First try to get params from current URL if we're already on a search route
-      if (location.pathname.startsWith("/search") && location.search) {
-        searchPath = `/search${location.search}`;
-      } 
-      // Otherwise, check if there's search state that should be reflected in URL
-      else if (searchState.artist || searchState.song) {
-        const params = new URLSearchParams();
-        if (searchState.artist) params.set('artist', toSlug(searchState.artist));
-        if (searchState.song) params.set('song', toSlug(searchState.song));
-        searchPath = `/search?${params.toString()}`;
-      }
-      
-      navigate(searchPath);
+      navigateToSearch();
     } else if (value === "my-chord-sheets") {
       navigate("/my-chord-sheets");
     }

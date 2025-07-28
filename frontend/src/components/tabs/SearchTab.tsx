@@ -8,10 +8,10 @@ import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/search/components/SearchResults";
 import { setLastSearchQuery } from '@/cache/implementations/search-cache';
-import { getCachedSearchResults } from '@/cache/implementations/search-cache';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/search/hooks/useArtistNavigation';
+import { storeOriginalSearchUrl } from '@/hooks/use-navigation-history';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -25,7 +25,7 @@ interface SearchTabProps {
 const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }) => {
   const { searchState, updateSearchState } = useSearchState();
   const [loading, setLoading] = useState(false);
-  const [selectedSong, setSelectedSongLocal] = useState<Song | null>(null);
+  const [selectedSongLocal, setSelectedSongLocal] = useState<Song | null>(null);
   const [activeArtist, setActiveArtist] = useState<Artist | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [artistInput, setArtistInput] = useState('');
@@ -38,6 +38,22 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   const navigate = useNavigate();
   const location = useLocation();
   const isInitialized = useRef(false);
+
+  // Store original URL for preservation when navigating away and back
+  useEffect(() => {
+    const currentPath = location.pathname + location.search;
+    
+    // Only store URLs that are search-related:
+    // 1. Artist pages (not basic app tabs)
+    // 2. Search pages with parameters
+    const isBasicAppTab = location.pathname === '/my-chord-sheets' || 
+                         location.pathname === '/upload' || 
+                         (location.pathname === '/search' && !location.search);
+    
+    if (!isBasicAppTab) {
+      storeOriginalSearchUrl(currentPath);
+    }
+  }, [location.pathname, location.search]);
 
   // Initialize input fields and search state from URL on mount
   useEffect(() => {
@@ -81,7 +97,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
       const params = new URLSearchParams();
       if (artistValue) params.set('artist', toSlug(artistValue));
       if (songValue) params.set('song', toSlug(songValue));
-      navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+      const searchUrl = params.toString() ? `/search?${params.toString()}` : '/search';
+      navigate(searchUrl, { replace: true });
     }
     
     // Update previous values for next comparison
@@ -107,7 +124,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     const params = new URLSearchParams();
     if (artistValue) params.set('artist', toSlug(artistValue));
     if (songValue) params.set('song', toSlug(songValue));
-    navigate(`/search${params.toString() ? `?${params.toString()}` : ''}`, { replace: location.pathname.startsWith('/search') });
+    const searchUrl = params.toString() ? `/search?${params.toString()}` : '/search';
+    navigate(searchUrl, { replace: location.pathname.startsWith('/search') });
   }, [updateSearchState, navigate, location.pathname]);
 
   // Handler for loading state changes from SearchResults
@@ -189,14 +207,23 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
 
   return (
     <div className="space-y-4">
-      {selectedSong ? (
+      {selectedSongLocal ? (
         <SongViewer
-          song={selectedSong}
+          song={{
+            song: selectedSongLocal,
+            chordSheet: {
+              title: selectedSongLocal.title || '',
+              artist: selectedSongLocal.artist || '',
+              songChords: '',
+              songKey: '',
+              guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'] as const,
+              guitarCapo: 0
+            }
+          }}
           chordDisplayRef={null}
           onBack={handleBackToSearch}
           onDelete={() => {}}
           onUpdate={() => {}}
-          backButtonLabel="Back to Search"
           hideDeleteButton={true}
         />
       ) : (
