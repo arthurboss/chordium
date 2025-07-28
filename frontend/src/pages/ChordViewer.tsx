@@ -283,11 +283,12 @@ const ChordViewer = () => {
           chordContent={currentChordData.songChords}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
-          onDelete={isFromMyChordSheets ? handleDeleteSong : handleSaveChordSheet}
+          onDelete={handleDeleteSong}
+          onSave={handleSaveChordSheet}
           onUpdate={() => { }}
-          deleteButtonLabel={isFromMyChordSheets ? "Remove from My Chord Sheets" : "Add to My Chord Sheets"}
-          deleteButtonVariant={isFromMyChordSheets ? "destructive" : "default"}
-          hideDeleteButton={false}
+          hideDeleteButton={!isFromMyChordSheets}
+          hideSaveButton={isFromMyChordSheets}
+          isFromMyChordSheets={isFromMyChordSheets}
         />
       </main>
       <Footer />

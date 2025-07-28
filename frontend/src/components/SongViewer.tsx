@@ -5,7 +5,7 @@ import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { Card } from "./ui/card";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Save } from "lucide-react";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -13,10 +13,11 @@ interface SongViewerProps {
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
   onDelete: (songPath: string) => void;
+  onSave?: () => void;
   onUpdate: (content: string) => void;
-  deleteButtonLabel?: string;
-  deleteButtonVariant?: "outline" | "destructive" | "default";
   hideDeleteButton?: boolean;
+  hideSaveButton?: boolean;
+  isFromMyChordSheets?: boolean;
 }
 
 const SongViewer = ({
@@ -25,9 +26,11 @@ const SongViewer = ({
   chordDisplayRef,
   onBack,
   onDelete,
+  onSave,
   onUpdate,
-  deleteButtonLabel = "Delete Song",
-  hideDeleteButton = false
+  hideDeleteButton = false,
+  hideSaveButton = false,
+  isFromMyChordSheets = false
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
 
@@ -60,10 +63,25 @@ const SongViewer = ({
           tabIndex={0}
           aria-label="back-button"
         >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+          <ArrowLeft className="h-4 w-4 text-primary" />
+          Back
         </Button>
-        {!hideDeleteButton && (
+
+        {/* Show Save button for search results, Delete button for My Chord Sheets */}
+        {!hideSaveButton && !isFromMyChordSheets && onSave && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSave}
+            tabIndex={0}
+            aria-label="save to my chord sheets"
+          >
+            <Save className="h-4 w-4 text-primary" />
+            Save
+          </Button>
+        )}
+
+        {!hideDeleteButton && (isFromMyChordSheets || (!onSave || hideSaveButton)) && (
           <Button
             size="sm"
             variant="outline"
@@ -76,7 +94,7 @@ const SongViewer = ({
             tabIndex={0}
             aria-label="delete chord sheet"
           >
-            <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
+            <Trash2 className="h-4 w-4 text-destructive dark:text-red-300" />
             Delete
           </Button>
         )}
