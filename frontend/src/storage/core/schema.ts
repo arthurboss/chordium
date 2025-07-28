@@ -33,6 +33,4 @@ export {
 export {
   KEY_FORMATS,
   validateKeyFormat,
-  extractArtistPath,
-  extractSongPath,
 } from '../utils/keys';

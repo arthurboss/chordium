@@ -58,8 +58,7 @@ types/
 ```text
 utils/keys/
 ├── formats.ts        # Key format definitions
-├── validation.ts     # Key validation functions
-└── extraction.ts     # Key extraction utilities
+└── validation.ts     # Key validation functions
 ```
 
 ## Key Features
@@ -112,7 +111,6 @@ const expiresAt = calculateExpirationTime(TTL_CONFIG.CHORD_SHEET_UNSAVED);
 
 // Key utilities
 const isValid = validateKeyFormat(key, "chordSheet");
-const artistPath = extractArtistPath("alicia-keys/if-i-aint-got-you");
 ```
 
 ## Code Structure
