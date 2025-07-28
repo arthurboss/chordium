@@ -1,6 +1,6 @@
 name: Backend Tests
-# Runs backend unit tests (Jest) when backend files or shared dependencies change
-# Includes logger utility and comprehensive S3 caching functionality tests
+# Runs backend unit tests (Jest + TypeScript) when backend files or shared dependencies change
+# Tests run directly on TypeScript source files using ts-jest for better compatibility
 on:
   push:
     branches: ["*"]
@@ -43,9 +43,6 @@ jobs:
 
       - name: Install root dependencies
         run: npm ci --silent
-
-      - name: Build backend using Turborepo
-        run: npx turbo build --filter=chordium-backend
 
       - name: Run backend unit tests
         run: npx turbo test --filter=chordium-backend

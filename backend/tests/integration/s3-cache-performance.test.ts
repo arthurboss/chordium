@@ -22,15 +22,15 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule('../../services/s3-storage.service.ts', () => ({
+jest.unstable_mockModule('../../services/s3-storage.service', () => ({
   s3StorageService: mockS3StorageService,
 }));
 
-jest.unstable_mockModule('../../services/cifraclub.service.ts', () => ({
+jest.unstable_mockModule('../../services/cifraclub.service', () => ({
   default: mockCifraClubService,
 }));
 
-jest.unstable_mockModule('../../utils/logger.ts', () => ({
+jest.unstable_mockModule('../../utils/logger', () => ({
   default: mockLogger,
 }));
 
