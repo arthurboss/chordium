@@ -93,5 +93,5 @@ frontend-deployment/
 *-logs.txt
 
 # Temporary documentation and analysis files
-frontend/src/search/docs/temp/
+**/temp/
 
