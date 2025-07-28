@@ -5,8 +5,8 @@
 /** Index definitions for object stores */
 export const INDEXES = {
   chordSheets: {
-    artist: 'artist',
-    title: 'title',
+    artist: 'chordSheet.artist',    // Index nested property
+    title: 'chordSheet.title',      // Index nested property
     saved: 'saved',
     timestamp: 'timestamp',
     expiresAt: 'expiresAt',

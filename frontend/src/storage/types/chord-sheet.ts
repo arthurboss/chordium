@@ -12,10 +12,6 @@ export interface StoredChordSheet {
   /** Primary key: Uses Song.path format "artist-path/song-path" for consistency */
   id: string;
   
-  /** Basic metadata (redundant but indexed for performance) */
-  artist: string;
-  title: string;
-  
   /** Full chord sheet data (from domain ChordSheet type) */
   chordSheet: ChordSheet;
   
