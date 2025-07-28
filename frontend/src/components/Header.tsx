@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => (
-    <header className="flex justify-between py-1.5 px-3 sm:px-4 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
-      <Link 
-        to="/" 
-        className="flex items-center p-[4px] hover:opacity-90 transition-opacity rounded-md"
+  <header className="py-1.5 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
+    <div className="flex justify-between px-4 max-w-3xl mx-auto">
+      <Link
+        to="/"
+        className="flex items-center hover:opacity-90 transition-opacity rounded-md"
         tabIndex={0}
         aria-label="Chordium home"
       >
@@ -24,7 +25,7 @@ const Header = () => (
         />
         <h1 className="font-semibold text-lg m-0">Chordium</h1>
       </Link>
-      
+
       <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuContent align="end">
@@ -39,8 +40,9 @@ const Header = () => (
         </DropdownMenu>
         <ThemeToggle />
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 
 
 export default Header;
