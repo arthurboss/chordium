@@ -7,6 +7,7 @@ import {
   isArtistPage, 
   extractArtistFromUrl 
 } from '@/search/utils';
+import { storeOriginalSearchUrl } from '@/hooks/use-navigation-history';
 
 /**
  * Hook to manage artist navigation state and logic
@@ -25,6 +26,10 @@ export const useArtistNavigation = () => {
    * Navigate to artist page when artist is selected
    */
   const navigateToArtist = useCallback((artist: Artist) => {
+    // Store current URL for back navigation
+    const currentUrl = location.pathname + location.search;
+    storeOriginalSearchUrl(currentUrl);
+    
     // Store current search parameters for back navigation
     const searchParams = new URLSearchParams(location.search);
     originalSearchParams.current = {
@@ -33,7 +38,7 @@ export const useArtistNavigation = () => {
     };
     
     navigateToArtistUtil(artist, navigate);
-  }, [navigate, location.search]);
+  }, [navigate, location.search, location.pathname]);
 
   /**
    * Navigate back to search results
