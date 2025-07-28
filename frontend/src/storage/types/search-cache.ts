@@ -14,7 +14,7 @@ export interface SearchCacheEntry {
    * - Artist search: "artist-path" (e.g., "alicia-keys")  
    * - Song search: "artist-path/song-path" (e.g., "alicia-keys/if-aint-got-you")
    */
-  id: string;
+  path: string;
   
   /** Search context */
   query: string; // Original search term

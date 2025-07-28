@@ -10,7 +10,7 @@ import type { ChordSheet } from '@chordium/types';
  */
 export interface StoredChordSheet {
   /** Primary key: Uses Song.path format "artist-path/song-path" for consistency */
-  id: string;
+  path: string;
   
   /** Full chord sheet data (from domain ChordSheet type) */
   chordSheet: ChordSheet;

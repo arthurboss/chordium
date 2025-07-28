@@ -49,7 +49,7 @@ services/cleanup/
 ```text
 types/
 ├── chord-sheet.ts    # StoredChordSheet interface
-├── search-cache.ts   # SearchCacheEntry interface
+├── search-cache.ts   # SearchCacheEntry interface  
 └── schema.ts         # Database schema definition
 ```
 
@@ -86,10 +86,17 @@ utils/keys/
 ### **Consistent Key Format**
 
 ```typescript
+// All storage types use 'path' for consistency with domain objects
 // Chord sheets: "artist-path/song-path" (from Song.path)
 // Artist search: "artist-path" (from Artist.path)
 // Song search: "artist-path/song-path" (from Song.path)
 ```
+
+### **Data Model**
+
+- **Single Source of Truth**: Artist/title data lives in `chordSheet` object
+- **Domain Alignment**: StoredChordSheet extends domain ChordSheet type
+- **Efficient Indexing**: Indexes on `chordSheet.artist` and `chordSheet.title`
 
 ## Usage (When Complete)
 
