@@ -2,16 +2,18 @@ import GitHubIcon from "./icons/GitHubIcon";
 
 const Footer = () => {
   return (
-    <footer className="flex justify-end py-1 px-3 sm:px-4 dark:bg-[--card] items-center mt-auto border-t">  
-        <a 
-          href="https://github.com/arthurboss/chordium" 
-          className="p-[4px] text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+    <footer className="mt-auto border-t dark:bg-[--card]">
+      <div className="flex justify-end sm:justify-center py-1 px-4 max-w-3xl mx-auto">
+        <a
+          href="https://github.com/arthurboss/chordium"
+          className="p-[4px] text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-row-reverse sm:flex-row items-center gap-1.5"
           target="_blank"
           rel="noopener noreferrer"
         >
           <GitHubIcon size={24} />
-          <span className="hidden sm:inline">Source</span>
+          <span>Source</span>
         </a>
+      </div>
     </footer>
   );
 };
