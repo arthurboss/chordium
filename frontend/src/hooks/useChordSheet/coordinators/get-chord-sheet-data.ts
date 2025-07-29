@@ -1,36 +1,44 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { unifiedChordSheetCache } from '../../../cache/implementations/unified-chord-sheet-cache';
-import { parseStorageKey } from '../utils/parse-storage-key';
+import type { Song } from '@chordium/types';
+import { ChordSheetStore } from '@/storage/stores/chord-sheets/store';
+import { getChordSheetFromStorage } from '@/storage/services';
 import { fetchChordSheetFromBackend } from './fetch-chord-sheet-from-backend';
 
 /**
- * Gets chord sheet data, checking cache first then fetching if needed
+ * Gets chord sheet data, checking IndexedDB first, then fetching if needed
  * 
- * @param storageKey - Combined storage key (artist_name-song_title)
+ * @param path - Song path used as IndexedDB key (e.g., "eagles/hotel-california")
  * @param fetchUrl - URL to fetch from if not cached
  * @returns Promise with chord sheet data or null if failed
  */
 export async function getChordSheetData(
-  storageKey: string,
+  path: Song['path'],
   fetchUrl: string
 ): Promise<ChordSheet | null> {
-  // Parse the storage key to get artist and title
-  const { artist, title } = parseStorageKey(storageKey);
-  
-  // First check cache
-  const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(artist, title);
-  
-  if (cachedChordSheet) {
-    return cachedChordSheet;
-  }
-
-  // Not cached, fetch from backend
-  const chordSheet = await fetchChordSheetFromBackend(fetchUrl, artist, title);
-  
-  if (chordSheet) {
-    // Cache the chord sheet using the parsed artist and title
-    unifiedChordSheetCache.cacheChordSheet(artist, title, chordSheet);
+  // Step 1: Check IndexedDB for saved chord sheets first
+  const storedChordSheet = await getChordSheetFromStorage(path);
+  if (storedChordSheet) {
+    return storedChordSheet;
   }
   
-  return chordSheet;
+  // Step 2: Not in IndexedDB, fetch from backend
+  // Extract artist and title from songPath for backend call
+  const pathParts = path.split('/');
+  const artist = pathParts[0]?.replace(/-/g, ' ') || '';
+  const title = pathParts[1]?.replace(/-/g, ' ') || '';
+  
+  const fetchedChordSheet = await fetchChordSheetFromBackend(fetchUrl, artist, title);
+  
+  if (fetchedChordSheet) {
+    // Store the fetched chord sheet in IndexedDB for future use
+    try {
+      const chordSheetStore = new ChordSheetStore();
+      await chordSheetStore.store(fetchedChordSheet, { saved: false }, path);
+    } catch (error) {
+      console.error('Error storing chord sheet in IndexedDB:', error);
+      // Continue anyway - we have the chord sheet data
+    }
+  }
+  
+  return fetchedChordSheet;
 }

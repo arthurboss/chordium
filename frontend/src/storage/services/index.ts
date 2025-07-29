@@ -3,3 +3,4 @@
  */
 
 export * from './cleanup';
+export { getChordSheetFromStorage } from './chord-sheets/retrieval';
