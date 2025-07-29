@@ -1,5 +1,6 @@
 import { ChordSheet } from '@/types/chordSheet';
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+// TODO: Replace with IndexedDB implementation
+// import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Update a ChordSheet in myChordSheets cache
@@ -8,5 +9,7 @@ import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sh
  * @param updatedChordSheet Updated chord sheet data
  */
 export const updateChordSheet = (artist: string, title: string, updatedChordSheet: ChordSheet): void => {
-  unifiedChordSheetCache.cacheChordSheet(artist, title, updatedChordSheet, { saved: true });
+  // TODO: Implement IndexedDB chord sheet update
+  // unifiedChordSheetCache.cacheChordSheet(artist, title, updatedChordSheet, { saved: true });
+  console.warn('updateChordSheet: IndexedDB implementation not yet available');
 };

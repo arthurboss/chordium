@@ -3,4 +3,7 @@
  */
 
 export * from './cleanup';
-export { getChordSheetFromStorage } from './chord-sheets/retrieval';
+
+// Chord sheet retrieval services  
+export { getChordSheetFromCache } from './chord-sheets/cache-retrieval';
+export { getSavedChordSheet } from './chord-sheets/saved-retrieval';

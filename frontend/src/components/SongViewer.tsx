@@ -3,7 +3,6 @@ import ChordDisplay from "@/components/ChordDisplay";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { Card } from "./ui/card";
 import { ArrowLeft, Trash2, Save } from "lucide-react";
 
@@ -46,10 +45,11 @@ const SongViewer = ({
       return '';
     }
 
-    // Try to get from cache using artist and title
-    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(songObj.artist, songObj.title);
-
-    return cachedChordSheet?.songChords ?? '';
+    // TODO: Implement IndexedDB cache lookup
+    // const cachedChordSheet = await getSavedChordSheet(songObj.artist, songObj.title);
+    // return cachedChordSheet?.songChords ?? '';
+    
+    return '';
   }, [songObj, directChordContent]);
 
   return (

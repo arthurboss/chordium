@@ -13,7 +13,8 @@ import { scrollToElement } from "../utils/scroll-utils";
 import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+// TODO: Replace with IndexedDB implementation
+// import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
@@ -201,7 +202,9 @@ const TabContainer = ({
           <SongViewer
             song={{
               song: selectedSong,
-              chordSheet: unifiedChordSheetCache.getCachedChordSheet(selectedSong.artist, selectedSong.title) || {
+              chordSheet: {
+                // TODO: Replace with IndexedDB lookup
+                // unifiedChordSheetCache.getCachedChordSheet(selectedSong.artist, selectedSong.title) || 
                 title: selectedSong.title,
                 artist: selectedSong.artist,
                 songChords: '',

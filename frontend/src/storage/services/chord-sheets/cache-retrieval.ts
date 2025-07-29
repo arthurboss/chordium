@@ -1,20 +1,27 @@
 /**
- * Chord sheet retrieval service
+ * Cache retrieval service for search and general chord sheet loading
  * 
- * Handles retrieving chord sheets from IndexedDB storage with proper
- * error handling and type conversion between StoredChordSheet and ChordSheet.
+ * This service checks if a chord sheet exists in IndexedDB cache before
+ * allowing a backend fetch. Used by the search feature and general chord
+ * sheet loading to avoid unnecessary API calls for previously fetched content.
+ * 
+ * Returns ANY chord sheet from IndexedDB (saved OR cached).
  */
 
 import type { ChordSheet, Song } from '@chordium/types';
 import { ChordSheetStore } from '../../stores/chord-sheets/store';
 
 /**
- * Retrieves a chord sheet from IndexedDB by song path
+ * Retrieves a chord sheet from IndexedDB cache by song path
+ * 
+ * Used by search and general loading to check if a chord sheet is already
+ * cached before making backend API calls. Returns any chord sheet regardless
+ * of saved status.
  * 
  * @param path - Song path used as IndexedDB key (e.g., "eagles/hotel-california")
- * @returns Promise resolving to ChordSheet if found, null if not found or on error
+ * @returns Promise resolving to ChordSheet if found in cache, null if not cached
  */
-export async function getChordSheetFromStorage(path: Song['path']): Promise<ChordSheet | null> {
+export async function getChordSheetFromCache(path: Song['path']): Promise<ChordSheet | null> {
   try {
     const chordSheetStore = new ChordSheetStore();
     const storedChordSheet = await chordSheetStore.get(path);
@@ -34,7 +41,7 @@ export async function getChordSheetFromStorage(path: Song['path']): Promise<Chor
     
     return null;
   } catch (error) {
-    console.error('Error checking IndexedDB:', error);
+    console.error('Error checking IndexedDB cache:', error);
     return null;
   }
 }

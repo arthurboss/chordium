@@ -1,7 +1,9 @@
 import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
-import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
+// TODO: Replace with IndexedDB implementation
+// import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
 import { Song } from '../types/song';
-import { extractSongMetadata } from './metadata-extraction';
+// TODO: Re-enable when IndexedDB is implemented
+// import { extractSongMetadata } from './metadata-extraction';
 
 export interface LocalSongResult {
   title: string;
@@ -44,23 +46,20 @@ export async function findLocalSong(
     
     if (foundSong) {
       
-      // Try to get the chord sheet from cache using the artist and title
-      const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
+      // TODO: Implement IndexedDB chord sheet retrieval
+      // const cachedChordSheet = await getSavedChordSheet(foundSong.artist, foundSong.title);
+      // For now, return null to skip cached lookup
+      return null;
       
-      if (!cachedChordSheet) {
-        return null;
-      }
-      
-      // Extract metadata from the chord sheet content
-      const metadata = extractSongMetadata(cachedChordSheet.songChords);
-      return {
-        title: foundSong.title ?? '',
-        artist: foundSong.artist ?? '',
-        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
-        key: metadata.songKey ?? '',
-        tuning: metadata.guitarTuning ?? '',
-        capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',
-      };
+      // const metadata = extractSongMetadata(cachedChordSheet.songChords);
+      // return {
+      //   title: foundSong.title ?? '',
+      //   artist: foundSong.artist ?? '',
+      //   path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
+      //   key: metadata.songKey ?? '',
+      //   tuning: metadata.guitarTuning ?? '',
+      //   capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',
+      // };
     }
     
     return null;

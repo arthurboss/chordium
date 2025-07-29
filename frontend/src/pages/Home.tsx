@@ -6,8 +6,7 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleSongs } from "@/storage/hooks/use-sample-songs";
-import { useMyChordSheetsIndexedDB } from "@/hooks/use-my-chord-sheets-indexeddb";
+import { useSampleSongs, useSavedChordSheets } from "@/storage/hooks";
 import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -31,16 +30,17 @@ const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { myChordSheetsAsSongs, refreshMyChordSheets } = useMyChordSheetsIndexedDB();
-  const [myChordSheets, setMyChordSheets] = useState<Song[]>([]);
+  const { chordSheets: myChordSheets, refresh: refreshMyChordSheets } = useSavedChordSheets();
   
-  // Update local state when IndexedDB data changes
+  // Load sample songs in development mode and refresh chord sheets when complete
+  const { isLoaded } = useSampleSongs();
+  
+  // Refresh chord sheets when sample songs finish loading
   useEffect(() => {
-    setMyChordSheets(myChordSheetsAsSongs);
-  }, [myChordSheetsAsSongs]);
-  
-  // Load sample songs in development mode (doesn't return any state)
-  useSampleSongs();
+    if (isLoaded) {
+      refreshMyChordSheets();
+    }
+  }, [isLoaded, refreshMyChordSheets]);
   
   useSearchRedirect();
 
@@ -73,7 +73,7 @@ const Home = () => {
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}
           myChordSheets={myChordSheets}
-          setMySongs={setMyChordSheets}
+          setMySongs={refreshMyChordSheets}
           selectedSong={selectedSong}
           setSelectedSong={setSelectedSong}
         />

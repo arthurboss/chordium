@@ -2,7 +2,9 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { toast } from "@/hooks/use-toast";
 import { updateChordSheet } from './updateChordSheet';
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
+// TODO: Replace with IndexedDB implementation
+// import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
 
 /**
  * Handles chord sheet update from UI context (both UI state and persistent storage)
@@ -48,8 +50,18 @@ export const handleUpdateChordSheetFromUI = (
   const artist = artistPart.replace(/_/g, ' ');
   const title = titlePart.replace(/_/g, ' ');
   
-  // Get the existing ChordSheet
-  const existingChordSheet = unifiedChordSheetCache.getCachedChordSheet(artist, title);
+  // TODO: Implement IndexedDB chord sheet retrieval
+  // const existingChordSheet = await getSavedChordSheet(artist, title);
+  // For now, create a minimal chord sheet to update
+  const existingChordSheet = {
+    title,
+    artist, 
+    songChords: content,
+    songKey: '',
+    guitarTuning: GUITAR_TUNINGS.STANDARD,
+    guitarCapo: 0
+  };
+  
   if (!existingChordSheet) {
     toast({
       title: "Update failed", 

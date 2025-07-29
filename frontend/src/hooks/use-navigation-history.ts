@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLastSearchQuery } from '@/cache/implementations/search-cache';
+// TODO: Replace with IndexedDB search cache
+// import { getLastSearchQuery } from '@/cache/implementations/search-cache';
+// TODO: Replace with IndexedDB search cache
+// import { getLastSearchQuery } from '@/cache/implementations/search-cache';
 
 // Storage key for preserving original URL format
 const ORIGINAL_SEARCH_URL_KEY = 'original_search_url';
@@ -56,21 +59,10 @@ export function useNavigationHistory() {
       return;
     }
     
-    // Fallback to reconstructing URL from search cache
-    const lastQuery = getLastSearchQuery();
-    
-    if (lastQuery) {
-      // Construct URL parameters
-      const params = new URLSearchParams();
-      if (lastQuery.artist) params.set('artist', lastQuery.artist);
-      if (lastQuery.song) params.set('song', lastQuery.song);
-      
-      // Navigate back to search with the parameters
-      navigate(`/search?${params.toString()}`);
-    } else {
-      // If no search history, just go to the search page
-      navigate('/search');
-    }
+    // TODO: Implement IndexedDB search cache retrieval
+    // const lastQuery = getLastSearchQuery();
+    // For now, just navigate back to search without parameters
+    navigate('/search');
   }, [navigate]);
   
   return { navigateBackToSearch };

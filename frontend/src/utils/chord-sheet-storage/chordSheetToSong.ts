@@ -1,6 +1,8 @@
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
-import { generateCacheKey } from '@/cache/core/cache-key-generator';
+// TODO: Replace with IndexedDB key generation
+// import { generateCacheKey } from '@/cache/core/cache-key-generator';
+import { generateChordSheetId } from '@/utils/chord-sheet-id-generator';
 
 /**
  * Convert ChordSheet to Song for UI compatibility using cache key format
@@ -8,7 +10,7 @@ import { generateCacheKey } from '@/cache/core/cache-key-generator';
  * @returns Song object for UI layer
  */
 export const chordSheetToSong = (chordSheet: ChordSheet): Song => {
-  const cacheKey = generateCacheKey(chordSheet.artist, chordSheet.title);
+  const cacheKey = generateChordSheetId(chordSheet.artist, chordSheet.title);
   return {
     title: chordSheet.title,
     artist: chordSheet.artist,

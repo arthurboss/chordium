@@ -1,9 +1,10 @@
 import { useCallback, useRef } from "react";
 import type { Artist, Song } from "@chordium/types";
-import { 
-  cacheSearchResults, 
-  getCachedSearchResults 
-} from "@/cache/implementations/search-cache";
+// TODO: Replace with IndexedDB search cache for search functionality
+// import { 
+//   cacheSearchResults, 
+//   getCachedSearchResults 
+// } from "@/cache/implementations/search-cache";
 import type { SearchResultsAction } from "@/search/types/searchResultsAction";
 import { getApiBaseUrl } from "@/utils/api-base-url";
 
@@ -49,8 +50,9 @@ export const useSearchFetch = ({
         return;
       }
 
-      // Check cache first
-      const cachedResults = getCachedSearchResults(artistParam, songParam);
+      // TODO: Check IndexedDB search cache first
+      // const cachedResults = getCachedSearchResults(artistParam, songParam);
+      const cachedResults = null; // Skip cache for now
       if (cachedResults !== null) {
         if (artistParam) {
           // Artist search - cached results are Artist[]
@@ -93,11 +95,13 @@ export const useSearchFetch = ({
       if (!artistParam && songParam) {
         // Song search
         dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
-        cacheSearchResults(artistParam, songParam, data);
+        // TODO: Cache search results in IndexedDB
+        // cacheSearchResults(artistParam, songParam, data);
       } else {
         // Artist search
         dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
-        cacheSearchResults(artistParam, songParam, data);
+        // TODO: Cache search results in IndexedDB
+        // cacheSearchResults(artistParam, songParam, data);
       }
 
       if (onFetchComplete) onFetchComplete();
