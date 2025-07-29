@@ -69,44 +69,60 @@ utils/keys/
 - Users must manually delete saved items
 - Smart cleanup respects user preferences
 
-### **Priority-Based Cleanup**
+### **Priority-Based Cleanup with LRU**
 
 ```typescript
 // High Priority (kept longer)
 - Saved items (never removed)
-- Recently accessed items
-- Frequently used items
+- Recently accessed items (storage.lastAccessed field)
+- Frequently used items (storage.accessCount field)
 
-// Low Priority (removed first)
-- Old, rarely accessed cache
+// Low Priority (removed first)  
+- Old, rarely accessed cache (based on storage.lastAccessed, not storage.timestamp)
 - Expired search results
 ```
+
+**Key Improvement**: Uses `storage.lastAccessed` timestamp instead of `storage.timestamp` (creation time) for proper LRU eviction. This ensures recently used items are kept even if they were cached long ago.
 
 ### **Consistent Key Format**
 
 ```typescript
 // All storage types use 'path' for consistency with domain objects
 // Chord sheets: "artist-path/song-path" (from Song.path)
-// Artist search: "artist-path" (from Artist.path)
+// Artist search: "artist-path" (from Artist.path)  
 // Song search: "artist-path/song-path" (from Song.path)
+// Note: Path is IndexedDB key only, not duplicated in stored value
 ```
 
 ### **Data Model**
 
-- **Single Source of Truth**: Artist/title data lives in `chordSheet` object
-- **Domain Alignment**: StoredChordSheet extends domain ChordSheet type
-- **Efficient Indexing**: Indexes on `chordSheet.artist` and `chordSheet.title`
+- **Optimized Structure**: StoredChordSheet extends ChordSheet with organized storage metadata
+- **Direct Access**: Content fields accessible directly (`record.songChords`, `record.title`)
+- **Organized Metadata**: Storage fields grouped under `storage` namespace (`record.storage.saved`)
+- **Domain Alignment**: Perfect alignment with @chordium/types ChordSheet interface
+- **Efficient Indexing**: Indexes on `artist`, `title`, and `storage.*` fields
+- **LRU Tracking**: `storage.lastAccessed` field enables proper cache eviction based on actual usage
+- **No Redundancy**: Eliminated duplicate path storage (IndexedDB key provides this)
 
 ## Usage (When Complete)
 
 ```typescript
 import { storage } from "@/storage";
 
+// Direct content access (optimized structure)
+const chords = record.songChords;        // ✅ Direct access
+const title = record.title;             // ✅ Clean access  
+const artist = record.artist;           // ✅ Simple access
+
+// Organized storage metadata
+const isSaved = record.storage.saved;           // ✅ Clear intent
+const lastAccessed = record.storage.lastAccessed; // ✅ LRU tracking
+
 // Smart cleanup (respects saved items)
 const result = await cleanup.performCleanup();
 
 // TTL utilities
-const expired = isExpired(item.expiresAt);
+const expired = isExpired(item.storage.expiresAt);
 const expiresAt = calculateExpirationTime(TTL_CONFIG.CHORD_SHEET_UNSAVED);
 
 // Key utilities
@@ -123,6 +139,7 @@ const isValid = validateKeyFormat(key, "chordSheet");
 
 ✅ **Phase 1**: Setup & Discovery  
 ✅ **Phase 2**: Core Infrastructure (42 modular files)  
-🚧 **Phase 3**: IndexedDB Manager (Next)
+✅ **Phase 3**: Structure Optimization (flattened StoredChordSheet with organized metadata)
+🚧 **Phase 4**: IndexedDB Manager (Next)
 
-**Current**: Foundation complete, ready for IndexedDB manager implementation.
+**Current**: Foundation complete with optimized data structure, ready for IndexedDB manager implementation.

@@ -3,24 +3,24 @@
  */
 
 /**
- * Log when sample loading is skipped due to existing data
+ * Log when sample loading is skipped
  */
-export const logSkippingLoad = (): void => {
-  console.log('Sample songs: Skipping load - user already has saved chord sheets');
+export const logSkippingLoad = (reason: string): void => {
+  console.log(`Sample songs: Skipping load - ${reason}`);
 };
 
 /**
  * Log the start of sample loading
  */
-export const logLoadingStart = (count: number): void => {
-  console.log(`Sample songs: Loading ${count} sample chord sheets`);
+export const logLoadingStart = (): void => {
+  console.log('Sample songs: Starting to load sample chord sheets');
 };
 
 /**
  * Log successful completion of sample loading
  */
-export const logLoadingSuccess = (): void => {
-  console.log('Sample songs: Successfully loaded all samples');
+export const logLoadingSuccess = (count: number): void => {
+  console.log(`Sample songs: Successfully loaded ${count} sample chord sheets`);
 };
 
 /**

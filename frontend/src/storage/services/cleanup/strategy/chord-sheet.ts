@@ -11,39 +11,60 @@ import type { CleanupStrategy } from './types';
  * CRITICAL: Saved items are NEVER automatically removed (user does it manually)
  */
 export function calculateChordSheetCleanupPriority(item: StoredChordSheet): CleanupStrategy {
-  // ABSOLUTE RULE: Never remove saved items
-  if (item.saved) {
+  // Never remove saved items
+  if (item.storage.saved) {
     return {
-      priority: 1000,
-      reason: 'User saved - never auto-remove',
-      canRemove: false
+      canRemove: false,
+      priority: 0,
+      reason: 'item is saved by user'
     };
   }
 
-  // Delegate to unsaved item calculation
+  // For cached items, use LRU logic with lastAccessed
   return calculateUnsavedChordSheetPriority(item);
 }
 
 /**
  * Calculates priority for unsaved chord sheets only
+ * Uses lastAccessed for proper LRU (Least Recently Used) logic
  */
 function calculateUnsavedChordSheetPriority(item: StoredChordSheet): CleanupStrategy {
   let priority = 0;
   const reasons: string[] = [];
 
-  // Recently accessed items get higher priority
-  const daysSinceAccess = (Date.now() - item.timestamp) / (1000 * 60 * 60 * 24);
-  if (daysSinceAccess < 1) {
+  // LRU Logic: Recently accessed items get higher priority (kept longer)
+  const daysSinceLastAccess = (Date.now() - item.storage.lastAccessed) / (1000 * 60 * 60 * 24);
+  
+  if (daysSinceLastAccess < 1) {
     priority += 50;
     reasons.push('accessed today');
-  } else if (daysSinceAccess < 7) {
-    priority += 25;
+  } else if (daysSinceLastAccess < 3) {
+    priority += 30;
+    reasons.push('accessed recently');
+  } else if (daysSinceLastAccess < 7) {
+    priority += 15;
     reasons.push('accessed this week');
+  } else if (daysSinceLastAccess < 30) {
+    priority += 5;
+    reasons.push('accessed this month');
+  }
+  // Items not accessed in 30+ days get priority 0 (first to be removed)
+
+  // Access frequency bonus: Frequently used items get higher priority
+  if (item.storage.accessCount > 10) {
+    priority += 20;
+    reasons.push('frequently used');
+  } else if (item.storage.accessCount > 5) {
+    priority += 10;
+    reasons.push('regularly used');
+  } else if (item.storage.accessCount > 2) {
+    priority += 5;
+    reasons.push('multiple uses');
   }
 
   return {
     priority,
-    reason: reasons.join(', ') || 'low usage',
+    reason: reasons.join(', ') || 'rarely used',
     canRemove: true
   };
 }

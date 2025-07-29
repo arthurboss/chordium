@@ -6,7 +6,8 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleChordSheets } from "@/hooks/use-sample-chord-sheets";
+import { useSampleSongs } from "@/storage/hooks/use-sample-songs";
+import { useMyChordSheetsIndexedDB } from "@/hooks/use-my-chord-sheets-indexeddb";
 import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -30,7 +31,17 @@ const Home = () => {
   const location = useLocation(); // Get location
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { myChordSheets, setMyChordSheets, refreshMyChordSheets } = useSampleChordSheets();
+  const { myChordSheetsAsSongs, refreshMyChordSheets } = useMyChordSheetsIndexedDB();
+  const [myChordSheets, setMyChordSheets] = useState<Song[]>([]);
+  
+  // Update local state when IndexedDB data changes
+  useEffect(() => {
+    setMyChordSheets(myChordSheetsAsSongs);
+  }, [myChordSheetsAsSongs]);
+  
+  // Load sample songs in development mode (doesn't return any state)
+  useSampleSongs();
+  
   useSearchRedirect();
 
   // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
@@ -57,6 +68,7 @@ const Home = () => {
         <div className="text-center bg-purple-100 border-l-4 border-purple-400 text-purple-900 p-3 mb-4 rounded shadow">
           <strong>Note:</strong> This app is in development. Some features may not work as expected.
         </div>
+        
         <TabContainer
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}

@@ -1,8 +1,8 @@
 /**
- * Sample songs service for loading predefined chord sheets in development mode
+ * Sample songs loading orchestrator
  */
 
-import type { IChordSheetStorageService } from './types';
+import type { IChordSheetStorage } from './types';
 import { isDevelopmentMode } from './environment';
 import { shouldLoadSamples } from './duplicate-prevention';
 import { loadSampleData } from './data-loader';
@@ -15,37 +15,36 @@ import {
 } from './logging';
 
 /**
- * Sample songs service for loading development data
+ * Service for loading sample songs in development mode
+ * Follows SRP - only responsible for orchestrating the loading process
  */
 export class SampleSongsService {
-  constructor(private readonly chordSheetService: IChordSheetStorageService) {}
+  constructor(private readonly storage: IChordSheetStorage) {}
 
   /**
-   * Load sample chord sheets in development mode only
-   * Implements duplicate prevention - only loads if no saved chord sheets exist
+   * Load sample songs if conditions are met
    */
   async loadSampleSongs(): Promise<void> {
-    // Production mode - do nothing
-    if (!isDevelopmentMode()) {
-      return;
-    }
-
-    // Check for existing saved chord sheets (prevents duplicates)
-    if (!(await shouldLoadSamples(this.chordSheetService))) {
-      logSkippingLoad();
-      return;
-    }
-
     try {
-      // Dynamic import sample data (only in development)
+      // Skip if not in development mode
+      if (!isDevelopmentMode()) {
+        logSkippingLoad('production mode');
+        return;
+      }
+
+      // Skip if user already has saved chord sheets
+      if (!(await shouldLoadSamples(this.storage))) {
+        logSkippingLoad('user has existing saved chord sheets');
+        return;
+      }
+
+      logLoadingStart();
+      
+      // Load and store sample data
       const samples = await loadSampleData();
+      await storeSampleSongs(samples, this.storage);
       
-      logLoadingStart(samples.length);
-      
-      // Store each sample with saved: true
-      await storeSampleSongs(samples, this.chordSheetService);
-      
-      logLoadingSuccess();
+      logLoadingSuccess(samples.length);
     } catch (error) {
       logLoadingError(error);
     }

@@ -3,20 +3,13 @@
  */
 
 import type { ChordSheet } from '@chordium/types';
+import type { StoredChordSheet } from '../../types';
 
 /**
- * Interface for chord sheet storage service
- * This will be implemented by the actual IndexedDB chord sheet service
+ * Interface for chord sheet storage operations
+ * Following SRP - only methods needed for sample songs
  */
-export interface IChordSheetStorageService {
-  /** Get all saved chord sheets */
-  getAllSaved(): Promise<ChordSheet[]>;
-  
-  /** Store a chord sheet with metadata */
-  store(
-    artist: string, 
-    title: string, 
-    chordSheet: ChordSheet, 
-    metadata: { saved: boolean; source?: string }
-  ): Promise<void>;
+export interface IChordSheetStorage {
+  getAllSaved(): Promise<StoredChordSheet[]>;
+  store(path: string, chordSheet: ChordSheet, metadata: { saved: boolean; source?: string }): Promise<void>;
 }

@@ -2,15 +2,15 @@
  * Duplicate prevention logic for sample songs
  */
 
-import type { IChordSheetStorageService } from './types';
+import type { IChordSheetStorage } from './types';
 
 /**
  * Check if sample songs should be loaded
  * Returns false if user already has saved chord sheets
  */
 export const shouldLoadSamples = async (
-  chordSheetService: IChordSheetStorageService
+  storage: IChordSheetStorage
 ): Promise<boolean> => {
-  const existingSaved = await chordSheetService.getAllSaved();
+  const existingSaved = await storage.getAllSaved();
   return existingSaved.length === 0;
 };

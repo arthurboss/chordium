@@ -9,8 +9,12 @@
 // Main service class
 export { SampleSongsService } from './loader';
 
+// Storage implementations
+export { IndexedDBStorage, indexedDBStorage } from './indexeddb-storage';
+
 // Types
-export type { IChordSheetStorageService } from './types';
+export type { IChordSheetStorage } from './types';
+export type { SampleChordSheetRecord } from './data-loader';
 
 // Utilities (for testing and advanced usage)
 export { isDevelopmentMode } from './environment';
