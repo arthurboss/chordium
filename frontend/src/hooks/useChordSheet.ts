@@ -33,6 +33,11 @@ export function useChordSheet(url?: string, originalPath?: string) {
   useEffect(() => {
     const loadChordSheet = async () => {
       try {
+        // Skip fetch if we have no URL and no originalPath (My Chord Sheets context)
+        if (!url && !originalPath) {
+          return;
+        }
+
         // Step 1: Try loading from local sources first (My Chord Sheets context)
         if (loadingStrategy.shouldLoadLocal(params.artist, params.song)) {
           const localData = await loadingStrategy.loadLocal(params.artist, params.song);

@@ -1,173 +1,69 @@
-import { useRef, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { useChordSheet } from "@/hooks/useChordSheet";
-import { Song } from "@/types/song";
-import { ChordSheet } from "@/types/chordSheet";
-import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
-import { useNavigationHistory } from "@/hooks/use-navigation-history";
-import { useAddToMyChordSheets } from "@/hooks/useAddToMyChordSheets";
-import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import { toast } from "@/hooks/use-toast";
-
-// UI state interface for local song data with loading and error states  
-interface LocalSongData extends ChordSheet {
-  loading: boolean;
-  error: string | null;
-}
+import { getSavedChordSheet } from "@/storage/services";
+import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
+import type { Song, ChordSheet } from "@chordium/types";
 
 const ChordViewer = () => {
-  const { artist, song, id } = useParams();
+  const { artist, song } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { navigateBackToSearch } = useNavigationHistory();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  const addToMyChordSheets = useAddToMyChordSheets();
 
-  // TODO: Remove these when implementing IndexedDB
-  // const [localSongData, setLocalSongData] = useState<LocalSongData | null>(null);
-  // const [isLoadingLocal, setIsLoadingLocal] = useState(false);
-
-  // Get Song object from navigation state (if passed from search results)
+  // Song object from navigation state (if passed from search results)
   const navigationSong = location.state?.song as Song | undefined;
 
-  // Determine if this song is actually in "My Chord Sheets" by checking storage
-  const [isFromMyChordSheets] = useState(false);
+  // Local state for chord sheet data
+  const [chordSheet, setChordSheet] = useState<ChordSheet | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Implement IndexedDB check for My Chord Sheets
-  // useEffect(() => {
-  //   // Check if current song is in My Chord Sheets using IndexedDB
-  // }, [navigationSong?.path, artist, song]);
+  useEffect(() => {
+    async function loadChordSheet() {
+      setIsLoading(true);
+      setError(null);
+      const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
+      if (!path) {
+        setError("Invalid song path");
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const savedChordSheet = await getSavedChordSheet(path);
+        if (savedChordSheet) {
+          setChordSheet(savedChordSheet);
+        } else {
+          setError("Chord sheet not found in saved items");
+        }
+      } catch (err) {
+        console.error("Error loading chord sheet:", err);
+        setError("Failed to load chord sheet from storage");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadChordSheet();
+  }, [artist, song, navigationSong?.path]);
 
-  // Get chord data from server (for search results only)
-  // Skip server fetch for My Chord Sheets context
-  // Pass the original song path from navigation state for accurate fetching (path only, not full URL)
-  const originalSongPath = navigationSong?.path;
-  const chordData = useChordSheet(undefined, originalSongPath);
-
-  // Load song from My Chord Sheets if this is a My Chord Sheets route
-  // TODO: Implement IndexedDB-based loading for My Chord Sheets
-  // useEffect(() => {
-  //   if (isFromMyChordSheets && artist && song) {
-  //     // Load from IndexedDB
-  //   }
-  // }, [isFromMyChordSheets, artist, song, navigationSong?.artist, navigationSong?.title]);
-
-  // Helper to normalize data for UI consumption
-  const getCurrentChordData = () => {
-    // TODO: Implement IndexedDB loading for My Chord Sheets
-    // if (isFromMyChordSheets && localSongData) {
-    //   return {
-    //     ...localSongData,
-    //     loading: isLoadingLocal
-    //   };
-    // }
-    
-    // Convert ChordSheet from hook to LocalSongData-like structure for UI
-    // Preserve the actual loading and error state from the hook
-    return {
-      ...chordData,
-      loading: chordData.loading,
-      error: chordData.error
-    };
-  };
-
-  const currentChordData = getCurrentChordData();
-
-  // Handle back navigation
   const handleBack = () => {
-    if (isFromMyChordSheets) {
-      // If viewing from My Chord Sheets, go back to My Chord Sheets tab
-      navigate('/my-chord-sheets');
-    } else {
-      // If viewing from search results, go back to search
-      navigateBackToSearch();
-    }
+    navigate("/my-chord-sheets");
   };
 
-  // Extract song title - prioritize navigation state, then chord data, fallback to URL params
-  const getSongTitle = () => {
-    if (navigationSong?.title) {
-      return navigationSong.title;
-    }
-    if (currentChordData.title && currentChordData.title !== '') {
-      return currentChordData.title;
-    }
-    if (song) {
-      return decodeURIComponent(song.replace(/-/g, ' '));
-    }
-    return 'Chord Sheet';
-  };
-
-  // Extract artist name - prioritize navigation state, then chord data, fallback to URL params
-  const getArtistName = () => {
-    if (navigationSong?.artist) {
-      return navigationSong.artist;
-    }
-    if (currentChordData.artist && currentChordData.artist !== '' && currentChordData.artist !== 'Unknown Artist') {
-      return currentChordData.artist;
-    }
-    if (artist) {
-      return decodeURIComponent(artist.replace(/-/g, ' '));
-    }
-    return '';
-  };
-
-  // Create song data object from chord sheet data
-  const createSongData = () => {
-    // Use navigation Song object as primary source, fallback to URL/chord data
-    const songTitle = navigationSong?.title || getSongTitle();
-    const artistName = navigationSong?.artist || getArtistName();
-    const cacheKey = artist && song ? generateChordSheetId(artist, song) : id || 'unknown';
-
-    const songObj: Song = {
-      title: songTitle, // Use navigation Song object as primary source
-      artist: artistName, // Use navigation Song object as primary source
-      path: cacheKey // Use cache key, not chord content
-    };
-
-    const chordSheet: ChordSheet = {
-      title: songTitle, // Use URL params - the song title from search result
-      artist: artistName, // Use URL params - the artist name from search result
-      songChords: currentChordData.songChords ?? '',
-      songKey: currentChordData.songKey ?? '',
-      guitarTuning: GUITAR_TUNINGS.STANDARD,
-      guitarCapo: currentChordData.guitarCapo ?? 0
-    };
-
-    return {
-      song: songObj,
-      chordSheet
-    };
-  };
-
-  // Add chord sheet to My Chord Sheets
-  const handleSaveChordSheet = () => {
-    const songData = createSongData();
-    addToMyChordSheets(songData);
-  };
-
-  // Delete song from My Chord Sheets
-  const handleDeleteSong = () => {
-    // TODO: Implement IndexedDB deletion
-    // const songPath = navigationSong?.path || generateChordSheetId(artist || '', song || '');
-    // const songTitle = navigationSong?.title || getSongTitle();
-
-    // Show toast notification
+  const handleDelete = () => {
     toast({
-      title: "Feature not implemented",
-      description: "Delete functionality will be implemented with IndexedDB"
+      title: "Delete not implemented",
+      description: "Chord sheet deletion will be implemented with IndexedDB",
     });
-
-    // Navigate back to My Chord Sheets
-    navigate('/');
+    navigate("/my-chord-sheets");
   };
 
-  if (currentChordData.loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -179,35 +75,31 @@ const ChordViewer = () => {
     );
   }
 
-  if (currentChordData.error) {
+  if (error || !chordSheet) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <ErrorState error={`Failed to load chord sheet: ${currentChordData.error}`} />
+          <ErrorState error={`Failed to load chord sheet: ${error || "Not found"}`} />
         </main>
         <Footer />
       </div>
     );
   }
 
-  const songData = createSongData();
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
         <SongViewer
-          song={songData}
-          chordContent={currentChordData.songChords}
+          song={{ song: navigationSong || { ...chordSheet, path: generateChordSheetId(chordSheet.artist, chordSheet.title) }, chordSheet }}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
-          onDelete={handleDeleteSong}
-          onSave={handleSaveChordSheet}
-          onUpdate={() => { }}
-          hideDeleteButton={!isFromMyChordSheets}
-          hideSaveButton={isFromMyChordSheets}
-          isFromMyChordSheets={isFromMyChordSheets}
+          onDelete={handleDelete}
+          onUpdate={() => {}}
+          hideDeleteButton={false}
+          hideSaveButton={true}
+          isFromMyChordSheets={true}
         />
       </main>
       <Footer />

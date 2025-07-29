@@ -33,11 +33,16 @@ const SongViewer = ({
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
 
-  // Load chord sheet content - use direct content if provided, otherwise load from cache
+  // Load chord sheet content - use direct content if provided, otherwise use chord sheet content
   const chordContent = useMemo(() => {
 
     if (directChordContent) {
       return directChordContent;
+    }
+
+    // Use the chord sheet content from the prop
+    if (chordSheet?.songChords) {
+      return chordSheet.songChords;
     }
 
     // Validate song object to prevent cache key generation errors
@@ -45,12 +50,9 @@ const SongViewer = ({
       return '';
     }
 
-    // TODO: Implement IndexedDB cache lookup
-    // const cachedChordSheet = await getSavedChordSheet(songObj.artist, songObj.title);
-    // return cachedChordSheet?.songChords ?? '';
-    
+    // Fallback for edge cases
     return '';
-  }, [songObj, directChordContent]);
+  }, [songObj, directChordContent, chordSheet?.songChords]);
 
   return (
     <div className="animate-fade-in">

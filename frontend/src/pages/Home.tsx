@@ -28,6 +28,7 @@ const getInitialTab = (pathname: string): string => {
 
 const Home = () => {
   const location = useLocation(); // Get location
+  
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { chordSheets: myChordSheets, refresh: refreshMyChordSheets } = useSavedChordSheets();

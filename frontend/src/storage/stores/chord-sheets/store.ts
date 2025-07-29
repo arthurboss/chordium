@@ -35,7 +35,9 @@ export class ChordSheetStore {
       // Get all records and filter in memory instead of using index
       // This avoids the IDBKeyRange issue with nested properties
       const request = store.getAll();
-      request.onerror = () => reject(new Error(`Failed to get saved chord sheets: ${request.error?.message || 'Unknown error'}`));
+      request.onerror = () => {
+        reject(new Error(`Failed to get saved chord sheets: ${request.error?.message || 'Unknown error'}`));
+      };
       request.onsuccess = () => {
         const allRecords = request.result as StoredChordSheet[];
         const savedRecords = allRecords.filter(record => record.storage?.saved === true);

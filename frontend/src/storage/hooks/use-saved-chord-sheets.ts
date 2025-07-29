@@ -27,7 +27,7 @@ export function useSavedChordSheets() {
       // StoredChordSheet already has all the information we need, including path
       setChordSheets(storedChordSheets);
     } catch (error) {
-      console.error('Failed to load saved chord sheets from IndexedDB:', error);
+      console.error('[useSavedChordSheets] Failed to load saved chord sheets from IndexedDB:', error);
       setChordSheets([]);
     }
   }, []);
@@ -37,8 +37,5 @@ export function useSavedChordSheets() {
     refresh();
   }, [refresh]);
 
-  return { 
-    chordSheets, // StoredChordSheet[] - contains all info including path
-    refresh 
-  };
+  return { chordSheets, refresh };
 }
