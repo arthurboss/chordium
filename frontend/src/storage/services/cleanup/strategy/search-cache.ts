@@ -5,6 +5,7 @@
 import type { SearchCacheEntry } from '../../../types';
 import { isExpired } from '../../../core/ttl/validation';
 import type { CleanupStrategy } from './types';
+import { daysSince } from '../../../utils/time-constants';
 
 /**
  * Calculates cleanup priority for search cache entries
@@ -14,7 +15,7 @@ export function calculateSearchCacheCleanupPriority(item: SearchCacheEntry): Cle
   const reasons: string[] = [];
 
   // Recently cached items
-  const daysSinceCached = (Date.now() - item.timestamp) / (1000 * 60 * 60 * 24);
+  const daysSinceCached = daysSince(item.timestamp);
   if (daysSinceCached < 1) {
     priority += 30;
     reasons.push('cached today');

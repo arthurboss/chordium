@@ -1,7 +1,9 @@
 /**
  * Access tracking module barrel export
  * 
- * Provides clean interface for chord sheet access tracking persistence operations.
+ * Note: This module now re-exports from the main access tracking utilities
+ * to maintain a clean import path. The actual implementation is centralized
+ * in stores/chord-sheets/utils/access-tracking.
  */
 
-export { persistAccessUpdate } from "./persist-access-update";
+export { updateAccess } from "../../../stores/chord-sheets/utils/access-tracking";

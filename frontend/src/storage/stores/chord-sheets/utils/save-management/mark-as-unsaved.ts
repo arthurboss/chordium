@@ -7,6 +7,7 @@
 
 import type { StoredChordSheet } from "../../../../types/chord-sheet";
 import { calculateCacheExpiration } from "../ttl-constants";
+import { updateAccess } from "../access-tracking";
 
 /**
  * Unmarks a saved chord sheet (converts back to cached with TTL)
@@ -20,15 +21,15 @@ import { calculateCacheExpiration } from "../ttl-constants";
 export function markAsUnsaved(
   storedChordSheet: StoredChordSheet
 ): StoredChordSheet {
-  const now = Date.now();
+  // First update access time, then set unsaved status
+  const accessUpdated = updateAccess(storedChordSheet);
   
   return {
-    ...storedChordSheet,
+    ...accessUpdated,
     storage: {
-      ...storedChordSheet.storage,
+      ...accessUpdated.storage,
       saved: false,
-      expiresAt: calculateCacheExpiration(now),
-      lastAccessed: now,
+      expiresAt: calculateCacheExpiration(accessUpdated.storage.lastAccessed),
     },
   };
 }

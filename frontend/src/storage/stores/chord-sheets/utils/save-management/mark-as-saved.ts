@@ -6,6 +6,7 @@
  */
 
 import type { StoredChordSheet } from "../../../../types/chord-sheet";
+import { updateAccess } from "../access-tracking";
 
 /**
  * Marks a chord sheet as saved by user (never expires)
@@ -19,13 +20,15 @@ import type { StoredChordSheet } from "../../../../types/chord-sheet";
 export function markAsSaved(
   storedChordSheet: StoredChordSheet
 ): StoredChordSheet {
+  // First update access time, then set saved status
+  const accessUpdated = updateAccess(storedChordSheet);
+  
   return {
-    ...storedChordSheet,
+    ...accessUpdated,
     storage: {
-      ...storedChordSheet.storage,
+      ...accessUpdated.storage,
       saved: true,
       expiresAt: null, // Saved items never expire
-      lastAccessed: Date.now(), // Update access time when saving
     },
   };
 }

@@ -8,6 +8,7 @@
 import type { StoredChordSheet } from '../../../../types';
 import type { CleanupStrategy } from '../types';
 import { calculateAccessFrequencyPriority } from '../access-frequency';
+import { daysSince } from '../../../../utils/time-constants';
 
 /**
  * Strategy for cached chord sheets using LRU logic
@@ -28,7 +29,7 @@ export function calculateCachedChordSheetStrategy(item: StoredChordSheet): Clean
   const reasons: string[] = [];
 
   // LRU Logic: Recently accessed items get higher priority (kept longer)
-  const daysSinceLastAccess = (Date.now() - item.storage.lastAccessed) / (1000 * 60 * 60 * 24);
+  const daysSinceLastAccess = daysSince(item.storage.lastAccessed);
   
   if (daysSinceLastAccess < 1) {
     priority += 50;
