@@ -8,5 +8,5 @@ export * from "./cleanup";
 export { getChordSheetFromCache } from "./chord-sheets/cache-retrieval";
 export { getSavedChordSheet } from "./chord-sheets/saved-retrieval";
 
-// Chord sheet operations
+// Chord sheet management services
 export { deleteChordSheet } from "./delete-chord-sheet";

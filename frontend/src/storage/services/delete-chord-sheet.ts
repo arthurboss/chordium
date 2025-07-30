@@ -2,18 +2,19 @@
  * Delete chord sheet service
  */
 
-import type { Song } from '@chordium/types';
+import type { ChordSheet } from '@chordium/types';
+import type { ChordiumDBSchema } from '@/storage/types/schema';
 import { ChordSheetStore } from '@/storage/stores/chord-sheets/store';
 import { toast } from "@/hooks/use-toast";
 
 /**
  * Delete a chord sheet by path with user feedback
  * 
- * @param path - Song path to delete
- * @param title - Song title for user feedback
+ * @param path - Database key (path) for the chord sheet to delete
+ * @param title - Chord sheet title for user feedback
  * @returns Promise that resolves when deletion is complete
  */
-export async function deleteChordSheet(path: Song["path"], title: Song["title"]): Promise<void> {
+export async function deleteChordSheet(path: ChordiumDBSchema['chordSheets']['path'], title: ChordSheet["title"]): Promise<void> {
   try {
     const store = new ChordSheetStore();
     await store.delete(path);

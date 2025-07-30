@@ -5,8 +5,7 @@ import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { toast } from "@/hooks/use-toast";
-import { getSavedChordSheet } from "@/storage/services";
+import { getSavedChordSheet, deleteChordSheet } from "@/storage/services";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import type { Song, ChordSheet } from "@chordium/types";
 
@@ -21,6 +20,7 @@ const ChordViewer = () => {
 
   // Local state for chord sheet data
   const [chordSheet, setChordSheet] = useState<ChordSheet | null>(null);
+  const [chordSheetPath, setChordSheetPath] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,6 +38,7 @@ const ChordViewer = () => {
         const savedChordSheet = await getSavedChordSheet(path);
         if (savedChordSheet) {
           setChordSheet(savedChordSheet);
+          setChordSheetPath(path); // Store the path for delete operations
         } else {
           setError("Chord sheet not found in saved items");
         }
@@ -55,11 +56,14 @@ const ChordViewer = () => {
     navigate("/my-chord-sheets");
   };
 
-  const handleDelete = () => {
-    toast({
-      title: "Delete not implemented",
-      description: "Chord sheet deletion will be implemented with IndexedDB",
-    });
+  const handleDelete = async () => {
+    if (!chordSheet || !chordSheetPath) return;
+    
+    // Use the stored path (database key)
+    const path = chordSheetPath;
+    const title = chordSheet.title || 'Unknown song';
+    
+    await deleteChordSheet(path, title);
     navigate("/my-chord-sheets");
   };
 
