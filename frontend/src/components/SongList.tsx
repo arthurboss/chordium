@@ -1,9 +1,10 @@
 import type { Song } from "../types/song";
+import type { StoredChordSheet } from "@/storage/types";
 import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 
 interface SongListProps {
-  songs: Song[];
+  songs: StoredChordSheet[];
   onSongSelect: (song: Song) => void;
   onDeleteSong: (songPath: string) => void;
   onUploadClick: () => void;
@@ -25,19 +26,28 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, 
     <div ref={listRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
       {songs.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {[...songs].reverse().map((song, index) => (
-            <ResultCard
-              key={`${song.path}-${index}`}
-              icon="music"
-              title={song.title}
-              subtitle={song.artist}
-              onView={(path) => onSongSelect(song)}
-              onDelete={onDeleteSong}
-              path={song.path}
-              isDeletable={true}
-              song={song}
-            />
-          ))}
+          {[...songs].reverse().map((storedChordSheet, index) => {
+            // Extract Song fields for navigation (no conversion, just type projection)
+            const songForNavigation: Song = {
+              path: storedChordSheet.path,
+              title: storedChordSheet.title,
+              artist: storedChordSheet.artist
+            };
+            
+            return (
+              <ResultCard
+                key={`${storedChordSheet.path}-${index}`}
+                icon="music"
+                title={storedChordSheet.title}
+                subtitle={storedChordSheet.artist}
+                onView={() => onSongSelect(songForNavigation)}
+                onDelete={onDeleteSong}
+                path={storedChordSheet.path}
+                isDeletable={true}
+                song={songForNavigation}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-8">

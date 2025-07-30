@@ -5,23 +5,22 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchState } from "@/context/SearchStateContext";
 
 import { Song } from "../types/song";
+import type { StoredChordSheet } from "@/storage/types";
 import SongList from "./SongList";
 import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
+import { deleteChordSheet } from "@/storage/services";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-// TODO: Replace with IndexedDB implementation
-// import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  myChordSheets: Song[];
-  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
+  myChordSheets: StoredChordSheet[];
+  setMySongs: () => Promise<void>; // This is actually the refresh function
   selectedSong: Song | null;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
 }
@@ -129,15 +128,35 @@ const TabContainer = ({
   };
   
   const handleSaveUploadedChordSheet = (content: string, title: string) => {
-    handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
+    // NOTE: Save functionality will be implemented with IndexedDB
+    console.warn('Save functionality not yet implemented');
   };
   
   const handleChordSheetUpdate = (content: string) => {
-    handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
+    // NOTE: Update functionality will be implemented with IndexedDB
+    console.warn('Update functionality not yet implemented');
   };
   
-  const handleChordSheetDelete = (songPath: string) => {
-    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
+  const handleChordSheetDelete = async (songPath: string) => {
+    // Find the song for user feedback
+    const songToDelete = myChordSheets.find(song => song.path === songPath);
+    const songTitle = songToDelete?.title || 'Unknown song';
+    
+    try {
+      // Delete from IndexedDB using the service
+      await deleteChordSheet(songPath, songTitle);
+      
+      // Refresh the data from IndexedDB (this updates the UI)
+      await setMySongs();
+      
+      // Clear selection if the deleted song was selected
+      if (selectedSong?.path === songPath) {
+        setSelectedSong(null);
+      }
+    } catch (error) {
+      // Error handling and user feedback is done by the service
+      console.error('Delete operation failed:', error);
+    }
   };
 
   // Handle keyboard navigation for the tabs
@@ -203,8 +222,7 @@ const TabContainer = ({
             song={{
               song: selectedSong,
               chordSheet: {
-                // TODO: Replace with IndexedDB lookup
-                // unifiedChordSheetCache.getCachedChordSheet(selectedSong.artist, selectedSong.title) || 
+                // NOTE: Chord sheet content loading will be implemented with IndexedDB
                 title: selectedSong.title,
                 artist: selectedSong.artist,
                 songChords: '',

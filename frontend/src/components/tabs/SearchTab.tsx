@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Song } from "@/types/song";
+import type { StoredChordSheet } from "@/storage/types";
 import type { Artist } from "@/types/artist";
 import { useSearchState } from "@/context/SearchStateContext";
 import SongViewer from "@/components/SongViewer";
@@ -18,8 +19,17 @@ interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  myChordSheets: Song[];
+  myChordSheets: StoredChordSheet[];
 }
+
+// Helper function to extract Song metadata for search deduplication
+const extractSongMetadata = (chordSheets: StoredChordSheet[]): Song[] => {
+  return chordSheets.map(chordSheet => ({
+    path: chordSheet.path,
+    title: chordSheet.title,
+    artist: chordSheet.artist
+  }));
+};
 
 // Local state for selectedSong (for viewing a song from search results)
 
@@ -251,7 +261,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
                 setMySongs={setMySongs}
                 setActiveTab={setActiveTab}
                 setSelectedSong={handleSongSelect}
-                myChordSheets={myChordSheets}
+                myChordSheets={extractSongMetadata(myChordSheets)}
                 artist={hasSearched ? submittedArtist : searchState.artist}
                 song={hasSearched ? submittedSong : searchState.song}
                 filterArtist={activeArtist ? submittedArtist : artistInput}

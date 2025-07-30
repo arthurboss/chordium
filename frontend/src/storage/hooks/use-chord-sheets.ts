@@ -7,42 +7,26 @@
  * - NO localStorage dependencies - pure IndexedDB only
  */
 
-import { useState, useEffect, useCallback } from "react";
-import { Song } from "@/types/song";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { StoredChordSheet } from "@/storage/types";
 import { SampleSongsService, indexedDBStorage } from "@/storage/services/sample-songs";
 import { ChordSheetStore } from "@/storage/stores/chord-sheets/store";
-
-/**
- * Convert StoredChordSheet to Song for UI compatibility
- */
-function storedChordSheetToSong(storedChordSheet: StoredChordSheet): Song {
-  return {
-    artist: storedChordSheet.artist,
-    title: storedChordSheet.title,
-    path: `${storedChordSheet.artist.toLowerCase().replace(/\s+/g, '-')}/${storedChordSheet.title.toLowerCase().replace(/\s+/g, '-')}`,
-    songKey: storedChordSheet.songKey,
-    guitarTuning: storedChordSheet.guitarTuning,
-    guitarCapo: storedChordSheet.guitarCapo
-  };
-}
 
 /**
  * Pure IndexedDB hook for chord sheets management
  * Handles both sample loading and My Chord Sheets
  */
 export function useChordSheets() {
-  const [myChordSheets, setMyChordSheets] = useState<Song[]>([]);
+  const [myChordSheets, setMyChordSheets] = useState<StoredChordSheet[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const chordSheetStore = new ChordSheetStore();
+  const chordSheetStore = useMemo(() => new ChordSheetStore(), []);
 
   const loadMyChordSheets = useCallback(async () => {
     try {
       const savedChordSheets = await chordSheetStore.getAllSaved();
-      const songsFromChordSheets = savedChordSheets.map(storedChordSheetToSong);
-      setMyChordSheets(songsFromChordSheets);
+      setMyChordSheets(savedChordSheets);
     } catch (err) {
       console.error('Failed to load My Chord Sheets from IndexedDB:', err);
       setError(err as Error);
