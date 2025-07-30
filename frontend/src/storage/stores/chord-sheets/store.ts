@@ -8,6 +8,7 @@ import {
   getChordSheet,
   getAllSavedChordSheets,
   storeChordSheet,
+  deleteChordSheet,
   deleteAllChordSheets,
 } from "./operations";
 
