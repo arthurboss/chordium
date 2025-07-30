@@ -6,7 +6,7 @@ export { IndexedDBStorage, indexedDBStorage } from './indexeddb-storage';
 
 // Types
 export type { IChordSheetStorage } from './types';
-export type { SampleChordSheetRecord } from './data-loader';
+export type { SampleChordSheetRecord } from './data-loader.types';
 
 // Utilities (for testing and advanced usage)
 export { isDevelopmentMode } from './environment';

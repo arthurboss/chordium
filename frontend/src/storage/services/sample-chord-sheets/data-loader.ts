@@ -7,14 +7,7 @@
  */
 
 import type { ChordSheet } from '@chordium/types';
-
-/**
- * Sample chord sheet with associated path for storage
- */
-export interface SampleChordSheetRecord {
-  path: string;
-  chordSheet: ChordSheet;
-}
+import type { SampleChordSheetRecord } from './data-loader.types';
 
 /**
  * Load sample chord sheet data with proper paths

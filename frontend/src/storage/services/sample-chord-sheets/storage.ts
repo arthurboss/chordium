@@ -2,7 +2,7 @@
  * Sample chord sheets storage logic
  */
 
-import type { SampleChordSheetRecord } from './data-loader';
+import type { SampleChordSheetRecord } from './data-loader.types';
 import type { IChordSheetStorage } from './types';
 
 /**
@@ -13,9 +13,6 @@ export const storeSampleChordSheets = async (
   storage: IChordSheetStorage
 ): Promise<void> => {
   for (const sample of samples) {
-    await storage.store(sample.path, sample.chordSheet, {
-      saved: true,
-      source: 'sample-dev'
-    });
+    await storage.store(sample.path, sample.chordSheet, true); // Sample chord sheets are saved
   }
 };

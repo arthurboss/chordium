@@ -27,9 +27,9 @@ export class IndexedDBStorage implements IChordSheetStorage {
   }
 
   /**
-   * Get all saved chord sheets from IndexedDB
+   * Get all saved chord sheets
    * 
-   * @returns Promise resolving to array of saved StoredChordSheet objects
+   * @returns Promise resolving to array of saved chord sheets
    */
   async getAllSaved(): Promise<StoredChordSheet[]> {
     return this.chordSheetStore.getAllSaved();
@@ -40,18 +40,18 @@ export class IndexedDBStorage implements IChordSheetStorage {
    * 
    * @param path - The storage path (Song.path format)
    * @param chordSheet - The chord sheet data to store
-   * @param metadata - Storage metadata including saved status
+   * @param saved - Whether this is a user-saved chord sheet
    * @returns Promise that resolves when storage is complete
    */
   async store(
     path: string,
     chordSheet: ChordSheet,
-    metadata: { saved: boolean; source?: string }
+    saved: boolean
   ): Promise<void> {
     // Delegate to the chord sheet store with correct parameter ordering
-    return this.chordSheetStore.store(chordSheet, metadata, path);
+    return this.chordSheetStore.store(chordSheet, saved, path);
   }
 }
 
-// Export singleton for use in sample chord sheets service
+// Export singleton instance for easy use
 export const indexedDBStorage = new IndexedDBStorage();

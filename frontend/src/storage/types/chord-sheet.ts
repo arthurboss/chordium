@@ -26,7 +26,5 @@ export interface StoredChordSheet extends ChordSheet {
     version: number;
     /** TTL - null for saved items (never expire), timestamp for cached items */
     expiresAt: number | null;
-    /** Source identifier for tracking where chord sheet came from */
-    source?: string;
   };
 }

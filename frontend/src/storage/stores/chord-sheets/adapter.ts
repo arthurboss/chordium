@@ -23,15 +23,15 @@ export class ChordSheetStorageAdapter implements IChordSheetStorage {
   }
 
   /**
-   * Store a chord sheet with metadata
+   * Store a chord sheet with saved flag
    */
   async store(
     path: string,
     chordSheet: ChordSheet,
-    metadata: { saved: boolean; source?: string }
+    saved: boolean
   ): Promise<void> {
     // Pass the path to the store method as required by the signature
-    return this.chordSheetStore.store(chordSheet, metadata, path);
+    return this.chordSheetStore.store(chordSheet, saved, path);
   }
 }
 

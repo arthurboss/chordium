@@ -28,10 +28,10 @@ export class ChordSheetStore {
    */
   async store(
     chordSheet: ChordSheet,
-    metadata: { saved: boolean; source?: string },
+    saved: boolean,
     path: Song["path"]
   ): Promise<void> {
-    return storeChordSheet(chordSheet, metadata, path);
+    return storeChordSheet(chordSheet, saved, path);
   }
 
   /**
