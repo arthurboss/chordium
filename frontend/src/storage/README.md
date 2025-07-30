@@ -1,203 +1,75 @@
 # Storage System
 
-IndexedDB-based storage for Chordium PWA.
+Offline-first storage for Chordium that keeps your chord sheets available without internet.
 
-## Why IndexedDB?
+## What It Does
 
-- **PWA Ready**: Works offline, essential for chord sheet access
-- **Large Storage**: 150MB+ capacity vs localStorage's 5-10MB limits
-- **Structured**: Proper database with indexes and efficient queries
-- **Performance**: Async operations with background cleanup
-- **Smart Management**: Intelligent TTL and priority-based cleanup
+The storage system ensures users can access their chord sheets anytime, even offline. It intelligently manages limited browser storage to keep the most important content available.
 
-## Database: `Chordium` (Version 1)
+## Key Benefits
 
-**Object Stores:**
+- **Always Available**: Chord sheets work offline once loaded
+- **Large Capacity**: Stores 500+ chord sheets (150MB total)
+- **Smart Management**: Automatically removes old, unused content to make room for new saves
+- **Respects User Intent**: Never removes chord sheets you explicitly saved
 
-- `chordSheets` - Individual chord sheet storage with metadata
-- `searchCache` - Search results with 30-day TTL
+## How It Works
 
-**Storage Limits (IndexedDB Optimized):**
+### User Protection
+- **Saved chord sheets are permanent** - only you can delete them
+- Recently viewed songs stay available longer
+- Frequently accessed content gets priority
+- Old search results and rarely used cache gets cleaned up first
 
-- Search Cache: 1000 items, 50MB
-- Chord Sheets: 500 items, 100MB
-- Total Target: 150MB with 80% cleanup threshold
+### Storage Limits
+- **Chord Sheets**: Up to 500 saved sheets
+- **Search Cache**: Up to 1,000 recent searches (30-day expiration)
+- **Total Capacity**: 150MB (equivalent to thousands of chord sheets)
 
-## Architecture
+When storage gets full (80% capacity), the system automatically removes:
+1. Expired search results first
+2. Old, rarely accessed cached content
+3. Never touches your saved chord sheets
 
-### Core Infrastructure ✅
+## For Users
 
-```text
-core/
-├── config/        # Database configuration
-├── ttl/          # TTL policies and utilities
-└── schema.ts     # Aggregated schema exports
-```
+### What Gets Saved Forever
+- Any chord sheet you mark as "saved"
+- These persist across browser sessions and devices (if using the same browser)
 
-### IndexedDB Implementation ✅
+### What Gets Cleaned Up
+- Search results older than 30 days
+- Chord sheets you viewed but didn't save (after being unused for weeks)
+- Temporary cache files
 
-```text
-stores/chord-sheets/
-├── store.ts                    # CRUD operations for chord sheet storage
-├── database/connection.ts      # Database connection with singleton pattern
-└── utils/stored-chord-sheet-factory.ts  # Factory for creating StoredChordSheet objects
+### Storage Indicators
+Users can see:
+- How many chord sheets they have saved
+- Storage usage levels
+- When cleanup happens (transparent, non-disruptive)
 
-services/sample-songs/
-├── index.ts                    # Main service exports
-├── loader.ts                   # Sample songs loading orchestrator
-├── data-loader.ts              # Dynamic sample data imports
-├── storage.ts                  # Sample songs storage logic
-├── indexeddb-storage.ts        # IndexedDB storage implementation
-├── types.ts                    # Service type definitions
-├── environment.ts              # Development mode detection
-├── duplicate-prevention.ts     # Prevents loading when user has data
-└── logging.ts                  # Service logging utilities
-```
+## Technical Implementation
 
-### Smart Cleanup System ✅
+### Technology Choice
+Uses **IndexedDB** (browser's built-in database) because:
+- Works offline with large storage capacity (150MB vs 5MB for basic storage)
+- Structured database with efficient searching
+- Handles thousands of chord sheets without performance issues
 
-```text
-services/cleanup/
-├── strategy/     # Priority calculation (protects saved items)
-├── monitor/      # Storage usage monitoring
-├── service/      # Size estimation and result handling
-└── triggers/     # Automated cleanup triggers
-```
+### Core Components
+- **Chord Sheet Storage**: Saves user's chord sheets with metadata (title, artist, when last accessed)
+- **Search Cache**: Temporarily stores search results to avoid re-fetching
+- **Smart Cleanup**: Automatically manages storage space without user intervention
+- **Offline Support**: Everything works without internet connection
 
-### Type System ✅
-
-```text
-types/
-├── chord-sheet.ts    # StoredChordSheet interface
-├── search-cache.ts   # SearchCacheEntry interface  
-└── schema.ts         # Database schema definition
-```
-
-### Utilities ✅
-
-```text
-utils/keys/
-├── formats.ts        # Key format definitions
-└── validation.ts     # Key validation functions
-```
-
-## Key Features
-
-### **User Intent Protection**
-
-- **CRITICAL RULE**: Saved chord sheets (`saved: true`) are NEVER automatically removed
-- Users must manually delete saved items
-- Smart cleanup respects user preferences
-
-### **Priority-Based Cleanup with LRU**
-
+### Developer Integration
 ```typescript
-// High Priority (kept longer)
-- Saved items (never removed)
-- Recently accessed items (storage.lastAccessed field)
-- Frequently used items (storage.accessCount field)
+// Save a chord sheet permanently
+await store.store(chordSheet, { saved: true });
 
-// Low Priority (removed first)  
-- Old, rarely accessed cache (based on storage.lastAccessed, not storage.timestamp)
-- Expired search results
+// Get all user's saved sheets
+const savedSheets = await store.getAllSaved();
+
+// Check if storage needs cleanup
+const needsCleanup = await monitor.checkStorageUsage();
 ```
-
-**Key Improvement**: Uses `storage.lastAccessed` timestamp instead of `storage.timestamp` (creation time) for proper LRU eviction. This ensures recently used items are kept even if they were cached long ago.
-
-### **Consistent Key Format**
-
-```typescript
-// All storage types use 'path' for consistency with domain objects
-// Chord sheets: "artist-path/song-path" (from Song.path)
-// Artist search: "artist-path" (from Artist.path)  
-// Song search: "artist-path/song-path" (from Song.path)
-// Note: Path is IndexedDB key only, not duplicated in stored value
-```
-
-### **Data Model**
-
-- **Optimized Structure**: StoredChordSheet extends ChordSheet with organized storage metadata
-- **Direct Access**: Content fields accessible directly (`record.songChords`, `record.title`)
-- **Organized Metadata**: Storage fields grouped under `storage` namespace (`record.storage.saved`)
-- **Domain Alignment**: Perfect alignment with @chordium/types ChordSheet interface
-- **Efficient Indexing**: Indexes on `artist`, `title`, and `storage.*` fields
-- **LRU Tracking**: `storage.lastAccessed` field enables proper cache eviction based on actual usage
-- **No Redundancy**: Eliminated duplicate path storage (IndexedDB key provides this)
-
-## Usage (Production Ready)
-
-```typescript
-import { useSampleSongs } from "@/storage/hooks/use-sample-songs";
-import { useMyChordSheetsIndexedDB } from "@/hooks/use-my-chord-sheets-indexeddb";
-import { ChordSheetStore } from "@/storage/stores/chord-sheets/store";
-
-// Sample songs loading (development mode)
-const { isLoading, isLoaded, error } = useSampleSongs();
-
-// Chord sheet management
-const { 
-  myChordSheetsAsSongs, 
-  refreshMyChordSheets 
-} = useMyChordSheetsIndexedDB();
-
-// Direct IndexedDB operations
-const store = new ChordSheetStore();
-await store.store(chordSheet, { saved: true }, 'artist/song-path');
-const saved = await store.getAllSaved();
-
-// Direct content access (optimized structure)
-const chords = record.songChords;        // ✅ Direct access
-const title = record.title;             // ✅ Clean access  
-const artist = record.artist;           // ✅ Simple access
-
-// Organized storage metadata
-const isSaved = record.storage.saved;           // ✅ Clear intent
-const lastAccessed = record.storage.lastAccessed; // ✅ LRU tracking
-
-// Smart cleanup (respects saved items)
-const result = await cleanup.performCleanup();
-
-// TTL utilities
-const expired = isExpired(item.storage.expiresAt);
-const expiresAt = calculateExpirationTime(TTL_CONFIG.CHORD_SHEET_UNSAVED);
-
-// Key utilities
-const isValid = validateKeyFormat(key, "chordSheet");
-```
-
-## Code Structure
-
-- **Modular Design**: Each file handles a specific responsibility
-- **Clean APIs**: Barrel exports provide simple import paths
-- **Type Safety**: Full TypeScript coverage with domain type integration
-
-## Status
-
-✅ **Phase 1**: Setup & Discovery  
-✅ **Phase 2**: Core Infrastructure (42 modular files)  
-✅ **Phase 3**: Structure Optimization (flattened StoredChordSheet with organized metadata)
-✅ **Phase 4**: IndexedDB Implementation (Production Ready)
-✅ **Phase 5**: My Chord Sheets Feature Complete (July 30, 2025)
-
-**Current**: Complete My Chord Sheets functionality with full IndexedDB integration. Users can view saved chord sheets with complete metadata and chord content. Core database layer, CRUD operations, sample song loading, and chord viewing all working seamlessly.
-
-### Completed Features
-
-- **✅ IndexedDB Database Layer**: Full CRUD operations with singleton connection pattern
-- **✅ Sample Songs System**: Automatic loading in development mode with duplicate prevention  
-- **✅ Chord Sheet Management**: Complete storage and retrieval of user's saved chord sheets
-- **✅ My Chord Sheets Viewing**: Full end-to-end chord sheet viewing with content display
-- **✅ ChordViewer Integration**: Pure IndexedDB implementation for individual chord sheet viewing
-- **✅ Type Safety**: Full TypeScript coverage with domain type integration
-- **✅ Error Handling**: Comprehensive error handling and transaction management
-- **✅ Performance Optimization**: Singleton pattern prevents database connection conflicts
-
-### Ready for Production
-
-- IndexedDB database successfully created and managed
-- Sample songs automatically load in development mode
-- User chord sheets persist across browser sessions  
-- **Complete My Chord Sheets flow working**: Sample songs → list view → individual chord viewing
-- **Full content display**: Metadata (title, artist, key, tuning, capo) and complete chord content
-- Clean, professional codebase with all debug code removed
-- Comprehensive error handling and type safety
