@@ -5,8 +5,8 @@ import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { getSavedChordSheet } from "@/storage/services";
-import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { getChordSheet, deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
 import { toast } from "@/hooks/use-toast";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import type { Song, ChordSheet } from "@chordium/types";
@@ -37,9 +37,14 @@ const ChordViewer = () => {
         return;
       }
       try {
-        const savedChordSheet = await getSavedChordSheet(path);
-        if (savedChordSheet) {
-          setChordSheet(savedChordSheet);
+        // Get chord sheet from storage using pure operation
+        const storedChordSheet = await getChordSheet(path);
+        
+        // Check if it exists and is saved (business logic in component)
+        if (storedChordSheet?.storage?.saved) {
+          // Convert to domain format and set
+          const domainChordSheet = storedToChordSheet(storedChordSheet);
+          setChordSheet(domainChordSheet);
           setChordSheetPath(path); // Store the path for delete operations
         } else {
           setError("Chord sheet not found in saved items");

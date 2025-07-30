@@ -8,7 +8,8 @@
 
 import { useState, useEffect } from 'react';
 import type { ChordSheet } from '@chordium/types';
-import { getSavedChordSheet } from '@/storage/services';
+import { getChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
 import SongViewer from '@/components/SongViewer';
 import type { MyChordSheetsViewerProps } from './types';
 
@@ -27,11 +28,14 @@ export function MyChordSheetsViewer(props: Readonly<MyChordSheetsViewerProps>) {
         setIsLoading(true);
         setError(null);
 
-        // Only load from IndexedDB saved chord sheets
-        const savedChordSheet = await getSavedChordSheet(selectedSong.path);
+        // Only load from IndexedDB saved chord sheets - using pure operation
+        const storedChordSheet = await getChordSheet(selectedSong.path);
         
-        if (savedChordSheet) {
-          setChordSheet(savedChordSheet);
+        // Check if it exists and is saved (business logic in component)
+        if (storedChordSheet?.storage?.saved) {
+          // Convert to domain format
+          const domainChordSheet = storedToChordSheet(storedChordSheet);
+          setChordSheet(domainChordSheet);
         } else {
           // This shouldn't happen if UI is properly filtered, but handle gracefully
           setError('Chord sheet not found in saved items');

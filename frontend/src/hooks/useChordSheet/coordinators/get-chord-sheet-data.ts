@@ -1,7 +1,8 @@
 import { ChordSheet } from '@/types/chordSheet';
 import type { Song } from '@chordium/types';
 import { ChordSheetStore } from '@/storage/stores/chord-sheets/store';
-import { getChordSheetFromCache } from '@/storage/services';
+import { getChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
 import { fetchChordSheetFromBackend } from './fetch-chord-sheet-from-backend';
 
 /**
@@ -15,10 +16,11 @@ export async function getChordSheetData(
   path: Song['path'],
   fetchUrl: string
 ): Promise<ChordSheet | null> {
-  // Step 1: Check IndexedDB for saved chord sheets first
-  const storedChordSheet = await getChordSheetFromCache(path);
+  // Step 1: Check IndexedDB for any chord sheets first (cache or saved)
+  const storedChordSheet = await getChordSheet(path);
   if (storedChordSheet) {
-    return storedChordSheet;
+    // Convert to domain format and return
+    return storedToChordSheet(storedChordSheet);
   }
   
   // Step 2: Not in IndexedDB, fetch from backend
