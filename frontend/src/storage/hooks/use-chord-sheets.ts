@@ -41,7 +41,7 @@ export function useChordSheets(): UseChordSheetsResult {
   const savedChordSheets = useSavedChordSheets();
   const sampleLoading = useSampleLoading();
   
-  // Orchestrate initialization
+  // Coordinate sample loading and saved chord sheets management
   useChordSheetsInitialization({ sampleLoading, savedChordSheets });
   
   // Combine loading states for unified experience

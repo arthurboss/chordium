@@ -15,6 +15,11 @@ import type { CreateStoredChordSheetOptions } from "./create-stored-chord-sheet.
  * 
  * Initializes both timestamp and lastAccessed to the same value because
  * creation represents the first access, ensuring accurate LRU tracking.
+ * 
+ * @param chordSheet - The ChordSheet data to store
+ * @param path - The unique path identifier for the chord sheet
+ * @param options - Storage options including saved status and expiration
+ * @returns StoredChordSheet ready for IndexedDB storage
  */
 export function createStoredChordSheet(
   chordSheet: ChordSheet,
@@ -35,9 +40,9 @@ export function createStoredChordSheet(
     storage: {
       saved,
       timestamp: now, // When first stored
-      lastAccessed: now, // When first accessed (same as storage for new items)
-      accessCount: 1, // First access
-      version: 1, // Schema version
+      lastAccessed: now, // Same as storage time for new items
+      accessCount: 1,
+      version: 1,
       expiresAt: options.expiresAt ?? (saved ? null : calculateCacheExpiration(now)),
     },
   };

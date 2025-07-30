@@ -6,6 +6,8 @@ import { getDatabase } from '../stores/chord-sheets/database/connection';
  * 
  * This prevents race conditions where UI loads faster than database initialization,
  * avoiding the need for retry logic and UI flashing.
+ * 
+ * @returns Object with isReady boolean and error state
  */
 export function useDatabaseReady() {
   const [isReady, setIsReady] = useState(false);

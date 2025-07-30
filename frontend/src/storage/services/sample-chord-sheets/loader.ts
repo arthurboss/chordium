@@ -40,7 +40,7 @@ export class SampleChordSheetsService {
 
       logLoadingStart();
       
-      // Load and store sample data
+      // Populate storage with development samples
       const samples = await loadSampleData();
       await storeSampleChordSheets(samples, this.storage);
       

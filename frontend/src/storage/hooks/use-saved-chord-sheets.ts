@@ -20,7 +20,7 @@ export function useSavedChordSheets() {
 
   const refresh = useCallback(async () => {
     try {
-      // Get saved chord sheets from IndexedDB using the direct store
+      // Direct store access for better performance than abstract layer
       const chordSheetStore = new ChordSheetStore();
       const storedChordSheets = await chordSheetStore.getAllSaved();
       
@@ -33,7 +33,7 @@ export function useSavedChordSheets() {
   }, []);
 
   useEffect(() => {
-    // Load saved chord sheets on mount
+    // Initialize saved chord sheets from storage on component mount
     refresh();
   }, [refresh]);
 
