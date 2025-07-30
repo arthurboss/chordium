@@ -30,11 +30,9 @@ export class ChordSheetStorageAdapter implements IChordSheetStorage {
     chordSheet: ChordSheet,
     saved: boolean
   ): Promise<void> {
-    // Pass the path to the store method as required by the signature
     return this.chordSheetStore.store(chordSheet, saved, path);
   }
 }
 
-// Export singleton instances for easy use
 export const chordSheetStore = new ChordSheetStore();
 export const chordSheetStorage = new ChordSheetStorageAdapter(chordSheetStore);

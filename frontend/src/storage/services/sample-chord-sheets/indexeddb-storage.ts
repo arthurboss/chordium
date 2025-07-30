@@ -48,10 +48,8 @@ export class IndexedDBStorage implements IChordSheetStorage {
     chordSheet: ChordSheet,
     saved: boolean
   ): Promise<void> {
-    // Delegate to the chord sheet store with correct parameter ordering
     return this.chordSheetStore.store(chordSheet, saved, path);
   }
 }
 
-// Export singleton instance for easy use
 export const indexedDBStorage = new IndexedDBStorage();

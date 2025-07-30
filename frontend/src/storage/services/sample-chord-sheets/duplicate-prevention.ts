@@ -17,13 +17,11 @@ import type { IChordSheetStorage } from './types';
 export const shouldLoadSamples = async (
   storage: IChordSheetStorage
 ): Promise<boolean> => {
-  // Only load samples in development
   if (process.env.NODE_ENV !== 'development') {
     return false;
   }
 
   try {
-    // If any chord sheets exist, assume samples are already loaded
     const existingSheets = await storage.getAllSaved();
     return existingSheets.length === 0;
   } catch (error) {

@@ -38,7 +38,6 @@ export function useSampleLoadingEffect(actions: SampleLoadingActions): void {
         const sampleChordSheetsService = new SampleChordSheetsService(indexedDBStorage);
         await sampleChordSheetsService.loadSampleChordSheets();
         
-        // Mark as loaded in this session
         samplesLoadedInSession = true;
         setIsLoaded(true);
       } catch (err) {

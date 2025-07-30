@@ -33,14 +33,13 @@ export function createStoredChordSheet(
     // Inherit ChordSheet fields directly
     ...chordSheet,
     
-    // Add path for IndexedDB key (redundant but required for UI compatibility)
     path,
     
     // Storage metadata
     storage: {
       saved,
-      timestamp: now, // When first stored
-      lastAccessed: now, // Same as storage time for new items
+      timestamp: now,
+      lastAccessed: now,
       accessCount: 1,
       version: 1,
       expiresAt: options.expiresAt ?? (saved ? null : calculateCacheExpiration(now)),

@@ -24,7 +24,6 @@ export function useSavedChordSheets() {
       const chordSheetStore = new ChordSheetStore();
       const storedChordSheets = await chordSheetStore.getAllSaved();
       
-      // StoredChordSheet already has all the information we need, including path
       setChordSheets(storedChordSheets);
     } catch (error) {
       console.error('[useSavedChordSheets] Failed to load saved chord sheets from IndexedDB:', error);
@@ -33,7 +32,6 @@ export function useSavedChordSheets() {
   }, []);
 
   useEffect(() => {
-    // Initialize saved chord sheets from storage on component mount
     refresh();
   }, [refresh]);
 
