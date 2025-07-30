@@ -5,6 +5,7 @@
 
 import type { StoredChordSheet } from '../../../types';
 import type { CleanupStrategy } from './types';
+import { calculateAccessFrequencyPriority } from './access-frequency';
 
 /**
  * Calculates cleanup priority for a chord sheet
@@ -50,16 +51,11 @@ function calculateUnsavedChordSheetPriority(item: StoredChordSheet): CleanupStra
   }
   // Items not accessed in 30+ days get priority 0 (first to be removed)
 
-  // Access frequency bonus: Frequently used items get higher priority
-  if (item.storage.accessCount > 10) {
-    priority += 20;
-    reasons.push('frequently used');
-  } else if (item.storage.accessCount > 5) {
-    priority += 10;
-    reasons.push('regularly used');
-  } else if (item.storage.accessCount > 2) {
-    priority += 5;
-    reasons.push('multiple uses');
+  // Access frequency bonus: Use shared utility
+  const accessFrequency = calculateAccessFrequencyPriority(item.storage.accessCount);
+  priority += accessFrequency.priority;
+  if (accessFrequency.reason) {
+    reasons.push(accessFrequency.reason);
   }
 
   return {
