@@ -84,11 +84,13 @@ npm run dev:be
 ## 🧪 Testing
 
 ### Run All Tests
+
 ```bash
 npm run test
 ```
 
 ### Run Individual Test Suites
+
 ```bash
 # Frontend tests
 npm run test:fe
@@ -101,6 +103,7 @@ npm run test:watch
 ```
 
 ### End-to-End Tests
+
 ```bash
 # Run Cypress tests
 npm run test:e2e
@@ -109,6 +112,7 @@ npm run test:e2e
 ## 🔧 Code Quality
 
 ### Linting
+
 ```bash
 # Lint all code
 npm run lint
@@ -122,6 +126,7 @@ npm run lint:be
 ```
 
 ### Type Checking
+
 ```bash
 # Frontend type checking
 cd frontend && npm run lint:ts
@@ -150,6 +155,10 @@ npm run build:be
 - **Check:** Run `npm run check:fixtures` to ensure no duplicates
 
 ## 🎯 Development Guidelines
+
+### Code Standards
+
+**📋 For detailed coding standards, see [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md)**
 
 ### Code Style
 
@@ -228,11 +237,13 @@ When reporting issues, please include:
 ## 🚀 Deployment
 
 ### Frontend
+
 - Built with Vite
 - Optimized for production
 - Deployed to static hosting
 
 ### Backend
+
 - Node.js Express server
 - Requires environment variables
 - Deployed to Node.js hosting
@@ -243,4 +254,4 @@ When reporting issues, please include:
 - Search existing issues
 - Create a new issue with detailed information
 
-Thank you for contributing to Chordium! 🎸 
+Thank you for contributing to Chordium! 🎸
