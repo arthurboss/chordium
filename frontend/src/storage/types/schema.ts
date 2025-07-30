@@ -48,7 +48,3 @@ export interface ChordiumDBSchema {
     };
   };
 }
-
-/** Type exports for convenience */
-export type ChordSheetStore = ChordiumDBSchema['chordSheets'];
-export type SearchCacheStore = ChordiumDBSchema['searchCache'];

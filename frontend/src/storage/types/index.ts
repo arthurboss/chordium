@@ -5,8 +5,4 @@
 
 export type { StoredChordSheet } from "./chord-sheet";
 export type { SearchCacheEntry } from "./search-cache";
-export type {
-  ChordiumDBSchema,
-  ChordSheetStore,
-  SearchCacheStore,
-} from "./schema";
+export type { ChordiumDBSchema } from "./schema";
