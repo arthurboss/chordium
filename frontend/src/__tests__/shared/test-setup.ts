@@ -28,8 +28,8 @@ export const mockLocalStorage = (() => {
 })();
 
 /**
- * Test songs based on the actual sample songs in shared/fixtures/chord-sheet/
- * These mirror the real songs to ensure tests work with actual data
+ * Test chord sheets based on the actual sample chord sheets in shared/fixtures/chord-sheet/
+ * These mirror the real chord sheets to ensure tests work with actual data
  */
 export const TEST_SONGS: ChordSheet[] = [
   {

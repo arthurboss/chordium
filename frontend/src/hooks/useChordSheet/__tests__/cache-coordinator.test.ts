@@ -36,7 +36,7 @@ describe('CacheCoordinator', () => {
     vi.clearAllMocks();
     cacheCoordinator = new CacheCoordinator();
     
-    // Load real sample songs from shared test setup
+    // Load real sample chord sheets from shared test setup
     const hotelCalifornia = getTestSong(1); // Hotel California
     const wonderwall = getTestSong(0); // Wonderwall
     

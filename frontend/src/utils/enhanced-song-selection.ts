@@ -17,7 +17,7 @@ export interface EnhancedSongSelectionReturn {
 
 /**
  * Enhanced song selection hook that checks for duplicates in My Chord Sheets
- * before navigating to a song. Works for both search results and sample songs.
+ * before navigating to a song. Works for both search results and sample chord sheets.
  */
 export function useEnhancedSongSelection({
   navigate,

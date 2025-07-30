@@ -1,7 +1,7 @@
 /**
- * IndexedDB storage implementation for sample songs service
+ * IndexedDB storage implementation for sample chord sheets service
  * 
- * Provides a clean interface for the sample songs service to work with IndexedDB
+ * Provides a clean interface for the sample chord sheets service to work with IndexedDB
  * storage. Implements the IChordSheetStorage interface using the chord sheets
  * store. This is the pure IndexedDB implementation without any localStorage
  * dependencies.
@@ -16,8 +16,8 @@ import { ChordSheetStore } from '../../stores/chord-sheets/store';
  * IndexedDB implementation of chord sheet storage
  * 
  * Wraps the ChordSheetStore to provide the interface expected by the sample
- * songs service. Handles the parameter ordering and provides a clean API
- * for the sample songs loading logic.
+ * chord sheets service. Handles the parameter ordering and provides a clean API
+ * for the sample chord sheets loading logic.
  */
 export class IndexedDBStorage implements IChordSheetStorage {
   private readonly chordSheetStore: ChordSheetStore;
@@ -53,5 +53,5 @@ export class IndexedDBStorage implements IChordSheetStorage {
   }
 }
 
-// Export singleton for use in sample songs service
+// Export singleton for use in sample chord sheets service
 export const indexedDBStorage = new IndexedDBStorage();

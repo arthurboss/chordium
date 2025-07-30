@@ -6,7 +6,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
   });
 
   it('should handle sample song selection with deduplication', () => {
-    // 1. First, verify that sample songs are loaded in "My Chord Sheets"
+    // 1. First, verify that sample chord sheets are loaded in "My Chord Sheets"
     cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('.song-card, [data-cy="song-card"]').should('have.length.at.least', 1);
     
@@ -40,7 +40,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
   });
 
   it('should handle navigation between tabs correctly', () => {
-    // 1. Start with sample songs in My Chord Sheets
+    // 1. Start with sample chord sheets in My Chord Sheets
     cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('body').should(($body) => {
       expect($body.text()).to.satisfy((text: string) => 
@@ -57,7 +57,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     cy.get('input[placeholder*="artist" i], input[name*="artist" i]').first().should('be.visible');
     cy.get('input[placeholder*="song" i], input[name*="song" i]').first().should('be.visible');
     
-    // 4. The test should verify that sample songs still appear and behave correctly
+    // 4. The test should verify that sample chord sheets still appear and behave correctly
     cy.get('[data-cy="tab-my-chord-sheets"]').click();
     cy.get('body').should(($body) => {
       expect($body.text()).to.satisfy((text: string) => 

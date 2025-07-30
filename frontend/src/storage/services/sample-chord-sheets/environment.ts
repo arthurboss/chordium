@@ -1,5 +1,5 @@
 /**
- * Environment detection utilities for sample songs
+ * Environment detection utilities for sample chord sheets
  */
 
 /**

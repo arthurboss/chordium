@@ -1,11 +1,11 @@
 /**
- * Debug version of the IndexedDB sample songs hook with logging
+ * Debug version of the IndexedDB sample chord sheets hook with logging
  * 
- * This helps us understand what's happening with the sample songs loading
+ * This helps us understand what's happening with the sample chord sheets loading
  */
 
 import { useState, useEffect } from "react";
-import { SampleSongsService, indexedDBStorage } from "@/storage/services/sample-songs";
+import { SampleChordSheetsService, indexedDBStorage } from "@/storage/services/sample-chord-sheets";
 
 export function useDebugIndexedDB() {
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
@@ -28,11 +28,11 @@ export function useDebugIndexedDB() {
           logs.push(`  ${index + 1}. ${song.artist} - ${song.title} (saved: ${song.storage.saved})`);
         });
         
-        // Test sample songs service
-        logs.push(`🎵 Testing sample songs service...`);
-        const sampleSongsService = new SampleSongsService(indexedDBStorage);
-        await sampleSongsService.loadSampleSongs();
-        logs.push(`✅ Sample songs service completed`);
+        // Test sample chord sheets service
+        logs.push(`🎵 Testing sample chord sheets service...`);
+        const sampleChordSheetsService = new SampleChordSheetsService(indexedDBStorage);
+        await sampleChordSheetsService.loadSampleChordSheets();
+        logs.push(`✅ Sample chord sheets service completed`);
         
         // Check again after loading
         const songsAfterLoad = await indexedDBStorage.getAllSaved();

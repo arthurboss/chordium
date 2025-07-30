@@ -5,12 +5,12 @@
 
 import type { ChordSheet } from '@chordium/types';
 import type { StoredChordSheet } from '../../types';
-import type { IChordSheetStorage } from '../../services/sample-songs/types';
+import type { IChordSheetStorage } from '../../services/sample-chord-sheets/types';
 import { ChordSheetStore } from './store';
 
 /**
  * Adapter that implements IChordSheetStorage using ChordSheetStore
- * Simplifies the interface for sample songs service
+ * Simplifies the interface for sample chord sheets service
  */
 export class ChordSheetStorageAdapter implements IChordSheetStorage {
   constructor(private readonly chordSheetStore: ChordSheetStore) {}

@@ -1,5 +1,5 @@
 /**
- * Sample songs storage logic
+ * Sample chord sheets storage logic
  */
 
 import type { SampleChordSheetRecord } from './data-loader';
@@ -8,7 +8,7 @@ import type { IChordSheetStorage } from './types';
 /**
  * Store sample chord sheets with saved: true metadata
  */
-export const storeSampleSongs = async (
+export const storeSampleChordSheets = async (
   samples: SampleChordSheetRecord[],
   storage: IChordSheetStorage
 ): Promise<void> => {

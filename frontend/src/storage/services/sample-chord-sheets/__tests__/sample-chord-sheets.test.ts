@@ -1,5 +1,5 @@
 /**
- * Tests for sample songs service
+ * Tests for sample chord sheets service
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -31,7 +31,7 @@ vi.mock('../logging', () => ({
   logLoadingError: vi.fn()
 }));
 
-describe('Sample Songs Service', () => {
+describe('Sample Chord Sheets Service', () => {
   let mockChordSheetService: IChordSheetStorageService;
   let sampleSongsService: SampleSongsService;
 

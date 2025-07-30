@@ -5,7 +5,7 @@ import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.js
 import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
 import { GuitarTuning } from '../types/guitarTuning';
 
-// Mock fetch to load real sample songs
+// Mock fetch to load real sample chord sheets
 global.fetch = vi.fn();
 
 describe('ChordSheet Interface Consistency', () => {

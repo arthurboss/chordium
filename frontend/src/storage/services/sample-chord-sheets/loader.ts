@@ -1,12 +1,12 @@
 /**
- * Sample songs loading orchestrator
+ * Sample chord sheets loading orchestrator
  */
 
 import type { IChordSheetStorage } from './types';
 import { isDevelopmentMode } from './environment';
 import { shouldLoadSamples } from './duplicate-prevention';
 import { loadSampleData } from './data-loader';
-import { storeSampleSongs } from './storage';
+import { storeSampleChordSheets } from './storage';
 import { 
   logSkippingLoad, 
   logLoadingStart, 
@@ -15,16 +15,16 @@ import {
 } from './logging';
 
 /**
- * Service for loading sample songs in development mode
+ * Service for loading sample chord sheets in development mode
  * Follows SRP - only responsible for orchestrating the loading process
  */
-export class SampleSongsService {
+export class SampleChordSheetsService {
   constructor(private readonly storage: IChordSheetStorage) {}
 
   /**
-   * Load sample songs if conditions are met
+   * Load sample chord sheets if conditions are met
    */
-  async loadSampleSongs(): Promise<void> {
+  async loadSampleChordSheets(): Promise<void> {
     try {
       // Skip if not in development mode
       if (!isDevelopmentMode()) {
@@ -42,7 +42,7 @@ export class SampleSongsService {
       
       // Load and store sample data
       const samples = await loadSampleData();
-      await storeSampleSongs(samples, this.storage);
+      await storeSampleChordSheets(samples, this.storage);
       
       logLoadingSuccess(samples.length);
     } catch (error) {

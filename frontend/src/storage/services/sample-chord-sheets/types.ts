@@ -1,5 +1,5 @@
 /**
- * Types for sample songs service
+ * Types for sample chord sheets service
  */
 
 import type { ChordSheet } from '@chordium/types';
@@ -7,7 +7,7 @@ import type { StoredChordSheet } from '../../types';
 
 /**
  * Interface for chord sheet storage operations
- * Following SRP - only methods needed for sample songs
+ * Following SRP - only methods needed for sample chord sheets
  */
 export interface IChordSheetStorage {
   getAllSaved(): Promise<StoredChordSheet[]>;

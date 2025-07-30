@@ -1,13 +1,5 @@
-/**
- * Sample songs service exports
- */
-
-/**
- * Sample songs service - main exports
- */
-
 // Main service class
-export { SampleSongsService } from './loader';
+export { SampleChordSheetsService } from './loader';
 
 // Storage implementations
 export { IndexedDBStorage, indexedDBStorage } from './indexeddb-storage';
@@ -20,7 +12,7 @@ export type { SampleChordSheetRecord } from './data-loader';
 export { isDevelopmentMode } from './environment';
 export { shouldLoadSamples } from './duplicate-prevention';
 export { loadSampleData } from './data-loader';
-export { storeSampleSongs } from './storage';
+export { storeSampleChordSheets } from './storage';
 export { 
   logSkippingLoad, 
   logLoadingStart, 

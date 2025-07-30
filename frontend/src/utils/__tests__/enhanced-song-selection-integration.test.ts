@@ -13,7 +13,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
   let mockSetSelectedSong: ReturnType<typeof vi.fn>;
   let mockSetActiveTab: ReturnType<typeof vi.fn>;
 
-  // Simulate the real app scenario: Sample songs are loaded as My Chord Sheets
+  // Simulate the real app scenario: Sample chord sheets are loaded as My Chord Sheets
   const myChordSheetsWithSamples: Song[] = [
     {
       title: "Wonderwall",
@@ -66,7 +66,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
       expect(mockSetActiveTab).toHaveBeenCalledWith('my-chord-sheets');
     });
 
-    it('should handle tab switching with persistent sample songs', () => {
+    it('should handle tab switching with persistent sample chord sheets', () => {
       const { result } = renderHook(() => 
         useEnhancedSongSelection({
           navigate: mockNavigate,
@@ -139,7 +139,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
       expect(mockSetActiveTab).not.toHaveBeenCalled();
     });
 
-    it('should handle sample songs clicked directly from My Chord Sheets', () => {
+    it('should handle sample chord sheets clicked directly from My Chord Sheets', () => {
       const { result } = renderHook(() => 
         useEnhancedSongSelection({
           navigate: mockNavigate,
@@ -162,7 +162,7 @@ describe('Enhanced Song Selection - Integration Test', () => {
     });
 
     it('should handle user adding songs to My Chord Sheets and then searching again', () => {
-      // Start with just sample songs
+      // Start with just sample chord sheets
       const initialMySongs = [myChordSheetsWithSamples[0], myChordSheetsWithSamples[1]]; // Just Wonderwall and Hotel California
       
       const { result, rerender } = renderHook(

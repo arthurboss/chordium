@@ -1,8 +1,8 @@
 /**
- * Hook result for sample songs loading in development mode
+ * Hook result for sample chord sheets loading in development mode
  */
-export interface UseSampleSongsResult {
-  /** Whether sample songs are currently being loaded */
+export interface UseSampleChordSheetsResult {
+  /** Whether sample chord sheets are currently being loaded */
   isLoading: boolean;
   /** Whether the loading operation completed successfully */
   isLoaded: boolean;

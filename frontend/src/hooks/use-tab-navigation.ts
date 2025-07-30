@@ -75,7 +75,7 @@ const handleSongSelection = (
     return;
   }
 
-  // Check user's songs (includes sample songs in dev mode)
+  // Check user's songs (includes sample chord sheets in dev mode)
   if (myChordSheets?.length > 0) {
     const foundStoredChordSheet = myChordSheets.find(
       (chordSheet) => chordSheet.path === songIdFromQuery

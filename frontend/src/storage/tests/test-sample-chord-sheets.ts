@@ -1,9 +1,9 @@
 /**
- * Test script for the IndexedDB-based sample songs implementation
- * This tests the new useSampleSongs hook and IndexedDBStorage service
+ * Test script for the IndexedDB-based sample chord sheets implementation
+ * This tests the new useSampleChordSheets hook and IndexedDBStorage service
  */
 
-import { SampleSongsService, indexedDBStorage } from '../services/sample-songs/index.js';
+import { SampleChordSheetsService, indexedDBStorage } from '../services/sample-chord-sheets/index.js';
 
 /**
  * Test the IndexedDB storage service
@@ -18,10 +18,10 @@ async function testIndexedDBStorage(): Promise<void> {
     // Test 1: Check if we can initialize storage
     console.log('✅ Storage initialized successfully');
     
-    // Test 2: Load sample songs
-    console.log('📦 Loading sample songs...');
-    await sampleSongsService.loadSampleSongs();
-    console.log('✅ Sample songs loaded successfully');
+        // Test 2: Load sample chord sheets
+    console.log('📦 Loading sample chord sheets...');
+    await loadSampleChordSheets();
+    console.log('✅ Sample chord sheets loaded successfully');
     
     // Test 3: Verify songs are stored
     console.log('🔍 Verifying stored songs...');
@@ -58,7 +58,7 @@ async function testIndexedDBStorage(): Promise<void> {
 }
 
 /**
- * Test the sample songs in dev mode only
+ * Test the sample chord sheets in dev mode only
  */
 async function testDevModeOnly(): Promise<void> {
   console.log('🔧 Testing dev mode restriction...');
@@ -85,7 +85,7 @@ async function testDevModeOnly(): Promise<void> {
  * Main test runner
  */
 async function runTests(): Promise<void> {
-  console.log('🚀 Starting Sample Songs Implementation Tests\n');
+  console.log('🚀 Starting Sample Chord Sheets Implementation Tests\n');
   
   try {
     await testIndexedDBStorage();
@@ -95,7 +95,7 @@ async function runTests(): Promise<void> {
     console.log('\n🎉 All tests completed successfully!');
     console.log('\n📋 Summary:');
     console.log('  ✅ IndexedDB storage service working');
-    console.log('  ✅ Sample songs loading correctly');
+    console.log('  ✅ Sample chord sheets loading correctly');
     console.log('  ✅ Duplicate prevention functioning');
     console.log('  ✅ Dev mode restriction enforced');
     console.log('  ✅ Pure IndexedDB implementation (no localStorage)');

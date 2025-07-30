@@ -1,16 +1,16 @@
 /**
- * Hook for sample songs loading in development mode
+ * Hook for sample chord sheets loading in development mode
  * 
  * Handles only the sample loading concern - checking environment,
  * loading samples, and tracking loading state. Isolated from saved sheets.
  */
 
 import { useState, useCallback } from "react";
-import { SampleSongsService, indexedDBStorage } from "../../services/sample-songs";
+import { SampleChordSheetsService, indexedDBStorage } from "../../services/sample-chord-sheets";
 import type { UseSampleLoadingResult } from "./use-sample-loading.types";
 
 /**
- * Hook for loading sample songs in development mode
+ * Hook for loading sample chord sheets in development mode
  * 
  * Manages the loading of sample chord sheets into IndexedDB storage.
  * Focused only on sample loading, not on saved sheets management.
@@ -24,11 +24,11 @@ export function useSampleLoading(): UseSampleLoadingResult {
       setIsLoadingSamples(true);
       setSampleError(null);
 
-      const sampleSongsService = new SampleSongsService(indexedDBStorage);
-      await sampleSongsService.loadSampleSongs();
+      const sampleChordSheetsService = new SampleChordSheetsService(indexedDBStorage);
+      await sampleChordSheetsService.loadSampleChordSheets();
 
     } catch (err) {
-      console.error('Failed to load sample songs:', err);
+      console.error('Failed to load sample chord sheets:', err);
       setSampleError(err as Error);
     } finally {
       setIsLoadingSamples(false);

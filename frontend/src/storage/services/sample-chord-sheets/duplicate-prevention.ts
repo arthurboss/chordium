@@ -1,11 +1,11 @@
 /**
- * Duplicate prevention logic for sample songs
+ * Duplicate prevention logic for sample chord sheets
  */
 
 import type { IChordSheetStorage } from './types';
 
 /**
- * Check if sample songs should be loaded
+ * Check if sample chord sheets should be loaded
  * Returns false if user already has saved chord sheets
  */
 export const shouldLoadSamples = async (

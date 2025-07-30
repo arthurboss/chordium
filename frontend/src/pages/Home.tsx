@@ -6,7 +6,7 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleSongs, useSavedChordSheets } from "@/storage/hooks";
+import { useSampleChordSheets, useSavedChordSheets } from "@/storage/hooks";
 import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -33,10 +33,10 @@ const Home = () => {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { chordSheets: myChordSheets, refresh: refreshMyChordSheets } = useSavedChordSheets();
   
-  // Load sample songs in development mode and refresh chord sheets when complete
-  const { isLoaded } = useSampleSongs();
+  // Load sample chord sheets in development mode and refresh chord sheets when complete
+  const { isLoaded } = useSampleChordSheets();
   
-  // Refresh chord sheets when sample songs finish loading
+  // Refresh chord sheets when sample chord sheets finish loading
   useEffect(() => {
     if (isLoaded) {
       refreshMyChordSheets();

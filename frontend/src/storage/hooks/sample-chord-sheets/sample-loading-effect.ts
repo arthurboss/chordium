@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { SampleSongsService, indexedDBStorage } from '../../services/sample-songs';
-import type { SampleLoadingActions } from './use-sample-songs.types';
+import { SampleChordSheetsService, indexedDBStorage } from '../../services/sample-chord-sheets';
+import type { SampleLoadingActions } from './use-sample-chord-sheets.types';
 
 /**
- * Effect hook for automatically loading sample songs in development mode
+ * Effect hook for automatically loading sample chord sheets in development mode
  * 
  * Loads sample chord sheets when component mounts, handling all
  * conditions internally (dev mode check, existing songs check, etc).
@@ -17,12 +17,12 @@ export function useSampleLoadingEffect(actions: SampleLoadingActions): void {
         setIsLoading(true);
         setError(null);
 
-        const sampleSongsService = new SampleSongsService(indexedDBStorage);
-        await sampleSongsService.loadSampleSongs();
+        const sampleChordSheetsService = new SampleChordSheetsService(indexedDBStorage);
+        await sampleChordSheetsService.loadSampleChordSheets();
         
         setIsLoaded(true);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to load sample songs'));
+        setError(err instanceof Error ? err : new Error('Failed to load sample chord sheets'));
       } finally {
         setIsLoading(false);
       }

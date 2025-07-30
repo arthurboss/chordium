@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import type { SampleLoadingState, SampleLoadingActions } from './use-sample-songs.types';
+import type { SampleLoadingState, SampleLoadingActions } from './use-sample-chord-sheets.types';
 
 /**
  * Hook for managing sample loading state
  * 
- * Provides state variables and setters for sample songs loading.
+ * Provides state variables and setters for sample chord sheets loading.
  * Separated from effect logic for better testability.
  */
 export function useSampleLoadingState(): SampleLoadingState & SampleLoadingActions {

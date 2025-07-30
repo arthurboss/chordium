@@ -1,5 +1,5 @@
 /**
- * Test utilities and mocks for sample songs service
+ * Test utilities and mocks for sample chord sheets service
  */
 
 import { vi } from 'vitest';

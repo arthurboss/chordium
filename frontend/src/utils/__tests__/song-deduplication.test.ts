@@ -169,7 +169,7 @@ describe('Song Deduplication Utils', () => {
   });
 
   describe('Integration Scenarios', () => {
-    it('should handle sample songs vs searched songs correctly', () => {
+    it('should handle sample chord sheets vs searched songs correctly', () => {
       const sampleSongs = [
         { path: 'oasis/wonderwall', title: 'Wonderwall', artist: 'Oasis' }
       ];

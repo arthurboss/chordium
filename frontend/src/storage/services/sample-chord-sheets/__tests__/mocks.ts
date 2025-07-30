@@ -1,5 +1,5 @@
 /**
- * Mock setup for sample songs service tests
+ * Mock setup for sample chord sheets service tests
  */
 
 import { vi } from 'vitest';

@@ -25,7 +25,7 @@ import { unifiedChordSheetCache } from '../../cache/implementations/unified-chor
 const mockGetCachedChordSheet = vi.mocked(unifiedChordSheetCache.getCachedChordSheet);
 const mockCacheChordSheet = vi.mocked(unifiedChordSheetCache.cacheChordSheet);
 
-// Real sample songs for testing
+// Real sample chord sheets for testing
 const hotelCaliforniaChordSheet: ChordSheet = {
   title: "Hotel California",
   artist: "Eagles",

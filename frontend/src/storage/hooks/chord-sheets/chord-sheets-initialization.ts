@@ -23,7 +23,7 @@ export function useChordSheetsInitialization({
 
   useEffect(() => {
     const initializeChordSheets = async () => {
-      // Load sample songs first (in development mode)
+      // Load sample chord sheets first (in development mode)
       await loadSamples();
       
       // Then load/refresh saved chord sheets (includes samples if loaded)

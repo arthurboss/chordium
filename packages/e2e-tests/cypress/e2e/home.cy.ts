@@ -22,7 +22,7 @@ describe('Chordium E2E Tests', () => {
   it('should navigate to My Chord Sheets tab', () => {
     cy.get('button[role="tab"]').contains('My Chord Sheets').click();
     cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
-    // Sample songs should be visible
+    // Sample chord sheets should be visible
     cy.contains('Hotel California').should('be.visible');
     cy.contains('Wonderwall').should('be.visible');
   });
