@@ -2,7 +2,7 @@
  * Database initialization logic for chord sheets storage
  */
 
-import { DB_NAME, DB_VERSION, deleteDatabase } from '../../../../core/config/database';
+import { DB_NAME, DB_VERSION } from '../../../../core/config/database';
 import createSchema from './create-schema.js';
 
 /**
@@ -11,9 +11,7 @@ import createSchema from './create-schema.js';
  */
 export default async function initializeDatabase(): Promise<IDBDatabase> {
   try {
-    await deleteDatabase();
-    
-    return new Promise((resolve, reject) => {
+    return await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
       
       request.onerror = () => reject(new Error(`Failed to open database: ${request.error?.message || 'Unknown error'}`));
