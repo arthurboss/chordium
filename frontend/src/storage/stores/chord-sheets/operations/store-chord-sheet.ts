@@ -3,7 +3,7 @@
  */
 
 import type { ChordSheet, Song } from '@chordium/types';
-import { createStoredChordSheet } from '../utils/stored-chord-sheet-factory';
+import { createStoredChordSheet } from '../utils/factories';
 import executeWriteTransaction from '../utils/transactions/write-transaction';
 
 /**
