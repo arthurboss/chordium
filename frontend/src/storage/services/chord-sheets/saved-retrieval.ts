@@ -6,7 +6,8 @@
  * Maintains the same public API while using the new modular architecture.
  */
 
-import type { ChordSheet, Song } from '@chordium/types';
+import type { ChordSheet } from '@chordium/types';
+import type { StoredChordSheet } from '../../types/chord-sheet';
 import { getSavedStoredChordSheet } from './retrieval';
 import { storedToChordSheet } from './conversion';
 import { updateAccess } from '../../stores/chord-sheets/utils/access-tracking';
@@ -18,7 +19,7 @@ import { ChordSheetStore } from '../../stores/chord-sheets/store';
  * Ensures only saved chord sheets are returned, updates access tracking,
  * and converts to domain format. Composed from focused modules.
  */
-export async function getSavedChordSheet(path: Song['path']): Promise<ChordSheet | null> {
+export async function getSavedChordSheet(path: StoredChordSheet['path']): Promise<ChordSheet | null> {
   try {
     // Pure retrieval - no side effects
     const storedChordSheet = await getSavedStoredChordSheet(path);

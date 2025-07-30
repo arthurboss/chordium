@@ -2,15 +2,19 @@
  * Removes a chord sheet from storage
  */
 
-import type { Song } from '@chordium/types';
+import type { StoredChordSheet } from '../../../types/chord-sheet';
 import executeWriteTransaction from '../utils/transactions/write-transaction';
 
 /**
  * @param path - Song identifier to remove
  * @throws {DatabaseOperationError} When storage operation fails
  */
-export default async function deleteChordSheet(path: Song["path"]): Promise<void> {
-  return executeWriteTransaction((store) => 
-    store.delete(path)
-  );
+export default async function deleteChordSheet(path: StoredChordSheet['path']): Promise<void> {
+  if (!path) {
+    throw new Error('Path is required for delete operation');
+  }
+  
+  return executeWriteTransaction((store) => {
+    return store.delete(path);
+  });
 }

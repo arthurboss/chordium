@@ -8,7 +8,6 @@ import {
   getChordSheet,
   getAllSavedChordSheets,
   storeChordSheet,
-  deleteChordSheet,
   deleteAllChordSheets,
 } from "./operations";
 
@@ -44,7 +43,7 @@ export class ChordSheetStore {
   /**
    * Delete a chord sheet
    */
-  async delete(path: Song["path"]): Promise<void> {
+  async delete(path: StoredChordSheet["path"]): Promise<void> {
     return deleteChordSheet(path);
   }
 

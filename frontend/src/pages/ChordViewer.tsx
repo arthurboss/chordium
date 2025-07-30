@@ -5,7 +5,9 @@ import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { getSavedChordSheet, deleteChordSheet } from "@/storage/services";
+import { getSavedChordSheet } from "@/storage/services";
+import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { toast } from "@/hooks/use-toast";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
 import type { Song, ChordSheet } from "@chordium/types";
 
@@ -59,15 +61,25 @@ const ChordViewer = () => {
   const handleDelete = async () => {
     if (!chordSheet || !chordSheetPath) return;
     
-    // Use the stored path (database key)
-    const path = chordSheetPath;
-    const title = chordSheet.title || 'Unknown song';
-    
-    await deleteChordSheet(path, title);
-    navigate("/my-chord-sheets");
-  };
-
-  if (isLoading) {
+    try {
+      // Use pure database operation
+      await deleteChordSheet(chordSheetPath);
+      
+      toast({
+        title: "Chord sheet removed",
+        description: `"${chordSheet.title}" has been removed from My Chord Sheets`,
+      });
+      
+      navigate("/my-chord-sheets");
+    } catch (error) {
+      console.error('Failed to remove chord sheet:', error);
+      toast({
+        title: "Remove failed",
+        description: `Failed to remove "${chordSheet.title}". Please try again.`,
+        variant: "destructive"
+      });
+    }
+  };  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />

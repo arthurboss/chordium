@@ -11,7 +11,8 @@ import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { deleteChordSheet } from "@/storage/services";
+import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
@@ -140,11 +141,20 @@ const TabContainer = ({
   const handleChordSheetDelete = async (songPath: string) => {
     // Find the song for user feedback
     const songToDelete = myChordSheets.find(song => song.path === songPath);
-    const songTitle = songToDelete?.title || 'Unknown song';
+    
+    if (!songToDelete) {
+      console.error('Song not found for deletion:', songPath);
+      return;
+    }
 
     try {
-      // Delete from IndexedDB using the service
-      await deleteChordSheet(songPath, songTitle);
+      // Use pure database operation
+      await deleteChordSheet(songPath);
+
+      toast({
+        title: "Chord sheet removed",
+        description: `"${songToDelete.title}" has been removed from My Chord Sheets`,
+      });
 
       // Refresh the data from IndexedDB (this updates the UI)
       await setMySongs();
@@ -154,8 +164,12 @@ const TabContainer = ({
         setSelectedSong(null);
       }
     } catch (error) {
-      // Error handling and user feedback is done by the service
-      console.error('Delete operation failed:', error);
+      console.error('Failed to remove chord sheet:', error);
+      toast({
+        title: "Remove failed",
+        description: `Failed to remove "${songToDelete.title}". Please try again.`,
+        variant: "destructive"
+      });
     }
   };
 

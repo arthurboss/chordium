@@ -7,6 +7,3 @@ export * from "./cleanup";
 // Chord sheet retrieval services
 export { getChordSheetFromCache } from "./chord-sheets/cache-retrieval";
 export { getSavedChordSheet } from "./chord-sheets/saved-retrieval";
-
-// Chord sheet management services
-export { deleteChordSheet } from "./delete-chord-sheet";
