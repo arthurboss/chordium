@@ -8,18 +8,7 @@
 import type { ChordSheet } from "@chordium/types";
 import type { StoredChordSheet } from "../../../../types/chord-sheet";
 import { calculateCacheExpiration } from "../ttl-constants";
-
-/**
- * Options for creating a new stored chord sheet
- */
-export interface CreateStoredChordSheetOptions {
-  /** Whether the chord sheet is saved by user (true) or cached (false) */
-  saved?: boolean;
-  /** Source of the chord sheet (e.g., 'api', 'sample', 'user') */
-  source?: string;
-  /** Custom expiration timestamp (overrides default TTL) */
-  expiresAt?: number | null;
-}
+import type { CreateStoredChordSheetOptions } from "./create-stored-chord-sheet.types";
 
 /**
  * Creates a new StoredChordSheet for first-time storage

@@ -1,70 +1,65 @@
 /**
- * Pure IndexedDB hook for managing chord sheets (both samples and user-saved)
+ * Orchestrated chord sheets hook
  * 
- * This hook provides a single source of truth for all chord sheet management:
- * - Loads sample songs in development mode (into IndexedDB)
- * - Manages My Chord Sheets (from IndexedDB)
- * - NO localStorage dependencies - pure IndexedDB only
+ * Composes the modular hooks (sample loading, saved sheets, initialization)
+ * to provide the complete chord sheets functionality. Maintains the same
+ * public API while using the new modular architecture.
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { StoredChordSheet } from "@/storage/types";
-import { SampleSongsService, indexedDBStorage } from "@/storage/services/sample-songs";
-import { ChordSheetStore } from "@/storage/stores/chord-sheets/store";
+import { 
+  useSavedChordSheets, 
+  useSampleLoading, 
+  useChordSheetsInitialization 
+} from "./chord-sheets";
 
 /**
- * Pure IndexedDB hook for chord sheets management
- * Handles both sample loading and My Chord Sheets
+ * Return type for the composed chord sheets hook
  */
-export function useChordSheets() {
-  const [myChordSheets, setMyChordSheets] = useState<StoredChordSheet[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+export interface UseChordSheetsResult {
+  /** Current saved chord sheets */
+  myChordSheets: StoredChordSheet[];
+  /** Function to update chord sheets state */
+  setMyChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+  /** Function to refresh chord sheets from storage */
+  refreshMyChordSheets: () => Promise<void>;
+  /** Overall loading state (combines sample loading and chord sheets loading) */
+  isLoading: boolean;
+  /** Any error from operations */
+  error: Error | null;
+}
 
-  const chordSheetStore = useMemo(() => new ChordSheetStore(), []);
+/**
+ * Composed hook for complete chord sheets management
+ * 
+ * Orchestrates sample loading and saved chord sheets management.
+ * Maintains the original API while using focused modular components.
+ */
+export function useChordSheets(): UseChordSheetsResult {
+  // Use focused hooks for specific concerns
+  const savedChordSheets = useSavedChordSheets();
+  const sampleLoading = useSampleLoading();
+  
+  // Orchestrate initialization
+  useChordSheetsInitialization({ sampleLoading, savedChordSheets });
+  
+  // Combine loading states for unified experience
+  const isLoading = useMemo(() => 
+    savedChordSheets.isLoading || sampleLoading.isLoadingSamples,
+    [savedChordSheets.isLoading, sampleLoading.isLoadingSamples]
+  );
+  
+  // Combine errors with priority (saved sheets errors take precedence)
+  const error = useMemo(() => 
+    savedChordSheets.error || sampleLoading.sampleError,
+    [savedChordSheets.error, sampleLoading.sampleError]
+  );
 
-  const loadMyChordSheets = useCallback(async () => {
-    try {
-      const savedChordSheets = await chordSheetStore.getAllSaved();
-      setMyChordSheets(savedChordSheets);
-    } catch (err) {
-      console.error('Failed to load My Chord Sheets from IndexedDB:', err);
-      setError(err as Error);
-    }
-  }, [chordSheetStore]);
-
-  const refreshMyChordSheets = useCallback(async () => {
-    await loadMyChordSheets();
-  }, [loadMyChordSheets]);
-
-  useEffect(() => {
-    const initializeChordSheets = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Load sample songs in development mode (stores them in IndexedDB)
-        const sampleSongsService = new SampleSongsService(indexedDBStorage);
-        await sampleSongsService.loadSampleSongs();
-
-        // Load My Chord Sheets from IndexedDB (includes samples if they were loaded)
-        await loadMyChordSheets();
-
-      } catch (err) {
-        console.error('Failed to initialize chord sheets:', err);
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeChordSheets();
-  }, [loadMyChordSheets]);
-
-  return { 
-    myChordSheets, 
-    setMyChordSheets, 
-    refreshMyChordSheets,
+  return {
+    myChordSheets: savedChordSheets.myChordSheets,
+    setMyChordSheets: savedChordSheets.setMyChordSheets,
+    refreshMyChordSheets: savedChordSheets.refreshMyChordSheets,
     isLoading,
     error
   };

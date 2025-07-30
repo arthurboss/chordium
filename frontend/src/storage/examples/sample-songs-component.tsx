@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSampleSongs } from '../hooks/use-sample-songs';
+import { useSampleSongs } from '../hooks/sample-songs';
 
 /**
  * Sample component that loads sample songs in development mode

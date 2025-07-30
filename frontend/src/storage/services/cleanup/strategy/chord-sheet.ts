@@ -1,66 +1,13 @@
 /**
  * Chord sheet cleanup priority calculation
+ * 
+ * Re-exports the main cleanup function from the refactored modular structure.
+ * The actual implementation is now split into focused modules:
+ * - saved-strategy: Simple rules for saved items
+ * - cached-strategy: Complex LRU logic for cached items  
+ * - priority-calculator: Orchestrates strategy selection
+ * 
  * CRITICAL: Saved items are NEVER automatically removed
  */
 
-import type { StoredChordSheet } from '../../../types';
-import type { CleanupStrategy } from './types';
-import { calculateAccessFrequencyPriority } from './access-frequency';
-
-/**
- * Calculates cleanup priority for a chord sheet
- * CRITICAL: Saved items are NEVER automatically removed (user does it manually)
- */
-export function calculateChordSheetCleanupPriority(item: StoredChordSheet): CleanupStrategy {
-  // Never remove saved items
-  if (item.storage.saved) {
-    return {
-      canRemove: false,
-      priority: 0,
-      reason: 'item is saved by user'
-    };
-  }
-
-  // For cached items, use LRU logic with lastAccessed
-  return calculateUnsavedChordSheetPriority(item);
-}
-
-/**
- * Calculates priority for unsaved chord sheets only
- * Uses lastAccessed for proper LRU (Least Recently Used) logic
- */
-function calculateUnsavedChordSheetPriority(item: StoredChordSheet): CleanupStrategy {
-  let priority = 0;
-  const reasons: string[] = [];
-
-  // LRU Logic: Recently accessed items get higher priority (kept longer)
-  const daysSinceLastAccess = (Date.now() - item.storage.lastAccessed) / (1000 * 60 * 60 * 24);
-  
-  if (daysSinceLastAccess < 1) {
-    priority += 50;
-    reasons.push('accessed today');
-  } else if (daysSinceLastAccess < 3) {
-    priority += 30;
-    reasons.push('accessed recently');
-  } else if (daysSinceLastAccess < 7) {
-    priority += 15;
-    reasons.push('accessed this week');
-  } else if (daysSinceLastAccess < 30) {
-    priority += 5;
-    reasons.push('accessed this month');
-  }
-  // Items not accessed in 30+ days get priority 0 (first to be removed)
-
-  // Access frequency bonus: Use shared utility
-  const accessFrequency = calculateAccessFrequencyPriority(item.storage.accessCount);
-  priority += accessFrequency.priority;
-  if (accessFrequency.reason) {
-    reasons.push(accessFrequency.reason);
-  }
-
-  return {
-    priority,
-    reason: reasons.join(', ') || 'rarely used',
-    canRemove: true
-  };
-}
+export { calculateChordSheetCleanupPriority } from './chord-sheet/priority-calculator';
