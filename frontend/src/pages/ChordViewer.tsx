@@ -1,15 +1,16 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
-import LoadingState from "@/components/LoadingState";
+import SearchLoadingState from "@/components/SearchResults/SearchLoadingState";
 import ErrorState from "@/components/ErrorState";
-import { getChordSheet, deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
-import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
+import NavigationCard from "@/components/NavigationCard";
+import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
 import { toast } from "@/hooks/use-toast";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import type { Song, ChordSheet } from "@chordium/types";
+import { useChordSheetData } from "@/hooks/useChordSheetData";
+import type { Song } from "@chordium/types";
 
 const ChordViewer = () => {
   const { artist, song } = useParams();
@@ -20,55 +21,21 @@ const ChordViewer = () => {
   // Song object from navigation state (if passed from search results)
   const navigationSong = location.state?.song as Song | undefined;
 
-  // Local state for chord sheet data
-  const [chordSheet, setChordSheet] = useState<ChordSheet | null>(null);
-  const [chordSheetPath, setChordSheetPath] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Generate path for chord sheet lookup
+  const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
 
-  useEffect(() => {
-    async function loadChordSheet() {
-      setIsLoading(true);
-      setError(null);
-      const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
-      if (!path) {
-        setError("Invalid song path");
-        setIsLoading(false);
-        return;
-      }
-      try {
-        // Get chord sheet from storage using pure operation
-        const storedChordSheet = await getChordSheet(path);
-        
-        // Check if it exists and is saved (business logic in component)
-        if (storedChordSheet?.storage?.saved) {
-          // Convert to domain format and set
-          const domainChordSheet = storedToChordSheet(storedChordSheet);
-          setChordSheet(domainChordSheet);
-          setChordSheetPath(path); // Store the path for delete operations
-        } else {
-          setError("Chord sheet not found in saved items");
-        }
-      } catch (err) {
-        console.error("Error loading chord sheet:", err);
-        setError("Failed to load chord sheet from storage");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadChordSheet();
-  }, [artist, song, navigationSong?.path]);
+  // Use the traditional hook approach
+  const { chordSheet, isLoading, error } = useChordSheetData(path || "");
 
   const handleBack = () => {
     navigate("/my-chord-sheets");
   };
 
   const handleDelete = async () => {
-    if (!chordSheet || !chordSheetPath) return;
+    if (!chordSheet || !path) return;
     
     try {
-      // Use pure database operation
-      await deleteChordSheet(chordSheetPath);
+      await deleteChordSheet(path);
       
       toast({
         title: "Chord sheet removed",
@@ -84,12 +51,27 @@ const ChordViewer = () => {
         variant: "destructive"
       });
     }
-  };  if (isLoading) {
+  };
+
+  if (!path) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <LoadingState message="Loading chord sheet..." />
+          <NavigationCard onBack={handleBack} />
+          <ErrorState error="Invalid song path" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+          <SearchLoadingState />
         </main>
         <Footer />
       </div>
@@ -101,7 +83,8 @@ const ChordViewer = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <ErrorState error={`Failed to load chord sheet: ${error || "Not found"}`} />
+          <NavigationCard onBack={handleBack} />
+          <ErrorState error={error || "Chord sheet not found in saved items"} />
         </main>
         <Footer />
       </div>
@@ -112,8 +95,19 @@ const ChordViewer = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+        <NavigationCard 
+          onBack={handleBack}
+          onDelete={handleDelete}
+          showDeleteButton={true}
+        />
         <SongViewer
-          song={{ song: navigationSong || { ...chordSheet, path: generateChordSheetId(chordSheet.artist, chordSheet.title) }, chordSheet }}
+          song={{ 
+            song: navigationSong || { 
+              ...chordSheet, 
+              path: generateChordSheetId(chordSheet.artist, chordSheet.title) 
+            }, 
+            chordSheet 
+          }}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
           onDelete={handleDelete}
