@@ -2,15 +2,15 @@
  * Chord sheet storage interface for user's local data
  */
 
-import type { ChordSheet, Song } from '@chordium/types';
-import type { StoredChordSheet } from '../../types';
+import type { ChordSheet, Song } from "@chordium/types";
+import type { StoredChordSheet } from "../../types";
 import {
   getChordSheet,
   getAllSavedChordSheets,
   storeChordSheet,
   deleteChordSheet,
-  deleteAllChordSheets
-} from './operations';
+  deleteAllChordSheets,
+} from "./operations";
 
 /**
  * Manages chord sheet storage operations

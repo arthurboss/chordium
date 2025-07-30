@@ -33,7 +33,7 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, 
               title: storedChordSheet.title,
               artist: storedChordSheet.artist
             };
-            
+
             return (
               <ResultCard
                 key={`${storedChordSheet.path}-${index}`}

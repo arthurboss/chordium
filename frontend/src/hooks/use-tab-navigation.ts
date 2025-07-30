@@ -14,43 +14,47 @@ interface TabNavigationProps {
 /**
  * Determines which tab should be active based on the current path and query parameters
  */
-const determineActiveTab = (path: string, queryParams: URLSearchParams): string => {
-  
+const determineActiveTab = (
+  path: string,
+  queryParams: URLSearchParams
+): string => {
   // Handle path-based routing first - paths take priority over query parameters
   switch (true) {
     case path.startsWith("/upload"):
       return "upload";
-    
+
     case path.startsWith("/my-chord-sheets"):
       // This includes /my-chord-sheets/artist/song routes - should stay in my-chord-sheets tab
       // Path-based routing takes priority over query parameters for My Chord Sheets
       return "my-chord-sheets";
-    
+
     case path.startsWith("/search"):
       // Explicit search path
       return "search";
-    
+
     case path.startsWith("/artist/"):
       // Artist songs from search results - show in search tab
       return "search";
-    
+
     case path === "/":
       // Root path defaults to my-chord-sheets
       return "my-chord-sheets";
-    
+
     default: {
       // Handle artist routes: /artist-name (single segment paths)
-      const pathSegments = path.split('/').filter(segment => segment.length > 0);
-      if (pathSegments.length === 1 && pathSegments[0] !== '') {
+      const pathSegments = path
+        .split("/")
+        .filter((segment) => segment.length > 0);
+      if (pathSegments.length === 1 && pathSegments[0] !== "") {
         // This is likely an artist page, show search tab with artist selected
         return "search";
       }
-      
+
       // Handle search context based on query parameters only for non-specific paths
       if (getSearchParamsType(queryParams)) {
         return "search";
       }
-      
+
       // Fallback for unknown paths, default to "my-chord-sheets"
       return "my-chord-sheets";
     }
@@ -73,13 +77,15 @@ const handleSongSelection = (
 
   // Check user's songs (includes sample songs in dev mode)
   if (myChordSheets?.length > 0) {
-    const foundStoredChordSheet = myChordSheets.find(chordSheet => chordSheet.path === songIdFromQuery);
+    const foundStoredChordSheet = myChordSheets.find(
+      (chordSheet) => chordSheet.path === songIdFromQuery
+    );
     if (foundStoredChordSheet) {
       // Extract Song fields for navigation (no conversion, just type projection)
       const songForNavigation: Song = {
         path: foundStoredChordSheet.path,
         title: foundStoredChordSheet.title,
-        artist: foundStoredChordSheet.artist
+        artist: foundStoredChordSheet.artist,
       };
       setSelectedSong(songForNavigation);
       return;
@@ -94,10 +100,10 @@ export const useTabNavigation = ({
   myChordSheets,
   setActiveTab,
   activeTab, // Consumed here
-  setSelectedSong
+  setSelectedSong,
 }: TabNavigationProps): void => {
   const location = useLocation();
-  
+
   useEffect(() => {
     const currentPath = location.pathname;
     const queryParams = new URLSearchParams(location.search);
@@ -105,7 +111,7 @@ export const useTabNavigation = ({
 
     // Determine the tab based on the current path and search parameters
     const determinedTab = determineActiveTab(currentPath, queryParams);
-    
+
     // Update active tab if it has changed
     if (activeTab !== determinedTab) {
       setActiveTab(determinedTab);

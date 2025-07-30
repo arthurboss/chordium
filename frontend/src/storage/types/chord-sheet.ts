@@ -9,7 +9,8 @@ import type { ChordSheet, Song } from '@chordium/types';
  * Inherits all ChordSheet fields directly for easy access
  */
 export interface StoredChordSheet extends ChordSheet {
-  /** Song path for IndexedDB key and navigation */
+  /** Song path for IndexedDB key and navigation
+   * Note: This is redundant with the database key but kept for UI compatibility */
   path: Song["path"];
   /** Storage-specific metadata grouped for organization */
   storage: {

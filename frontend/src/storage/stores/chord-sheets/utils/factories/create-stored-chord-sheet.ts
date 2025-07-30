@@ -28,7 +28,7 @@ export function createStoredChordSheet(
     // Inherit ChordSheet fields directly
     ...chordSheet,
     
-    // Add path for IndexedDB key
+    // Add path for IndexedDB key (redundant but required for UI compatibility)
     path,
     
     // Storage metadata
