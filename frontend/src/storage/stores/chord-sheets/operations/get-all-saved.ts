@@ -1,9 +1,5 @@
-/**
- * Retrieves user's saved chord sheets (favorites)
- */
-
 import type { StoredChordSheet } from "../../../types";
-import executeReadTransaction from "../utils/transactions/read-transaction";
+import { executeReadTransaction } from "../utils/transactions";
 
 /**
  * @returns Chord sheets marked as saved by the user
