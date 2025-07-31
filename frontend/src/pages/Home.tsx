@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom"; // Import useLocation
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,7 +6,7 @@ import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 import TestComponent from "@/components/TestComponent";
-import { useSampleChordSheets, useSavedChordSheets } from "@/storage/hooks";
+import { useChordSheets } from "@/storage/hooks";
 import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
@@ -28,29 +28,12 @@ const getInitialTab = (pathname: string): string => {
 
 const Home = () => {
   const location = useLocation(); // Get location
-  
+
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-  const { chordSheets: myChordSheets, refresh: refreshMyChordSheets } = useSavedChordSheets();
-  
-  // Load sample chord sheets in development mode and refresh chord sheets when complete
-  const { isLoaded } = useSampleChordSheets();
-  
-  // Refresh chord sheets when sample chord sheets finish loading
-  useEffect(() => {
-    if (isLoaded) {
-      refreshMyChordSheets();
-    }
-  }, [isLoaded, refreshMyChordSheets]);
-  
-  useSearchRedirect();
+  const { myChordSheets, refreshMyChordSheets } = useChordSheets();
 
-  // Refresh My Chord Sheets when the active tab changes to my-chord-sheets
-  useEffect(() => {
-    if (activeTab === 'my-chord-sheets') {
-      refreshMyChordSheets();
-    }
-  }, [activeTab, refreshMyChordSheets]);
+  useSearchRedirect();
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({
@@ -69,7 +52,7 @@ const Home = () => {
         <div className="text-center bg-purple-100 border-l-4 border-purple-400 text-purple-900 p-3 mb-4 rounded shadow">
           <strong>Note:</strong> This app is in development. Some features may not work as expected.
         </div>
-        
+
         <TabContainer
           activeTab={activeTab} // Ensure this uses the activeTab state variable
           setActiveTab={setActiveTab}

@@ -1,4 +1,4 @@
-export { useSampleChordSheets } from './sample-chord-sheets';
-export type { UseSampleChordSheetsResult } from './sample-chord-sheets';
-export { useSavedChordSheets } from './use-saved-chord-sheets';
-export { useChordSheets } from './use-chord-sheets';
+export { useSampleLoading } from "./chord-sheets";
+export type { UseSampleLoadingResult } from "./chord-sheets";
+export { useChordSheets } from "./use-chord-sheets";
+export type { UseChordSheetsResult } from "./use-chord-sheets.types";

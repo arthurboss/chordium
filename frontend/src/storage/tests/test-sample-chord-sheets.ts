@@ -1,6 +1,6 @@
 /**
  * Test script for the IndexedDB-based sample chord sheets implementation
- * This tests the new useSampleChordSheets hook and IndexedDBStorage service
+ * This tests the SampleChordSheetsService and IndexedDBStorage service
  */
 
 import { SampleChordSheetsService, indexedDBStorage } from '../services/sample-chord-sheets/index.js';
