@@ -1,19 +1,18 @@
 /**
  * Index definitions for object stores
  */
-
-/** Index definitions for object stores */
 export const INDEXES = {
   chordSheets: {
-    artist: 'chordSheet.artist',    // Index nested property
-    title: 'chordSheet.title',      // Index nested property
-    saved: 'saved',
-    timestamp: 'timestamp',
-    expiresAt: 'expiresAt',
+    artist: "artist", // Direct property access
+    title: "title", // Direct property access
+    saved: "storage.saved", // Nested property access
+    lastAccessed: "storage.lastAccessed", // For LRU cleanup
+    timestamp: "storage.timestamp", // For creation time queries
+    expiresAt: "storage.expiresAt", // For TTL cleanup
   },
   searchCache: {
-    timestamp: 'timestamp',
-    searchType: 'searchType',
-    expiresAt: 'expiresAt',
+    timestamp: "timestamp",
+    searchType: "searchType",
+    expiresAt: "expiresAt",
   },
 } as const;

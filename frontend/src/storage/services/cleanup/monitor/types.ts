@@ -1,7 +1,3 @@
-/**
- * Storage usage estimation types
- */
-
 /** Storage usage estimation */
 export interface StorageEstimate {
   /** Current usage in bytes */

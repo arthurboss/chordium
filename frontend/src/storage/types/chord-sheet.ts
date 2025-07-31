@@ -2,25 +2,29 @@
  * Stored chord sheet type definition
  */
 
-import type { ChordSheet } from '@chordium/types';
+import type { ChordSheet, Song } from '@chordium/types';
 
 /**
  * Extended ChordSheet for storage with metadata
- * Adds storage-specific fields to the domain ChordSheet type
+ * Inherits all ChordSheet fields directly for easy access
  */
-export interface StoredChordSheet {
-  /** Primary key: Uses Song.path format "artist-path/song-path" for consistency */
-  path: string;
-  
-  /** Full chord sheet data (from domain ChordSheet type) */
-  chordSheet: ChordSheet;
-  
-  /** Storage metadata */
-  saved: boolean; // true = user saved (never expires), false = cached (expires after TTL)
-  timestamp: number;
-  accessCount: number;
-  version: number;
-  
-  /** TTL - null for saved items (never expire), timestamp for cached items */
-  expiresAt: number | null;
+export interface StoredChordSheet extends ChordSheet {
+  /** Song path for IndexedDB key and navigation
+   * Note: This is redundant with the database key but kept for UI compatibility */
+  path: Song["path"];
+  /** Storage-specific metadata grouped for organization */
+  storage: {
+    /** Whether user has saved this chord sheet (never expires if true) */
+    saved: boolean;
+    /** When first stored/cached */
+    timestamp: number;
+    /** When user last opened/viewed this chord sheet */
+    lastAccessed: number;
+    /** Number of times user has accessed this chord sheet */
+    accessCount: number;
+    /** Schema version for future migrations */
+    version: number;
+    /** TTL - null for saved items (never expire), timestamp for cached items */
+    expiresAt: number | null;
+  };
 }
