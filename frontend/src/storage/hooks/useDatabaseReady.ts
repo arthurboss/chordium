@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { getDatabase } from '../stores/chord-sheets/database/connection';
+import { useState, useEffect } from "react";
+import { getDatabase } from "../stores/chord-sheets/database/connection";
 
 /**
  * Hook to wait for IndexedDB database to be ready before showing UI
- * 
+ *
  * This prevents race conditions where UI loads faster than database initialization,
  * avoiding the need for retry logic and UI flashing.
- * 
+ *
  * @returns Object with isReady boolean and error state
  */
 export function useDatabaseReady() {
@@ -20,7 +20,7 @@ export function useDatabaseReady() {
       try {
         // This will wait for the database to be fully initialized
         await getDatabase();
-        
+
         if (!cancelled) {
           setIsReady(true);
         }

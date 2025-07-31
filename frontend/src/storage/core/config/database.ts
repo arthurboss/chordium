@@ -3,7 +3,7 @@
  */
 
 /** Database name for IndexedDB */
-export const DB_NAME = 'Chordium';
+export const DB_NAME = "Chordium";
 
 /** Database version for IndexedDB */
 export const DB_VERSION = 1;

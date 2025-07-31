@@ -1,11 +1,18 @@
 /**
  * Complete chord sheets hook
- * 
+ *
  * Handles both sample loading in development and saved chord sheets management.
  * Provides unified interface for all chord sheet operations.
  */
 
-import { useState, useEffect, useCallback, useOptimistic, startTransition, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useOptimistic,
+  startTransition,
+  useMemo,
+} from "react";
 import type { StoredChordSheet } from "../types/chord-sheet";
 import { ChordSheetStore } from "../stores/chord-sheets/store";
 import { performanceTracker } from "../../utils/performance";
@@ -14,7 +21,7 @@ import type { UseChordSheetsResult } from "./use-chord-sheets.types";
 
 /**
  * Complete chord sheets management hook
- * 
+ *
  * Orchestrates sample loading and saved chord sheets management.
  * Provides unified loading states and error handling.
  */
@@ -80,26 +87,26 @@ export function useChordSheets(): UseChordSheetsResult {
   }, [refreshMyChordSheets]);
 
   // Coordinate sample loading and saved chord sheets management
-  useChordSheetsInitialization({ 
-    sampleLoading, 
-    savedChordSheets: { 
-      myChordSheets: optimisticChordSheets, 
+  useChordSheetsInitialization({
+    sampleLoading,
+    savedChordSheets: {
+      myChordSheets: optimisticChordSheets,
       setMyChordSheets: setChordSheets,
       refreshMyChordSheets,
       isLoading: isSavedLoading,
-      error: savedError
-    } 
+      error: savedError,
+    },
   });
 
   // Combine loading states for unified experience
-  const isLoading = useMemo(() => 
-    isSavedLoading || sampleLoading.isLoadingSamples,
+  const isLoading = useMemo(
+    () => isSavedLoading || sampleLoading.isLoadingSamples,
     [isSavedLoading, sampleLoading.isLoadingSamples]
   );
 
   // Combine errors with priority (saved sheets errors take precedence)
-  const error = useMemo(() => 
-    savedError || sampleLoading.sampleError,
+  const error = useMemo(
+    () => savedError || sampleLoading.sampleError,
     [savedError, sampleLoading.sampleError]
   );
 
@@ -109,6 +116,6 @@ export function useChordSheets(): UseChordSheetsResult {
     setMyChordSheets: setChordSheets,
     refreshMyChordSheets,
     isLoading,
-    error
+    error,
   };
 }

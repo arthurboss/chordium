@@ -1,10 +1,3 @@
-/**
- * IndexedDB Schema aggregator for Chordium PWA Storage System
- * Re-exports all schema-related definitions from modular files
- * Built from scratch - no backward compatibility with previous implementation
- */
-
-// Re-export all types from the modular type system
 export type {
   StoredChordSheet,
   SearchCacheEntry,

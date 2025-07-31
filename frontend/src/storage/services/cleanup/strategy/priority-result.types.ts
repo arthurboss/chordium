@@ -1,8 +1,4 @@
 /**
- * Types for cleanup strategy priority calculations
- */
-
-/**
  * Result of priority calculation for cleanup operations
  */
 export interface PriorityResult {

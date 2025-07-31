@@ -1,6 +1,3 @@
-/**
- * Return type for the sample loading hook
- */
 export interface UseSampleLoadingResult {
   /** Whether samples are currently being loaded */
   isLoadingSamples: boolean;

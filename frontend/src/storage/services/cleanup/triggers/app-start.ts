@@ -1,8 +1,4 @@
-/**
- * App startup cleanup trigger
- */
-
-import { shouldTriggerCleanup } from '../monitor/threshold';
+import { shouldTriggerCleanup } from "../monitor/threshold";
 
 /**
  * Triggers cleanup on application start if needed

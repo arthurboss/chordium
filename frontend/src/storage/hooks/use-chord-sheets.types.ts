@@ -1,13 +1,6 @@
-/**
- * Types for the composed chord sheets hook
- */
-
 import type { StoredChordSheet } from "@/storage/types";
 import type React from "react";
 
-/**
- * Return type for the composed chord sheets hook
- */
 export interface UseChordSheetsResult {
   /** Current saved chord sheets */
   myChordSheets: StoredChordSheet[];

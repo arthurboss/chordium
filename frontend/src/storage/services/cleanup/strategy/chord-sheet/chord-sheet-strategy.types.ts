@@ -1,4 +1,4 @@
-export type { CleanupStrategy } from '../types';
+export type { CleanupStrategy } from "../types";
 
 /**
  * Result of access frequency calculation for cleanup priority
