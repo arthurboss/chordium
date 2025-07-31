@@ -13,3 +13,14 @@ export interface UseChordSheetsResult {
   /** Any error from operations */
   error: Error | null;
 }
+
+export interface UseChordSheetsState {
+  chordSheets: StoredChordSheet[];
+  setChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  error: Error | null;
+  setError: React.Dispatch<React.SetStateAction<Error | null>>;
+  optimisticChordSheets: StoredChordSheet[];
+  setOptimisticChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+}
