@@ -1,128 +1,86 @@
 # Storage System
 
-IndexedDB-based storage for Chordium PWA.
+Offline-first storage for Chordium that keeps your chord sheets available without internet.
 
-## Why IndexedDB?
+## What It Does
 
-- **PWA Ready**: Works offline, essential for chord sheet access
-- **Large Storage**: 150MB+ capacity vs localStorage's 5-10MB limits
-- **Structured**: Proper database with indexes and efficient queries
-- **Performance**: Async operations with background cleanup
-- **Smart Management**: Intelligent TTL and priority-based cleanup
+The storage system ensures users can access their chord sheets anytime, even offline. It intelligently manages limited browser storage to keep the most important content available.
 
-## Database: `Chordium` (Version 1)
+## Key Benefits
 
-**Object Stores:**
+- **Always Available**: Chord sheets work offline once loaded
+- **Large Capacity**: Stores 500+ chord sheets (150MB total)
+- **Smart Management**: Automatically removes old, unused content to make room for new saves
+- **Respects User Intent**: Never removes chord sheets you explicitly saved
 
-- `chordSheets` - Individual chord sheet storage with metadata
-- `searchCache` - Search results with 30-day TTL
+## How It Works
 
-**Storage Limits (IndexedDB Optimized):**
+### User Protection
 
-- Search Cache: 1000 items, 50MB
-- Chord Sheets: 500 items, 100MB
-- Total Target: 150MB with 80% cleanup threshold
+- **Saved chord sheets are permanent** - only you can delete them
+- Recently viewed songs stay available longer
+- Frequently accessed content gets priority
+- Old search results and rarely used cache gets cleaned up first
 
-## Architecture
+### Storage Limits
 
-### Core Infrastructure ✅
+- **Chord Sheets**: Up to 500 saved sheets
+- **Search Cache**: Up to 1,000 recent searches (30-day expiration)
+- **Total Capacity**: 150MB (equivalent to thousands of chord sheets)
 
-```text
-core/
-├── config/        # Database configuration
-├── ttl/          # TTL policies and utilities
-└── schema.ts     # Aggregated schema exports
-```
+When storage gets full (80% capacity), the system automatically removes:
 
-### Smart Cleanup System ✅
+1. Expired search results first
+2. Old, rarely accessed cached content
+3. Never touches your saved chord sheets
 
-```text
-services/cleanup/
-├── strategy/     # Priority calculation (protects saved items)
-├── monitor/      # Storage usage monitoring
-├── service/      # Size estimation and result handling
-└── triggers/     # Automated cleanup triggers
-```
+## For Users
 
-### Type System ✅
+### What Gets Saved Forever
 
-```text
-types/
-├── chord-sheet.ts    # StoredChordSheet interface
-├── search-cache.ts   # SearchCacheEntry interface  
-└── schema.ts         # Database schema definition
-```
+- Any chord sheet you mark as "saved"
+- These persist across browser sessions and devices (if using the same browser)
 
-### Utilities ✅
+### What Gets Cleaned Up
 
-```text
-utils/keys/
-├── formats.ts        # Key format definitions
-└── validation.ts     # Key validation functions
-```
+- Search results older than 30 days
+- Chord sheets you viewed but didn't save (after being unused for weeks)
+- Temporary cache files
 
-## Key Features
+### Storage Indicators
 
-### **User Intent Protection**
+Users can see:
 
-- **CRITICAL RULE**: Saved chord sheets (`saved: true`) are NEVER automatically removed
-- Users must manually delete saved items
-- Smart cleanup respects user preferences
+- How many chord sheets they have saved
+- Storage usage levels
+- When cleanup happens (transparent, non-disruptive)
 
-### **Priority-Based Cleanup**
+## Technical Implementation
 
-```typescript
-// High Priority (kept longer)
-- Saved items (never removed)
-- Recently accessed items
-- Frequently used items
+### Technology Choice
 
-// Low Priority (removed first)
-- Old, rarely accessed cache
-- Expired search results
-```
+Uses **IndexedDB** (browser's built-in database) because:
 
-### **Consistent Key Format**
+- Works offline with large storage capacity (150MB vs 5MB for basic storage)
+- Structured database with efficient searching
+- Handles thousands of chord sheets without performance issues
+
+### Core Components
+
+- **Chord Sheet Storage**: Saves user's chord sheets with metadata (title, artist, when last accessed)
+- **Search Cache**: Temporarily stores search results to avoid re-fetching
+- **Smart Cleanup**: Automatically manages storage space without user intervention
+- **Offline Support**: Everything works without internet connection
+
+### Developer Integration
 
 ```typescript
-// All storage types use 'path' for consistency with domain objects
-// Chord sheets: "artist-path/song-path" (from Song.path)
-// Artist search: "artist-path" (from Artist.path)
-// Song search: "artist-path/song-path" (from Song.path)
+// Save a chord sheet permanently
+await store.store(chordSheet, { saved: true });
+
+// Get all user's saved sheets
+const savedSheets = await store.getAllSaved();
+
+// Check if storage needs cleanup
+const needsCleanup = await monitor.checkStorageUsage();
 ```
-
-### **Data Model**
-
-- **Single Source of Truth**: Artist/title data lives in `chordSheet` object
-- **Domain Alignment**: StoredChordSheet extends domain ChordSheet type
-- **Efficient Indexing**: Indexes on `chordSheet.artist` and `chordSheet.title`
-
-## Usage (When Complete)
-
-```typescript
-import { storage } from "@/storage";
-
-// Smart cleanup (respects saved items)
-const result = await cleanup.performCleanup();
-
-// TTL utilities
-const expired = isExpired(item.expiresAt);
-const expiresAt = calculateExpirationTime(TTL_CONFIG.CHORD_SHEET_UNSAVED);
-
-// Key utilities
-const isValid = validateKeyFormat(key, "chordSheet");
-```
-
-## Code Structure
-
-- **Modular Design**: Each file handles a specific responsibility
-- **Clean APIs**: Barrel exports provide simple import paths
-- **Type Safety**: Full TypeScript coverage with domain type integration
-
-## Status
-
-✅ **Phase 1**: Setup & Discovery  
-✅ **Phase 2**: Core Infrastructure (42 modular files)  
-🚧 **Phase 3**: IndexedDB Manager (Next)
-
-**Current**: Foundation complete, ready for IndexedDB manager implementation.
