@@ -1,39 +1,65 @@
 /**
  * Hook for managing saved chord sheets from IndexedDB
  * 
- * This hook provides access to the user's saved chord sheets from IndexedDB.
- * It includes both user-added chord sheets and sample chord sheets (in dev mode).
+ * Provides access to user's saved chord sheets with optimistic updates
+ * for immediate UI feedback during IndexedDB operations.
  * 
- * Returns StoredChordSheet[] which contains all needed info including path.
+ * @returns Object with chordSheets array and refresh function
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useOptimistic, startTransition } from "react";
 import type { StoredChordSheet } from "../types/chord-sheet";
 import { ChordSheetStore } from "../stores/chord-sheets/store";
+import { performanceTracker } from "../../utils/performance";
 
 /**
  * Hook for managing saved chord sheets from IndexedDB
- * @returns Object with chordSheets (StoredChordSheet[]) and refresh function
+ * 
+ * @returns Object with chordSheets array and refresh function
  */
 export function useSavedChordSheets() {
   const [chordSheets, setChordSheets] = useState<StoredChordSheet[]>([]);
 
+  // Optimistic updates provide immediate UI feedback while IndexedDB operations complete
+  const [optimisticChordSheets, setOptimisticChordSheets] = useOptimistic(
+    chordSheets,
+    (_current: StoredChordSheet[], optimistic: StoredChordSheet[]) => optimistic
+  );
+
   const refresh = useCallback(async () => {
+    const hookStartTime = performance.now();
+    performanceTracker.startMeasure('chord-sheets-refresh');
+    
     try {
-      // Direct store access for better performance than abstract layer
       const chordSheetStore = new ChordSheetStore();
-      const storedChordSheets = await chordSheetStore.getAllSaved();
       
+      const dataFetchStart = performance.now();
+      const storedChordSheets = await chordSheetStore.getAllSaved();
+      const dataFetchTime = performance.now() - dataFetchStart;
+      
+      // Non-blocking update prevents UI freezing during large data operations
+      startTransition(() => {
+        setOptimisticChordSheets(storedChordSheets);
+      });
       setChordSheets(storedChordSheets);
+      
+      // Performance tracking helps identify IndexedDB bottlenecks
+      const totalTime = performance.now() - hookStartTime;
+      performanceTracker.trackHookPerformance('useSavedChordSheets', totalTime, dataFetchTime);
+      
     } catch (error) {
       console.error('[useSavedChordSheets] Failed to load saved chord sheets from IndexedDB:', error);
       setChordSheets([]);
+      setOptimisticChordSheets([]);
+    } finally {
+      performanceTracker.endMeasure('chord-sheets-refresh');
     }
-  }, []);
+  }, [setOptimisticChordSheets]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { chordSheets, refresh };
+  // Return optimistic state for immediate UI response to user actions
+  return { chordSheets: optimisticChordSheets, refresh };
 }
