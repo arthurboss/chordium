@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,17 +6,22 @@ import SongViewer from "@/components/SongViewer";
 import SearchLoadingState from "@/components/SearchResults/SearchLoadingState";
 import ErrorState from "@/components/ErrorState";
 import NavigationCard from "@/components/NavigationCard";
-import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { deleteChordSheet, getChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
 import { toast } from "@/hooks/use-toast";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import { useChordSheetData } from "@/hooks/useChordSheetData";
-import type { Song } from "@chordium/types";
+import type { Song, ChordSheet } from "@chordium/types";
 
 const ChordViewer = () => {
   const { artist, song } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
+  
+  // State for chord sheet data
+  const [chordSheet, setChordSheet] = useState<ChordSheet | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Song object from navigation state (if passed from search results)
   const navigationSong = location.state?.song as Song | undefined;
@@ -24,8 +29,50 @@ const ChordViewer = () => {
   // Generate path for chord sheet lookup
   const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
 
-  // Use the traditional hook approach
-  const { chordSheet, isLoading, error } = useChordSheetData(path || "");
+  // Load chord sheet data
+  useEffect(() => {
+    if (!path) {
+      setError("No path provided for chord sheet");
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadChordSheet = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const storedChordSheet = await getChordSheet(path);
+        
+        if (cancelled) return;
+        
+        if (storedChordSheet?.storage?.saved) {
+          const domainChordSheet = storedToChordSheet(storedChordSheet);
+          setChordSheet(domainChordSheet);
+        } else {
+          setChordSheet(null);
+          setError("Chord sheet not found");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Error loading chord sheet:", err);
+          setError("Failed to load chord sheet");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadChordSheet();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [path]);
 
   const handleBack = () => {
     navigate("/my-chord-sheets");
