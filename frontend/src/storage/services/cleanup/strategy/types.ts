@@ -1,7 +1,3 @@
-/**
- * Cleanup strategy result interface
- */
-
 /** Cleanup strategy result */
 export interface CleanupStrategy {
   /** Priority score - higher means keep longer (1000 = never remove) */

@@ -1,8 +1,4 @@
-/**
- * Size estimation utilities for storage items
- */
-
-import type { StoredChordSheet, SearchCacheEntry } from '../../../types';
+import type { StoredChordSheet, SearchCacheEntry } from "../../../types";
 
 /**
  * Estimates size of a chord sheet in bytes

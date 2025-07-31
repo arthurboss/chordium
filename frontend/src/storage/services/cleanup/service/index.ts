@@ -1,7 +1,6 @@
-/**
- * Barrel export for cleanup service modules
- */
-
-export type { CleanupResult } from './types';
-export { estimateChordSheetSize, estimateSearchCacheSize } from './size-estimation';
-export { createEmptyResult } from './result-factory';
+export type { CleanupResult } from "./types";
+export {
+  estimateChordSheetSize,
+  estimateSearchCacheSize,
+} from "./size-estimation";
+export { createEmptyResult } from "./result-factory";

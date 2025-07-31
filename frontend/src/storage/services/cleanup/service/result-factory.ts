@@ -1,8 +1,4 @@
-/**
- * Empty cleanup result factory
- */
-
-import type { CleanupResult } from './types';
+import type { CleanupResult } from "./types";
 
 /**
  * Creates empty cleanup result
@@ -13,7 +9,7 @@ export function createEmptyResult(): CleanupResult {
     searchCacheRemoved: 0,
     totalItemsRemoved: 0,
     estimatedSpaceFreed: 0,
-    strategy: 'No cleanup needed',
-    protectedItems: 0
+    strategy: "No cleanup needed",
+    protectedItems: 0,
   };
 }

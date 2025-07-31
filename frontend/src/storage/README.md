@@ -12,6 +12,8 @@ The storage system ensures users can access their chord sheets anytime, even off
 - **Large Capacity**: Stores 500+ chord sheets (150MB total)
 - **Smart Management**: Automatically removes old, unused content to make room for new saves
 - **Respects User Intent**: Never removes chord sheets you explicitly saved
+- **Development Samples**: Includes sample chord sheets for development mode
+- **React 19 Optimized**: Uses modern React features for optimal performance
 
 ## How It Works
 
@@ -71,16 +73,45 @@ Uses **IndexedDB** (browser's built-in database) because:
 - **Search Cache**: Temporarily stores search results to avoid re-fetching
 - **Smart Cleanup**: Automatically manages storage space without user intervention
 - **Offline Support**: Everything works without internet connection
+- **Sample Loading Service**: Provides development chord sheets for testing and demos
+- **Modular Hooks**: React hooks with single responsibility and optimistic updates
 
 ### Developer Integration
 
 ```typescript
+// Use the complete chord sheets hook (includes sample loading)
+import { useChordSheets } from "@/storage/hooks";
+
+function MyComponent() {
+  const { myChordSheets, isLoading, error, refreshMyChordSheets } = useChordSheets();
+  
+  if (isLoading) return <div>Loading chord sheets...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
+  return (
+    <div>
+      <h3>My Chord Sheets ({myChordSheets.length})</h3>
+      {myChordSheets.map(sheet => (
+        <div key={sheet.path}>{sheet.title} - {sheet.artist}</div>
+      ))}
+    </div>
+  );
+}
+
+// Direct storage operations
+import { ChordSheetStore } from "@/storage/stores/chord-sheets/store";
+
+const store = new ChordSheetStore();
+
 // Save a chord sheet permanently
-await store.store(chordSheet, { saved: true });
+await store.store(chordSheet, true, songPath);
 
 // Get all user's saved sheets
 const savedSheets = await store.getAllSaved();
 
-// Check if storage needs cleanup
-const needsCleanup = await monitor.checkStorageUsage();
+// Sample loading service (development mode only)
+import { SampleChordSheetsService, indexedDBStorage } from "@/storage/services/sample-chord-sheets";
+
+const sampleService = new SampleChordSheetsService(indexedDBStorage);
+await sampleService.loadSampleChordSheets();
 ```

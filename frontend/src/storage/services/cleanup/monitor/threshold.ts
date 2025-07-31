@@ -1,9 +1,5 @@
-/**
- * Cleanup threshold checking
- */
-
-import { LIMITS } from '../../../core/ttl/limits';
-import { getCurrentUsage } from './usage';
+import { LIMITS } from "../../../core/ttl/limits";
+import { getCurrentUsage } from "./usage";
 
 /**
  * Checks if cleanup should be triggered based on usage thresholds

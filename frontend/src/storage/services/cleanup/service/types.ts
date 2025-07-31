@@ -1,7 +1,3 @@
-/**
- * Cleanup operation result types
- */
-
 /** Result of cleanup operation */
 export interface CleanupResult {
   /** Number of chord sheets removed */
