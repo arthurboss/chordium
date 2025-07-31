@@ -1,10 +1,6 @@
-/**
- * Saves chord sheets to user's local storage
- */
-
-import type { ChordSheet, Song } from '@chordium/types';
-import { createStoredChordSheet } from '../utils/factories';
-import executeWriteTransaction from '../utils/transactions/write-transaction';
+import type { ChordSheet, Song } from "@chordium/types";
+import { createStoredChordSheet } from "../utils/factories";
+import { executeWriteTransaction } from "../utils/transactions";
 
 /**
  * @param chordSheet - Chord sheet content to save
@@ -20,8 +16,6 @@ export default async function storeChordSheet(
   path: Song["path"]
 ): Promise<void> {
   const storedChordSheet = createStoredChordSheet(chordSheet, path, { saved });
-  
-  return executeWriteTransaction((store) => 
-    store.put(storedChordSheet)
-  );
+
+  return executeWriteTransaction((store) => store.put(storedChordSheet));
 }
