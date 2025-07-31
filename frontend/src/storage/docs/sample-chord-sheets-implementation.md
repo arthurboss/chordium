@@ -1,40 +1,39 @@
-# Sample Chord Sheets IndexedDB Implementation Summary
+# Sample Chord Sheets Implementation
 
 ## Overview
 
-The sample chord sheets feature has been completely migrated from localStorage to IndexedDB, following ultra-modular architecture principles. This implementation provides a pure IndexedDB solution for loading sample chord sheets in development mode.
+The sample chord sheets feature provides sample data for development mode using IndexedDB storage. The implementation follows modular architecture principles and integrates seamlessly with the existing chord sheets system.
 
 ## Architecture
 
 ### Components
 
-1. **SampleSongsService** (`services/sample-songs/loader.ts`)
+1. **SampleChordSheetsService** (`services/sample-chord-sheets/loader.ts`)
    - Main orchestrator for loading sample chord sheets
    - Follows Single Responsibility Principle
    - Dependency injection for storage interface
 
-2. **IndexedDBStorage** (`services/sample-songs/indexeddb-storage.ts`)
+2. **IndexedDBStorage** (`services/sample-chord-sheets/indexeddb-storage.ts`)
    - Pure IndexedDB implementation of `IChordSheetStorage`
    - Wraps `ChordSheetStore` with clean interface
-   - No localStorage dependencies
+   - Consistent with overall storage architecture
 
-3. **useSampleChordSheets Hook** (`hooks/use-sample-chord-sheets.ts`)
-   - React hook for component integration
-   - Handles loading state and error management
-   - Dev-mode only functionality
+3. **useChordSheets Hook** (`hooks/use-chord-sheets.ts`)
+   - Main hook for complete chord sheets management
+   - Handles both saved chord sheets and sample loading
+   - Unified loading states and error handling
 
-4. **Data & Utilities** (modular services)
-   - Environment detection
-   - Duplicate prevention
-   - Storage logic
-   - Logging utilities
+4. **useSampleLoading Hook** (`hooks/chord-sheets/use-sample-loading.ts`)
+   - Focused hook for sample loading functionality
+   - Manual trigger for sample loading operations
+   - Development mode only functionality
 
 ## Key Features
 
 ✅ **Pure IndexedDB Implementation**
-- No localStorage dependencies
 - Uses existing IndexedDB infrastructure
 - Consistent with overall storage architecture
+- No external dependencies
 
 ✅ **Development Mode Only**
 - Automatic environment detection
@@ -42,19 +41,19 @@ The sample chord sheets feature has been completely migrated from localStorage t
 - Configurable behavior
 
 ✅ **Duplicate Prevention**
-- Checks existing saved songs
+- Checks existing saved chord sheets
 - Prevents redundant data
 - Maintains data integrity
 
-✅ **Database Readiness Management**
-- `useDatabaseReady` hook waits for IndexedDB initialization
-- No UI flashing or retry logic needed
-- Smooth loading experience without race conditions
+✅ **Unified State Management**
+- Single `useChordSheets` hook for complete functionality
+- Automatic sample loading coordination
+- Combined loading states and error handling
 
 ✅ **Modular Architecture**
-- Ultra-modular design following SRP
-- Clean dependency injection
+- Clean separation of concerns
 - Testable components
+- Focused responsibilities
 
 ✅ **Error Handling**
 - Comprehensive error management
@@ -63,90 +62,125 @@ The sample chord sheets feature has been completely migrated from localStorage t
 
 ## Sample Data
 
-The implementation includes two sample chord sheets:
+The implementation includes sample chord sheets for development:
 
 1. **Oasis - Wonderwall**
-   - Classic chords progression
+   - Classic chord progression
    - Popular beginner song
 
 2. **Eagles - Hotel California**
-   - More complex chord patterns
+   - Complex chord patterns
    - Advanced guitar techniques
 
-Both songs are marked with `storage.saved: true` to appear in the saved songs list.
+Sample chord sheets are marked with `storage.saved: true` to appear in the "My Chord Sheets" section.
 
 ## Usage
 
-### React Hook
+### Complete Chord Sheets Management
 
 ```typescript
-import { useSampleChordSheets } from '@/storage/hooks/use-sample-chord-sheets';
+import { useChordSheets } from '@/storage/hooks';
 
 function MyComponent() {
-  const { isLoading, error, isLoaded } = useSampleChordSheets();
+  const { myChordSheets, isLoading, error, refreshMyChordSheets } = useChordSheets();
   
-  if (isLoading) return <div>Loading samples...</div>;
+  if (isLoading) return <div>Loading chord sheets...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  if (isLoaded) return <div>Samples ready!</div>;
   
-  return <div>No samples (production mode)</div>;
+  return (
+    <div>
+      <h3>My Chord Sheets ({myChordSheets.length})</h3>
+      {myChordSheets.map(sheet => (
+        <div key={sheet.id}>{sheet.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Sample Loading Only
+
+```typescript
+import { useSampleLoading } from '@/storage/hooks';
+
+function SampleLoader() {
+  const { isLoadingSamples, sampleError, loadSamples } = useSampleLoading();
+  
+  return (
+    <button onClick={loadSamples} disabled={isLoadingSamples}>
+      {isLoadingSamples ? 'Loading...' : 'Load Samples'}
+    </button>
+  );
 }
 ```
 
 ### Direct Service Usage
 
 ```typescript
-import { SampleSongsService, indexedDBStorage } from '@/storage/services/sample-songs';
+import { SampleChordSheetsService, indexedDBStorage } from '@/storage/services/sample-chord-sheets';
 
-const service = new SampleSongsService(indexedDBStorage);
-await service.loadSampleSongs();
+const service = new SampleChordSheetsService(indexedDBStorage);
+await service.loadSampleChordSheets();
 ```
 
-## Archive Management
+## API Reference
 
-Old localStorage-based implementations have been moved to:
-- `frontend/_archive/src/hooks/use-sample-chord-sheets/`
+### useChordSheets Hook
 
-This follows the project's archive strategy for deprecated code.
+Returns:
+- `myChordSheets: StoredChordSheet[]` - All saved chord sheets
+- `setMyChordSheets: Function` - Update chord sheets state
+- `refreshMyChordSheets: Function` - Refresh from storage
+- `isLoading: boolean` - Combined loading state
+- `error: Error | null` - Any operation errors
+
+### useSampleLoading Hook
+
+Returns:
+- `isLoadingSamples: boolean` - Sample loading state
+- `sampleError: Error | null` - Sample loading errors
+- `loadSamples: Function` - Trigger sample loading
 
 ## Testing
 
-Comprehensive test suite available at:
-- `storage/tests/test-sample-songs.ts`
+Test suite available at:
+- `storage/tests/test-sample-chord-sheets.ts`
 
-Tests cover:
+Covers:
 - IndexedDB storage functionality
 - Duplicate prevention
 - Development mode restrictions
-- Error handling
+- Error handling scenarios
 
 ## Integration
 
-The hook is automatically exported and available for use:
+Available exports:
 
 ```typescript
-// Available exports
 import { 
-  useSampleChordSheets,          // React hook
-  SampleSongsService,      // Service class
-  indexedDBStorage         // Storage instance
+  useChordSheets,              // Complete chord sheets hook
+  useSampleLoading,            // Sample loading hook
+  SampleChordSheetsService,    // Service class
+  indexedDBStorage             // Storage instance
 } from '@/storage';
 ```
 
 ## Benefits
 
-1. **Consistency**: Uses same IndexedDB infrastructure as main app
-2. **Performance**: Better than localStorage for structured data
-3. **Scalability**: Easy to add more sample chord sheets
-4. **Maintainability**: Ultra-modular design enables easy testing and changes
-5. **Type Safety**: Full TypeScript support with proper interfaces
+1. **Unified Interface**: Single hook for complete chord sheets functionality
+2. **Performance**: Optimized IndexedDB operations with React 19 features
+3. **Type Safety**: Full TypeScript support with proper interfaces
+4. **Modularity**: Clean separation between concerns
+5. **Developer Experience**: Automatic sample loading in development mode
 
-## Migration Status
+## Data Flow
 
-✅ **Complete**: Sample chord sheets now use pure IndexedDB implementation
-✅ **Archived**: Old localStorage implementation properly archived
-✅ **Tested**: Comprehensive test coverage
-✅ **Documented**: Full documentation and examples
-✅ **Integrated**: Ready for use in the application
+```
+Development Mode Startup
+├── useChordSheets hook initialization
+├── useSampleLoading loads sample data
+├── useChordSheetsInitialization coordinates loading
+└── Refreshes saved chord sheets (includes samples)
+```
 
-The sample chord sheets feature is now fully migrated to IndexedDB and ready for production use in development mode.
+The sample chord sheets feature provides a seamless development experience with sample data while maintaining production-ready architecture.
