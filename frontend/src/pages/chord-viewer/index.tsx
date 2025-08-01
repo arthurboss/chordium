@@ -7,7 +7,7 @@ import { useChordSheet } from "@/hooks/use-chord-sheet";
 import type { RouteParams } from "./chord-viewer.types";
 
 // Utils
-import { convertUrlParamsToPath } from "./utils/url-to-path-converter";
+import { resolveChordSheetPath } from "./utils/path-resolver";
 import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
@@ -28,7 +28,7 @@ const ChordViewer = () => {
   const routeParams = useParams() as RouteParams;
   
   // Convert URL parameters to chord sheet storage path
-  const path = convertUrlParamsToPath(routeParams);
+  const path = resolveChordSheetPath(routeParams);
   
   // Fetch chord sheet data (handles database readiness internally)
   const chordSheetResult = useChordSheet({ path });
