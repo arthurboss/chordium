@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { getDatabase } from "../stores/chord-sheets/database/connection";
+import { SampleChordSheetsService, indexedDBStorage } from "../services/sample-chord-sheets";
 
 /**
- * Hook to wait for IndexedDB database to be ready before showing UI
+ * Hook to wait for IndexedDB database to be ready and sample data loaded before showing UI
  *
- * This prevents race conditions where UI loads faster than database initialization,
- * avoiding the need for retry logic and UI flashing.
+ * This prevents race conditions where:
+ * 1. UI loads faster than database initialization
+ * 2. Sample chord sheets are not yet loaded in development mode
+ *
+ * In development mode, this also ensures sample data is available before resolving as ready.
  *
  * @returns Object with isReady boolean and error state
  */
@@ -16,10 +20,16 @@ export function useDatabaseReady() {
   useEffect(() => {
     let cancelled = false;
 
-    const waitForDatabase = async () => {
+    const waitForDatabaseAndSamples = async () => {
       try {
-        // This will wait for the database to be fully initialized
+        // First, wait for the database to be fully initialized
         await getDatabase();
+
+        // In development mode, also ensure sample data is loaded
+        if (import.meta.env.DEV) {
+          const sampleService = new SampleChordSheetsService(indexedDBStorage);
+          await sampleService.loadSampleChordSheets();
+        }
 
         if (!cancelled) {
           setIsReady(true);
@@ -31,7 +41,7 @@ export function useDatabaseReady() {
       }
     };
 
-    waitForDatabase();
+    waitForDatabaseAndSamples();
 
     return () => {
       cancelled = true;
