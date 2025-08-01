@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,11 +6,13 @@ import SongViewer from "@/components/SongViewer";
 import SearchLoadingState from "@/components/SearchResults/SearchLoadingState";
 import ErrorState from "@/components/ErrorState";
 import NavigationCard from "@/components/NavigationCard";
-import { deleteChordSheet, getChordSheet } from "@/storage/stores/chord-sheets/operations";
-import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
+import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
 import { toast } from "@/hooks/use-toast";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import type { Song, ChordSheet } from "@chordium/types";
+import { useChordSheets } from "@/storage/hooks";
+import { resolveSampleChordSheetPath } from "@/storage/services/sample-chord-sheets/path-resolver";
+import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
+import type { Song } from "@chordium/types";
 
 const ChordViewer = () => {
   const { artist, song } = useParams();
@@ -18,61 +20,34 @@ const ChordViewer = () => {
   const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   
-  // State for chord sheet data
-  const [chordSheet, setChordSheet] = useState<ChordSheet | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Song object from navigation state (if passed from search results)
   const navigationSong = location.state?.song as Song | undefined;
 
   // Generate path for chord sheet lookup
   const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
 
-  // Load chord sheet data
-  useEffect(() => {
-    if (!path) {
-      setError("No path provided for chord sheet");
-      setIsLoading(false);
-      return;
+  // Use the main hook that handles database initialization and sample loading
+  const { myChordSheets, isLoading, error } = useChordSheets();
+
+  // Find the specific chord sheet, resolving sample paths if needed
+  const chordSheet = useMemo(() => {
+    if (!path || isLoading) return null;
+    
+    // First try direct path lookup
+    const directMatch = myChordSheets.find(sheet => sheet.path === path);
+    if (directMatch?.storage?.saved) {
+      return storedToChordSheet(directMatch);
     }
-
-    let cancelled = false;
-
-    const loadChordSheet = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const storedChordSheet = await getChordSheet(path);
-        
-        if (cancelled) return;
-        
-        if (storedChordSheet?.storage?.saved) {
-          const domainChordSheet = storedToChordSheet(storedChordSheet);
-          setChordSheet(domainChordSheet);
-        } else {
-          setChordSheet(null);
-          setError("Chord sheet not found");
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Error loading chord sheet:", err);
-          setError("Failed to load chord sheet");
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadChordSheet();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [path]);
+    
+    // For samples, try resolved path lookup
+    const resolvedPath = resolveSampleChordSheetPath(path);
+    const resolvedMatch = myChordSheets.find(sheet => sheet.path === resolvedPath);
+    if (resolvedMatch?.storage?.saved) {
+      return storedToChordSheet(resolvedMatch);
+    }
+    
+    return null;
+  }, [path, myChordSheets, isLoading]);
 
   const handleBack = () => {
     navigate("/my-chord-sheets");
@@ -82,7 +57,9 @@ const ChordViewer = () => {
     if (!chordSheet || !path) return;
     
     try {
-      await deleteChordSheet(path);
+      // Use resolved path for sample chord sheets
+      const resolvedPath = resolveSampleChordSheetPath(path);
+      await deleteChordSheet(resolvedPath);
       
       toast({
         title: "Chord sheet removed",
@@ -125,13 +102,14 @@ const ChordViewer = () => {
     );
   }
 
-  if (error || !chordSheet) {
+  if (error || (!isLoading && !chordSheet)) {
+    const errorMessage = error instanceof Error ? error.message : error || "Chord sheet not found in saved items";
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
           <NavigationCard onBack={handleBack} />
-          <ErrorState error={error || "Chord sheet not found in saved items"} />
+          <ErrorState error={errorMessage} />
         </main>
         <Footer />
       </div>
