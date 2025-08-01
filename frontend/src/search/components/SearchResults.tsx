@@ -9,7 +9,6 @@ interface SearchResultsProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  myChordSheets?: Song[];
   artist: string;
   song: string;
   filterArtist: string;
@@ -26,7 +25,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   setMySongs, 
   setActiveTab,
   setSelectedSong,
-  myChordSheets = [],
   artist, 
   song,
   filterArtist,
@@ -51,8 +49,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     onArtistSelect,
     setMySongs,
     setActiveTab,
-    setSelectedSong,
-    myChordSheets,
+    setSelectedSong
   });
 
   return (

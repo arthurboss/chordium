@@ -8,6 +8,4 @@ export interface UseSongActionsProps {
   memoizedSongs: Song[];
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  // New prop for My Chord Sheets to enable deduplication
-  myChordSheets?: Song[];
 }

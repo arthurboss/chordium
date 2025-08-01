@@ -1,34 +1,34 @@
 import { useRef, useEffect, useState } from "react";
-import { useTabStatePersistence } from "../hooks/useTabStatePersistence";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchState } from "@/context/SearchStateContext";
 
 import { Song } from "../types/song";
-import SongList from "./SongList";
+import type { StoredChordSheet } from "@/storage/types";
+import ChordSheetList from "./chord-sheet-list";
 import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { handleDeleteChordSheetFromUI, handleUpdateChordSheetFromUI, handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
+import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  myChordSheets: Song[];
-  setMySongs: React.Dispatch<React.SetStateAction<Song[]>>;
+  myChordSheets: StoredChordSheet[];
+  setMySongs: () => Promise<void>; // This is actually the refresh function
   selectedSong: Song | null;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
 }
 
-const TabContainer = ({ 
-  activeTab, 
-  setActiveTab, 
-  myChordSheets, 
+const TabContainer = ({
+  activeTab,
+  setActiveTab,
+  myChordSheets,
   setMySongs,
   selectedSong,
   setSelectedSong
@@ -37,14 +37,9 @@ const TabContainer = ({
   const location = useLocation();
   const { searchState } = useSearchState();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  const { getTabState, setTabState } = useTabStatePersistence();
   
   // Local state to track the last search URL for tab switching
   const [lastSearchUrl, setLastSearchUrl] = useState<string | null>(null);
-
-  // Example: Persist myChordSheets state (e.g., scroll position)
-  const myChordSheetsTabState = getTabState<{ scroll: number }>("my-chord-sheets", { scroll: 0 });
-  const setMyChordSheetsTabState = (state: { scroll: number }) => setTabState("my-chord-sheets", state);
 
   // Track when we're on a search-related page and store the URL
   useEffect(() => {
@@ -101,42 +96,82 @@ const TabContainer = ({
     }
   };
   
-  const handleSongSelect = (song: Song) => {
+  const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
     
-    // For My Chord Sheets: Navigate to /my-chord-sheets/:artist/:song and pass Song object as state
-    if (song.artist && song.title) {
+    // For My Chord Sheets: Navigate directly to chord sheet page
+    if (storedChordSheet.artist && storedChordSheet.title) {
       // Create URL-friendly slugs using Unicode-aware function
-      const artistSlug = toSlug(song.artist);
-      const songSlug = toSlug(song.title);
+      const artistSlug = toSlug(storedChordSheet.artist);
+      const songSlug = toSlug(storedChordSheet.title);
       
-      const targetUrl = `/my-chord-sheets/${artistSlug}/${songSlug}`;
-      // Pass the Song object as navigation state so ChordViewer can use it directly
+      const targetUrl = `/${artistSlug}/${songSlug}`;
+      // Pass a minimal Song object for navigation state
       navigate(targetUrl, {
         state: {
-          song: song
+          song: {
+            path: storedChordSheet.path,
+            title: storedChordSheet.title,
+            artist: storedChordSheet.artist
+          }
         }
       });
     } else {
-      // Fallback for songs without proper artist/title structure
-      setSelectedSong(song);
-      navigate(`/my-chord-sheets?song=${encodeURIComponent(song.path)}`, {
+      // Fallback for chord sheets without proper artist/title structure
+      navigate(`/${encodeURIComponent(storedChordSheet.path)}`, {
         state: {
-          song: song
+          song: {
+            path: storedChordSheet.path,
+            title: storedChordSheet.title,
+            artist: storedChordSheet.artist
+          }
         }
       });
     }
   };
   
   const handleSaveUploadedChordSheet = (content: string, title: string) => {
-    handleSaveNewChordSheetFromUI(content, title, setMySongs, navigate, setActiveTab);
+    // NOTE: Save functionality will be implemented with IndexedDB
+    console.warn('Save functionality not yet implemented');
   };
-  
+
   const handleChordSheetUpdate = (content: string) => {
-    handleUpdateChordSheetFromUI(content, selectedSong, myChordSheets, setMySongs, setSelectedSong);
+    // NOTE: Update functionality will be implemented with IndexedDB
+    console.warn('Update functionality not yet implemented');
   };
-  
-  const handleChordSheetDelete = (songPath: string) => {
-    handleDeleteChordSheetFromUI(songPath, myChordSheets, setMySongs, selectedSong, setSelectedSong);
+
+  const handleChordSheetDelete = async (songPath: string) => {
+    // Find the song for user feedback
+    const songToDelete = myChordSheets.find(song => song.path === songPath);
+    
+    if (!songToDelete) {
+      console.error('Song not found for deletion:', songPath);
+      return;
+    }
+
+    try {
+      // Use pure database operation
+      await deleteChordSheet(songPath);
+
+      toast({
+        title: "Chord sheet removed",
+        description: `"${songToDelete.title}" has been removed from My Chord Sheets`,
+      });
+
+      // Refresh the data from IndexedDB (this updates the UI)
+      await setMySongs();
+
+      // Clear selection if the deleted song was selected
+      if (selectedSong?.path === songPath) {
+        setSelectedSong(null);
+      }
+    } catch (error) {
+      console.error('Failed to remove chord sheet:', error);
+      toast({
+        title: "Remove failed",
+        description: `Failed to remove "${songToDelete.title}". Please try again.`,
+        variant: "destructive"
+      });
+    }
   };
 
   // Handle keyboard navigation for the tabs
@@ -187,7 +222,6 @@ const TabContainer = ({
           setMySongs={setMySongs}
           setActiveTab={setActiveTab}
           setSelectedSong={setSelectedSong}
-          myChordSheets={myChordSheets}
         />
       </div>
       <div style={{ display: activeTab === "upload" ? "block" : "none" }}>
@@ -201,7 +235,8 @@ const TabContainer = ({
           <SongViewer
             song={{
               song: selectedSong,
-              chordSheet: unifiedChordSheetCache.getCachedChordSheet(selectedSong.artist, selectedSong.title) || {
+              chordSheet: {
+                // NOTE: Chord sheet content loading will be implemented with IndexedDB
                 title: selectedSong.title,
                 artist: selectedSong.artist,
                 songChords: '',
@@ -219,13 +254,11 @@ const TabContainer = ({
             isFromMyChordSheets={true}
           />
         ) : (
-          <SongList
-            songs={myChordSheets}
-            onSongSelect={handleSongSelect}
-            onDeleteSong={handleChordSheetDelete}
+          <ChordSheetList
+            chordSheets={myChordSheets}
+            onChordSheetSelect={handleSongSelect}
+            onDeleteChordSheet={handleChordSheetDelete}
             onUploadClick={() => handleTabChange("upload")}
-            tabState={myChordSheetsTabState}
-            setTabState={setMyChordSheetsTabState}
           />
         )}
       </div>

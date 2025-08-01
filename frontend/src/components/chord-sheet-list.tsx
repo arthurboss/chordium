@@ -1,21 +1,17 @@
-import type { Song } from "../types/song";
+import { useRef } from "react";
+import type { ChordSheetListProps } from "./chord-sheet-list.types";
 import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
-
-interface SongListProps {
-  songs: Song[];
-  onSongSelect: (song: Song) => void;
-  onDeleteSong: (songPath: string) => void;
-  onUploadClick: () => void;
-  tabState?: { scroll: number };
-  setTabState?: (state: { scroll: number }) => void;
-}
-
-
-import { useRef } from "react";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 
-const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, setTabState }: SongListProps) => {
+const ChordSheetList = ({ 
+  chordSheets, 
+  onChordSheetSelect, 
+  onDeleteChordSheet, 
+  onUploadClick, 
+  tabState, 
+  setTabState 
+}: ChordSheetListProps) => {
   const listRef = useRef<HTMLDivElement>(null);
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
@@ -23,25 +19,29 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, 
 
   return (
     <div ref={listRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
-      {songs.length > 0 ? (
+      {chordSheets.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {[...songs].reverse().map((song, index) => (
+          {[...chordSheets].reverse().map((storedChordSheet, index) => (
             <ResultCard
-              key={`${song.path}-${index}`}
+              key={`${storedChordSheet.path}-${index}`}
               icon="music"
-              title={song.title}
-              subtitle={song.artist}
-              onView={(path) => onSongSelect(song)}
-              onDelete={onDeleteSong}
-              path={song.path}
+              title={storedChordSheet.title}
+              subtitle={storedChordSheet.artist}
+              onView={() => onChordSheetSelect(storedChordSheet)}
+              onDelete={onDeleteChordSheet}
+              path={storedChordSheet.path}
               isDeletable={true}
-              song={song}
+              song={{
+                path: storedChordSheet.path,
+                title: storedChordSheet.title,
+                artist: storedChordSheet.artist
+              }}
             />
           ))}
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground mb-3">You haven't saved any songs yet.</p>
+          <p className="text-muted-foreground mb-3">You haven't saved any chord sheets yet.</p>
           <Button
             onClick={onUploadClick}
             variant="outline"
@@ -56,4 +56,4 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, 
   );
 };
 
-export default SongList;
+export default ChordSheetList;

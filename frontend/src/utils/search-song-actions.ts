@@ -1,29 +1,30 @@
 import { useCallback } from 'react';
 import { Song } from '@/types/song';
 import { useNavigate } from 'react-router-dom';
-import { useEnhancedSongSelection } from './enhanced-song-selection';
+import { toSlug } from '@/utils/url-slug-utils';
 import type { UseSongActionsProps } from '@/search/types';
 
 export const useSongActions = ({ 
   setMySongs,
   memoizedSongs,
   setActiveTab,
-  setSelectedSong,
-  myChordSheets = []
+  setSelectedSong
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
   
-  // Use the enhanced song selection hook for deduplication
-  const { handleSongSelection } = useEnhancedSongSelection({
-    navigate,
-    setSelectedSong,
-    setActiveTab,
-    myChordSheets
-  });
-
   const handleView = useCallback((songData: Song) => {
-    handleSongSelection(songData);
-  }, [handleSongSelection]);
+    // Navigate directly to chord sheet page - no deduplication needed
+    // Search is for discovery, chord sheets are handled separately
+    if (songData.artist && songData.title) {
+      const artistSlug = toSlug(songData.artist);
+      const songSlug = toSlug(songData.title);
+      const targetUrl = `/${artistSlug}/${songSlug}`;
+      
+      navigate(targetUrl, {
+        state: { song: songData }
+      });
+    }
+  }, [navigate]);
 
   const handleAdd = useCallback((songId: string) => {
     if (!setMySongs) return;

@@ -17,5 +17,4 @@ export interface UseSearchStateOptions {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  myChordSheets?: Song[];
 }

@@ -17,12 +17,11 @@ interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  myChordSheets: Song[];
 }
 
 // Local state for selectedSong (for viewing a song from search results)
 
-const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSelectedSong, myChordSheets }) => {
+const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSelectedSong }) => {
   const { searchState, updateSearchState } = useSearchState();
   const [loading, setLoading] = useState(false);
   const [selectedSongLocal, setSelectedSongLocal] = useState<Song | null>(null);
@@ -250,7 +249,6 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
                 setMySongs={setMySongs}
                 setActiveTab={setActiveTab}
                 setSelectedSong={handleSongSelect}
-                myChordSheets={myChordSheets}
                 artist={hasSearched ? submittedArtist : searchState.artist}
                 song={hasSearched ? submittedSong : searchState.song}
                 filterArtist={activeArtist ? submittedArtist : artistInput}

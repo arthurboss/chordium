@@ -93,45 +93,8 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Route for songs from My Chord Sheets: /my-chord-sheets/artist/song
-        path: "my-chord-sheets/:artist/:song", 
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        // Route for songs from search results: /artist/song
+        // Unified route for all chord sheets: /artist/song
         path: ":artist/:song",
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        path: "chord/:artist/:song",
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        path: "chord/:id",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>

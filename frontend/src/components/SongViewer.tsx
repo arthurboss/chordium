@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
+import NavigationCard from "@/components/NavigationCard";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
 import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
-import { Card } from "./ui/card";
-import { ArrowLeft, Trash2, Save } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -54,20 +54,12 @@ const SongViewer = ({
 
   return (
     <div className="animate-fade-in">
-      <Card className="flex flex-row p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onBack}
-          className="mr-2"
-          tabIndex={0}
-          aria-label="back-button"
-        >
-          <ArrowLeft className="h-4 w-4 text-primary" />
-          Back
-        </Button>
-
-        {/* Show Save button for search results, Delete button for My Chord Sheets */}
+      <NavigationCard
+        onBack={onBack}
+        onDelete={isFromMyChordSheets && !hideDeleteButton ? () => onDelete(songObj.path) : undefined}
+        showDeleteButton={isFromMyChordSheets && !hideDeleteButton}
+      >
+        {/* Show Save button for search results only */}
         {!hideSaveButton && !isFromMyChordSheets && onSave && (
           <Button
             variant="outline"
@@ -75,30 +67,13 @@ const SongViewer = ({
             onClick={onSave}
             tabIndex={0}
             aria-label="save to my chord sheets"
+            className="ml-auto"
           >
             <Save className="h-4 w-4 text-primary" />
             Save
           </Button>
         )}
-
-        {!hideDeleteButton && (isFromMyChordSheets || (!onSave || hideSaveButton)) && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onDelete) {
-                onDelete(songObj.path);
-              }
-            }}
-            tabIndex={0}
-            aria-label="delete chord sheet"
-          >
-            <Trash2 className="h-4 w-4 text-destructive dark:text-red-300" />
-            Delete
-          </Button>
-        )}
-      </Card>
+      </NavigationCard>
       <div className="mt-6">
         <ChordDisplay
           ref={chordDisplayRef}
