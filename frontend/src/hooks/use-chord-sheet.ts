@@ -10,6 +10,7 @@ import type { ChordSheet } from "@chordium/types";
 import type { UseChordSheetResult, UseChordSheetParams } from "./use-chord-sheet.types";
 import getChordSheet from "@/storage/stores/chord-sheets/operations/get-chord-sheet";
 import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
+import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
 
 /**
  * Loads and manages chord sheet data with smart caching strategy
@@ -26,8 +27,26 @@ export function useChordSheet({ path }: UseChordSheetParams): UseChordSheetResul
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Wait for database to be ready before proceeding
+  const { isReady: isDatabaseReady, error: databaseError } = useDatabaseReady();
 
   useEffect(() => {
+    // If database isn't ready yet, keep loading
+    if (!isDatabaseReady) {
+      setIsLoading(true);
+      setError(null);
+      return;
+    }
+    
+    // If database failed to initialize, show that error
+    if (databaseError) {
+      setIsLoading(false);
+      setError(`Database initialization failed: ${databaseError.message}`);
+      return;
+    }
+    
+    // Now that database is ready, check if path is provided
     if (!path) {
       setChordSheet(null);
       setIsSaved(false);
@@ -76,7 +95,7 @@ export function useChordSheet({ path }: UseChordSheetParams): UseChordSheetResul
     return () => {
       cancelled = true;
     };
-  }, [path]);
+  }, [path, isDatabaseReady, databaseError]);
 
   return { chordSheet, isSaved, isLoading, error };
 }

@@ -7,11 +7,9 @@ import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
 import NavigationCard from "@/components/NavigationCard";
 import { useChordSheet } from "@/hooks/use-chord-sheet";
-import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
 import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
-import { deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
-import { generateChordSheetPath } from "@/utils/chord-sheet-path";
+import deleteChordSheet from "@/storage/stores/chord-sheets/operations/delete-chord-sheet";
 import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
 import { toast } from "@/hooks/use-toast";
 import type { ChordSheetData } from './chord-viewer.types';
@@ -21,9 +19,6 @@ const ChordViewer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { artist, song } = useParams();
-  
-  // Wait for database to be ready before accessing chord sheets
-  const { isReady: isDatabaseReady, error: databaseError } = useDatabaseReady();
   
   // Extract navigation data from location state if available
   // Note: This maintains backward compatibility with existing navigation state
@@ -49,11 +44,11 @@ const ChordViewer = () => {
 
   const path = generatePath();
   
-  // Only use the chord sheet hook when database is ready
-  const chordSheetResult = useChordSheet({ path: isDatabaseReady ? path : '' });
+  // Use the chord sheet hook (now handles database readiness internally)
+  const chordSheetResult = useChordSheet({ path });
 
-  // Determine if this chord sheet is saved (comes from My Chord Sheets context)
-  const isFromMyChordSheets = location.pathname.startsWith('/my-chord-sheets/');
+  // Determine if this chord sheet is saved - use database state only
+  const isFromMyChordSheets = chordSheetResult.isSaved;
 
   // Extract song title - prioritize navigation state, then chord data, fallback to URL params
   const getSongTitle = () => {
@@ -124,45 +119,39 @@ const ChordViewer = () => {
   };
 
   // Delete song from My Chord Sheets
-  const handleDeleteSong = () => {
+  const handleDeleteSong = async () => {
     const songPath = navigationData?.path || path;
     const songTitle = getSongTitle();
 
-    // Delete from storage
-    deleteChordSheetByPath(songPath);
+    try {
+      // Delete from database using the direct path
+      await deleteChordSheet(songPath);
 
-    // Show toast notification
-    toast({
-      title: "Chord sheet deleted",
-      description: `"${songTitle}" has been removed from My Chord Sheets`
-    });
+      // Show toast notification
+      toast({
+        title: "Chord sheet deleted",
+        description: `"${songTitle}" has been removed from My Chord Sheets`
+      });
 
-    // Navigate back to My Chord Sheets
-    navigate('/my-chord-sheets');
+      // Navigate back to My Chord Sheets
+      navigate('/my-chord-sheets');
+    } catch (error) {
+      console.error('Failed to delete chord sheet:', error);
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete chord sheet. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
-  // Handle database initialization errors
-  if (databaseError) {
+  // Show loading while chord sheet is loading (includes database initialization)
+  if (chordSheetResult.isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <NavigationCard onBack={handleBack} />
-          <ErrorState error={`Database initialization failed: ${databaseError.message}`} />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Show loading while database is initializing or chord sheet is loading
-  if (!isDatabaseReady || chordSheetResult.isLoading) {
-    const loadingMessage = !isDatabaseReady ? "Initializing database..." : "Loading chord sheet...";
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <LoadingState message={loadingMessage} />
+          <LoadingState message="Loading..." />
         </main>
         <Footer />
       </div>
