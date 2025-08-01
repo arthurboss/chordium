@@ -23,3 +23,12 @@ export interface ChordViewerNavigationMethods {
   navigateToMyChordSheets: () => void;
   navigateToHome: () => void;
 }
+
+/**
+ * Navigation data extracted from router location state
+ */
+export interface NavigationData {
+  path: string;
+  title: string;
+  artist: string;
+}
