@@ -23,3 +23,20 @@ export interface ChordViewerNavigationMethods {
   navigateToMyChordSheets: () => void;
   navigateToHome: () => void;
 }
+
+/**
+ * Chord sheet operation handlers
+ */
+export interface ChordSheetOperations {
+  handleSaveChordSheet: () => Promise<void>;
+  handleDeleteSong: () => Promise<void>;
+}
+
+/**
+ * Parameters for chord sheet operations hook
+ */
+export interface UseChordSheetOperationsParams {
+  chordSheetData: ChordSheetData | null;
+  path: string;
+  songTitle: string;
+}
