@@ -5,9 +5,15 @@
 import type { Song } from "@chordium/types";
 import type { StoredChordSheet } from "../../../types/chord-sheet";
 import executeReadTransaction from "../utils/transactions/read-transaction";
+import getDatabase from "../database/connection/get-database";
+import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
 
 /**
- * Gets a stored chord sheet by its unique path identifier
+ * Gets a stored chord sheet by its unique path identifier with enhanced lookup
+ * 
+ * Ensures database initialization before lookup and handles sample chord sheet
+ * path resolution for consistent access across different ID formats.
+ * 
  * @param path - Song path identifier
  * @returns StoredChordSheet if found, null otherwise
  * @throws {DatabaseOperationError} When storage access fails
@@ -15,7 +21,23 @@ import executeReadTransaction from "../utils/transactions/read-transaction";
 export default async function getChordSheet(
   path: Song["path"]
 ): Promise<StoredChordSheet | null> {
-  return executeReadTransaction<StoredChordSheet | undefined>((store) =>
-    store.get(path)
-  ).then((result) => result || null);
+  // Ensure database initialization to prevent race conditions
+  await getDatabase();
+
+  // Try direct path lookup first
+  let result = await executeReadTransaction<StoredChordSheet | undefined>(
+    (store) => store.get(path)
+  );
+
+  // If not found, try sample path resolution for format differences
+  if (!result) {
+    const resolvedPath = resolveSampleChordSheetPath(path);
+    if (resolvedPath !== path) {
+      result = await executeReadTransaction<StoredChordSheet | undefined>(
+        (store) => store.get(resolvedPath)
+      );
+    }
+  }
+
+  return result || null;
 }
