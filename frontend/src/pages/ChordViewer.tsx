@@ -11,6 +11,7 @@ import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 import deleteChordSheet from "@/storage/stores/chord-sheets/operations/delete-chord-sheet";
 import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
+import { generateChordSheetPath, chordSheetPathToStoragePath } from "@/utils/chord-sheet-path";
 import { toast } from "@/hooks/use-toast";
 import type { ChordSheetData } from './chord-viewer.types';
 
@@ -25,24 +26,18 @@ const ChordViewer = () => {
   // The navigation state contains the same path format as our URL parameters
   const navigationData = location.state?.song as { path: string; title: string; artist: string } | undefined;
 
-  // Generate path for chord sheet lookup  
-  const generatePath = () => {
-    // Prioritize navigation state path if available (more reliable)
-    if (navigationData?.path) {
-      return navigationData.path;
-    }
-    
-    // Fallback to URL parameters  
-    if (artist && song) {
-      // Use URL parameters to generate path in database format: artist/song
-      const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
-      const songName = decodeURIComponent(song.replace(/-/g, ' '));
-      return `${artistName.toLowerCase().replace(/\s+/g, '-')}/${songName.toLowerCase().replace(/\s+/g, '-')}`;
-    }
-    return '';
-  };
-
-  const path = generatePath();
+  // Generate path for chord sheet lookup
+  // Prioritize navigation state path (already in storage format) or convert URL params
+  const path = navigationData?.path || 
+    (artist && song ? 
+      chordSheetPathToStoragePath(
+        generateChordSheetPath(
+          decodeURIComponent(artist.replace(/-/g, ' ')),
+          decodeURIComponent(song.replace(/-/g, ' '))
+        )
+      ) : 
+      ''
+    );
   
   // Use the chord sheet hook (now handles database readiness internally)
   const chordSheetResult = useChordSheet({ path });
