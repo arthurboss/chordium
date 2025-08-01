@@ -1,137 +1,200 @@
-import { useRef, useMemo } from "react";
+import { useRef } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
-import { toast } from "@/hooks/use-toast";
+import { useChordSheet } from "@/hooks/use-chord-sheet";
+import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
+import { ChordSheet } from "@/types/chordSheet";
+import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
+import { deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
 import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
-import { useChordSheets } from "@/storage/hooks";
-import { resolveSampleChordSheetPath } from "@/storage/services/sample-chord-sheets/path-resolver";
-import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
-import type { Song } from "@chordium/types";
+import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
+import { toast } from "@/hooks/use-toast";
+import type { ChordSheetData } from './chord-viewer.types';
 
 const ChordViewer = () => {
-  const { artist, song } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { artist, song } = useParams();
   
-  // Song object from navigation state (if passed from search results)
-  const navigationSong = location.state?.song as Song | undefined;
+  // Wait for database to be ready before accessing chord sheets
+  const { isReady: isDatabaseReady, error: databaseError } = useDatabaseReady();
+  
+  // Extract navigation data from location state if available
+  // Note: This maintains backward compatibility with existing navigation state
+  // The navigation state contains the same path format as our URL parameters
+  const navigationData = location.state?.song as { path: string; title: string; artist: string } | undefined;
 
   // Generate path for chord sheet lookup
-  const path = navigationSong?.path || (artist && song ? generateChordSheetId(artist, song) : undefined);
-
-  // Use the main hook that handles database initialization and sample loading
-  const { myChordSheets, isLoading, error } = useChordSheets();
-
-  // Find the specific chord sheet, resolving sample paths if needed
-  const chordSheet = useMemo(() => {
-    if (!path || isLoading) return null;
-    
-    // First try direct path lookup
-    const directMatch = myChordSheets.find(sheet => sheet.path === path);
-    if (directMatch?.storage?.saved) {
-      return storedToChordSheet(directMatch);
-    }
-    
-    // For samples, try resolved path lookup
-    const resolvedPath = resolveSampleChordSheetPath(path);
-    const resolvedMatch = myChordSheets.find(sheet => sheet.path === resolvedPath);
-    if (resolvedMatch?.storage?.saved) {
-      return storedToChordSheet(resolvedMatch);
-    }
-    
-    return null;
-  }, [path, myChordSheets, isLoading]);
-
-  const handleBack = () => {
-    navigate("/my-chord-sheets");
+  const generatePath = () => {
+    if (artist && song) return generateChordSheetId(artist, song);
+    return '';
   };
 
-  const handleDelete = async () => {
-    if (!chordSheet || !path) return;
+  const path = generatePath();
+  
+  // Only use the chord sheet hook when database is ready
+  const chordSheetResult = useChordSheet({ path: isDatabaseReady ? path : '' });
+
+  // Determine if this chord sheet is saved (comes from My Chord Sheets context)
+  const isFromMyChordSheets = location.pathname.startsWith('/my-chord-sheets/');
+
+  // Extract song title - prioritize navigation state, then chord data, fallback to URL params
+  const getSongTitle = () => {
+    if (navigationData?.title) return navigationData.title;
+    if (chordSheetResult.chordSheet?.title) return chordSheetResult.chordSheet.title;
+    if (song) return decodeURIComponent(song.replace(/-/g, ' '));
+    return 'Chord Sheet';
+  };
+
+  // Extract artist name - prioritize navigation state, then chord data, fallback to URL params
+  const getArtistName = () => {
+    if (navigationData?.artist) return navigationData.artist;
+    if (chordSheetResult.chordSheet?.artist && chordSheetResult.chordSheet.artist !== 'Unknown Artist') {
+      return chordSheetResult.chordSheet.artist;
+    }
+    if (artist) return decodeURIComponent(artist.replace(/-/g, ' '));
+    return '';
+  };
+
+  // Create chord sheet data object for display
+  const createChordSheetData = (): ChordSheetData => {
+    const songTitle = getSongTitle();
+    const artistName = getArtistName();
+
+    const chordSheet: ChordSheet = {
+      title: songTitle,
+      artist: artistName,
+      songChords: chordSheetResult.chordSheet?.songChords ?? '',
+      songKey: chordSheetResult.chordSheet?.songKey ?? '',
+      guitarTuning: chordSheetResult.chordSheet?.guitarTuning ?? GUITAR_TUNINGS.STANDARD,
+      guitarCapo: chordSheetResult.chordSheet?.guitarCapo ?? 0
+    };
+
+    return { chordSheet, path };
+  };
+
+  // Handle back navigation
+  const handleBack = () => {
+    if (isFromMyChordSheets) {
+      navigate('/my-chord-sheets');
+    } else {
+      // Navigate back to search results or home
+      navigate('/');
+    }
+  };
+
+  // Save chord sheet to My Chord Sheets
+  const handleSaveChordSheet = async () => {
+    if (!chordSheetResult.chordSheet) return;
     
     try {
-      // Use resolved path for sample chord sheets
-      const resolvedPath = resolveSampleChordSheetPath(path);
-      await deleteChordSheet(resolvedPath);
+      const chordSheetData = createChordSheetData();
+      // Store as saved chord sheet (saved: true)
+      await storeChordSheet(chordSheetData.chordSheet, true, chordSheetData.path);
       
       toast({
-        title: "Chord sheet removed",
-        description: `"${chordSheet.title}" has been removed from My Chord Sheets`,
+        title: "Chord sheet saved",
+        description: `"${chordSheetData.chordSheet.title}" has been added to My Chord Sheets`
       });
-      
-      navigate("/my-chord-sheets");
     } catch (error) {
-      console.error('Failed to remove chord sheet:', error);
+      console.error('Failed to save chord sheet:', error);
       toast({
-        title: "Remove failed",
-        description: `Failed to remove "${chordSheet.title}". Please try again.`,
+        title: "Save failed",
+        description: "Failed to save chord sheet. Please try again.",
         variant: "destructive"
       });
     }
   };
 
-  if (!path) {
+  // Delete song from My Chord Sheets
+  const handleDeleteSong = () => {
+    const songPath = navigationData?.path || path;
+    const songTitle = getSongTitle();
+
+    // Delete from storage
+    deleteChordSheetByPath(songPath);
+
+    // Show toast notification
+    toast({
+      title: "Chord sheet deleted",
+      description: `"${songTitle}" has been removed from My Chord Sheets`
+    });
+
+    // Navigate back to My Chord Sheets
+    navigate('/my-chord-sheets');
+  };
+
+  // Handle database initialization errors
+  if (databaseError) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <ErrorState error="Invalid song path" />
+          <ErrorState error={`Database initialization failed: ${databaseError.message}`} />
         </main>
         <Footer />
       </div>
     );
   }
 
-  if (isLoading) {
+  // Show loading while database is initializing or chord sheet is loading
+  if (!isDatabaseReady || chordSheetResult.isLoading) {
+    const loadingMessage = !isDatabaseReady ? "Initializing database..." : "Loading chord sheet...";
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <LoadingState message="Loading chord sheet..." />
+          <LoadingState message={loadingMessage} />
         </main>
         <Footer />
       </div>
     );
   }
 
-  if (error || (!isLoading && !chordSheet)) {
-    const errorMessage = error instanceof Error ? error.message : error || "Chord sheet not found in saved items";
+  if (chordSheetResult.error) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <ErrorState error={errorMessage} />
+          <ErrorState error={chordSheetResult.error} />
         </main>
         <Footer />
       </div>
     );
   }
+
+  const chordSheetData = createChordSheetData();
+  
+  // Create compatibility layer for SongViewer (until SongViewer is refactored)
+  const songViewerData = {
+    song: {
+      title: chordSheetData.chordSheet.title,
+      artist: chordSheetData.chordSheet.artist,
+      path: chordSheetData.path
+    },
+    chordSheet: chordSheetData.chordSheet
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
         <SongViewer
-          song={{ 
-            song: navigationSong || { 
-              ...chordSheet, 
-              path: generateChordSheetId(chordSheet.artist, chordSheet.title) 
-            }, 
-            chordSheet 
-          }}
+          song={songViewerData}
+          chordContent={chordSheetResult.chordSheet?.songChords ?? ''}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
-          onDelete={handleDelete}
-          onUpdate={() => {}}
-          hideDeleteButton={false}
-          hideSaveButton={true}
-          isFromMyChordSheets={true}
+          onDelete={handleDeleteSong}
+          onSave={handleSaveChordSheet}
+          onUpdate={() => { }}
+          hideDeleteButton={!isFromMyChordSheets}
+          hideSaveButton={isFromMyChordSheets}
+          isFromMyChordSheets={isFromMyChordSheets}
         />
       </main>
       <Footer />
