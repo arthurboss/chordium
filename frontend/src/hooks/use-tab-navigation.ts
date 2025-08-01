@@ -1,10 +1,11 @@
 import { Song } from "@chordium/types";
+import type { StoredChordSheet } from "@/storage/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { getSearchParamsType } from "@/search/utils";
 
 interface TabNavigationProps {
-  myChordSheets: Song[];
+  myChordSheets: StoredChordSheet[];
   setActiveTab: (tab: string) => void;
   activeTab: string; // Added: current activeTab from Home's state
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
@@ -62,7 +63,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
 const handleSongSelection = (
   songIdFromQuery: string,
   determinedTab: string,
-  myChordSheets: Song[],
+  myChordSheets: StoredChordSheet[],
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   // Only handle song selection if we're in my-chord-sheets tab
@@ -74,7 +75,13 @@ const handleSongSelection = (
   if (myChordSheets?.length > 0) {
     const foundMySong = myChordSheets.find(song => song.path === songIdFromQuery);
     if (foundMySong) {
-      setSelectedSong(foundMySong);
+      // Convert StoredChordSheet to Song for selection
+      const songForSelection: Song = {
+        path: foundMySong.path,
+        title: foundMySong.title,
+        artist: foundMySong.artist
+      };
+      setSelectedSong(songForSelection);
       return;
     }
   }

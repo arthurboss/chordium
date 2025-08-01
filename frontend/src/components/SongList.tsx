@@ -1,10 +1,10 @@
-import type { Song } from "../types/song";
+import type { StoredChordSheet } from "@/storage/types";
 import ResultCard from "@/components/ResultCard";
 import { Button } from "@/components/ui/button";
 
 interface SongListProps {
-  songs: Song[];
-  onSongSelect: (song: Song) => void;
+  songs: StoredChordSheet[];
+  onSongSelect: (storedChordSheet: StoredChordSheet) => void;
   onDeleteSong: (songPath: string) => void;
   onUploadClick: () => void;
   tabState?: { scroll: number };
@@ -25,17 +25,21 @@ const SongList = ({ songs, onSongSelect, onDeleteSong, onUploadClick, tabState, 
     <div ref={listRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
       {songs.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {[...songs].reverse().map((song, index) => (
+          {[...songs].reverse().map((storedChordSheet, index) => (
             <ResultCard
-              key={`${song.path}-${index}`}
+              key={`${storedChordSheet.path}-${index}`}
               icon="music"
-              title={song.title}
-              subtitle={song.artist}
-              onView={(path) => onSongSelect(song)}
+              title={storedChordSheet.title}
+              subtitle={storedChordSheet.artist}
+              onView={() => onSongSelect(storedChordSheet)}
               onDelete={onDeleteSong}
-              path={song.path}
+              path={storedChordSheet.path}
               isDeletable={true}
-              song={song}
+              song={{
+                path: storedChordSheet.path,
+                title: storedChordSheet.title,
+                artist: storedChordSheet.artist
+              }}
             />
           ))}
         </div>
