@@ -21,17 +21,8 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
     case path.startsWith("/upload"):
       return "upload";
     
-    case path.startsWith("/my-chord-sheets"):
-      // This includes /my-chord-sheets/artist/song routes - should stay in my-chord-sheets tab
-      // Path-based routing takes priority over query parameters for My Chord Sheets
-      return "my-chord-sheets";
-    
     case path.startsWith("/search"):
       // Explicit search path
-      return "search";
-    
-    case path.startsWith("/artist/"):
-      // Artist songs from search results - show in search tab
       return "search";
     
     case path === "/":
@@ -39,11 +30,17 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       return "my-chord-sheets";
     
     default: {
-      // Handle artist routes: /artist-name (single segment paths)
+      // Handle artist routes and chord sheet routes: /artist or /artist/song
       const pathSegments = path.split('/').filter(segment => segment.length > 0);
+      
       if (pathSegments.length === 1 && pathSegments[0] !== '') {
-        // This is likely an artist page, show search tab with artist selected
+        // This is an artist page: /artist-name - show search tab
         return "search";
+      } else if (pathSegments.length === 2) {
+        // This is a chord sheet page: /artist/song
+        // For unified URLs, we'll default to my-chord-sheets tab
+        // The ChordViewer component can handle navigation state for context
+        return "my-chord-sheets";
       }
       
       // Handle search context based on query parameters only for non-specific paths
