@@ -1,17 +1,12 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LoadingState from "@/components/LoadingState";
-import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
-
-interface ChordViewerLoadingProps {
-  readonly navigation: ChordViewerNavigationMethods;
-}
 
 /**
  * Loading state component for chord viewer
  * Shows loading indicator while chord sheet data is being fetched
  */
-export function ChordViewerLoading({ navigation }: ChordViewerLoadingProps) {
+export function ChordViewerLoading() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

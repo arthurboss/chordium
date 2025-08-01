@@ -57,7 +57,7 @@ const ChordViewer = () => {
 
   // Loading state
   if (chordSheetResult.isLoading) {
-    return <ChordViewerLoading navigation={navigation} />;
+    return <ChordViewerLoading />;
   }
 
   // Error state
