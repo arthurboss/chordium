@@ -1,12 +1,11 @@
 import { useRef, useEffect, useState } from "react";
-import { useTabStatePersistence } from "../hooks/useTabStatePersistence";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchState } from "@/context/SearchStateContext";
 
 import { Song } from "../types/song";
 import type { StoredChordSheet } from "@/storage/types";
-import SongList from "./SongList";
+import ChordSheetList from "./chord-sheet-list";
 import SongViewer from "./SongViewer";
 import SearchTab from "./tabs/SearchTab";
 import UploadTab from "./tabs/UploadTab";
@@ -38,14 +37,9 @@ const TabContainer = ({
   const location = useLocation();
   const { searchState } = useSearchState();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-  const { getTabState, setTabState } = useTabStatePersistence();
   
   // Local state to track the last search URL for tab switching
   const [lastSearchUrl, setLastSearchUrl] = useState<string | null>(null);
-
-  // Example: Persist myChordSheets state (e.g., scroll position)
-  const myChordSheetsTabState = getTabState<{ scroll: number }>("my-chord-sheets", { scroll: 0 });
-  const setMyChordSheetsTabState = (state: { scroll: number }) => setTabState("my-chord-sheets", state);
 
   // Track when we're on a search-related page and store the URL
   useEffect(() => {
@@ -260,13 +254,11 @@ const TabContainer = ({
             isFromMyChordSheets={true}
           />
         ) : (
-          <SongList
-            songs={myChordSheets}
-            onSongSelect={handleSongSelect}
-            onDeleteSong={handleChordSheetDelete}
+          <ChordSheetList
+            chordSheets={myChordSheets}
+            onChordSheetSelect={handleSongSelect}
+            onDeleteChordSheet={handleChordSheetDelete}
             onUploadClick={() => handleTabChange("upload")}
-            tabState={myChordSheetsTabState}
-            setTabState={setMyChordSheetsTabState}
           />
         )}
       </div>
