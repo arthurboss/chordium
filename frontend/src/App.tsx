@@ -9,7 +9,7 @@ import { KeepAliveService } from "@/services/keep-alive.service";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
-const ChordViewer = lazy(() => import("./pages/ChordViewer"));
+const ChordViewer = lazy(() => import("./pages/chord-viewer"));
 const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
 const queryClient = createQueryClientWithErrorHandling();

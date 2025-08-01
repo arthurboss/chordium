@@ -2,7 +2,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { validateRoute } from '@/utils/route-validation';
 import RedirectToHome from './RedirectToHome';
-import ChordViewer from '@/pages/ChordViewer';
+import ChordViewer from '@/pages/chord-viewer';
 
 /**
  * Wrapper for song routes that validates if the artist/song names look legitimate
