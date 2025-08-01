@@ -1,12 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
-/**
- * Navigation methods for different chord sheet sources
- */
-export interface ChordViewerNavigationMethods {
-  navigateToMyChordSheets: () => void;
-  navigateToHome: () => void;
-}
+import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
 
 /**
  * Hook for chord viewer navigation logic

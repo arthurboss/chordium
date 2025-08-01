@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ErrorState from "@/components/ErrorState";
 import NavigationCard from "@/components/NavigationCard";
-import type { ChordViewerNavigationMethods } from "../hooks/use-chord-viewer-navigation";
+import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
 
 interface ChordViewerErrorProps {
   readonly error: string;

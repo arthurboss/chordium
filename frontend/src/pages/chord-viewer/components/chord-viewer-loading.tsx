@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LoadingState from "@/components/LoadingState";
-import type { ChordViewerNavigationMethods } from "../hooks/use-chord-viewer-navigation";
+import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
 
 interface ChordViewerLoadingProps {
   readonly navigation: ChordViewerNavigationMethods;
