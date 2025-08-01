@@ -11,7 +11,7 @@ import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
 import { ChordSheet } from "@/types/chordSheet";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 import { deleteChordSheetByPath } from "@/utils/chord-sheet-storage";
-import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
+import { generateChordSheetPath } from "@/utils/chord-sheet-path";
 import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
 import { toast } from "@/hooks/use-toast";
 import type { ChordSheetData } from './chord-viewer.types';

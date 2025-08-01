@@ -2,7 +2,7 @@ import { Song } from "@/types/song";
 import { ChordSheet } from "@/types/chordSheet";
 import { handleSaveNewChordSheetFromUI } from "@/utils/chord-sheet-storage";
 import { useNavigate } from "react-router-dom";
-import { generateChordSheetId } from "@/utils/chord-sheet-id-generator";
+import { generateChordSheetPath } from "@/utils/chord-sheet-path";
 import { useCallback } from "react";
 
 interface AddToMyChordSheetsData {
@@ -17,8 +17,8 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
     const { song, chordSheet } = data;
     
     try {
-      // Generate chord sheet ID from song data (this should match Song.path)
-      const chordSheetId = song.path || generateChordSheetId(song.artist, song.title);
+      // Generate chord sheet path from song data (this should match Song.path)
+      const chordSheetPath = song.path || generateChordSheetPath(song.artist, song.title);
 
       // Create complete ChordSheet object for storage
       // Backend now provides accurate title and artist from scraped data
@@ -36,7 +36,7 @@ export function useAddToMyChordSheets(setMySongs?: React.Dispatch<React.SetState
       if (setMySongs && setActiveTab) {
         // User is on home page with state
         handleSaveNewChordSheetFromUI(
-          chordSheetId, 
+          chordSheetPath, 
           fullChordSheet.title, 
           setMySongs, 
           navigate, 

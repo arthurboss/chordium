@@ -2,11 +2,11 @@
  * Path resolution service for sample chord sheets
  * 
  * Handles the mapping between different ID formats:
- * - URL-based IDs (from generateChordSheetId): "eagles_hotel-california"
+ * - URL-based paths (from generateChordSheetPath): "eagles_hotel-california"
  * - Database paths (slash format): "eagles/hotel-california"
  */
 
-import { chordSheetIdToPath } from '@/utils/chord-sheet-id-generator';
+import { chordSheetPathToStoragePath } from '@/utils/chord-sheet-path';
 import { SAMPLE_CHORD_SHEET_PATHS } from './sample-paths';
 
 /**
@@ -23,7 +23,7 @@ export function resolveSampleChordSheetPath(requestedPath: string): string {
   
   // Check if it looks like a chord sheet ID (contains underscore)
   if (requestedPath.includes('_')) {
-    const convertedPath = chordSheetIdToPath(requestedPath);
+    const convertedPath = chordSheetPathToStoragePath(requestedPath);
     if ((SAMPLE_CHORD_SHEET_PATHS as readonly string[]).includes(convertedPath)) {
       return convertedPath;
     }

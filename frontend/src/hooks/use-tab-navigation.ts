@@ -25,6 +25,10 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       // Explicit search path
       return "search";
     
+    case path.startsWith("/my-chord-sheets"):
+      // Explicit my-chord-sheets path
+      return "my-chord-sheets";
+    
     case path === "/":
       // Root path defaults to my-chord-sheets
       return "my-chord-sheets";
@@ -117,5 +121,6 @@ export const useTabNavigation = ({
         setSelectedSong
       );
     }
-  }, [location, myChordSheets, setActiveTab, activeTab, setSelectedSong]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, myChordSheets, setActiveTab, setSelectedSong]);
 };

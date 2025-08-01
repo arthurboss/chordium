@@ -1,52 +1,52 @@
 import { describe, it, expect } from 'vitest';
-import { generateChordSheetId, parseChordSheetId, chordSheetIdToPath } from '../chord-sheet-id-generator';
+import { generateChordSheetPath, parseChordSheetPath, chordSheetPathToStoragePath } from '../chord-sheet-path';
 
-describe('ChordSheet ID Generator', () => {
-  describe('generateChordSheetId', () => {
-    it('should generate ID with dashes for spaces and underscore separator', () => {
-      const id = generateChordSheetId('Leonardo Gonçalves', 'Getsêmani');
-      expect(id).toBe('leonardo-goncalves_getsemani');
+describe('ChordSheet Path Generator', () => {
+  describe('generateChordSheetPath', () => {
+    it('should generate path with dashes for spaces and underscore separator', () => {
+      const path = generateChordSheetPath('Leonardo Gonçalves', 'Getsêmani');
+      expect(path).toBe('leonardo-goncalves_getsemani');
     });
 
     it('should handle single word artist and title', () => {
-      const id = generateChordSheetId('Oasis', 'Wonderwall');
-      expect(id).toBe('oasis_wonderwall');
+      const path = generateChordSheetPath('Oasis', 'Wonderwall');
+      expect(path).toBe('oasis_wonderwall');
     });
 
     it('should handle multiple spaces', () => {
-      const id = generateChordSheetId('The Beatles', 'Hey Jude Song');
-      expect(id).toBe('the-beatles_hey-jude-song');
+      const path = generateChordSheetPath('The Beatles', 'Hey Jude Song');
+      expect(path).toBe('the-beatles_hey-jude-song');
     });
 
     it('should remove diacritics from artist and title', () => {
-      const id = generateChordSheetId('João Vitor', 'Canção de Amor');
-      expect(id).toBe('joao-vitor_cancao-de-amor');
+      const path = generateChordSheetPath('João Vitor', 'Canção de Amor');
+      expect(path).toBe('joao-vitor_cancao-de-amor');
     });
 
     it('should handle special characters and normalize properly', () => {
-      const id = generateChordSheetId('André & Maria', 'São Paulo Nights');
-      expect(id).toBe('andre-&-maria_sao-paulo-nights');
+      const path = generateChordSheetPath('André & Maria', 'São Paulo Nights');
+      expect(path).toBe('andre-&-maria_sao-paulo-nights');
     });
 
     it('should handle empty strings gracefully', () => {
-      const id = generateChordSheetId('', '');
-      expect(id).toBe('_');
+      const path = generateChordSheetPath('', '');
+      expect(path).toBe('_');
     });
 
     it('should handle artist with no title', () => {
-      const id = generateChordSheetId('Artist Name', '');
-      expect(id).toBe('artist-name_');
+      const path = generateChordSheetPath('Artist Name', '');
+      expect(path).toBe('artist-name_');
     });
 
     it('should handle title with no artist', () => {
-      const id = generateChordSheetId('', 'Song Title');
-      expect(id).toBe('_song-title');
+      const path = generateChordSheetPath('', 'Song Title');
+      expect(path).toBe('_song-title');
     });
   });
 
-  describe('parseChordSheetId', () => {
+  describe('parseChordSheetPath', () => {
     it('should parse standard ID format correctly', () => {
-      const result = parseChordSheetId('leonardo-goncalves_getsemani');
+      const result = parseChordSheetPath('leonardo-goncalves_getsemani');
       expect(result).toEqual({
         artist: 'leonardo goncalves',
         title: 'getsemani'
@@ -54,7 +54,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle multiple dashes in names', () => {
-      const result = parseChordSheetId('the-beatles_hey-jude-song');
+      const result = parseChordSheetPath('the-beatles_hey-jude-song');
       expect(result).toEqual({
         artist: 'the beatles',
         title: 'hey jude song'
@@ -62,7 +62,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle ID with no underscore as title only', () => {
-      const result = parseChordSheetId('wonderwall');
+      const result = parseChordSheetPath('wonderwall');
       expect(result).toEqual({
         artist: 'Unknown Artist',
         title: 'wonderwall'
@@ -70,7 +70,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle empty ID', () => {
-      const result = parseChordSheetId('');
+      const result = parseChordSheetPath('');
       expect(result).toEqual({
         artist: 'Unknown Artist',
         title: ''
@@ -78,7 +78,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle ID with empty artist part', () => {
-      const result = parseChordSheetId('_song-title');
+      const result = parseChordSheetPath('_song-title');
       expect(result).toEqual({
         artist: '',
         title: 'song title'
@@ -86,7 +86,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle ID with empty title part', () => {
-      const result = parseChordSheetId('artist-name_');
+      const result = parseChordSheetPath('artist-name_');
       expect(result).toEqual({
         artist: 'artist name',
         title: ''
@@ -94,7 +94,7 @@ describe('ChordSheet ID Generator', () => {
     });
 
     it('should handle multiple underscores by using the last one as separator', () => {
-      const result = parseChordSheetId('rock-n-roll-artist_song-title');
+      const result = parseChordSheetPath('rock-n-roll-artist_song-title');
       expect(result).toEqual({
         artist: 'rock n roll artist',
         title: 'song title'
@@ -105,8 +105,8 @@ describe('ChordSheet ID Generator', () => {
   describe('round-trip consistency', () => {
     it('should maintain consistency for standard cases', () => {
       const original = { artist: 'Leonardo Gonçalves', title: 'Getsêmani' };
-      const id = generateChordSheetId(original.artist, original.title);
-      const parsed = parseChordSheetId(id);
+      const path = generateChordSheetPath(original.artist, original.title);
+      const parsed = parseChordSheetPath(path);
       
       // Note: we expect lowercase and normalized characters
       expect(parsed).toEqual({
@@ -117,10 +117,10 @@ describe('ChordSheet ID Generator', () => {
 
     it('should handle complex names with spaces', () => {
       const original = { artist: 'The Red Hot Chili Peppers', title: 'Under The Bridge Tonight' };
-      const id = generateChordSheetId(original.artist, original.title);
-      const parsed = parseChordSheetId(id);
+      const path = generateChordSheetPath(original.artist, original.title);
+      const parsed = parseChordSheetPath(path);
       
-      expect(id).toBe('the-red-hot-chili-peppers_under-the-bridge-tonight');
+      expect(path).toBe('the-red-hot-chili-peppers_under-the-bridge-tonight');
       expect(parsed).toEqual({
         artist: 'the red hot chili peppers',
         title: 'under the bridge tonight'
@@ -128,14 +128,14 @@ describe('ChordSheet ID Generator', () => {
     });
   });
 
-  describe('chordSheetIdToPath', () => {
+  describe('chordSheetPathToStoragePath', () => {
     it('should convert ID to path format', () => {
-      expect(chordSheetIdToPath('eagles_hotel-california')).toBe('eagles/hotel-california');
-      expect(chordSheetIdToPath('oasis_wonderwall')).toBe('oasis/wonderwall');
+      expect(chordSheetPathToStoragePath('eagles_hotel-california')).toBe('eagles/hotel-california');
+      expect(chordSheetPathToStoragePath('oasis_wonderwall')).toBe('oasis/wonderwall');
     });
 
     it('should handle complex artist names', () => {
-      expect(chordSheetIdToPath('the-red-hot-chili-peppers_under-the-bridge')).toBe('the-red-hot-chili-peppers/under-the-bridge');
+      expect(chordSheetPathToStoragePath('the-red-hot-chili-peppers_under-the-bridge')).toBe('the-red-hot-chili-peppers/under-the-bridge');
     });
   });
 });
