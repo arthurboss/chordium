@@ -21,8 +21,8 @@ import type { SampleChordSheetRecord } from './data-loader.types';
 export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
   try {
     const [wonderwallModule, hotelCaliforniaModule] = await Promise.all([
-      import('../../data/samples/oasis-wonderwall.json'),
-      import('../../data/samples/eagles-hotel_california.json')
+      import('../../data/samples/oasis_wonderwall.json'),
+      import('../../data/samples/eagles_hotel-california.json')
     ]);
 
     return [
@@ -31,7 +31,7 @@ export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
         chordSheet: wonderwallModule.default as ChordSheet
       },
       {
-        path: 'eagles/hotel-california', 
+        path: 'eagles/hotel-california',
         chordSheet: hotelCaliforniaModule.default as ChordSheet
       }
     ];

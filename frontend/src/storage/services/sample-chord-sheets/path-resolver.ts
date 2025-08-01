@@ -2,19 +2,12 @@
  * Path resolution service for sample chord sheets
  * 
  * Handles the mapping between different ID formats:
- * - URL-based IDs (from generateChordSheetId): "eagles-hotel_california"
+ * - URL-based IDs (from generateChordSheetId): "eagles_hotel-california"
  * - Database paths (slash format): "eagles/hotel-california"
  */
 
+import { chordSheetIdToPath } from '@/utils/chord-sheet-id-generator';
 import { SAMPLE_CHORD_SHEET_PATHS } from './sample-paths';
-
-/**
- * Maps generateChordSheetId format to database path format for samples
- */
-const SAMPLE_ID_TO_PATH_MAP: Record<string, string> = {
-  'oasis-wonderwall': 'oasis/wonderwall',
-  'eagles-hotel_california': 'eagles/hotel-california'
-};
 
 /**
  * Resolves a chord sheet path, handling sample chord sheet ID format differences
@@ -28,13 +21,15 @@ export function resolveSampleChordSheetPath(requestedPath: string): string {
     return requestedPath;
   }
   
-  // Check if it maps to a sample path via the ID mapping
-  const mappedPath = SAMPLE_ID_TO_PATH_MAP[requestedPath];
-  if (mappedPath) {
-    return mappedPath;
+  // Check if it looks like a chord sheet ID (contains underscore)
+  if (requestedPath.includes('_')) {
+    const convertedPath = chordSheetIdToPath(requestedPath);
+    if ((SAMPLE_CHORD_SHEET_PATHS as readonly string[]).includes(convertedPath)) {
+      return convertedPath;
+    }
   }
   
-  // Return the original path (not a sample or no mapping needed)
+  // Return the original path (not a sample or no conversion needed)
   return requestedPath;
 }
 

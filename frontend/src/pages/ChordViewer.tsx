@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
+import NavigationCard from "@/components/NavigationCard";
 import { useChordSheet } from "@/hooks/use-chord-sheet";
 import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
 import { ChordSheet } from "@/types/chordSheet";
@@ -29,9 +30,20 @@ const ChordViewer = () => {
   // The navigation state contains the same path format as our URL parameters
   const navigationData = location.state?.song as { path: string; title: string; artist: string } | undefined;
 
-  // Generate path for chord sheet lookup
+  // Generate path for chord sheet lookup  
   const generatePath = () => {
-    if (artist && song) return generateChordSheetId(artist, song);
+    // Prioritize navigation state path if available (more reliable)
+    if (navigationData?.path) {
+      return navigationData.path;
+    }
+    
+    // Fallback to URL parameters  
+    if (artist && song) {
+      // Use URL parameters to generate path in database format: artist/song
+      const artistName = decodeURIComponent(artist.replace(/-/g, ' '));
+      const songName = decodeURIComponent(song.replace(/-/g, ' '));
+      return `${artistName.toLowerCase().replace(/\s+/g, '-')}/${songName.toLowerCase().replace(/\s+/g, '-')}`;
+    }
     return '';
   };
 
@@ -135,6 +147,7 @@ const ChordViewer = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+          <NavigationCard onBack={handleBack} />
           <ErrorState error={`Database initialization failed: ${databaseError.message}`} />
         </main>
         <Footer />
@@ -161,6 +174,7 @@ const ChordViewer = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+          <NavigationCard onBack={handleBack} />
           <ErrorState error={chordSheetResult.error} />
         </main>
         <Footer />
