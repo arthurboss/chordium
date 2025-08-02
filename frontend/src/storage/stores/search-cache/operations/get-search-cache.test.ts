@@ -30,7 +30,7 @@ describe("getSearchCache", () => {
   });
 
   const validCacheEntry: SearchCacheEntry = {
-    path: "search:artist:metallica:cifraclub",
+    path: "metallica", // Artist search term
     results: [
       {
         path: "metallica",
@@ -44,7 +44,7 @@ describe("getSearchCache", () => {
         song: null,
       },
       searchType: "artist" as const,
-      dataSource: "cifraclub" as const,
+      dataSource: "supabase" as const,
     },
     storage: {
       timestamp: Date.now(),
@@ -74,7 +74,7 @@ describe("getSearchCache", () => {
   it("should return cached entry when it exists and is not expired", async () => {
     mockExecuteTransaction.mockResolvedValue(validCacheEntry);
 
-    const result = await getSearchCache("search:artist:metallica:cifraclub");
+    const result = await getSearchCache("metallica");
 
     expect(result).toEqual(validCacheEntry);
     expect(mockGetDatabase).toHaveBeenCalledOnce();
@@ -84,7 +84,7 @@ describe("getSearchCache", () => {
   it("should return expired entry when checkExpiration is false", async () => {
     mockExecuteTransaction.mockResolvedValue(expiredCacheEntry);
 
-    const result = await getSearchCache("search:artist:metallica:cifraclub", false);
+    const result = await getSearchCache("metallica", false);
 
     expect(result).toEqual(expiredCacheEntry);
     expect(mockGetDatabase).toHaveBeenCalledOnce();
@@ -94,7 +94,7 @@ describe("getSearchCache", () => {
   it("should return null for expired entry when checkExpiration is true", async () => {
     mockExecuteTransaction.mockResolvedValue(expiredCacheEntry);
 
-    const result = await getSearchCache("search:artist:metallica:cifraclub", true);
+    const result = await getSearchCache("metallica", true);
 
     expect(result).toBeNull();
     expect(mockGetDatabase).toHaveBeenCalledOnce();
@@ -104,7 +104,7 @@ describe("getSearchCache", () => {
   it("should default to checking expiration when checkExpiration not provided", async () => {
     mockExecuteTransaction.mockResolvedValue(expiredCacheEntry);
 
-    const result = await getSearchCache("search:artist:metallica:cifraclub");
+    const result = await getSearchCache("metallica");
 
     expect(result).toBeNull(); // Should be null due to expiration check
     expect(mockGetDatabase).toHaveBeenCalledOnce();
