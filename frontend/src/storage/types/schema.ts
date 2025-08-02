@@ -6,6 +6,7 @@
  * where Song.path serves as the consistent identifier across the system.
  */
 
+import type { SearchType } from '@chordium/types';
 import type { StoredChordSheet } from './chord-sheet';
 import type { SearchCacheEntry } from './search-cache';
 
@@ -42,7 +43,7 @@ export interface ChordiumDBSchema {
       /** Index on timestamp for temporal queries */
       timestamp: number;
       /** Index on search type for filtering different search types */
-      searchType: string;
+      searchType: SearchType;
       /** Index on expiration for TTL cleanup */
       expiresAt: number;
     };
