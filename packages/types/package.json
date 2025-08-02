@@ -1,6 +1,6 @@
 {
   "name": "@chordium/types",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TypeScript types and interfaces for Chordium",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
