@@ -11,8 +11,9 @@ export const INDEXES = {
     expiresAt: "storage.expiresAt", // For TTL cleanup
   },
   searchCache: {
-    timestamp: "timestamp",
-    searchType: "searchType",
-    expiresAt: "expiresAt",
+    timestamp: "storage.timestamp", // For creation time queries
+    searchType: "search.searchType", // For filtering by search type
+    dataSource: "search.dataSource", // For filtering by data source
+    expiresAt: "storage.expiresAt", // For TTL cleanup
   },
 } as const;

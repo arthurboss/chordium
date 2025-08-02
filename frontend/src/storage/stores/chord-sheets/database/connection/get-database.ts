@@ -13,7 +13,7 @@ let database: IDBDatabase | null = null;
  */
 export default function getDatabase(): Promise<IDBDatabase> {
   // If we have a valid cached database connection, return it
-  if (database && !database.objectStoreNames.contains("chordSheets")) {
+  if (database && (!database.objectStoreNames.contains("chordSheets") || !database.objectStoreNames.contains("searchCache"))) {
     // Database schema is invalid, reset
     database = null;
     databasePromise = null;
