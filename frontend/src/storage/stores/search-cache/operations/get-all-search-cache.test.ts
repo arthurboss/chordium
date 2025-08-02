@@ -6,6 +6,10 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { SearchCacheEntry } from "../../../types/search-cache";
 import getAllSearchCache from "./get-all-search-cache";
 
+// Import real fixture data
+import hillsongArtists from "../../../../../../shared/fixtures/artists/hillsong.json";
+import oceansSearch from "../../../../../../shared/fixtures/cifraclub-search/oceans.json";
+
 // Mock the database utilities
 vi.mock("../../chord-sheets/database/connection", () => ({
   getDatabase: vi.fn(),
@@ -19,6 +23,7 @@ vi.mock("../utils/transactions/read-transaction", () => ({
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
 import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { Artist, Song } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
 const mockExecuteTransaction = vi.mocked(executeSearchCacheReadTransaction);
@@ -31,17 +36,11 @@ describe("getAllSearchCache", () => {
 
   const mockCacheEntries: SearchCacheEntry[] = [
     {
-      path: "metallica", // Artist search term
-      results: [
-        {
-          path: "metallica",
-          displayName: "Metallica",
-          songCount: 125,
-        },
-      ],
+      path: "hillsong", // Artist search term (from search-types.md: /api/artists)
+      results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
       search: {
         query: {
-          artist: "metallica",
+          artist: "hillsong",
           song: null,
         },
         searchType: "artist" as const,
@@ -54,18 +53,12 @@ describe("getAllSearchCache", () => {
       },
     },
     {
-      path: "hello", // Song search term
-      results: [
-        {
-          path: "adele/hello",
-          title: "Hello",
-          artist: "Adele",
-        },
-      ],
+      path: "oceans", // Song search term (from search-types.md: /api/cifraclub-search)
+      results: oceansSearch as Song[], // Real fixture data from cifraclub-search/oceans.json
       search: {
         query: {
           artist: null,
-          song: "hello",
+          song: "oceans",
         },
         searchType: "song" as const,
         dataSource: "cifraclub" as const,
@@ -85,6 +78,8 @@ describe("getAllSearchCache", () => {
 
     expect(result).toEqual(mockCacheEntries);
     expect(result).toHaveLength(2);
+    expect(result[0].results).toHaveLength(hillsongArtists.length); // Real fixture length
+    expect(result[1].results).toHaveLength(oceansSearch.length); // Real fixture length
     expect(mockGetDatabase).toHaveBeenCalledOnce();
     expect(mockExecuteTransaction).toHaveBeenCalledOnce();
   });

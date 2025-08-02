@@ -6,6 +6,9 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { SearchCacheEntry } from "../../../types/search-cache";
 import getSearchCache from "./get-search-cache";
 
+// Import real fixture data
+import hillsongArtists from "../../../../../../shared/fixtures/artists/hillsong.json";
+
 // Mock the database utilities to avoid initialization issues in tests
 vi.mock("../../chord-sheets/database/connection", () => ({
   getDatabase: vi.fn(),
@@ -19,6 +22,7 @@ vi.mock("../utils/transactions/read-transaction", () => ({
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
 import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { Artist } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
 const mockExecuteTransaction = vi.mocked(executeSearchCacheReadTransaction);
@@ -30,17 +34,11 @@ describe("getSearchCache", () => {
   });
 
   const validCacheEntry: SearchCacheEntry = {
-    path: "metallica", // Artist search term
-    results: [
-      {
-        path: "metallica",
-        displayName: "Metallica",
-        songCount: 125,
-      },
-    ],
+    path: "hillsong", // Artist search term (from search-types.md: /api/artists)
+    results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
     search: {
       query: {
-        artist: "metallica",
+        artist: "hillsong",
         song: null,
       },
       searchType: "artist" as const,
