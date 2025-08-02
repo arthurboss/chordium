@@ -1,0 +1,17 @@
+[
+ {
+  "path": "adele/hello",
+  "title": "Hello",
+  "artist": "Adele"
+ },
+ {
+  "path": "adele/someone-like-you",
+  "title": "Someone Like You",
+  "artist": "Adele"
+ },
+ {
+  "path": "adele/rolling-in-the-deep",
+  "title": "Rolling in the Deep",
+  "artist": "Adele"
+ }
+]
