@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLastSearchQuery } from '@/cache/implementations/search-cache';
+import { getLastSearchQuery } from '@/utils/last-search-query';
 
 // Storage key for preserving original URL format
 const ORIGINAL_SEARCH_URL_KEY = 'original_search_url';

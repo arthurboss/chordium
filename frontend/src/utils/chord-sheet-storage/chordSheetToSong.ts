@@ -1,17 +1,23 @@
 import { Song } from '@/types/song';
 import { ChordSheet } from '@/types/chordSheet';
-import { generateCacheKey } from '@/cache/core/cache-key-generator';
 
 /**
- * Convert ChordSheet to Song for UI compatibility using cache key format
+ * Generate a path key from artist and title
+ */
+function generatePathKey(artist: string, title: string): string {
+  return `${artist.toLowerCase().replace(/\s+/g, '-')}-${title.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+/**
+ * Convert ChordSheet to Song for UI compatibility using path key format
  * @param chordSheet ChordSheet object to convert
  * @returns Song object for UI layer
  */
 export const chordSheetToSong = (chordSheet: ChordSheet): Song => {
-  const cacheKey = generateCacheKey(chordSheet.artist, chordSheet.title);
+  const pathKey = generatePathKey(chordSheet.artist, chordSheet.title);
   return {
     title: chordSheet.title,
     artist: chordSheet.artist,
-    path: cacheKey // Use the cache key as the path for consistency
+    path: pathKey // Use the path key for consistency
   };
 };
