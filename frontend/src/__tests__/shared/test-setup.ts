@@ -5,7 +5,6 @@
 import { vi } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
-import { generateCacheKey as generateChordSheetCacheKey } from '@/cache/core/cache-key-generator';
 
 // Mock localStorage with proper implementation
 export const mockLocalStorage = (() => {
@@ -79,7 +78,7 @@ export function getRandomTestSong(): ChordSheet {
  * Generate a cache key for testing
  */
 export function generateCacheKey(artist: string, title: string): string {
-  return generateChordSheetCacheKey(artist, title);
+  return `${artist.toLowerCase().replace(/\s+/g, '-')}-${title.toLowerCase().replace(/\s+/g, '-')}`;
 }
 
 /**

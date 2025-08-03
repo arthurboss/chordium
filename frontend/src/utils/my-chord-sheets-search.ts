@@ -1,4 +1,4 @@
-import { unifiedChordSheetCache } from '@/cache/implementations/unified-chord-sheet-cache';
+import { ChordSheetStore } from '@/storage/stores/chord-sheets/store';
 import { ChordSheet, Song } from '@chordium/types';
 import { isAccentInsensitiveMatch } from '@/search/utils';
 
@@ -21,9 +21,10 @@ export function convertChordSheetToSong(chordSheet: ChordSheet): Song {
  * @param songQuery - Song/title search term (optional)
  * @returns Array of Song objects from My Chord Sheets that match the search
  */
-export function searchMyChordSheets(artistQuery?: string, songQuery?: string): Song[] {
+export async function searchMyChordSheets(artistQuery?: string, songQuery?: string): Promise<Song[]> {
   // Get all chord sheets from My Chord Sheets
-  const allMyChordSheets = unifiedChordSheetCache.getAllSavedChordSheets();
+  const chordSheetStore = new ChordSheetStore();
+  const allMyChordSheets = await chordSheetStore.getAllSaved();
   
   // If no search terms, return empty array (don't return all songs)
   if (!artistQuery?.trim() && !songQuery?.trim()) {
@@ -31,18 +32,18 @@ export function searchMyChordSheets(artistQuery?: string, songQuery?: string): S
   }
   
   // Filter songs based on search criteria
-  const matchingSongs = allMyChordSheets.filter(chordSheet => {
+  const matchingSongs = allMyChordSheets.filter(storedChordSheet => {
     let artistMatch = true;
     let songMatch = true;
     
     // Check artist match if artist query provided
     if (artistQuery?.trim()) {
-      artistMatch = isAccentInsensitiveMatch(artistQuery.trim(), chordSheet.artist);
+      artistMatch = isAccentInsensitiveMatch(artistQuery.trim(), storedChordSheet.artist);
     }
     
     // Check song/title match if song query provided  
     if (songQuery?.trim()) {
-      songMatch = isAccentInsensitiveMatch(songQuery.trim(), chordSheet.title);
+      songMatch = isAccentInsensitiveMatch(songQuery.trim(), storedChordSheet.title);
     }
     
     // Both conditions must be true (if provided)
@@ -50,7 +51,7 @@ export function searchMyChordSheets(artistQuery?: string, songQuery?: string): S
   });
   
   // Convert ChordSheets to Songs for consistency with search results
-  return matchingSongs.map(convertChordSheetToSong);
+  return matchingSongs.map(storedChordSheet => convertChordSheetToSong(storedChordSheet));
 }
 
 /**
@@ -59,7 +60,7 @@ export function searchMyChordSheets(artistQuery?: string, songQuery?: string): S
  * @param songQuery - Song/title search term (optional)
  * @returns True if any local songs match the search
  */
-export function hasLocalMatches(artistQuery?: string, songQuery?: string): boolean {
-  const matches = searchMyChordSheets(artistQuery, songQuery);
+export async function hasLocalMatches(artistQuery?: string, songQuery?: string): Promise<boolean> {
+  const matches = await searchMyChordSheets(artistQuery, songQuery);
   return matches.length > 0;
 }

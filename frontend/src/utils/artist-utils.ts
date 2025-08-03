@@ -1,6 +1,6 @@
 // Utility functions for artist-related logic
-import { Song } from "@/types/song";
-import { cacheArtistSongs, getCachedArtistSongs } from "@/cache/implementations/artist-cache";
+import { SEARCH_TYPES, Song } from "@/types/song";
+import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 import { getApiBaseUrl } from './api-base-url';
 
 export function extractArtistSlug(artistUrl: string): string | null {
@@ -20,9 +20,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   }
 
   // Try to get cached results first
-  const cachedSongs = getCachedArtistSongs(artistPath);
-  if (cachedSongs) {
-    return cachedSongs;
+  const cachedEntry = await searchCacheService.get(artistPath);
+  if (cachedEntry && cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG) {
+    return cachedEntry.results as Song[];
   }
 
   const apiUrl = `${getApiBaseUrl()}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
@@ -39,7 +39,15 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     const data: Song[] = await resp.json();
     
     // Cache the results for future use
-    cacheArtistSongs(artistPath, data);
+    await searchCacheService.storeResults({
+      path: artistPath,
+      results: data,
+      search: {
+        query: { artist: artistPath, song: null },
+        searchType: SEARCH_TYPES.ARTIST_SONG,
+        dataSource: 's3',
+      }
+    });
     
     // Return the data as-is (Song objects with title and path)
     return data;
