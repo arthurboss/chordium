@@ -11,6 +11,25 @@ import type { UseChordSheetResult, UseChordSheetParams } from "./use-chord-sheet
 import getChordSheet from "@/storage/stores/chord-sheets/operations/get-chord-sheet";
 import { storedToChordSheet } from "@/storage/services/chord-sheets/conversion";
 import { useDatabaseReady } from "@/storage/hooks/useDatabaseReady";
+import { fetchChordSheetFromAPI } from "@/services/api/fetch-chord-sheet";
+
+/**
+ * Attempts to fetch chord sheet from API when not found in storage
+ */
+async function fetchFromAPI(path: string): Promise<{ chordSheet: ChordSheet | null; error: string | null }> {
+  try {
+    const apiChordSheet = await fetchChordSheetFromAPI(path);
+    
+    if (apiChordSheet) {
+      return { chordSheet: apiChordSheet, error: null };
+    } else {
+      return { chordSheet: null, error: "Chord sheet not found" };
+    }
+  } catch (apiError) {
+    console.error("API fetch failed:", apiError);
+    return { chordSheet: null, error: "Failed to fetch chord sheet from server" };
+  }
+}
 
 /**
  * Loads and manages chord sheet data with smart caching strategy
@@ -73,10 +92,14 @@ export function useChordSheet({ path }: UseChordSheetParams): UseChordSheetResul
           setChordSheet(domainChordSheet);
           setIsSaved(stored.storage.saved);
         } else {
-          // Not found in storage - will implement API fetch in next phase
-          setChordSheet(null);
-          setIsSaved(false);
-          setError("Chord sheet not found in storage. API fetch not yet implemented.");
+          // Not found in storage - try API fetch
+          const apiResult = await fetchFromAPI(path);
+          
+          if (cancelled) return;
+          
+          setChordSheet(apiResult.chordSheet);
+          setIsSaved(false); // From API, not saved yet
+          setError(apiResult.error);
         }
       } catch (err) {
         if (!cancelled) {
