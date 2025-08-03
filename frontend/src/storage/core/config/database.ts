@@ -11,7 +11,7 @@
  * Used by both chord-sheets and search-cache stores to ensure
  * they operate on the same database instance.
  */
-export const DB_NAME = "ChordiumStorage";
+export const DB_NAME = "chordium";
 
 /**
  * Version of the IndexedDB database schema
