@@ -1,3 +1,5 @@
+import { TTL } from "../../../core/ttl/constants";
+
 /**
  * Time-to-live (TTL) constants for chord sheet storage
  * 
@@ -11,7 +13,7 @@
  * Cached items expire after this duration to prevent storage bloat
  * while saved items remain permanently stored.
  */
-export const DEFAULT_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+export const DEFAULT_CACHE_TTL_MS = TTL.CHORD_SHEETS;
 
 /**
  * Calculates expiration timestamp for cached items

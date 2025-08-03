@@ -3,8 +3,7 @@
  */
 
 import type { DeleteSearchCacheFunction } from "./delete-search-cache.types";
-import executeSearchCacheWriteTransaction from "../utils/transactions/write-transaction";
-import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { executeWriteTransaction, executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../../chord-sheets/database/connection";
 
 /**
@@ -24,7 +23,8 @@ const deleteSearchCache: DeleteSearchCacheFunction = async (
   await getDatabase();
 
   // First check if entry exists
-  const existingEntry = await executeSearchCacheReadTransaction<unknown>(
+  const existingEntry = await executeReadTransaction<unknown>(
+    "searchCache",
     (store) => store.get(path)
   );
 
@@ -33,7 +33,8 @@ const deleteSearchCache: DeleteSearchCacheFunction = async (
   }
 
   // Delete the entry
-  await executeSearchCacheWriteTransaction<undefined>(
+  await executeWriteTransaction<undefined>(
+    "searchCache",
     (store) => store.delete(path)
   );
 

@@ -4,7 +4,7 @@
 
 import type { SearchCacheEntry } from "../../../types/search-cache";
 import type { StoreSearchCacheFunction } from "./store-search-cache.types";
-import executeSearchCacheWriteTransaction from "../utils/transactions/write-transaction";
+import { executeWriteTransaction } from "../../../core/transactions";
 import { getDatabase } from "../../chord-sheets/database/connection";
 
 /**
@@ -24,7 +24,8 @@ const storeSearchCache: StoreSearchCacheFunction = async (
   // Ensure database initialization
   await getDatabase();
 
-  await executeSearchCacheWriteTransaction<IDBValidKey>(
+  await executeWriteTransaction<IDBValidKey>(
+    "searchCache",
     (store) => store.put(entry)
   );
 };

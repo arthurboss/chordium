@@ -3,3 +3,4 @@
  */
 
 export * from "./cleanup";
+export * from "./search-cache";

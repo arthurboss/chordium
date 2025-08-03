@@ -1,28 +1,30 @@
-import { getDatabase } from "../../../chord-sheets/database/connection";
-import { DatabaseOperationError, StorageQuotaExceededError } from "../../../chord-sheets/types/errors";
+import { getDatabase } from "../../stores/chord-sheets/database/connection";
+import { DatabaseOperationError, StorageQuotaExceededError } from "../../stores/chord-sheets/types/errors";
 
 /**
- * Executes a write transaction on the searchCache object store
+ * Generic write transaction executor for any IndexedDB object store
  *
+ * @param storeName - Name of the object store to access
  * @param operation - Function that performs the write operation
- * @returns Promise resolving to the operation result
+ * @returns Promise that resolves when the operation completes
  * @throws {DatabaseOperationError} When database operation fails
  * @throws {StorageQuotaExceededError} When storage quota is exceeded
  */
-export default async function executeSearchCacheWriteTransaction<T>(
+export default async function executeWriteTransaction<T = void>(
+  storeName: string,
   operation: (store: IDBObjectStore) => IDBRequest<T>
 ): Promise<T> {
   const db = await getDatabase();
-  const transaction = db.transaction(["searchCache"], "readwrite");
-  const store = transaction.objectStore("searchCache");
+  const transaction = db.transaction([storeName], "readwrite");
+  const store = transaction.objectStore(storeName);
 
   return new Promise((resolve, reject) => {
     const request = operation(store);
 
     request.onerror = () => {
       const error = request.error;
-      
-      // Handle quota exceeded error specifically
+
+      // Check for quota exceeded error
       if (error?.name === "QuotaExceededError") {
         reject(
           new StorageQuotaExceededError(

@@ -14,18 +14,17 @@ vi.mock("../../chord-sheets/database/connection", () => ({
   getDatabase: vi.fn(),
 }));
 
-vi.mock("../utils/transactions/read-transaction", () => ({
-  __esModule: true,
-  default: vi.fn(),
+vi.mock("../../../core/transactions", () => ({
+  executeReadTransaction: vi.fn(),
 }));
 
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
-import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { executeReadTransaction } from "../../../core/transactions";
 import { Artist } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
-const mockExecuteTransaction = vi.mocked(executeSearchCacheReadTransaction);
+const mockExecuteTransaction = vi.mocked(executeReadTransaction);
 
 describe("getSearchCache", () => {
   beforeEach(() => {

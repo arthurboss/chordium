@@ -10,24 +10,18 @@ vi.mock("../../chord-sheets/database/connection", () => ({
   getDatabase: vi.fn(),
 }));
 
-vi.mock("../utils/transactions/write-transaction", () => ({
-  __esModule: true,
-  default: vi.fn(),
-}));
-
-vi.mock("../utils/transactions/read-transaction", () => ({
-  __esModule: true,
-  default: vi.fn(),
+vi.mock("../../../core/transactions", () => ({
+  executeReadTransaction: vi.fn(),
+  executeWriteTransaction: vi.fn(),
 }));
 
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
-import executeSearchCacheWriteTransaction from "../utils/transactions/write-transaction";
-import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { executeReadTransaction, executeWriteTransaction } from "../../../core/transactions";
 
 const mockGetDatabase = vi.mocked(getDatabase);
-const mockExecuteWriteTransaction = vi.mocked(executeSearchCacheWriteTransaction);
-const mockExecuteReadTransaction = vi.mocked(executeSearchCacheReadTransaction);
+const mockExecuteReadTransaction = vi.mocked(executeReadTransaction);
+const mockExecuteWriteTransaction = vi.mocked(executeWriteTransaction);
 
 describe("deleteSearchCache", () => {
   beforeEach(() => {

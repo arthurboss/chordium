@@ -4,7 +4,7 @@
 
 import type { SearchCacheEntry } from "../../../types/search-cache";
 import type { GetSearchCacheFunction } from "./get-search-cache.types";
-import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../../chord-sheets/database/connection";
 import { isExpired } from "../../../core/ttl/validation";
 
@@ -26,7 +26,8 @@ const getSearchCache: GetSearchCacheFunction = async (
   // Ensure database initialization
   await getDatabase();
 
-  const result = await executeSearchCacheReadTransaction<SearchCacheEntry | undefined>(
+  const result = await executeReadTransaction<SearchCacheEntry | undefined>(
+    "searchCache",
     (store) => store.get(path)
   );
 

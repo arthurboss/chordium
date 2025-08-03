@@ -14,18 +14,17 @@ vi.mock("../../chord-sheets/database/connection", () => ({
   getDatabase: vi.fn(),
 }));
 
-vi.mock("../utils/transactions/write-transaction", () => ({
-  __esModule: true,
-  default: vi.fn(),
+vi.mock("../../../core/transactions", () => ({
+  executeWriteTransaction: vi.fn(),
 }));
 
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
-import executeSearchCacheWriteTransaction from "../utils/transactions/write-transaction";
+import { executeWriteTransaction } from "../../../core/transactions";
 import { Artist } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
-const mockExecuteTransaction = vi.mocked(executeSearchCacheWriteTransaction);
+const mockExecuteTransaction = vi.mocked(executeWriteTransaction);
 
 describe("storeSearchCache", () => {
   beforeEach(() => {
@@ -58,7 +57,7 @@ describe("storeSearchCache", () => {
 
     expect(mockGetDatabase).toHaveBeenCalledOnce();
     expect(mockExecuteTransaction).toHaveBeenCalledOnce();
-    expect(mockExecuteTransaction).toHaveBeenCalledWith(expect.any(Function));
+    expect(mockExecuteTransaction).toHaveBeenCalledWith("searchCache", expect.any(Function));
   });
 
   it("should replace existing entry with same path", async () => {

@@ -4,7 +4,7 @@
 
 import type { SearchCacheEntry } from "../../../types/search-cache";
 import type { GetAllSearchCacheFunction } from "./get-all-search-cache.types";
-import executeSearchCacheReadTransaction from "../utils/transactions/read-transaction";
+import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../../chord-sheets/database/connection";
 
 /**
@@ -20,7 +20,8 @@ const getAllSearchCache: GetAllSearchCacheFunction = async (): Promise<SearchCac
   // Ensure database initialization
   await getDatabase();
 
-  const result = await executeSearchCacheReadTransaction<SearchCacheEntry[]>(
+  const result = await executeReadTransaction<SearchCacheEntry[]>(
+    "searchCache",
     (store) => store.getAll()
   );
 
