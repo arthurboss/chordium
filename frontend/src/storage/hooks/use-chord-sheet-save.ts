@@ -1,6 +1,6 @@
-import type { ChordSheetData } from "../chord-viewer.types";
-import { saveChordSheetToStorage } from "../utils/chord-sheet-storage";
-import { showSaveSuccessNotification, showSaveErrorNotification } from "../utils/notifications";
+import type { ChordSheetData } from "@/pages/chord-viewer/chord-viewer.types";
+import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
+import { showSaveSuccessNotification, showSaveErrorNotification } from "@/pages/chord-viewer/utils/notifications";
 
 /**
  * Hook for chord sheet save operations
@@ -20,7 +20,8 @@ export function useChordSheetSave(
     }
     
     try {
-      await saveChordSheetToStorage(chordSheetData);
+      // Store chord sheet with saved: true (creates new or updates existing to saved: true)
+      await storeChordSheet(chordSheetData.chordSheet, true, chordSheetData.path);
       showSaveSuccessNotification(chordSheetData.chordSheet.title);
       
       // Refresh chord sheet state to update isSaved flag
