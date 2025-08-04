@@ -23,9 +23,7 @@ export const useSearchState = ({
   onFetchComplete,
   onLoadingChange,
   onArtistSelect,
-  setMySongs,
-  setActiveTab,
-  setSelectedSong
+  setMySongs
 }: UseSearchStateOptions) => {
   const [state, dispatch] = useReducer(searchStateReducer, initialSearchState);
   
@@ -88,9 +86,7 @@ export const useSearchState = ({
   // Song actions
   const songActions = useSongActions({
     memoizedSongs: state.activeArtist ? state.artistSongs || [] : state.songs,
-    setMySongs,
-    setActiveTab,
-    setSelectedSong
+    setMySongs
   });
 
   // Artist selection handler

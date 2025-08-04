@@ -6,9 +6,7 @@ import type { UseSongActionsProps } from '@/search/types';
 
 export const useSongActions = ({ 
   setMySongs,
-  memoizedSongs,
-  setActiveTab,
-  setSelectedSong
+  memoizedSongs
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
   
