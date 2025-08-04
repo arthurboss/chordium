@@ -1,7 +1,6 @@
-import { getMyChordSheetsAsSongs } from './chord-sheet-storage';
-import { unifiedChordSheetCache } from '../cache/implementations/unified-chord-sheet-cache';
-import { Song } from '../types/song';
 import { extractSongMetadata } from './metadata-extraction';
+import getAllSaved from '@/storage/stores/chord-sheets/operations/get-all-saved';
+import { storedToChordSheet } from '@/storage/services/chord-sheets/conversion';
 
 export interface LocalSongResult {
   title: string;
@@ -14,7 +13,7 @@ export interface LocalSongResult {
 
 /**
  * Finds a song in local storage (My Chord Sheets) by artist and song parameters
- * Follows SRP: Single responsibility of finding local songs
+ * Uses IndexedDB storage system to search saved chord sheets
  * 
  * @param artistParam - URL-encoded artist parameter (e.g., "eagles", "oasis")
  * @param songParam - URL-encoded song parameter (e.g., "hotel-california")
@@ -25,38 +24,33 @@ export async function findLocalSong(
   songParam: string
 ): Promise<LocalSongResult | null> {
   try {
-    // Get all songs from modular chord sheet storage
-    const myChordSheets = getMyChordSheetsAsSongs();
+    // Get all saved chord sheets from IndexedDB
+    const savedChordSheets = await getAllSaved();
     
     const artistName = decodeURIComponent(artistParam.replace(/-/g, ' '));
     const songName = decodeURIComponent(songParam.replace(/-/g, ' '));
     
-    // Search in My Chord Sheets
-    const foundSong = myChordSheets.find((song: Song) => {
-      const songArtist = song.artist?.toLowerCase() ?? '';
-      const songTitle = song.title?.toLowerCase() ?? '';
+    // Search in saved chord sheets
+    const foundStored = savedChordSheets.find((stored) => {
+      const storedArtist = stored.artist?.toLowerCase() ?? '';
+      const storedTitle = stored.title?.toLowerCase() ?? '';
       return (
-        songArtist.includes(artistName.toLowerCase()) ||
-        songTitle.includes(songName.toLowerCase()) ||
-        songTitle === songName.toLowerCase()
+        storedArtist.includes(artistName.toLowerCase()) ||
+        storedTitle.includes(songName.toLowerCase()) ||
+        storedTitle === songName.toLowerCase()
       );
     });
     
-    if (foundSong) {
-      
-      // Try to get the chord sheet from cache using the artist and title
-      const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(foundSong.artist, foundSong.title);
-      
-      if (!cachedChordSheet) {
-        return null;
-      }
+    if (foundStored) {
+      // Convert to domain model
+      const chordSheet = storedToChordSheet(foundStored);
       
       // Extract metadata from the chord sheet content
-      const metadata = extractSongMetadata(cachedChordSheet.songChords);
+      const metadata = extractSongMetadata(chordSheet.songChords);
       return {
-        title: foundSong.title ?? '',
-        artist: foundSong.artist ?? '',
-        path: cachedChordSheet.songChords, // Return the actual chord content for API compatibility
+        title: chordSheet.title ?? '',
+        artist: chordSheet.artist ?? '',
+        path: foundStored.path, // Use the storage path for routing
         key: metadata.songKey ?? '',
         tuning: metadata.guitarTuning ?? '',
         capo: metadata.guitarTuning?.includes('Capo') ? metadata.guitarTuning : '',

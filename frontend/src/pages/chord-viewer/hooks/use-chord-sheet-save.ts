@@ -6,9 +6,13 @@ import { showSaveSuccessNotification, showSaveErrorNotification } from "../utils
  * Hook for chord sheet save operations
  * 
  * @param chordSheetData - Chord sheet data to save
+ * @param refetch - Optional function to refresh chord sheet state after save
  * @returns Save handler function
  */
-export function useChordSheetSave(chordSheetData: ChordSheetData | null) {
+export function useChordSheetSave(
+  chordSheetData: ChordSheetData | null, 
+  refetch?: () => void
+) {
   const handleSave = async (): Promise<void> => {
     if (!chordSheetData?.chordSheet) {
       console.warn('No chord sheet data available for saving');
@@ -18,6 +22,11 @@ export function useChordSheetSave(chordSheetData: ChordSheetData | null) {
     try {
       await saveChordSheetToStorage(chordSheetData);
       showSaveSuccessNotification(chordSheetData.chordSheet.title);
+      
+      // Refresh chord sheet state to update isSaved flag
+      if (refetch) {
+        refetch();
+      }
     } catch (error) {
       console.error('Failed to save chord sheet:', error);
       showSaveErrorNotification();

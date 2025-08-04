@@ -18,6 +18,8 @@ export interface UseChordSheetResult {
   isLoading: boolean;
   /** Error message if loading fails */
   error: string | null;
+  /** Function to refetch chord sheet from storage (useful after save operations) */
+  refetch: () => void;
 }
 
 /**
