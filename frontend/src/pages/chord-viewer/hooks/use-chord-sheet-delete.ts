@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { deleteChordSheetFromStorage } from "../utils/chord-sheet-deletion";
+import deleteChordSheet from "@/storage/stores/chord-sheets/operations/delete-chord-sheet";
 import { showDeleteSuccessNotification, showDeleteErrorNotification } from "../utils/notifications";
 
 /**
@@ -14,7 +14,7 @@ export function useChordSheetDelete(path: string, songTitle: string) {
   
   const handleDelete = async (): Promise<void> => {
     try {
-      await deleteChordSheetFromStorage(path);
+      await deleteChordSheet(path);
       showDeleteSuccessNotification(songTitle);
       navigate('/my-chord-sheets');
     } catch (error) {
