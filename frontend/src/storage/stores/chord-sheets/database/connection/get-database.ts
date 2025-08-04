@@ -3,24 +3,33 @@
  */
 
 import initializeDatabase from "./initialization";
+import { hasValidSchema } from "./schema-validator";
 
 let databasePromise: Promise<IDBDatabase> | null = null;
 let database: IDBDatabase | null = null;
+
+/**
+ * Reset the cached database connection and promise
+ */
+function resetConnection(): void {
+  database = null;
+  databasePromise = null;
+}
 
 /**
  * @returns Promise that resolves to IDBDatabase instance
  * @throws {Error} When database connection fails
  */
 export default function getDatabase(): Promise<IDBDatabase> {
-  // If we have a valid cached database connection, return it
-  if (database && !database.objectStoreNames.contains("chordSheets")) {
-    // Database schema is invalid, reset
-    database = null;
-    databasePromise = null;
-  }
-
+  // If we have a cached database, validate its schema
   if (database) {
-    return Promise.resolve(database);
+    if (!hasValidSchema(database)) {
+      // Database schema is invalid, reset and reinitialize
+      resetConnection();
+    } else {
+      // Database is valid, return it
+      return Promise.resolve(database);
+    }
   }
 
   // If we already have a pending initialization, return it
@@ -34,24 +43,15 @@ export default function getDatabase(): Promise<IDBDatabase> {
       // Cache the successful connection
       database = db;
 
-      // Handle database close events
-      db.onclose = () => {
-        database = null;
-        databasePromise = null;
-      };
-
-      // Handle database error events
-      db.onerror = () => {
-        database = null;
-        databasePromise = null;
-      };
+      // Handle database close and error events
+      db.onclose = resetConnection;
+      db.onerror = resetConnection;
 
       return db;
     })
     .catch((error) => {
       // Reset on error so next call can retry
-      databasePromise = null;
-      database = null;
+      resetConnection();
       throw error;
     });
 

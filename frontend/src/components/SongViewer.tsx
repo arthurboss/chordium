@@ -4,7 +4,7 @@ import NavigationCard from "@/components/NavigationCard";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
-import { unifiedChordSheetCache } from "@/cache/implementations/unified-chord-sheet-cache";
+import { useChordSheets } from "@/storage/hooks/use-chord-sheets";
 import { Save } from "lucide-react";
 
 interface SongViewerProps {
@@ -33,24 +33,25 @@ const SongViewer = ({
   isFromMyChordSheets = false
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
+  const { myChordSheets } = useChordSheets();
 
-  // Load chord sheet content - use direct content if provided, otherwise load from cache
-  const chordContent = useMemo(() => {
-
+  // Determine the chord content to display
+  const chordContentToDisplay = useMemo(() => {
+    // If direct chord content is provided, use it (for search results)
     if (directChordContent) {
       return directChordContent;
     }
 
-    // Validate song object to prevent cache key generation errors
-    if (!songObj.artist || !songObj.title) {
-      return '';
+    // If this is from myChordSheets, look up the chord content from stored data
+    if (isFromMyChordSheets && songObj.artist && songObj.title) {
+      const storedChordSheet = myChordSheets.find(stored => 
+        stored.artist === songObj.artist && stored.title === songObj.title
+      );
+      return storedChordSheet?.songChords ?? '';
     }
 
-    // Try to get from cache using artist and title
-    const cachedChordSheet = unifiedChordSheetCache.getCachedChordSheet(songObj.artist, songObj.title);
-
-    return cachedChordSheet?.songChords ?? '';
-  }, [songObj, directChordContent]);
+    return '';
+  }, [songObj, directChordContent, isFromMyChordSheets, myChordSheets]);
 
   return (
     <div className="animate-fade-in">
@@ -78,7 +79,7 @@ const SongViewer = ({
         <ChordDisplay
           ref={chordDisplayRef}
           chordSheet={chordSheet}
-          content={chordContent}
+          content={chordContentToDisplay}
           onSave={onUpdate}
         />
       </div>

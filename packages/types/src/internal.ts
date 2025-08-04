@@ -17,11 +17,6 @@ export interface RawData {
 }
 
 /**
- * Data source identifier for normalization
- */
-export type DataSource = 'supabase' | 'cifraclub' | 'unknown';
-
-/**
  * Result from title and artist extraction operations
  */
 export interface TitleArtistResult {

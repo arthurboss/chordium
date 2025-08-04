@@ -53,7 +53,22 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
     case 'artist-songs-empty':
       return <div style={{ padding: 32, textAlign: 'center' }}><h3>No songs found for {stateData.activeArtist?.displayName || 'this artist'}.</h3><p>Try searching for another artist or song.</p></div>;
     case 'songs-view':
-      return <SongsView activeArtist={stateData.activeArtist} filteredSongs={stateData.searchType === 'artist' ? filteredSongs : undefined} songs={stateData.searchType === 'song' ? stateData.songs : undefined} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      // For artist search results, show artists; for song search results, show songs
+      if (stateData.searchType === 'artist' && stateData.activeArtist && stateData.artistSongs) {
+        // Artist songs view (when an artist is selected)
+        return <SongsView activeArtist={stateData.activeArtist} filteredSongs={filteredSongs} songs={undefined} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      } else if (stateData.searchType === 'artist') {
+        // Artist search results - show artists, not songs
+        const filteredArtists = filterArtist 
+          ? artists.filter(artist => 
+              artist.displayName.toLowerCase().includes(filterArtist.toLowerCase())
+            )
+          : artists;
+        return <SearchResultsLayout results={filteredArtists} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
+      } else {
+        // Song search results
+        return <SongsView activeArtist={stateData.activeArtist} filteredSongs={undefined} songs={stateData.songs} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      }
     case 'hasSearched': {
       // Filter artists by the artist filter input
       const filteredArtists = filterArtist 
@@ -62,7 +77,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
           )
         : artists;
       
-      return <div data-cy="search-results-layout-wrapper" {...testAttr("search-results")}><SearchResultsLayout artists={filteredArtists} songs={songs} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} /></div>;
+      return <SearchResultsLayout results={[...filteredArtists, ...songs]} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
     }
     case 'default':
     default:

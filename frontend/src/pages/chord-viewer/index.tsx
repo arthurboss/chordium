@@ -49,7 +49,7 @@ const ChordViewer = () => {
   };
   
   // Chord sheet operations using focused hooks
-  const { handleSave } = useChordSheetSave(chordSheetData);
+  const { handleSave } = useChordSheetSave(chordSheetData, chordSheetResult.refetch);
   const { handleDelete } = useChordSheetDelete(
     path, 
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'

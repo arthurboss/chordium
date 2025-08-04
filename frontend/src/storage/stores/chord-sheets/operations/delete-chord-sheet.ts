@@ -1,5 +1,5 @@
 import type { StoredChordSheet } from "../../../types/chord-sheet";
-import { executeWriteTransaction } from "../utils/transactions";
+import { executeWriteTransaction } from "../../../core/transactions";
 
 /**
  * @param path - Song identifier to remove
@@ -12,7 +12,7 @@ export default async function deleteChordSheet(
     throw new Error("Path is required for delete operation");
   }
 
-  return executeWriteTransaction((store) => {
+  return executeWriteTransaction("chordSheets", (store) => {
     return store.delete(path);
   });
 }

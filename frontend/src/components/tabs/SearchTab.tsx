@@ -7,7 +7,7 @@ import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/search/components/SearchResults";
-import { setLastSearchQuery } from '@/cache/implementations/search-cache';
+import { setLastSearchQuery } from '@/utils/last-search-query';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/search/hooks/useArtistNavigation';

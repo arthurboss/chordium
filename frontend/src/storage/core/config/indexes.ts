@@ -1,18 +1,29 @@
 /**
- * Index definitions for object stores
+ * IndexedDB index configuration constants
+ * 
+ * Centralizes index field names to ensure consistency across all database operations
+ * and prevent typos in index references.
+ */
+
+/**
+ * Index configurations for each object store
  */
 export const INDEXES = {
+  /** Chord sheets store indexes */
   chordSheets: {
-    artist: "artist", // Direct property access
-    title: "title", // Direct property access
-    saved: "storage.saved", // Nested property access
-    lastAccessed: "storage.lastAccessed", // For LRU cleanup
-    timestamp: "storage.timestamp", // For creation time queries
-    expiresAt: "storage.expiresAt", // For TTL cleanup
+    artist: "artist",
+    title: "title", 
+    saved: "saved",
+    lastAccessed: "lastAccessed",
+    timestamp: "timestamp",
+    expiresAt: "expiresAt",
   },
+  
+  /** Search cache store indexes */
   searchCache: {
     timestamp: "timestamp",
-    searchType: "searchType",
+    searchType: "searchType", 
+    dataSource: "dataSource",
     expiresAt: "expiresAt",
   },
 } as const;

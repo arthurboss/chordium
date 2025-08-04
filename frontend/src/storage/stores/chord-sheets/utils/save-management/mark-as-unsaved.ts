@@ -6,7 +6,7 @@
  */
 
 import type { StoredChordSheet } from "../../../../types/chord-sheet";
-import { calculateCacheExpiration } from "../ttl-constants";
+import { calculateCacheExpiration } from "../../../../core/ttl/cache-expiration";
 import { updateAccess } from "../access-tracking";
 
 /**

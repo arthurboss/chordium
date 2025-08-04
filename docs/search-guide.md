@@ -17,12 +17,15 @@
 ## 🎭 Search Types
 
 ### 🎤 Artist Search
+
 Type just an artist name (like "Adele") to find all their songs
 
-### 🎵 Song Search  
+### 🎵 Song Search
+
 Type just a song name (like "Hello") to find that song by any artist
 
 ### 🎼 Artist-Song Search
+
 Type both artist and song (like "Adele Hello") to find a specific song
 
 > 💡 **Pro Tip**: The search automatically knows what type you want based on which fields you fill!
@@ -32,12 +35,15 @@ Type both artist and song (like "Adele Hello") to find a specific song
 ## 🎛️ How Filtering Works
 
 ### After an Artist Search 🎤
+
 Type in the song field to filter through that artist's songs
 
 ### After a Song Search 🎵
+
 Type in the artist field to filter through artists who recorded that song
 
 ### After an Artist-Song Search 🎼
+
 Type in either field to refine your search within the current results
 
 > 🧹 **Clear Button**: Clicking the Clear button or clearing both fields will remove all results from the page, giving you a fresh start!
@@ -52,4 +58,4 @@ Type in either field to refine your search within the current results
 
 📌 **Bookmark Friendly**: Your search stays saved in the web address so you can bookmark or share it
 
-⚡ **Performance First**: The web address only changes when you submit a search, not while you're typing 
+⚡ **Performance First**: The web address only changes when you submit a search, not while you're typing

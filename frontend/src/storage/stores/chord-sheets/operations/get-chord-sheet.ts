@@ -4,8 +4,8 @@
 
 import type { Song } from "@chordium/types";
 import type { StoredChordSheet } from "../../../types/chord-sheet";
-import executeReadTransaction from "../utils/transactions/read-transaction";
-import getDatabase from "../database/connection/get-database";
+import { executeReadTransaction } from "../../../core/transactions";
+import { getDatabase } from "../database/connection";
 import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
 
 /**
@@ -26,6 +26,7 @@ export default async function getChordSheet(
 
   // Try direct path lookup first
   let result = await executeReadTransaction<StoredChordSheet | undefined>(
+    "chordSheets",
     (store) => store.get(path)
   );
 
@@ -34,6 +35,7 @@ export default async function getChordSheet(
     const resolvedPath = resolveSampleChordSheetPath(path);
     if (resolvedPath !== path) {
       result = await executeReadTransaction<StoredChordSheet | undefined>(
+        "chordSheets",
         (store) => store.get(resolvedPath)
       );
     }

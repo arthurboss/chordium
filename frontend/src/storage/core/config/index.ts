@@ -1,5 +1,7 @@
 /**
- * Barrel export for configuration modules
+ * Core configuration constants
+ * 
+ * Centralizes configuration settings used across the storage system
  */
 
 export * from "./database";

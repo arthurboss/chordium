@@ -1,9 +1,6 @@
 import { useCallback, useRef } from "react";
 import type { Artist, Song } from "@chordium/types";
-import { 
-  cacheSearchResults, 
-  getCachedSearchResults 
-} from "@/cache/implementations/search-cache";
+import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 import type { SearchResultsAction } from "@/search/types/searchResultsAction";
 import { getApiBaseUrl } from "@/utils/api-base-url";
 
@@ -12,6 +9,23 @@ interface UseSearchFetchOptions {
   onFetchComplete?: () => void;
   setSearchFetching: (loading: boolean) => void;
 }
+
+/**
+ * Generate cache path for search parameters
+ */
+const generateCachePath = (artist: string, song: string): string => {
+  if (!artist && song) {
+    // Song-only search
+    return song.toLowerCase().trim();
+  } else if (artist && !song) {
+    // Artist-only search  
+    return artist.toLowerCase().trim();
+  } else if (artist && song) {
+    // Artist + song search (use artist path for caching)
+    return artist.toLowerCase().trim();
+  }
+  return '';
+};
 
 /**
  * Hook for handling search API requests with caching
@@ -50,25 +64,31 @@ export const useSearchFetch = ({
       }
 
       // Check cache first
-      const cachedResults = getCachedSearchResults(artistParam, songParam);
-      if (cachedResults !== null) {
-        if (artistParam) {
-          // Artist search - cached results are Artist[]
-          dispatch({ 
-            type: "SEARCH_SUCCESS", 
-            artists: cachedResults as unknown as Artist[], 
-            songs: [] 
-          });
-        } else if (songParam) {
-          // Song search - cached results are Song[]
-          dispatch({ 
-            type: "SEARCH_SUCCESS", 
-            artists: [], 
-            songs: cachedResults as unknown as Song[] 
-          });
+      const cachePath = generateCachePath(artistParam, songParam);
+      if (cachePath) {
+        const cachedEntry = await searchCacheService.get(cachePath);
+        if (cachedEntry) {
+          const { results, search } = cachedEntry;
+          
+          if (search.searchType === 'artist') {
+            // Artist search results
+            dispatch({ 
+              type: "SEARCH_SUCCESS", 
+              artists: results as Artist[], 
+              songs: [] 
+            });
+          } else {
+            // Song search results
+            dispatch({ 
+              type: "SEARCH_SUCCESS", 
+              artists: [], 
+              songs: results as Song[] 
+            });
+          }
+          
+          if (onFetchComplete) onFetchComplete();
+          return;
         }
-        if (onFetchComplete) onFetchComplete();
-        return;
       }
 
       // Make API call based on search type
@@ -93,11 +113,37 @@ export const useSearchFetch = ({
       if (!artistParam && songParam) {
         // Song search
         dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
-        cacheSearchResults(artistParam, songParam, data);
+        
+        // Cache results
+        const cachePath = generateCachePath(artistParam, songParam);
+        if (cachePath) {
+          await searchCacheService.storeResults({
+            path: cachePath,
+            results: data,
+            search: {
+              query: { artist: null, song: songParam },
+              searchType: 'song',
+              dataSource: 'cifraclub'
+            }
+          });
+        }
       } else {
         // Artist search
         dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
-        cacheSearchResults(artistParam, songParam, data);
+        
+        // Cache results
+        const cachePath = generateCachePath(artistParam, songParam);
+        if (cachePath) {
+          await searchCacheService.storeResults({
+            path: cachePath,
+            results: data,
+            search: {
+              query: { artist: artistParam, song: songParam || null },
+              searchType: 'artist',
+              dataSource: 'supabase'
+            }
+          });
+        }
       }
 
       if (onFetchComplete) onFetchComplete();

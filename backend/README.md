@@ -46,10 +46,10 @@ npm test -- tests/services/s3/connection.test.js       # Connection testing
 
 ## API Endpoints
 
-- `GET /api/artists?artist=<name>` - Search artists
-- `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs
-- `GET /api/artist-songs?artistPath=<path>` - Get artist songs
-- `GET /api/chord-sheet?url=<encoded-url>` - Get chord sheet
+- `GET /api/artists?artist=<name>` - Search for artists matching a name
+- `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs (artist and/or song parameters)
+- `GET /api/artist-songs?artistPath=<path>` - Get all songs by a specific artist
+- `GET /api/cifraclub-chord-sheet?url=<encoded-url>` - Get chord sheet from URL
 
 ## Environment
 
