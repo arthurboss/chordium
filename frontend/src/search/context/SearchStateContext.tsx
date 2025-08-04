@@ -1,11 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import type { Song } from "@/types/song";
-
-export interface SearchState {
-  artist: string;
-  song: string;
-  results: Song[];
-}
+import React, { createContext, useContext, useState, useCallback } from "react";
+import type { SearchState, SearchStateContextValue } from "./SearchStateContext.types";
+import { useHydrateSearch } from "./hooks/useHydrateSearch";
+import { usePersistSearch } from "./hooks/usePersistSearch";
 
 const defaultState: SearchState = {
   artist: "",
@@ -13,39 +9,28 @@ const defaultState: SearchState = {
   results: [],
 };
 
-const SearchStateContext = createContext<{
-  searchState: SearchState;
-  setSearchState: (s: SearchState) => void;
-  updateSearchState: (patch: Partial<SearchState>) => void;
-} | undefined>(undefined);
+const SearchStateContext = createContext<SearchStateContextValue | undefined>(undefined);
 
 export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Hydrate from localStorage on first load, but keep all state in memory after
-  const [searchState, setSearchState] = useState<SearchState>(() => {
-    try {
-      const cached = localStorage.getItem("chordium-search-cache");
-      return cached ? JSON.parse(cached) : defaultState;
-    } catch {
-      return defaultState;
-    }
-  });
+  const [searchState, setSearchState] = useState<SearchState>(defaultState);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Persist to localStorage only when searchState changes
-  useEffect(() => {
-    localStorage.setItem("chordium-search-cache", JSON.stringify(searchState));
-  }, [searchState]);
+  useHydrateSearch(setSearchState, setHydrated);
+  usePersistSearch(searchState, hydrated);
 
-  // Helper for partial updates (like setState)
   const updateSearchState = useCallback((patch: Partial<SearchState>) => {
     setSearchState((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  // Memoize context value for performance
   const contextValue = React.useMemo(() => ({
     searchState,
     setSearchState,
     updateSearchState,
   }), [searchState, updateSearchState]);
+
+  if (!hydrated) {
+    return null;
+  }
 
   return (
     <SearchStateContext.Provider value={contextValue}>
