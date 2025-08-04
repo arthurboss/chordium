@@ -2,7 +2,11 @@
 const ORIGINAL_SEARCH_URL_KEY = "original_search_url";
 
 /**
- * Store the original search URL format to preserve it during navigation
+ * storeOriginalSearchUrl
+ *
+ * Stores the original search URL format in sessionStorage to preserve it during navigation.
+ *
+ * @param url - The original search URL to store
  */
 export function storeOriginalSearchUrl(url: string) {
   try {

@@ -11,7 +11,7 @@ import { setLastSearchQuery } from '@/utils/last-search-query';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/search/hooks/useArtistNavigation';
-import { storeOriginalSearchUrl } from '@/hooks/use-navigation-history';
+import { storeOriginalSearchUrl } from '@/utils/storeOriginalSearchUrl';
 
 interface SearchTabProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
