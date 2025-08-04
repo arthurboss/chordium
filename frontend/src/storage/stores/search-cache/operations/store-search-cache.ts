@@ -24,7 +24,7 @@ const storeSearchCache: StoreSearchCacheFunction = async (
   // Ensure database initialization
   await getDatabase();
 
-  await executeWriteTransaction<IDBValidKey>(
+  await executeWriteTransaction(
     "searchCache",
     (store) => store.put(entry)
   );
