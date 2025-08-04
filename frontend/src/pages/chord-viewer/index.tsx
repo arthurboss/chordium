@@ -12,8 +12,7 @@ import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
 import { useChordViewerNavigation } from "./hooks/use-chord-viewer-navigation";
-import { useChordSheetSave } from "@/storage/hooks/use-chord-sheet-save";
-import { useChordSheetDelete } from "./hooks/use-chord-sheet-delete";
+import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components
 import { ChordViewerLoading } from "./components/chord-viewer-loading";
@@ -26,32 +25,32 @@ import { ChordViewerError } from "./components/chord-viewer-error";
 const ChordViewer = () => {
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const routeParams = useParams() as RouteParams;
-  
+
   // Convert URL parameters to chord sheet storage path
   const path = resolveChordSheetPath(routeParams);
-  
+
   // Fetch chord sheet data (handles database readiness internally)
   const chordSheetResult = useChordSheet({ path });
-  
+
   // Create complete chord sheet data object (only if chord sheet exists)
-  const chordSheetData = chordSheetResult.chordSheet 
+  const chordSheetData = chordSheetResult.chordSheet
     ? createChordSheetData(chordSheetResult.chordSheet, path)
     : null;
-  
+
   // Navigation handlers
   const navigation = useChordViewerNavigation();
   const isFromMyChordSheets = chordSheetResult.isSaved;
-  
+
   const handleBack = () => {
-    return isFromMyChordSheets 
-      ? navigation.navigateToMyChordSheets() 
+    return isFromMyChordSheets
+      ? navigation.navigateToMyChordSheets()
       : navigation.navigateToHome();
   };
-  
+
   // Chord sheet operations using focused hooks
   const { handleSave } = useChordSheetSave(chordSheetData, chordSheetResult.refetch);
   const { handleDelete } = useChordSheetDelete(
-    path, 
+    path,
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
   );
 
@@ -63,8 +62,8 @@ const ChordViewer = () => {
   // Error state
   if (chordSheetResult.error) {
     return (
-      <ChordViewerError 
-        error={chordSheetResult.error} 
+      <ChordViewerError
+        error={chordSheetResult.error}
         navigation={navigation}
         onBack={handleBack}
       />
@@ -74,8 +73,8 @@ const ChordViewer = () => {
   // Guard against missing chord sheet data
   if (!chordSheetData) {
     return (
-      <ChordViewerError 
-        error="Chord sheet not found" 
+      <ChordViewerError
+        error="Chord sheet not found"
         navigation={navigation}
         onBack={handleBack}
       />

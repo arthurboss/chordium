@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import deleteChordSheet from "@/storage/stores/chord-sheets/operations/delete-chord-sheet";
-import { showDeleteSuccessNotification, showDeleteErrorNotification } from "../utils/notifications";
+import { showDeleteSuccessNotification, showDeleteErrorNotification } from "@/pages/chord-viewer/utils/notifications";
 
 /**
  * Hook for chord sheet delete operations
