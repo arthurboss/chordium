@@ -3,10 +3,12 @@ import { Song } from "@/types/song";
 import ArtistResults from "@/components/ArtistResults";
 import SongItem from "@/components/SongItem";
 import { Artist } from '@/types/artist';
+import { SearchType, SEARCH_TYPES } from '@chordium/types';
 import SearchResultsSection from "@/components/SearchResultsSection";
 
 interface SearchResultsLayoutProps {
   results: (Artist | Song)[];
+  searchType?: SearchType;
   onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   onArtistSelect?: (artist: Artist) => void;
@@ -15,14 +17,27 @@ interface SearchResultsLayoutProps {
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results,
+  searchType,
   onView,
   onDelete,
   onArtistSelect,
   hasSearched = false
 }) => {
-  // Separate artists and songs from unified results
-  const artists = results.filter((item): item is Artist => 'displayName' in item);
-  const songs = results.filter((item): item is Song => 'title' in item);
+  // Use searchType to avoid expensive filtering when possible
+  let artists: Artist[] = [];
+  let songs: Song[] = [];
+
+  if (searchType === SEARCH_TYPES.ARTIST) {
+    // When searchType is artist, all results should be artists
+    artists = results as Artist[];
+  } else if (searchType === SEARCH_TYPES.SONG) {
+    // When searchType is song, all results should be songs
+    songs = results as Song[];
+  } else {
+    // Fall back to type detection for mixed results or when searchType is not specified
+    artists = results.filter((item): item is Artist => 'displayName' in item);
+    songs = results.filter((item): item is Song => 'title' in item);
+  }
   
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;

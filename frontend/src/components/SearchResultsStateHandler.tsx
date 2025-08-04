@@ -1,6 +1,7 @@
 import React from 'react';
 import { Song } from '@/types/song';
 import { Artist } from '@/types/artist';
+import { SEARCH_TYPES, SearchType } from '@chordium/types';
 import SearchResultsLayout from './SearchResultsLayout';
 import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
@@ -12,7 +13,7 @@ interface SearchResultsStateHandlerProps {
     activeArtist?: Artist;
     artistSongsError?: string;
     artistSongs?: Song[];
-    searchType?: 'artist' | 'song';
+    searchType?: SearchType;
     hasSongs?: boolean;
     songs?: Song[];
   };
@@ -51,20 +52,22 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       return <ErrorState error={stateData.artistSongsError || 'Unknown error'} />;
 
     case 'songs-view':
-      if (stateData.searchType === 'artist' && stateData.activeArtist && stateData.artistSongs) {
+      if (stateData.searchType === SEARCH_TYPES.ARTIST && stateData.activeArtist && stateData.artistSongs) {
         return (
           <SearchResultsLayout
             results={stateData.artistSongs}
+            searchType={SEARCH_TYPES.SONG}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
         );
-      } else if (stateData.searchType === 'song' && stateData.songs) {
+      } else if (stateData.searchType === SEARCH_TYPES.SONG && stateData.songs) {
         return (
           <SearchResultsLayout
             results={stateData.songs}
+            searchType={SEARCH_TYPES.SONG}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
@@ -75,6 +78,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
         return (
           <SearchResultsLayout
             results={[...artists, ...songs]}
+            searchType={stateData.searchType}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
