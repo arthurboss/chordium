@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useState, useCallback, useMemo } from "react";
 import type { Artist } from "@chordium/types";
-import { useSongActions } from "@/utils/search-song-actions";
+import { useSongActions } from "@/search/hooks/useSongActions";
 import { initialSearchState } from "./useSearchState/core/initialSearchState";
 import { searchStateReducer } from "./useSearchState/core/searchStateReducer";
 import { determineUIState } from "./useSearchState/utils/determineUIState";
@@ -8,10 +8,6 @@ import { useSearchFetch } from "./useSearchState/handlers/useSearchFetch";
 import { useArtistSongsFetch } from "./useSearchState/handlers/useArtistSongsFetch";
 import type { UseSearchStateOptions } from "@/search/types/useSearchStateOptions";
 
-/**
- * Consolidated search state hook that manages all search-related state
- * Replaces: useSearchResults, useArtistSongs, useSearchResultsReducer, useSearchEffects
- */
 export const useSearchState = ({
   artist,
   song,
@@ -23,18 +19,28 @@ export const useSearchState = ({
   onFetchComplete,
   onLoadingChange,
   onArtistSelect,
-  setMySongs
+  setMySongs,
 }: UseSearchStateOptions) => {
   const [state, dispatch] = useReducer(searchStateReducer, initialSearchState);
-  
+
   // Search fetch state
   const [searchFetching, setSearchFetching] = useState(false);
   const [artistSongsFetching, setArtistSongsFetching] = useState(false);
 
   // Single source of truth for loading state
   const isLoading = useMemo(() => {
-    return state.loading || state.artistSongsLoading || searchFetching || artistSongsFetching;
-  }, [state.loading, state.artistSongsLoading, searchFetching, artistSongsFetching]);
+    return (
+      state.loading ||
+      state.artistSongsLoading ||
+      searchFetching ||
+      artistSongsFetching
+    );
+  }, [
+    state.loading,
+    state.artistSongsLoading,
+    searchFetching,
+    artistSongsFetching,
+  ]);
 
   // Notify parent of loading changes
   useEffect(() => {
@@ -44,16 +50,16 @@ export const useSearchState = ({
   }, [isLoading, onLoadingChange]);
 
   // Search fetch handler
-  const { fetchSearchResults } = useSearchFetch({ 
-    dispatch, 
-    onFetchComplete, 
-    setSearchFetching 
+  const { fetchSearchResults } = useSearchFetch({
+    dispatch,
+    onFetchComplete,
+    setSearchFetching,
   });
 
   // Artist songs fetch handler
-  const { fetchArtistSongsData, clearArtistSongsFetch } = useArtistSongsFetch({ 
-    dispatch, 
-    setArtistSongsFetching 
+  const { fetchArtistSongsData, clearArtistSongsFetch } = useArtistSongsFetch({
+    dispatch,
+    setArtistSongsFetching,
   });
 
   // Effect: Handle search fetch when shouldFetch changes
@@ -71,7 +77,12 @@ export const useSearchState = ({
       dispatch({ type: "CLEAR_ARTIST" });
       clearArtistSongsFetch();
     }
-  }, [activeArtist, state.activeArtist, fetchArtistSongsData, clearArtistSongsFetch]);
+  }, [
+    activeArtist,
+    state.activeArtist,
+    fetchArtistSongsData,
+    clearArtistSongsFetch,
+  ]);
 
   // Effect: Handle filter changes for artist songs
   useEffect(() => {
@@ -86,29 +97,32 @@ export const useSearchState = ({
   // Song actions
   const songActions = useSongActions({
     memoizedSongs: state.activeArtist ? state.artistSongs || [] : state.songs,
-    setMySongs
+    setMySongs,
   });
 
   // Artist selection handler
-  const handleArtistSelect = useCallback((artist: Artist) => {
-    if (onArtistSelect) {
-      onArtistSelect(artist);
-    }
-  }, [onArtistSelect]);
+  const handleArtistSelect = useCallback(
+    (artist: Artist) => {
+      if (onArtistSelect) {
+        onArtistSelect(artist);
+      }
+    },
+    [onArtistSelect]
+  );
 
   return {
     // State
     state,
     stateData,
     isLoading,
-    
+
     // Data
     artists: state.artists,
     songs: state.songs,
     artistSongs: state.artistSongs,
     filteredArtistSongs: state.filteredArtistSongs,
     activeArtist: state.activeArtist,
-    
+
     // Actions
     dispatch,
     handleView: songActions.handleView,
