@@ -46,15 +46,18 @@ export function useSearchCache(params: UseSearchCacheParams = {}): UseSearchCach
   const [state, dispatch] = useReducer(useSearchCacheReducer, initialState);
   
   const operations = useSearchCacheOperations(params, dispatch);
+  
+  // Extract getFromCache to use in dependency array
+  const { getFromCache } = operations;
 
   // Auto-load cache entry when path changes (if path is provided)
   useEffect(() => {
     if (params.path && params.validateTTL !== false) {
-      operations.getFromCache().catch(() => {
+      getFromCache().catch(() => {
         // Error is already handled in operations, this is just to prevent unhandled promise rejection
       });
     }
-  }, [params.path, params.validateTTL]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [params.path, params.validateTTL, getFromCache]);
 
   return {
     // State
