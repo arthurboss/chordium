@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
-import { useSearchState } from "@/context/SearchStateContext";
+import { useSearchState } from "@/search/context/SearchStateContext";
 import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
