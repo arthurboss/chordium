@@ -58,9 +58,3 @@ export const LIMITS = {
   /** Cleanup threshold (trigger cleanup when usage exceeds this ratio) */
   CLEANUP_THRESHOLD: 0.8, // 80%
 } as const;
-
-/**
- * Legacy exports for backward compatibility
- * @deprecated Use TTL.CHORD_SHEETS instead
- */
-export const DEFAULT_CACHE_TTL_MS = TTL.CHORD_SHEETS;

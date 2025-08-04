@@ -7,7 +7,7 @@
 
 import type { ChordSheet } from "@chordium/types";
 import type { StoredChordSheet } from "../../../../types/chord-sheet";
-import { calculateCacheExpiration } from "../ttl-constants";
+import { calculateCacheExpiration } from "../../../../core/ttl/cache-expiration";
 import type { CreateStoredChordSheetOptions } from "./create-stored-chord-sheet.types";
 
 /**
