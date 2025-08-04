@@ -6,8 +6,7 @@ import { Artist } from '@/types/artist';
 import SearchResultsSection from "@/components/SearchResultsSection";
 
 interface SearchResultsLayoutProps {
-  artists: Artist[];
-  songs: Song[];
+  results: (Artist | Song)[];
   onView: (song: Song) => void;
   onDelete: (songId: string) => void;
   onArtistSelect?: (artist: Artist) => void;
@@ -15,16 +14,18 @@ interface SearchResultsLayoutProps {
 }
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
-  artists,
-  songs = [],
+  results,
   onView,
   onDelete,
   onArtistSelect,
   hasSearched = false
 }) => {
+  // Separate artists and songs from unified results
+  const artists = results.filter((item): item is Artist => 'displayName' in item);
+  const songs = results.filter((item): item is Song => 'title' in item);
+  
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;
-  
   // Handle empty results
   if (!hasArtists && !hasSongs && hasSearched) {
     return (

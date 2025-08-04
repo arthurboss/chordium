@@ -18,8 +18,8 @@ export const searchStateReducer = (
         artistSongsError: null,
       };
 
-    case "SEARCH_SUCCESS":
-      return {
+    case "SEARCH_SUCCESS": {
+      const newState = {
         ...state,
         loading: false,
         error: null,
@@ -32,6 +32,9 @@ export const searchStateReducer = (
         artistSongs: null,
         filteredArtistSongs: [],
       };
+      
+      return newState;
+    }
 
     case "SEARCH_ERROR":
       return {

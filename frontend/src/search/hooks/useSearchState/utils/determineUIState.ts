@@ -1,7 +1,7 @@
 import type { SearchResultsState } from "@/search/types/searchResultsState";
 
 /**
- * Determine UI state from the reducer state
+ * Determines the current UI state based on search results state
  * Returns appropriate state object for rendering components
  */
 export const determineUIState = (state: SearchResultsState) => {
@@ -38,10 +38,8 @@ export const determineUIState = (state: SearchResultsState) => {
     };
   }
 
-  // Handle case where artist is selected but has no songs
   if (
     state.activeArtist &&
-    !state.artistSongsLoading &&
     state.artistSongs &&
     state.artistSongs.length === 0
   ) {
@@ -58,6 +56,16 @@ export const determineUIState = (state: SearchResultsState) => {
       songs: state.songs,
       searchType: "song" as const,
       hasSongs: true,
+    };
+  }
+
+  // Handle artist search results
+  if (state.hasSearched && state.artists.length > 0) {
+    return {
+      state: "songs-view" as const,
+      songs: [], // No songs for artist results
+      searchType: "artist" as const,
+      hasSongs: false,
     };
   }
 

@@ -54,8 +54,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       if (stateData.searchType === 'artist' && stateData.activeArtist && stateData.artistSongs) {
         return (
           <SearchResultsLayout
-            artists={[]}
-            songs={stateData.artistSongs}
+            results={stateData.artistSongs}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
@@ -65,8 +64,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       } else if (stateData.searchType === 'song' && stateData.songs) {
         return (
           <SearchResultsLayout
-            artists={[]}
-            songs={stateData.songs}
+            results={stateData.songs}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
@@ -76,8 +74,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
       } else {
         return (
           <SearchResultsLayout
-            artists={artists}
-            songs={songs}
+            results={[...artists, ...songs]}
             onView={onView}
             onDelete={(_songId: string) => {}}
             onArtistSelect={onArtistSelect}
