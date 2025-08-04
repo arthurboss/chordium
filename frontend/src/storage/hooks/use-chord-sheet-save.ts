@@ -1,6 +1,6 @@
-import type { ChordSheetData } from "../chord-viewer.types";
+import type { ChordSheetData } from "@/pages/chord-viewer/chord-viewer.types";
 import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
-import { showSaveSuccessNotification, showSaveErrorNotification } from "../utils/notifications";
+import { showSaveSuccessNotification, showSaveErrorNotification } from "@/pages/chord-viewer/utils/notifications";
 
 /**
  * Hook for chord sheet save operations

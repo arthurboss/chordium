@@ -12,7 +12,7 @@ import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
 import { useChordViewerNavigation } from "./hooks/use-chord-viewer-navigation";
-import { useChordSheetSave } from "./hooks/use-chord-sheet-save";
+import { useChordSheetSave } from "@/storage/hooks/use-chord-sheet-save";
 import { useChordSheetDelete } from "./hooks/use-chord-sheet-delete";
 
 // Components
