@@ -5,6 +5,15 @@ import storeSearchCache from "@/storage/stores/search-cache/operations/store-sea
 import { enforceSearchCacheDataSource } from "@/storage/utils/enforceSearchCacheDataSource";
 import type { SearchType, DataSource } from "@chordium/types";
 
+/**
+ * usePersistSearch
+ *
+ * Persists the current search state to the cache when hydrated.
+ * Ensures mapping rules between searchType and dataSource are enforced before storing.
+ *
+ * @param searchState - The current search state to persist
+ * @param hydrated - Whether the state has been hydrated from persistent storage
+ */
 export function usePersistSearch(searchState: SearchState, hydrated: boolean) {
   useEffect(() => {
     if (!hydrated) return;
