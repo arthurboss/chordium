@@ -1,18 +1,12 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import type { SearchState, SearchStateContextValue } from "./SearchStateContext.types";
+import React, { useState, useCallback } from "react";
+import type { SearchState } from "./SearchStateContext.types";
 import { useHydrateSearch } from "./hooks/useHydrateSearch";
 import { usePersistSearch } from "./hooks/usePersistSearch";
-
-const defaultState: SearchState = {
-  artist: "",
-  song: "",
-  results: [],
-};
-
-const SearchStateContext = createContext<SearchStateContextValue | undefined>(undefined);
+import { defaultSearchState } from "./defaultSearchState";
+import { SearchStateContext } from "./SearchStateContext";
 
 export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [searchState, setSearchState] = useState<SearchState>(defaultState);
+  const [searchState, setSearchState] = useState<SearchState>(defaultSearchState);
   const [hydrated, setHydrated] = useState(false);
 
   useHydrateSearch(setSearchState, setHydrated);
@@ -38,9 +32,3 @@ export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     </SearchStateContext.Provider>
   );
 };
-
-export function useSearchState() {
-  const ctx = useContext(SearchStateContext);
-  if (!ctx) throw new Error("useSearchState must be used within a SearchStateProvider");
-  return ctx;
-}

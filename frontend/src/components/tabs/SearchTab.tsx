@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
-import { useSearchState } from "@/search/context/SearchStateContext";
+import { useSearchState } from "@/search/context";
 import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
@@ -41,14 +41,14 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   // Store original URL for preservation when navigating away and back
   useEffect(() => {
     const currentPath = location.pathname + location.search;
-    
+
     // Only store URLs that are search-related:
     // 1. Artist pages (not basic app tabs)
     // 2. Search pages with parameters
-    const isBasicAppTab = location.pathname === '/my-chord-sheets' || 
-                         location.pathname === '/upload' || 
-                         (location.pathname === '/search' && !location.search);
-    
+    const isBasicAppTab = location.pathname === '/my-chord-sheets' ||
+      location.pathname === '/upload' ||
+      (location.pathname === '/search' && !location.search);
+
     if (!isBasicAppTab) {
       storeOriginalSearchUrl(currentPath);
     }
@@ -63,7 +63,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     if ((artistParam || songParam) && !isInitialized.current) {
       const artist = artistParam ? fromSlug(artistParam) : '';
       const song = songParam ? fromSlug(songParam) : '';
-      
+
       // Set input fields
       setArtistInput(artist);
       setSongInput(song);
@@ -83,15 +83,15 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
 
   // Handlers for search form - memoized to prevent re-renders
   const handleInputChange = useCallback((artistValue: string, songValue: string) => {
-    
+
     // Always update the input fields so the UI shows what user types
     setArtistInput(artistValue);
     setSongInput(songValue);
-    
+
     // Only update URL when an input is cleared (goes from non-empty to empty)
     const artistCleared = prevArtistInput && !artistValue;
     const songCleared = prevSongInput && !songValue;
-    
+
     if (artistCleared || songCleared) {
       const params = new URLSearchParams();
       if (artistValue) params.set('artist', toSlug(artistValue));
@@ -99,7 +99,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
       const searchUrl = params.toString() ? `/search?${params.toString()}` : '/search';
       navigate(searchUrl, { replace: true });
     }
-    
+
     // Update previous values for next comparison
     setPrevArtistInput(artistValue);
     setPrevSongInput(songValue);
@@ -108,7 +108,7 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
   }, [prevArtistInput, prevSongInput, navigate]);
 
   const handleSearchSubmit = useCallback((artistValue: string, songValue: string) => {
-    
+
     // Clear artist/song selection state before new search
     setActiveArtist(null);
     setSelectedSongLocal(null);
@@ -146,14 +146,14 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
       const artistPath = getCurrentArtistPath();
       if (artistPath) {
         const artistName = fromSlug(artistPath);
-        
+
         // Set up the artist as if it was selected from search results
         const artist: Artist = {
           displayName: artistName,
           path: artistPath,
           songCount: null
         };
-        
+
         setActiveArtist(artist);
         setArtistInput(artistName);
         setPrevArtistInput(artistName);
@@ -221,8 +221,8 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
           }}
           chordDisplayRef={null}
           onBack={handleBackToSearch}
-          onDelete={() => {}}
-          onUpdate={() => {}}
+          onDelete={() => { }}
+          onUpdate={() => { }}
           hideDeleteButton={true}
         />
       ) : (
