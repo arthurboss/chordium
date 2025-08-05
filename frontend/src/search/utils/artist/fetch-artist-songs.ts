@@ -1,17 +1,14 @@
-// Utility functions for artist-related logic
-import { SEARCH_TYPES, Song } from "@/types/song";
+/**
+ * Fetches the list of songs for a given artist path, using cache if available.
+ *
+ * @param artistPath - The path identifier for the artist
+ * @returns Promise resolving to an array of Song objects
+ * @throws Error if the artist path is invalid or the API call fails
+ */
+import type { Song } from "@/types/song";
+import { SEARCH_TYPES } from "@/types/song";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
-import { getApiBaseUrl } from './api-base-url';
-
-export function extractArtistSlug(artistUrl: string): string | null {
-  try {
-    const url = new URL(artistUrl);
-    const slug = url.pathname.replace(/^\/+|\/+$/g, '').split('/')[0];
-    return slug || null;
-  } catch {
-    return null;
-  }
-}
+import { getApiBaseUrl } from "@/utils/api-base-url";
 
 export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   if (!artistPath) {
@@ -26,18 +23,14 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   }
 
   const apiUrl = `${getApiBaseUrl()}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
-  
   try {
     const resp = await fetch(apiUrl);
-    
     if (!resp.ok) {
       const errorText = await resp.text();
       console.error(`API error (${resp.status}): ${errorText}`);
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
-    
     const data: Song[] = await resp.json();
-    
     // Cache the results for future use
     await searchCacheService.storeResults({
       path: artistPath,
@@ -48,8 +41,6 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
         dataSource: 's3',
       }
     });
-    
-    // Return the data as-is (Song objects with title and path)
     return data;
   } catch (error) {
     console.error('Error fetching artist songs:', error);
