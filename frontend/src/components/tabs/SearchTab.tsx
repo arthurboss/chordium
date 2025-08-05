@@ -7,7 +7,6 @@ import SongViewer from "@/components/SongViewer";
 import SearchBar from "@/components/SearchBar";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchResults from "@/search/components/SearchResults";
-import { setLastSearchQuery } from '@/utils/last-search-query';
 import { toSlug, fromSlug } from '@/utils/url-slug-utils';
 import { cyAttr } from '@/utils/test-utils/cy-attr';
 import { useArtistNavigation } from '@/search/hooks/useArtistNavigation';
@@ -74,7 +73,6 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
 
       // Set search state and let useSearchResults handle cache checking
       updateSearchState({ artist, song, results: [] });
-      setLastSearchQuery(artist, song);
       setHasSearched(true);
       setShouldFetch(true);
       isInitialized.current = true;
@@ -116,7 +114,6 @@ const SearchTab: React.FC<SearchTabProps> = ({ setMySongs, setActiveTab, setSele
     setSubmittedArtist(artistValue);
     setSubmittedSong(songValue);
     updateSearchState({ artist: artistValue, song: songValue, results: [] });
-    setLastSearchQuery(artistValue, songValue);
     setHasSearched(true);
     setShouldFetch(true);
     // Update the URL with the search query
