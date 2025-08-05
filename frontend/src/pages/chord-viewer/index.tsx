@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
-import { useChordSheet } from "@/hooks/use-chord-sheet";
+import { useSingleChordSheet } from "@/storage/hooks/use-single-chord-sheet";
 import type { RouteParams } from "./chord-viewer.types";
 
 // Utils
@@ -29,8 +29,8 @@ const ChordViewer = () => {
   // Convert URL parameters to chord sheet storage path
   const path = resolveChordSheetPath(routeParams);
 
-  // Fetch chord sheet data (handles database readiness internally)
-  const chordSheetResult = useChordSheet({ path });
+  // Fetch single chord sheet data from IndexedDB
+  const chordSheetResult = useSingleChordSheet({ path });
 
   // Create complete chord sheet data object (only if chord sheet exists)
   const chordSheetData = chordSheetResult.chordSheet
@@ -39,7 +39,7 @@ const ChordViewer = () => {
 
   // Navigation handlers
   const navigation = useChordViewerNavigation();
-  const isFromMyChordSheets = chordSheetResult.isSaved;
+  const isFromMyChordSheets = chordSheetResult.chordSheet?.storage?.saved ?? false;
 
   const handleBack = () => {
     return isFromMyChordSheets
@@ -48,7 +48,7 @@ const ChordViewer = () => {
   };
 
   // Chord sheet operations using focused hooks
-  const { handleSave } = useChordSheetSave(chordSheetData, chordSheetResult.refetch);
+  const { handleSave } = useChordSheetSave(chordSheetData);
   const { handleDelete } = useChordSheetDelete(
     path,
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
