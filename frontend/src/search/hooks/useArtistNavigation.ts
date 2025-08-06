@@ -6,14 +6,11 @@ import {
   navigateBackToSearch as navigateBackToSearchUtil,
   isArtistPage,
   extractArtistFromUrl,
-} from "@/search/utils";
+} from "../utils";
 import { storeOriginalSearchUrl } from "@/utils/storeOriginalSearchUrl";
 
 /**
  * Hook to manage artist navigation state and logic
- *
- * Follows DRY: Centralizes artist navigation logic
- * Follows SRP: Single responsibility for artist navigation
  */
 export const useArtistNavigation = () => {
   const navigate = useNavigate();

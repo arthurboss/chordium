@@ -1,8 +1,8 @@
 import { useState, useRef, useTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSearchState } from "@/search/context";
+import { useSearchState } from "../../../context";
 import { toSlug } from "@/utils/url-slug-utils";
-import { useArtistNavigation } from "@/search/hooks/useArtistNavigation";
+import { useArtistNavigation } from "@/search";
 import type {
   SearchTabLogicProps,
   SearchTabLogicResult,

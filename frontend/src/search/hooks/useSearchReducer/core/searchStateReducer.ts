@@ -1,4 +1,4 @@
-import type { SearchResultsState, SearchResultsAction } from "@/search/types";
+import type { SearchResultsState, SearchResultsAction } from "../../../types";
 import { filterArtistSongsByTitle } from "../utils/filterArtistSongsByTitle";
 
 /**

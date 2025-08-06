@@ -1,10 +1,4 @@
-import type { Song } from '@chordium/types';
-
-export interface SearchState {
-  artist: string;
-  song: string;
-  results: Song[];
-}
+import { SearchState } from "../types";
 
 export type SearchStateContextValue = {
   searchState: SearchState;

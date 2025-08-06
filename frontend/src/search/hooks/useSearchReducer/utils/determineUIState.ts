@@ -1,4 +1,4 @@
-import type { SearchResultsState } from "@/search/types/searchResultsState";
+import type { SearchResultsState } from "../../../types/searchResultsState";
 
 /**
  * Determines the current UI state based on search results state

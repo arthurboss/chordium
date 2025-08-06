@@ -1,6 +1,6 @@
 import React from 'react';
 import { Song, Artist } from '@chordium/types';
-import { useSearchState } from '@/search/hooks';
+import { useSearchReducer } from '@/search';
 import SearchResultsStateHandler from '@/components/SearchResults/SearchResultsStateHandler';
 import { testAttr } from '@/utils/test-utils/test-attr';
 import '@/components/custom-scrollbar.css';
@@ -15,35 +15,31 @@ interface SearchResultsProps {
   filterSong: string;
   activeArtist: Artist | null;
   onArtistSelect: (artist: Artist) => void;
-  hasSearched?: boolean;
   shouldFetch?: boolean;
   onFetchComplete?: () => void;
   onLoadingChange?: (loading: boolean) => void;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ 
-  setMySongs, 
+const SearchResults: React.FC<SearchResultsProps> = ({
+  setMySongs,
   setActiveTab,
   setSelectedSong,
-  artist, 
+  artist,
   song,
   filterArtist,
   filterSong,
   activeArtist,
   onArtistSelect,
-  hasSearched,
   shouldFetch,
   onFetchComplete,
   onLoadingChange,
 }) => {
-  const searchState = useSearchState({
+  const searchState = useSearchReducer({
     artist,
     song,
-    filterArtist,
     filterSong,
     shouldFetch: shouldFetch || false,
     activeArtist,
-    hasSearched: hasSearched || false,
     onFetchComplete,
     onLoadingChange,
     onArtistSelect,

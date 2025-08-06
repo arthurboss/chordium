@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import type { Artist } from "@chordium/types";
-import { fetchArtistSongs } from "@/search/utils";
-import type { SearchResultsAction } from "@/search/types/searchResultsAction";
+import { fetchArtistSongs } from "../../../utils";
+import type { SearchResultsAction } from "../../../types/searchResultsAction";
 
 interface UseArtistSongsFetchOptions {
   dispatch: React.Dispatch<SearchResultsAction>;

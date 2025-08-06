@@ -1,6 +1,6 @@
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
-import type { SearchState } from "@/search/context";
+import type { SearchState } from "../../../context/SearchState.types";
 
 export interface SearchTabLogicProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;

@@ -4,7 +4,7 @@ import React from "react";
 import SongViewer from "@/components/SongViewer";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchBar from "@/components/SearchBar";
-import SearchResults from "@/search/components/SearchResults";
+import SearchResults from "../SearchResults";
 import { cyAttr } from "@/utils/test-utils/cy-attr";
 import { useSearchTabLogic } from "./hooks/useSearchTabLogic";
 

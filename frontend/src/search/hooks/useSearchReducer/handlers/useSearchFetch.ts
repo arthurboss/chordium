@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import type { Artist, Song } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
-import type { SearchResultsAction } from "@/search/types/searchResultsAction";
+import type { SearchResultsAction } from "../../../types/searchResultsAction";
 import { getApiBaseUrl } from "@/utils/api-base-url";
 
 interface UseSearchFetchOptions {

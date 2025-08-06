@@ -1,26 +1,24 @@
 import { useReducer, useEffect, useState, useCallback, useMemo } from "react";
 import type { Artist } from "@chordium/types";
-import { useSongActions } from "@/search/hooks/useSongActions";
-import { initialSearchState } from "./useSearchState/core/initialSearchState";
-import { searchStateReducer } from "./useSearchState/core/searchStateReducer";
-import { determineUIState } from "./useSearchState/utils/determineUIState";
-import { useSearchFetch } from "./useSearchState/handlers/useSearchFetch";
-import { useArtistSongsFetch } from "./useSearchState/handlers/useArtistSongsFetch";
-import type { UseSearchStateOptions } from "@/search/types/useSearchStateOptions";
+import { useSongActions } from "../useSongActions";
+import { initialSearchState } from "./core/initialSearchState";
+import { searchStateReducer } from "./core/searchStateReducer";
+import { determineUIState } from "./utils/determineUIState";
+import { useSearchFetch } from "./handlers/useSearchFetch";
+import { useArtistSongsFetch } from "./handlers/useArtistSongsFetch";
+import type { UseSearchReducerOptions } from "./useSearchReducer.types";
 
-export const useSearchState = ({
+export const useSearchReducer = ({
   artist,
   song,
-  filterArtist,
   filterSong,
   shouldFetch,
   activeArtist,
-  hasSearched,
   onFetchComplete,
   onLoadingChange,
   onArtistSelect,
   setMySongs,
-}: UseSearchStateOptions) => {
+}: UseSearchReducerOptions) => {
   const [state, dispatch] = useReducer(searchStateReducer, initialSearchState);
 
   // Search fetch state

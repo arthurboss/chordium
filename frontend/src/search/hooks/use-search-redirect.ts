@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useSearchState } from "@/search/context";
+import { useSearchState } from "../context";
 import { fromSlug } from "@/utils/url-slug-utils";
 
 // Restores search state from URL parameters on mount

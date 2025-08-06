@@ -7,7 +7,7 @@ import { Song } from "../types/song";
 import type { StoredChordSheet } from "@/storage/types";
 import ChordSheetList from "./chord-sheet-list";
 import SongViewer from "./SongViewer";
-import SearchTab from "./tabs/SearchTab";
+import { SearchTab } from "@/search";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
 import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";

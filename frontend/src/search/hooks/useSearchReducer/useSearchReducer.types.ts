@@ -1,16 +1,14 @@
 import type { Artist, Song } from "@chordium/types";
 
 /**
- * Options interface for useSearchState hook
+ * Options interface for useSearchReducer hook
  */
-export interface UseSearchStateOptions {
+export interface UseSearchReducerOptions {
   artist: string;
   song: string;
-  filterArtist: string;
   filterSong: string;
   shouldFetch: boolean;
   activeArtist: Artist | null;
-  hasSearched: boolean;
   onFetchComplete?: () => void;
   onLoadingChange?: (loading: boolean) => void;
   onArtistSelect?: (artist: Artist) => void;

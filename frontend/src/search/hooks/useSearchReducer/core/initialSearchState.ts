@@ -1,4 +1,4 @@
-import type { SearchResultsState } from "@/search/types/searchResultsState";
+import type { SearchResultsState } from "../../../types/searchResultsState";
 
 /**
  * Initial state for search state reducer
