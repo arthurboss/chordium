@@ -1,4 +1,4 @@
-import { SearchState } from "../types";
+import { SearchState } from "./SearchState.types";
 
 export type SearchStateContextValue = {
   searchState: SearchState;

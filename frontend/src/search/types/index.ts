@@ -4,7 +4,7 @@
  */
 
 // Core search types
-export type { SearchState } from './searchState';
+export type { SearchStatus } from './searchState';
 export type { SearchQuery } from './searchQuery';
 export type { SearchFilters } from './searchFilters';
 export type { SearchParamType } from './searchParamType';
