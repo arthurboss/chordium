@@ -9,7 +9,7 @@ import { cyAttr } from "@/utils/test-utils/cy-attr";
 import { useSearchTabLogic } from "./hooks/useSearchTabLogic";
 
 
-import type { SearchTabProps } from "./search-tab.types";
+import type { SearchTabProps } from "./SearchTab.types";
 
 const SearchTab: React.FC<SearchTabProps> = (props) => {
  const logic = useSearchTabLogic(props);
