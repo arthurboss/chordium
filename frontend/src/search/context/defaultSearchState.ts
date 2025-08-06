@@ -1,6 +1,6 @@
-import type { SearchState } from "./SearchStateContext.types";
+import { SearchDataState } from "../types/SearchDataState";
 
-export const defaultSearchState: SearchState = {
+export const defaultSearchState: SearchDataState = {
   artist: "",
   song: "",
   results: [],

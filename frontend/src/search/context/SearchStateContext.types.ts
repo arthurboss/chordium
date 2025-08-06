@@ -1,7 +1,7 @@
-import { SearchState } from "./SearchState.types";
+import { SearchDataState } from "../types/SearchDataState";
 
 export type SearchStateContextValue = {
-  searchState: SearchState;
-  setSearchState: (s: SearchState) => void;
-  updateSearchState: (patch: Partial<SearchState>) => void;
+  searchState: SearchDataState;
+  setSearchState: (s: SearchDataState) => void;
+  updateSearchState: (patch: Partial<SearchDataState>) => void;
 };

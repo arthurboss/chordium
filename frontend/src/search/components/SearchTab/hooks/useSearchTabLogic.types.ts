@@ -1,6 +1,6 @@
 import type { Song } from "@/types/song";
 import type { Artist } from "@/types/artist";
-import type { SearchState } from "../../../context/SearchState.types";
+import type { SearchDataState } from "../../../types/SearchDataState";
 
 export interface SearchTabLogicProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -16,7 +16,7 @@ export interface SearchTabLogicResult {
   songInput: string;
   clearDisabled: boolean;
   hasSearched: boolean;
-  searchState: SearchState;
+  searchState: SearchDataState;
   submittedArtist: string;
   submittedSong: string;
   shouldFetch: boolean;

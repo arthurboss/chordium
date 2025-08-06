@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import type { SearchState } from "../SearchStateContext.types";
+
 import getSearchCache from "@/storage/stores/search-cache/operations/get-search-cache";
 import { SEARCH_TYPES, Song } from "@chordium/types";
+import { SearchDataState } from "@/search/types/SearchDataState";
 
 export function useHydrateSearch(
-  setSearchState: (s: SearchState) => void,
+  setSearchState: (s: SearchDataState) => void,
   setHydrated: (h: boolean) => void
 ) {
   useEffect(() => {

@@ -1,6 +1,6 @@
 import type { Song } from "@chordium/types";
 
-export interface SearchState {
+export interface SearchDataState {
   artist: string;
   song: string;
   results: Song[];

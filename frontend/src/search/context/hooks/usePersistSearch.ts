@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import type { SearchState } from "../SearchStateContext.types";
 import type { SearchCacheEntry } from "@/storage/types/search-cache";
 import storeSearchCache from "@/storage/stores/search-cache/operations/store-search-cache";
 import { enforceSearchCacheDataSource } from "@/storage/utils/enforceSearchCacheDataSource";
 import type { SearchType, DataSource } from "@chordium/types";
+import { SearchDataState } from "../../types/SearchDataState";
 
 /**
  * usePersistSearch
@@ -14,7 +14,10 @@ import type { SearchType, DataSource } from "@chordium/types";
  * @param searchState - The current search state to persist
  * @param hydrated - Whether the state has been hydrated from persistent storage
  */
-export function usePersistSearch(searchState: SearchState, hydrated: boolean) {
+export function usePersistSearch(
+  searchState: SearchDataState,
+  hydrated: boolean
+) {
   useEffect(() => {
     if (!hydrated) return;
     const cacheKey = "global-search-state";
