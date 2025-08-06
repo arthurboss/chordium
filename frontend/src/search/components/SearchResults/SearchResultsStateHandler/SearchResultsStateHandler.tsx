@@ -1,82 +1,63 @@
 import React from 'react';
-import { SEARCH_TYPES } from '@chordium/types';
-import { SearchResultsLayout } from '..';
-import LoadingState from '@/components/LoadingState';
-import ErrorState from '@/components/ErrorState';
 import { SearchResultsStateHandlerProps } from './SearchResultsStateHandler.types';
+import SongsView from '../SongsView';
+import ErrorState from '@/components/ErrorState';
+import SearchResultsLayout from '../SearchResultsLayout/SearchResultsLayout';
+import LoadingState from '@/components/LoadingState';
 
-const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
+
+export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
   stateData,
   artists,
   songs,
+  filteredSongs,
+  filterSong,
+  filterArtist = '', // <-- default
   onView,
-  onArtistSelect,
+  onAdd,
+  onArtistSelect
 }) => {
   switch (stateData.state) {
     case 'loading':
-      return <LoadingState message="Loading results..." />;
-
+      return <LoadingState />;
     case 'error':
-      return <ErrorState error={stateData.error?.message || 'Unknown error'} />;
-
+      return <ErrorState error={String(stateData.error)} />;
     case 'artist-songs-loading':
       return <LoadingState message="Loading artist songs..." />;
-
     case 'artist-songs-error':
-      return <ErrorState error={stateData.artistSongsError || 'Unknown error'} />;
-
-    case 'songs-view':
-      if (stateData.searchType === SEARCH_TYPES.ARTIST && stateData.activeArtist && stateData.artistSongs) {
-        return (
-          <SearchResultsLayout
-            results={stateData.artistSongs}
-            searchType={SEARCH_TYPES.SONG}
-            onView={onView}
-            onDelete={(_songId: string) => { }}
-            onArtistSelect={onArtistSelect}
-            hasSearched={true}
-          />
-        );
-      } else if (stateData.searchType === SEARCH_TYPES.SONG && stateData.songs) {
-        return (
-          <SearchResultsLayout
-            results={stateData.songs}
-            searchType={SEARCH_TYPES.SONG}
-            onView={onView}
-            onDelete={(_songId: string) => { }}
-            onArtistSelect={onArtistSelect}
-            hasSearched={true}
-          />
-        );
-      } else {
-        return (
-          <SearchResultsLayout
-            results={[...artists, ...songs]}
-            searchType={stateData.searchType}
-            onView={onView}
-            onDelete={(_songId: string) => { }}
-            onArtistSelect={onArtistSelect}
-            hasSearched={true}
-          />
-        );
-      }
-
+      return <ErrorState error={String(stateData.artistSongsError)} />;
     case 'artist-songs-empty':
-      return (
-        <div className="p-8 text-center text-gray-500">
-          No songs found for {stateData.activeArtist?.displayName}.
-        </div>
-      );
+      return <div style={{ padding: 32, textAlign: 'center' }}><h3>No songs found for {stateData.activeArtist?.displayName || 'this artist'}.</h3><p>Try searching for another artist or song.</p></div>;
+    case 'songs-view':
+      // For artist search results, show artists; for song search results, show songs
+      if (stateData.searchType === 'artist' && stateData.activeArtist && stateData.artistSongs) {
+        // Artist songs view (when an artist is selected)
+        return <SongsView activeArtist={stateData.activeArtist} filteredSongs={filteredSongs} songs={undefined} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      } else if (stateData.searchType === 'artist') {
+        // Artist search results - show artists, not songs
+        const filteredArtists = filterArtist
+          ? artists.filter(artist =>
+            artist.displayName.toLowerCase().includes(filterArtist.toLowerCase())
+          )
+          : artists;
+        return <SearchResultsLayout results={filteredArtists} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
+      } else {
+        // Song search results
+        return <SongsView activeArtist={stateData.activeArtist} filteredSongs={undefined} songs={stateData.songs} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
+      }
+    case 'hasSearched': {
+      // Filter artists by the artist filter input
+      const filteredArtists = filterArtist
+        ? artists.filter(artist =>
+          artist.displayName.toLowerCase().includes(filterArtist.toLowerCase())
+        )
+        : artists;
 
-    case 'hasSearched':
-      return (
-        <div className="p-8 text-center text-gray-500">
-          No results found. Try adjusting your search terms.
-        </div>
-      );
-
+      return <SearchResultsLayout results={[...filteredArtists, ...songs]} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
+    }
+    case 'default':
     default:
-      return null;
+      return <div data-cy="search-results-default-null" />;
   }
 };
 
