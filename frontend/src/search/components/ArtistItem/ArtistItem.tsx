@@ -1,13 +1,7 @@
 import React from 'react';
 import ResultCard from "@/components/ResultCard";
-import { Artist } from '@/types/artist';
 import { ChevronRight } from "lucide-react";
-
-interface ArtistItemProps {
-  item: Artist;
-  style?: React.CSSProperties;
-  onArtistSelect?: (artist: Artist) => void;
-}
+import { ArtistItemProps } from './ArtistItem.types';
 
 const ArtistItem: React.FC<ArtistItemProps> = ({ item, style, onArtistSelect }) => {
   const handleViewArtist = () => {

@@ -3,10 +3,10 @@ import { ListChildComponentProps } from 'react-window';
 import { Artist } from '@chordium/types';
 
 import VirtualizedListWithArrow from "@/components/ui/VirtualizedListWithArrow";
-import ArtistItem from "@/components/ArtistItem";
 
 import { CARD_HEIGHTS } from "@/constants/ui-constants";
 import { ArtistResultsProps } from './ArtistResults.types';
+import { ArtistItem } from '../ArtistItem';
 
 const VIRTUALIZATION_THRESHOLD = 30;
 
