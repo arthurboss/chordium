@@ -5,20 +5,22 @@
  * @returns Promise resolving to an array of Song objects
  * @throws Error if the artist path is invalid or the API call fails
  */
-import type { Song } from "@/types/song";
-import { SEARCH_TYPES } from "@/types/song";
+import { SEARCH_TYPES, type Song } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 import { getApiBaseUrl } from "@/utils/api-base-url";
 
 export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   if (!artistPath) {
-    console.error('Invalid artist path: empty string');
-    throw new Error('Invalid artist path');
+    console.error("Invalid artist path: empty string");
+    throw new Error("Invalid artist path");
   }
 
   // Try to get cached results first
   const cachedEntry = await searchCacheService.get(artistPath);
-  if (cachedEntry && cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG) {
+  if (
+    cachedEntry &&
+    cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG
+  ) {
     return cachedEntry.results as Song[];
   }
 
@@ -38,12 +40,12 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
       search: {
         query: { artist: artistPath, song: null },
         searchType: SEARCH_TYPES.ARTIST_SONG,
-        dataSource: 's3',
-      }
+        dataSource: "s3",
+      },
     });
     return data;
   } catch (error) {
-    console.error('Error fetching artist songs:', error);
+    console.error("Error fetching artist songs:", error);
     throw error;
   }
 }
