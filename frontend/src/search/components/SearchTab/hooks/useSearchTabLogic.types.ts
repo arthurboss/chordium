@@ -1,5 +1,4 @@
-import type { Song } from "@/types/song";
-import type { Artist } from "@/types/artist";
+import type { Song, Artist } from "@chordium/types";
 import type { SearchDataState } from "../../../types/SearchDataState";
 
 export interface SearchTabLogicProps {

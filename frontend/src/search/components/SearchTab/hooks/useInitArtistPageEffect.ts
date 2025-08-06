@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { fromSlug } from "@/utils/url-slug-utils";
-import type { Artist } from "@/types/artist";
+import type { Artist } from "@chordium/types";
 
 export function useInitArtistPageEffect(
   location: { pathname: string },
@@ -19,7 +19,11 @@ export function useInitArtistPageEffect(
       const artistPath = getCurrentArtistPath();
       if (artistPath) {
         const artistName = fromSlug(artistPath);
-        setActiveArtist({ displayName: artistName, path: artistPath, songCount: null });
+        setActiveArtist({
+          displayName: artistName,
+          path: artistPath,
+          songCount: null,
+        });
         setArtistInput(artistName);
         setPrevArtistInput(artistName);
         setSubmittedArtist(artistName);

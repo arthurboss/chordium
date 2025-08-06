@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Song } from "@/types/song";
+import type { Song } from "@chordium/types";
 import { useNavigate } from "react-router-dom";
 import { toSlug } from "@/utils/url-slug-utils";
 import type { UseSongActionsProps } from "../types";
