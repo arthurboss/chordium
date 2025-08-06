@@ -1,7 +1,7 @@
 /**
  * Props interface for SearchResultsStateHandler component
  */
-import type { Artist, Song } from '@chordium/types';
+import type { Artist, Song, SearchType } from "@chordium/types";
 
 export interface SearchResultsStateHandlerProps {
   stateData: {
@@ -10,16 +10,12 @@ export interface SearchResultsStateHandlerProps {
     activeArtist?: Artist;
     artistSongsError?: string;
     artistSongs?: Song[];
-    searchType?: 'artist' | 'song';
+    searchType?: SearchType;
     hasSongs?: boolean;
     songs?: Song[];
   };
   artists: Artist[];
   songs: Song[];
-  filteredSongs: Song[];
-  filterSong: string;
-  filterArtist: string;
   onView: (song: Song) => void;
-  onAdd: (songId: string) => void;
   onArtistSelect: (artist: Artist) => void;
 }

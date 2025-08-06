@@ -1,11 +1,6 @@
 
 import React from 'react';
-
-interface SearchResultsSectionProps {
-  title: string;
-  children: React.ReactNode;
-  className?: string;
-}
+import { SearchResultsSectionProps } from './SearchResultsSection.types';
 
 const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
   title,

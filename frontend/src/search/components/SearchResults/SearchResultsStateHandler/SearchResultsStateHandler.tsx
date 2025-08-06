@@ -1,41 +1,15 @@
 import React from 'react';
-import { Song } from '@/types/song';
-import { Artist } from '@/types/artist';
-import { SEARCH_TYPES, SearchType } from '@chordium/types';
-import SearchResultsLayout from './SearchResultsLayout';
-import LoadingState from './LoadingState';
-import ErrorState from './ErrorState';
-
-interface SearchResultsStateHandlerProps {
-  stateData: {
-    state: string;
-    error?: Error;
-    activeArtist?: Artist;
-    artistSongsError?: string;
-    artistSongs?: Song[];
-    searchType?: SearchType;
-    hasSongs?: boolean;
-    songs?: Song[];
-  };
-  artists: Artist[];
-  songs: Song[];
-  filteredSongs: Song[];
-  filterSong: string;
-  filterArtist: string;
-  onView: (song: Song) => void;
-  onAdd: (songId: string) => void;
-  onArtistSelect: (artist: Artist) => void;
-}
+import { SEARCH_TYPES } from '@chordium/types';
+import { SearchResultsLayout } from '..';
+import LoadingState from '@/components/LoadingState';
+import ErrorState from '@/components/ErrorState';
+import { SearchResultsStateHandlerProps } from './SearchResultsStateHandler.types';
 
 const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
   stateData,
   artists,
   songs,
-  filteredSongs,
-  filterSong,
-  filterArtist,
   onView,
-  onAdd,
   onArtistSelect,
 }) => {
   switch (stateData.state) {
@@ -58,7 +32,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
             results={stateData.artistSongs}
             searchType={SEARCH_TYPES.SONG}
             onView={onView}
-            onDelete={(_songId: string) => {}}
+            onDelete={(_songId: string) => { }}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
@@ -69,7 +43,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
             results={stateData.songs}
             searchType={SEARCH_TYPES.SONG}
             onView={onView}
-            onDelete={(_songId: string) => {}}
+            onDelete={(_songId: string) => { }}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
@@ -80,7 +54,7 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
             results={[...artists, ...songs]}
             searchType={stateData.searchType}
             onView={onView}
-            onDelete={(_songId: string) => {}}
+            onDelete={(_songId: string) => { }}
             onArtistSelect={onArtistSelect}
             hasSearched={true}
           />
@@ -106,4 +80,4 @@ const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps> = ({
   }
 };
 
-export default SearchResultsStateHandler; 
+export default SearchResultsStateHandler;

@@ -27,8 +27,6 @@ export type { SearchCache } from './searchCache';
 
 // Component prop types
 export type { SearchBarProps } from './searchBarProps';
-export type { SearchResultsProps } from './searchResultsProps';
-export type { SearchResultsStateHandlerProps } from './searchResultsStateHandlerProps';
 export type { SearchResultsLayoutProps } from './searchResultsLayoutProps';
 export type { SearchResultsSectionProps } from './searchResultsSectionProps';
 

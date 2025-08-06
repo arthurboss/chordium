@@ -2,15 +2,15 @@ import { User, Music, ArrowLeft, Search, Trash2 } from "lucide-react";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { SearchBarProps } from "@/search/types";
+import type { SearchBarProps } from "./SearchBar.types";
 
-const SearchBar = ({ 
-  className = "", 
-  artistLoading = false, 
+const SearchBar = ({
+  className = "",
+  artistLoading = false,
   loading = false,
   artistValue = "",
   songValue = "",
-  onInputChange, 
+  onInputChange,
   onSearchSubmit,
   showBackButton = false,
   onBackClick,
@@ -24,7 +24,7 @@ const SearchBar = ({
   const handleArtistChange = (value: string) => {
     onInputChange(value, songValue);
   };
-  
+
   const handleSongChange = (value: string) => {
     onInputChange(artistValue, value);
   };
@@ -39,7 +39,7 @@ const SearchBar = ({
       <div className="flex flex-col gap-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
-                        <FormField
+            <FormField
               id="artist-search-input"
               value={artistValue}
               onChange={handleArtistChange}
@@ -62,11 +62,11 @@ const SearchBar = ({
             />
           </div>
         </div>
-        
+
         <Separator className="my-2" />
-        
+
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             type="button"
             variant="outline"
             size="sm"
@@ -89,7 +89,7 @@ const SearchBar = ({
           >
             <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
           </Button>
-          <Button 
+          <Button
             type="submit"
             className="w-24"
             size="sm"

@@ -1,19 +1,10 @@
 import React from 'react';
-import { Song } from "@/types/song";
+import type { Artist, Song } from "@chordium/types";
 import ArtistResults from "@/components/ArtistResults";
 import SongItem from "@/components/SongItem";
-import { Artist } from '@/types/artist';
-import { SearchType, SEARCH_TYPES } from '@chordium/types';
-import SearchResultsSection from "@/components/SearchResultsSection";
-
-interface SearchResultsLayoutProps {
-  results: (Artist | Song)[];
-  searchType?: SearchType;
-  onView: (song: Song) => void;
-  onDelete: (songId: string) => void;
-  onArtistSelect?: (artist: Artist) => void;
-  hasSearched?: boolean;
-}
+import { SEARCH_TYPES } from '@chordium/types';
+import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
+import type { SearchResultsLayoutProps } from "./SearchResultsLayout.types";
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results,
@@ -38,7 +29,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     artists = results.filter((item): item is Artist => 'displayName' in item);
     songs = results.filter((item): item is Song => 'title' in item);
   }
-  
+
   const hasArtists = artists && artists.length > 0;
   const hasSongs = songs && songs.length > 0;
   // Handle empty results
@@ -61,16 +52,16 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
           <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
         </SearchResultsSection>
       )}
-      
+
       {hasSongs && (
         <SearchResultsSection title="Songs">
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {songs.map((song, index) => (
-              <SongItem 
+              <SongItem
                 key={`${song.path}-${index}`}
-                item={song} 
-                onView={onView} 
-                onDelete={onDelete} 
+                item={song}
+                onView={onView}
+                onDelete={onDelete}
               />
             ))}
           </div>

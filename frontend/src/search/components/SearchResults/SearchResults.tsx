@@ -1,24 +1,9 @@
 import React from 'react';
-import { Song, Artist } from '@chordium/types';
 import { useSearchReducer } from '@/search';
-import SearchResultsStateHandler from '@/components/SearchResults/SearchResultsStateHandler';
+import { SearchResultsStateHandler } from '.';
 import { testAttr } from '@/utils/test-utils/test-attr';
 import '@/components/custom-scrollbar.css';
-
-interface SearchResultsProps {
-  setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
-  setActiveTab?: (tab: string) => void;
-  setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
-  artist: string;
-  song: string;
-  filterArtist: string;
-  filterSong: string;
-  activeArtist: Artist | null;
-  onArtistSelect: (artist: Artist) => void;
-  shouldFetch?: boolean;
-  onFetchComplete?: () => void;
-  onLoadingChange?: (loading: boolean) => void;
-}
+import { SearchResultsProps } from './SearchResults.types';
 
 const SearchResults: React.FC<SearchResultsProps> = ({
   setMySongs,
