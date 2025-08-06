@@ -7,6 +7,7 @@
 - **Artist search input:** `"hillsong"`
 - **Song search input:** `null`
 
+- **Search type:** `artist`
 - **API endpoint:** `/api/artists`
 - **Request URL path:** `/api/artists?artist=hillsong&song=`
 - **Response example:** [`hillsong.json`](../../shared/fixtures/artists/hillsong.json)
@@ -22,6 +23,7 @@
 - **Artist search input:** `"hillsong"`
 - **Song search input:** `"oceans"`
 
+- **Search type:** `artist`
 - **API endpoint:** `/api/artists`
 - **Request URL path:** `/api/artists?artist=hillsong&song=oceans`
 - **Response example:** [`hillsong.json`](../../shared/fixtures/artists/hillsong.json)
@@ -37,6 +39,7 @@
 - **Artist search input:** `"hillsong"` _(not altered. Value selected in the list of results from previous response)_
 - **Song search input:** `null` _(not altered as well)_
 
+- **Search type:** `artist-song`
 - **API endpoint:** `/api/artist-songs`
 - **Request URL path:** `/api/artist-songs?artistPath=hillsong-united`
 - **Response example:** [`hillsong-united.json`](../../shared/fixtures/artist-songs/hillsong-united.json)
@@ -50,6 +53,7 @@
 - **Artist search input:** `null`
 - **Song search input:** `"oceans"`
 
+- **Search type:** `song`
 - **API endpoint:** `/api/cifraclub-search`
 - **Request URL path:** `/api/cifraclub-search?artist=&song=oceans`
 - **Response example:** [`oceans.json`](../../shared/fixtures/cifraclub-search/oceans.json)
@@ -62,12 +66,12 @@
 
 ### 🎼 CHORD SHEET
 
+> Chord sheet isn't a search type, but it is closely related to the search types, so it is included here for clarity.
+>
 > 2 scenarios:
 >
 > - Song selection from songs list. The origin search could be either: **artist | song | artist + song**
 > - User directly lands on a song page (**e.g: `/radiohead/creep`**)
-
->
 
 - **Artist search input:** `"Radiohead"` | `null`
 - **Song search input:** `"creep"` | `null`

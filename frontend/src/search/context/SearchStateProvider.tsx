@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
 import type { SearchDataState } from "../types/SearchDataState";
-import { useHydrateSearch } from "./hooks/useHydrateSearch";
-import { usePersistSearch } from "./hooks/usePersistSearch";
 import { defaultSearchState } from "./defaultSearchState";
 import { SearchStateContext } from "./SearchStateContext";
 
@@ -18,10 +16,6 @@ import { SearchStateContext } from "./SearchStateContext";
  */
 export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [searchState, setSearchState] = useState<SearchDataState>(defaultSearchState);
-  const [hydrated, setHydrated] = useState(false);
-
-  useHydrateSearch(setSearchState, setHydrated);
-  usePersistSearch(searchState, hydrated);
 
   const updateSearchState = useCallback((patch: Partial<SearchDataState>) => {
     setSearchState((prev) => ({ ...prev, ...patch }));
@@ -32,10 +26,6 @@ export const SearchStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setSearchState,
     updateSearchState,
   }), [searchState, updateSearchState]);
-
-  if (!hydrated) {
-    return null;
-  }
 
   return (
     <SearchStateContext.Provider value={contextValue}>
