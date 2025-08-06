@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Artist, Song } from "@chordium/types";
 import { ArtistResults } from "../../ArtistResults";
-import SongItem from "@/components/SongItem";
+import { SongItem } from "../../SongItem";
 import { SEARCH_TYPES } from '@chordium/types';
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
 import type { SearchResultsLayoutProps } from "./SearchResultsLayout.types";
