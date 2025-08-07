@@ -230,36 +230,12 @@ const TabContainer = ({
           />
         </div>
         <div style={{ display: activeTab === "my-chord-sheets" ? "block" : "none" }}>
-          {selectedSong ? (
-            <SongViewer
-              song={{
-                song: selectedSong,
-                chordSheet: {
-                  // NOTE: Chord sheet content loading will be implemented with IndexedDB
-                  title: selectedSong.title,
-                  artist: selectedSong.artist,
-                  songChords: '',
-                  songKey: '',
-                  guitarTuning: GUITAR_TUNINGS.STANDARD,
-                  guitarCapo: 0
-                }
-              }}
-              chordDisplayRef={chordDisplayRef}
-              onBack={() => setSelectedSong(null)}
-              onDelete={handleChordSheetDelete}
-              onUpdate={handleChordSheetUpdate}
-              hideDeleteButton={false}
-              hideSaveButton={true}
-              isFromMyChordSheets={true}
-            />
-          ) : (
-            <ChordSheetList
-              chordSheets={myChordSheets}
-              onChordSheetSelect={handleSongSelect}
-              onDeleteChordSheet={handleChordSheetDelete}
-              onUploadClick={() => handleTabChange("upload")}
-            />
-          )}
+          <ChordSheetList
+            chordSheets={myChordSheets}
+            onChordSheetSelect={handleSongSelect}
+            onDeleteChordSheet={handleChordSheetDelete}
+            onUploadClick={() => handleTabChange("upload")}
+          />
         </div>
       </div>
     </Tabs>

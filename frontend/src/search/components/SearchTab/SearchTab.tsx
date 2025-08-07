@@ -79,8 +79,8 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
       />
      </FormContainer>
      {hasSearched && (
-      <div {...cyAttr('search-results-area')}>
        <SearchResults
+       {...cyAttr('search-results-area')}
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
         setSelectedSong={handleSongSelect}
@@ -94,7 +94,6 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
         onLoadingChange={handleLoadingChange}
         onFetchComplete={() => setShouldFetch(false)}
        />
-      </div>
      )}
     </>
    )}
