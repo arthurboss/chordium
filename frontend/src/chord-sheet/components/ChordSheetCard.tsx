@@ -1,6 +1,6 @@
 import React from "react";
-import { Music, Trash2 } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Trash2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
 import { cyAttr } from "@/utils/test-utils";
 
@@ -9,14 +9,13 @@ import { cyAttr } from "@/utils/test-utils";
  */
 const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-28" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
+    <Card className="h-18 w-full overflow-hidden cursor-pointer hover:border-primary/70 hover:text-primary transition-colors duration-300" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
       <CardContent
-        className="flex-1 flex flex-col justify-between p-4 pb-2"
+        className="flex-1 flex flex-col justify-between p-4"
         onClick={() => onView(chordSheet)}
         {...cyAttr(`chordsheet-card-content-${chordSheet.path}`)}
       >
-        <div className="flex items-start gap-2 w-full">
-          <Music className="h-6 w-6 text-chord mt-1" />
+        <div className="flex gap-2 w-full items-center">
           <div className="min-w-0 flex-1">
             <h3
               className="w-full block font-semibold truncate text-base mb-1"
@@ -33,29 +32,19 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
               {chordSheet.artist}
             </p>
           </div>
+          <button
+            className="flex justify-center items-center h-10 w-10 border border-red-500 rounded-full text-destructive dark:text-red-500 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30 transition-colors duration-300"
+            onClick={(e) => { e.stopPropagation(); onDelete(chordSheet) }}
+            type="button"
+            tabIndex={0}
+            aria-label={`Delete chord sheet ${chordSheet.title}`}
+            {...cyAttr(`delete-btn-${chordSheet.path}`)}
+          >
+            <Trash2 className="h-4 center" />
+            <span className="sr-only">Delete</span>
+          </button>
         </div>
       </CardContent>
-      <CardFooter className="bg-muted/50 flex justify-between">
-        <button
-          className="text-chord hover:underline font-medium text-sm flex items-center gap-1"
-          onClick={() => onView(chordSheet)}
-          tabIndex={0}
-          aria-label={`View chord sheet ${chordSheet.title}`}
-          {...cyAttr(`view-btn-${chordSheet.path}`)}
-        >
-          View
-        </button>
-        <button
-          className="text-destructive dark:text-red-500 hover:underline text-sm flex items-center gap-1"
-          onClick={() => onDelete(chordSheet)}
-          tabIndex={0}
-          aria-label={`Delete chord sheet ${chordSheet.title}`}
-          {...cyAttr(`delete-btn-${chordSheet.path}`)}
-        >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
-        </button>
-      </CardFooter>
     </Card>
   );
 };
