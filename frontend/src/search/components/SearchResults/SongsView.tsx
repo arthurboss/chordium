@@ -50,19 +50,11 @@ export const SongsView: React.FC<SongsViewProps> = ({
       <div className="virtualized-item" style={style}>
         <ResultCard
           key={`${item.path}-${index}`}
-          icon="music"
+          searchType="song"
           title={item.title}
           subtitle={item.artist}
-          onView={(path) => onView(item)} // ResultCard passes path, but we still call onView with song
-          onDelete={() => onAdd(item.path)}
           path={item.path}
-          deleteButtonIcon="plus"
-          deleteButtonLabel={`Add ${item.title}`}
-          viewButtonIcon="external"
-          viewButtonLabel="View Chords"
-          isDeletable={true}
-          compact
-          song={item} // Pass the song object for enhanced navigation
+          onClick={() => onView(item)}
         />
       </div>
     );

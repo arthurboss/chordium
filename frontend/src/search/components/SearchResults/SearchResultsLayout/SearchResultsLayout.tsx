@@ -11,7 +11,6 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results,
   searchType,
   onView,
-  onDelete,
   onArtistSelect,
   hasSearched = false
 }) => {
@@ -54,18 +53,13 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
             items={artists}
             itemHeight={CARD_HEIGHTS.RESULT_CARD}
             virtualizationThreshold={30}
-            renderItem={({ item, index, style }) => (
-              <div style={style} key={item.path || index}>
-                <ResultCard
-                  icon="user"
-                  title={item.displayName}
-                  onView={() => onArtistSelect?.(item)}
-                  path={item.path}
-                  viewButtonIcon="none"
-                  isDeletable={false}
-                  compact
-                />
-              </div>
+            renderItem={({ item }) => (
+              <ResultCard
+                searchType="artist"
+                title={item.displayName}
+                path={item.path}
+                onClick={() => onArtistSelect?.(item)}
+              />
             )}
           />
         </SearchResultsSection>
@@ -78,24 +72,14 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
             itemHeight={CARD_HEIGHTS.RESULT_CARD}
             virtualizationThreshold={30}
             fallbackClassName="grid gap-3 sm:grid-cols-2 md:grid-cols-3"
-            renderItem={({ item, index, style }) => (
-              <div style={style} key={item.path || index}>
-                <ResultCard
-                  icon="music"
-                  title={item.title}
-                  subtitle={item.artist}
-                  onView={() => onView?.(item)}
-                  onDelete={() => onDelete?.(item.path)}
-                  path={item.path}
-                  deleteButtonIcon="plus"
-                  deleteButtonLabel={`Add ${item.title}`}
-                  viewButtonIcon="external"
-                  viewButtonLabel="View Chords"
-                  isDeletable={true}
-                  compact
-                  song={item}
-                />
-              </div>
+            renderItem={({ item }) => (
+              <ResultCard
+                searchType="song"
+                title={item.title}
+                subtitle={item.artist}
+                path={item.path}
+                onClick={() => onView?.(item)}
+              />
             )}
           />
         </SearchResultsSection>

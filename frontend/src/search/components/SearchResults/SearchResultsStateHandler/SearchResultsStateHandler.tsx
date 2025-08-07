@@ -40,7 +40,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
             artist.displayName.toLowerCase().includes(filterArtist.toLowerCase())
           )
           : artists;
-        return <SearchResultsLayout results={filteredArtists} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
+        return <SearchResultsLayout results={filteredArtists} onView={onView} onArtistSelect={onArtistSelect} hasSearched={true} />;
       } else {
         // Song search results
         return <SongsView activeArtist={stateData.activeArtist} filteredSongs={undefined} songs={stateData.songs} filterSong={filterSong} filterArtist={filterArtist} onView={onView} onAdd={onAdd} searchType={stateData.searchType} />;
@@ -53,7 +53,7 @@ export const SearchResultsStateHandler: React.FC<SearchResultsStateHandlerProps>
         )
         : artists;
 
-      return <SearchResultsLayout results={[...filteredArtists, ...songs]} onView={onView} onDelete={onAdd} onArtistSelect={onArtistSelect} hasSearched={true} />;
+      return <SearchResultsLayout results={[...filteredArtists, ...songs]} onView={onView} onArtistSelect={onArtistSelect} hasSearched={true} />;
     }
     case 'default':
     default:
