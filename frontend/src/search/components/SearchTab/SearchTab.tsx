@@ -90,7 +90,6 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
         filterSong={songInput}
         activeArtist={activeArtist}
         onArtistSelect={handleArtistSelect}
-        hasSearched={hasSearched}
         shouldFetch={shouldFetch}
         onLoadingChange={handleLoadingChange}
         onFetchComplete={() => setShouldFetch(false)}

@@ -32,7 +32,6 @@ export const determineUIState = (state: SearchResultsState) => {
     return {
       state: "songs-view" as const,
       activeArtist: state.activeArtist,
-      artistSongs: state.artistSongs,
       searchType: "artist" as const,
       hasSongs: true,
     };
@@ -53,7 +52,6 @@ export const determineUIState = (state: SearchResultsState) => {
   if (state.hasSearched && state.songs.length > 0) {
     return {
       state: "songs-view" as const,
-      songs: state.songs,
       searchType: "song" as const,
       hasSongs: true,
     };
@@ -63,15 +61,12 @@ export const determineUIState = (state: SearchResultsState) => {
   if (state.hasSearched && state.artists.length > 0) {
     return {
       state: "songs-view" as const,
-      songs: [], // No songs for artist results
       searchType: "artist" as const,
       hasSongs: false,
     };
   }
 
-  if (state.hasSearched) {
-    return { state: "hasSearched" as const, hasSongs: false };
-  }
+
 
   return { state: "default" as const };
 };

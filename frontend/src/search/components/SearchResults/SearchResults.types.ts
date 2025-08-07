@@ -14,7 +14,6 @@ export interface SearchResultsProps {
   filterSong: string;
   activeArtist: Artist | null;
   onArtistSelect: (artist: Artist) => void;
-  hasSearched?: boolean;
   shouldFetch?: boolean;
   onFetchComplete?: () => void;
   onLoadingChange?: (loading: boolean) => void;

@@ -1,4 +1,5 @@
 import { Artist, Song } from "@chordium/types";
+import type { SearchResult } from "../SearchResultsLayout/SearchResultsLayout.types";
 
 type UIState =
   | { state: "loading" }
@@ -13,8 +14,6 @@ type UIState =
   | {
       state: "songs-view";
       activeArtist?: Artist;
-      artistSongs?: Song[];
-      songs?: Song[];
       searchType: "artist" | "song";
       hasSongs: boolean;
     }
@@ -23,12 +22,6 @@ type UIState =
 
 export interface SearchResultsStateHandlerProps {
   stateData: UIState;
-  artists: Artist[];
-  songs: Song[];
-  filteredSongs: Song[];
-  filterSong: string;
-  filterArtist?: string; // <-- add this
-  onView: (songData: Song) => void;
-  onAdd: (songId: string) => void;
-  onArtistSelect: (artist: Artist) => void;
+  results: SearchResult[];
+  onResultClick: (item: SearchResult) => void;
 }
