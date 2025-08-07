@@ -1,38 +1,40 @@
-
 import { Music, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cyAttr } from "@/utils/test-utils";
-import { SEARCH_TYPES, type SearchType } from "@chordium/types";
 
-interface ResultCardProps {
-  searchType: Omit<SearchType, 'artist-song'>;
-  title: string;
-  subtitle?: string;
-  path: string;
-  onClick: (item: { title: string; artist: string; path: string }) => void;
-}
+import type { ResultCardProps } from './ResultCard.type';
 
 const ResultCard = ({
-  searchType,
-  title,
-  subtitle,
-  path,
+  result,
   onClick,
 }: ResultCardProps) => {
-  const Icon = searchType === SEARCH_TYPES.SONG ? Music : User;
+  const path = result.path;
+  let Icon: React.ElementType;
+  let title: string;
+  let subtitle: string | undefined;
+
+  if (result.type === 'song') {
+    Icon = Music;
+    title = result.title;
+    subtitle = result.artist;
+  } else {
+    Icon = User;
+    title = result.displayName;
+    subtitle = undefined;
+  }
 
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${searchType}-card-compact-${path}`)}>
+    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${result.type}-card-compact-${path}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
-        onClick={() => onClick({ title, artist: subtitle || '', path })}
-        {...cyAttr(`${searchType}-card-compact-content-${path}`)}
+        onClick={() => onClick(result)}
+        {...cyAttr(`${result.type}-card-compact-content-${path}`)}
       >
         <Icon className="h-6 w-6 text-chord" />
         <div className="min-w-0 flex-1">
           <h3
             className="w-full block font-semibold truncate text-sm"
-            {...cyAttr(`${searchType}-title-${path}`)}
+            {...cyAttr(`${result.type}-title-${path}`)}
             title={title}
           >
             {title}
@@ -40,7 +42,7 @@ const ResultCard = ({
           {subtitle && (
             <p
               className="text-muted-foreground text-xs truncate w-full block"
-              {...cyAttr(`${searchType}-subtitle-${path}`)}
+              {...cyAttr(`${result.type}-subtitle-${path}`)}
               title={subtitle}
             >
               {subtitle}

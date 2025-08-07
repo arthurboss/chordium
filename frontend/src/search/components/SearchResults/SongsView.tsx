@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
 import { Artist, Song } from '@chordium/types';
-import ResultCard from '@/components/ResultCard';
 import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
 import { ListChildComponentProps } from 'react-window';
 import { CARD_HEIGHTS } from '@/constants/ui-constants';
 import { SearchResultsSection } from '.';
 import { cyAttr } from '@/utils/test-utils';
 import '@/components/custom-scrollbar.css';
+import { ResultCard } from '../ResultCard';
 
 interface SongsViewProps {
   // For artist-based searches
@@ -50,10 +50,7 @@ export const SongsView: React.FC<SongsViewProps> = ({
       <div className="virtualized-item" style={style}>
         <ResultCard
           key={`${item.path}-${index}`}
-          searchType="song"
-          title={item.title}
-          subtitle={item.artist}
-          path={item.path}
+          result={{ ...item, type: 'song' }}
           onClick={() => onView(item)}
         />
       </div>

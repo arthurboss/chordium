@@ -1,12 +1,11 @@
-/**
- * Props interface for SearchResultsLayout component
- */
-import type { Artist, SearchType, Song } from "@chordium/types";
+import type { Artist, Song, SearchType } from "@chordium/types";
+
+// Discriminated union for search results
+export type SearchResult =
+  | (Song & { type: "song" })
+  | (Artist & { type: "artist" });
 
 export interface SearchResultsLayoutProps {
-  results: (Artist | Song)[];
-  searchType?: SearchType;
-  onView: (song: Song) => void;
-  onArtistSelect?: (artist: Artist) => void;
-  hasSearched?: boolean;
+  results: SearchResult[];
+  onResultClick: (result: SearchResult) => void;
 }
