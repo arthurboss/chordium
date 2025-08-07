@@ -31,6 +31,7 @@ const SearchResultsLayout: React.FC<Omit<SearchResultsLayoutProps, 'searchType'>
           items={results}
           renderItem={({ item }) => (
             <ResultCard
+              key={item.path}
               result={item}
               onClick={onResultClick}
             />
