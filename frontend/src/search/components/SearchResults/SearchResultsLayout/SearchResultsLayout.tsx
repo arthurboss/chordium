@@ -1,7 +1,8 @@
 import React from 'react';
 import type { Artist, Song } from "@chordium/types";
-import { ArtistResults } from "../../ArtistResults";
-import { SongItem } from "../../SongItem";
+import ResultsList from '@/components/ui/ResultsList';
+import { CARD_HEIGHTS } from "@/constants/ui-constants";
+import ResultCard from '@/components/ResultCard';
 import { SEARCH_TYPES } from '@chordium/types';
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
 import type { SearchResultsLayoutProps } from "./SearchResultsLayout.types";
@@ -49,22 +50,54 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     <div className="flex flex-col gap-8 w-full">
       {hasArtists && (
         <SearchResultsSection title="Artist Results">
-          <ArtistResults artists={artists} onArtistSelect={onArtistSelect} />
+          <ResultsList
+            items={artists}
+            itemHeight={CARD_HEIGHTS.RESULT_CARD}
+            virtualizationThreshold={30}
+            renderItem={({ item, index, style }) => (
+              <div style={style} key={item.path || index}>
+                <ResultCard
+                  icon="user"
+                  title={item.displayName}
+                  onView={() => onArtistSelect?.(item)}
+                  path={item.path}
+                  viewButtonIcon="none"
+                  isDeletable={false}
+                  compact
+                />
+              </div>
+            )}
+          />
         </SearchResultsSection>
       )}
 
       {hasSongs && (
         <SearchResultsSection title="Songs">
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-            {songs.map((song, index) => (
-              <SongItem
-                key={`${song.path}-${index}`}
-                item={song}
-                onView={onView}
-                onDelete={onDelete}
-              />
-            ))}
-          </div>
+          <ResultsList
+            items={songs}
+            itemHeight={CARD_HEIGHTS.RESULT_CARD}
+            virtualizationThreshold={30}
+            fallbackClassName="grid gap-3 sm:grid-cols-2 md:grid-cols-3"
+            renderItem={({ item, index, style }) => (
+              <div style={style} key={item.path || index}>
+                <ResultCard
+                  icon="music"
+                  title={item.title}
+                  subtitle={item.artist}
+                  onView={() => onView?.(item)}
+                  onDelete={() => onDelete?.(item.path)}
+                  path={item.path}
+                  deleteButtonIcon="plus"
+                  deleteButtonLabel={`Add ${item.title}`}
+                  viewButtonIcon="external"
+                  viewButtonLabel="View Chords"
+                  isDeletable={true}
+                  compact
+                  song={item}
+                />
+              </div>
+            )}
+          />
         </SearchResultsSection>
       )}
     </div>
