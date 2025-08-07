@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Artist, Song } from "@chordium/types";
 import ResultsList from '@/components/ui/ResultsList';
-import { CARD_HEIGHTS } from "@/constants/ui-constants";
 import ResultCard from '@/components/ResultCard';
 import { SEARCH_TYPES } from '@chordium/types';
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
@@ -51,8 +50,6 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         <SearchResultsSection title="Artist Results">
           <ResultsList
             items={artists}
-            itemHeight={CARD_HEIGHTS.RESULT_CARD}
-            virtualizationThreshold={30}
             renderItem={({ item }) => (
               <ResultCard
                 searchType="artist"
@@ -69,9 +66,6 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         <SearchResultsSection title="Songs">
           <ResultsList
             items={songs}
-            itemHeight={CARD_HEIGHTS.RESULT_CARD}
-            virtualizationThreshold={30}
-            fallbackClassName="grid gap-3 sm:grid-cols-2 md:grid-cols-3"
             renderItem={({ item }) => (
               <ResultCard
                 searchType="song"
