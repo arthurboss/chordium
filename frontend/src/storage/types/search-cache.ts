@@ -5,7 +5,8 @@
  * Supports three search patterns: artist-only, song-only, and artist+song combination.
  */
 
-import type { Song, Artist, SearchType, DataSource } from '@chordium/types';
+import type { Song, Artist, DataSource } from '@chordium/types';
+import type { SearchContext } from '@/search/types/SearchDataState';
 import type { StoredRecord } from './stored-record';
 
 /**
@@ -32,41 +33,9 @@ export interface SearchCacheEntry extends StoredRecord {
    * 
    * Contains all contextual information about the search that produced these results.
    */
-  search: {
-    /** 
-     * Original search query context for instant filtering support
-     * 
-     * Stores the two-field search structure from the UI to enable:
-     * - Query validation (ensure cached results match current search)
-     * - Instant filtering context (know what was originally searched)
-     * - Search pattern determination (artist vs song vs artist+song)
-     */
-    query: {
-      /** Artist name from search input, null for song-only searches */
-      artist: string | null;
-      /** Song title from search input, null for artist-only searches */
-      song: string | null;
-    };
-    
-    /** 
-     * Search type using extended SearchType enum
-     * 
-     * - 'artist': Returns Artist[] for artist-only/artist+song searches, or Song[] for songs-by-artist
-     * - 'song': Returns Song[] (all songs with titles containing the searched word)
-     * - 'artist-song': Returns Song[] (specific song by specific artist)
-     * 
-     * Maps to the search patterns supported by the backend API.
-     */
-    searchType: SearchType;
-    
-    /** 
+  search: SearchContext & {
+    /**
      * Data source identifier for user feedback and retry logic
-     * 
-     * Tracks the backend data source for:
-     * - User feedback ("Results from database" vs "Results from web scraping")
-     * - Retry logic (if CifraClub results are poor, try different approach)
-     * - Performance tracking (Supabase is faster/more reliable than scraping)
-     * - Cache TTL decisions (reliable sources can be cached longer)
      */
     dataSource: DataSource;
   };

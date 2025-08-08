@@ -3,16 +3,7 @@
  */
 
 import type { Artist, Song, SearchType, DataSource } from "@chordium/types";
-
-/**
- * Search query context for caching
- */
-export interface SearchQuery {
-  /** Artist name from search input, null for song-only searches */
-  artist: string | null;
-  /** Song title from search input, null for artist-only searches */  
-  song: string | null;
-}
+import type { SearchQuery } from "@/search/types/searchQuery";
 
 /**
  * Cache storage options for store-results

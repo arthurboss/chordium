@@ -36,48 +36,61 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setActiveTab,
   });
 
-  // Filtering and unification logic
+  const { stateData } = searchState;
+
+  // Always call hooks first (React hooks must be called in the same order every render)
   const filteredArtists = usePropertyFilter(searchState.artists, filterArtist, 'displayName');
   const filteredArtistSongs = usePropertyFilter(searchState.artistSongs || [], filterSong, 'title');
   const filteredSongs = usePropertyFilter(searchState.songs, filterSong, 'title');
+
+  // Handle loading state
+  if (stateData.state === 'loading') {
+    return <LoadingState message={stateData.message} />;
+  }
+
+  // Handle error state
+  if (stateData.state === 'error') {
+    return <ErrorState error={stateData.error} />;
+  }
+
+  // Handle default state - prepare results and click handlers
+
   let results: SearchResult[] = [];
-  let onResultClick: (item: SearchResult) => void = () => { };
-  const state = searchState.stateData.state;
-  if (state === 'default') {
-    if (searchState.stateData.searchType === 'artist') {
-      // Artist search results or artist songs view (both handled as artists or songs)
-      if (searchState.stateData.activeArtist && searchState.artistSongs) {
-        // Artist songs view
-        results = filteredArtistSongs.map(s => ({ ...s, type: 'song' as const }));
-        onResultClick = (item) => { if (item.type === 'song') searchState.handleView(item); };
-      } else {
-        // Artist search results
-        results = filteredArtists.map(a => ({ ...a, type: 'artist' as const }));
-        onResultClick = (item) => { if (item.type === 'artist') searchState.handleArtistSelect(item); };
-      }
+  let onResultClick: (item: SearchResult) => void = () => {};
+
+  if (stateData.searchType === 'artist') {
+    if (stateData.activeArtist && searchState.artistSongs) {
+      // Artist songs view
+      results = filteredArtistSongs.map(s => ({ ...s, type: 'song' as const }));
+      onResultClick = (item) => { 
+        if (item.type === 'song') searchState.handleView(item); 
+      };
     } else {
-      // Song search results
-      results = filteredSongs.map(s => ({ ...s, type: 'song' as const }));
-      onResultClick = (item) => { if (item.type === 'song') searchState.handleView(item); };
+      // Artist search results
+      results = filteredArtists.map(a => ({ ...a, type: 'artist' as const }));
+      onResultClick = (item) => { 
+        if (item.type === 'artist') searchState.handleArtistSelect(item); 
+      };
     }
+  } else {
+    // Song search results
+    results = filteredSongs.map(s => ({ ...s, type: 'song' as const }));
+    onResultClick = (item) => { 
+      if (item.type === 'song') searchState.handleView(item); 
+    };
   }
 
-
-  switch (searchState.stateData.state) {
-    case 'loading':
-      return <LoadingState />;
-    case 'error':
-      return <ErrorState error={String(searchState.stateData.error)} />;
-    case 'artist-songs-loading':
-      return <LoadingState message="Loading artist songs..." />;
-    case 'artist-songs-error':
-      return <ErrorState error={String(searchState.stateData.artistSongsError)} />;
-    case 'artist-songs-empty':
-      return <div style={{ padding: 32, textAlign: 'center' }}><h3>No songs found for {searchState.stateData.activeArtist?.displayName || 'this artist'}.</h3><p>Try searching for another artist or song.</p></div>;
-    case 'default':
-      return <SearchResultsLayout results={results} onResultClick={onResultClick} />;
-
+  // Handle empty state within default
+  if (stateData.isEmpty && stateData.emptyMessage) {
+    return (
+      <div style={{ padding: 32, textAlign: 'center' }}>
+        <h3>{stateData.emptyMessage}</h3>
+        <p>Try searching for another artist or song.</p>
+      </div>
+    );
   }
+
+  return <SearchResultsLayout results={results} onResultClick={onResultClick} />;
 };
 
 export default SearchResults;

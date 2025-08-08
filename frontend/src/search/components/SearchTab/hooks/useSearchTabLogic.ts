@@ -90,7 +90,25 @@ export function useSearchTabLogic(
     setLoading(true);
     setSubmittedArtist(artistValue);
     setSubmittedSong(songValue);
-    updateSearchState({ artist: artistValue, song: songValue, results: [] });
+    
+    // Determine search type based on input values
+    // Following backend logic in determineSearchType()
+    let searchType: "artist" | "song" | "artist-song";
+    if (artistValue && !songValue) {
+      searchType = "artist";
+    } else if (!artistValue && songValue) {
+      searchType = "song";
+    } else if (artistValue && songValue) {
+      searchType = "song"; // Backend treats artist+song as song search
+    } else {
+      searchType = "artist"; // Default fallback
+    }
+    
+    updateSearchState({ 
+      searchType,
+      results: [],
+      query: { artist: artistValue, song: songValue }
+    });
     setHasSearched(true);
     setShouldFetch(true);
     startTransition(() => {
@@ -133,7 +151,11 @@ export function useSearchTabLogic(
     setShouldFetch(false);
     setActiveArtist(null);
     setLoading(false);
-    updateSearchState({ artist: "", song: "", results: [] });
+    updateSearchState({ 
+      searchType: "artist", 
+      results: [],
+      query: { artist: "", song: "" }
+    });
     startTransition(() => {
       navigate("/search", { replace: true });
     });

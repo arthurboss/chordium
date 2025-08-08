@@ -5,15 +5,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Song } from "../types/song";
 import type { StoredChordSheet } from "@/storage/types";
 import ChordSheetList from "./chord-sheet-list";
-import SongViewer from "./SongViewer";
-import { useSearchState, SearchTab } from "@/search";
+import { SearchTab } from "@/search";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
 import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
 import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
   activeTab: string;
@@ -34,7 +32,6 @@ const TabContainer = ({
 }: TabContainerProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { searchState } = useSearchState();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
 
   // Local state to track the last search URL for tab switching
@@ -64,17 +61,6 @@ const TabContainer = ({
     // First priority: use the stored search URL from local state
     if (lastSearchUrl) {
       navigate(lastSearchUrl);
-      return;
-    }
-
-    // Fallback: construct from current search state
-    if (searchState.artist || searchState.song) {
-      const params = new URLSearchParams();
-      if (searchState.artist) params.set('artist', toSlug(searchState.artist));
-      if (searchState.song) params.set('song', toSlug(searchState.song));
-
-      const searchUrl = `/search?${params.toString()}`;
-      navigate(searchUrl);
       return;
     }
 

@@ -38,7 +38,7 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
       path: artistPath,
       results: data,
       search: {
-        query: { artist: artistPath, song: null },
+        query: { artist: artistPath, song: "" },
         searchType: SEARCH_TYPES.ARTIST_SONG,
         dataSource: "s3",
       },
