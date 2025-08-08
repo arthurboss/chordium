@@ -1,6 +1,7 @@
 import type { SearchDataState } from '@/search/types/SearchDataState';
 import type { SearchCacheEntry } from '@/storage/types/search-cache';
 import type { Artist, Song, DataSource } from '@chordium/types';
+import type { SearchResult } from '@/search/components/SearchResults/SearchResultsLayout/SearchResultsLayout.types';
 
 /**
  * Create a cache entry from UI search state and raw results
@@ -41,6 +42,18 @@ export function mapCacheEntryToSearchState(entry: SearchCacheEntry): SearchDataS
     // UI results are discriminated; caller should transform raw results accordingly
     results: [],
   };
+}
+
+
+/**
+ * Local UI mapping helpers (keep component lean)
+ */
+export function mapArtistsToSearchResults(artists: Artist[]): SearchResult[] {
+  return artists.map((artist) => ({ ...artist, type: 'artist' as const }));
+}
+
+export function mapSongsToSearchResults(songs: Song[]): SearchResult[] {
+  return songs.map((song) => ({ ...song, type: 'song' as const }));
 }
 
 
