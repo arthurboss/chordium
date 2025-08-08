@@ -3,6 +3,8 @@
  * Organized by functional category for easy imports
  */
 
+export { fetchArtistSongs } from './artist/fetch-artist-songs';
+
 // Core search utilities
 export { getSearchParamsType } from './core/getSearchParamsType';
 export { getQueryDisplayText } from './core/getQueryDisplayText';

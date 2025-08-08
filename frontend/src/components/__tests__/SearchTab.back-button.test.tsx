@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import SearchTab from '../tabs/SearchTab';
-import { SearchStateProvider } from '@/context/SearchStateContext';
+import { SearchStateProvider } from '@/search/context';
 
 // Mock the search cache
 vi.mock('@/cache/implementations/search-cache', () => ({

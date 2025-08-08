@@ -4,7 +4,7 @@
  */
 
 // Core search types
-export type { SearchState } from './searchState';
+export type { SearchStatus } from './searchState';
 export type { SearchQuery } from './searchQuery';
 export type { SearchFilters } from './searchFilters';
 export type { SearchParamType } from './searchParamType';
@@ -27,8 +27,6 @@ export type { SearchCache } from './searchCache';
 
 // Component prop types
 export type { SearchBarProps } from './searchBarProps';
-export type { SearchResultsProps } from './searchResultsProps';
-export type { SearchResultsStateHandlerProps } from './searchResultsStateHandlerProps';
 export type { SearchResultsLayoutProps } from './searchResultsLayoutProps';
 export type { SearchResultsSectionProps } from './searchResultsSectionProps';
 

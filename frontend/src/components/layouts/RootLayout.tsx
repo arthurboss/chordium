@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { SearchStateProvider } from "@/context/SearchStateContext";
+import { SearchStateProvider } from "@/search/context";
 import { QueryErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 
 /**

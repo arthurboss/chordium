@@ -1,16 +1,16 @@
 import { useRef } from "react";
 import type { ChordSheetListProps } from "./chord-sheet-list.types";
-import ResultCard from "@/components/ResultCard";
+import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
 import { Button } from "@/components/ui/button";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 
-const ChordSheetList = ({ 
-  chordSheets, 
-  onChordSheetSelect, 
-  onDeleteChordSheet, 
-  onUploadClick, 
-  tabState, 
-  setTabState 
+const ChordSheetList = ({
+  chordSheets,
+  onChordSheetSelect,
+  onDeleteChordSheet,
+  onUploadClick,
+  tabState,
+  setTabState
 }: ChordSheetListProps) => {
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -22,20 +22,11 @@ const ChordSheetList = ({
       {chordSheets.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {[...chordSheets].reverse().map((storedChordSheet, index) => (
-            <ResultCard
+            <ChordSheetCard
               key={`${storedChordSheet.path}-${index}`}
-              icon="music"
-              title={storedChordSheet.title}
-              subtitle={storedChordSheet.artist}
-              onView={() => onChordSheetSelect(storedChordSheet)}
-              onDelete={onDeleteChordSheet}
-              path={storedChordSheet.path}
-              isDeletable={true}
-              song={{
-                path: storedChordSheet.path,
-                title: storedChordSheet.title,
-                artist: storedChordSheet.artist
-              }}
+              chordSheet={storedChordSheet}
+              onView={onChordSheetSelect}
+              onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
             />
           ))}
         </div>

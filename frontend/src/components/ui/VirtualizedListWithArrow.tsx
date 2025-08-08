@@ -17,7 +17,7 @@ function VirtualizedListWithArrow<T>({
   itemHeight,
   renderItem,
   className = "custom-scrollbar scrollbar-always",
-  height = '70vh',
+  height = '60vh',
   showArrow = true
 }: VirtualizedListProps<T>) {
   const [isAtBottom, setIsAtBottom] = useState(false);
