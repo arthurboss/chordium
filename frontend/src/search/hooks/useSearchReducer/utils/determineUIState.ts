@@ -28,45 +28,43 @@ export const determineUIState = (state: SearchResultsState) => {
     };
   }
 
-  if (state.activeArtist && state.artistSongs && state.artistSongs.length > 0) {
-    return {
-      state: "songs-view" as const,
-      activeArtist: state.activeArtist,
-      searchType: "artist" as const,
-      hasSongs: true,
-    };
-  }
-
   if (
     state.activeArtist &&
-    state.artistSongs &&
-    state.artistSongs.length === 0
+    state.artistSongs
   ) {
+    if (state.artistSongs.length > 0) {
+      return {
+        state: "default" as const,
+        activeArtist: state.activeArtist,
+        searchType: "artist" as const,
+        hasSongs: true,
+      };
+    }
+
     return {
       state: "artist-songs-empty" as const,
       activeArtist: state.activeArtist,
     };
   }
 
-  // New state for song-only search results
-  if (state.hasSearched && state.songs.length > 0) {
-    return {
-      state: "songs-view" as const,
-      searchType: "song" as const,
-      hasSongs: true,
-    };
+  if (state.hasSearched) {
+    if (state.songs.length > 0) {
+      return {
+        state: "default" as const,
+        searchType: "song" as const,
+        hasSongs: true,
+      };
+    }
+
+    // Handle artist search results
+    if (state.artists.length > 0) {
+      return {
+        state: "default" as const,
+        searchType: "artist" as const,
+        hasSongs: false,
+      };
+    }
   }
-
-  // Handle artist search results
-  if (state.hasSearched && state.artists.length > 0) {
-    return {
-      state: "songs-view" as const,
-      searchType: "artist" as const,
-      hasSongs: false,
-    };
-  }
-
-
 
   return { state: "default" as const };
 };

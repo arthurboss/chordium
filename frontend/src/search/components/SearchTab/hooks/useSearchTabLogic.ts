@@ -14,11 +14,10 @@ import { useInitArtistPageEffect } from "./useInitArtistPageEffect";
 export function useSearchTabLogic(
   props: SearchTabLogicProps
 ): SearchTabLogicResult {
-  const { setMySongs, setActiveTab, setSelectedSong } = props;
+  const { setMySongs, setActiveTab } = props;
   const { searchState, updateSearchState } = useSearchState();
   const [loading, setLoading] = useState(false);
   const [, startTransition] = useTransition();
-  const [selectedSongLocal, setSelectedSongLocal] = useState(null);
   const [activeArtist, setActiveArtist] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [artistInput, setArtistInput] = useState("");
@@ -88,7 +87,6 @@ export function useSearchTabLogic(
 
   function handleSearchSubmit(artistValue: string, songValue: string) {
     setActiveArtist(null);
-    setSelectedSongLocal(null);
     setLoading(true);
     setSubmittedArtist(artistValue);
     setSubmittedSong(songValue);
@@ -110,19 +108,11 @@ export function useSearchTabLogic(
     setLoading(isLoading);
   }
 
-  function handleSongSelect(song) {
-    setSelectedSongLocal(song);
-  }
-
   function handleArtistSelect(artist) {
     setActiveArtist(artist);
     startTransition(() => {
       navigateToArtist(artist);
     });
-  }
-
-  function handleBackToSearch() {
-    setSelectedSongLocal(null);
   }
 
   function handleBackToArtistList() {
@@ -142,7 +132,6 @@ export function useSearchTabLogic(
     setHasSearched(false);
     setShouldFetch(false);
     setActiveArtist(null);
-    setSelectedSongLocal(null);
     setLoading(false);
     updateSearchState({ artist: "", song: "", results: [] });
     startTransition(() => {
@@ -153,7 +142,6 @@ export function useSearchTabLogic(
   const clearDisabled = !artistInput && !songInput && !hasSearched;
 
   return {
-    selectedSongLocal,
     activeArtist,
     loading,
     artistInput,
@@ -164,9 +152,7 @@ export function useSearchTabLogic(
     submittedArtist,
     submittedSong,
     shouldFetch,
-    handleBackToSearch,
     handleBackToArtistList,
-    handleSongSelect,
     handleArtistSelect,
     handleInputChange,
     handleSearchSubmit,
@@ -175,6 +161,5 @@ export function useSearchTabLogic(
     setShouldFetch,
     setMySongs,
     setActiveTab,
-    setSelectedSong,
   };
 }

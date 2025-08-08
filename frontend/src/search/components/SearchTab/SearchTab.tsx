@@ -14,7 +14,6 @@ import type { SearchTabProps } from "./SearchTab.types";
 const SearchTab: React.FC<SearchTabProps> = (props) => {
  const logic = useSearchTabLogic(props);
  const {
-  selectedSongLocal,
   activeArtist,
   loading,
   artistInput,
@@ -25,9 +24,7 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
   submittedArtist,
   submittedSong,
   shouldFetch,
-  handleBackToSearch,
   handleBackToArtistList,
-  handleSongSelect,
   handleArtistSelect,
   handleInputChange,
   handleSearchSubmit,
@@ -36,32 +33,10 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
   setShouldFetch,
   setMySongs,
   setActiveTab,
-  // setSelectedSong
  } = logic;
 
  return (
   <div className="space-y-4">
-   {selectedSongLocal ? (
-    <SongViewer
-     song={{
-      song: selectedSongLocal,
-      chordSheet: {
-       title: selectedSongLocal.title || '',
-       artist: selectedSongLocal.artist || '',
-       songChords: '',
-       songKey: '',
-       guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'] as const,
-       guitarCapo: 0
-      }
-     }}
-     chordDisplayRef={null}
-     onBack={handleBackToSearch}
-     onDelete={() => { }}
-     onUpdate={() => { }}
-     hideDeleteButton={true}
-    />
-   ) : (
-    <>
      <FormContainer>
       <SearchBar
        artistValue={artistInput}
@@ -79,11 +54,10 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
       />
      </FormContainer>
      {hasSearched && (
+      <div {...cyAttr('search-results-area')}>
        <SearchResults
-       {...cyAttr('search-results-area')}
         setMySongs={setMySongs}
         setActiveTab={setActiveTab}
-        setSelectedSong={handleSongSelect}
         artist={hasSearched ? submittedArtist : searchState.artist}
         song={hasSearched ? submittedSong : searchState.song}
         filterArtist={activeArtist ? submittedArtist : artistInput}
@@ -94,9 +68,8 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
         onLoadingChange={handleLoadingChange}
         onFetchComplete={() => setShouldFetch(false)}
        />
+      </div>
      )}
-    </>
-   )}
   </div>
  );
 };
