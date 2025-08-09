@@ -4,6 +4,7 @@
  */
 
 export { fetchArtistSongs } from './artist/fetch-artist-songs';
+export * from './mappers/search-mappers';
 
 // Core search utilities
 export { getSearchParamsType } from './core/getSearchParamsType';

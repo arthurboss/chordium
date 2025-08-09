@@ -11,14 +11,14 @@ const SearchResultsLayout: React.FC<Omit<SearchResultsLayoutProps, 'searchType'>
   results = [],
   onResultClick
 }) => {
-    // Handle empty results
-    if (results.length === 0) {
-      return (
-        <div className="p-8 text-center text-gray-500" data-cy="search-no-chord-sheets-found">
-          No results were found.
-        </div>
-      );
-    }
+  // Handle empty results
+  if (results.length === 0) {
+    return (
+      <div className="p-8 text-center text-gray-500" data-cy="search-no-chord-sheets-found">
+        No results were found.
+      </div>
+    );
+  }
 
   // Infer type from first result
   const firstType = results[0].type;

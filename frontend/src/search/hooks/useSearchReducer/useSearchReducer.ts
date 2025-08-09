@@ -25,7 +25,6 @@ export const useSearchReducer = ({
   const [searchFetching, setSearchFetching] = useState(false);
   const [artistSongsFetching, setArtistSongsFetching] = useState(false);
 
-  // Single source of truth for loading state
   const isLoading = useMemo(() => {
     return (
       state.loading ||

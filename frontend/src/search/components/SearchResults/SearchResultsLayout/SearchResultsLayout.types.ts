@@ -1,4 +1,4 @@
-import type { Artist, Song, SearchType } from "@chordium/types";
+import type { Artist, Song } from "@chordium/types";
 
 // Discriminated union for search results
 export type SearchResult =
