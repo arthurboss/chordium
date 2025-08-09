@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ScrollArrow } from '@/components/ui/ScrollArrow';
+import { useAtBottom } from '@/hooks/useAtBottom';
 
 interface VirtualizedListProps<T> {
   readonly items: T[];
@@ -42,6 +43,8 @@ function VirtualizedList<T>({
     overscan: 5,
   });
 
+  const getTotalSize = React.useCallback(() => rowVirtualizer.getTotalSize(), [rowVirtualizer]);
+  const isAtBottom = useAtBottom({ ref: parentRef, getTotalSize });
 
   return (
     <>
@@ -82,17 +85,18 @@ function VirtualizedList<T>({
       </div>
 
       <div className='relative w-full z-10 bottom-8'>
-        <div className="pointer-events-none absolute left-0 bottom-0 w-full h-8 bg-background backdrop-blur-xl" style={{
+        {!isAtBottom && (<div className="pointer-events-none absolute left-0 bottom-0 w-full h-8 bg-background backdrop-blur-xl" style={{
           maskImage:
             'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, black 100%)',
           WebkitMaskImage:
             'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, black 100%)',
         }}
-        />
+        />)}
+
         <div className="left-0 w-full flex justify-center translate-y-[-1.5rem]">
           <ScrollArrow
             parentRef={parentRef}
-            getTotalSize={rowVirtualizer.getTotalSize}
+            getTotalSize={getTotalSize}
           />
         </div>
       </div>
