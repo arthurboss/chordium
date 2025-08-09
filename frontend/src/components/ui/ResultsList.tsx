@@ -1,5 +1,4 @@
-import React from 'react';
-import VirtualizedListWithArrow from '@/components/ui/VirtualizedListWithArrow';
+import VirtualizedList from '@/components/ui/VirtualizedList';
 import { ResultsListProps } from './ResultsList.types';
 import { CARD_HEIGHTS } from "@/constants/ui-constants";
 
@@ -16,11 +15,11 @@ export function ResultsList<T>({
   const isVirtualized = items.length >= 30;
   if (isVirtualized) {
     return (
-      <VirtualizedListWithArrow
+      <VirtualizedList
         items={items}
         itemHeight={CARD_HEIGHTS.RESULT_CARD}
-        renderItem={({ index, style }: { index: number; style: React.CSSProperties }) =>
-          renderItem({ item: items[index], index, style })
+        renderItem={({ item, index, style }) =>
+          renderItem({ item, index, style })
         }
       />
     );
