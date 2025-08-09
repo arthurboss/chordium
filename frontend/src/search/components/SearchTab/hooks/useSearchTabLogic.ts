@@ -60,8 +60,7 @@ export function useSearchTabLogic(
     setArtistInput,
     setPrevArtistInput,
     setSubmittedArtist,
-    setHasSearched,
-    setShouldFetch
+    setHasSearched
   );
 
   function handleInputChange(artistValue: string, songValue: string) {
