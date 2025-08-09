@@ -1,8 +1,9 @@
-import { User, Music, ArrowLeft, Search, Trash2 } from "lucide-react";
+import { User, Music, ArrowLeft, Search } from "lucide-react";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { SearchBarProps } from "./SearchBar.types";
+import RoundTrashButton from "@/components/ui/RoundTrashButton";
 
 const SearchBar = ({
   className = "",
@@ -78,17 +79,13 @@ const SearchBar = ({
             Back
           </Button>
           <div className="flex-grow" />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
+
+          <RoundTrashButton
             onClick={onClearSearch}
-            data-testid="clear-search-button"
+            aria-label="Clear search"
+            tabIndex={0}
             disabled={clearDisabled}
-            className="w-12"
-          >
-            <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
-          </Button>
+          />
           <Button
             type="submit"
             className="w-24"

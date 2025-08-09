@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2 } from "lucide-react";
+import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
 import { cyAttr } from "@/utils/test-utils";
@@ -32,17 +32,12 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
               {chordSheet.artist}
             </p>
           </div>
-          <button
-            className="flex justify-center items-center h-10 w-10 border border-red-500 rounded-full text-destructive dark:text-red-500 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30 transition-colors duration-300"
-            onClick={(e) => { e.stopPropagation(); onDelete(chordSheet) }}
-            type="button"
-            tabIndex={0}
+          <RoundTrashButton
+            onClick={e => { e.stopPropagation(); onDelete(chordSheet); }}
             aria-label={`Delete chord sheet ${chordSheet.title}`}
+            tabIndex={0}
             {...cyAttr(`delete-btn-${chordSheet.path}`)}
-          >
-            <Trash2 className="h-4 center" />
-            <span className="sr-only">Delete</span>
-          </button>
+          />
         </div>
       </CardContent>
     </Card>
