@@ -84,8 +84,8 @@ function VirtualizedList<T>({
 
       </div>
 
-      <div className='relative w-full z-10 bottom-8'>
-        {!isAtBottom && (<div className="pointer-events-none absolute left-0 bottom-0 w-full h-8 bg-background backdrop-blur-xl" style={{
+      <div className='relative w-full z-10'>
+        {!isAtBottom && (<div className="pointer-events-none absolute h-8 w-full translate-y-[-2rem] bg-background backdrop-blur-xl" style={{
           maskImage:
             'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, black 100%)',
           WebkitMaskImage:
@@ -93,7 +93,7 @@ function VirtualizedList<T>({
         }}
         />)}
 
-        <div className="left-0 w-full flex justify-center translate-y-[-1.5rem]">
+        <div className="flex justify-center w-fit mx-auto translate-y-[-2rem]">
           <ScrollArrow
             parentRef={parentRef}
             getTotalSize={getTotalSize}
