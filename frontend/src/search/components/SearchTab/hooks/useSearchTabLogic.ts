@@ -35,6 +35,7 @@ export function useSearchTabLogic(
     navigateBackToSearch,
     isOnArtistPage,
     getCurrentArtistPath,
+    originalSearchParams,
   } = useArtistNavigation();
 
   usePreserveSearchUrlEffect(location);
@@ -135,7 +136,14 @@ export function useSearchTabLogic(
   function handleBackToArtistList() {
     setActiveArtist(null);
     startTransition(() => {
-      navigateBackToSearch();
+      // If originalSearchParams is empty (e.g., after page refresh), 
+      // construct search URL from current active artist
+      if (!originalSearchParams.artist && !originalSearchParams.song && activeArtist) {
+        const artistSlug = toSlug(activeArtist.displayName);
+        navigate(`/search?artist=${artistSlug}`, { replace: true });
+      } else {
+        navigateBackToSearch();
+      }
     });
   }
 
