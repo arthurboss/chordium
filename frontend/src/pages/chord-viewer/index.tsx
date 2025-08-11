@@ -11,7 +11,7 @@ import { resolveChordSheetPath } from "./utils/path-resolver";
 import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
-import { useNavigation } from "@/hooks/use-navigation";
+import { useNavigation } from "@/hooks/navigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components

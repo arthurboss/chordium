@@ -2,7 +2,7 @@ import { useState, useRef, useTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSearchState } from "../../../context";
 import { toSlug } from "@/utils/url-slug-utils";
-import { useNavigation } from "@/hooks/use-navigation";
+import { useNavigation } from "@/hooks/navigation";
 import type {
   SearchTabLogicProps,
   SearchTabLogicResult,
