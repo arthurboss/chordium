@@ -1,5 +1,5 @@
 // Storage key for navigation path
-const NAVIGATION_PATH_KEY = "chordium_navigation_path";
+const NAVIGATION_PATH_KEY = "chordium-navigation-path";
 
 /**
  * Stores the navigation path for back button functionality
