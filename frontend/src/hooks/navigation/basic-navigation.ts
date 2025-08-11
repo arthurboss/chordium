@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getOriginalSearchUrl, getNavigationSource } from "@/utils/chordium-navigation";
+import { getNavigationPath } from "@/utils/navigation-path-storage";
 import type { BasicNavigationMethods } from "./navigation.types";
 
 /**
@@ -21,15 +21,15 @@ export function useBasicNavigation(): BasicNavigationMethods {
   }, [navigate]);
 
   const navigateToSearch = useCallback(() => {
-    // First, try to get the stored original search URL
-    const originalSearchUrl = getOriginalSearchUrl();
+    // First, try to get the stored navigation path
+    const storedPath = getNavigationPath();
     
-    if (originalSearchUrl) {
-      navigate(originalSearchUrl);
+    if (storedPath && storedPath.startsWith('/search')) {
+      navigate(storedPath);
       return;
     }
 
-    // If no stored URL, try to construct search URL from current path
+    // If no stored search path, try to construct search URL from current path
     // This handles the case where user came from search results
     const { artist } = params;
     
@@ -45,17 +45,16 @@ export function useBasicNavigation(): BasicNavigationMethods {
   }, [navigate, params]);
 
   const navigateBack = useCallback(() => {
-    const navigationSource = getNavigationSource();
+    const storedPath = getNavigationPath();
     
-    if (navigationSource === 'my-chord-sheets') {
-      navigateToMyChordSheets();
-    } else if (navigationSource === 'search') {
-      navigateToSearch();
+    if (storedPath) {
+      // Navigate directly to the stored path
+      navigate(storedPath);
     } else {
-      // Fallback: if no source is stored, determine based on context
+      // Fallback: if no path is stored, default to search
       navigateToSearch();
     }
-  }, [navigateToMyChordSheets, navigateToSearch]);
+  }, [navigate, navigateToSearch]);
 
   return {
     navigateToMyChordSheets,

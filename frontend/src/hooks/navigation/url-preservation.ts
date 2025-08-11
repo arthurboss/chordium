@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { storeOriginalSearchUrl } from "@/utils/chordium-navigation";
+import { storeNavigationPath } from "@/utils/navigation-path-storage";
 import type { UrlPreservationConfig } from "./navigation.types";
 
 /**
@@ -29,9 +29,9 @@ export function getUrlPreservationConfig(pathname: string, search: string): UrlP
 }
 
 /**
- * Hook that automatically preserves search URLs during navigation
+ * Hook that automatically preserves navigation paths during navigation
  * 
- * Prevents chord sheet URLs from overwriting search URLs and maintains
+ * Prevents chord sheet URLs from overwriting navigation paths and maintains
  * navigation state for proper back button functionality.
  */
 export function useUrlPreservation(): void {
@@ -41,7 +41,7 @@ export function useUrlPreservation(): void {
     const config = getUrlPreservationConfig(location.pathname, location.search);
     
     if (!config.isBasicAppTab && !config.isChordSheetPath) {
-      storeOriginalSearchUrl(config.currentPath);
+      storeNavigationPath(config.currentPath);
     }
   }, [location.pathname, location.search]);
 }

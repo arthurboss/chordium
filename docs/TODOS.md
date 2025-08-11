@@ -1,5 +1,10 @@
 # TODOs
 
+- keep scroll position when navigating away
+- persist search when going to saved chord sheet and back to search
+- add link to saved chord sheet to notification
+
+
 - Migrate SearchStateContext from localstorage to indexedDB, and check if it is even necessary
 
 - check how to unify searches when results are most likely the same, such as:
@@ -9,3 +14,4 @@
 
 "oficina g3"
 "oficina-g3"
+
