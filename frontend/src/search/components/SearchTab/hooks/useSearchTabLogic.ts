@@ -2,12 +2,12 @@ import { useState, useRef, useTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSearchState } from "../../../context";
 import { toSlug } from "@/utils/url-slug-utils";
-import { useArtistNavigation } from "@/hooks/use-navigation";
+import { useNavigation } from "@/hooks/use-navigation";
 import type {
   SearchTabLogicProps,
   SearchTabLogicResult,
 } from "./useSearchTabLogic.types";
-import { usePreserveSearchUrlEffect } from "./usePreserveSearchUrlEffect";
+
 import { useInitSearchStateEffect } from "./useInitSearchStateEffect";
 import { useInitArtistPageEffect } from "./useInitArtistPageEffect";
 
@@ -32,13 +32,11 @@ export function useSearchTabLogic(
   const isInitialized = useRef(false);
   const {
     navigateToArtist,
-    navigateBackToSearch,
     isOnArtistPage,
     getCurrentArtistPath,
-    originalSearchParams,
-  } = useArtistNavigation();
+  } = useNavigation();
 
-  usePreserveSearchUrlEffect(location);
+
   useInitSearchStateEffect(
     location,
     isInitialized,
@@ -136,13 +134,12 @@ export function useSearchTabLogic(
   function handleBackToArtistList() {
     setActiveArtist(null);
     startTransition(() => {
-      // If originalSearchParams is empty (e.g., after page refresh), 
-      // construct search URL from current active artist
-      if (!originalSearchParams.artist && !originalSearchParams.song && activeArtist) {
+      // Navigate back to search results or construct from current artist
+      if (activeArtist) {
         const artistSlug = toSlug(activeArtist.displayName);
         navigate(`/search?artist=${artistSlug}`, { replace: true });
       } else {
-        navigateBackToSearch();
+        navigate('/search', { replace: true });
       }
     });
   }

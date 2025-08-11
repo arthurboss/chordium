@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import type { Song } from "@chordium/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toSlug } from "@/utils/url-slug-utils";
-import { storeNavigationSource } from "@/utils/chordium-navigation";
+import { storeNavigationSource, storeOriginalSearchUrl } from "@/utils/chordium-navigation";
 import type { UseSongActionsProps } from "./useSongActions.type";
 
 /**
@@ -20,9 +20,14 @@ export const useSongActions = ({
   memoizedSongs,
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleView = useCallback(
     (songData: Song) => {
+      // Store the current search URL before navigating away
+      const currentSearchUrl = location.pathname + location.search;
+      storeOriginalSearchUrl(currentSearchUrl);
+      
       // Store that user is navigating from search
       storeNavigationSource('search');
       
@@ -38,7 +43,7 @@ export const useSongActions = ({
         });
       }
     },
-    [navigate]
+    [navigate, location]
   );
 
   const handleAdd = useCallback(
