@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { storeOriginalSearchUrl } from "@/utils/storeOriginalSearchUrl";
+import { storeOriginalSearchUrl } from "@/utils/chordium-navigation";
 
 export function usePreserveSearchUrlEffect(location: { pathname: string; search: string }) {
   useEffect(() => {

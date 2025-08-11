@@ -2,5 +2,5 @@
 export * from "./useSearchReducer";
 
 // Re-export navigation hooks
-export { useArtistNavigation } from "./useArtistNavigation";
+export { useArtistNavigation } from "@/hooks/use-navigation";
 export { useSearchRedirect } from "./use-search-redirect";

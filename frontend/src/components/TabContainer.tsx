@@ -12,6 +12,7 @@ import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
 import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
+import { storeNavigationSource } from "@/utils/chordium-navigation";
 
 interface TabContainerProps {
   activeTab: string;
@@ -81,8 +82,10 @@ const TabContainer = ({
     }
   };
 
-  const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
-
+    const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
+    // Store that user is navigating from my-chord-sheets
+    storeNavigationSource('my-chord-sheets');
+    
     // For My Chord Sheets: Navigate directly to chord sheet page
     if (storedChordSheet.artist && storedChordSheet.title) {
       // Create URL-friendly slugs using Unicode-aware function

@@ -22,6 +22,8 @@ export interface RouteParams extends Record<string, string | undefined> {
 export interface ChordViewerNavigationMethods {
   navigateToMyChordSheets: () => void;
   navigateToHome: () => void;
+  navigateToSearch: () => void;
+  navigateBack: () => void;
 }
 
 /**

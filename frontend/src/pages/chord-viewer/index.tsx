@@ -11,7 +11,7 @@ import { resolveChordSheetPath } from "./utils/path-resolver";
 import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
-import { useChordViewerNavigation } from "./hooks/use-chord-viewer-navigation";
+import { useChordViewerNavigation } from "@/hooks/use-navigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components
@@ -42,9 +42,7 @@ const ChordViewer = () => {
   const isFromMyChordSheets = chordSheetResult.chordSheet?.storage?.saved ?? false;
 
   const handleBack = () => {
-    return isFromMyChordSheets
-      ? navigation.navigateToMyChordSheets()
-      : navigation.navigateToHome();
+    return navigation.navigateBack();
   };
 
   // Chord sheet operations using focused hooks

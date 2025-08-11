@@ -10,4 +10,3 @@
 "oficina g3"
 "oficina-g3"
 
-- handle going back from chord sheet to search results

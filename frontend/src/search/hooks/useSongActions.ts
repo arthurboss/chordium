@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { Song } from "@chordium/types";
 import { useNavigate } from "react-router-dom";
 import { toSlug } from "@/utils/url-slug-utils";
+import { storeNavigationSource } from "@/utils/chordium-navigation";
 import type { UseSongActionsProps } from "./useSongActions.type";
 
 /**
@@ -22,6 +23,9 @@ export const useSongActions = ({
 
   const handleView = useCallback(
     (songData: Song) => {
+      // Store that user is navigating from search
+      storeNavigationSource('search');
+      
       // Navigate directly to chord sheet page - no deduplication needed
       // Search is for discovery, chord sheets are handled separately
       if (songData.artist && songData.title) {
