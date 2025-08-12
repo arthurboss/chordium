@@ -134,13 +134,15 @@ export function useSearchTabLogic(
   function handleBackToArtistList() {
     setActiveArtist(null);
     startTransition(() => {
-      // Navigate back to search results or construct from current artist
-      if (activeArtist) {
-        const artistSlug = toSlug(activeArtist.displayName);
-        navigate(`/search?artist=${artistSlug}`, { replace: true });
-      } else {
-        navigate('/search', { replace: true });
-      }
+      // Navigate back to search results using original search parameters
+      // This preserves the user's original query instead of using the artist's display name
+      const params = new URLSearchParams();
+      if (submittedArtist) params.set("artist", toSlug(submittedArtist));
+      if (submittedSong) params.set("song", toSlug(submittedSong));
+      const searchUrl = params.toString()
+        ? `/search?${params.toString()}`
+        : "/search";
+      navigate(searchUrl, { replace: true });
     });
   }
 
