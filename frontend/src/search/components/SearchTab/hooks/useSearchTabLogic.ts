@@ -2,12 +2,12 @@ import { useState, useRef, useTransition } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSearchState } from "../../../context";
 import { toSlug } from "@/utils/url-slug-utils";
-import { useArtistNavigation } from "@/hooks/use-navigation";
+import { useNavigation } from "@/hooks/navigation";
 import type {
   SearchTabLogicProps,
   SearchTabLogicResult,
 } from "./useSearchTabLogic.types";
-import { usePreserveSearchUrlEffect } from "./usePreserveSearchUrlEffect";
+
 import { useInitSearchStateEffect } from "./useInitSearchStateEffect";
 import { useInitArtistPageEffect } from "./useInitArtistPageEffect";
 
@@ -32,13 +32,11 @@ export function useSearchTabLogic(
   const isInitialized = useRef(false);
   const {
     navigateToArtist,
-    navigateBackToSearch,
     isOnArtistPage,
     getCurrentArtistPath,
-    originalSearchParams,
-  } = useArtistNavigation();
+  } = useNavigation();
 
-  usePreserveSearchUrlEffect(location);
+
   useInitSearchStateEffect(
     location,
     isInitialized,
@@ -136,14 +134,15 @@ export function useSearchTabLogic(
   function handleBackToArtistList() {
     setActiveArtist(null);
     startTransition(() => {
-      // If originalSearchParams is empty (e.g., after page refresh), 
-      // construct search URL from current active artist
-      if (!originalSearchParams.artist && !originalSearchParams.song && activeArtist) {
-        const artistSlug = toSlug(activeArtist.displayName);
-        navigate(`/search?artist=${artistSlug}`, { replace: true });
-      } else {
-        navigateBackToSearch();
-      }
+      // Navigate back to search results using original search parameters
+      // This preserves the user's original query instead of using the artist's display name
+      const params = new URLSearchParams();
+      if (submittedArtist) params.set("artist", toSlug(submittedArtist));
+      if (submittedSong) params.set("song", toSlug(submittedSong));
+      const searchUrl = params.toString()
+        ? `/search?${params.toString()}`
+        : "/search";
+      navigate(searchUrl, { replace: true });
     });
   }
 

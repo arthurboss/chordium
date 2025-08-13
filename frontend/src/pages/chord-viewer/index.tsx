@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,7 +11,7 @@ import { resolveChordSheetPath } from "./utils/path-resolver";
 import { createChordSheetData } from "./utils/chord-sheet-data";
 
 // Hooks
-import { useChordViewerNavigation } from "@/hooks/use-navigation";
+import { useNavigation } from "@/hooks/navigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components
@@ -37,28 +37,41 @@ const ChordViewer = () => {
     ? createChordSheetData(chordSheetResult.chordSheet, path)
     : null;
 
+  // Local state for saved status to update UI immediately after save
+  const [isSaved, setIsSaved] = useState(
+    chordSheetResult.chordSheet?.storage?.saved ?? false
+  );
+
+  // Keep isSaved in sync with chordSheetResult
+  useEffect(() => {
+    setIsSaved(chordSheetResult.chordSheet?.storage?.saved ?? false);
+  }, [chordSheetResult.chordSheet?.storage?.saved]);
+
   // Navigation handlers
-  const navigation = useChordViewerNavigation();
-  const isFromMyChordSheets = chordSheetResult.chordSheet?.storage?.saved ?? false;
+  const navigation = useNavigation();
 
   const handleBack = () => {
     return navigation.navigateBack();
   };
 
   // Chord sheet operations using focused hooks
-  const { handleSave } = useChordSheetSave(chordSheetData);
+  const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData);
+  // Wrap handleSave to update local isSaved state immediately after save
+  const handleSave = async () => {
+    await baseHandleSave();
+    setIsSaved(true);
+  };
   const { handleDelete } = useChordSheetDelete(
     path,
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
   );
 
-  // Loading state
+
+
+  // Unified guard logic: Only show loading, error, or missing data when not loading
   if (chordSheetResult.isLoading) {
     return <ChordViewerLoading />;
-  }
-
-  // Error state
-  if (chordSheetResult.error) {
+  } else if (chordSheetResult.error) {
     return (
       <ChordViewerError
         error={chordSheetResult.error}
@@ -66,10 +79,7 @@ const ChordViewer = () => {
         onBack={handleBack}
       />
     );
-  }
-
-  // Guard against missing chord sheet data
-  if (!chordSheetData) {
+  } else if (!chordSheetData) {
     return (
       <ChordViewerError
         error="Chord sheet not found"
@@ -98,9 +108,9 @@ const ChordViewer = () => {
           onDelete={handleDelete}
           onSave={handleSave}
           onUpdate={() => { }}
-          hideDeleteButton={!isFromMyChordSheets}
-          hideSaveButton={isFromMyChordSheets}
-          isFromMyChordSheets={isFromMyChordSheets}
+          hideDeleteButton={!isSaved}
+          hideSaveButton={isSaved}
+          isFromMyChordSheets={isSaved}
         />
       </main>
       <Footer />
