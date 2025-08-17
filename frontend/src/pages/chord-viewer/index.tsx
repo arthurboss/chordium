@@ -1,7 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import SongViewer from "@/components/SongViewer";
 import { useSingleChordSheet } from "@/storage/hooks/use-single-chord-sheet";
 import type { RouteParams } from "./chord-viewer.types";
@@ -91,7 +89,6 @@ const ChordViewer = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
         <SongViewer
           song={{
@@ -113,7 +110,6 @@ const ChordViewer = () => {
           isFromMyChordSheets={isSaved}
         />
       </main>
-      <Footer />
     </div>
   );
 };

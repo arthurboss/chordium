@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom"; // Import useLocation
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
@@ -45,8 +43,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-
       <main className="w-full max-w-3xl mx-auto flex-1 container px-3 py-4 sm:px-4 sm:py-6">
         {/* Development Banner */}
         <div className="text-center bg-purple-100 border-l-4 border-purple-400 text-purple-900 p-3 mb-4 rounded shadow">
@@ -68,8 +64,6 @@ const Home = () => {
           <TestComponent />
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };
