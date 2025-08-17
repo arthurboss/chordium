@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import type { Song } from "@chordium/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toSlug } from "@/utils/url-slug-utils";
-import { storeNavigationSource } from "@/utils/chordium-navigation";
+import { storeNavigationPath } from "@/utils/navigation-path-storage";
 import type { UseSongActionsProps } from "./useSongActions.type";
 
 /**
@@ -20,11 +20,13 @@ export const useSongActions = ({
   memoizedSongs,
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleView = useCallback(
     (songData: Song) => {
-      // Store that user is navigating from search
-      storeNavigationSource('search');
+      // Store the current search path before navigating away
+      const currentPath = location.pathname + location.search;
+      storeNavigationPath(currentPath);
       
       // Navigate directly to chord sheet page - no deduplication needed
       // Search is for discovery, chord sheets are handled separately
@@ -38,7 +40,7 @@ export const useSongActions = ({
         });
       }
     },
-    [navigate]
+    [navigate, location]
   );
 
   const handleAdd = useCallback(
