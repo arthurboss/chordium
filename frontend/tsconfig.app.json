@@ -28,6 +28,7 @@
   },
   "include": [
     "src",
+    "tailwind.config.ts",
     "cypress",
     "cypress/**/*.ts",
     "cypress/support/cypress.d.ts"
