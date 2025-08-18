@@ -4,23 +4,7 @@ import { searchCacheService } from "@/storage/services/search-cache/search-cache
 
 import { getApiBaseUrl } from "@/utils/api-base-url";
 import { UseSearchFetchOptions } from "./useSearchFetch.types";
-
-/**
- * Generate cache path for search parameters
- */
-const generateCachePath = (artist: string, song: string): string => {
-  if (!artist && song) {
-    // Song-only search
-    return song.toLowerCase().trim();
-  } else if (artist && !song) {
-    // Artist-only search
-    return artist.toLowerCase().trim();
-  } else if (artist && song) {
-    // Artist + song search (use artist path for caching)
-    return artist.toLowerCase().trim();
-  }
-  return "";
-};
+import { getNormalizedSearchCacheKey } from "@/search/utils/normalization/getNormalizedSearchCacheKey";
 
 /**
  * Hook for handling search API requests with caching
@@ -60,12 +44,11 @@ export const useSearchFetch = ({
         }
 
         // Check cache first
-        const cachePath = generateCachePath(artistParam, songParam);
+        const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
         if (cachePath) {
           const cachedEntry = await searchCacheService.get(cachePath);
           if (cachedEntry) {
             const { results, search } = cachedEntry;
-
             if (search.searchType === "artist") {
               // Artist search results
               dispatch({
@@ -81,7 +64,6 @@ export const useSearchFetch = ({
                 songs: results as Song[],
               });
             }
-
             if (onFetchComplete) onFetchComplete();
             return;
           }
@@ -97,12 +79,10 @@ export const useSearchFetch = ({
           // Artist search or artist+song search
           apiUrl = `${baseUrl}/api/artists?artist=${encodeURIComponent(artistParam)}&song=${encodeURIComponent(songParam)}`;
         }
-
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch search results: ${response.status}`);
         }
-
         const text = await response.text();
         const data = text ? JSON.parse(text) : [];
 
@@ -111,7 +91,7 @@ export const useSearchFetch = ({
           dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
 
           // Cache results
-          const cachePath = generateCachePath(artistParam, songParam);
+          const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
           if (cachePath) {
             await searchCacheService.storeResults({
               path: cachePath,
@@ -128,7 +108,7 @@ export const useSearchFetch = ({
           dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
 
           // Cache results
-          const cachePath = generateCachePath(artistParam, songParam);
+          const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
           if (cachePath) {
             await searchCacheService.storeResults({
               path: cachePath,
