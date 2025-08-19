@@ -1,13 +1,12 @@
 # TODOs
 
-- add a "load more results" button after getting results from cache, in order to fetch new results
-
+- add a "refresh results" button if results were gotten from cache, in order to avoid stale data in case previous searches had db unavailable or other cases
+- artist search input not filtering when on "song" searchType
 - keep scroll position when navigating away (stashed. requires cleanup)
 - persist search when going to saved chord sheet and back to search
 - add link to saved chord sheet to notification (showSaveSuccessNotification)
 
 - Migrate SearchStateContext from localstorage to indexedDB, and check if it is even necessary
-
 
 - fix going to song results back to artist list pre-filtering results from session storage (or url):
 
