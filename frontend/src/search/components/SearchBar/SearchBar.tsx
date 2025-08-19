@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { SearchBarProps } from "./SearchBar.types";
 import RoundTrashButton from "@/components/ui/RoundTrashButton";
+import { cyAttr } from "@/utils/test-utils";
 
 const SearchBar = ({
   className = "",
@@ -74,6 +75,7 @@ const SearchBar = ({
             onClick={onBackClick}
             className="w-24"
             disabled={!!(loading || artistLoading || !showBackButton || !onBackClick)}
+            {...cyAttr('back-button')}
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -85,13 +87,14 @@ const SearchBar = ({
             aria-label="Clear search"
             tabIndex={0}
             disabled={clearDisabled}
+            {...cyAttr('clear-search-button')}
           />
           <Button
             type="submit"
             className="w-24"
             size="sm"
             disabled={!!(loading || artistLoading || isSearchDisabled)}
-            data-testid="search-submit"
+            {...cyAttr('search-submit-button')}
           >
             <Search className="h-4 w-4" />
             Search

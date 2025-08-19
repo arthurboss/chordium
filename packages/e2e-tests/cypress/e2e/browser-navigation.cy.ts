@@ -44,11 +44,14 @@ describe('Browser Navigation Tests', () => {
   });
 
   it('should navigate to artist/song route when viewing a song from My Chord Sheets', () => {
-    // Click View Chords on a song from My Chord Sheets
-    cy.contains('View Chords').first().click();
+    // Wait for chord sheets to load and be visible
+    cy.get('[data-cy^="chordsheet-card-"]', { timeout: 10000 }).should('be.visible');
     
-    // URL should follow pattern /my-chord-sheets/artist/song-name
-    cy.url().should('match', /\/my-chord-sheets\/[\w-]+\/[\w-]+$/);
+    // Click on a chord sheet card (the entire card is clickable)
+    cy.get('[data-cy^="chordsheet-card-"]').first().click();
+    
+    // URL should follow pattern /artist-name/song-title
+    cy.url().should('match', /\/[\w-]+\/[\w-]+$/);
     
     // Should show song content
     cy.get('body').should('not.contain', 'Not Found');
