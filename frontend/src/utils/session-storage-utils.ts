@@ -42,7 +42,9 @@ export function storeChordUrl(artistSlug: string, songSlug: string, url: string)
     sessionStorage.setItem(key, url);
     sessionStorage.setItem(`${key}-timestamp`, Date.now().toString());
   } catch (error) {
-    console.error('Failed to store chord URL in session storage:', error);
+    if (import.meta.env.DEV) {
+      console.error('Failed to store chord URL in session storage:', error);
+    }
   }
 }
 

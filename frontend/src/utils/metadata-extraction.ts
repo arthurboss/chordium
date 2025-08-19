@@ -72,7 +72,9 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
         metadata.title = parts[1].trim();
       }
     } catch (error) {
-      console.error('Error extracting metadata from filename:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error extracting metadata from filename:', error);
+      }
     }
   }
 

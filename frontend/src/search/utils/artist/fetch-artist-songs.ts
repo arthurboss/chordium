@@ -12,7 +12,9 @@ import { getNormalizedSearchCacheKey } from "@/search/utils/normalization/getNor
 
 export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   if (!artistPath) {
-    console.error("Invalid artist path: empty string");
+    if (import.meta.env.DEV) {
+      console.error("Invalid artist path: empty string");
+    }
     throw new Error("Invalid artist path");
   }
 
@@ -31,7 +33,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     const resp = await fetch(apiUrl);
     if (!resp.ok) {
       const errorText = await resp.text();
-      console.error(`API error (${resp.status}): ${errorText}`);
+      if (import.meta.env.DEV) {
+        console.error(`API error (${resp.status}): ${errorText}`);
+      }
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
     const data: Song[] = await resp.json();
@@ -47,7 +51,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     });
     return data;
   } catch (error) {
-    console.error("Error fetching artist songs:", error);
+    if (import.meta.env.DEV) {
+      console.error("Error fetching artist songs:", error);
+    }
     throw error;
   }
 }

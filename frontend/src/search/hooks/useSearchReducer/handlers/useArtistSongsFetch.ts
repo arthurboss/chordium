@@ -33,7 +33,9 @@ export const useArtistSongsFetch = ({
         const songs = await fetchArtistSongs(artist.path);
         dispatch({ type: "ARTIST_SONGS_SUCCESS", songs });
       } catch (err) {
-        console.error("[useArtistSongsFetch] ARTIST SONGS ERROR:", err);
+        if (import.meta.env.DEV) {
+          console.error("[useArtistSongsFetch] ARTIST SONGS ERROR:", err);
+        }
         const errorMessage =
           err instanceof Error ? err.message : "Failed to fetch artist songs";
         dispatch({ type: "ARTIST_SONGS_ERROR", error: errorMessage });

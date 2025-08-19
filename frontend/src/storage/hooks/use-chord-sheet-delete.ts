@@ -18,7 +18,9 @@ export function useChordSheetDelete(path: string, songTitle: string) {
       showDeleteSuccessNotification(songTitle);
       navigate('/my-chord-sheets');
     } catch (error) {
-      console.error('Failed to delete chord sheet:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to delete chord sheet:', error);
+      }
       showDeleteErrorNotification();
     }
   };

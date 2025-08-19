@@ -119,12 +119,10 @@ const TabContainer = ({
 
   const handleSaveUploadedChordSheet = (content: string, title: string) => {
     // NOTE: Save functionality will be implemented with IndexedDB
-    console.warn('Save functionality not yet implemented');
   };
 
   const handleChordSheetUpdate = (content: string) => {
     // NOTE: Update functionality will be implemented with IndexedDB
-    console.warn('Update functionality not yet implemented');
   };
 
   const handleChordSheetDelete = async (songPath: string) => {
@@ -132,7 +130,9 @@ const TabContainer = ({
     const songToDelete = myChordSheets.find(song => song.path === songPath);
 
     if (!songToDelete) {
-      console.error('Song not found for deletion:', songPath);
+      if (import.meta.env.DEV) {
+        console.error('Song not found for deletion:', songPath);
+      }
       return;
     }
 
@@ -153,7 +153,9 @@ const TabContainer = ({
         setSelectedSong(null);
       }
     } catch (error) {
-      console.error('Failed to remove chord sheet:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to remove chord sheet:', error);
+      }
       toast({
         title: "Remove failed",
         description: `Failed to remove "${songToDelete.title}". Please try again.`,

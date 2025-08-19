@@ -36,7 +36,9 @@ export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
       }
     ];
   } catch (error) {
-    console.error('Failed to load sample chord sheet data:', error);
+    if (import.meta.env.DEV) {
+      console.error('Failed to load sample chord sheet data:', error);
+    }
     throw new Error('Unable to load sample chord sheet data');
   }
 };

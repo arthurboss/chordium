@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom"; // Import useLocation
 import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
-import TestComponent from "@/components/TestComponent";
+
 import { useChordSheets } from "@/storage/hooks";
 import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
@@ -58,12 +58,7 @@ const Home = () => {
         />
       </main>
 
-      {/* Include test component for build optimization testing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="hidden">
-          <TestComponent />
-        </div>
-      )}
+
     </div>
   );
 };

@@ -15,7 +15,9 @@ export function useChordSheetSave(
 ) {
   const handleSave = async (): Promise<void> => {
     if (!chordSheetData?.chordSheet) {
-      console.warn('No chord sheet data available for saving');
+      if (import.meta.env.DEV) {
+        console.warn('No chord sheet data available for saving');
+      }
       return;
     }
     
@@ -29,7 +31,9 @@ export function useChordSheetSave(
         refetch();
       }
     } catch (error) {
-      console.error('Failed to save chord sheet:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to save chord sheet:', error);
+      }
       showSaveErrorNotification();
     }
   };

@@ -32,7 +32,9 @@ export async function fetchChordSheetFromAPI(path: string): Promise<ChordSheet |
     return data as ChordSheet;
     
   } catch (error) {
-    console.error('Error fetching chord sheet from API:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error fetching chord sheet from API:', error);
+    }
     throw error;
   }
 }

@@ -25,7 +25,9 @@ export const shouldLoadSamples = async (
     const existingSheets = await storage.getAllSaved();
     return existingSheets.length === 0;
   } catch (error) {
-    console.warn('Error checking for existing chord sheets, will load samples:', error);
+    if (import.meta.env.DEV) {
+      console.warn('Error checking for existing chord sheets, will load samples:', error);
+    }
     return true;
   }
 };

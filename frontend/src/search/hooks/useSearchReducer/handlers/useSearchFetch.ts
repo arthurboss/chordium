@@ -126,7 +126,9 @@ export const useSearchFetch = ({
 
         if (onFetchComplete) onFetchComplete();
       } catch (err) {
-        console.error("[useSearchFetch] FETCH ERROR:", err);
+        if (import.meta.env.DEV) {
+          console.error("[useSearchFetch] FETCH ERROR:", err);
+        }
         const errorObj =
           err instanceof Error
             ? err

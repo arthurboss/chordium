@@ -10,7 +10,9 @@ export function storeNavigationPath(path: string): void {
   try {
     sessionStorage.setItem(NAVIGATION_PATH_KEY, path);
   } catch (error) {
-    console.warn("Failed to store navigation path:", error);
+    if (import.meta.env.DEV) {
+      console.warn("Failed to store navigation path:", error);
+    }
   }
 }
 
@@ -23,7 +25,9 @@ export function getNavigationPath(): string | null {
   try {
     return sessionStorage.getItem(NAVIGATION_PATH_KEY);
   } catch (error) {
-    console.warn("Failed to retrieve navigation path:", error);
+    if (import.meta.env.DEV) {
+      console.warn("Failed to retrieve navigation path:", error);
+    }
     return null;
   }
 }
@@ -35,7 +39,9 @@ export function clearNavigationPath(): void {
   try {
     sessionStorage.removeItem(NAVIGATION_PATH_KEY);
   } catch (error) {
-    console.warn("Failed to clear navigation path:", error);
+    if (import.meta.env.DEV) {
+      console.warn("Failed to clear navigation path:", error);
+    }
   }
 }
 
