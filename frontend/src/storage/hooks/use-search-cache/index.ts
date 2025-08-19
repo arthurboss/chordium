@@ -15,13 +15,13 @@ import { useSearchCacheOperations } from "./operations/use-search-cache-operatio
  * Provides state management and operations for search cache functionality,
  * following the modular pattern of other storage hooks.
  * 
- * @param params - Hook parameters including path, query, search type, and data source
+ * @param params - Hook parameters including searchKey, query, search type, and data source
  * @returns Hook result with state and operations
  * 
  * @example
  * ```tsx
  * const { cacheEntry, isLoading, error, getFromCache, storeInCache } = useSearchCache({
- *   path: 'artists/search',
+ *   searchKey: 'artists/search',
  *   query: { text: 'Beatles' },
  *   searchType: 'artist',
  *   dataSource: 'cifraclub'
@@ -50,14 +50,14 @@ export function useSearchCache(params: UseSearchCacheParams = {}): UseSearchCach
   // Extract getFromCache to use in dependency array
   const { getFromCache } = operations;
 
-  // Auto-load cache entry when path changes (if path is provided)
+  // Auto-load cache entry when searchKey changes (if searchKey is provided)
   useEffect(() => {
-    if (params.path && params.validateTTL !== false) {
+    if (params.searchKey && params.validateTTL !== false) {
       getFromCache().catch(() => {
         // Error is already handled in operations, this is just to prevent unhandled promise rejection
       });
     }
-  }, [params.path, params.validateTTL, getFromCache]);
+  }, [params.searchKey, params.validateTTL, getFromCache]);
 
   return {
     // State

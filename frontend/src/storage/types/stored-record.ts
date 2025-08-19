@@ -7,10 +7,7 @@
  * Base interface for all stored records in IndexedDB
  * Defines common storage metadata patterns shared across all stored types
  */
-export interface StoredRecord {
-  /** Primary key for IndexedDB storage */
-  path: string;
-  
+export interface StoredRecord {  
   /** Storage-specific metadata grouped for organization */
   storage: {
     /** When first stored/cached */

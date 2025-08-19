@@ -23,8 +23,8 @@ export function setupMockConsole() {
  */
 export function createMockCacheEntry(overrides: Record<string, unknown> = {}) {
   return {
-    path: 'artists/search',
-    results: [{ path: 'artist/beatles', displayName: 'The Beatles', songCount: 10 }] as Artist[],
+    searchKey: 'beatles|artist',
+    results: [{ searchKey: 'artist/beatles', displayName: 'The Beatles', songCount: 10 }] as Artist[],
     search: {
       query: { artist: 'Beatles', song: null },
       searchType: 'artist' as const,

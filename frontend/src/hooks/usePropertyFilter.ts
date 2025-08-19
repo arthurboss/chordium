@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { normalizeForSearch } from "@/search/utils/normalization/normalizeForSearch";
 
 /**
  * Generic hook to filter an array of objects by a given property and filter string.
@@ -13,11 +14,13 @@ export function usePropertyFilter<T>(
 ): T[] {
   return useMemo(() => {
     if (!filter) return items;
-    const lower = filter.toLowerCase();
+    const normalizedFilter = normalizeForSearch(filter);
     return items.filter((item) => {
       const value = item[property];
       if (typeof value === "string" || typeof value === "number") {
-        return String(value).toLowerCase().includes(lower);
+        const normalizedValue = normalizeForSearch(String(value));
+        const match = normalizedValue.includes(normalizedFilter);
+        return match;
       }
       return false;
     });

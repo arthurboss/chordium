@@ -7,17 +7,17 @@ import { executeWriteTransaction, executeReadTransaction } from "../../../core/t
 import { getDatabase } from "../../chord-sheets/database/connection";
 
 /**
- * Deletes a cached search entry by its path key
+ * Deletes a cached search entry by its searchKey
  * 
  * First checks if the entry exists, then deletes it if found.
  * This approach allows us to return whether deletion actually occurred.
  * 
- * @param path - The cache key path to delete
+ * @param searchKey - The cache key to delete
  * @returns Promise resolving to true if deleted, false if not found
  * @throws {DatabaseOperationError} When database deletion fails
  */
 const deleteSearchCache: DeleteSearchCacheFunction = async (
-  path: string
+  searchKey: string
 ): Promise<boolean> => {
   // Ensure database initialization
   await getDatabase();
@@ -25,7 +25,7 @@ const deleteSearchCache: DeleteSearchCacheFunction = async (
   // First check if entry exists
   const existingEntry = await executeReadTransaction<unknown>(
     "searchCache",
-    (store) => store.get(path)
+    (store) => store.get(searchKey)
   );
 
   if (!existingEntry) {
@@ -35,7 +35,7 @@ const deleteSearchCache: DeleteSearchCacheFunction = async (
   // Delete the entry
   await executeWriteTransaction<undefined>(
     "searchCache",
-    (store) => store.delete(path)
+    (store) => store.delete(searchKey)
   );
 
   return true;

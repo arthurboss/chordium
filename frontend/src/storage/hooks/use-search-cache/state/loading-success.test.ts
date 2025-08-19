@@ -10,7 +10,7 @@ describe('useSearchCacheReducer - LOADING_SUCCESS', () => {
 
   it('should set loading to false and update cache entry', () => {
     const mockCacheEntry = createMockCacheEntry({
-      results: [{ path: 'artist/test', displayName: 'Test Artist', songCount: 5 }],
+      results: [{ searchKey: 'artist/test', displayName: 'Test Artist', songCount: 5 }],
     });
 
     const previousState: UseSearchCacheState = {

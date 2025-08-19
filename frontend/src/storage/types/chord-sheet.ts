@@ -11,6 +11,8 @@ import type { StoredRecord } from "./stored-record";
  * Inherits path, storage.timestamp, storage.version, storage.expiresAt from StoredRecord
  */
 export interface StoredChordSheet extends ChordSheet, StoredRecord {
+  /** Primary key for IndexedDB storage. ([artist-name]/[song-title]) */
+  path: string;
   /** Storage-specific metadata for chord sheets */
   storage: StoredRecord["storage"] & {
     /** Whether user has saved this chord sheet (never expires if true) */

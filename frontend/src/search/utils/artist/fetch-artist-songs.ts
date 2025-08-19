@@ -8,6 +8,7 @@
 import { SEARCH_TYPES, type Song } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 import { getApiBaseUrl } from "@/utils/api-base-url";
+import { getNormalizedSearchCacheKey } from "@/search/utils/normalization/getNormalizedSearchCacheKey";
 
 export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   if (!artistPath) {
@@ -15,8 +16,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     throw new Error("Invalid artist path");
   }
 
-  // Try to get cached results first
-  const cachedEntry = await searchCacheService.get(artistPath);
+  // Use normalized searchKey for cache
+  const searchKey = getNormalizedSearchCacheKey(artistPath, "", SEARCH_TYPES.ARTIST_SONG);
+  const cachedEntry = await searchCacheService.get(searchKey);
   if (
     cachedEntry &&
     cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG
@@ -33,9 +35,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
     const data: Song[] = await resp.json();
-    // Cache the results for future use
+    // Cache the results for future use (use normalized searchKey)
     await searchCacheService.storeResults({
-      path: artistPath,
+      searchKey,
       results: data,
       search: {
         query: { artist: artistPath, song: "" },

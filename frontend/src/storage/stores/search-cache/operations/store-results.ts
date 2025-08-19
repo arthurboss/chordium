@@ -11,7 +11,7 @@ import { getDefaultTTL } from "../utils/get-default-ttl";
  * Handles TTL calculation and entry structure creation.
  */
 const storeResults: StoreResultsFunction = async (
-  path: string,
+  searchKey: string,
   results: Artist[] | Song[],
   query: SearchQuery,
   searchType: SearchType,
@@ -21,7 +21,7 @@ const storeResults: StoreResultsFunction = async (
   const ttl = options.ttl || getDefaultTTL(dataSource);
   
   const entry: SearchCacheEntry = {
-    path,
+    searchKey,
     results,
     search: {
       query,

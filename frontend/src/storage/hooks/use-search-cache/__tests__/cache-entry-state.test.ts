@@ -30,7 +30,7 @@ describe('useSearchCache - Cache Entry State', () => {
     mockGetService.mockResolvedValue(mockCacheEntry);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -78,7 +78,7 @@ describe('useSearchCache - Cache Entry State', () => {
     mockDeleteService.mockResolvedValue(true);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       query: { artist: 'Beatles', song: null },
       searchType: 'artist',
       dataSource: 'cifraclub',

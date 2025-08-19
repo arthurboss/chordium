@@ -30,7 +30,7 @@ describe('useSearchCache - getFromCache', () => {
     mockGetService.mockResolvedValue(mockCacheEntry);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -41,7 +41,7 @@ describe('useSearchCache - getFromCache', () => {
       returnedEntry = await result.current.getFromCache();
     });
 
-    expect(mockGetService).toHaveBeenCalledWith('artists/search');
+  expect(mockGetService).toHaveBeenCalledWith('artists/search');
     expect(result.current.cacheEntry).toEqual(mockCacheEntry);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
@@ -54,7 +54,7 @@ describe('useSearchCache - getFromCache', () => {
     mockGetService.mockRejectedValue(error);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -75,7 +75,7 @@ describe('useSearchCache - getFromCache', () => {
     expect(thrownError).toEqual(error);
   });
 
-  it('should return null when path is missing', async () => {
+  it('should return null when searchKey is missing', async () => {
     const { result } = renderHook(() => useSearchCache());
 
     let returnedEntry;
@@ -91,7 +91,7 @@ describe('useSearchCache - getFromCache', () => {
     mockGetService.mockResolvedValue(null);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 

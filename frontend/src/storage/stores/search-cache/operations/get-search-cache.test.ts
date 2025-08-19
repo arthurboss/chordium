@@ -33,7 +33,7 @@ describe("getSearchCache", () => {
   });
 
   const validCacheEntry: SearchCacheEntry = {
-    path: "hillsong", // Artist search term (from search-types.md: /api/artists)
+    searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
     results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
     search: {
       query: {
@@ -61,7 +61,7 @@ describe("getSearchCache", () => {
   it("should return null when entry does not exist", async () => {
     mockExecuteTransaction.mockResolvedValue(undefined);
 
-    const result = await getSearchCache("non-existent-path");
+    const result = await getSearchCache("non-existent-searchKey");
 
     expect(result).toBeNull();
     expect(mockGetDatabase).toHaveBeenCalledOnce();

@@ -70,8 +70,8 @@ export function useSearchTabLogic(
     if (artistCleared || songCleared) {
       startTransition(() => {
         const params = new URLSearchParams();
-        if (artistValue) params.set("artist", toSlug(artistValue));
-        if (songValue) params.set("song", toSlug(songValue));
+        if (artistValue) params.set("artist", artistValue);
+        if (songValue) params.set("song", songValue);
         const searchUrl = params.toString()
           ? `/search?${params.toString()}`
           : "/search";
@@ -88,7 +88,6 @@ export function useSearchTabLogic(
     setLoading(true);
     setSubmittedArtist(artistValue);
     setSubmittedSong(songValue);
-    
     // Determine search type based on input values
     // Following backend logic in determineSearchType()
     let searchType: "artist" | "song" | "artist-song";
@@ -101,7 +100,6 @@ export function useSearchTabLogic(
     } else {
       searchType = "artist"; // Default fallback
     }
-    
     updateSearchState({ 
       searchType,
       results: [],
@@ -111,8 +109,8 @@ export function useSearchTabLogic(
     setShouldFetch(true);
     startTransition(() => {
       const params = new URLSearchParams();
-      if (artistValue) params.set("artist", toSlug(artistValue));
-      if (songValue) params.set("song", toSlug(songValue));
+      if (artistValue) params.set("artist", artistValue);
+      if (songValue) params.set("song", songValue);
       const searchUrl = params.toString()
         ? `/search?${params.toString()}`
         : "/search";

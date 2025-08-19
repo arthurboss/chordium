@@ -11,12 +11,12 @@ export function useCacheRetrieval(
   params: UseSearchCacheParams,
   dispatch: React.Dispatch<UseSearchCacheAction>
 ) {
-  const { path } = params;
+  const { searchKey } = params;
 
   const getFromCache = useCallback(async () => {
-    if (!path) {
-      logger.warn("Missing path parameter for cache retrieval", {
-        path: !!path,
+    if (!searchKey) {
+      logger.warn("Missing searchKey parameter for cache retrieval", {
+        searchKey: !!searchKey,
       });
       return null;
     }
@@ -24,7 +24,7 @@ export function useCacheRetrieval(
     try {
       dispatch({ type: "LOADING_START" });
       
-      const cacheEntry = await searchCacheService.get(path);
+      const cacheEntry = await searchCacheService.get(searchKey);
 
       dispatch({ 
         type: "LOADING_SUCCESS", 
@@ -36,7 +36,7 @@ export function useCacheRetrieval(
       const errorMessage = error instanceof Error ? error.message : "Failed to retrieve from cache";
       logger.error("Failed to get search cache entry", {
         error: errorMessage,
-        path,
+        searchKey,
       });
       
       dispatch({ 
@@ -46,7 +46,7 @@ export function useCacheRetrieval(
       
       throw error;
     }
-  }, [path, dispatch]);
+  }, [searchKey, dispatch]);
 
   const getAllFromCache = useCallback(async () => {
     try {

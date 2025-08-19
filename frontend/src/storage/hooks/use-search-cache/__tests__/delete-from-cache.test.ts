@@ -28,7 +28,7 @@ describe('useSearchCache - deleteFromCache', () => {
     mockDeleteService.mockResolvedValue(true);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -38,7 +38,7 @@ describe('useSearchCache - deleteFromCache', () => {
       await result.current.deleteFromCache();
     });
 
-    expect(mockDeleteService).toHaveBeenCalledWith('artists/search');
+  expect(mockDeleteService).toHaveBeenCalledWith('artists/search');
     expect(result.current.cacheEntry).toBeNull();
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
@@ -50,7 +50,7 @@ describe('useSearchCache - deleteFromCache', () => {
     mockDeleteService.mockRejectedValue(error);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -70,7 +70,7 @@ describe('useSearchCache - deleteFromCache', () => {
     expect(thrownError).toEqual(error);
   });
 
-  it('should skip deletion when path is missing', async () => {
+  it('should skip deletion when searchKey is missing', async () => {
     const { result } = renderHook(() => useSearchCache());
 
     await act(async () => {

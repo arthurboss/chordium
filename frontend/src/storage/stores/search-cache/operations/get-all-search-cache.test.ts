@@ -35,7 +35,7 @@ describe("getAllSearchCache", () => {
 
   const mockCacheEntries: SearchCacheEntry[] = [
     {
-      path: "hillsong", // Artist search term (from search-types.md: /api/artists)
+      searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
       results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
       search: {
         query: {
@@ -52,7 +52,7 @@ describe("getAllSearchCache", () => {
       },
     },
     {
-      path: "oceans", // Song search term (from search-types.md: /api/cifraclub-search)
+      searchKey: "oceans", // Song search term (from search-types.md: /api/cifraclub-search)
       results: oceansSearch as Song[], // Real fixture data from cifraclub-search/oceans.json
       search: {
         query: {
@@ -115,7 +115,7 @@ describe("getAllSearchCache", () => {
   it("should handle large number of cache entries", async () => {
     const largeCacheArray = Array.from({ length: 1000 }, (_, i) => ({
       ...mockCacheEntries[0],
-      path: `artist-${i}`, // Realistic search term paths
+      searchKey: `artist-${i}`, // Realistic search term searchKeys
     }));
 
     mockExecuteTransaction.mockResolvedValue(largeCacheArray);

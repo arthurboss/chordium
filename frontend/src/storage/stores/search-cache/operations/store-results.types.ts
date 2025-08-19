@@ -19,7 +19,7 @@ export interface StoreCacheOptions {
  * Function signature for storing API results as cache entry
  */
 export type StoreResultsFunction = (
-  path: string,
+  searchKey: string,
   results: Artist[] | Song[],
   query: SearchQuery,
   searchType: SearchType,

@@ -5,14 +5,14 @@
 import type { SearchCacheEntry } from "../../../types/search-cache";
 
 /**
- * Function signature for getting a single search cache entry by path
+ * Function signature for getting a single search cache entry by searchKey
  * 
- * @param path - The cache key path to retrieve
+ * @param searchKey - The cache key searchKey to retrieve
  * @param checkExpiration - Whether to check if entry has expired (defaults to true)
  * @returns Promise resolving to the cached entry or null if not found/expired
  * @throws {DatabaseOperationError} When database access fails
  */
 export type GetSearchCacheFunction = (
-  path: string,
+  searchKey: string,
   checkExpiration?: boolean
 ) => Promise<SearchCacheEntry | null>;

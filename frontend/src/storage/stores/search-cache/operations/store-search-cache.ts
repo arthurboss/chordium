@@ -9,25 +9,39 @@ import { getDatabase } from "../../chord-sheets/database/connection";
 
 /**
  * Stores search results in IndexedDB with TTL metadata
- * 
- * Will replace any existing entry with the same path. This ensures
+ *
+ * Will replace any existing entry with the same searchKey. This ensures
  * that cache entries are always updated with the latest data.
- * 
+ *
  * @param entry - The complete search cache entry to store
  * @returns Promise that resolves when the entry is successfully stored
  * @throws {DatabaseOperationError} When database storage fails
  * @throws {StorageQuotaExceededError} When storage quota is exceeded
  */
+
 const storeSearchCache: StoreSearchCacheFunction = async (
   entry: SearchCacheEntry
 ): Promise<void> => {
+  // Ensure searchKey is a valid non-empty string
+  if (
+    !entry.searchKey ||
+    typeof entry.searchKey !== "string" ||
+    entry.searchKey.trim() === ""
+  ) {
+    console.error(
+      "[storeSearchCache] Invalid searchKey for cache entry:",
+      entry.searchKey,
+      entry
+    );
+    throw new Error(
+      "Invalid searchKey for cache entry: " + String(entry.searchKey)
+    );
+  }
+
   // Ensure database initialization
   await getDatabase();
 
-  await executeWriteTransaction(
-    "searchCache",
-    (store) => store.put(entry)
-  );
+  await executeWriteTransaction("searchCache", (store) => store.put(entry));
 };
 
 export default storeSearchCache;

@@ -28,7 +28,7 @@ describe("SearchCacheService", () => {
   describe("get", () => {
     it("should retrieve cached search results by path", async () => {
       const mockEntry: SearchCacheEntry = {
-        path: "hillsong",
+        searchKey: "hillsong",
         search: {
           query: {
             artist: "hillsong",
@@ -84,7 +84,7 @@ describe("SearchCacheService", () => {
       vi.mocked(storeResults.default).mockResolvedValue();
 
       await service.storeResults({
-        path: "hillsong",
+        searchKey: "hillsong",
         results: mockResults,
         search: {
           query: { artist: "hillsong", song: null },
@@ -110,7 +110,7 @@ describe("SearchCacheService", () => {
       vi.mocked(storeResults.default).mockResolvedValue();
 
       await service.storeResults({
-        path: "test-path",
+        searchKey: "test-path",
         results: mockResults,
         search: {
           query: { artist: null, song: "test query" },
@@ -156,7 +156,7 @@ describe("SearchCacheService", () => {
       const { getAllSearchCache, deleteSearchCache } = await import("../../stores/search-cache/operations");
       const mockEntries: SearchCacheEntry[] = [
         {
-          path: "entry1",
+          searchKey: "entry1",
           search: { 
             query: { artist: "test1", song: null }, 
             searchType: "artist" as SearchType, 
@@ -166,7 +166,7 @@ describe("SearchCacheService", () => {
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },
         },
         {
-          path: "entry2", 
+          searchKey: "entry2", 
           search: { 
             query: { artist: null, song: "test2" }, 
             searchType: "song" as SearchType, 
@@ -192,7 +192,7 @@ describe("SearchCacheService", () => {
     it("should return all cached entries", async () => {
       const mockEntries: SearchCacheEntry[] = [
         {
-          path: "test1",
+          searchKey: "test1",
           search: { 
             query: { artist: "test1", song: null }, 
             searchType: "artist" as SearchType, 
