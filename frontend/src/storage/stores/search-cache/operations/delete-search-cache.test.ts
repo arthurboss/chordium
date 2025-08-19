@@ -31,7 +31,7 @@ describe("deleteSearchCache", () => {
 
   it("should return true when entry exists and is deleted", async () => {
     // Mock that entry exists
-    mockExecuteReadTransaction.mockResolvedValue({ path: "some-entry" });
+    mockExecuteReadTransaction.mockResolvedValue({ searchKey: "some-entry" });
     // Mock successful deletion
     mockExecuteWriteTransaction.mockResolvedValue(undefined);
 
@@ -47,7 +47,7 @@ describe("deleteSearchCache", () => {
     // Mock that no entry exists
     mockExecuteReadTransaction.mockResolvedValue(undefined);
 
-    const result = await deleteSearchCache("non-existent-path");
+    const result = await deleteSearchCache("non-existent-searchKey");
 
     expect(result).toBe(false);
     expect(mockGetDatabase).toHaveBeenCalledOnce();
@@ -59,7 +59,7 @@ describe("deleteSearchCache", () => {
   it("should handle database initialization", async () => {
     mockExecuteReadTransaction.mockResolvedValue(undefined);
 
-    await deleteSearchCache("some-path");
+    await deleteSearchCache("some-searchKey");
 
     expect(mockGetDatabase).toHaveBeenCalledOnce();
   });
@@ -68,14 +68,14 @@ describe("deleteSearchCache", () => {
     const dbError = new Error("Database delete failed");
     mockExecuteReadTransaction.mockRejectedValue(dbError);
 
-    await expect(deleteSearchCache("some-path"))
+    await expect(deleteSearchCache("some-searchKey"))
       .rejects.toThrow("Database delete failed");
     
     expect(mockGetDatabase).toHaveBeenCalledOnce();
     expect(mockExecuteReadTransaction).toHaveBeenCalledOnce();
   });
 
-  it("should handle empty path gracefully", async () => {
+  it("should handle empty searchKey gracefully", async () => {
     mockExecuteReadTransaction.mockResolvedValue(undefined);
 
     const result = await deleteSearchCache("");

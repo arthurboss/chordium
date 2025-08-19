@@ -11,32 +11,32 @@ import storeResults from "../../stores/search-cache/operations/store-results";
  */
 class SearchCacheServiceImpl implements SearchCacheService {
   /**
-   * Retrieve cached search results by path
+   * Retrieve cached search results by searchKey
    */
-  async get(path: string, options: GetSearchCacheOptions = {}): Promise<SearchCacheEntry | null> {
+  async get(searchKey: string, options: GetSearchCacheOptions = {}): Promise<SearchCacheEntry | null> {
     const { validateTTL = true } = options;
-    return getSearchCache(path, validateTTL);
+    return getSearchCache(searchKey, validateTTL);
   }
 
   /**
    * Store search results in cache
    */
   async storeResults(
-    cacheData: Pick<SearchCacheEntry, 'path' | 'results'> & {
+    cacheData: Pick<SearchCacheEntry, 'searchKey' | 'results'> & {
       search: SearchCacheEntry['search'];
     },
     options: StoreSearchResultsOptions = {}
   ): Promise<void> {
-    const { path, results, search } = cacheData;
+    const { searchKey, results, search } = cacheData;
     const { query, searchType, dataSource } = search;
-    return storeResults(path, results, query, searchType, dataSource, options);
+    return storeResults(searchKey, results, query, searchType, dataSource, options);
   }
 
   /**
-   * Delete cached search results by path
+   * Delete cached search results by searchKey
    */
-  async delete(path: string): Promise<boolean> {
-    return deleteSearchCache(path);
+  async delete(searchKey: string): Promise<boolean> {
+    return deleteSearchCache(searchKey);
   }
 
   /**
@@ -45,7 +45,7 @@ class SearchCacheServiceImpl implements SearchCacheService {
   async clear(): Promise<void> {
     const allEntries = await getAllSearchCache();
     await Promise.all(
-      allEntries.map(entry => deleteSearchCache(entry.path))
+      allEntries.map(entry => deleteSearchCache(entry.searchKey))
     );
   }
 

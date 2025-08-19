@@ -33,7 +33,7 @@ describe("storeSearchCache", () => {
   });
 
   const validCacheEntry: SearchCacheEntry = {
-    path: "hillsong", // Artist search term (from search-types.md: /api/artists)
+    searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
     results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
     search: {
       query: {
@@ -60,12 +60,12 @@ describe("storeSearchCache", () => {
     expect(mockExecuteTransaction).toHaveBeenCalledWith("searchCache", expect.any(Function));
   });
 
-  it("should replace existing entry with same path", async () => {
+  it("should replace existing entry with same searchKey", async () => {
     const updatedEntry: SearchCacheEntry = {
       ...validCacheEntry,
       results: [
         {
-          path: "hillsong-en-espaol",
+          searchKey: "hillsong-en-espaol",
           displayName: "Hillsong en Español (Updated)",
           songCount: 130,
         },
@@ -108,7 +108,7 @@ describe("storeSearchCache", () => {
     const largeCacheEntry: SearchCacheEntry = {
       ...validCacheEntry,
       results: Array.from({ length: 1000 }, (_, i) => ({
-        path: `hillsong-song-${i}`,
+        searchKey: `hillsong-song-${i}`,
         displayName: `Hillsong Song ${i}`,
         songCount: i,
       })),

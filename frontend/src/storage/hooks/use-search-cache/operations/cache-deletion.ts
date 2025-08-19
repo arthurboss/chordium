@@ -5,18 +5,18 @@ import { searchCacheService } from "../../../services/search-cache/search-cache-
 import { logger } from "./logger";
 
 /**
- * Deletes cached entries by path or clears all cache
+ * Deletes cached entries by searchKey or clears all cache
  */
 export function useCacheDeletion(
   params: UseSearchCacheParams,
   dispatch: React.Dispatch<UseSearchCacheAction>
 ) {
-  const { path } = params;
+  const { searchKey } = params;
 
   const deleteFromCache = useCallback(async () => {
-    if (!path) {
-      logger.warn("Missing path parameter for cache deletion", {
-        path: !!path,
+    if (!searchKey) {
+      logger.warn("Missing searchKey parameter for cache deletion", {
+        searchKey: !!searchKey,
       });
       return;
     }
@@ -24,7 +24,7 @@ export function useCacheDeletion(
     try {
       dispatch({ type: "LOADING_START" });
       
-      await searchCacheService.delete(path);
+      await searchCacheService.delete(searchKey);
 
       dispatch({ 
         type: "LOADING_SUCCESS", 
@@ -32,13 +32,13 @@ export function useCacheDeletion(
       });
 
       logger.info("Successfully deleted search cache entry", {
-        path,
+        searchKey,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to delete from cache";
       logger.error("Failed to delete search cache entry", {
         error: errorMessage,
-        path,
+        searchKey,
       });
       
       dispatch({ 
@@ -48,7 +48,7 @@ export function useCacheDeletion(
       
       throw error;
     }
-  }, [path, dispatch]);
+  }, [searchKey, dispatch]);
 
   const clearAllCache = useCallback(async () => {
     try {

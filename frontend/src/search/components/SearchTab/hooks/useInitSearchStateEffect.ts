@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { fromSlug } from "@/utils/url-slug-utils";
 
 export function useInitSearchStateEffect(
   location: { search: string; pathname: string },
@@ -25,17 +24,14 @@ export function useInitSearchStateEffect(
     const searchParams = new URLSearchParams(location.search);
     const artistParam = searchParams.get('artist');
     const songParam = searchParams.get('song');
-    
     if (artistParam || songParam) {
-      const artist = artistParam ? fromSlug(artistParam) : '';
-      const song = songParam ? fromSlug(songParam) : '';
-      
+      // Always restore the raw value from the URL
+      const artist = artistParam || '';
+      const song = songParam || '';
       // Create a key to track what we've processed
       const currentParamsKey = `${artistParam || ''}|${songParam || ''}`;
-      
       // Only process if we haven't processed these exact parameters before
-      if (currentParamsKey !== lastProcessedParams.current) {
-        
+      if (currentParamsKey !== lastProcessedParams.current && !isInitialized.current) {
         setArtistInput(artist);
         setSongInput(song);
         setPrevArtistInput(artist);

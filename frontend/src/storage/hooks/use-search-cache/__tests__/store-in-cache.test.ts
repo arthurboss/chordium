@@ -26,8 +26,8 @@ describe('useSearchCache - storeInCache', () => {
 
   const mockCacheEntry = createMockCacheEntry();
   const mockResults: Artist[] = [
-    { path: 'artist/beatles', displayName: 'The Beatles', songCount: 10 },
-    { path: 'artist/stones', displayName: 'The Rolling Stones', songCount: 8 },
+    { searchKey: 'artist/beatles', displayName: 'The Beatles', songCount: 10 },
+    { searchKey: 'artist/stones', displayName: 'The Rolling Stones', songCount: 8 },
   ];
 
   it('should store results successfully', async () => {
@@ -37,7 +37,7 @@ describe('useSearchCache - storeInCache', () => {
     mockGetService.mockResolvedValue(mockCacheEntry);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       query: { artist: 'Beatles', song: null },
       searchType: 'artist',
       dataSource: 'cifraclub',
@@ -51,7 +51,7 @@ describe('useSearchCache - storeInCache', () => {
     });
 
     expect(mockStoreService).toHaveBeenCalledWith({
-      path: 'artists/search',
+      searchKey: 'artists/search',
       results: mockResults,
       search: {
         query: { artist: 'Beatles', song: null },
@@ -71,7 +71,7 @@ describe('useSearchCache - storeInCache', () => {
     mockStoreService.mockRejectedValue(error);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       query: { artist: 'Beatles', song: null },
       searchType: 'artist',
       dataSource: 'cifraclub',
@@ -96,7 +96,7 @@ describe('useSearchCache - storeInCache', () => {
   });
 
   it('should skip storage when required parameters are missing', async () => {
-    const { result } = renderHook(() => useSearchCache({ path: 'test' }));
+  const { result } = renderHook(() => useSearchCache({ searchKey: 'test' }));
 
     await act(async () => {
       await result.current.storeInCache(mockResults);

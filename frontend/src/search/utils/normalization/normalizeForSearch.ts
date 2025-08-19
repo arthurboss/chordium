@@ -19,8 +19,8 @@ export function normalizeForSearch(text: string): string {
     .toLowerCase()
     .normalize("NFD") // Decompose Unicode characters
     .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-    .replace(/[/\\-]+/g, " ") // Replace slashes and dashes with spaces
+    .replace(/[/\\-]+/g, "") // Remove slashes and dashes
     .replace(/[^\p{L}\p{N}\s]/gu, "") // Keep Unicode letters, numbers, and whitespace
-    .replace(/\s+/g, " ") // Replace multiple spaces with single space
+    .replace(/\s+/g, "") // Remove multiple spaces
     .trim();
 }

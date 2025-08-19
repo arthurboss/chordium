@@ -12,12 +12,12 @@ export function useCacheStorage(
   params: UseSearchCacheParams,
   dispatch: React.Dispatch<UseSearchCacheAction>
 ) {
-  const { dataSource, searchType, path, query } = params;
+  const { dataSource, searchType, searchKey, query } = params;
 
   const storeInCache = useCallback(async (results: unknown[]) => {
-    if (!path || !query || !searchType || !dataSource) {
+    if (!searchKey || !query || !searchType || !dataSource) {
       logger.warn("Missing required parameters for cache storage", {
-        path: !!path,
+        searchKey: !!searchKey,
         query: !!query,
         searchType: !!searchType,
         dataSource: !!dataSource,
@@ -29,7 +29,7 @@ export function useCacheStorage(
       dispatch({ type: "LOADING_START" });
       
       await searchCacheService.storeResults({
-        path,
+        searchKey,
         results: results as Artist[] | Song[], // Type assertion since we can't know the exact type at runtime
         search: {
           query,
@@ -39,7 +39,7 @@ export function useCacheStorage(
       });
 
       // Get the newly stored cache entry
-      const cacheEntry = await searchCacheService.get(path);
+      const cacheEntry = await searchCacheService.get(searchKey);
 
       dispatch({ 
         type: "LOADING_SUCCESS", 
@@ -47,7 +47,7 @@ export function useCacheStorage(
       });
 
       logger.info("Successfully stored search results in cache", {
-        path,
+        searchKey,
         query,
         searchType,
         dataSource,
@@ -57,7 +57,7 @@ export function useCacheStorage(
       const errorMessage = error instanceof Error ? error.message : "Failed to store in cache";
       logger.error("Failed to store search results in cache", {
         error: errorMessage,
-        path,
+        searchKey,
         query,
         searchType,
         dataSource,
@@ -71,7 +71,7 @@ export function useCacheStorage(
       
       throw error;
     }
-  }, [path, query, searchType, dataSource, dispatch]);
+  }, [searchKey, query, searchType, dataSource, dispatch]);
 
   return {
     storeInCache,

@@ -22,14 +22,7 @@ export function filterArtistsByNameOrPath(
 
   return artists.filter((artist) => {
     const normalizedDisplayName = normalizeForSearch(artist.displayName);
-    const normalizedPath = artist.path && typeof artist.path === "string" ? normalizeForSearch(artist.path) : "";
-    console.log({
-      displayName: artist.displayName,
-      path: artist.path,
-      normalizedDisplayName,
-      normalizedPath,
-      normalizedFilter
-    });
+    const normalizedPath = normalizeForSearch(artist.path);
     const displayNameMatch = normalizedDisplayName.includes(normalizedFilter);
     const pathMatch = normalizedPath.includes(normalizedFilter);
     return displayNameMatch || pathMatch;

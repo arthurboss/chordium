@@ -20,8 +20,8 @@ export default function createSchema(db: IDBDatabase): void {
   chordSheetsStore.createIndex('timestamp', chordSheetsIndexes.timestamp, { unique: false });
   chordSheetsStore.createIndex('expiresAt', chordSheetsIndexes.expiresAt, { unique: false });
 
-  // Create search cache store
-  const searchCacheStore = db.createObjectStore(STORES.SEARCH_CACHE, { keyPath: 'path' });
+  // Create search cache store (migrated to use 'searchKey' as keyPath)
+  const searchCacheStore = db.createObjectStore(STORES.SEARCH_CACHE, { keyPath: 'searchKey' });
   
   const searchCacheIndexes = INDEXES.searchCache;
   searchCacheStore.createIndex('timestamp', searchCacheIndexes.timestamp, { unique: false });

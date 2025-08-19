@@ -23,38 +23,39 @@ export interface GetSearchCacheOptions {
  * abstracting away the underlying store implementation details.
  */
 export interface SearchCacheService {
+
   /**
-   * Retrieve cached search results by path
-   * 
-   * @param path - Cache key path (e.g., "hillsong", "hillsong-united")
+   * Retrieve cached search results by searchKey
+   *
+   * @param searchKey - Cache key (e.g., "acdc|artist", "acdc|thunderstruck|artist")
    * @param options - Retrieval options
    * @returns Cached entry or null if not found/expired
    */
-  get(path: string, options?: GetSearchCacheOptions): Promise<SearchCacheEntry | null>;
+  get(searchKey: string, options?: GetSearchCacheOptions): Promise<SearchCacheEntry | null>;
 
   /**
    * Store search results in cache
-   * 
+   *
    * Accepts the core fields from SearchCacheEntry structure for consistency.
    * The storage metadata (timestamp, version, expiresAt) is handled automatically.
-   * 
-   * @param cacheData - Core cache entry data (path, results, search metadata)
+   *
+   * @param cacheData - Core cache entry data (searchKey, results, search metadata)
    * @param options - Storage options
    */
   storeResults(
-    cacheData: Pick<SearchCacheEntry, 'path' | 'results'> & {
+    cacheData: Pick<SearchCacheEntry, 'searchKey' | 'results'> & {
       search: SearchCacheEntry['search'];
     },
     options?: StoreSearchResultsOptions
   ): Promise<void>;
 
   /**
-   * Delete cached search results by path
-   * 
-   * @param path - Cache key path to delete
+   * Delete cached search results by searchKey
+   *
+   * @param searchKey - Cache key to delete
    * @returns True if entry was deleted, false if not found
    */
-  delete(path: string): Promise<boolean>;
+  delete(searchKey: string): Promise<boolean>;
 
   /**
    * Clear all cached search results

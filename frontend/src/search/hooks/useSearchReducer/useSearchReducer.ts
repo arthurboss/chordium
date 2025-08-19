@@ -62,7 +62,12 @@ export const useSearchReducer = ({
   // Effect: Handle search fetch when shouldFetch changes
   useEffect(() => {
     if (shouldFetch && (artist || song)) {
-      fetchSearchResults(artist, song);
+      // Determine searchType using the same logic as determineUIState
+      let searchType: "artist" | "song" | "artist-song" = "artist";
+      if (song) {
+        searchType = "song"; // Backend treats artist+song as song search
+      }
+      fetchSearchResults(artist, song, searchType);
     }
   }, [artist, song, shouldFetch, fetchSearchResults]);
 

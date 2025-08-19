@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import type { Artist, Song } from "@chordium/types";
+import type { Artist, Song, SearchType } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 
 import { getApiBaseUrl } from "@/utils/api-base-url";
@@ -15,24 +15,26 @@ export const useSearchFetch = ({
   setSearchFetching,
 }: UseSearchFetchOptions) => {
   const isFetching = useRef(false);
-  const lastFetchParams = useRef<{ artist: string; song: string }>({
+  const lastFetchParams = useRef<{ artist: string; song: string; searchType: SearchType }>({
     artist: "",
     song: "",
+    searchType: "artist",
   });
 
   const fetchSearchResults = useCallback(
-    async (artistParam: string, songParam: string) => {
+    async (artistParam: string, songParam: string, searchType: SearchType) => {
       if (isFetching.current) return;
 
       const paramsChanged =
         artistParam !== lastFetchParams.current.artist ||
-        songParam !== lastFetchParams.current.song;
+        songParam !== lastFetchParams.current.song ||
+        searchType !== lastFetchParams.current.searchType;
 
       if (!paramsChanged) return;
 
       isFetching.current = true;
       setSearchFetching(true);
-      lastFetchParams.current = { artist: artistParam, song: songParam };
+      lastFetchParams.current = { artist: artistParam, song: songParam, searchType };
 
       try {
         dispatch({ type: "SEARCH_START" });
@@ -44,9 +46,9 @@ export const useSearchFetch = ({
         }
 
         // Check cache first
-        const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
-        if (cachePath) {
-          const cachedEntry = await searchCacheService.get(cachePath);
+        const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
+        if (cacheKey) {
+          const cachedEntry = await searchCacheService.get(cacheKey);
           if (cachedEntry) {
             const { results, search } = cachedEntry;
             if (search.searchType === "artist") {
@@ -91,14 +93,14 @@ export const useSearchFetch = ({
           dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
 
           // Cache results
-          const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
-          if (cachePath) {
+          const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
+          if (cacheKey) {
             await searchCacheService.storeResults({
-              path: cachePath,
+              searchKey: cacheKey,
               results: data,
               search: {
                 query: { artist: "", song: songParam },
-                searchType: "song",
+                searchType: searchType,
                 dataSource: "cifraclub",
               },
             });
@@ -108,14 +110,14 @@ export const useSearchFetch = ({
           dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
 
           // Cache results
-          const cachePath = getNormalizedSearchCacheKey(artistParam, songParam);
-          if (cachePath) {
+          const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
+          if (cacheKey) {
             await searchCacheService.storeResults({
-              path: cachePath,
+              searchKey: cacheKey,
               results: data,
               search: {
                 query: { artist: artistParam, song: songParam || "" },
-                searchType: "artist",
+                searchType: searchType,
                 dataSource: "supabase",
               },
             });

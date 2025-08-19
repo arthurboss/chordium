@@ -31,7 +31,7 @@ describe('useSearchCache - Error State', () => {
     mockGetService.mockRejectedValue(error);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -69,7 +69,7 @@ describe('useSearchCache - Error State', () => {
     mockGetService.mockResolvedValueOnce(mockCacheEntry);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 
@@ -101,7 +101,7 @@ describe('useSearchCache - Error State', () => {
     mockGetService.mockRejectedValue(error);
 
     const params: UseSearchCacheParams = {
-      path: 'artists/search',
+      searchKey: 'artists/search',
       validateTTL: false,
     };
 

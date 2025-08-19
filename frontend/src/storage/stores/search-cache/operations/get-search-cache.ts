@@ -1,5 +1,5 @@
 /**
- * Get a single search cache entry by path
+ * Get a single search cache entry by searchKey
  */
 
 import type { SearchCacheEntry } from "../../../types/search-cache";
@@ -14,13 +14,13 @@ import { isExpired } from "../../../core/ttl/validation";
  * By default, expired entries are treated as not found to ensure users
  * get fresh data when cache has expired.
  * 
- * @param path - The cache key path to retrieve
+ * @param searchKey - The cache key searchKey to retrieve
  * @param checkExpiration - Whether to check if entry has expired (defaults to true)
  * @returns Promise resolving to the cached entry or null if not found/expired
  * @throws {DatabaseOperationError} When database access fails
  */
 const getSearchCache: GetSearchCacheFunction = async (
-  path: string,
+  searchKey: string,
   checkExpiration = true
 ): Promise<SearchCacheEntry | null> => {
   // Ensure database initialization
@@ -28,7 +28,7 @@ const getSearchCache: GetSearchCacheFunction = async (
 
   const result = await executeReadTransaction<SearchCacheEntry | undefined>(
     "searchCache",
-    (store) => store.get(path)
+    (store) => store.get(searchKey)
   );
 
   if (!result) {

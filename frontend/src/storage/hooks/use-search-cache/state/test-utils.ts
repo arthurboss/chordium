@@ -4,7 +4,7 @@ import type { SearchCacheEntry } from '../../../types/search-cache';
  * Creates mock cache entry for testing
  */
 export const createMockCacheEntry = (overrides: Partial<SearchCacheEntry> = {}): SearchCacheEntry => ({
-  path: 'test/path',
+  searchKey: 'beatles||artist',
   results: [],
   search: {
     query: { artist: 'test', song: null },

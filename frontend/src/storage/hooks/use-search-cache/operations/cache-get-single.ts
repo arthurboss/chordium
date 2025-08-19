@@ -5,26 +5,26 @@ import { searchCacheService } from "../../../services/search-cache/search-cache-
 import { logger } from "./logger";
 
 /**
- * Retrieves individual cache entries by path
+ * Retrieves individual cache entries by searchKey
  */
 export function useCacheGetSingle(
   params: UseSearchCacheParams,
   dispatch: React.Dispatch<UseSearchCacheAction>
 ) {
-  const { path } = params;
+    const { searchKey } = params;
 
   const getFromCache = useCallback(async () => {
-    if (!path) {
-      logger.warn("Missing path parameter for cache retrieval", {
-        path: !!path,
-      });
-      return null;
-    }
+      if (!searchKey) {
+        logger.warn("Missing searchKey parameter for cache retrieval", {
+          searchKey: !!searchKey,
+        });
+        return null;
+      }
 
     try {
       dispatch({ type: "LOADING_START" });
       
-      const cacheEntry = await searchCacheService.get(path);
+        const cacheEntry = await searchCacheService.get(searchKey);
 
       dispatch({ 
         type: "LOADING_SUCCESS", 
@@ -32,7 +32,7 @@ export function useCacheGetSingle(
       });
 
       logger.info("Successfully retrieved search cache entry", {
-        path,
+          searchKey,
         found: !!cacheEntry,
       });
 
@@ -41,7 +41,7 @@ export function useCacheGetSingle(
       const errorMessage = error instanceof Error ? error.message : "Failed to retrieve from cache";
       logger.error("Failed to get search cache entry", {
         error: errorMessage,
-        path,
+          searchKey,
       });
       
       dispatch({ 
@@ -51,7 +51,7 @@ export function useCacheGetSingle(
       
       throw error;
     }
-  }, [path, dispatch]);
+  }, [searchKey, dispatch]);
 
   return {
     getFromCache,

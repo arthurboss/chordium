@@ -41,7 +41,7 @@ describe('useSearchCache - Initialization', () => {
       expect(typeof result.current.clearCacheEntry).toBe('function');
     });
 
-    it('should not auto-load when path is not provided', () => {
+    it('should not auto-load when searchKey is not provided', () => {
       const mockGetService = vi.mocked(searchCacheService.get);
 
       renderHook(() => useSearchCache());
@@ -51,12 +51,12 @@ describe('useSearchCache - Initialization', () => {
   });
 
   describe('auto-loading behavior', () => {
-    it('should auto-load cache when path is provided', async () => {
+    it('should auto-load cache when searchKey is provided', async () => {
       const mockGetService = vi.mocked(searchCacheService.get);
       mockGetService.mockResolvedValue(mockCacheEntry);
 
       const params: UseSearchCacheParams = {
-        path: 'artists/search',
+        searchKey: 'artists/search',
         query: { artist: 'Beatles', song: null },
         searchType: 'artist',
         dataSource: 'cifraclub',
@@ -68,7 +68,7 @@ describe('useSearchCache - Initialization', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockGetService).toHaveBeenCalledWith('artists/search');
+  expect(mockGetService).toHaveBeenCalledWith('artists/search');
       expect(result.current.cacheEntry).toEqual(mockCacheEntry);
       expect(result.current.error).toBeNull();
     });
@@ -77,7 +77,7 @@ describe('useSearchCache - Initialization', () => {
       const mockGetService = vi.mocked(searchCacheService.get);
 
       const params: UseSearchCacheParams = {
-        path: 'artists/search',
+        searchKey: 'artists/search',
         validateTTL: false,
       };
 
@@ -92,7 +92,7 @@ describe('useSearchCache - Initialization', () => {
       mockGetService.mockRejectedValue(error);
 
       const params: UseSearchCacheParams = {
-        path: 'artists/search',
+        searchKey: 'artists/search',
       };
 
       const { result } = renderHook(() => useSearchCache(params));
