@@ -1,5 +1,6 @@
 # TODOs
 
+- add logic to delete old db when migrating versions (test on old db edge iphone)
 - add a "refresh results" button if results were gotten from cache, in order to avoid stale data in case previous searches had db unavailable or other cases
 - artist search input not filtering when on "song" searchType
 - keep scroll position when navigating away (stashed. requires cleanup)

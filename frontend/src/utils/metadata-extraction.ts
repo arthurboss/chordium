@@ -2,23 +2,37 @@
  * Utility functions for extracting metadata from song chord sheets
  */
 
+import { ChordSheet } from "@chordium/types";
+
 /**
  * Song metadata structure
  */
-export interface SongMetadata {
-  title?: string;
-  artist?: string;
-  songKey?: string;
+export type SongMetadata = Partial<
+  Omit<ChordSheet, "songChords" | "guitarTuning">
+> & {
   guitarTuning?: string;
-}
+};
 
 /**
  * Common section names that shouldn't be treated as titles
  */
 const COMMON_SECTIONS = new Set([
-  'intro', 'verse', 'chorus', 'bridge', 'outro', 'solo',
-  'pre-chorus', 'refrain', 'interlude', 'hook', 'breakdown',
-  'pre-verse', 'post-chorus', 'instrumental', 'coda', 'tag'
+  "intro",
+  "verse",
+  "chorus",
+  "bridge",
+  "outro",
+  "solo",
+  "pre-chorus",
+  "refrain",
+  "interlude",
+  "hook",
+  "breakdown",
+  "pre-verse",
+  "post-chorus",
+  "instrumental",
+  "coda",
+  "tag",
 ]);
 
 /**
@@ -29,13 +43,26 @@ const COMMON_SECTIONS = new Set([
 function findHeaderEndIndex(lines: string[]): number {
   // Accept both [Section] and unbracketed section headers (e.g. Intro, Verse 1, Chorus:)
   const sectionNames = [
-    'intro', 'verse', 'chorus', 'bridge', 'outro', 'solo',
-    'pre-chorus', 'refrain', 'interlude', 'hook', 'breakdown',
-    'pre-verse', 'post-chorus', 'instrumental', 'coda', 'tag'
+    "intro",
+    "verse",
+    "chorus",
+    "bridge",
+    "outro",
+    "solo",
+    "pre-chorus",
+    "refrain",
+    "interlude",
+    "hook",
+    "breakdown",
+    "pre-verse",
+    "post-chorus",
+    "instrumental",
+    "coda",
+    "tag",
   ];
   const sectionRegexes = [
     /^\s*\[[^\]]+\]\s*$/i, // [Intro]
-    new RegExp(`^\\s*(${sectionNames.join('|')})(\\s*\\d+)?[:.]?\\s*$`, 'i') // Intro, Verse 1, Chorus:
+    new RegExp(`^\\s*(${sectionNames.join("|")})(\\s*\\d+)?[:.]?\\s*$`, "i"), // Intro, Verse 1, Chorus:
   ];
   for (let i = 0; i < lines.length; i++) {
     for (const regex of sectionRegexes) {
@@ -53,7 +80,10 @@ function findHeaderEndIndex(lines: string[]): number {
  * @param fileName Optional filename to extract metadata from first
  * @returns Object containing extracted metadata (title, artist, tunings)
  */
-export function extractSongMetadata(content: string, fileName?: string): SongMetadata {
+export function extractSongMetadata(
+  content: string,
+  fileName?: string
+): SongMetadata {
   const metadata: SongMetadata = {};
   if (!content) return metadata;
 
@@ -61,10 +91,10 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
   if (fileName) {
     try {
       const fileNameWithoutExt = fileName
-        .replace(/\.(pdf|PDF|txt|TXT|text|TEXT)$/, '')
-        .replace(/\s*\(\d+\)$/, '');
+        .replace(/\.(pdf|PDF|txt|TXT|text|TEXT)$/, "")
+        .replace(/\s*\(\d+\)$/, "");
       const parts = fileNameWithoutExt.split(" - ");
-      if (parts.length >= 3 && parts[0].toLowerCase().includes('cifra club')) {
+      if (parts.length >= 3 && parts[0].toLowerCase().includes("cifra club")) {
         metadata.artist = parts[1].trim();
         metadata.title = parts[2].trim();
       } else if (parts.length >= 2) {
@@ -73,17 +103,17 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
       }
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Error extracting metadata from filename:', error);
+        console.error("Error extracting metadata from filename:", error);
       }
     }
   }
 
   // Split by lines for analysis
-  const lines = content.split('\n').slice(0, 50); // Analyze first 50 lines
+  const lines = content.split("\n").slice(0, 50); // Analyze first 50 lines
 
   // Use improved header detection
   const headerEndIdx = findHeaderEndIndex(lines);
-  const headerLines = lines.slice(0, headerEndIdx).join('\n');
+  const headerLines = lines.slice(0, headerEndIdx).join("\n");
 
   // Look for title patterns (use full content for fallback extraction)
   if (!metadata.title) {
@@ -92,7 +122,7 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
       /song\s*[:|-]\s*(.+)/i,
       /name\s*[:|-]\s*(.+)/i,
       /título\s*[:|-]\s*(.+)/i,
-      /música\s*[:|-]\s*(.+)/i
+      /música\s*[:|-]\s*(.+)/i,
     ];
     let foundTitle = false;
     let titleLineIdx = -1;
@@ -125,11 +155,13 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
           // Only skip if the line is exactly a section marker (no extra content)
           const isExactSectionMarker =
             /^\s*\[[^\]]+\]\s*$/i.test(line) ||
-            /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(line);
+            /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(
+              line
+            );
           if (isExactSectionMarker) continue;
           // If line looks like 'Artist - Title', split
           const artistTitleMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/i);
-          if (artistTitleMatch && !line.startsWith('[')) {
+          if (artistTitleMatch && !line.startsWith("[")) {
             metadata.artist = artistTitleMatch[1].trim();
             metadata.title = artistTitleMatch[2].trim();
             break;
@@ -142,10 +174,14 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
             if (!nextLine) continue;
             const isNextExactSectionMarker =
               /^\s*\[[^\]]+\]\s*$/i.test(nextLine) ||
-              /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(nextLine);
+              /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(
+                nextLine
+              );
             if (isNextExactSectionMarker) continue;
             // If next line is labeled as Song/Title, extract
-            const nextTitleMatch = nextLine.match(/^(song|title)\s*[:|-]\s*(.+)$/i);
+            const nextTitleMatch = nextLine.match(
+              /^(song|title)\s*[:|-]\s*(.+)$/i
+            );
             if (nextTitleMatch) {
               metadata.title = nextTitleMatch[2].trim();
             } else {
@@ -164,10 +200,15 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
         if (!prevLine) continue;
         const isExactSectionMarker =
           /^\s*\[[^\]]+\]\s*$/i.test(prevLine) ||
-          /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(prevLine);
+          /^\s*(intro|verse|chorus|bridge|outro|solo|pre-chorus|refrain|interlude|hook|breakdown|pre-verse|post-chorus|instrumental|coda|tag)(\s*\d+)?[:.]?\s*$/i.test(
+            prevLine
+          );
         if (isExactSectionMarker) continue;
         // Remove label if present
-        const cleanedArtist = prevLine.replace(/^(artist|by|artista|compositor)\s*[:|-]?\s*/i, '');
+        const cleanedArtist = prevLine.replace(
+          /^(artist|by|artista|compositor)\s*[:|-]?\s*/i,
+          ""
+        );
         metadata.artist = cleanedArtist;
         break;
       }
@@ -183,13 +224,13 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
       /written by\s*[:|-]\s*(.+)/i,
       /composer\s*[:|-]\s*(.+)/i,
       /artista\s*[:|-]\s*(.+)/i,
-      /compositor\s*[:|-]\s*(.+)/i
+      /compositor\s*[:|-]\s*(.+)/i,
     ];
     for (const pattern of artistPatterns) {
       const match = headerLines.match(pattern);
       if (match && match[1]) {
         metadata.artist = match[1].trim();
-        metadata.artist = metadata.artist.replace(/^by\s+/i, '');
+        metadata.artist = metadata.artist.replace(/^by\s+/i, "");
         break;
       }
     }
@@ -201,14 +242,14 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
     /guitar tuning\s*[:|-]\s*(.+)/i,
     /afinação\s*[:|-]?\s*(.+)/i,
     /capo\s*[:|-]?\s*(?:on)?\s*(?:fret)?\s*(\d+)/i,
-    /capotraste\s*[:|-]?\s*(\d+)/i
+    /capotraste\s*[:|-]?\s*(\d+)/i,
   ];
   for (const pattern of tuningPatterns) {
     const match = headerLines.match(pattern);
     if (match && match[1]) {
       const matchedText = match[1].trim();
-      if (match[0].toLowerCase().includes('capo')) {
-        metadata.guitarTuning = `Capo ${matchedText}`;
+      if (match[0].toLowerCase().includes("capo")) {
+        metadata.guitarCapo = parseInt(matchedText, 10);
       } else {
         metadata.guitarTuning = matchedText;
       }
@@ -220,7 +261,7 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
     const standardTuningPatterns = [
       /(standard tuning|e\s*a\s*d\s*g\s*b\s*e|eadgbe|drop d|drop c|open g)/i,
       /\b([A-G][#b]?)\s+([A-G][#b]?)\s+([A-G][#b]?)\s+([A-G][#b]?)\s+([A-G][#b]?)\s+([A-G][#b]?)\b/i,
-      /(afinação\s+padrão|padrão|standard)/i
+      /(afinação\s+padrão|padrão|standard)/i,
     ];
     for (const pattern of standardTuningPatterns) {
       const match = headerLines.match(pattern);
@@ -242,7 +283,7 @@ export function extractSongMetadata(content: string, fileName?: string): SongMet
       /tom\s*[:|-]?\s*([A-G][#b]?\s*(maior|menor|maj|min|m)?)/i,
       /^([A-G][#b]?\s*(major|minor|maj|min|m))$/im,
       /^([A-G][#b]?\s*(maior|menor|maj|min|m))$/im,
-      /^([A-G][#b]?m?)$/im
+      /^([A-G][#b]?m?)$/im,
     ];
     for (const pattern of keyPatterns) {
       const match = headerLines.match(pattern);

@@ -4,15 +4,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Song } from "../types/song";
 import type { StoredChordSheet } from "@/storage/types";
+import type { ChordSheet } from "@chordium/types";
 import ChordSheetList from "./chord-sheet-list";
 import { SearchTab } from "@/search";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { deleteChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets/operations";
 import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 import { storeNavigationPath } from "@/utils/navigation-path-storage";
+import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
   activeTab: string;
@@ -82,10 +84,10 @@ const TabContainer = ({
     }
   };
 
-    const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
+  const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
     // Store that user is navigating from my-chord-sheets
     storeNavigationPath('/my-chord-sheets');
-    
+
     // For My Chord Sheets: Navigate directly to chord sheet page
     if (storedChordSheet.artist && storedChordSheet.title) {
       // Create URL-friendly slugs using Unicode-aware function
@@ -117,12 +119,83 @@ const TabContainer = ({
     }
   };
 
-  const handleSaveUploadedChordSheet = (content: string, title: string) => {
-    // NOTE: Save functionality will be implemented with IndexedDB
-  };
+  // Utility to map string tuning to enum value
+  function mapStringToGuitarTuning(tuning: string) {
+    const normalized = tuning.trim().toLowerCase();
+    for (const key in GUITAR_TUNINGS) {
+      if (
+        key.toLowerCase() === normalized ||
+        GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS].join('-').toLowerCase() === normalized.replace(/\s+/g, '-')
+      ) {
+        return GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS];
+      }
+    }
+    return GUITAR_TUNINGS.STANDARD;
+  }
 
-  const handleChordSheetUpdate = (content: string) => {
-    // NOTE: Update functionality will be implemented with IndexedDB
+  const handleSaveUploadedChordSheet = async (meta: {
+    content: string;
+    title: string;
+    artist: string;
+    songKey: string;
+    guitarTuning: string;
+    guitarCapo: number;
+  }) => {
+  try {
+      // Use the provided guitarCapo value
+      const guitarCapo = meta.guitarCapo || 0;
+
+      // Map string tuning to enum value
+      const mappedTuning = mapStringToGuitarTuning(meta.guitarTuning);
+
+      // Create a ChordSheet object with user-confirmed metadata
+      const chordSheet: ChordSheet = {
+        title: meta.title || "Untitled Song",
+        artist: meta.artist || "Unknown Artist",
+        songChords: meta.content,
+        songKey: meta.songKey || "",
+        guitarTuning: mappedTuning,
+        guitarCapo
+      };
+
+      // Create a path for the chord sheet using artist and title
+      const artistSlug = toSlug(chordSheet.artist);
+      const titleSlug = toSlug(chordSheet.title);
+      const path = `${artistSlug}/${titleSlug}`;
+
+      // Store the chord sheet in IndexedDB as a saved chord sheet
+      await storeChordSheet(chordSheet, true, path);
+
+      // Show success notification
+      toast({
+        title: "Chord sheet saved",
+        description: `"${chordSheet.title}" has been saved to My Chord Sheets`,
+      });
+
+      // Refresh the chord sheets list to show the new addition
+      await setMySongs();
+
+      // Navigate to the saved chord sheet
+      navigate(`/${artistSlug}/${titleSlug}`, {
+        state: {
+          song: {
+            path,
+            title: chordSheet.title,
+            artist: chordSheet.artist
+          }
+        }
+      });
+
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Failed to save uploaded chord sheet:', error);
+      }
+      toast({
+        title: "Save failed",
+        description: "Failed to save the chord sheet. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleChordSheetDelete = async (songPath: string) => {

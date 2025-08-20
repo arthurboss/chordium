@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { isValidFileType } from '@/utils/file-validation';
 import { showInvalidFileFormatError, showFileReadError } from '@/utils/file-toast';
@@ -7,7 +7,15 @@ import { readFileAsText } from '@/utils/file-reading';
 import { extractSongMetadata } from '@/utils/metadata-extraction';
 
 interface UseFileUploadProps {
-  onFileContent: (content: string, fileName: string) => void;
+  onFileContent: (content: string, fileName: string, metadata?: {
+    title: string;
+    artist: string;
+    songKey: string;
+    guitarTuning: string;
+    guitarCapo: number;
+  }) => void;
+  externalShowMetadata?: boolean;
+  onShowMetadataChange?: (show: boolean) => void;
 }
 
 interface UseFileUploadReturn {
@@ -18,6 +26,7 @@ interface UseFileUploadReturn {
   artist: string;
   songKey: string;
   guitarTuning: string;
+  guitarCapo: number;
   processFile: (file: File) => void;
   handleFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleClearFile: () => void;
@@ -26,12 +35,13 @@ interface UseFileUploadReturn {
   setArtist: (artist: string) => void;
   setSongKey: (key: string) => void;
   setGuitarTuning: (tuning: string) => void;
+  setGuitarCapo: (capo: number) => void;
 }
 
 /**
  * Custom hook to manage file upload state and functionality
  */
-export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUploadReturn => {
+export const useFileUpload = ({ onFileContent, externalShowMetadata, onShowMetadataChange }: UseFileUploadProps): UseFileUploadReturn => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showMetadataForm, setShowMetadataForm] = useState(false);
   const [fileContent, setFileContent] = useState("");
@@ -39,7 +49,15 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
   const [artist, setArtist] = useState("");
   const [songKey, setSongKey] = useState("");
   const [guitarTuning, setGuitarTuning] = useState("");
+  const [guitarCapo, setGuitarCapo] = useState(0);
   const { toast } = useToast();
+
+  // Handle external control of metadata form
+  useEffect(() => {
+    if (externalShowMetadata !== undefined) {
+      setShowMetadataForm(externalShowMetadata);
+    }
+  }, [externalShowMetadata]);
 
   const processFile = (file: File) => {
     if (!isValidFileType(file)) {
@@ -74,6 +92,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
         
         // Show metadata form
         setShowMetadataForm(true);
+        onShowMetadataChange?.(true);
       },
       () => showFileReadError(toast)
     );
@@ -97,10 +116,17 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
   };
 
   const handleContinue = () => {
-    // Pass the content and metadata to the parent component
+    // Pass the content, filename, and user-entered metadata to the parent component
     const formattedName = `${title}${artist ? ' - ' + artist : ''}`;
-    onFileContent(fileContent, formattedName);
+    onFileContent(fileContent, formattedName, {
+      title,
+      artist,
+      songKey,
+      guitarTuning,
+      guitarCapo
+    });
     setShowMetadataForm(false);
+    onShowMetadataChange?.(false);
   };
 
   return {
@@ -111,6 +137,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     artist,
     songKey,
     guitarTuning,
+    guitarCapo,
     processFile,
     handleFileInputChange,
     handleClearFile,
@@ -118,6 +145,7 @@ export const useFileUpload = ({ onFileContent }: UseFileUploadProps): UseFileUpl
     setTitle,
     setArtist,
     setSongKey,
-    setGuitarTuning
+    setGuitarTuning,
+    setGuitarCapo
   };
 };
