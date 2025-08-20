@@ -1,5 +1,5 @@
 import { DB_NAME, DB_VERSION } from "../../../../core/config/database";
-import createSchema from "./create-schema";
+import { handleIndexedDBMigrations } from "./migration-handler";
 
 /**
  * @returns Promise that resolves to initialized IDBDatabase
@@ -19,7 +19,9 @@ export default async function initializeDatabase(): Promise<IDBDatabase> {
       request.onsuccess = () => resolve(request.result);
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        createSchema(db);
+        const oldVersion = event.oldVersion || 0;
+        const newVersion = event.newVersion || DB_VERSION;
+        handleIndexedDBMigrations(db, oldVersion, newVersion);
       };
     });
   } catch (error) {
