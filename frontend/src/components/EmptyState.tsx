@@ -1,11 +1,14 @@
 import { Card } from "@/components/ui/card";
-import { getQueryDisplayText } from "@/search/utils";
 
-const EmptyState = ({ searchParams }: { searchParams: any }) => (
-  <Card className="p-6 text-center">
-    <p className="text-lg font-medium mb-2">No results for {getQueryDisplayText(searchParams)}</p>
-    <p className="text-muted-foreground">Try a different search term.</p>
-  </Card>
+interface EmptyStateProps {
+  message: string;
+  dataTestId?: string;
+}
+
+const EmptyState = ({ message, dataTestId = "empty-state" }: EmptyStateProps) => (
+  <Card data-testid={dataTestId} className="p-6 text-center text-muted-foreground">{message}</Card>
 );
 
 export default EmptyState;
+
+

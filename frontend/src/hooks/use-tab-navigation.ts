@@ -1,10 +1,11 @@
 import { Song } from "@chordium/types";
+import type { StoredChordSheet } from "@/storage/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { getSearchParamsType } from "@/search/utils";
 
 interface TabNavigationProps {
-  myChordSheets: Song[];
+  myChordSheets: StoredChordSheet[];
   setActiveTab: (tab: string) => void;
   activeTab: string; // Added: current activeTab from Home's state
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
@@ -20,29 +21,30 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
     case path.startsWith("/upload"):
       return "upload";
     
-    case path.startsWith("/my-chord-sheets"):
-      // This includes /my-chord-sheets/artist/song routes - should stay in my-chord-sheets tab
-      // Path-based routing takes priority over query parameters for My Chord Sheets
-      return "my-chord-sheets";
-    
     case path.startsWith("/search"):
       // Explicit search path
       return "search";
     
-    case path.startsWith("/artist/"):
-      // Artist songs from search results - show in search tab
-      return "search";
+    case path.startsWith("/my-chord-sheets"):
+      // Explicit my-chord-sheets path
+      return "my-chord-sheets";
     
     case path === "/":
       // Root path defaults to my-chord-sheets
       return "my-chord-sheets";
     
     default: {
-      // Handle artist routes: /artist-name (single segment paths)
+      // Handle artist routes and chord sheet routes: /artist or /artist/song
       const pathSegments = path.split('/').filter(segment => segment.length > 0);
+      
       if (pathSegments.length === 1 && pathSegments[0] !== '') {
-        // This is likely an artist page, show search tab with artist selected
+        // This is an artist page: /artist-name - show search tab
         return "search";
+      } else if (pathSegments.length === 2) {
+        // This is a chord sheet page: /artist/song
+        // For unified URLs, we'll default to my-chord-sheets tab
+        // The ChordViewer component can handle navigation state for context
+        return "my-chord-sheets";
       }
       
       // Handle search context based on query parameters only for non-specific paths
@@ -62,7 +64,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
 const handleSongSelection = (
   songIdFromQuery: string,
   determinedTab: string,
-  myChordSheets: Song[],
+  myChordSheets: StoredChordSheet[],
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>
 ): void => {
   // Only handle song selection if we're in my-chord-sheets tab
@@ -74,7 +76,13 @@ const handleSongSelection = (
   if (myChordSheets?.length > 0) {
     const foundMySong = myChordSheets.find(song => song.path === songIdFromQuery);
     if (foundMySong) {
-      setSelectedSong(foundMySong);
+      // Convert StoredChordSheet to Song for selection
+      const songForSelection: Song = {
+        path: foundMySong.path,
+        title: foundMySong.title,
+        artist: foundMySong.artist
+      };
+      setSelectedSong(songForSelection);
       return;
     }
   }
@@ -113,5 +121,6 @@ export const useTabNavigation = ({
         setSelectedSong
       );
     }
-  }, [location, myChordSheets, setActiveTab, activeTab, setSelectedSong]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, myChordSheets, setActiveTab, setSelectedSong]);
 };

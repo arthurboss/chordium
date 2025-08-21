@@ -1,0 +1,1 @@
+export { useSearchReducer } from "./useSearchReducer";

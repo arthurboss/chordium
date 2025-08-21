@@ -25,17 +25,15 @@
       // Apply theme on page load
       (function() {
         // Clear theme from localStorage on first load to start fresh
-        // Use a flag to ensure we only do this once
-        const hasRunInitialThemeSetup = localStorage.getItem('hasRunInitialThemeSetup');
-        if (!hasRunInitialThemeSetup) {
-          localStorage.removeItem('theme');
-          localStorage.setItem('hasRunInitialThemeSetup', 'true');
+        // Use the theme key itself as the flag - if it doesn't exist, it's first time
+        const savedTheme = localStorage.getItem('chordium-theme');
+        if (savedTheme === null) {
+          // First time - don't set any theme, let it follow system preference
+          // This replaces the old flag-based approach
         }
         
         // Get current theme from localStorage or system preference
-        const savedTheme = localStorage.theme;
-        const systemPreference = getSystemThemePreference();
-        const theme = savedTheme || systemPreference;
+        const theme = savedTheme || getSystemThemePreference();
         
         // Apply theme
         if (theme === 'dark') {
@@ -48,7 +46,7 @@
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         mediaQuery.addEventListener('change', (e) => {
           // Only apply system theme if user hasn't manually set a preference
-          if (!localStorage.theme) {
+          if (!localStorage.getItem('chordium-theme')) {
             if (e.matches) {
               document.documentElement.classList.add('dark');
             } else {

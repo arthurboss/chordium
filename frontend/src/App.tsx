@@ -9,7 +9,7 @@ import { KeepAliveService } from "@/services/keep-alive.service";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
-const ChordViewer = lazy(() => import("./pages/ChordViewer"));
+const ChordViewer = lazy(() => import("./pages/chord-viewer"));
 const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
 const queryClient = createQueryClientWithErrorHandling();
@@ -93,45 +93,8 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Route for songs from My Chord Sheets: /my-chord-sheets/artist/song
-        path: "my-chord-sheets/:artist/:song", 
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        // Route for songs from search results: /artist/song
+        // Unified route for all chord sheets: /artist/song
         path: ":artist/:song",
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        path: "chord/:artist/:song",
-        element: (
-          <RouteErrorBoundary>
-            <AsyncErrorBoundary>
-              <Suspense fallback={<Loading />}>
-                <ChordViewer />
-              </Suspense>
-            </AsyncErrorBoundary>
-          </RouteErrorBoundary>
-        )
-      },
-      {
-        path: "chord/:id",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
@@ -160,15 +123,6 @@ const router = createBrowserRouter([
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-    // Debug logging for environment variables (always log this)
-    console.log('[AppInitializer] Environment Debug:', {
-      NODE_ENV: import.meta.env.NODE_ENV,
-      PROD: import.meta.env.PROD,
-      DEV: import.meta.env.DEV,
-      VITE_API_URL: import.meta.env.VITE_API_URL,
-      'All env vars': Object.keys(import.meta.env)
-    });
-    
     // Only initialize keep-alive service in production
     if (import.meta.env.PROD) {
       KeepAliveService.initializeOnAppStart();

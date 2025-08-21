@@ -11,15 +11,17 @@ describe('My Chord Sheets Navigation Verification', () => {
   });
 
   it('should navigate to ChordViewer when clicking on songs (expected behavior)', () => {
-    // Click on the View Chords button for the first song
-    cy.contains('View Chords').first().click();
+    // Wait for chord sheets to load and be visible
+    cy.get('[data-cy^="chordsheet-card-"]', { timeout: 10000 }).should('be.visible');
+    
+    // Click on a chord sheet card (the entire card is clickable)
+    cy.get('[data-cy^="chordsheet-card-"]').first().click();
     
     // Should navigate to the ChordViewer page (not the tabbed interface)
-    cy.url().should('include', '/my-chord-sheets');
-    cy.url().should('match', /\/my-chord-sheets\/[\w-]+\/[\w-]+/); // Should be /my-chord-sheets/artist/song
+    cy.url().should('match', /\/[\w-]+\/[\w-]+/); // Should be /artist/song (not /my-chord-sheets/artist/song)
     
     // Should show the chord viewer interface with back button
-    cy.get('body').should('contain', 'Back to My Chord Sheets');
+    cy.get('button[aria-label="back-button"]').should('be.visible');
     
     // Should NOT show the tab interface (we're in ChordViewer now)
     cy.get('[data-cy="tab-my-chord-sheets"]').should('not.exist');
@@ -27,22 +29,23 @@ describe('My Chord Sheets Navigation Verification', () => {
 
   it('should return to My Chord Sheets tab when clicking Back from ChordViewer', () => {
     // Navigate to a song
-    cy.contains('View Chords').first().click();
-    cy.url().should('match', /\/my-chord-sheets\/[\w-]+\/[\w-]+/);
-    cy.get('body').should('contain', 'Back to My Chord Sheets');
+    cy.get('[data-cy^="chordsheet-card-"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-cy^="chordsheet-card-"]').first().click();
+    cy.url().should('match', /\/[\w-]+\/[\w-]+/);
+    cy.get('button[aria-label="back-button"]').should('be.visible');
     
     // Click the back button
-    cy.contains('Back to My Chord Sheets').click();
+    cy.get('button[aria-label="back-button"]').click();
     
     // Should return to the My Chord Sheets tab (this is where our fix applies)
     cy.url().should('include', '/my-chord-sheets');
-    cy.url().should('not.match', /\/my-chord-sheets\/[\w-]+\/[\w-]+/); // Should not be artist/song route
+    cy.url().should('not.match', /\/[\w-]+\/[\w-]+/); // Should not be artist/song route
     
     // Should show the My Chord Sheets tab as active (this was the bug)
     cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // Should show the song list again
-    cy.contains('Hotel California').should('be.visible');
+    cy.get('[data-cy^="chordsheet-card-"]').should('be.visible');
   });
 
   it('should handle songs without proper artist/title structure (main bug fix)', () => {

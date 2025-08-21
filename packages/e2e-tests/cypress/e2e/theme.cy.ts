@@ -14,9 +14,9 @@ describe('Theme Functionality Tests', () => {
     // Check that no theme is set in localStorage (meaning system theme is used)
     cy.getAllLocalStorage().then((localStorage) => {
       const baseUrl = Cypress.config('baseUrl') || '';
-      // Either the localStorage object doesn't exist or it doesn't have a theme property
+      // Either the localStorage object doesn't exist or it doesn't have a chordium-theme property
       if (localStorage[baseUrl]) {
-        expect(localStorage[baseUrl]).to.not.have.property('theme');
+        expect(localStorage[baseUrl]).to.not.have.property('chordium-theme');
       } else {
         expect(true).to.equal(true); // No localStorage means system theme
       }
@@ -37,7 +37,7 @@ describe('Theme Functionality Tests', () => {
     
     // Verify localStorage has the right theme directly using window.localStorage
     cy.window().then(win => {
-      expect(win.localStorage.getItem('theme')).to.equal('light');
+      expect(win.localStorage.getItem('chordium-theme')).to.equal('light');
     });
     
     // Verify the HTML element doesn't have the 'dark' class
@@ -66,7 +66,7 @@ describe('Theme Functionality Tests', () => {
     
     // Verify localStorage has the right theme directly using window.localStorage
     cy.window().then(win => {
-      expect(win.localStorage.getItem('theme')).to.equal('dark');
+      expect(win.localStorage.getItem('chordium-theme')).to.equal('dark');
     });
     
     // Verify the HTML element has the 'dark' class
@@ -90,7 +90,7 @@ describe('Theme Functionality Tests', () => {
     
     // Verify localStorage has no theme (system theme) directly using window.localStorage
     cy.window().then(win => {
-      const theme = win.localStorage.getItem('theme');
+      const theme = win.localStorage.getItem('chordium-theme');
       expect(theme).to.equal(null);
     });
     

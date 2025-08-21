@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+deps.json
 
 # Editor directories and files
 .vscode/*
@@ -93,5 +94,5 @@ frontend-deployment/
 *-logs.txt
 
 # Temporary documentation and analysis files
-frontend/src/search/docs/temp/
+**/temp/
 

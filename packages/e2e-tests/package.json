@@ -10,11 +10,9 @@
     "test:ci": "cypress run --record",
     "test:dev": "cypress run --config baseUrl=http://localhost:8080"
   },
-  "dependencies": {
-    "cypress": "14.3.3"
-  },
   "devDependencies": {
     "@types/node": "^24.0.14",
+    "cypress": "14.5.4",
     "typescript": "^5.8.3"
   }
 }

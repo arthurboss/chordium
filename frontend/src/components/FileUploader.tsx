@@ -1,14 +1,21 @@
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useFileUpload } from '@/hooks/use-file-upload';
 import DropZone from '@/components/DropZone';
-import MetadataFormSection from '@/components/MetadataFormSection';
+import SongMetadataForm from '@/components/SongMetadataForm';
 
 interface FileUploaderProps {
-  onFileContent: (content: string, fileName: string) => void;
-  forceShowMetadata?: boolean;
+  onFileContent: (content: string, fileName: string, metadata?: {
+    title: string;
+    artist: string;
+    songKey: string;
+    guitarTuning: string;
+    guitarCapo: number;
+  }) => void;
+  externalShowMetadata?: boolean;
+  onShowMetadataChange?: (show: boolean) => void;
 }
 
-const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploaderProps) => {
+const FileUploader = ({ onFileContent, externalShowMetadata, onShowMetadataChange }: FileUploaderProps) => {
   const {
     selectedFile,
     showMetadataForm,
@@ -16,6 +23,7 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     artist,
     songKey,
     guitarTuning,
+    guitarCapo,
     processFile,
     handleFileInputChange,
     handleClearFile,
@@ -23,8 +31,9 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
     setTitle,
     setArtist,
     setSongKey,
-    setGuitarTuning
-  } = useFileUpload({ onFileContent });
+    setGuitarTuning,
+    setGuitarCapo
+  } = useFileUpload({ onFileContent, externalShowMetadata, onShowMetadataChange });
   
   const { 
     isDragOver, 
@@ -45,19 +54,20 @@ const FileUploader = ({ onFileContent, forceShowMetadata = false }: FileUploader
         onClearFile={handleClearFile}
       />
 
-      {selectedFile && (showMetadataForm || forceShowMetadata) && (
-        <MetadataFormSection 
-          show={true}
-          title={title}
-          artist={artist}
-          songKey={songKey}
-          guitarTuning={guitarTuning}
-          onTitleChange={setTitle}
-          onArtistChange={setArtist}
-          onSongKeyChange={setSongKey}
-          onGuitarTuningChange={setGuitarTuning}
-          onContinue={handleContinue}
-        />
+      {selectedFile && showMetadataForm && (
+          <SongMetadataForm
+            title={title}
+            artist={artist}
+            songKey={songKey}
+            guitarTuning={guitarTuning}
+            guitarCapo={guitarCapo}
+            onTitleChange={setTitle}
+            onArtistChange={setArtist}
+            onSongKeyChange={setSongKey}
+            onGuitarTuningChange={setGuitarTuning}
+            onGuitarCapoChange={setGuitarCapo}
+            onContinue={handleContinue}
+          />
       )}
     </>
   );

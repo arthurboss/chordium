@@ -7,7 +7,7 @@ import SpeedControl from './SpeedControl';
 import { Slider } from '../ui/slider';
 import { ChordSheetControlsProps } from './types';
 import StickyBottomContainer from '../StickyBottomContainer';
-import { useStickyAtBottom } from '@/hooks/use-sticky-at-bottom';
+import { useAtBottom } from '@/hooks/useAtBottom';
 
 function TextPreferences({
   fontSize,
@@ -102,7 +102,7 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
   fontStyle,
   setFontStyle,
 }) => {
-  const isAtBottom = useStickyAtBottom(60);
+  const isAtBottom = useAtBottom({ offset: 60 });
 
   // Only TextPreferences button remains
   const MenuButtons = (

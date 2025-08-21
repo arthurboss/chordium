@@ -27,13 +27,3 @@
   box-sizing: border-box;
   padding-right: 12px;
 }
-
-/* Height for virtualized lists in songs view */
-.songs-view-height {
-  height: 60vh;
-}
-
-/* Virtualized item wrapper */
-.virtualized-item {
-  /* This allows the style prop from react-window to work correctly */
-}

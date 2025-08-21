@@ -15,7 +15,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Import after mocking
-import { useSongActions } from '@/utils/search-song-actions';
+import { useSongActions } from '@/search/hooks/useSongActions';
 
 describe('Song Navigation', () => {
   beforeEach(() => {
