@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import * as os from "os";
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -51,6 +52,19 @@ export default defineConfig(({ mode }) => {
       //   algorithm: 'gzip',
       //   ext: '.gz',
       // }),
+      // Enable PWA only in production
+      isProduction && VitePWA({
+        registerType: 'autoUpdate',
+        manifest: undefined, // Uses public/manifest.json if present
+        workbox: {
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+        },
+        devOptions: {
+          enabled: false,
+        },
+      }),
     ].filter(Boolean),
     preview: {
       port: 4173,
