@@ -40,9 +40,9 @@ describe('Song Navigation', () => {
 
     result.current.handleView(mockSong);
 
-    // Verify navigate was called with the Song object in state
+    // Verify navigate was called with the song's path property
     expect(mockNavigate).toHaveBeenCalledWith(
-      '/test-artist/test-song',
+      '/test-path',
       {
         state: {
           song: mockSong
@@ -69,9 +69,9 @@ describe('Song Navigation', () => {
 
     result.current.handleView(mockSong);
 
-    // Verify navigate was called with properly slugified URL but original Song object
+    // Verify navigate was called with the song's path property (no slugification needed)
     expect(mockNavigate).toHaveBeenCalledWith(
-      '/artist-with-u/song-with-n-and-c',
+      '/test-path',
       {
         state: {
           song: mockSong
@@ -98,14 +98,75 @@ describe('Song Navigation', () => {
 
     result.current.handleView(mockSong);
 
-    // Verify the Song object is passed in navigation state
+    // Verify the Song object is passed in navigation state using the song's path
     expect(mockNavigate).toHaveBeenCalledWith(
-      '/my-artist/my-song',
+      '/my-song-path',
       {
         state: {
           song: mockSong
         }
       }
     );
+  });
+
+  it('should use exact path from backend instead of constructing new URL', () => {
+    // This test demonstrates the fix for the original issue
+    // The song has a specific path format from the backend that should be preserved
+    const mockSong: Song = {
+      title: 'Espelhos Mágicos',
+      artist: 'Oficina G3',
+      path: 'oficina-g3/espelhos-magicos-' // Note the trailing dash from backend
+    };
+
+    // Render the hook in a proper React context
+    const { result } = renderHook(
+      () => useSongActions({ memoizedSongs: [] }),
+      {
+        wrapper: ({ children }: { children: React.ReactNode }) => 
+          React.createElement(MemoryRouter, {}, children)
+      }
+    );
+
+    result.current.handleView(mockSong);
+
+    // Verify navigate was called with the exact path from backend
+    // Before the fix, this would have been '/oficina-g3/espelhos-magicos' (no trailing dash)
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/oficina-g3/espelhos-magicos-',
+      {
+        state: {
+          song: mockSong
+        }
+      }
+    );
+  });
+
+  it('should preserve exact path format for API calls', () => {
+    // This test verifies that the navigation state contains the exact path
+    // that should be used for API calls, not a reconstructed one
+    const mockSong: Song = {
+      title: 'Espelhos Mágicos',
+      artist: 'Oficina G3',
+      path: 'oficina-g3/espelhos-magicos-' // Exact path from backend
+    };
+
+    // Render the hook in a proper React context
+    const { result } = renderHook(
+      () => useSongActions({ memoizedSongs: [] }),
+      {
+        wrapper: ({ children }: { children: React.ReactNode }) => 
+          React.createElement(MemoryRouter, {}, children)
+      }
+    );
+
+    result.current.handleView(mockSong);
+
+    // Verify that the navigation state contains the exact path from backend
+    const navigateCall = mockNavigate.mock.calls[0];
+    const navigationState = navigateCall[1].state;
+    
+    expect(navigationState.song.path).toBe('oficina-g3/espelhos-magicos-');
+    expect(navigationState.song.title).toBe('Espelhos Mágicos');
+    expect(navigationState.song.artist).toBe('Oficina G3');
   });
 });
