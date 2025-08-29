@@ -6,6 +6,8 @@ import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
 import { KeepAliveService } from "@/services/keep-alive.service";
+import OfflineTestPanel from "@/components/OfflineTestPanel";
+import OfflineToast from "@/components/OfflineToast";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -80,13 +82,13 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Route for artist pages: /artist
+        // Route for artist pages: /artist - with validation
         path: ":artist",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
-                <Home />
+                <SmartRouteHandler />
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
@@ -110,9 +112,11 @@ const router = createBrowserRouter([
         path: "*",
         element: (
           <RouteErrorBoundary>
-            <Suspense fallback={<Loading />}>
-              <SmartRouteHandler />
-            </Suspense>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <SmartRouteHandler />
+              </Suspense>
+            </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
       }
@@ -138,6 +142,8 @@ const App = () => (
       <TooltipProvider>
         <AppInitializer>
           <RouterProvider router={router} />
+          <OfflineToast />
+          {import.meta.env.DEV && <OfflineTestPanel />}
         </AppInitializer>
       </TooltipProvider>
     </QueryClientProvider>

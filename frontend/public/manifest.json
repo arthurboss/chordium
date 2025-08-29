@@ -37,6 +37,53 @@
       "src": "/favicon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Find guitar chords",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "short_name": "Upload",
+      "description": "Upload a new chord sheet",
+      "url": "/upload",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "My Chord Sheets",
+      "short_name": "My Songs",
+      "description": "View your saved chord sheets",
+      "url": "/my-chord-sheets",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
-} 
+}
