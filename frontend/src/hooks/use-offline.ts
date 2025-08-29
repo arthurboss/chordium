@@ -17,14 +17,30 @@ interface OfflineState {
  * @returns OfflineState object with current network status
  */
 export function useOffline(): OfflineState {
-  const [state, setState] = useState<OfflineState>(() => ({
-    isOffline: !navigator.onLine,
-    wasOnline: navigator.onLine,
-    lastOnline: navigator.onLine ? new Date() : null,
-  }));
+  const [state, setState] = useState<OfflineState>(() => {
+    const initialOffline = !navigator.onLine;
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('useOffline Initial State:', {
+        navigatorOnLine: navigator.onLine,
+        initialOffline,
+        userAgent: navigator.userAgent
+      });
+    }
+    
+    return {
+      isOffline: initialOffline,
+      wasOnline: navigator.onLine, // Assume we were online if navigator.onLine is true
+      lastOnline: navigator.onLine ? new Date() : null,
+    };
+  });
 
   useEffect(() => {
     const handleOnline = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🟢 Online event fired');
+      }
       setState(prev => ({
         isOffline: false,
         wasOnline: true,
@@ -33,6 +49,9 @@ export function useOffline(): OfflineState {
     };
 
     const handleOffline = () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔴 Offline event fired');
+      }
       setState(prev => ({
         isOffline: true,
         wasOnline: prev.wasOnline || prev.lastOnline !== null,

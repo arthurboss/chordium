@@ -60,9 +60,41 @@ export default defineConfig(({ mode }) => {
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
+          // Re-enable navigateFallback but with better caching
           navigateFallback: '/index.html',
+          navigateFallbackAllowlist: [/^(?!\/__).*/],
           runtimeCaching: [
+            {
+              // Cache the manifest file with CacheFirst strategy
+              urlPattern: /manifest\.json$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'manifest-cache',
+                expiration: {
+                  maxEntries: 1,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              // Cache the main app files with CacheFirst strategy
+              urlPattern: /\.(?:js|css|html)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'app-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
             {
               urlPattern: /\/api\//,
               handler: 'NetworkFirst',

@@ -14,7 +14,7 @@ interface OfflineRouteHandlerProps {
  * Smart offline route handler that:
  * 1. Checks if user is offline
  * 2. Validates if the requested route is available offline
- * 3. Shows appropriate fallback UI based on the situation
+ * 3. Shows appropriate fallback UI only for unavailable routes
  */
 const OfflineRouteHandler = ({ children }: OfflineRouteHandlerProps) => {
   const location = useLocation();

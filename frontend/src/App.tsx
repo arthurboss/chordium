@@ -6,8 +6,8 @@ import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
 import { KeepAliveService } from "@/services/keep-alive.service";
-import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 import OfflineTestPanel from "@/components/OfflineTestPanel";
+import OfflineToast from "@/components/OfflineToast";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -34,11 +34,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <Home />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -48,11 +46,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <Home />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -66,11 +62,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <Home />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -80,11 +74,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <Home />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -95,11 +87,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <Home />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <Home />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -110,11 +100,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <ChordViewer />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <ChordViewer />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -125,11 +113,9 @@ const router = createBrowserRouter([
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
-              <OfflineRouteHandler>
-                <Suspense fallback={<Loading />}>
-                  <SmartRouteHandler />
-                </Suspense>
-              </OfflineRouteHandler>
+              <Suspense fallback={<Loading />}>
+                <SmartRouteHandler />
+              </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
         )
@@ -156,7 +142,8 @@ const App = () => (
       <TooltipProvider>
         <AppInitializer>
           <RouterProvider router={router} />
-          <OfflineTestPanel />
+          <OfflineToast />
+          {import.meta.env.DEV && <OfflineTestPanel />}
         </AppInitializer>
       </TooltipProvider>
     </QueryClientProvider>

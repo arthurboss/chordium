@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import OfflineIndicator from "@/components/OfflineIndicator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ const Header = () => (
       </Link>
 
       <div className="flex items-center gap-2">
+        <OfflineIndicator />
         <DropdownMenu>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
