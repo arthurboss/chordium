@@ -75,7 +75,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /manifest\.json$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'manifest-cache',
+                cacheName: 'chordium-v1-manifest',
                 expiration: {
                   maxEntries: 1,
                   maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
@@ -90,7 +90,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:js|css|html)$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'app-cache',
+                cacheName: 'chordium-v1-app-assets',
                 expiration: {
                   maxEntries: 100,
                   maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -104,7 +104,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\/api\//,
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'api-cache',
+                cacheName: 'chordium-v1-api-responses',
                 networkTimeoutSeconds: 10,
                 expiration: {
                   maxEntries: 50,
@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'image-cache',
+                cacheName: 'chordium-v1-images',
                 expiration: {
                   maxEntries: 60,
                   maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
