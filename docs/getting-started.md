@@ -16,57 +16,44 @@ cd chordium
 
 # Install all dependencies (npm workspaces handle this automatically)
 npm install
-
-# Start both frontend and backend development servers
-npm run dev
 ```
 
-The frontend will be available at http://localhost:8080 and the backend at http://localhost:3001.
+## Workspace Structure
 
-## Development Commands
+This monorepo contains the following workspaces:
 
-```sh
-# Start both frontend and backend
-npm run dev
+- **`frontend/`** - React/Vite application with PWA features
+- **`backend/`** - Node.js/Express API server
+- **`packages/types/`** - Shared TypeScript types published to npm
+- **`packages/e2e-tests/`** - End-to-end testing suite
 
-# Start only frontend
-npm run dev:fe
+See individual README files for detailed documentation:
+- [Frontend README](../frontend/README.md) - Frontend development and PWA features
+- [Backend README](../backend/README.md) - API development and deployment
 
-# Start only backend
-npm run dev:be
 
-# Build both frontend and backend
-npm run build
+The frontend will be available at http://localhost:8080.
 
-# Run tests for both
-npm run test
+The backend will be available at http://localhost:3001.
 
-# Run tests in watch mode
-npm run test:watch
-
-# Lint both frontend and backend
-npm run lint
-
-# Auto-fix linting issues
-npm run lint:fix
-
-# Check for duplicate fixtures
-npm run check:fixtures
-```
-
-## Quick Reference Commands
+## Monorepo Commands
 
 ```bash
 # Development
 npm run dev              # Start both frontend and backend
 npm run dev:fe           # Start only frontend
 npm run dev:be           # Start only backend
+npm run dev:pwa          # Start PWA development (HTTPS)
 
 # Testing
 npm run test             # Run all tests
 npm run test:watch       # Run tests in watch mode
 npm run test:fe          # Run only frontend tests
 npm run test:be          # Run only backend tests
+npm run test:e2e         # Run end-to-end tests
+npm run test:e2e:open    # Open Cypress test runner
+npm run test:e2e:headed  # Run E2E tests with browser visible
+npm run test:e2e:dev     # Run E2E tests against dev server
 
 # Code Quality
 npm run lint             # Lint all code
@@ -77,4 +64,60 @@ npm run check:fixtures   # Check for duplicate fixtures
 npm run build            # Build both frontend and backend
 npm run build:fe         # Build only frontend
 npm run build:be         # Build only backend
+npm run build:types      # Build shared types package
+
+# Running
+npm run start            # Build and start production servers
+npm run start:fe         # Start frontend preview server
+npm run start:be         # Start backend server
+
+# Package Management
+npm run clean            # Clean all node_modules and build artifacts
+npm run clean:install    # Clean and reinstall all dependencies
+npm run use-workspace    # Switch to workspace dependencies
+npm run use-npm          # Switch to npm dependencies
+
+# Utilities
+npm run kill             # Kill all development servers
+npm run kill:fe          # Kill frontend server only
+npm run kill:be          # Kill backend server only
+```
+
+## PWA Development
+
+Chordium includes Progressive Web App (PWA) features for offline functionality and mobile app-like experience.
+
+### Quick Setup
+
+```sh
+# Setup PWA development environment
+npm run setup:pwa
+```
+
+### Development
+
+```sh
+# PWA development (HTTPS, full PWA features)
+npm run dev:pwa
+```
+
+For detailed PWA development workflow, see [Frontend README](../frontend/README.md).
+
+## 📦 @chordium/types Package
+
+Chordium publishes a shared TypeScript types package to npm for type safety across the entire monorepo:
+
+- **Package**: [`@chordium/types`](https://www.npmjs.com/package/@chordium/types)
+- **Purpose**: Shared type definitions for API contracts, data models, and interfaces
+- **Usage**: Currently used by frontend; backend still uses local types due to Render deployment constraints
+- **Build**: Automatically built and versioned with Turborepo dependency management
+
+```sh
+# Install in your project
+npm install @chordium/types
+```
+
+```typescript
+// Import shared types
+import { Song, Artist, ChordSheet } from "@chordium/types";
 ```

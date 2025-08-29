@@ -20,6 +20,7 @@ _Experience Chordium's clean interface, smart search, and intuitive chord displa
 
 Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter:
 
+- **Install-less App (PWA)** - Works offline and installs like a native app
 - **Clean Interface** - Distraction-free chord viewing experience
 - **Smart Search** - Find songs and artists with intelligent caching
 - **Chord Diagrams** - Clear fingering positions for each chord
@@ -66,6 +67,7 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 | [🏢 Monorepo](./docs/MONOREPO.md)                              | Monorepo architecture and workspace management     |
 | [🗄️ Cache Architecture](./docs/cache-architecture.md)          | Frontend caching system design and implementation  |
 | [⚡ Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
+| [📱 PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
 | [🧠 Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
 
 ## 🚀 Quick Start
@@ -75,31 +77,9 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 git clone https://github.com/arthurboss/chordium.git
 cd chordium
 npm install
-
-# Start development servers
-npm run dev
 ```
 
-Visit `http://localhost:8080` for the frontend and `http://localhost:3001` for the backend API.
-
-## 📦 @chordium/types Package
-
-Chordium publishes a shared TypeScript types package to npm for type safety across the entire monorepo:
-
-- **Package**: [`@chordium/types`](https://www.npmjs.com/package/@chordium/types)
-- **Purpose**: Shared type definitions for API contracts, data models, and interfaces
-- **Usage**: Currently used by frontend; backend still uses local types due to Render deployment constraints
-- **Build**: Automatically built and versioned with Turborepo dependency management
-
-```sh
-# Install in your project
-npm install @chordium/types
-```
-
-```typescript
-// Import shared types
-import { Song, Artist, ChordSheet } from "@chordium/types";
-```
+See [Getting Started](./docs/getting-started.md) for development setup and commands.
 
 ## 📝 License
 
