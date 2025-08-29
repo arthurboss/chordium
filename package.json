@@ -17,6 +17,7 @@
     "dev": "turbo run dev",
     "dev:fe": "turbo run dev --filter=chordium-frontend",
     "dev:be": "turbo run dev --filter=chordium-backend",
+    "dev:pwa": "turbo run dev:pwa --filter=chordium-frontend",
     "build": "turbo run build && cd frontend && npm run prerender",
     "build:types": "turbo run build --filter=@chordium/types",
     "build:fe": "turbo run build --filter=chordium-frontend",
@@ -43,6 +44,7 @@
     "kill:fe": "./scripts/kill-servers.sh fe",
     "kill:be": "./scripts/kill-servers.sh be",
     "check:fixtures": "bash scripts/check-no-duplicate-chord-sheet-fixtures.sh",
+    "setup:pwa": "cd frontend && ./scripts/setup-pwa-dev.sh",
     "start": "turbo run build && turbo run start --filter=chordium-backend & turbo run preview --filter=chordium-frontend",
     "start:fe": "turbo run preview --filter=chordium-frontend",
     "start:be": "turbo run start --filter=chordium-backend"

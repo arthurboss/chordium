@@ -10,11 +10,16 @@ import viteCompression from 'vite-plugin-compression';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
+  const isHttps = process.env.VITE_HTTPS_ENABLED === 'true';
   
   return {
     server: {
       host: "::",
       port: 8080,
+      https: isHttps ? {
+        key: path.resolve(__dirname, '../backend/localhost+2-key.pem'),
+        cert: path.resolve(__dirname, '../backend/localhost+2.pem'),
+      } : undefined,
       // Add historyApiFallback for SPA routing
       cors: true,
       proxy: isProduction ? undefined : {
@@ -52,8 +57,8 @@ export default defineConfig(({ mode }) => {
       //   algorithm: 'gzip',
       //   ext: '.gz',
       // }),
-      // Enable PWA only in production
-      isProduction && VitePWA({
+      // Enable PWA in both development and production
+      VitePWA({
         registerType: 'autoUpdate',
         manifest: undefined, // Uses public/manifest.json if present
         workbox: {
@@ -127,7 +132,9 @@ export default defineConfig(({ mode }) => {
           ],
         },
         devOptions: {
-          enabled: false,
+          enabled: true, // Enable PWA in development
+          type: 'module', // Use ES modules for better development experience
+          navigateFallback: '/index.html',
         },
       }),
     ].filter(Boolean),

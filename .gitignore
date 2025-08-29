@@ -72,6 +72,20 @@ shared/**/*.js
 backend/dist/
 frontend/dist/
 
+# SSL certificates (for frontend HTTPS development)
+backend/ssl/
+backend/*.pem
+backend/*.key
+backend/*.crt
+backend/*.cert
+*.pem
+*.key
+*.crt
+*.cert
+
+# PWA development files
+frontend/dev-dist/
+
 # Temporary files
 ci-logs.txt
 

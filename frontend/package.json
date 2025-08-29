@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:pwa": "VITE_HTTPS_ENABLED=true vite",
+    "setup:pwa": "./scripts/setup-pwa-dev.sh",
     "build": "vite build --mode production",
     "build:prerender": "npm run build && npm run prerender",
     "prerender": "node scripts/prerender.mjs",

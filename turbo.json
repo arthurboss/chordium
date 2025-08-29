@@ -35,6 +35,11 @@
       "cache": false,
       "persistent": true
     },
+    "dev:pwa": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
     "start": {
       "dependsOn": ["build"],
       "cache": false,
