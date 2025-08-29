@@ -82,13 +82,13 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Route for artist pages: /artist
+        // Route for artist pages: /artist - with validation
         path: ":artist",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
-                <Home />
+                <SmartRouteHandler />
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
