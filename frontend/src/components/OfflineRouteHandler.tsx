@@ -5,6 +5,7 @@ import { validateRoute } from '@/utils/route-validation';
 import OfflineFallback from '@/pages/OfflineFallback';
 import RedirectToHome from './RedirectToHome';
 import NotFound from '@/pages/NotFound';
+import { useSearchState } from '@/search/context';
 
 interface OfflineRouteHandlerProps {
   children: React.ReactNode;
@@ -19,7 +20,17 @@ interface OfflineRouteHandlerProps {
 const OfflineRouteHandler = ({ children }: OfflineRouteHandlerProps) => {
   const location = useLocation();
   const { isOffline } = useOffline();
+  
   const { myChordSheets } = useChordSheets();
+  const { searchState } = useSearchState();
+  
+  // Debug logging
+  console.log('OfflineRouteHandler:', {
+    pathname: location.pathname,
+    isOffline,
+    myChordSheetsCount: myChordSheets?.length || 0,
+    searchResultsCount: searchState.results.length
+  });
   
   // If online, render children normally
   if (!isOffline) {
@@ -34,22 +45,12 @@ const OfflineRouteHandler = ({ children }: OfflineRouteHandlerProps) => {
     return <RedirectToHome reason={`Invalid URL pattern: ${location.pathname}`} />;
   }
 
-  // Define which routes work offline
-  const offlineCompatibleRoutes = [
-    '/',
-    '/search',
-    '/my-chord-sheets',
-    '/upload'
-  ];
-  
-  // Check if this is a known offline-compatible route
-  if (offlineCompatibleRoutes.includes(location.pathname)) {
-    return <>{children}</>;
-  }
-
-  // Check if this is a chord sheet route (artist/song pattern)
+  // Only handle chord sheet routes (/:artist/:song)
+  // All other routes are handled by the Home component and don't need offline validation
   const pathSegments = location.pathname.split('/').filter(Boolean);
+  
   if (pathSegments.length >= 2) {
+    // This is a chord sheet route: /artist/song
     const artistSlug = pathSegments[0];
     const songSlug = pathSegments[1];
     const requestedPath = `${artistSlug}/${songSlug}`;
@@ -68,8 +69,9 @@ const OfflineRouteHandler = ({ children }: OfflineRouteHandlerProps) => {
     }
   }
 
-  // For any other route, show offline fallback
-  return <OfflineFallback requestedPath={location.pathname} />;
+  // For any other route (including single segment routes), render normally
+  // These are handled by the Home component and don't need offline validation
+  return <>{children}</>;
 };
 
 export default OfflineRouteHandler;

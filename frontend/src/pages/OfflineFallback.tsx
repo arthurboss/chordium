@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Wifi, WifiOff, RefreshCw, Home, Music, Clock } from 'lucide-react';
+import { Wifi, WifiOff, Home, Music, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,7 +17,6 @@ const OfflineFallback = ({ requestedPath }: OfflineFallbackProps) => {
   const { myChordSheets } = useChordSheets();
   
   const path = requestedPath || location.pathname;
-  const isChordSheetRoute = path.includes('/') && path.split('/').length >= 2;
 
   useEffect(() => {
     console.warn(
@@ -26,10 +25,6 @@ const OfflineFallback = ({ requestedPath }: OfflineFallbackProps) => {
       'Offline status:', { isOffline, wasOnline, lastOnline }
     );
   }, [path, isOffline, wasOnline, lastOnline]);
-
-  const handleRetry = () => {
-    window.location.reload();
-  };
 
   const handleGoHome = () => {
     window.location.href = '/';
@@ -55,34 +50,15 @@ const OfflineFallback = ({ requestedPath }: OfflineFallbackProps) => {
   };
 
   const getTitle = (): string => {
-    if (isChordSheetRoute) {
-      return 'Chord Sheet Not Available Offline';
-    }
-    return 'You\'re Offline';
+    return 'Chord Sheet Not Available Offline';
   };
 
   const getDescription = (): string => {
-    if (isChordSheetRoute) {
-      return 'This chord sheet isn\'t available offline. Check your saved chord sheets or try again when you\'re back online.';
-    }
-    return 'You\'re currently offline. Some features may not be available until you reconnect to the internet.';
+    return 'This chord sheet isn\'t available offline. Check your saved chord sheets or try again when you\'re back online.';
   };
 
   const getAvailableActions = () => {
     const actions = [];
-
-    // Always show retry button
-    actions.push(
-      <Button 
-        key="retry"
-        onClick={handleRetry} 
-        variant="default"
-        className="flex items-center gap-2"
-      >
-        <RefreshCw className="h-4 w-4" />
-        Try Again
-      </Button>
-    );
 
     // Show saved chord sheets if available
     if (myChordSheets && myChordSheets.length > 0) {
@@ -144,16 +120,14 @@ const OfflineFallback = ({ requestedPath }: OfflineFallbackProps) => {
             </AlertDescription>
           </Alert>
 
-          {isChordSheetRoute && (
-            <Alert>
-              <Music className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Requested Path:</strong> {path}
-                <br />
-                <strong>Available Offline:</strong> {myChordSheets?.length || 0} chord sheets
-              </AlertDescription>
-            </Alert>
-          )}
+          <Alert>
+            <Music className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Requested Path:</strong> {path}
+              <br />
+              <strong>Available Offline:</strong> {myChordSheets?.length || 0} chord sheets
+            </AlertDescription>
+          </Alert>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {getAvailableActions()}

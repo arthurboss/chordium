@@ -8,6 +8,7 @@ import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling
 import { KeepAliveService } from "@/services/keep-alive.service";
 import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
+import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -101,7 +102,9 @@ const router = createBrowserRouter([
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
-                <ChordViewer />
+                <OfflineRouteHandler>
+                  <ChordViewer />
+                </OfflineRouteHandler>
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
