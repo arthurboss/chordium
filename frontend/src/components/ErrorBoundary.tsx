@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, Bug, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -18,6 +18,7 @@ interface State {
   error: Error | null;
   errorInfo: React.ErrorInfo | null;
   errorId: string;
+  copied: boolean;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -27,7 +28,8 @@ class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: ''
+      errorId: '',
+      copied: false
     };
   }
 
@@ -104,8 +106,49 @@ class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: ''
+      errorId: '',
+      copied: false
     });
+  };
+
+  private readonly handleCopyError = async () => {
+    const { error, errorInfo, errorId } = this.state;
+    
+    const errorDetails = `Error ID: ${errorId}
+Error Message: ${error?.message || 'Unknown error'}
+URL: ${window.location.href}
+User Agent: ${navigator.userAgent}
+Timestamp: ${new Date().toISOString()}
+
+Error Stack:
+${error?.stack || 'No stack trace available'}
+
+Component Stack:
+${errorInfo?.componentStack || 'No component stack available'}`;
+
+    try {
+      await navigator.clipboard.writeText(errorDetails);
+      this.setState({ copied: true });
+      
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        this.setState({ copied: false });
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy error details:', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = errorDetails;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      this.setState({ copied: true });
+      setTimeout(() => {
+        this.setState({ copied: false });
+      }, 2000);
+    }
   };
 
   private readonly handleRetry = () => {
@@ -243,7 +286,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                 </Button>
               </div>
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t space-y-3">
                 <Button 
                   onClick={this.handleReportBug} 
                   variant="ghost" 
@@ -261,12 +304,30 @@ ${errorInfo?.componentStack || 'No component stack available'}
                     🐛 Development Details (Click to expand)
                   </summary>
                   <div className="space-y-2 text-sm font-mono">
-                    <div>
+                    <div className="flex justify-between items-center">
                       <strong>Error Stack:</strong>
-                      <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
-                        {this.state.error.stack}
-                      </pre>
+                      <Button 
+                        onClick={this.handleCopyError} 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                      >
+                        {this.state.copied ? (
+                          <>
+                            <Check className="h-3 w-3 mr-1" />
+                            Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copy All
+                          </>
+                        )}
+                      </Button>
                     </div>
+                    <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
+                      {this.state.error.stack}
+                    </pre>
                     {this.state.errorInfo && (
                       <div>
                         <strong>Component Stack:</strong>
