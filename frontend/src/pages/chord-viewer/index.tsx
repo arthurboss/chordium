@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
 import { useSingleChordSheet } from "@/storage/hooks/use-single-chord-sheet";
 import type { RouteParams } from "./chord-viewer.types";
@@ -7,6 +7,7 @@ import type { RouteParams } from "./chord-viewer.types";
 // Utils
 import { resolveChordSheetPath } from "./utils/path-resolver";
 import { createChordSheetData } from "./utils/chord-sheet-data";
+import { extractNavigationData } from "./utils/navigation-data";
 
 // Hooks
 import { useNavigation } from "@/hooks/navigation";
@@ -23,9 +24,12 @@ import { ChordViewerError } from "./components/chord-viewer-error";
 const ChordViewer = () => {
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const routeParams = useParams() as RouteParams;
+  const location = useLocation();
 
-  // Convert URL parameters to chord sheet storage path
-  const path = resolveChordSheetPath(routeParams);
+  // Try to get the path from navigation state first (most accurate)
+  // Fall back to URL parameters if navigation state is not available
+  const navigationData = extractNavigationData(location.state);
+  const path = navigationData?.path || resolveChordSheetPath(routeParams);
 
   // Fetch single chord sheet data from IndexedDB
   const chordSheetResult = useSingleChordSheet({ path });

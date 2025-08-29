@@ -28,12 +28,10 @@ export const useSongActions = ({
       const currentPath = location.pathname + location.search;
       storeNavigationPath(currentPath);
       
-      // Navigate directly to chord sheet page - no deduplication needed
-      // Search is for discovery, chord sheets are handled separately
-      if (songData.artist && songData.title) {
-        const artistSlug = toSlug(songData.artist);
-        const songSlug = toSlug(songData.title);
-        const targetUrl = `/${artistSlug}/${songSlug}`;
+      // Navigate directly to chord sheet page using the song's path property
+      // This ensures we use the exact path format that the backend expects
+      if (songData.path) {
+        const targetUrl = `/${songData.path}`;
 
         navigate(targetUrl, {
           state: { song: songData },
