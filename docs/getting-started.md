@@ -43,7 +43,7 @@ The backend will be available at http://localhost:3001.
 npm run dev              # Start both frontend and backend
 npm run dev:fe           # Start only frontend
 npm run dev:be           # Start only backend
-npm run dev:pwa          # Start PWA development (HTTPS)
+npm run dev:pwa          # Start PWA development (HTTPS) + backend
 
 # Testing
 npm run test             # Run all tests
@@ -97,7 +97,7 @@ npm run setup:pwa
 ### Development
 
 ```sh
-# PWA development (HTTPS, full PWA features)
+# PWA development (HTTPS, full PWA features + backend)
 npm run dev:pwa
 ```
 

@@ -28,9 +28,9 @@ npm run setup:pwa
 ```bash
 npm run dev:pwa
 ```
-- **URL**: https://localhost:8080
-- **Features**: Full PWA capabilities, service workers, offline functionality
-- **Use for**: PWA feature testing, service worker development, offline testing
+- **URL**: https://localhost:8080 (frontend). Run `npm run dev:pwa` from monorepo's root to have the backend on http://localhost:3001)
+- **Features**: Full PWA capabilities, service workers, offline functionality, complete API backend
+- **Use for**: PWA feature testing, service worker development, offline testing, full-stack development
 
 ### SSL Certificate Setup
 
@@ -48,7 +48,7 @@ The setup script automatically installs mkcert and generates trusted certificate
 - **Start with HTTP mode** (`npm run dev`) for general development
 - **Switch to HTTPS mode** (`npm run dev:pwa`) when testing PWA features
 - **Both modes have hot reload** and PWA plugin enabled
-- **Backend runs on HTTP** - frontend proxies API calls to it
+- **Backend runs on HTTP** - frontend proxies API calls to it (automatically started with `dev:pwa`)
 - **Production**: Both frontend and backend are HTTPS (automatic with Vercel + Render)
 
 ### Environment Variables
