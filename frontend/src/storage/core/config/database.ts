@@ -10,8 +10,9 @@
  *
  * Used by both chord-sheets and search-cache stores to ensure
  * they operate on the same database instance.
+ * Versioned for future migration support.
  */
-export const DB_NAME = "chordium";
+export const DB_NAME = "chordium-v1";
 
 /**
  * Version of the IndexedDB database schema
