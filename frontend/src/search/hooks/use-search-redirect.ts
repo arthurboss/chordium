@@ -3,14 +3,22 @@ import { useLocation } from "react-router-dom";
 import { useSearchState } from "../context";
 import { fromSlug } from "@/utils/url-slug-utils";
 import { SearchType } from "@chordium/types";
+import { useSearchCache } from "@/storage/hooks/use-search-cache";
 
 // Restores search state from URL parameters on mount
 export function useSearchRedirect() {
   const location = useLocation();
-  const { updateSearchState } = useSearchState();
+  const { updateSearchState, searchState } = useSearchState();
+  
+  // Try to get search cache for fallback restoration
+  const { cacheEntry } = useSearchCache({
+    searchKey: searchState.query.artist || searchState.query.song ? 
+      `${searchState.query.artist}|${searchState.query.song}|${searchState.searchType}` : 
+      undefined
+  });
 
   useEffect(() => {
-    // Only handle search routes
+    // Only handle search routes - don't restore from artist page URLs
     if (location.pathname === "/search") {
       const searchParams = new URLSearchParams(location.search);
       const artistParam = searchParams.get("artist");
@@ -39,7 +47,17 @@ export function useSearchRedirect() {
           results: [],
           query: { artist, song }
         });
+      } else if (cacheEntry && cacheEntry.search) {
+        // Fallback: try to restore from cache if no URL parameters
+        // This helps preserve search context when navigating back
+        updateSearchState({
+          searchType: cacheEntry.search.searchType,
+          results: cacheEntry.results,
+          query: cacheEntry.search.query
+        });
       }
     }
-  }, [location.search, location.pathname, updateSearchState]);
+    // Note: We intentionally don't handle artist page URLs here
+    // to preserve the original search state when navigating back
+  }, [location.search, location.pathname, updateSearchState, cacheEntry]);
 }

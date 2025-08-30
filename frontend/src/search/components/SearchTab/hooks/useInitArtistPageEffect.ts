@@ -23,10 +23,16 @@ export function useInitArtistPageEffect(
           path: artistPath,
           songCount: null,
         });
+        
+        // Set the input field to show the artist name for display purposes
+        // but don't overwrite the submitted search state
         setArtistInput(artistName);
         setPrevArtistInput(artistName);
-        setSubmittedArtist(artistName);
+        
+        // Don't set submittedArtist here - preserve the original search query
+        // This allows the back button to return to the original search results
         setHasSearched(true);
+        
         // Note: Don't set setShouldFetch(true) here because that would trigger
         // an artist search instead of artist songs fetching.
         // The activeArtist effect in useSearchReducer will handle songs fetching.

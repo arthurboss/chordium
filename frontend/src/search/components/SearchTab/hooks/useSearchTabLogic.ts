@@ -26,6 +26,9 @@ export function useSearchTabLogic(
   const [prevSongInput, setPrevSongInput] = useState("");
   const [submittedArtist, setSubmittedArtist] = useState("");
   const [submittedSong, setSubmittedSong] = useState("");
+  // New state to preserve the original search query for navigation back
+  const [originalSearchArtist, setOriginalSearchArtist] = useState("");
+  const [originalSearchSong, setOriginalSearchSong] = useState("");
   const [shouldFetch, setShouldFetch] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +49,8 @@ export function useSearchTabLogic(
     setPrevSongInput,
     setSubmittedArtist,
     setSubmittedSong,
+    setOriginalSearchArtist,
+    setOriginalSearchSong,
     updateSearchState,
     setHasSearched,
     setShouldFetch
@@ -88,6 +93,11 @@ export function useSearchTabLogic(
     setLoading(true);
     setSubmittedArtist(artistValue);
     setSubmittedSong(songValue);
+    
+    // Preserve the original search query for navigation back
+    setOriginalSearchArtist(artistValue);
+    setOriginalSearchSong(songValue);
+    
     // Determine search type based on input values
     // Following backend logic in determineSearchType()
     let searchType: "artist" | "song" | "artist-song";
@@ -133,10 +143,13 @@ export function useSearchTabLogic(
     setActiveArtist(null);
     startTransition(() => {
       // Navigate back to search results using original search parameters
-      // This preserves the user's original query instead of using the artist's display name
+      // Use the preserved original search query instead of the current submitted values
       const params = new URLSearchParams();
-      if (submittedArtist) params.set("artist", toSlug(submittedArtist));
-      if (submittedSong) params.set("song", toSlug(submittedSong));
+      const artistToUse = originalSearchArtist || submittedArtist;
+      const songToUse = originalSearchSong || submittedSong;
+      
+      if (artistToUse) params.set("artist", toSlug(artistToUse));
+      if (songToUse) params.set("song", toSlug(songToUse));
       const searchUrl = params.toString()
         ? `/search?${params.toString()}`
         : "/search";
@@ -151,6 +164,8 @@ export function useSearchTabLogic(
     setPrevSongInput("");
     setSubmittedArtist("");
     setSubmittedSong("");
+    setOriginalSearchArtist(null);
+    setOriginalSearchSong(null);
     setHasSearched(false);
     setShouldFetch(false);
     setActiveArtist(null);
