@@ -6,5 +6,9 @@ export const defaultSearchState: SearchDataState = {
   query: {
     artist: "",
     song: ""
+  },
+  originalQuery: {
+    artist: "",
+    song: ""
   }
 };

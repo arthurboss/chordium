@@ -10,6 +10,8 @@ import { useSearchTabLogic } from "./hooks/useSearchTabLogic";
 import type { SearchTabProps } from "./SearchTab.types";
 
 const SearchTab: React.FC<SearchTabProps> = (props) => {
+   console.log('🔍 SearchTab: rendering with props:', props);
+   
    const logic = useSearchTabLogic(props);
    const {
       activeArtist,
@@ -32,6 +34,17 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
       setMySongs,
       setActiveTab,
    } = logic;
+
+   console.log('🔍 SearchTab: logic state:', {
+      activeArtist: activeArtist?.displayName,
+      loading,
+      artistInput,
+      songInput,
+      hasSearched,
+      submittedArtist,
+      submittedSong,
+      shouldFetch
+   });
 
    return (
       <div className="space-y-4">

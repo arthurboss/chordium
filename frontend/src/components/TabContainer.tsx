@@ -15,6 +15,7 @@ import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 import { storeNavigationPath } from "@/utils/navigation-path-storage";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
+import { urlPersistenceService } from "@/services/url-persistence.service";
 
 interface TabContainerProps {
   activeTab: string;
@@ -37,19 +38,40 @@ const TabContainer = ({
   const location = useLocation();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
 
-  // Local state to track the last search URL for tab switching
-  const [lastSearchUrl, setLastSearchUrl] = useState<string | null>(null);
+  // Debug log to see if TabContainer is rendered
+  console.log('🔄 TabContainer: component rendered', {
+    pathname: location.pathname,
+    activeTab,
+    lastSearchUrl: urlPersistenceService.getLastSearchUrl()
+  });
 
   // Track when we're on a search-related page and store the URL
   useEffect(() => {
     const currentPath = location.pathname + location.search;
+
+    console.log('🔄 TabContainer: tracking URL:', {
+      currentPath,
+      pathname: location.pathname,
+      search: location.search,
+      isSearchPage: location.pathname === '/search',
+      isMyChordSheets: location.pathname.startsWith('/my-chord-sheets'),
+      isUpload: location.pathname.startsWith('/upload'),
+      isRoot: location.pathname === '/',
+      shouldStore: location.pathname === '/search' ||
+        (!location.pathname.startsWith('/my-chord-sheets') &&
+          !location.pathname.startsWith('/upload') &&
+          location.pathname !== '/')
+    });
 
     // Store URL if it's a search page or an artist page (not basic app tabs)
     if (location.pathname === '/search' ||
       (!location.pathname.startsWith('/my-chord-sheets') &&
         !location.pathname.startsWith('/upload') &&
         location.pathname !== '/')) {
-      setLastSearchUrl(currentPath);
+      console.log('🔄 TabContainer: storing URL:', currentPath);
+      urlPersistenceService.setLastSearchUrl(currentPath);
+    } else {
+      console.log('🔄 TabContainer: not storing URL (basic app tab)');
     }
   }, [location.pathname, location.search]);
 
@@ -61,13 +83,41 @@ const TabContainer = ({
   }, [selectedSong]);
 
   const navigateToSearch = () => {
-    // First priority: use the stored search URL from local state
+    const lastSearchUrl = urlPersistenceService.getLastSearchUrl();
+    console.log('🔄 TabContainer: navigateToSearch called, lastSearchUrl:', lastSearchUrl);
+    
+    // First priority: use the stored search URL from service
     if (lastSearchUrl) {
-      navigate(lastSearchUrl);
-      return;
+      // Check if the stored URL is an artist route (/:artist)
+      const isArtistRoute = lastSearchUrl.startsWith('/') && 
+        !lastSearchUrl.startsWith('/search') && 
+        !lastSearchUrl.startsWith('/my-chord-sheets') && 
+        !lastSearchUrl.startsWith('/upload') &&
+        lastSearchUrl !== '/' &&
+        lastSearchUrl.split('/').filter(segment => segment.length > 0).length === 1;
+      
+      console.log('🔄 TabContainer: URL analysis:', {
+        lastSearchUrl,
+        isArtistRoute,
+        isSearchRoute: lastSearchUrl.startsWith('/search')
+      });
+      
+      if (isArtistRoute) {
+        // For artist routes, navigate directly to the artist URL
+        // The search tab will handle artist routes properly
+        console.log('🔄 TabContainer: navigating to artist route:', lastSearchUrl);
+        navigate(lastSearchUrl);
+        return;
+      } else if (lastSearchUrl.startsWith('/search')) {
+        // For search routes, navigate to the stored search URL
+        console.log('🔄 TabContainer: navigating to search route:', lastSearchUrl);
+        navigate(lastSearchUrl);
+        return;
+      }
     }
 
     // Final fallback: go to basic search page
+    console.log('🔄 TabContainer: navigating to fallback search page');
     navigate("/search");
   };
 

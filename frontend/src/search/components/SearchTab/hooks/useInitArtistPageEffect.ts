@@ -14,10 +14,27 @@ export function useInitArtistPageEffect(
   setHasSearched: (val: boolean) => void
 ) {
   useEffect(() => {
+    // Reset initialization flag when pathname changes to allow re-initialization
+    // This is needed when switching back to the search tab from other tabs
+    console.log('🔄 useInitArtistPageEffect: resetting initialization flag for pathname:', location.pathname);
+    isInitialized.current = false;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    console.log('🔄 useInitArtistPageEffect: checking artist page:', {
+      pathname: location.pathname,
+      isOnArtistPage: isOnArtistPage(),
+      isInitialized: isInitialized.current
+    });
+    
     if (isOnArtistPage() && !isInitialized.current) {
       const artistPath = getCurrentArtistPath();
+      console.log('🔄 useInitArtistPageEffect: artist path found:', artistPath);
+      
       if (artistPath) {
         const artistName = fromSlug(artistPath);
+        console.log('🔄 useInitArtistPageEffect: initializing artist page for:', artistName);
+        
         setActiveArtist({
           displayName: artistName,
           path: artistPath,
@@ -37,7 +54,12 @@ export function useInitArtistPageEffect(
         // an artist search instead of artist songs fetching.
         // The activeArtist effect in useSearchReducer will handle songs fetching.
         isInitialized.current = true;
+        console.log('🔄 useInitArtistPageEffect: artist page initialized successfully');
+      } else {
+        console.log('🔄 useInitArtistPageEffect: no artist path found');
       }
+    } else {
+      console.log('🔄 useInitArtistPageEffect: not on artist page or already initialized');
     }
   }, [location.pathname, isOnArtistPage, getCurrentArtistPath]);
 }

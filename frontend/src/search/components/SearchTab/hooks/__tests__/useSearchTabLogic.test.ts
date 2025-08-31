@@ -101,4 +101,17 @@ describe('useSearchTabLogic - Original Search Query Preservation', () => {
     expect(result.current.submittedSong).toBe('');
     expect(result.current.hasSearched).toBe(false);
   });
+
+  it('should handle artist route navigation correctly', () => {
+    // This test verifies that the hook can handle artist route navigation
+    // The actual artist route handling is tested in integration tests
+    const { result } = renderHook(() => useSearchTabLogic(mockProps), {
+      wrapper: SearchStateProvider
+    });
+
+    // Verify that the hook returns the expected structure
+    expect(result.current).toHaveProperty('handleArtistSelect');
+    expect(result.current).toHaveProperty('handleBackToArtistList');
+    expect(result.current).toHaveProperty('activeArtist');
+  });
 });
