@@ -44,10 +44,9 @@ export function useSearchTabLogic(
     try {
       const storedQuery = sessionStorage.getItem(SEARCH_QUERY_KEY);
       if (storedQuery) {
-        const { artist, song, timestamp } = JSON.parse(storedQuery);
-        const isRecent = Date.now() - timestamp < 24 * 60 * 60 * 1000; // 24 hours
+        const { artist, song } = JSON.parse(storedQuery);
         
-        if (isRecent && (artist || song)) {
+        if (artist || song) {
           console.log('🔄 useSearchTabLogic: restoring search query from session storage:', { artist, song });
           setOriginalSearchArtist(artist || '');
           setOriginalSearchSong(song || '');
@@ -58,9 +57,6 @@ export function useSearchTabLogic(
           setSubmittedArtist(artist || '');
           setSubmittedSong(song || '');
           setHasSearched(true);
-        } else {
-          // Clear expired or invalid stored query
-          sessionStorage.removeItem(SEARCH_QUERY_KEY);
         }
       }
     } catch (error) {
@@ -72,11 +68,7 @@ export function useSearchTabLogic(
   // Save search query to session storage whenever it changes
   const saveSearchQueryToSession = useCallback((artist: string, song: string) => {
     try {
-      const searchData = {
-        artist,
-        song,
-        timestamp: Date.now()
-      };
+      const searchData = { artist, song };
       sessionStorage.setItem(SEARCH_QUERY_KEY, JSON.stringify(searchData));
       console.log('🔄 useSearchTabLogic: saved search query to session storage:', searchData);
     } catch (error) {
