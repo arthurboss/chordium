@@ -87,6 +87,7 @@ export const searchStateReducer = (
           state.artistSongs || [],
           action.filter
         ),
+        lastAppliedFilter: action.filter, // Track the last applied filter
       };
 
     case "SET_SEARCH_FETCHING":

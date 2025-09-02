@@ -18,4 +18,5 @@ export const initialSearchState: SearchResultsState = {
   // API fetching states
   searchFetching: false,
   artistSongsFetching: false,
+  lastAppliedFilter: '', // Track last applied filter
 };
