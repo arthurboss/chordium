@@ -39,7 +39,7 @@ export function useSearchTabLogic(
   // Session storage keys for search query persistence
   const SEARCH_QUERY_KEY = 'chordium_search_query';
 
-  // Load search query from session storage on mount
+  // Load search query from session storage on mount and when returning to search page
   useEffect(() => {
     try {
       const storedQuery = sessionStorage.getItem(SEARCH_QUERY_KEY);
@@ -63,9 +63,9 @@ export function useSearchTabLogic(
       console.warn('Failed to restore search query from session storage:', error);
       sessionStorage.removeItem(SEARCH_QUERY_KEY);
     }
-  }, []);
+  }, [location.pathname]); // Restore whenever the pathname changes (including returning to search)
 
-  // Save search query to session storage whenever it changes
+  // Save search query to session storage when submitting search
   const saveSearchQueryToSession = useCallback((artist: string, song: string) => {
     try {
       const searchData = { artist, song };
@@ -75,6 +75,40 @@ export function useSearchTabLogic(
       console.warn('Failed to save search query to session storage:', error);
     }
   }, []);
+
+  // Store the current route whenever it changes (for tab switching)
+  // Only store search-related routes: /search (with query) or /:artist
+  const saveCurrentRoute = useCallback(() => {
+    try {
+      const storedQuery = sessionStorage.getItem(SEARCH_QUERY_KEY);
+      if (storedQuery) {
+        const searchData = JSON.parse(storedQuery);
+        
+        // Only store routes that are part of the search flow
+        const isSearchRoute = location.pathname === '/search' && location.search;
+        const isArtistRoute = location.pathname !== '/search' && 
+          !location.pathname.startsWith('/my-chord-sheets') && 
+          !location.pathname.startsWith('/upload') && 
+          location.pathname !== '/' &&
+          location.pathname.split('/').filter(segment => segment.length > 0).length === 1;
+        
+        if (isSearchRoute || isArtistRoute) {
+          searchData.lastRoute = location.pathname + location.search;
+          sessionStorage.setItem(SEARCH_QUERY_KEY, JSON.stringify(searchData));
+          console.log('🔄 useSearchTabLogic: updated route in session storage:', searchData.lastRoute);
+        } else {
+          console.log('🔄 useSearchTabLogic: skipping route storage (not search flow):', location.pathname);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to update route in session storage:', error);
+    }
+  }, [location.pathname, location.search]);
+
+  // Update route in session storage whenever location changes
+  useEffect(() => {
+    saveCurrentRoute();
+  }, [saveCurrentRoute]);
 
   // Clear search query from session storage
   const clearSearchQueryFromSession = useCallback(() => {

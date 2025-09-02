@@ -14,7 +14,6 @@ import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
-import { urlPersistenceService } from "@/services/url-persistence.service";
 
 interface TabContainerProps {
   activeTab: string;
@@ -40,39 +39,10 @@ const TabContainer = ({
   // Debug log to see if TabContainer is rendered
   console.log('🔄 TabContainer: component rendered', {
     pathname: location.pathname,
-    activeTab,
-    lastSearchUrl: urlPersistenceService.getLastSearchUrl()
+    activeTab
   });
 
-  // Track when we're on a search-related page and store the URL
-  useEffect(() => {
-    const currentPath = location.pathname + location.search;
-
-    console.log('🔄 TabContainer: tracking URL:', {
-      currentPath,
-      pathname: location.pathname,
-      search: location.search,
-      isSearchPage: location.pathname === '/search',
-      isMyChordSheets: location.pathname.startsWith('/my-chord-sheets'),
-      isUpload: location.pathname.startsWith('/upload'),
-      isRoot: location.pathname === '/',
-      shouldStore: location.pathname === '/search' ||
-        (!location.pathname.startsWith('/my-chord-sheets') &&
-          !location.pathname.startsWith('/upload') &&
-          location.pathname !== '/')
-    });
-
-    // Store URL if it's a search page or an artist page (not basic app tabs)
-    if (location.pathname === '/search' ||
-      (!location.pathname.startsWith('/my-chord-sheets') &&
-        !location.pathname.startsWith('/upload') &&
-        location.pathname !== '/')) {
-      console.log('🔄 TabContainer: storing URL:', currentPath);
-      urlPersistenceService.setLastSearchUrl(currentPath);
-    } else {
-      console.log('🔄 TabContainer: not storing URL (basic app tab)');
-    }
-  }, [location.pathname, location.search]);
+  // No more URL tracking - we'll reconstruct from search query when needed
 
   // Scroll to chord display when needed
   useEffect(() => {
@@ -82,40 +52,26 @@ const TabContainer = ({
   }, [selectedSong]);
 
   const navigateToSearch = () => {
-    const lastSearchUrl = urlPersistenceService.getLastSearchUrl();
-    console.log('🔄 TabContainer: navigateToSearch called, lastSearchUrl:', lastSearchUrl);
+    console.log('🔄 TabContainer: navigateToSearch called');
     
-    // First priority: use the stored search URL from service
-    if (lastSearchUrl) {
-      // Check if the stored URL is an artist route (/:artist)
-      const isArtistRoute = lastSearchUrl.startsWith('/') && 
-        !lastSearchUrl.startsWith('/search') && 
-        !lastSearchUrl.startsWith('/my-chord-sheets') && 
-        !lastSearchUrl.startsWith('/upload') &&
-        lastSearchUrl !== '/' &&
-        lastSearchUrl.split('/').filter(segment => segment.length > 0).length === 1;
-      
-      console.log('🔄 TabContainer: URL analysis:', {
-        lastSearchUrl,
-        isArtistRoute,
-        isSearchRoute: lastSearchUrl.startsWith('/search')
-      });
-      
-      if (isArtistRoute) {
-        // For artist routes, navigate directly to the artist URL
-        // The search tab will handle artist routes properly
-        console.log('🔄 TabContainer: navigating to artist route:', lastSearchUrl);
-        navigate(lastSearchUrl);
-        return;
-      } else if (lastSearchUrl.startsWith('/search')) {
-        // For search routes, navigate to the stored search URL
-        console.log('🔄 TabContainer: navigating to search route:', lastSearchUrl);
-        navigate(lastSearchUrl);
-        return;
+    // Try to restore the last route from session storage
+    try {
+      const storedQuery = sessionStorage.getItem('chordium_search_query');
+      if (storedQuery) {
+        const { lastRoute } = JSON.parse(storedQuery);
+        
+        if (lastRoute) {
+          // Navigate to the stored route (search with query or artist page)
+          console.log('🔄 TabContainer: navigating to stored route:', lastRoute);
+          navigate(lastRoute);
+          return;
+        }
       }
+    } catch (error) {
+      console.warn('Failed to restore route from session storage:', error);
     }
-
-    // Final fallback: go to basic search page
+    
+    // Fallback: go to basic search page
     console.log('🔄 TabContainer: navigating to fallback search page');
     navigate("/search");
   };
