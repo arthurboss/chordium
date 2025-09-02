@@ -8,7 +8,6 @@ import type {
 } from "./useSearchTabLogic.types";
 
 import { useInitSearchStateEffect } from "./useInitSearchStateEffect";
-import { useInitArtistPageEffect } from "./useInitArtistPageEffect";
 
 export function useSearchTabLogic(
   props: SearchTabLogicProps
@@ -73,7 +72,7 @@ export function useSearchTabLogic(
     setHasSearched(!!(urlParams.artist || urlParams.song));
   }, [urlParams]);
 
-  useInitSearchStateEffect(
+  useInitSearchStateEffect({
     location,
     isInitialized,
     setArtistInput,
@@ -86,19 +85,11 @@ export function useSearchTabLogic(
     setOriginalSearchSong,
     updateSearchStateWithOriginal,
     setHasSearched,
-    setShouldFetch
-  );
-  useInitArtistPageEffect(
-    location,
-    isOnArtistPage,
-    getCurrentArtistPath,
-    isInitialized,
+    setShouldFetch,
     setActiveArtist,
-    setArtistInput,
-    setPrevArtistInput,
-    setSubmittedArtist,
-    setHasSearched
-  );
+    isOnArtistPage,
+    getCurrentArtistPath
+  });
 
   function handleInputChange(artistValue: string, songValue: string) {
     setArtistInput(artistValue);

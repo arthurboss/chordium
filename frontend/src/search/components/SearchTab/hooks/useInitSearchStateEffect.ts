@@ -1,20 +1,46 @@
 import { useEffect, useRef } from "react";
+import { fromSlug } from "@/utils/url-slug-utils";
+import type { Artist } from "@chordium/types";
 
-export function useInitSearchStateEffect(
-  location: { search: string; pathname: string },
-  isInitialized: React.MutableRefObject<boolean>,
-  setArtistInput: (artist: string) => void,
-  setSongInput: (song: string) => void,
-  setPrevArtistInput: (artist: string) => void,
-  setPrevSongInput: (song: string) => void,
-  setSubmittedArtist: (artist: string) => void,
-  setSubmittedSong: (song: string) => void,
-  setOriginalSearchArtist: (artist: string | null) => void,
-  setOriginalSearchSong: (song: string | null) => void,
-  updateSearchState: (state: { artist: string; song: string; results: any[] }) => void,
-  setHasSearched: (val: boolean) => void,
-  setShouldFetch: (val: boolean) => void
-) {
+interface InitSearchStateOptions {
+  location: { search: string; pathname: string };
+  isInitialized: React.MutableRefObject<boolean>;
+  setArtistInput: (artist: string) => void;
+  setSongInput: (song: string) => void;
+  setPrevArtistInput: (artist: string) => void;
+  setPrevSongInput: (song: string) => void;
+  setSubmittedArtist: (artist: string) => void;
+  setSubmittedSong: (song: string) => void;
+  setOriginalSearchArtist: (artist: string | null) => void;
+  setOriginalSearchSong: (song: string | null) => void;
+  updateSearchStateWithOriginal: (state: { artist: string; song: string; results: unknown[] }) => void;
+  setHasSearched: (val: boolean) => void;
+  setShouldFetch: (val: boolean) => void;
+  setActiveArtist: (artist: Artist) => void;
+  isOnArtistPage: () => boolean;
+  getCurrentArtistPath: () => string | null;
+}
+
+export function useInitSearchStateEffect(options: InitSearchStateOptions) {
+  const {
+    location,
+    isInitialized,
+    setArtistInput,
+    setSongInput,
+    setPrevArtistInput,
+    setPrevSongInput,
+    setSubmittedArtist,
+    setSubmittedSong,
+    setOriginalSearchArtist,
+    setOriginalSearchSong,
+    updateSearchStateWithOriginal,
+    setHasSearched,
+    setShouldFetch,
+    setActiveArtist,
+    isOnArtistPage,
+    getCurrentArtistPath
+  } = options;
+
   const lastProcessedParams = useRef<string>('');
 
   useEffect(() => {
@@ -23,11 +49,17 @@ export function useInitSearchStateEffect(
     console.log('🔄 useInitSearchStateEffect: resetting initialization flag for pathname:', location.pathname);
     isInitialized.current = false;
     lastProcessedParams.current = '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   useEffect(() => {
-    console.log('🔄 useInitSearchStateEffect: checking pathname:', location.pathname);
-    // Only process search parameters when we're actually on the search page
+    console.log('🔄 useInitSearchStateEffect: checking route:', {
+      pathname: location.pathname,
+      isOnArtistPage: isOnArtistPage(),
+      isInitialized: isInitialized.current
+    });
+
+    // Handle /search route with query parameters
     if (location.pathname === '/search') {
       const searchParams = new URLSearchParams(location.search);
       const artistParam = searchParams.get('artist');
@@ -57,7 +89,7 @@ export function useInitSearchStateEffect(
           // Preserve the original search query for navigation back
           setOriginalSearchArtist(artist);
           setOriginalSearchSong(song);
-          updateSearchState({ artist, song, results: [] });
+          updateSearchStateWithOriginal({ artist, song, results: [] });
           setHasSearched(true);
           setShouldFetch(true);
           isInitialized.current = true;
@@ -71,8 +103,42 @@ export function useInitSearchStateEffect(
         isInitialized.current = false;
         lastProcessedParams.current = '';
       }
-    } else {
-      console.log('🔄 useInitSearchStateEffect: not on search page, skipping');
     }
-  }, [location.search, location.pathname, updateSearchState]);
+    // Handle /:artist route
+    else if (isOnArtistPage() && !isInitialized.current) {
+      const artistPath = getCurrentArtistPath();
+      console.log('🔄 useInitSearchStateEffect: artist path found:', artistPath);
+      
+      if (artistPath) {
+        const artistName = fromSlug(artistPath);
+        console.log('🔄 useInitSearchStateEffect: initializing artist page for:', artistName);
+        
+        setActiveArtist({
+          displayName: artistName,
+          path: artistPath,
+          songCount: null,
+        });
+        
+        // Set the input field to show the artist name for display purposes
+        // but don't overwrite the submitted search state
+        setArtistInput(artistName);
+        setPrevArtistInput(artistName);
+        
+        // Don't set submittedArtist here - preserve the original search query
+        // This allows the back button to return to the original search results
+        setHasSearched(true);
+        
+        // Note: Don't set setShouldFetch(true) here because that would trigger
+        // an artist search instead of artist songs fetching.
+        // The activeArtist effect in useSearchReducer will handle songs fetching.
+        isInitialized.current = true;
+        console.log('🔄 useInitSearchStateEffect: artist page initialized successfully');
+      } else {
+        console.log('🔄 useInitSearchStateEffect: no artist path found');
+      }
+    } else {
+      console.log('🔄 useInitSearchStateEffect: not on search or artist page, or already initialized');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, location.pathname, updateSearchStateWithOriginal, isOnArtistPage, getCurrentArtistPath]);
 }
