@@ -13,7 +13,8 @@ import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
 const ChordViewer = lazy(() => import("./pages/chord-viewer"));
-const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
+// Temporarily removed SmartRouteHandler to fix rendering issues
+// const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
 const queryClient = createQueryClientWithErrorHandling();
 
@@ -83,13 +84,13 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Route for artist pages: /artist - with validation
+        // Route for artist pages: /:artist - temporarily simplified
         path: ":artist",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
-                <SmartRouteHandler />
+                <Home />
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
@@ -111,13 +112,13 @@ const router = createBrowserRouter([
         )
       },
       {
-        // Catch-all route for 404
+        // Catch-all route for 404 - temporarily simplified
         path: "*",
         element: (
           <RouteErrorBoundary>
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
-                <SmartRouteHandler />
+                <Home />
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
