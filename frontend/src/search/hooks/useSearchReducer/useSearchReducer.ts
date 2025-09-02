@@ -84,6 +84,7 @@ export const useSearchReducer = ({
     state.activeArtist,
     fetchArtistSongsData,
     clearArtistSongsFetch,
+    dispatch,
   ]);
 
   // Effect: Handle filter changes for artist songs
@@ -91,7 +92,7 @@ export const useSearchReducer = ({
     if (state.artistSongs) {
       dispatch({ type: "FILTER_ARTIST_SONGS", filter: filterSong });
     }
-  }, [filterSong, state.artistSongs]);
+  }, [filterSong, state.artistSongs, dispatch]);
 
   // Generate UI state data
   const stateData = useMemo(() => determineUIState(state), [state]);

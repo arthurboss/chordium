@@ -1,4 +1,4 @@
-import { useState, useRef, useTransition, useEffect } from "react";
+import { useState, useRef, useTransition, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toSlug } from "@/utils/url-slug-utils";
 import { useNavigation } from "@/hooks/navigation";
@@ -48,26 +48,30 @@ export function useSearchTabLogic(
     setHasSearched(!!(state.artist || state.song));
   };
 
+  // Extract URL parameters using useMemo to prevent unnecessary recalculations
+  const urlParams = useMemo(() => {
+    const artistParam = location.search.split('artist=')[1]?.split('&')[0] || "";
+    const songParam = location.search.split('song=')[1]?.split('&')[0] || "";
+    return { artist: artistParam, song: songParam };
+  }, [location.search]);
+
   // Sync local state with URL parameters when it changes
   useEffect(() => {
     console.log('🔄 useSearchTabLogic: syncing state with URL parameters:', {
-      artist: location.search.split('artist=')[1]?.split('&')[0] || "",
-      song: location.search.split('song=')[1]?.split('&')[0] || ""
+      artist: urlParams.artist,
+      song: urlParams.song
     });
     
-    const artistParam = location.search.split('artist=')[1]?.split('&')[0] || "";
-    const songParam = location.search.split('song=')[1]?.split('&')[0] || "";
-    
-    setArtistInput(artistParam);
-    setSongInput(songParam);
-    setPrevArtistInput(artistParam);
-    setPrevSongInput(songParam);
-    setSubmittedArtist(artistParam);
-    setSubmittedSong(songParam);
-    setOriginalSearchArtist(artistParam);
-    setOriginalSearchSong(songParam);
-    setHasSearched(!!(artistParam || songParam));
-  }, [location.search]);
+    setArtistInput(urlParams.artist);
+    setSongInput(urlParams.song);
+    setPrevArtistInput(urlParams.artist);
+    setPrevSongInput(urlParams.song);
+    setSubmittedArtist(urlParams.artist);
+    setSubmittedSong(urlParams.song);
+    setOriginalSearchArtist(urlParams.artist);
+    setOriginalSearchSong(urlParams.song);
+    setHasSearched(!!(urlParams.artist || urlParams.song));
+  }, [urlParams]);
 
   useInitSearchStateEffect(
     location,
