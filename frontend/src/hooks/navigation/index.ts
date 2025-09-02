@@ -14,15 +14,7 @@ export type {
   ArtistNavigationMethods,
   NavigationUtilityMethods,
   NavigationMethods,
-  UrlPreservationConfig,
 } from "./navigation.types";
 
-// Utilities
-export { getUrlPreservationConfig } from "./url-preservation";
-export { 
-  storeNavigationPath, 
-  getNavigationPath, 
-  clearNavigationPath,
-  isMyChordSheetsPath,
-  isSearchPath 
-} from "@/utils/navigation-path-storage";
+// Note: Navigation path storage utilities have been removed
+// Browser history now handles navigation automatically

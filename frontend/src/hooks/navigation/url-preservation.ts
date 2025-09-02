@@ -1,47 +1,13 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { storeNavigationPath } from "@/utils/navigation-path-storage";
-import type { UrlPreservationConfig } from "./navigation.types";
+// No imports needed - this hook is now a no-op
 
 /**
- * Determines if the current path should be preserved as original search URL
+ * This hook is no longer needed since we're using browser history
+ * for navigation instead of manual path storage.
  * 
- * @param pathname - Current location pathname
- * @param search - Current location search parameters
- * @returns URL preservation configuration
- */
-export function getUrlPreservationConfig(pathname: string, search: string): UrlPreservationConfig {
-  const currentPath = pathname + search;
-  
-  const isBasicAppTab = pathname === '/my-chord-sheets' ||
-    pathname === '/upload' ||
-    (pathname === '/search' && !search);
-  
-  // Don't auto-store chord sheet URLs (they follow the pattern /:artist/:song)
-  const isChordSheetPath = pathname.split('/').filter(Boolean).length === 2 &&
-    !pathname.startsWith('/search');
-  
-  return {
-    isBasicAppTab,
-    isChordSheetPath,
-    currentPath
-  };
-}
-
-/**
- * Hook that automatically preserves navigation paths during navigation
- * 
- * Prevents chord sheet URLs from overwriting navigation paths and maintains
- * navigation state for proper back button functionality.
+ * Browser history automatically maintains the navigation stack,
+ * making manual path tracking unnecessary and potentially error-prone.
  */
 export function useUrlPreservation(): void {
-  const location = useLocation();
-
-  useEffect(() => {
-    const config = getUrlPreservationConfig(location.pathname, location.search);
-    
-    if (!config.isBasicAppTab && !config.isChordSheetPath) {
-      storeNavigationPath(config.currentPath);
-    }
-  }, [location.pathname, location.search]);
+  // No-op: browser history handles navigation automatically
+  // This hook is kept for backward compatibility but does nothing
 }

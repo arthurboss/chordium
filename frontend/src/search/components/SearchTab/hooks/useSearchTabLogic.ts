@@ -1,6 +1,5 @@
-import { useState, useRef, useTransition, useEffect, useMemo } from "react";
+import { useState, useRef, useTransition, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { toSlug } from "@/utils/url-slug-utils";
 import { useNavigation } from "@/hooks/navigation";
 import type {
   SearchTabLogicProps,
@@ -37,6 +36,64 @@ export function useSearchTabLogic(
   const [shouldFetch, setShouldFetch] = useState(false);
   const [activeArtist, setActiveArtist] = useState(null);
 
+  // Session storage keys for search query persistence
+  const SEARCH_QUERY_KEY = 'chordium_search_query';
+
+  // Load search query from session storage on mount
+  useEffect(() => {
+    try {
+      const storedQuery = sessionStorage.getItem(SEARCH_QUERY_KEY);
+      if (storedQuery) {
+        const { artist, song, timestamp } = JSON.parse(storedQuery);
+        const isRecent = Date.now() - timestamp < 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (isRecent && (artist || song)) {
+          console.log('🔄 useSearchTabLogic: restoring search query from session storage:', { artist, song });
+          setOriginalSearchArtist(artist || '');
+          setOriginalSearchSong(song || '');
+          setArtistInput(artist || '');
+          setSongInput(song || '');
+          setPrevArtistInput(artist || '');
+          setPrevSongInput(song || '');
+          setSubmittedArtist(artist || '');
+          setSubmittedSong(song || '');
+          setHasSearched(true);
+        } else {
+          // Clear expired or invalid stored query
+          sessionStorage.removeItem(SEARCH_QUERY_KEY);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to restore search query from session storage:', error);
+      sessionStorage.removeItem(SEARCH_QUERY_KEY);
+    }
+  }, []);
+
+  // Save search query to session storage whenever it changes
+  const saveSearchQueryToSession = useCallback((artist: string, song: string) => {
+    try {
+      const searchData = {
+        artist,
+        song,
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem(SEARCH_QUERY_KEY, JSON.stringify(searchData));
+      console.log('🔄 useSearchTabLogic: saved search query to session storage:', searchData);
+    } catch (error) {
+      console.warn('Failed to save search query to session storage:', error);
+    }
+  }, []);
+
+  // Clear search query from session storage
+  const clearSearchQueryFromSession = useCallback(() => {
+    try {
+      sessionStorage.removeItem(SEARCH_QUERY_KEY);
+      console.log('🔄 useSearchTabLogic: cleared search query from session storage');
+    } catch (error) {
+      console.warn('Failed to clear search query from session storage:', error);
+    }
+  }, []);
+
   // Helper function to update search state (now just updates local state)
   const updateSearchStateWithOriginal = (state: { artist: string; song: string; results: any[] }) => {
     // Update local state directly instead of going through context
@@ -49,28 +106,70 @@ export function useSearchTabLogic(
 
   // Extract URL parameters using useMemo to prevent unnecessary recalculations
   const urlParams = useMemo(() => {
-    const artistParam = location.search.split('artist=')[1]?.split('&')[0] || "";
-    const songParam = location.search.split('song=')[1]?.split('&')[0] || "";
-    return { artist: artistParam, song: songParam };
+    const searchParams = new URLSearchParams(location.search);
+    const artistParam = searchParams.get('artist') || "";
+    const songParam = searchParams.get('song') || "";
+    
+    // Ensure proper decoding of URL parameters
+    const artist = decodeURIComponent(artistParam);
+    const song = decodeURIComponent(songParam);
+    
+    return { artist, song };
   }, [location.search]);
 
   // Sync local state with URL parameters when it changes
   useEffect(() => {
     console.log('🔄 useSearchTabLogic: syncing state with URL parameters:', {
       artist: urlParams.artist,
-      song: urlParams.song
+      song: urlParams.song,
+      currentOriginalArtist: originalSearchArtist,
+      currentOriginalSong: originalSearchSong
     });
     
-    setArtistInput(urlParams.artist);
-    setSongInput(urlParams.song);
-    setPrevArtistInput(urlParams.artist);
-    setPrevSongInput(urlParams.song);
-    setSubmittedArtist(urlParams.artist);
-    setSubmittedSong(urlParams.song);
-    setOriginalSearchArtist(urlParams.artist);
-    setOriginalSearchSong(urlParams.song);
-    setHasSearched(!!(urlParams.artist || urlParams.song));
-  }, [urlParams]);
+    // Only update state if we have URL parameters AND we don't have an existing search query
+    // This prevents overwriting the original search query once it's been submitted
+    if ((urlParams.artist || urlParams.song) && !hasSearched) {
+      console.log('🔄 useSearchTabLogic: updating state with URL params (new search)');
+      setArtistInput(urlParams.artist);
+      setSongInput(urlParams.song);
+      setPrevArtistInput(urlParams.artist);
+      setPrevSongInput(urlParams.song);
+      setSubmittedArtist(urlParams.artist);
+      setSubmittedSong(urlParams.song);
+      setOriginalSearchArtist(urlParams.artist);
+      setOriginalSearchSong(urlParams.song);
+      setHasSearched(true);
+    } else if (!urlParams.artist && !urlParams.song && !hasSearched) {
+      // No URL parameters and no existing search - reset everything
+      console.log('🔄 useSearchTabLogic: no URL params and no existing search, resetting');
+      setArtistInput('');
+      setSongInput('');
+      setPrevArtistInput('');
+      setPrevSongInput('');
+      setSubmittedArtist('');
+      setSubmittedSong('');
+      setOriginalSearchArtist('');
+      setOriginalSearchSong('');
+      setHasSearched(false);
+    } else {
+      // We have an existing search query - preserve it, don't overwrite
+      console.log('🔄 useSearchTabLogic: preserving existing search query:', {
+        originalSearchArtist,
+        originalSearchSong,
+        hasSearched
+      });
+      
+      // Restore the original search query to input fields for display
+      if (originalSearchArtist || originalSearchSong) {
+        setArtistInput(originalSearchArtist || '');
+        setSongInput(originalSearchSong || '');
+        setPrevArtistInput(originalSearchArtist || '');
+        setPrevSongInput(originalSearchSong || '');
+        setSubmittedArtist(originalSearchArtist || '');
+        setSubmittedSong(originalSearchSong || '');
+      }
+    }
+  }, [urlParams, hasSearched, originalSearchArtist, originalSearchSong]);
 
   useInitSearchStateEffect({
     location,
@@ -122,6 +221,9 @@ export function useSearchTabLogic(
     setOriginalSearchArtist(artistValue);
     setOriginalSearchSong(songValue);
     
+    // Save search query to session storage for persistence across component unmounts
+    saveSearchQueryToSession(artistValue, songValue);
+    
     // Determine search type based on input values
     // Following backend logic in determineSearchType()
     let searchType: "artist" | "song" | "artist-song";
@@ -168,8 +270,8 @@ export function useSearchTabLogic(
       const artistToUse = originalSearchArtist || submittedArtist;
       const songToUse = originalSearchSong || submittedSong;
       
-      if (artistToUse) params.set("artist", toSlug(artistToUse));
-      if (songToUse) params.set("song", toSlug(songToUse));
+      if (artistToUse) params.set("artist", artistToUse);
+      if (songToUse) params.set("song", songToUse);
       const searchUrl = params.toString()
         ? `/search?${params.toString()}`
         : "/search";
@@ -190,7 +292,11 @@ export function useSearchTabLogic(
     setShouldFetch(false);
     setActiveArtist(null);
     setLoading(false);
-                   updateSearchStateWithOriginal({ artist: "", song: "", results: [] });
+    
+    // Clear search query from session storage
+    clearSearchQueryFromSession();
+    
+    updateSearchStateWithOriginal({ artist: "", song: "", results: [] });
     startTransition(() => {
       navigate("/search", { replace: true });
     });

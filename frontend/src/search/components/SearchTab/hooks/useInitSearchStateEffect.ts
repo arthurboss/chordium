@@ -72,24 +72,21 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
       });
       
       if (artistParam || songParam) {
-        // Always restore the raw value from the URL
-        const artist = artistParam || '';
-        const song = songParam || '';
-        // Create a key to track what we've processed
+        // Only initialize if we haven't already processed these parameters
+        // This prevents overwriting an existing search query
         const currentParamsKey = `${artistParam || ''}|${songParam || ''}`;
-        // Only process if we haven't processed these exact parameters before
         if (currentParamsKey !== lastProcessedParams.current && !isInitialized.current) {
           console.log('🔄 useInitSearchStateEffect: initializing search state from URL params');
-          setArtistInput(artist);
-          setSongInput(song);
-          setPrevArtistInput(artist);
-          setPrevSongInput(song);
-          setSubmittedArtist(artist);
-          setSubmittedSong(song);
+          setArtistInput(artistParam || '');
+          setSongInput(songParam || '');
+          setPrevArtistInput(artistParam || '');
+          setPrevSongInput(songParam || '');
+          setSubmittedArtist(artistParam || '');
+          setSubmittedSong(songParam || '');
           // Preserve the original search query for navigation back
-          setOriginalSearchArtist(artist);
-          setOriginalSearchSong(song);
-          updateSearchStateWithOriginal({ artist, song, results: [] });
+          setOriginalSearchArtist(artistParam);
+          setOriginalSearchSong(songParam);
+          updateSearchStateWithOriginal({ artist: artistParam || '', song: songParam || '', results: [] });
           setHasSearched(true);
           setShouldFetch(true);
           isInitialized.current = true;
@@ -98,9 +95,11 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
           console.log('🔄 useInitSearchStateEffect: skipping initialization - already processed or initialized');
         }
       } else {
-        // Reset when no search params
-        console.log('🔄 useInitSearchStateEffect: no search params, resetting');
-        isInitialized.current = false;
+        // No search params - don't reset if we have an existing search query
+        console.log('🔄 useInitSearchStateEffect: no search params');
+        if (!isInitialized.current) {
+          isInitialized.current = true;
+        }
         lastProcessedParams.current = '';
       }
     }
@@ -119,10 +118,28 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
           songCount: null,
         });
         
-        // Set the input field to show the artist name for display purposes
-        // but don't overwrite the submitted search state
-        setArtistInput(artistName);
-        setPrevArtistInput(artistName);
+        // IMPORTANT: Restore the original search query from session storage
+        // This ensures the input fields show the original search query
+        try {
+          const storedQuery = sessionStorage.getItem('chordium_search_query');
+          if (storedQuery) {
+            const { artist, song } = JSON.parse(storedQuery);
+            if (artist || song) {
+              console.log('🔄 useInitSearchStateEffect: restoring search query from session storage:', { artist, song });
+              setArtistInput(artist || '');
+              setSongInput(song || '');
+              setPrevArtistInput(artist || '');
+              setPrevSongInput(song || '');
+              setSubmittedArtist(artist || '');
+              setSubmittedSong(song || '');
+              setOriginalSearchArtist(artist || '');
+              setOriginalSearchSong(song || '');
+              setHasSearched(true);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to restore search query from session storage:', error);
+        }
         
         // Don't set submittedArtist here - preserve the original search query
         // This allows the back button to return to the original search results

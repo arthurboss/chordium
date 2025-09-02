@@ -13,7 +13,6 @@ import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets
 import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { storeNavigationPath } from "@/utils/navigation-path-storage";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 import { urlPersistenceService } from "@/services/url-persistence.service";
 
@@ -135,9 +134,6 @@ const TabContainer = ({
   };
 
   const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
-    // Store that user is navigating from my-chord-sheets
-    storeNavigationPath('/my-chord-sheets');
-
     // For My Chord Sheets: Navigate directly to chord sheet page
     if (storedChordSheet.artist && storedChordSheet.title) {
       // Create URL-friendly slugs using Unicode-aware function
