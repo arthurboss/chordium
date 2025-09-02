@@ -5,7 +5,6 @@ import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
 
 import { useChordSheets } from "@/storage/hooks";
-import { useSearchRedirect } from "@/search/hooks/use-search-redirect";
 
 // Function to determine initial tab based on path
 const getInitialTab = (pathname: string): string => {
@@ -30,8 +29,6 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const { myChordSheets, refreshMyChordSheets } = useChordSheets();
-
-  useSearchRedirect();
 
   // Use the tab navigation hook for URL parameters and navigation
   useTabNavigation({

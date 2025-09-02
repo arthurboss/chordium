@@ -1,6 +1,5 @@
 import { useState, useRef, useTransition, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSearchState } from "../../../context";
 import { toSlug } from "@/utils/url-slug-utils";
 import { useNavigation } from "@/hooks/navigation";
 import type {
@@ -15,7 +14,6 @@ export function useSearchTabLogic(
   props: SearchTabLogicProps
 ): SearchTabLogicResult {
   const { setMySongs, setActiveTab } = props;
-  const { searchState, updateSearchState } = useSearchState();
   const [loading, setLoading] = useState(false);
   const [, startTransition] = useTransition();
   const navigate = useNavigate();
@@ -27,48 +25,49 @@ export function useSearchTabLogic(
     getCurrentArtistPath,
   } = useNavigation();
 
-  // Initialize state from search context or defaults
-  const [artistInput, setArtistInput] = useState(searchState.query.artist || "");
-  const [songInput, setSongInput] = useState(searchState.query.song || "");
-  const [prevArtistInput, setPrevArtistInput] = useState(searchState.query.artist || "");
-  const [prevSongInput, setPrevSongInput] = useState(searchState.query.song || "");
-  const [submittedArtist, setSubmittedArtist] = useState(searchState.query.artist || "");
-  const [submittedSong, setSubmittedSong] = useState(searchState.query.song || "");
-  const [originalSearchArtist, setOriginalSearchArtist] = useState(searchState.originalQuery?.artist || "");
-  const [originalSearchSong, setOriginalSearchSong] = useState(searchState.originalQuery?.song || "");
-  const [hasSearched, setHasSearched] = useState(!!(searchState.query.artist || searchState.query.song));
+  // Initialize state from URL parameters or defaults
+  const [artistInput, setArtistInput] = useState("");
+  const [songInput, setSongInput] = useState("");
+  const [prevArtistInput, setPrevArtistInput] = useState("");
+  const [prevSongInput, setPrevSongInput] = useState("");
+  const [submittedArtist, setSubmittedArtist] = useState("");
+  const [submittedSong, setSubmittedSong] = useState("");
+  const [originalSearchArtist, setOriginalSearchArtist] = useState("");
+  const [originalSearchSong, setOriginalSearchSong] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
   const [shouldFetch, setShouldFetch] = useState(false);
   const [activeArtist, setActiveArtist] = useState(null);
 
-  // Helper function to update search state with original query
-  const updateSearchStateWithOriginal = (searchType: "artist" | "song" | "artist-song", query: { artist: string; song: string }, originalQuery?: { artist: string; song: string }) => {
-    updateSearchState({
-      searchType,
-      query,
-      originalQuery: originalQuery || query,
-      results: []
-    });
+  // Helper function to update search state (now just updates local state)
+  const updateSearchStateWithOriginal = (state: { artist: string; song: string; results: any[] }) => {
+    // Update local state directly instead of going through context
+    setSubmittedArtist(state.artist);
+    setSubmittedSong(state.song);
+    setOriginalSearchArtist(state.artist);
+    setOriginalSearchSong(state.song);
+    setHasSearched(!!(state.artist || state.song));
   };
 
-  // Sync local state with search context when it changes
+  // Sync local state with URL parameters when it changes
   useEffect(() => {
-    console.log('🔄 useSearchTabLogic: syncing state with search context:', {
-      queryArtist: searchState.query.artist,
-      querySong: searchState.query.song,
-      originalArtist: searchState.originalQuery?.artist,
-      originalSong: searchState.originalQuery?.song
+    console.log('🔄 useSearchTabLogic: syncing state with URL parameters:', {
+      artist: location.search.split('artist=')[1]?.split('&')[0] || "",
+      song: location.search.split('song=')[1]?.split('&')[0] || ""
     });
     
-    setArtistInput(searchState.query.artist || "");
-    setSongInput(searchState.query.song || "");
-    setPrevArtistInput(searchState.query.artist || "");
-    setPrevSongInput(searchState.query.song || "");
-    setSubmittedArtist(searchState.query.artist || "");
-    setSubmittedSong(searchState.query.song || "");
-    setOriginalSearchArtist(searchState.originalQuery?.artist || "");
-    setOriginalSearchSong(searchState.originalQuery?.song || "");
-    setHasSearched(!!(searchState.query.artist || searchState.query.song));
-  }, [searchState.query.artist, searchState.query.song, searchState.originalQuery?.artist, searchState.originalQuery?.song]);
+    const artistParam = location.search.split('artist=')[1]?.split('&')[0] || "";
+    const songParam = location.search.split('song=')[1]?.split('&')[0] || "";
+    
+    setArtistInput(artistParam);
+    setSongInput(songParam);
+    setPrevArtistInput(artistParam);
+    setPrevSongInput(songParam);
+    setSubmittedArtist(artistParam);
+    setSubmittedSong(songParam);
+    setOriginalSearchArtist(artistParam);
+    setOriginalSearchSong(songParam);
+    setHasSearched(!!(artistParam || songParam));
+  }, [location.search]);
 
   useInitSearchStateEffect(
     location,
@@ -81,7 +80,7 @@ export function useSearchTabLogic(
     setSubmittedSong,
     setOriginalSearchArtist,
     setOriginalSearchSong,
-    updateSearchState,
+    updateSearchStateWithOriginal,
     setHasSearched,
     setShouldFetch
   );
@@ -140,7 +139,7 @@ export function useSearchTabLogic(
     } else {
       searchType = "artist"; // Default fallback
     }
-    updateSearchStateWithOriginal(searchType, { artist: artistValue, song: songValue });
+         updateSearchStateWithOriginal({ artist: artistValue, song: songValue, results: [] });
     setHasSearched(true);
     setShouldFetch(true);
     startTransition(() => {
@@ -196,7 +195,7 @@ export function useSearchTabLogic(
     setShouldFetch(false);
     setActiveArtist(null);
     setLoading(false);
-         updateSearchStateWithOriginal("artist", { artist: "", song: "" });
+                   updateSearchStateWithOriginal({ artist: "", song: "", results: [] });
     startTransition(() => {
       navigate("/search", { replace: true });
     });
@@ -211,7 +210,12 @@ export function useSearchTabLogic(
     songInput,
     clearDisabled,
     hasSearched,
-    searchState,
+    searchState: { 
+      searchType: "artist", // Default search type
+      query: { artist: artistInput, song: songInput }, 
+      originalQuery: { artist: originalSearchArtist, song: originalSearchSong }, 
+      results: [] 
+    }, // Mock searchState for now
     submittedArtist,
     submittedSong,
     shouldFetch,
