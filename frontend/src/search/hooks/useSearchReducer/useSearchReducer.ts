@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useState, useCallback, useMemo } from "react";
+import { useReducer, useEffect, useCallback, useMemo } from "react";
 import type { Artist } from "@chordium/types";
 import { useSongActions } from "../useSongActions";
 import { initialSearchState } from "./core/initialSearchState";
@@ -21,22 +21,19 @@ export const useSearchReducer = ({
 }: UseSearchReducerOptions) => {
   const [state, dispatch] = useReducer(searchStateReducer, initialSearchState);
 
-  // Search fetch state
-  const [searchFetching, setSearchFetching] = useState(false);
-  const [artistSongsFetching, setArtistSongsFetching] = useState(false);
-
+  // Loading state calculation - now uses consolidated state
   const isLoading = useMemo(() => {
     return (
       state.loading ||
       state.artistSongsLoading ||
-      searchFetching ||
-      artistSongsFetching
+      state.searchFetching ||
+      state.artistSongsFetching
     );
   }, [
     state.loading,
     state.artistSongsLoading,
-    searchFetching,
-    artistSongsFetching,
+    state.searchFetching,
+    state.artistSongsFetching,
   ]);
 
   // Notify parent of loading changes
@@ -50,13 +47,13 @@ export const useSearchReducer = ({
   const { fetchSearchResults } = useSearchFetch({
     dispatch,
     onFetchComplete,
-    setSearchFetching,
+    setSearchFetching: (value) => dispatch({ type: "SET_SEARCH_FETCHING", fetching: value }),
   });
 
   // Artist songs fetch handler
   const { fetchArtistSongsData, clearArtistSongsFetch } = useArtistSongsFetch({
     dispatch,
-    setArtistSongsFetching,
+    setArtistSongsFetching: (value) => dispatch({ type: "SET_ARTIST_SONGS_FETCHING", fetching: value }),
   });
 
   // Effect: Handle search fetch when shouldFetch changes

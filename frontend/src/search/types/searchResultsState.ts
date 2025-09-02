@@ -14,4 +14,6 @@ export interface SearchResultsState {
   artists: Artist[];
   songs: Song[];
   filteredArtistSongs: Song[];
+  searchFetching: boolean;
+  artistSongsFetching: boolean;
 }

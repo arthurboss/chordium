@@ -89,6 +89,18 @@ export const searchStateReducer = (
         ),
       };
 
+    case "SET_SEARCH_FETCHING":
+      return {
+        ...state,
+        searchFetching: action.fetching,
+      };
+
+    case "SET_ARTIST_SONGS_FETCHING":
+      return {
+        ...state,
+        artistSongsFetching: action.fetching,
+      };
+
     default:
       return state;
   }

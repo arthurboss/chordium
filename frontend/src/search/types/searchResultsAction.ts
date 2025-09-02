@@ -11,4 +11,6 @@ export type SearchResultsAction =
   | { type: 'ARTIST_SONGS_SUCCESS'; songs: Song[] }
   | { type: 'ARTIST_SONGS_ERROR'; error: string }
   | { type: 'CLEAR_ARTIST' }
-  | { type: 'FILTER_ARTIST_SONGS'; filter: string };
+  | { type: 'FILTER_ARTIST_SONGS'; filter: string }
+  | { type: 'SET_SEARCH_FETCHING'; fetching: boolean }
+  | { type: 'SET_ARTIST_SONGS_FETCHING'; fetching: boolean };
