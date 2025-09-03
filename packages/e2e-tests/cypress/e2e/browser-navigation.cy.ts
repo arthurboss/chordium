@@ -72,12 +72,17 @@ describe('Browser Navigation Tests', () => {
     cy.get('body').should('not.contain', 'Not Found');
   });
 
-  it('should activate Search tab when URL has q parameter', () => {
+  it('should activate Search tab when URL has search parameters', () => {
     // Navigate to a search query URL
-    cy.visit('/search?q=test');
+    cy.visit('/search?artist=test&song=example');
     
     // Search tab should be active
     cy.get('[data-state="active"]').should('contain.text', 'Search');
+    
+    // Note: Input fields should NOT be populated from URL parameters
+    // They should only get values from session storage or user input
+    cy.get('input[placeholder="Artist"]').should('have.value', '');
+    cy.get('input[placeholder="Song"]').should('have.value', '');
   });
   
   // Testing a stub for browser back behavior - simulated through direct navigation
