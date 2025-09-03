@@ -15,4 +15,6 @@ export interface SearchContext {
  */
 export interface SearchDataState extends SearchContext {
   results: SearchResult[];
+  // Original search query for navigation back functionality
+  originalQuery?: SearchQuery;
 }

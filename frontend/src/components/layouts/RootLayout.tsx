@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { SearchStateProvider } from "@/search/context";
 import { QueryErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -12,7 +11,7 @@ import Header from "@/components/Header";
  */
 const RootLayout = () => {
   return (
-    <SearchStateProvider>
+    <>
       <Toaster />
       <Sonner />
       <QueryErrorBoundary>
@@ -20,7 +19,7 @@ const RootLayout = () => {
         <Outlet />
         <Footer />
       </QueryErrorBoundary>
-    </SearchStateProvider>
+    </>
   );
 };
 

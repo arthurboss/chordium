@@ -14,4 +14,9 @@ export const initialSearchState: SearchResultsState = {
   artists: [],
   songs: [],
   filteredArtistSongs: [],
+  
+  // API fetching states
+  searchFetching: false,
+  artistSongsFetching: false,
+  lastAppliedFilter: '', // Track last applied filter
 };

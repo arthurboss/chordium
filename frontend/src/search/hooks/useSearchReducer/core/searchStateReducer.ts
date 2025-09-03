@@ -80,6 +80,23 @@ export const searchStateReducer = (
         artistSongsError: null,
       };
 
+    case "CLEAR_SEARCH":
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        artists: [],
+        songs: [],
+        hasSearched: false,
+        activeArtist: null,
+        artistSongs: null,
+        filteredArtistSongs: [],
+        artistSongsError: null,
+        searchFetching: false,
+        artistSongsFetching: false,
+        lastAppliedFilter: '',
+      };
+
     case "FILTER_ARTIST_SONGS":
       return {
         ...state,
@@ -87,6 +104,19 @@ export const searchStateReducer = (
           state.artistSongs || [],
           action.filter
         ),
+        lastAppliedFilter: action.filter, // Track the last applied filter
+      };
+
+    case "SET_SEARCH_FETCHING":
+      return {
+        ...state,
+        searchFetching: action.fetching,
+      };
+
+    case "SET_ARTIST_SONGS_FETCHING":
+      return {
+        ...state,
+        artistSongsFetching: action.fetching,
       };
 
     default:

@@ -13,7 +13,6 @@ import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets
 import { toast } from "@/hooks/use-toast";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { storeNavigationPath } from "@/utils/navigation-path-storage";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 
 interface TabContainerProps {
@@ -37,21 +36,10 @@ const TabContainer = ({
   const location = useLocation();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
 
-  // Local state to track the last search URL for tab switching
-  const [lastSearchUrl, setLastSearchUrl] = useState<string | null>(null);
+  // Debug log to see if TabContainer is rendered
 
-  // Track when we're on a search-related page and store the URL
-  useEffect(() => {
-    const currentPath = location.pathname + location.search;
 
-    // Store URL if it's a search page or an artist page (not basic app tabs)
-    if (location.pathname === '/search' ||
-      (!location.pathname.startsWith('/my-chord-sheets') &&
-        !location.pathname.startsWith('/upload') &&
-        location.pathname !== '/')) {
-      setLastSearchUrl(currentPath);
-    }
-  }, [location.pathname, location.search]);
+  // No more URL tracking - we'll reconstruct from search query when needed
 
   // Scroll to chord display when needed
   useEffect(() => {
@@ -61,13 +49,23 @@ const TabContainer = ({
   }, [selectedSong]);
 
   const navigateToSearch = () => {
-    // First priority: use the stored search URL from local state
-    if (lastSearchUrl) {
-      navigate(lastSearchUrl);
-      return;
+    // Try to restore the last route from session storage
+    try {
+      const storedQuery = sessionStorage.getItem('chordium_search_query');
+      if (storedQuery) {
+        const { lastRoute } = JSON.parse(storedQuery);
+        
+        if (lastRoute) {
+          // Navigate to the stored route (search with query or artist page)
+          navigate(lastRoute);
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to restore route from session storage:', error);
     }
-
-    // Final fallback: go to basic search page
+    
+    // Fallback: go to basic search page
     navigate("/search");
   };
 
@@ -85,9 +83,6 @@ const TabContainer = ({
   };
 
   const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
-    // Store that user is navigating from my-chord-sheets
-    storeNavigationPath('/my-chord-sheets');
-
     // For My Chord Sheets: Navigate directly to chord sheet page
     if (storedChordSheet.artist && storedChordSheet.title) {
       // Create URL-friendly slugs using Unicode-aware function

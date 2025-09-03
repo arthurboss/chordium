@@ -23,6 +23,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onFetchComplete,
   onLoadingChange,
 }) => {
+
   const searchState = useSearchReducer({
     artist,
     song,

@@ -1,8 +1,6 @@
 import { useCallback } from "react";
 import type { Song } from "@chordium/types";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toSlug } from "@/utils/url-slug-utils";
-import { storeNavigationPath } from "@/utils/navigation-path-storage";
+import { useNavigate } from "react-router-dom";
 import type { UseSongActionsProps } from "./useSongActions.type";
 
 /**
@@ -20,16 +18,11 @@ export const useSongActions = ({
   memoizedSongs,
 }: UseSongActionsProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleView = useCallback(
     (songData: Song) => {
-      // Store the current search path before navigating away
-      const currentPath = location.pathname + location.search;
-      storeNavigationPath(currentPath);
-      
       // Navigate directly to chord sheet page using the song's path property
-      // This ensures we use the exact path format that the backend expects
+      // Browser history will automatically maintain the navigation stack
       if (songData.path) {
         const targetUrl = `/${songData.path}`;
 
@@ -38,7 +31,7 @@ export const useSongActions = ({
         });
       }
     },
-    [navigate, location]
+    [navigate]
   );
 
   const handleAdd = useCallback(

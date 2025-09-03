@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useState, useCallback, useMemo } from "react";
+import { useReducer, useEffect, useCallback, useMemo } from "react";
 import type { Artist } from "@chordium/types";
 import { useSongActions } from "../useSongActions";
 import { initialSearchState } from "./core/initialSearchState";
@@ -21,22 +21,19 @@ export const useSearchReducer = ({
 }: UseSearchReducerOptions) => {
   const [state, dispatch] = useReducer(searchStateReducer, initialSearchState);
 
-  // Search fetch state
-  const [searchFetching, setSearchFetching] = useState(false);
-  const [artistSongsFetching, setArtistSongsFetching] = useState(false);
-
+  // Loading state calculation - now uses consolidated state
   const isLoading = useMemo(() => {
     return (
       state.loading ||
       state.artistSongsLoading ||
-      searchFetching ||
-      artistSongsFetching
+      state.searchFetching ||
+      state.artistSongsFetching
     );
   }, [
     state.loading,
     state.artistSongsLoading,
-    searchFetching,
-    artistSongsFetching,
+    state.searchFetching,
+    state.artistSongsFetching,
   ]);
 
   // Notify parent of loading changes
@@ -50,48 +47,52 @@ export const useSearchReducer = ({
   const { fetchSearchResults } = useSearchFetch({
     dispatch,
     onFetchComplete,
-    setSearchFetching,
+    setSearchFetching: (value) => dispatch({ type: "SET_SEARCH_FETCHING", fetching: value }),
   });
 
   // Artist songs fetch handler
   const { fetchArtistSongsData, clearArtistSongsFetch } = useArtistSongsFetch({
     dispatch,
-    setArtistSongsFetching,
+    setArtistSongsFetching: (value) => dispatch({ type: "SET_ARTIST_SONGS_FETCHING", fetching: value }),
   });
 
-  // Effect: Handle search fetch when shouldFetch changes
+  // Memoized search type calculation to avoid recalculating on every render
+  const searchType = useMemo(() => {
+    if (song) return "song"; // Backend treats artist+song as song search
+    if (artist) return "artist";
+    return "artist"; // Default fallback
+  }, [artist, song]);
+
+  // Effect: Handle search fetch when shouldFetch changes - optimized with memoized search type
   useEffect(() => {
     if (shouldFetch && (artist || song)) {
-      // Determine searchType using the same logic as determineUIState
-      let searchType: "artist" | "song" | "artist-song" = "artist";
-      if (song) {
-        searchType = "song"; // Backend treats artist+song as song search
-      }
       fetchSearchResults(artist, song, searchType);
     }
-  }, [artist, song, shouldFetch, fetchSearchResults]);
+  }, [shouldFetch, searchType, fetchSearchResults]);
 
-  // Effect: Handle active artist changes
+  // Effect: Handle active artist changes - optimized to avoid unnecessary re-runs
   useEffect(() => {
-    if (activeArtist && activeArtist !== state.activeArtist) {
+    // Only run if activeArtist actually changed (comparing by path instead of object reference)
+    if (activeArtist && activeArtist.path !== state.activeArtist?.path) {
       fetchArtistSongsData(activeArtist);
     } else if (!activeArtist && state.activeArtist) {
       dispatch({ type: "CLEAR_ARTIST" });
       clearArtistSongsFetch();
     }
   }, [
-    activeArtist,
-    state.activeArtist,
+    activeArtist?.path, // Compare by path instead of full object
+    state.activeArtist?.path,
     fetchArtistSongsData,
     clearArtistSongsFetch,
+    dispatch,
   ]);
 
-  // Effect: Handle filter changes for artist songs
+  // Effect: Handle filter changes for artist songs - optimized to avoid unnecessary dispatches
   useEffect(() => {
-    if (state.artistSongs) {
+    if (state.artistSongs && filterSong !== state.lastAppliedFilter) {
       dispatch({ type: "FILTER_ARTIST_SONGS", filter: filterSong });
     }
-  }, [filterSong, state.artistSongs]);
+  }, [filterSong, state.artistSongs, state.lastAppliedFilter, dispatch]);
 
   // Generate UI state data
   const stateData = useMemo(() => determineUIState(state), [state]);
@@ -130,5 +131,6 @@ export const useSearchReducer = ({
     handleView: songActions.handleView,
     handleAdd: songActions.handleAdd,
     handleArtistSelect,
+    clearSearch: () => dispatch({ type: "CLEAR_SEARCH" }),
   };
 };

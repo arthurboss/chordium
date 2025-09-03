@@ -5,7 +5,6 @@ import { validateRoute } from '@/utils/route-validation';
 import OfflineFallback from '@/pages/OfflineFallback';
 import RedirectToHome from './RedirectToHome';
 import NotFound from '@/pages/NotFound';
-import { useSearchState } from '@/search/context';
 
 interface OfflineRouteHandlerProps {
   children: React.ReactNode;
@@ -22,14 +21,12 @@ const OfflineRouteHandler = ({ children }: OfflineRouteHandlerProps) => {
   const { isOffline } = useOffline();
   
   const { myChordSheets } = useChordSheets();
-  const { searchState } = useSearchState();
   
   // Debug logging
   console.log('OfflineRouteHandler:', {
     pathname: location.pathname,
     isOffline,
-    myChordSheetsCount: myChordSheets?.length || 0,
-    searchResultsCount: searchState.results.length
+    myChordSheetsCount: myChordSheets?.length || 0
   });
   
   // If online, render children normally
