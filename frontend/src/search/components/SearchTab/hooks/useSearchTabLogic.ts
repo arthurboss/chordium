@@ -35,19 +35,24 @@ export function useSearchTabLogic(
   const [hasSearched, setHasSearched] = useState(false);
   const [shouldFetch, setShouldFetch] = useState(false);
   const [activeArtist, setActiveArtist] = useState(null);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Session storage keys for search query persistence
   const SEARCH_QUERY_KEY = 'chordium_search_query';
 
   // Load search query from session storage on mount and when returning to search page
   useEffect(() => {
+    console.log('🔄 useSearchTabLogic: useEffect triggered - pathname:', location.pathname);
+    
     try {
       const storedQuery = sessionStorage.getItem(SEARCH_QUERY_KEY);
+      console.log('🔄 useSearchTabLogic: session storage contains:', storedQuery);
+      
       if (storedQuery) {
         const { artist, song } = JSON.parse(storedQuery);
         
         if (artist || song) {
-          console.log('🔄 useSearchTabLogic: restoring search query from session storage:', { artist, song });
+          console.log('🔄 useSearchTabLogic: RESTORING search query from session storage:', { artist, song });
           setOriginalSearchArtist(artist || '');
           setOriginalSearchSong(song || '');
           setArtistInput(artist || '');
@@ -57,7 +62,12 @@ export function useSearchTabLogic(
           setSubmittedArtist(artist || '');
           setSubmittedSong(song || '');
           setHasSearched(true);
+          console.log('🔄 useSearchTabLogic: RESTORATION COMPLETED');
+        } else {
+          console.log('🔄 useSearchTabLogic: stored query exists but no artist/song data');
         }
+      } else {
+        console.log('🔄 useSearchTabLogic: no stored query found in session storage');
       }
     } catch (error) {
       console.warn('Failed to restore search query from session storage:', error);
@@ -95,7 +105,8 @@ export function useSearchTabLogic(
         if (isSearchRoute || isArtistRoute) {
           searchData.lastRoute = location.pathname + location.search;
           sessionStorage.setItem(SEARCH_QUERY_KEY, JSON.stringify(searchData));
-          console.log('🔄 useSearchTabLogic: updated route in session storage:', searchData.lastRoute);
+          console.log('🔄 useSearchTabLogic: UPDATED route in session storage:', searchData.lastRoute);
+          console.log('🔄 useSearchTabLogic: full storage data now:', JSON.stringify(searchData));
         } else {
           console.log('🔄 useSearchTabLogic: skipping route storage (not search flow):', location.pathname);
         }
@@ -113,8 +124,13 @@ export function useSearchTabLogic(
   // Clear search query from session storage
   const clearSearchQueryFromSession = useCallback(() => {
     try {
+      console.log('🧹 clearSearchQueryFromSession: removing from session storage');
       sessionStorage.removeItem(SEARCH_QUERY_KEY);
-      console.log('🔄 useSearchTabLogic: cleared search query from session storage');
+      console.log('🧹 clearSearchQueryFromSession: successfully removed from session storage');
+      
+      // Verify it's actually gone
+      const checkStorage = sessionStorage.getItem(SEARCH_QUERY_KEY);
+      console.log('🧹 clearSearchQueryFromSession: verification - storage now contains:', checkStorage);
     } catch (error) {
       console.warn('Failed to clear search query from session storage:', error);
     }
@@ -144,58 +160,41 @@ export function useSearchTabLogic(
   }, [location.search]);
 
   // Sync local state with URL parameters when it changes
+  // This effect handles URL changes but does NOT restore input field values from URL
+  // Input fields should only get values from session storage or user input
   useEffect(() => {
+    // Skip URL sync if we're in the middle of clearing
+    if (isClearing) {
+      console.log('🔄 useSearchTabLogic: skipping URL sync - clearing in progress');
+      return;
+    }
+    
     console.log('🔄 useSearchTabLogic: syncing state with URL parameters:', {
       artist: urlParams.artist,
       song: urlParams.song,
       currentOriginalArtist: originalSearchArtist,
-      currentOriginalSong: originalSearchSong
+      currentOriginalSong: originalSearchSong,
+      hasSearched
     });
     
-    // Only update state if we have URL parameters AND we don't have an existing search query
-    // This prevents overwriting the original search query once it's been submitted
+    // IMPORTANT: We do NOT restore input field values from URL parameters
+    // Input fields should only get values from session storage or user input
+    // URL parameters are only used to reflect the current state, not drive it
+    
     if ((urlParams.artist || urlParams.song) && !hasSearched) {
-      console.log('🔄 useSearchTabLogic: updating state with URL params (new search)');
-      setArtistInput(urlParams.artist);
-      setSongInput(urlParams.song);
-      setPrevArtistInput(urlParams.artist);
-      setPrevSongInput(urlParams.song);
-      setSubmittedArtist(urlParams.artist);
-      setSubmittedSong(urlParams.song);
-      setOriginalSearchArtist(urlParams.artist);
-      setOriginalSearchSong(urlParams.song);
-      setHasSearched(true);
+      // This case should rarely happen - only if someone manually types a URL
+      console.log('🔄 useSearchTabLogic: URL params detected but not restoring to input fields (URL should not drive state)');
     } else if (!urlParams.artist && !urlParams.song && !hasSearched) {
-      // No URL parameters and no existing search - reset everything
-      console.log('🔄 useSearchTabLogic: no URL params and no existing search, resetting');
-      setArtistInput('');
-      setSongInput('');
-      setPrevArtistInput('');
-      setPrevSongInput('');
-      setSubmittedArtist('');
-      setSubmittedSong('');
-      setOriginalSearchArtist('');
-      setOriginalSearchSong('');
-      setHasSearched(false);
+      // No URL parameters and no existing search - this is fine, do nothing
+      console.log('🔄 useSearchTabLogic: no URL params and no existing search - this is expected, doing nothing');
+    } else if (hasSearched && (originalSearchArtist || originalSearchSong)) {
+      // We have an existing search query - this is fine, do nothing
+      // Input fields should already have the correct values from session storage
+      console.log('🔄 useSearchTabLogic: existing search query detected - input fields should already have correct values from session storage');
     } else {
-      // We have an existing search query - preserve it, don't overwrite
-      console.log('🔄 useSearchTabLogic: preserving existing search query:', {
-        originalSearchArtist,
-        originalSearchSong,
-        hasSearched
-      });
-      
-      // Restore the original search query to input fields for display
-      if (originalSearchArtist || originalSearchSong) {
-        setArtistInput(originalSearchArtist || '');
-        setSongInput(originalSearchSong || '');
-        setPrevArtistInput(originalSearchArtist || '');
-        setPrevSongInput(originalSearchSong || '');
-        setSubmittedArtist(originalSearchArtist || '');
-        setSubmittedSong(originalSearchSong || '');
-      }
+      console.log('🔄 useSearchTabLogic: no action needed - URL sync effect does not modify input field values');
     }
-  }, [urlParams, hasSearched, originalSearchArtist, originalSearchSong]);
+  }, [urlParams, hasSearched, originalSearchArtist, originalSearchSong, isClearing]);
 
   useInitSearchStateEffect({
     location,
@@ -221,17 +220,17 @@ export function useSearchTabLogic(
     setSongInput(songValue);
     const artistCleared = prevArtistInput && !artistValue;
     const songCleared = prevSongInput && !songValue;
+    
+    // If any input is cleared, ONLY clear the local state
+    // DO NOT update the URL - that should only happen with the trash button
     if (artistCleared || songCleared) {
-      startTransition(() => {
-        const params = new URLSearchParams();
-        if (artistValue) params.set("artist", artistValue);
-        if (songValue) params.set("song", songValue);
-        const searchUrl = params.toString()
-          ? `/search?${params.toString()}`
-          : "/search";
-        navigate(searchUrl, { replace: true });
-      });
+      console.log('🧹 handleInputChange: individual field cleared, updating local state only (not URL)');
+      
+      // No navigation, no URL changes - just clear the local input state
+      // The URL should preserve the original search query until trash button is clicked
+      // This prevents the URL from being cleared when clearing individual fields
     }
+    
     setPrevArtistInput(artistValue);
     setPrevSongInput(songValue);
     setShouldFetch(false);
@@ -306,6 +305,17 @@ export function useSearchTabLogic(
   }
 
   function handleClearSearch() {
+    console.log('🧹 handleClearSearch: STARTING CLEAR OPERATION');
+    
+    // Set clearing flag to prevent state restoration
+    setIsClearing(true);
+    
+    // Clear session storage FIRST to prevent restoration
+    console.log('🧹 handleClearSearch: clearing session storage');
+    clearSearchQueryFromSession();
+    
+    // Clear all local state
+    console.log('🧹 handleClearSearch: clearing local state');
     setArtistInput("");
     setSongInput("");
     setPrevArtistInput("");
@@ -319,13 +329,33 @@ export function useSearchTabLogic(
     setActiveArtist(null);
     setLoading(false);
     
-    // Clear search query from session storage
-    clearSearchQueryFromSession();
-    
+    // Update search state
+    console.log('🧹 handleClearSearch: updating search state');
     updateSearchStateWithOriginal({ artist: "", song: "", results: [] });
+    
+    // Navigate to clean search page WITHOUT query parameters
+    console.log('🧹 handleClearSearch: navigating to clean search page');
     startTransition(() => {
+      // Use replace: true to avoid adding to browser history
+      // Navigate to clean /search without any query parameters
+      // This ensures the URL sync effect won't see any artist/song params
       navigate("/search", { replace: true });
     });
+    
+    // Force clear URL parameters by updating the location
+    // This prevents the URL sync effect from restoring state
+    if (location.search) {
+      console.log('🧹 handleClearSearch: forcing URL parameter clear');
+      window.history.replaceState(null, '', '/search');
+    }
+    
+    console.log('🧹 handleClearSearch: CLEAR OPERATION COMPLETED');
+    
+    // Reset clearing flag after a short delay to allow navigation to complete
+    setTimeout(() => {
+      setIsClearing(false);
+      console.log('🧹 handleClearSearch: clearing flag reset');
+    }, 100);
   }
 
   const clearDisabled = !artistInput && !songInput && !hasSearched;

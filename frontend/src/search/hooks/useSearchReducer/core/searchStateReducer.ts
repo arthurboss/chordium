@@ -80,6 +80,23 @@ export const searchStateReducer = (
         artistSongsError: null,
       };
 
+    case "CLEAR_SEARCH":
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        artists: [],
+        songs: [],
+        hasSearched: false,
+        activeArtist: null,
+        artistSongs: null,
+        filteredArtistSongs: [],
+        artistSongsError: null,
+        searchFetching: false,
+        artistSongsFetching: false,
+        lastAppliedFilter: '',
+      };
+
     case "FILTER_ARTIST_SONGS":
       return {
         ...state,

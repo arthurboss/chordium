@@ -131,5 +131,6 @@ export const useSearchReducer = ({
     handleView: songActions.handleView,
     handleAdd: songActions.handleAdd,
     handleArtistSelect,
+    clearSearch: () => dispatch({ type: "CLEAR_SEARCH" }),
   };
 };
