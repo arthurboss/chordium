@@ -37,10 +37,7 @@ const TabContainer = ({
   const chordDisplayRef = useRef<HTMLDivElement>(null);
 
   // Debug log to see if TabContainer is rendered
-  console.log('🔄 TabContainer: component rendered', {
-    pathname: location.pathname,
-    activeTab
-  });
+
 
   // No more URL tracking - we'll reconstruct from search query when needed
 
@@ -52,8 +49,6 @@ const TabContainer = ({
   }, [selectedSong]);
 
   const navigateToSearch = () => {
-    console.log('🔄 TabContainer: navigateToSearch called');
-    
     // Try to restore the last route from session storage
     try {
       const storedQuery = sessionStorage.getItem('chordium_search_query');
@@ -62,7 +57,6 @@ const TabContainer = ({
         
         if (lastRoute) {
           // Navigate to the stored route (search with query or artist page)
-          console.log('🔄 TabContainer: navigating to stored route:', lastRoute);
           navigate(lastRoute);
           return;
         }
@@ -72,7 +66,6 @@ const TabContainer = ({
     }
     
     // Fallback: go to basic search page
-    console.log('🔄 TabContainer: navigating to fallback search page');
     navigate("/search");
   };
 
