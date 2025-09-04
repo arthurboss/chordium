@@ -6,4 +6,5 @@ export interface SearchResultsSectionProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  count?: number;
 }
