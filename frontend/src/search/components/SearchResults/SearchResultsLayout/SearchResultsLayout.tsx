@@ -7,9 +7,13 @@ import type { SearchResultsLayoutProps } from "./SearchResultsLayout.types";
 import { ResultCard } from '../../ResultCard';
 
 
-const SearchResultsLayout: React.FC<Omit<SearchResultsLayoutProps, 'searchType'>> = ({
+const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results = [],
-  onResultClick
+  onResultClick,
+  searchType,
+  artistQuery,
+  songQuery,
+  activeArtist
 }) => {
   // Handle empty results
   if (results.length === 0) {
@@ -20,9 +24,34 @@ const SearchResultsLayout: React.FC<Omit<SearchResultsLayoutProps, 'searchType'>
     );
   }
 
-  // Infer type from first result
-  const firstType = results[0].type;
-  const sectionTitle = firstType === 'artist' ? 'Artist Results' : 'Song Results';
+  // Generate dynamic title based on search type and user queries
+  const getSectionTitle = (): string => {
+    let title: string;
+    
+    // If we have an activeArtist and we're showing songs (not artists), show the artist name
+    if (activeArtist && results.length > 0 && results[0].type === 'song') {
+      title = activeArtist.displayName;
+    } else {
+      // Otherwise, use the original logic based on search type
+      switch (searchType) {
+        case 'artist':
+          title = artistQuery || 'Artists';
+          break;
+        case 'artist-song':
+          title = activeArtist?.displayName || artistQuery || 'Songs';
+          break;
+        case 'song':
+          title = songQuery || 'Songs';
+          break;
+        default:
+          title = 'Results';
+      }
+    }
+
+    return title;
+  };
+
+  const sectionTitle = getSectionTitle();
 
   return (
     <div className="flex flex-col gap-8 w-full">

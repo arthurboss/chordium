@@ -1,4 +1,4 @@
-import type { Artist, Song } from "@chordium/types";
+import type { Artist, Song, SearchType } from "@chordium/types";
 
 // Discriminated union for search results
 export type SearchResult =
@@ -8,4 +8,8 @@ export type SearchResult =
 export interface SearchResultsLayoutProps {
   results: SearchResult[];
   onResultClick: (result: SearchResult) => void;
+  searchType: SearchType;
+  artistQuery?: string;
+  songQuery?: string;
+  activeArtist?: Artist | null;
 }

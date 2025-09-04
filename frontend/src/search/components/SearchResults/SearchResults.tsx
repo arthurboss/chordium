@@ -65,7 +65,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       if (stateData.isEmpty && stateData.emptyMessage) {
         return <EmptyState message={stateData.emptyMessage} dataTestId="search-empty-state" />;
       }
-      return <SearchResultsLayout results={results} onResultClick={onResultClick} />;
+      return (
+        <SearchResultsLayout 
+          results={results} 
+          onResultClick={onResultClick}
+          searchType={stateData.searchType}
+          artistQuery={artist}
+          songQuery={song}
+          activeArtist={stateData.activeArtist}
+        />
+      );
     }
   }
 };
