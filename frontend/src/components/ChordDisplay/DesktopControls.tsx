@@ -91,7 +91,7 @@ function TextPreferencesMenu({
   );
 }
 
-function TransposeMenu({ transpose, setTranspose, transposeOptions }: {
+function KeyMenu({ transpose, setTranspose, transposeOptions }: {
   transpose: number;
   setTranspose: (value: number) => void;
   transposeOptions: number[];
@@ -101,7 +101,7 @@ function TransposeMenu({ transpose, setTranspose, transposeOptions }: {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
           <Music size={18} className="text-chord" />
-          <span className="font-medium text-sm">Transpose: {transpose > 0 ? `+${transpose}` : transpose}</span>
+          <span className="font-medium text-sm">Key: {transpose > 0 ? `+${transpose}` : transpose}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-2">
@@ -167,9 +167,9 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
                 </div>
               )}
             </div>
-            {/* Center: Transpose always centered and fixed */}
+            {/* Center: Key always centered and fixed */}
             <div className="flex items-center justify-center">
-              <TransposeMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
+              <KeyMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
             </div>
             {/* Right: Text Preferences */}
             <div className="flex items-center justify-end">

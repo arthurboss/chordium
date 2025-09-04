@@ -39,6 +39,44 @@ export function transposeChord(chord: string, halfSteps: number): string {
 }
 
 /**
+ * Convert a song key (like "C", "F#", "Am") to a numeric semitone value
+ * @param songKey The song key string (e.g., "C", "F#", "Am", "Bb")
+ * @returns The numeric semitone value (0-11) or 0 if invalid
+ */
+export function songKeyToSemitones(songKey: string): number {
+  if (!songKey || typeof songKey !== 'string') return 0;
+  
+  // Clean up the key string - remove common suffixes and normalize
+  const cleanKey = songKey.trim()
+    .replace(/\s+(major|minor|maj|min)$/i, '') // Remove major/minor suffixes (but not single 'm')
+    .replace(/\s+(maior|menor)$/i, '') // Remove Portuguese suffixes
+    .toUpperCase();
+  
+  // Handle the case where 'm' was removed but we need to keep the note
+  const finalKey = cleanKey === 'AM' ? 'A' : cleanKey;
+  
+  // Handle flat notes by converting to sharp equivalents
+  let normalizedKey = finalKey;
+  if (finalKey === 'BB' || finalKey === 'B♭') {
+    normalizedKey = 'A#';
+  } else if (finalKey === 'EB' || finalKey === 'E♭') {
+    normalizedKey = 'D#';
+  } else if (finalKey === 'AB' || finalKey === 'A♭') {
+    normalizedKey = 'G#';
+  } else if (finalKey === 'DB' || finalKey === 'D♭') {
+    normalizedKey = 'C#';
+  } else if (finalKey === 'GB' || finalKey === 'G♭') {
+    normalizedKey = 'F#';
+  } else if (finalKey === 'CB' || finalKey === 'C♭') {
+    normalizedKey = 'B';
+  }
+  
+  // Find the index in the NOTES array
+  const index = NOTES.indexOf(normalizedKey);
+  return index !== -1 ? index : 0;
+}
+
+/**
  * Parse a chord file and extract content
  * This is a simple implementation for demo purposes
  */

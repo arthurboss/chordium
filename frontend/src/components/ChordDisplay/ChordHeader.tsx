@@ -4,12 +4,11 @@ import SongChordDetails from '../SongChordDetails';
 interface ChordHeaderProps {
   title?: string;
   artist?: string;
-  songKey?: string;
   tuning?: string;
   capo?: string;
 }
 
-const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, songKey, tuning, capo }) => {
+const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, tuning, capo }) => {
   if (!title && !artist) return null;
   
   return (
@@ -20,7 +19,7 @@ const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, songKey, tunin
       </div>
 
       <div className='mb-4'>
-      <SongChordDetails songKey={songKey} tuning={tuning} capo={capo} />
+      <SongChordDetails tuning={tuning} capo={capo} />
       </div>
     </div>
   );

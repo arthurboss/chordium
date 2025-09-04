@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { processContent, getTransposeOptions } from '@/utils/chord-sheet-utils';
+import { songKeyToSemitones } from '@/utils/chordUtils';
 
 /**
  * Custom hook to manage chord display settings
  * @param initialContent The initial chord sheet content
+ * @param initialSongKey The initial song key to set as default transpose value
  * @returns Chord display settings and handlers
  */
-export const useChordDisplaySettings = (initialContent: string) => {
-  // Display settings
-  const [transpose, setTranspose] = useState(0);
+export const useChordDisplaySettings = (initialContent: string, initialSongKey?: string) => {
+  // Display settings - initialize transpose with song key value
+  const [transpose, setTranspose] = useState(() => songKeyToSemitones(initialSongKey || ''));
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');

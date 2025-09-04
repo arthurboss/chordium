@@ -87,8 +87,8 @@ export function processContent(rawContent: string, transpose: number = 0): Chord
 
 /**
  * Generate options for the transpose selector
- * @returns Array of transpose options from -12 to +12 semitones
+ * @returns Array of transpose options from -11 to +11 semitones (all 12 unique keys)
  */
 export function getTransposeOptions(): number[] {
-  return Array.from({ length: 25 }, (_, i) => i - 12);
+  return Array.from({ length: 23 }, (_, i) => i - 11);
 }

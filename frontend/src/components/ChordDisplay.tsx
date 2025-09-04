@@ -43,7 +43,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     setHideGuitarTabs,
     processedContent,
     transposeOptions
-  } = useChordDisplaySettings(content);
+  } = useChordDisplaySettings(content, chordSheet.songKey);
   
   const {
     isEditing,
@@ -86,7 +86,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
       <ChordHeader 
         title={chordSheet.title}
         artist={chordSheet.artist}
-        songKey={chordSheet.songKey}
         tuning={Array.isArray(chordSheet.guitarTuning) ? chordSheet.guitarTuning.join('-') : chordSheet.guitarTuning}
         capo={chordSheet.guitarCapo !== undefined ? chordSheet.guitarCapo.toString() : undefined}
       />
