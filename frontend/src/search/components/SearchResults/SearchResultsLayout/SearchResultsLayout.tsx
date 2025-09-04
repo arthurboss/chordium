@@ -26,7 +26,7 @@ const SearchResultsLayout: React.FC<Omit<SearchResultsLayoutProps, 'searchType'>
 
   return (
     <div className="flex flex-col gap-8 w-full">
-      <SearchResultsSection title={sectionTitle}>
+      <SearchResultsSection title={sectionTitle} count={results.length}>
         <ResultsList
           items={results}
           renderItem={({ item }) => (
