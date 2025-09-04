@@ -96,30 +96,58 @@ function KeyMenu({ transpose, setTranspose, transposeOptions }: {
   setTranspose: (value: number) => void;
   transposeOptions: number[];
 }) {
+  const handleIncrement = () => {
+    const currentIndex = transposeOptions.indexOf(transpose);
+    if (currentIndex < transposeOptions.length - 1) {
+      setTranspose(transposeOptions[currentIndex + 1]);
+    }
+  };
+
+  const handleDecrement = () => {
+    const currentIndex = transposeOptions.indexOf(transpose);
+    if (currentIndex > 0) {
+      setTranspose(transposeOptions[currentIndex - 1]);
+    }
+  };
+
+  const formatKeyDisplay = (value: number) => {
+    if (value === 0) return "Key";
+    if (value === 1) return "1/2 Key";
+    if (value === -1) return "-1/2 Key";
+    return `${value > 0 ? '+' : ''}${value} Key`;
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
-          <Music size={18} className="text-chord" />
-          <span className="font-medium text-sm">Key: {transpose > 0 ? `+${transpose}` : transpose}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="p-2">
-        <div className="grid grid-cols-5 gap-2">
-          {transposeOptions.map((value: number) => (
-            <Button
-              key={value}
-              variant={value === transpose ? "default" : "outline"}
-              size="sm"
-              className="min-w-[36px] h-8 px-0 text-sm"
-              onClick={() => setTranspose(value)}
-            >
-              {value > 0 ? `+${value}` : value}
-            </Button>
-          ))}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center bg-background border rounded-lg h-8 px-1">
+      {/* Decrement button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 hover:bg-muted"
+        onClick={handleDecrement}
+        disabled={transposeOptions.indexOf(transpose) === 0}
+      >
+        <span className="text-sm font-medium">−</span>
+      </Button>
+      
+      {/* Key display */}
+      <div className="flex items-center justify-center min-w-[80px] px-2">
+        <span className="font-medium text-sm text-foreground">
+          {formatKeyDisplay(transpose)}
+        </span>
+      </div>
+      
+      {/* Increment button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 hover:bg-muted"
+        onClick={handleIncrement}
+        disabled={transposeOptions.indexOf(transpose) === transposeOptions.length - 1}
+      >
+        <span className="text-sm font-medium">+</span>
+      </Button>
+    </div>
   );
 }
 
