@@ -1,6 +1,8 @@
 import React from 'react';
 import { usePropertyFilter } from '@/hooks/usePropertyFilter';
 import { mapArtistsToSearchResults, mapSongsToSearchResults } from '@/search/utils/mappers/search-mappers';
+import { filterSongsByArtistAndTitle } from '@/search/utils/filtering/filterSongsByArtistAndTitle';
+import { normalizeForSearch } from '@/search/utils/normalization/normalizeForSearch';
 import type { Artist, Song, SearchType } from '@chordium/types';
 import type { SearchResult } from '../SearchResultsLayout/SearchResultsLayout.types';
 
@@ -32,7 +34,19 @@ export function useSearchResultsViewModel({
   // Filtering hooks (must be called unconditionally)
   const filteredArtists = usePropertyFilter(artists, filterArtist, 'displayName');
   const filteredArtistSongs = usePropertyFilter(artistSongs || [], filterSong, 'title');
-  const filteredSongs = usePropertyFilter(songs, filterSong, 'title');
+  
+  // For song searches, filter by both artist and title
+  const filteredSongs = React.useMemo(() => {
+    if (searchType === 'song') {
+      return filterSongsByArtistAndTitle(songs, filterArtist, filterSong);
+    }
+    // For other search types, use simple title filtering
+    if (!filterSong) return songs;
+    const normalizedFilter = normalizeForSearch(filterSong);
+    return songs.filter(song => 
+      normalizeForSearch(song.title).includes(normalizedFilter)
+    );
+  }, [songs, filterArtist, filterSong, searchType]);
 
   // Build the view model (results + click handler) in a memo for stability
   const viewModel = React.useMemo(() => {
