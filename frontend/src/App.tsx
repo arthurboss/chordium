@@ -6,7 +6,7 @@ import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
 import { KeepAliveService } from "@/services/keep-alive.service";
-import OfflineTestPanel from "@/components/OfflineTestPanel";
+// import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 
@@ -147,7 +147,7 @@ const App = () => (
         <AppInitializer>
           <RouterProvider router={router} />
           <OfflineToast />
-          {import.meta.env.DEV && <OfflineTestPanel />}
+          {/* {import.meta.env.DEV && <OfflineTestPanel />} */}
         </AppInitializer>
       </TooltipProvider>
     </QueryClientProvider>
