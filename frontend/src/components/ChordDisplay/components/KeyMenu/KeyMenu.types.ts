@@ -3,6 +3,7 @@ export interface KeyMenuProps {
   setTranspose: (value: number) => void;
   defaultTranspose?: number;
   songKey?: string;
+  title?: string;
 }
 
 export interface KeyDisplay {

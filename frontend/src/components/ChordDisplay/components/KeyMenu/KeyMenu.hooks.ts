@@ -17,6 +17,7 @@ export const useKeyMenu = ({
 }: KeyMenuProps) => {
   // Track the UI transpose level (separate from actual transpose logic)
   const [uiTransposeLevel, setUiTransposeLevel] = useState(0);
+  const [animationDirection, setAnimationDirection] = useState<'up' | 'down'>('up');
 
   const handleIncrement = () => {
     // Check if we're already at the maximum transpose level (+11 semitones)
@@ -30,6 +31,7 @@ export const useKeyMenu = ({
     const newTranspose = transpose + 1;
     const newUiLevel = uiTransposeLevel + 1;
     
+    setAnimationDirection('up');
     setTranspose(newTranspose);
     setUiTransposeLevel(newUiLevel);
   };
@@ -46,6 +48,7 @@ export const useKeyMenu = ({
     const newTranspose = transpose - 1;
     const newUiLevel = uiTransposeLevel - 1;
     
+    setAnimationDirection('down');
     setTranspose(newTranspose);
     setUiTransposeLevel(newUiLevel);
   };
@@ -60,6 +63,7 @@ export const useKeyMenu = ({
     isAltered: uiTransposeLevel !== 0,
     handleIncrement,
     handleDecrement,
-    handleReset
+    handleReset,
+    animationDirection
   };
 };
