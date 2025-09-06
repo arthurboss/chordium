@@ -7,4 +7,5 @@ export interface TextPreferencesMenuProps {
   setFontStyle: (value: string) => void;
   viewMode: string;
   setViewMode: (value: string) => void;
+  title?: string;
 }

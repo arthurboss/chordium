@@ -19,7 +19,7 @@ export const TEXT_PREFERENCES_STYLES = {
 } as const;
 
 export const TEXT_PREFERENCES_LABELS = {
-  textPreferences: "Text Preferences",
+  textPreferences: "Style",
   viewMode: "View Mode",
   fontStyle: "Font Style",
   fontSize: "Font Size",

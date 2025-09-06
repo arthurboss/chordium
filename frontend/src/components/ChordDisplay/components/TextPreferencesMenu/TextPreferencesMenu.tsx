@@ -22,16 +22,19 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
   setFontStyle,
   viewMode,
   setViewMode,
+  title = "Text Preferences",
 }) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className={TEXT_PREFERENCES_STYLES.triggerButton}>
-          <Settings size={16} className={TEXT_PREFERENCES_STYLES.settingsIcon} />
-          <span className={TEXT_PREFERENCES_STYLES.buttonText}>{TEXT_PREFERENCES_LABELS.textPreferences}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={TEXT_PREFERENCES_STYLES.dropdownContent as any}>
+    <>
+      <span className="text-xs text-muted-foreground mb-1">{title}</span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className={TEXT_PREFERENCES_STYLES.triggerButton}>
+            <Settings size={16} className={TEXT_PREFERENCES_STYLES.settingsIcon} />
+            <span className={TEXT_PREFERENCES_STYLES.buttonText}>{TEXT_PREFERENCES_LABELS.textPreferences}</span>
+          </Button>
+        </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
         <div className={TEXT_PREFERENCES_STYLES.sectionContainer}>
           <div className={TEXT_PREFERENCES_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.viewMode}</div>
           <div className={TEXT_PREFERENCES_STYLES.buttonGroup}>
@@ -120,6 +123,7 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 };
 
