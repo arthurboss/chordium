@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { processContent, getTransposeOptions } from '@/utils/chord-sheet-utils';
+import { processContent } from '@/utils/chord-sheet-utils';
 import { songKeyToSemitones } from '@/utils/chordUtils';
 
 /**
@@ -9,8 +9,16 @@ import { songKeyToSemitones } from '@/utils/chordUtils';
  * @returns Chord display settings and handlers
  */
 export const useChordDisplaySettings = (initialContent: string, initialSongKey?: string) => {
-  // Display settings - initialize transpose with song key value
-  const [transpose, setTranspose] = useState(() => songKeyToSemitones(initialSongKey || ''));
+  // Display settings - initialize transpose to 0 (no transpose by default)
+  // The songKey is used for display purposes only, not for transposing the content
+  const defaultTranspose = 0;
+  const [transpose, setTranspose] = useState(defaultTranspose);
+  
+  // Update transpose when initialSongKey changes (e.g., when loading a different song)
+  // Always reset to 0 when loading a new song
+  useEffect(() => {
+    setTranspose(0);
+  }, [initialSongKey]);
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
@@ -19,14 +27,12 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   
   // Process the content with imported utility function
   const processedContent = processContent(initialContent, transpose);
-  
-  // Generate options for the transpose selector
-  const transposeOptions = getTransposeOptions();
 
   return {
     // Settings
     transpose,
     setTranspose,
+    defaultTranspose,
     fontSize, 
     setFontSize,
     fontSpacing,
@@ -39,7 +45,6 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
     setHideGuitarTabs,
     
     // Processed data
-    processedContent,
-    transposeOptions
+    processedContent
   };
 };

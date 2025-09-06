@@ -31,6 +31,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   const { 
     transpose, 
     setTranspose,
+    defaultTranspose,
     fontSize, 
     setFontSize,
     fontSpacing,
@@ -41,8 +42,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     setViewMode,
     hideGuitarTabs,
     setHideGuitarTabs,
-    processedContent,
-    transposeOptions
+    processedContent
   } = useChordDisplaySettings(content, chordSheet.songKey);
   
   const {
@@ -101,7 +101,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
       <ChordSheetControls
         transpose={transpose}
         setTranspose={setTranspose}
-        transposeOptions={transposeOptions}
+        defaultTranspose={defaultTranspose}
+        songKey={chordSheet.songKey}
         fontSize={fontSize}
         setFontSize={setFontSize}
         fontSpacing={fontSpacing}

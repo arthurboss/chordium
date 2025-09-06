@@ -33,13 +33,14 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
     border: 'border rounded-lg',
   };
   const desktopStyles = {
-    placement: 'hidden sm:block',
+    visibility: 'hidden sm:grid',
+    placement: 'items-center gap-4 [grid-template-columns:repeat(auto-fit,minmax(4rem,10rem))]',
   };
 
-  let baseStyles = `${commonStyles.placement} ${commonStyles.animation} ${commonStyles.background} ${commonStyles.margins}`;
+  let baseStyles = `select-none ${commonStyles.placement} ${commonStyles.animation} ${commonStyles.background} ${commonStyles.margins}`;
 
   if (mobileOnly) baseStyles += ` ${mobileStyles.visibility} ${mobileStyles.display} ${mobileStyles.border}`;
-  if (desktopOnly) baseStyles += ` ${desktopStyles.placement}`;
+  if (desktopOnly) baseStyles += ` ${desktopStyles.visibility} ${desktopStyles.placement} p-4`;
 
   return (
     <Card className={`${baseStyles} ${className}`.trim()}>

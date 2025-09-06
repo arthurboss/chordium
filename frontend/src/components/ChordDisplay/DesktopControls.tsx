@@ -1,160 +1,18 @@
 import React from 'react';
 import { CardContent } from '../ui/card';
-import { Button } from '../ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import { Music, Settings, Text, AlignLeft } from 'lucide-react';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
-import { Slider } from '../ui/slider';
+import KeyMenu from './components/KeyMenu';
+import TextPreferencesMenu from './components/TextPreferencesMenu';
 import { ChordSheetControlsProps } from './types';
 import StickyBottomContainer from '../StickyBottomContainer';
 import { useAtBottom } from '@/hooks/useAtBottom';
 
-function TextPreferencesMenu({
-  fontSize,
-  setFontSize,
-  fontSpacing,
-  setFontSpacing,
-  fontStyle,
-  setFontStyle,
-  viewMode,
-  setViewMode,
-}: {
-  fontSize: number;
-  setFontSize: (value: number) => void;
-  fontSpacing: number;
-  setFontSpacing: (value: number) => void;
-  fontStyle: string;
-  setFontStyle: (value: string) => void;
-  viewMode: string;
-  setViewMode: (value: string) => void;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-8 px-3 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0">
-          <Settings size={16} className="text-chord" />
-          <span className="font-medium text-sm">Text Preferences</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">View Mode</div>
-          <div className="flex items-center gap-2">
-            <Button variant={viewMode === 'normal' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('normal')} title="Normal"><Text size={18} /></Button>
-            <Button variant={viewMode === 'chords-only' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('chords-only')} title="Chords"><Music size={18} /></Button>
-            <Button variant={viewMode === 'lyrics-only' ? 'default' : 'outline'} size="sm" className="min-w-[40px] flex items-center justify-center" onClick={() => setViewMode('lyrics-only')} title="Lyrics"><AlignLeft size={18} /></Button>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-1">
-          <div className="font-semibold text-xs mb-1">Font Style</div>
-          <div className="flex items-center gap-2">
-            <Button variant={fontStyle === 'serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('serif')}>Serif</Button>
-            <Button variant={fontStyle === 'sans-serif' ? 'default' : 'outline'} size="sm" className="min-w-[60px]" onClick={() => setFontStyle('sans-serif')}>Sans</Button>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-3">
-          <div className="font-semibold text-xs mb-1">Font Size</div>
-          <div className="flex items-center gap-3">
-            <Slider
-              value={[fontSize]}
-              min={12}
-              max={24}
-              step={1}
-              onValueChange={(value) => setFontSize(value[0])}
-              className="w-32"
-            />
-            <span className="w-10 text-center text-sm">{fontSize}px</span>
-          </div>
-        </div>
-        <DropdownMenuSeparator />
-        <div className="px-2 py-3">
-          <div className="font-semibold text-xs mb-1">Font Spacing</div>
-          <div className="flex items-center gap-3">
-            <Slider
-              value={[fontSpacing]}
-              min={0}
-              max={0.2}
-              step={0.1}
-              onValueChange={(value) => setFontSpacing(value[0])}
-              className="w-32"
-            />
-            <span className="w-10 text-center text-sm">
-              {fontSpacing === 0 ? 'x1' : fontSpacing === 0.1 ? 'x2' : 'x3'}
-            </span>
-          </div>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function KeyMenu({ transpose, setTranspose, transposeOptions }: {
-  transpose: number;
-  setTranspose: (value: number) => void;
-  transposeOptions: number[];
-}) {
-  const handleIncrement = () => {
-    const currentIndex = transposeOptions.indexOf(transpose);
-    if (currentIndex < transposeOptions.length - 1) {
-      setTranspose(transposeOptions[currentIndex + 1]);
-    }
-  };
-
-  const handleDecrement = () => {
-    const currentIndex = transposeOptions.indexOf(transpose);
-    if (currentIndex > 0) {
-      setTranspose(transposeOptions[currentIndex - 1]);
-    }
-  };
-
-  const formatKeyDisplay = (value: number) => {
-    if (value === 0) return "Key";
-    if (value === 1) return "1/2 Key";
-    if (value === -1) return "-1/2 Key";
-    return `${value > 0 ? '+' : ''}${value} Key`;
-  };
-
-  return (
-    <div className="flex items-center bg-background border rounded-lg h-8 px-1">
-      {/* Decrement button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-6 w-6 p-0 hover:bg-muted"
-        onClick={handleDecrement}
-        disabled={transposeOptions.indexOf(transpose) === 0}
-      >
-        <span className="text-sm font-medium">−</span>
-      </Button>
-      
-      {/* Key display */}
-      <div className="flex items-center justify-center min-w-[80px] px-2">
-        <span className="font-medium text-sm text-foreground">
-          {formatKeyDisplay(transpose)}
-        </span>
-      </div>
-      
-      {/* Increment button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-6 w-6 p-0 hover:bg-muted"
-        onClick={handleIncrement}
-        disabled={transposeOptions.indexOf(transpose) === transposeOptions.length - 1}
-      >
-        <span className="text-sm font-medium">+</span>
-      </Button>
-    </div>
-  );
-}
-
 const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   transpose,
   setTranspose,
-  transposeOptions,
+  defaultTranspose = 0,
+  songKey,
   fontSize,
   setFontSize,
   fontSpacing,
@@ -163,54 +21,45 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setFontStyle,
   viewMode,
   setViewMode,
-  hideGuitarTabs,
-  setHideGuitarTabs,
   autoScroll,
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
-  setIsEditing,
-  handleDownload,
 }) => {
   const isAtBottom = useAtBottom();
 
   return (
     <StickyBottomContainer isAtBottom={isAtBottom} desktopOnly>
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex flex-col space-y-3">
-          <div className="grid grid-cols-3 items-center gap-2" style={{ gridTemplateColumns: '180px 1fr 180px' }}>
-            {/* Left: Play/Pause (Auto Scroll) button */}
-            <div className="flex items-center justify-start">
-              <PlayButton
-                autoScroll={autoScroll}
-                setAutoScroll={setAutoScroll}
-                size={16}
-                className={`h-8 w-auto px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'bg-primary/10 text-primary hover:bg-primary/20'}`}
-                variant="outline"
-              />
-              {/* Speed controls only show when playing, always between PlayButton and Transpose */}
-              {autoScroll && (
-                <div className="ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
-                  <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
-                </div>
-              )}
-            </div>
-            {/* Center: Key always centered and fixed */}
-            <div className="flex items-center justify-center">
-              <KeyMenu transpose={transpose} setTranspose={setTranspose} transposeOptions={transposeOptions} />
-            </div>
-            {/* Right: Text Preferences */}
-            <div className="flex items-center justify-end">
-              <TextPreferencesMenu
-                fontSize={fontSize} setFontSize={setFontSize}
-                fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-                fontStyle={fontStyle} setFontStyle={setFontStyle}
-                viewMode={viewMode} setViewMode={setViewMode}
-              />
-            </div>
+      {/* Left: Play/Pause (Auto Scroll) button */}
+      <div className='flex items-center'>
+        <PlayButton
+          autoScroll={autoScroll}
+          setAutoScroll={setAutoScroll}
+          size={16}
+          className={`h-8 w-full px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'max-w-[2rem] bg-primary/10 text-primary hover:bg-primary/20'}`}
+          variant="outline"
+        />
+        {/* Speed controls only show when playing, always between PlayButton and Transpose */}
+        {autoScroll && (
+          <div className="max-w-[7rem] ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
+            <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
           </div>
-        </div>
-      </CardContent>
+        )}
+      </div>
+      {/* Center: Key always centered and fixed */}
+      <KeyMenu
+        transpose={transpose}
+        setTranspose={setTranspose}
+        defaultTranspose={defaultTranspose}
+        songKey={songKey}
+      />
+      {/* Right: Text Preferences */}
+      <TextPreferencesMenu
+        fontSize={fontSize} setFontSize={setFontSize}
+        fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+        fontStyle={fontStyle} setFontStyle={setFontStyle}
+        viewMode={viewMode} setViewMode={setViewMode}
+      />
     </StickyBottomContainer>
   );
 };
