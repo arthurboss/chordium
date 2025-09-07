@@ -1,5 +1,4 @@
 import React from 'react';
-import { CardContent } from '../ui/card';
 import AutoScrollControls from './components/AutoScrollControls';
 import KeyMenu from './components/KeyMenu';
 import CapoMenu from './components/CapoMenu';
@@ -42,10 +41,10 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     if (capoTransposeLinked) {
       const capoDifference = newCapo - capo;
       const newTranspose = transpose - capoDifference;
-      
+
       // Clamp transpose to valid range (-11 to +11)
       const clampedTranspose = Math.max(-11, Math.min(11, newTranspose));
-      
+
       setTranspose(clampedTranspose);
     }
   };
@@ -57,10 +56,10 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     if (capoTransposeLinked) {
       const transposeDifference = newTranspose - transpose;
       const newCapo = capo - transposeDifference;
-      
+
       // Clamp capo to valid range (0-11)
       const clampedCapo = Math.max(0, Math.min(11, newCapo));
-      
+
       setCapo(clampedCapo);
     }
   };
@@ -70,7 +69,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     if (!capoTransposeLinked) {
       return { disableIncrement: capo >= 11, disableDecrement: capo <= 0 };
     }
-    
+
     // When linked, consider both capo and transpose limits
     return {
       disableIncrement: capo >= 11 || transpose <= -11,
@@ -82,7 +81,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     if (!capoTransposeLinked) {
       return { disableIncrement: transpose >= 11, disableDecrement: transpose <= -11 };
     }
-    
+
     // When linked, consider both capo and transpose limits
     return {
       disableIncrement: transpose >= 11 || capo <= 0,
@@ -97,8 +96,20 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   };
 
   return (
-    <StickyBottomContainer isAtBottom={isAtBottom} desktopOnly>
-      {/* Left: Auto Scroll Controls */}
+    <StickyBottomContainer
+      isAtBottom={isAtBottom}
+      desktopOnly
+    >
+      {/* Text Preferences */}
+      <div className={`flex flex-col`}>
+        <TextPreferencesMenu
+          fontSize={fontSize} setFontSize={setFontSize}
+          fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+          fontStyle={fontStyle} setFontStyle={setFontStyle}
+          viewMode={viewMode} setViewMode={setViewMode}
+        />
+      </div>
+      {/* Auto Scroll Controls */}
       <div className='flex flex-col items-start'>
         <AutoScrollControls
           autoScroll={autoScroll}
@@ -108,8 +119,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
         />
       </div>
 
-      {/* Center: Musical Controls Sub-Container */}
-      <div className='flex items-center justify-center gap-1'>
+      {/* Musical Controls Sub-Container */}
+      <div className="flex items-end gap-1 justify-end">
         {/* Capo Menu */}
         <div className='flex flex-col items-center'>
           <CapoMenu
@@ -141,16 +152,6 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
             disableDecrement={getTransposeDisableStates().disableDecrement}
           />
         </div>
-      </div>
-
-      {/* Right: Text Preferences */}
-      <div className='flex flex-col items-end'>
-        <TextPreferencesMenu
-          fontSize={fontSize} setFontSize={setFontSize}
-          fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-          fontStyle={fontStyle} setFontStyle={setFontStyle}
-          viewMode={viewMode} setViewMode={setViewMode}
-        />
       </div>
     </StickyBottomContainer>
   );

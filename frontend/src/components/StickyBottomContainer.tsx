@@ -34,7 +34,7 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
   };
   const desktopStyles = {
     visibility: 'hidden sm:grid',
-    placement: 'items-end gap-4 [grid-template-columns:repeat(auto-fit,minmax(4rem,10rem))]',
+    placement: 'items-end gap-4 [grid-template-columns:max-content_auto_1fr]',
   };
 
   let baseStyles = `select-none ${commonStyles.placement} ${commonStyles.animation} ${commonStyles.background} ${commonStyles.margins}`;

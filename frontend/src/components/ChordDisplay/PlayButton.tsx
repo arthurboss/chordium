@@ -19,9 +19,11 @@ const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size
     title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
     style={style}
   >
-    {autoScroll ? <Pause size={size} className="text-chord" /> : (<div className='flex items-center gap-2'>
+    {autoScroll ? (<Pause size={size} className="text-chord" />) : (
+    <div className='flex items-center gap-2'>
       <Play size={size} className="text-chord" />
-    </div>)}
+    </div>)
+    }
   </Button>
 );
 

@@ -22,10 +22,10 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
   setFontStyle,
   viewMode,
   setViewMode,
-  title = "Text Style",
+  title = "Style",
 }) => {
   return (
-    <div className='flex flex-col items-end gap-1'>
+    <div className='flex flex-col items-center gap-1'>
       <span className="text-xs text-muted-foreground">{title}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -33,7 +33,7 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
             <Settings size={16} className={TEXT_PREFERENCES_STYLES.settingsIcon} />
           </Button>
         </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="start">
         <div className={TEXT_PREFERENCES_STYLES.sectionContainer}>
           <div className={TEXT_PREFERENCES_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.viewMode}</div>
           <div className={TEXT_PREFERENCES_STYLES.buttonGroup}>

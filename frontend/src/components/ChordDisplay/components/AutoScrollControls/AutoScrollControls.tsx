@@ -18,7 +18,7 @@ const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
-  title = "Auto Scroll",
+  title = "Scroll",
 }) => {
   return (
     <div className='flex flex-col items-start gap-1'>
@@ -32,7 +32,7 @@ const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
         />
         {/* Speed controls only show when playing, always between PlayButton and Transpose */}
         {autoScroll && (
-          <div className="w-32 sm:w-20 md:w-32 ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
+          <div className="w-32 ml-3 transition-all duration-300 animate-in slide-in-from-left-2">
             <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
           </div>
         )}

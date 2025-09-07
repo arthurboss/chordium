@@ -41,7 +41,7 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
 
   return (
     <>
-      <div className={`text-xs text-muted-foreground mb-1 flex items-center justify-between gap-1 ${isAltered ? 'w-24' : 'w-20'}`}>
+      <div className={`text-xs text-muted-foreground mb-1 flex items-center justify-between gap-1 ${isAltered ? 'w-24' : 'w-16'}`}>
         <span>{title}</span>
         <span className="text-muted-foreground">
           {keyDisplay.transposeText && ` (${keyDisplay.transposeText})`}
