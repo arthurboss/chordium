@@ -16,11 +16,11 @@ const DeleteButton = ({ onDelete }: DeleteButtonProps) => (
       e.stopPropagation();
       onDelete();
     }}
-    className="flex-shrink-0"
+    className="flex-shrink-0 hover:border-red-500/20 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30"
     tabIndex={0}
     aria-label="delete-button"
   >
-    <Trash2 className="h-4 w-4 text-destructive dark:text-red-300" />
+    <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
     <span className="hidden sm:inline">Delete</span>
   </Button>
 );
