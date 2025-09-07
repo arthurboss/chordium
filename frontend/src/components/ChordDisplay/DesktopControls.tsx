@@ -41,7 +41,12 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     // If linked, adjust transpose inversely
     if (capoTransposeLinked && setCapoTransposeLinked) {
       const capoDifference = newCapo - capo;
-      setTranspose(transpose - capoDifference);
+      const newTranspose = transpose - capoDifference;
+      
+      // Clamp transpose to valid range (-11 to +11)
+      const clampedTranspose = Math.max(-11, Math.min(11, newTranspose));
+      
+      setTranspose(clampedTranspose);
     }
   };
 
@@ -51,7 +56,12 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     // If linked, adjust capo inversely
     if (capoTransposeLinked && setCapoTransposeLinked) {
       const transposeDifference = newTranspose - transpose;
-      setCapo(capo - transposeDifference);
+      const newCapo = capo - transposeDifference;
+      
+      // Clamp capo to valid range (0-11)
+      const clampedCapo = Math.max(0, Math.min(11, newCapo));
+      
+      setCapo(clampedCapo);
     }
   };
 

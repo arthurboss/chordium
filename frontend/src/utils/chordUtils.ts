@@ -11,13 +11,17 @@ export const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', '
  */
 export function transposeChord(chord: string, halfSteps: number): string {
   // If no transposition needed, return the original chord
-  if (halfSteps === 0) return chord;
+  if (halfSteps === 0) {
+    return chord;
+  }
   
   // Regular expression to match the chord root and any additional info
   const regex = /^([A-G][#b]?)(.*)$/;
   const match = chord.match(regex);
   
-  if (!match) return chord; // Not a valid chord
+  if (!match) {
+    return chord; // Not a valid chord
+  }
   
   const [, rootNote, rest] = match;
   
@@ -32,7 +36,10 @@ export function transposeChord(chord: string, halfSteps: number): string {
   
   // Find the index of the root note in the notes array
   const rootIndex = NOTES.indexOf(normalizedRoot as Note);
-  if (rootIndex === -1) return chord; // Not a valid note
+  
+  if (rootIndex === -1) {
+    return chord; // Not a valid note
+  }
   
   // Calculate the new root note after transposition
   const newRootIndex = (rootIndex + halfSteps + 12) % 12;
@@ -68,7 +75,9 @@ export function semitonesToKeyName(semitones: number): string {
  * @returns The numeric semitone value (0-11) or 0 if invalid
  */
 export function songKeyToSemitones(songKey: string): number {
-  if (!songKey || typeof songKey !== 'string') return 0;
+  if (!songKey || typeof songKey !== 'string') {
+    return 0;
+  }
   
   try {
     const trimmedKey = songKey.trim();

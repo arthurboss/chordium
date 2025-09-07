@@ -22,7 +22,9 @@ export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|
  * @returns Array of processed chord sections
  */
 export function processContent(rawContent: string, transpose: number = 0): ChordSection[] {
-  if (!rawContent) return [{ type: 'section', title: '', lines: [] }];
+  if (!rawContent) {
+    return [{ type: 'section', title: '', lines: [] }];
+  }
   
   const lines = rawContent.split('\n');
   const sections: ChordSection[] = [];
