@@ -16,7 +16,9 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
   capo,
   setCapo,
   defaultCapo = 0,
-  title = "Capo"
+  title = "Capo",
+  disableIncrement: externalDisableIncrement,
+  disableDecrement: externalDisableDecrement
 }) => {
   const {
     uiCapoLevel,
@@ -24,10 +26,14 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
     handleIncrement,
     handleDecrement,
     handleReset,
-    disableIncrement,
-    disableDecrement,
+    disableIncrement: internalDisableIncrement,
+    disableDecrement: internalDisableDecrement,
     animationDirection
   } = useCapoMenu({ capo, setCapo, defaultCapo });
+
+  // Use external disable states if provided, otherwise use internal ones
+  const disableIncrement = externalDisableIncrement ?? internalDisableIncrement;
+  const disableDecrement = externalDisableDecrement ?? internalDisableDecrement;
 
   const capoDisplay = formatCapoDisplay(capo, uiCapoLevel);
   

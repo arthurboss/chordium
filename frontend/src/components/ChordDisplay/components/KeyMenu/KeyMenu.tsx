@@ -19,8 +19,8 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
   defaultTranspose = 0,
   songKey,
   title = "Transpose Song Key",
-  capoTransposeLinked = false,
-  capo = 0
+  disableIncrement: externalDisableIncrement,
+  disableDecrement: externalDisableDecrement
 }) => {
   const {
     uiTransposeLevel,
@@ -29,9 +29,13 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
     handleDecrement,
     handleReset,
     animationDirection,
-    disableIncrement,
-    disableDecrement
-  } = useKeyMenu({ transpose, setTranspose, defaultTranspose, capoTransposeLinked, capo });
+    disableIncrement: internalDisableIncrement,
+    disableDecrement: internalDisableDecrement
+  } = useKeyMenu({ transpose, setTranspose, defaultTranspose });
+
+  // Use external disable states if provided, otherwise use internal ones
+  const disableIncrement = externalDisableIncrement ?? internalDisableIncrement;
+  const disableDecrement = externalDisableDecrement ?? internalDisableDecrement;
 
   const keyDisplay = formatKeyDisplay(transpose, uiTransposeLevel, songKey);
 

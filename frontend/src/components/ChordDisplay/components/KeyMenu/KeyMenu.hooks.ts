@@ -13,9 +13,7 @@ import type { KeyMenuProps } from './KeyMenu.types';
 export const useKeyMenu = ({ 
   transpose, 
   setTranspose, 
-  defaultTranspose = 0,
-  capoTransposeLinked = false,
-  capo = 0
+  defaultTranspose = 0
 }: KeyMenuProps) => {
   // Track the UI transpose level (separate from actual transpose logic)
   const [uiTransposeLevel, setUiTransposeLevel] = useState(0);
@@ -60,14 +58,9 @@ export const useKeyMenu = ({
     setUiTransposeLevel(0);
   };
 
-  // Calculate disable states considering linked capo
-  const disableIncrement = capoTransposeLinked 
-    ? (uiTransposeLevel >= getMaxTransposeLevel() || capo <= 0) // Can't increment if at max transpose OR capo would go below 0
-    : uiTransposeLevel >= getMaxTransposeLevel();
-    
-  const disableDecrement = capoTransposeLinked
-    ? (uiTransposeLevel <= getMinTransposeLevel() || capo >= 11) // Can't decrement if at min transpose OR capo would go above 11
-    : uiTransposeLevel <= getMinTransposeLevel();
+  // Calculate disable states based on transpose limits only
+  const disableIncrement = uiTransposeLevel >= getMaxTransposeLevel();
+  const disableDecrement = uiTransposeLevel <= getMinTransposeLevel();
 
   return {
     uiTransposeLevel,

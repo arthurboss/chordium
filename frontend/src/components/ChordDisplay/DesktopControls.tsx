@@ -39,7 +39,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     setCapo(newCapo);
 
     // If linked, adjust transpose inversely
-    if (capoTransposeLinked && setCapoTransposeLinked) {
+    if (capoTransposeLinked) {
       const capoDifference = newCapo - capo;
       const newTranspose = transpose - capoDifference;
       
@@ -54,7 +54,7 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
     setTranspose(newTranspose);
 
     // If linked, adjust capo inversely
-    if (capoTransposeLinked && setCapoTransposeLinked) {
+    if (capoTransposeLinked) {
       const transposeDifference = newTranspose - transpose;
       const newCapo = capo - transposeDifference;
       
@@ -63,6 +63,31 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
       
       setCapo(clampedCapo);
     }
+  };
+
+  // Calculate disable states for buttons based on linking
+  const getCapoDisableStates = () => {
+    if (!capoTransposeLinked) {
+      return { disableIncrement: capo >= 11, disableDecrement: capo <= 0 };
+    }
+    
+    // When linked, consider both capo and transpose limits
+    return {
+      disableIncrement: capo >= 11 || transpose <= -11,
+      disableDecrement: capo <= 0 || transpose >= 11
+    };
+  };
+
+  const getTransposeDisableStates = () => {
+    if (!capoTransposeLinked) {
+      return { disableIncrement: transpose >= 11, disableDecrement: transpose <= -11 };
+    }
+    
+    // When linked, consider both capo and transpose limits
+    return {
+      disableIncrement: transpose >= 11 || capo <= 0,
+      disableDecrement: transpose <= -11 || capo >= 11
+    };
   };
 
   const handleToggleLink = () => {
@@ -93,6 +118,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
             setCapo={handleCapoChange}
             defaultCapo={defaultCapo}
             title="Capo Fret"
+            disableIncrement={getCapoDisableStates().disableIncrement}
+            disableDecrement={getCapoDisableStates().disableDecrement}
           />
         </div>
         {/* Link Button */}
@@ -111,8 +138,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
             defaultTranspose={defaultTranspose}
             songKey={songKey}
             title="Transpose"
-            capoTransposeLinked={capoTransposeLinked}
-            capo={capo}
+            disableIncrement={getTransposeDisableStates().disableIncrement}
+            disableDecrement={getTransposeDisableStates().disableDecrement}
           />
         </div>
       </div>
