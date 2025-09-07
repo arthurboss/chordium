@@ -1,9 +1,9 @@
-import { ReactNode } from "react";
-
 export interface NavigationCardProps {
   onBack: () => void;
   onDelete?: () => void;
   showDeleteButton?: boolean;
+  onSave?: () => void;
+  showSaveButton?: boolean;
   className?: string;
-  children?: ReactNode;
+  title?: string;
 }

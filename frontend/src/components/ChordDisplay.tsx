@@ -4,7 +4,6 @@ import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
 import ChordSheetControls from './ChordDisplay/ChordSheetControls';
 import ChordEdit from './ChordDisplay/ChordEdit';
-import ChordHeader from './ChordDisplay/ChordHeader';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
@@ -88,11 +87,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
 
   return (
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
-      <ChordHeader 
-        title={chordSheet.title}
-        artist={chordSheet.artist}
-        tuning={Array.isArray(chordSheet.guitarTuning) ? chordSheet.guitarTuning.join('-') : chordSheet.guitarTuning}
-      />
       <ChordContent
         processedContent={processedContent}
         fontSize={fontSize}

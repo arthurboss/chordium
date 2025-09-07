@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Save } from "lucide-react";
 import { NavigationCardProps } from "./NavigationCard.types";
 
 /**
@@ -13,23 +13,35 @@ const NavigationCard = ({
   onBack,
   onDelete,
   showDeleteButton = false,
+  onSave,
+  showSaveButton = false,
   className = "",
-  children
+  title
 }: NavigationCardProps) => {
   return (
-    <Card className={`flex flex-row p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm mb-6 ${className}`}>
+    <Card className={`flex flex-row items-center gap-2 p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm ${className}`}>
       <Button
         variant="outline"
         size="sm"
         onClick={onBack}
-        className="mr-2"
+        className="flex-shrink-0"
         tabIndex={0}
         aria-label="back-button"
       >
         <ArrowLeft className="h-4 w-4 text-primary" />
-        Back
       </Button>
 
+
+      {/* Title */}
+      {title && (
+        <div className="flex flex-col flex-1 min-w-0 text-center">
+          <h1 className="text-lg font-semibold truncate" title={title}>
+            {title}
+          </h1>
+        </div>
+      )}
+
+      {/* Show either Delete or Save button, but not both */}
       {showDeleteButton && onDelete && (
         <Button
           size="sm"
@@ -38,15 +50,26 @@ const NavigationCard = ({
             e.stopPropagation();
             onDelete();
           }}
+          className="flex-shrink-0"
           tabIndex={0}
           aria-label="delete-button"
         >
           <Trash2 className="h-4 w-4 text-destructive dark:text-red-300" />
-          Delete
         </Button>
       )}
-
-      {children}
+      
+      {showSaveButton && onSave && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onSave}
+          className="flex-shrink-0"
+          tabIndex={0}
+          aria-label="save to my chord sheets"
+        >
+          <Save className="h-4 w-4 text-primary" />
+        </Button>
+      )}
     </Card>
   );
 };
