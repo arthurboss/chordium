@@ -12,7 +12,7 @@ import type { MetadataBadgeProps } from './MetadataBadge.types';
  */
 const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value }) => {
   return (
-    <div className="bg-muted whitespace-nowrap">
+    <div className="whitespace-nowrap">
       <span className="font-medium text-muted-foreground">{label}</span>
       <span className="ml-2 font-medium">{value}</span>
     </div>
