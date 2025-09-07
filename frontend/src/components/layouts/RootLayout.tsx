@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import SmallScreenWarning from "@/components/SmallScreenWarning";
 
 /**
  * Root layout component that wraps all routes
@@ -16,6 +17,8 @@ const RootLayout = () => {
       <Sonner />
       <QueryErrorBoundary>
         <Header />
+        {/* Warning for small screens. CSS handles visibility */}
+        <SmallScreenWarning />
         <Outlet />
         <Footer />
       </QueryErrorBoundary>
