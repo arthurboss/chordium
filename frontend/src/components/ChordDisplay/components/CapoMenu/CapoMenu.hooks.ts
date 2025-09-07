@@ -19,7 +19,7 @@ export const useCapoMenu = ({ capo, setCapo, defaultCapo = 0 }: UseCapoMenuProps
   const isAltered = capo !== defaultCapo;
 
   const handleIncrement = () => {
-    if (capo < 15) {
+    if (capo < 11) {
       const newCapo = capo + 1;
       setAnimationDirection('up');
       setCapo(newCapo);
@@ -49,7 +49,7 @@ export const useCapoMenu = ({ capo, setCapo, defaultCapo = 0 }: UseCapoMenuProps
     handleIncrement,
     handleDecrement,
     handleReset,
-    disableIncrement: capo >= 15,
+    disableIncrement: capo >= 11,
     disableDecrement: capo <= 0,
     animationDirection
   };

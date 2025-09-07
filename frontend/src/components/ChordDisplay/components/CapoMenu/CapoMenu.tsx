@@ -31,8 +31,8 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
 
   const capoDisplay = formatCapoDisplay(capo, uiCapoLevel);
   
-  // Generate capo digits (0-15)
-  const capoDigits = Array.from({ length: 16 }, (_, i) => i.toString());
+  // Generate capo digits (0-11)
+  const capoDigits = Array.from({ length: 12 }, (_, i) => i.toString());
 
   return (
     <>
