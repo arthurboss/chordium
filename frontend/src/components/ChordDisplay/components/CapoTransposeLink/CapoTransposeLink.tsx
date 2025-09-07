@@ -25,7 +25,7 @@ const CapoTransposeLink: React.FC<CapoTransposeLinkProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        className={`h-8 w-auto bg-none transition-colors duration-100 ${
+        className={`h-8 w-auto p-0 bg-none transition-colors duration-100 ${
           isLinked 
             ? 'text-primary hover:text-primary/80' 
             : 'text-muted-foreground hover:text-foreground'

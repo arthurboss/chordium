@@ -99,13 +99,12 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   return (
     <StickyBottomContainer isAtBottom={isAtBottom} desktopOnly>
       {/* Left: Auto Scroll Controls */}
-      <div className='flex flex-col items-center'>
+      <div className='flex flex-col items-start'>
         <AutoScrollControls
           autoScroll={autoScroll}
           setAutoScroll={setAutoScroll}
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
-          title="Scroll"
         />
       </div>
 
@@ -145,13 +144,12 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
       </div>
 
       {/* Right: Text Preferences */}
-      <div className='flex flex-col items-center'>
+      <div className='flex flex-col items-end'>
         <TextPreferencesMenu
           fontSize={fontSize} setFontSize={setFontSize}
           fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
           fontStyle={fontStyle} setFontStyle={setFontStyle}
           viewMode={viewMode} setViewMode={setViewMode}
-          title="Style"
         />
       </div>
     </StickyBottomContainer>

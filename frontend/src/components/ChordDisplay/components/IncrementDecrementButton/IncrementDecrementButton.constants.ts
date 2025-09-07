@@ -4,7 +4,7 @@ export const INCREMENT_DECREMENT_BUTTON_STYLES = {
   incrementButton: "h-6 w-4 p-0 text-primary hover:text-primary flex-shrink-0 transition-colors duration-200",
   resetButton: "h-6 w-6 p-0 text-red-500 hover:text-red-500 flex-shrink-0 transition-colors duration-200",
   verticalDivider: "h-4 w-px bg-border mx-1 flex-shrink-0",
-  displayContainer: "flex items-center justify-center flex-1 px-2 min-w-0 overflow-hidden relative h-6",
+  displayContainer: "flex items-center justify-center flex-1 min-w-0 overflow-hidden relative h-6",
   displayInner: "flex items-center justify-center gap-1 relative w-full h-full",
   buttonText: "text-sm font-medium",
   lockWheel: "h-full transition-transform duration-300 ease-in-out",

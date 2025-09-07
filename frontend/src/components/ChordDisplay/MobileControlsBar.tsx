@@ -132,10 +132,12 @@ const MobileControlsBar: React.FC<ChordSheetControlsProps> = ({
       {autoScroll && (
         <>
           <div className="flex items-center mr-auto ml-0 pl-0">{MenuButtons}</div>
+          <div className="flex items-center justify-center px-2">
           <div className="transition-all duration-200 animate-in slide-in-from-right-16 flex-1 flex items-center justify-center px-2">
             <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
           </div>
           <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
+          </div>
         </>
       )}
     </StickyBottomContainer>

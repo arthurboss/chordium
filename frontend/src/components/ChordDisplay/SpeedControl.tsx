@@ -17,7 +17,7 @@ const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, se
         max={10}
         step={1}
         onValueChange={(value) => setScrollSpeed(value[0])}
-        className="w-32"
+        className="flex-1 min-w-32 sm:min-w-8"
       />
       <span className="text-sm font-medium ml-2">x{scrollSpeed}</span>
     </div>
