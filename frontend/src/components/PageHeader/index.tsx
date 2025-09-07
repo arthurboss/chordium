@@ -1,23 +1,23 @@
 import { Card } from "@/components/ui/card";
 import { memo } from "react";
-import { NavigationCardProps } from "./NavigationCard.types";
+import { PageHeaderProps } from "./PageHeader.types";
 import BackButton from "./BackButton";
 import DeleteButton from "./DeleteButton";
 import SaveButton from "./SaveButton";
 import TitleSection from "./TitleSection";
 
 /**
- * Reusable navigation card component with back and optional delete functionality
+ * Reusable page header component with back and optional action functionality
  * 
- * Provides consistent navigation UI across different pages while being flexible
+ * Provides consistent page header UI across different pages while being flexible
  * enough to accommodate various use cases.
  */
-const NavigationCard = memo(({
+const PageHeader = memo(({
   onBack,
   onAction,
   isSaved,
   title
-}: NavigationCardProps) => {
+}: PageHeaderProps) => {
 
   return (
     <Card className="flex flex-row items-center gap-2 p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm">
@@ -44,6 +44,6 @@ const NavigationCard = memo(({
   );
 });
 
-NavigationCard.displayName = 'NavigationCard';
+PageHeader.displayName = 'PageHeader';
 
-export default NavigationCard;
+export default PageHeader;

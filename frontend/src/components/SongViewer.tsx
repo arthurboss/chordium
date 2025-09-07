@@ -1,5 +1,5 @@
 import ChordDisplay from "@/components/ChordDisplay";
-import NavigationCard from "@/components/NavigationCard";
+import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
@@ -64,7 +64,7 @@ const SongViewer = ({
 
   return (
     <div className="animate-fade-in flex flex-col">
-      <NavigationCard
+      <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
         isSaved={shouldShowActionButton && isFromMyChordSheets}
