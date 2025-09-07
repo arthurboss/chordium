@@ -4,7 +4,7 @@
 
 export const TEXT_PREFERENCES_STYLES = {
   triggerButton: "h-8 px-2 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0",
-  settingsIcon: "text-chord",
+  settingsIcon: "text-foreground",
   buttonText: "font-medium text-sm",
   dropdownContent: "align-end",
   sectionContainer: "px-2 py-1",

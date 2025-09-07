@@ -44,7 +44,7 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
               onClick={() => setViewMode('normal')} 
               title={TEXT_PREFERENCES_LABELS.normal}
             >
-              <Text size={18} />
+              <Text size={18} className="text-foreground" />
             </Button>
             <Button 
               variant={isViewModeActive(viewMode, 'chords-only') ? 'default' : 'outline'} 
@@ -53,7 +53,7 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
               onClick={() => setViewMode('chords-only')} 
               title={TEXT_PREFERENCES_LABELS.chords}
             >
-              <Music size={18} />
+              <Music size={18} className="text-foreground" />
             </Button>
             <Button 
               variant={isViewModeActive(viewMode, 'lyrics-only') ? 'default' : 'outline'} 
@@ -62,7 +62,7 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
               onClick={() => setViewMode('lyrics-only')} 
               title={TEXT_PREFERENCES_LABELS.lyrics}
             >
-              <AlignLeft size={18} />
+              <AlignLeft size={18} className="text-foreground" />
             </Button>
           </div>
         </div>
