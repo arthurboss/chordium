@@ -2,27 +2,17 @@ import React from "react";
 
 interface SongChordDetailsProps {
   tuning?: string;
-  capo?: string;
 }
 
-const SongChordDetails: React.FC<SongChordDetailsProps> = ({ tuning, capo }) => {
-  if (!tuning && !capo) return null;
+const SongChordDetails: React.FC<SongChordDetailsProps> = ({ tuning }) => {
+  if (!tuning) return null;
   
   return (
     <div className="flex flex-wrap gap-3 text-sm mb-4">
-      {tuning && (
-        <div className="inline-flex items-center rounded-md border px-3 py-1 bg-muted">
-          <span className="font-medium text-muted-foreground">Tuning:</span>
-          <span className="ml-2 font-medium">{tuning}</span>
-        </div>
-      )}
-      
-      {capo && (
-        <div className="inline-flex items-center rounded-md border px-3 py-1 bg-muted">
-          <span className="font-medium text-muted-foreground">Capo:</span>
-          <span className="ml-2 font-medium">{capo}</span>
-        </div>
-      )}
+      <div className="inline-flex items-center rounded-md border px-3 py-1 bg-muted">
+        <span className="font-medium text-muted-foreground">Tuning:</span>
+        <span className="ml-2 font-medium">{tuning}</span>
+      </div>
     </div>
   );
 };

@@ -21,7 +21,6 @@ const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size
     style={style}
   >
     {autoScroll ? <Pause size={size} className="text-chord" /> : <Play size={size} className="text-chord" />}
-    {!autoScroll && <span className="font-medium text-sm hidden sm:inline">Auto Scroll</span>}
   </Button>
 );
 

@@ -4,7 +4,7 @@ import { majorKey, minorKey } from '@tonaljs/key';
 import tonalNote from '@tonaljs/note';
 
 // Define the musical notes for transposing
-const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+export const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 /**
  * Transpose a chord by a given number of half steps

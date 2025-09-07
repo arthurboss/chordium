@@ -1,9 +1,10 @@
 import React from 'react';
 import { CardContent } from '../ui/card';
-import PlayButton from './PlayButton';
-import SpeedControl from './SpeedControl';
+import AutoScrollControls from './components/AutoScrollControls';
 import KeyMenu from './components/KeyMenu';
+import CapoMenu from './components/CapoMenu';
 import TextPreferencesMenu from './components/TextPreferencesMenu';
+import CapoTransposeLink from './components/CapoTransposeLink';
 import { ChordSheetControlsProps } from './types';
 import StickyBottomContainer from '../StickyBottomContainer';
 import { useAtBottom } from '@/hooks/useAtBottom';
@@ -13,6 +14,9 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setTranspose,
   defaultTranspose = 0,
   songKey,
+  capo,
+  setCapo,
+  defaultCapo = 0,
   fontSize,
   setFontSize,
   fontSpacing,
@@ -25,41 +29,92 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
+  capoTransposeLinked = false,
+  setCapoTransposeLinked,
 }) => {
   const isAtBottom = useAtBottom();
 
+  // Handle capo-transpose linking logic
+  const handleCapoChange = (newCapo: number) => {
+    setCapo(newCapo);
+
+    // If linked, adjust transpose inversely
+    if (capoTransposeLinked && setCapoTransposeLinked) {
+      const capoDifference = newCapo - capo;
+      setTranspose(transpose - capoDifference);
+    }
+  };
+
+  const handleTransposeChange = (newTranspose: number) => {
+    setTranspose(newTranspose);
+
+    // If linked, adjust capo inversely
+    if (capoTransposeLinked && setCapoTransposeLinked) {
+      const transposeDifference = newTranspose - transpose;
+      setCapo(capo - transposeDifference);
+    }
+  };
+
+  const handleToggleLink = () => {
+    if (setCapoTransposeLinked) {
+      setCapoTransposeLinked(!capoTransposeLinked);
+    }
+  };
+
   return (
     <StickyBottomContainer isAtBottom={isAtBottom} desktopOnly>
-      {/* Left: Play/Pause (Auto Scroll) button */}
-      <div className='flex items-center'>
-        <PlayButton
+      {/* Left: Auto Scroll Controls */}
+      <div className='flex flex-col items-center'>
+        <AutoScrollControls
           autoScroll={autoScroll}
           setAutoScroll={setAutoScroll}
-          size={16}
-          className={`h-8 w-full px-3 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 ${autoScroll && 'max-w-[2rem] bg-primary/10 text-primary hover:bg-primary/20'}`}
-          variant="outline"
+          scrollSpeed={scrollSpeed}
+          setScrollSpeed={setScrollSpeed}
+          title="Scroll"
         />
-        {/* Speed controls only show when playing, always between PlayButton and Transpose */}
-        {autoScroll && (
-          <div className="max-w-[7rem] ml-2 transition-all duration-300 animate-in slide-in-from-left-2">
-            <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
-          </div>
-        )}
       </div>
-      {/* Center: Key always centered and fixed */}
-      <KeyMenu
-        transpose={transpose}
-        setTranspose={setTranspose}
-        defaultTranspose={defaultTranspose}
-        songKey={songKey}
-      />
+
+      {/* Center: Musical Controls Sub-Container */}
+      <div className='flex items-center justify-center gap-1'>
+        {/* Capo Menu */}
+        <div className='flex flex-col items-center'>
+          <CapoMenu
+            capo={capo}
+            setCapo={handleCapoChange}
+            defaultCapo={defaultCapo}
+            title="Capo Fret"
+          />
+        </div>
+        {/* Link Button */}
+        <div className='flex flex-col items-center'>
+          <CapoTransposeLink
+            isLinked={capoTransposeLinked}
+            onToggle={handleToggleLink}
+            title="Link"
+          />
+        </div>
+        {/* Transpose Menu */}
+        <div className='flex flex-col items-center'>
+          <KeyMenu
+            transpose={transpose}
+            setTranspose={handleTransposeChange}
+            defaultTranspose={defaultTranspose}
+            songKey={songKey}
+            title="Transpose"
+          />
+        </div>
+      </div>
+
       {/* Right: Text Preferences */}
-      <TextPreferencesMenu
-        fontSize={fontSize} setFontSize={setFontSize}
-        fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-        fontStyle={fontStyle} setFontStyle={setFontStyle}
-        viewMode={viewMode} setViewMode={setViewMode}
-      />
+      <div className='flex flex-col items-center'>
+        <TextPreferencesMenu
+          fontSize={fontSize} setFontSize={setFontSize}
+          fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+          fontStyle={fontStyle} setFontStyle={setFontStyle}
+          viewMode={viewMode} setViewMode={setViewMode}
+          title="Style"
+        />
+      </div>
     </StickyBottomContainer>
   );
 };

@@ -31,7 +31,6 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className={TEXT_PREFERENCES_STYLES.triggerButton}>
             <Settings size={16} className={TEXT_PREFERENCES_STYLES.settingsIcon} />
-            <span className={TEXT_PREFERENCES_STYLES.buttonText}>{TEXT_PREFERENCES_LABELS.textPreferences}</span>
           </Button>
         </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

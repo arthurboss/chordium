@@ -32,6 +32,9 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     transpose, 
     setTranspose,
     defaultTranspose,
+    capo,
+    setCapo,
+    defaultCapo,
     fontSize, 
     setFontSize,
     fontSpacing,
@@ -42,8 +45,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     setViewMode,
     hideGuitarTabs,
     setHideGuitarTabs,
+    capoTransposeLinked,
+    setCapoTransposeLinked,
     processedContent
-  } = useChordDisplaySettings(content, chordSheet.songKey);
+  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
   
   const {
     isEditing,
@@ -87,7 +92,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         title={chordSheet.title}
         artist={chordSheet.artist}
         tuning={Array.isArray(chordSheet.guitarTuning) ? chordSheet.guitarTuning.join('-') : chordSheet.guitarTuning}
-        capo={chordSheet.guitarCapo !== undefined ? chordSheet.guitarCapo.toString() : undefined}
       />
       <ChordContent
         processedContent={processedContent}
@@ -103,6 +107,9 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         setTranspose={setTranspose}
         defaultTranspose={defaultTranspose}
         songKey={chordSheet.songKey}
+        capo={capo}
+        setCapo={setCapo}
+        defaultCapo={defaultCapo}
         fontSize={fontSize}
         setFontSize={setFontSize}
         fontSpacing={fontSpacing}
@@ -117,6 +124,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         setAutoScroll={toggleAutoScroll}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
+        capoTransposeLinked={capoTransposeLinked}
+        setCapoTransposeLinked={setCapoTransposeLinked}
         setIsEditing={setIsEditing}
         handleDownload={handleDownload}
       />

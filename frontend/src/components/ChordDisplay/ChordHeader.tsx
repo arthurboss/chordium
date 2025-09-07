@@ -5,10 +5,9 @@ interface ChordHeaderProps {
   title?: string;
   artist?: string;
   tuning?: string;
-  capo?: string;
 }
 
-const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, tuning, capo }) => {
+const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, tuning }) => {
   if (!title && !artist) return null;
   
   return (
@@ -19,7 +18,7 @@ const ChordHeader: React.FC<ChordHeaderProps> = ({ title, artist, tuning, capo }
       </div>
 
       <div className='mb-4'>
-      <SongChordDetails tuning={tuning} capo={capo} />
+      <SongChordDetails tuning={tuning} />
       </div>
     </div>
   );
