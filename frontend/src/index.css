@@ -2,23 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .small-screen-warning {
-    @apply hidden;
-  }
-  
-  @media (max-width: 319px) {
-    .small-screen-warning {
-      @apply block;
-    }
-    
-    /* Hide the main content area when screen is too small */
-    main {
-      @apply hidden;
-    }
-  }
-}
-
 @layer base {
   :root {
     --background: 240 5% 96%;

@@ -9,6 +9,7 @@ import { KeepAliveService } from "@/services/keep-alive.service";
 // import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
+import SmallScreenWarning from "@/components/SmallScreenWarning";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -145,6 +146,8 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AppInitializer>
+          {/* Small screen warning - positioned at app level */}
+          <SmallScreenWarning />
           <RouterProvider router={router} />
           <OfflineToast />
           {/* {import.meta.env.DEV && <OfflineTestPanel />} */}
