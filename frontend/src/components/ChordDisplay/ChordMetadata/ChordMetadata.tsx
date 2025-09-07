@@ -16,22 +16,22 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
     : chordSheet.guitarTuning;
 
   return (
-    <div className='grid grid-cols-2 sm:[grid-template-columns:repeat(4,_min-content)] gap-2 w-full sm:justify-between text-xs'>
-      <MetadataBadge 
-        label="Artist:" 
-        value={chordSheet.artist} 
+    <div className='grid [grid-template-columns:max-content_1fr] sm:[grid-template-columns:repeat(4,_min-content)] gap-y-1 gap-x-4 w-full sm:justify-between text-xs'>
+      <MetadataBadge
+        label="Artist:"
+        value={chordSheet.artist}
       />
-      <MetadataBadge 
-        label="Tuning:" 
-        value={tuning} 
+      <MetadataBadge
+        label="Song Key:"
+        value={chordSheet.songKey}
       />
-      <MetadataBadge 
-        label="Key:" 
-        value={chordSheet.songKey} 
+      <MetadataBadge
+        label="Guitar Tuning:"
+        value={tuning}
       />
-      <MetadataBadge 
-        label="Capo:" 
-        value={chordSheet.guitarCapo.toString()} 
+      <MetadataBadge
+        label="Guitar Capo:"
+        value={chordSheet.guitarCapo.toString()}
       />
     </div>
   );
