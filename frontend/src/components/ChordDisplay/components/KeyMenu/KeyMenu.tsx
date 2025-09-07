@@ -2,7 +2,7 @@ import React from 'react';
 import IncrementDecrementButton from '../IncrementDecrementButton';
 import { useKeyMenu } from './KeyMenu.hooks';
 import { formatKeyDisplay } from './KeyMenu.utils';
-import { ALL_POSSIBLE_KEY_NAMES } from '@music/constants/musicalKeys';
+import { ALL_POSSIBLE_KEY_NAMES } from '@/music/constants/musicalKeys';
 import type { KeyMenuProps } from './KeyMenu.types';
 
 /**
