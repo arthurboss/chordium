@@ -52,14 +52,22 @@ const SongViewer = ({
     return '';
   }, [songObj, directChordContent, isFromMyChordSheets, myChordSheets]);
 
+  const handleAction = () => {
+    if (isFromMyChordSheets && !hideDeleteButton) {
+      onDelete(songObj.path);
+    } else if (!hideSaveButton && !isFromMyChordSheets && onSave) {
+      onSave();
+    }
+  };
+
+  const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
+
   return (
     <div className="animate-fade-in flex flex-col">
       <NavigationCard
         onBack={onBack}
-        onDelete={isFromMyChordSheets && !hideDeleteButton ? () => onDelete(songObj.path) : undefined}
-        showDeleteButton={isFromMyChordSheets && !hideDeleteButton}
-        onSave={!hideSaveButton && !isFromMyChordSheets && onSave ? onSave : undefined}
-        showSaveButton={!hideSaveButton && !isFromMyChordSheets && !!onSave}
+        onAction={shouldShowActionButton && handleAction}
+        isSaved={shouldShowActionButton && isFromMyChordSheets}
         title={chordSheet.title}
       />
       <div className="py-2 sm:py-4 px-4">
