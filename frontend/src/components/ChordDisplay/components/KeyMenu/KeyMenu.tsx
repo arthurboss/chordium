@@ -18,7 +18,9 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
   setTranspose,
   defaultTranspose = 0,
   songKey,
-  title = "Transpose Song Key"
+  title = "Transpose Song Key",
+  capoTransposeLinked = false,
+  capo = 0
 }) => {
   const {
     uiTransposeLevel,
@@ -26,8 +28,10 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
     handleIncrement,
     handleDecrement,
     handleReset,
-    animationDirection
-  } = useKeyMenu({ transpose, setTranspose, defaultTranspose });
+    animationDirection,
+    disableIncrement,
+    disableDecrement
+  } = useKeyMenu({ transpose, setTranspose, defaultTranspose, capoTransposeLinked, capo });
 
   const keyDisplay = formatKeyDisplay(transpose, uiTransposeLevel, songKey);
 
@@ -47,8 +51,8 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
         isAltered={isAltered}
         title="Transpose Song Key"
         resetTitle="Reset to original song key"
-        disableIncrement={false}
-        disableDecrement={false}
+        disableIncrement={disableIncrement}
+        disableDecrement={disableDecrement}
         animationDirection={animationDirection}
         digits={ALL_POSSIBLE_KEY_NAMES} // Use all possible key names for mechanical lock wheel
       />

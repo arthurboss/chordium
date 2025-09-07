@@ -111,6 +111,8 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
             defaultTranspose={defaultTranspose}
             songKey={songKey}
             title="Transpose"
+            capoTransposeLinked={capoTransposeLinked}
+            capo={capo}
           />
         </div>
       </div>

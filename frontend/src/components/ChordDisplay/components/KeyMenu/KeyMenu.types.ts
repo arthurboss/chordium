@@ -4,6 +4,8 @@ export interface KeyMenuProps {
   defaultTranspose?: number;
   songKey?: string;
   title?: string;
+  capoTransposeLinked?: boolean;
+  capo?: number;
 }
 
 export interface KeyDisplay {
