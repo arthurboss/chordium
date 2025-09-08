@@ -25,17 +25,30 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
   hideGuitarTabs,
   setHideGuitarTabs,
   title = "Style",
+  variant = 'desktop',
+  buttonClassName,
+  iconSize = 16,
+  dropdownAlign = 'start',
+  dropdownClassName,
 }) => {
+  // Determine styling based on variant
+  const isMobile = variant === 'mobile';
+  const containerClassName = isMobile ? '' : 'flex flex-col items-center gap-1';
+  const triggerButtonClassName = buttonClassName || (isMobile ? 'h-10 w-10' : TEXT_PREFERENCES_STYLES.triggerButton);
+  const settingsIconClassName = isMobile ? '' : TEXT_PREFERENCES_STYLES.settingsIcon;
+  const contentAlign = dropdownAlign;
+  const contentClassName = dropdownClassName || (isMobile ? 'mr-4' : '');
+
   return (
-    <div className='flex flex-col items-center gap-1'>
-      <span className="text-xs text-muted-foreground">{title}</span>
+    <div className={containerClassName}>
+      {!isMobile && <span className="text-xs text-muted-foreground">{title}</span>}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className={TEXT_PREFERENCES_STYLES.triggerButton}>
-            <Settings size={16} className={TEXT_PREFERENCES_STYLES.settingsIcon} />
+          <Button variant="outline" className={triggerButtonClassName} title={isMobile ? "Text Preferences" : undefined}>
+            <Settings size={iconSize} className={settingsIconClassName} />
           </Button>
         </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align={contentAlign} className={contentClassName}>
         <div className={TEXT_PREFERENCES_STYLES.sectionContainer}>
           <div className={TEXT_PREFERENCES_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.viewMode}</div>
           <div className={TEXT_PREFERENCES_STYLES.buttonGroup}>

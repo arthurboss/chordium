@@ -10,4 +10,10 @@ export interface TextPreferencesMenuProps {
   hideGuitarTabs?: boolean;
   setHideGuitarTabs?: (value: boolean) => void;
   title?: string;
+  // Layout customization props
+  variant?: 'desktop' | 'mobile';
+  buttonClassName?: string;
+  iconSize?: number;
+  dropdownAlign?: 'start' | 'center' | 'end';
+  dropdownClassName?: string;
 }
