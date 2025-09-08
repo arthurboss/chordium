@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../../../ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator } from '../../../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem } from '../../../ui/dropdown-menu';
 import { Slider } from '../../../ui/slider';
 import { Music, Settings, Text, AlignLeft } from 'lucide-react';
 import { TEXT_PREFERENCES_STYLES, TEXT_PREFERENCES_LABELS, TEXT_PREFERENCES_VALUES } from './TextPreferencesMenu.constants';
@@ -22,6 +22,8 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
   setFontStyle,
   viewMode,
   setViewMode,
+  hideGuitarTabs,
+  setHideGuitarTabs,
   title = "Style",
 }) => {
   return (
@@ -67,6 +69,14 @@ const TextPreferencesMenu: React.FC<TextPreferencesMenuProps> = ({
           </div>
         </div>
         <DropdownMenuSeparator />
+        {hideGuitarTabs !== undefined && setHideGuitarTabs && (
+          <>
+            <DropdownMenuItem onClick={() => setHideGuitarTabs(!hideGuitarTabs)} className={hideGuitarTabs ? 'bg-accent text-accent-foreground' : ''}>
+              {hideGuitarTabs ? 'Show Guitar Tabs' : 'Hide Guitar Tabs'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <div className={TEXT_PREFERENCES_STYLES.sectionContainer}>
           <div className={TEXT_PREFERENCES_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.fontStyle}</div>
           <div className={TEXT_PREFERENCES_STYLES.buttonGroup}>

@@ -2,7 +2,7 @@ import { forwardRef, useEffect } from 'react';
 import type { ChordSheet } from '@/types/chordSheet';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
-import ChordSheetControls from './ChordDisplay/ChordSheetControls';
+import StickyControlsBar from './ChordDisplay/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
@@ -96,7 +96,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         hideGuitarTabs={hideGuitarTabs}
         renderChord={renderChord}
       />
-      <ChordSheetControls
+      <StickyControlsBar
         transpose={transpose}
         setTranspose={setTranspose}
         defaultTranspose={defaultTranspose}

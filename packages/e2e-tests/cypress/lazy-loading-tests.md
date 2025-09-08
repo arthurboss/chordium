@@ -6,7 +6,7 @@ This file contains automated end-to-end tests to verify that the lazy loading im
 
 - **Basic Page Loading**: Verifies main page components load without errors or React lazy loading exceptions
 - **ChordContent Component**: Tests that chord content is rendered properly when viewing a song
-- **ChordSheetControls**: Ensures auto-scroll controls and other features work correctly
+- **StickyControlsBar**: Ensures auto-scroll controls and other features work correctly
 - **Mobile vs Desktop Layout**: Tests that appropriate components load based on viewport size
 - **Component Interaction**: Verifies that transitioning between lazy-loaded components preserves state
 
@@ -15,11 +15,9 @@ This file contains automated end-to-end tests to verify that the lazy loading im
 The tests specifically verify these lazily-loaded components:
 
 - `LazyChordContent`
-- `LazyChordSheetControls`
+- `LazyStickyControlsBar`
 - `LazyChordEdit`
 - `LazyConfigMenu`
-- `LazyMobileControlsBar`
-- `LazyDesktopControls`
 
 ## How to Run
 

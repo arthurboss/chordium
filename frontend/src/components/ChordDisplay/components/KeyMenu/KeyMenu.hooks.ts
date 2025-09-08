@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getMaxTransposeLevel, getMinTransposeLevel } from './KeyMenu.utils';
 import type { KeyMenuProps } from './KeyMenu.types';
 
@@ -16,8 +16,13 @@ export const useKeyMenu = ({
   defaultTranspose = 0
 }: KeyMenuProps) => {
   // Track the UI transpose level (separate from actual transpose logic)
-  const [uiTransposeLevel, setUiTransposeLevel] = useState(0);
+  const [uiTransposeLevel, setUiTransposeLevel] = useState(transpose - defaultTranspose);
   const [animationDirection, setAnimationDirection] = useState<'up' | 'down'>('up');
+
+  // Synchronize uiTransposeLevel with actual transpose value when it changes externally
+  useEffect(() => {
+    setUiTransposeLevel(transpose - defaultTranspose);
+  }, [transpose, defaultTranspose]);
 
   const handleIncrement = () => {
     // Check if we're already at the maximum transpose level (+11 semitones)

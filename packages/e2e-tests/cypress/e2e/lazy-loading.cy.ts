@@ -30,7 +30,7 @@ describe.skip('Lazy Loading Components E2E Tests', () => {
     cy.get('body').should('not.contain', 'Error loading');
   });
 
-  it.skip('should load ChordSheetControls component correctly', () => {
+  it.skip('should load StickyControlsBar component correctly', () => {
     // Navigate to view a song
     cy.openSong('Hotel California');
     
@@ -42,7 +42,7 @@ describe.skip('Lazy Loading Components E2E Tests', () => {
     cy.get('#chord-display').should('exist');
   });
 
-  it.skip('should load MobileControlsBar on mobile layout', () => {
+  it.skip('should load StickyControlsBar on mobile layout', () => {
     // Set viewport to mobile size to trigger mobile controls
     cy.viewport('iphone-x');
     
@@ -57,7 +57,7 @@ describe.skip('Lazy Loading Components E2E Tests', () => {
     cy.get('.chord').should('exist');
   });
 
-  it.skip('should load DesktopControls on desktop layout', () => {
+  it.skip('should load StickyControlsBar on desktop layout', () => {
     // Ensure we're using a desktop viewport
     cy.viewport(1200, 800);
     

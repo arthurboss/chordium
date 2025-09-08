@@ -7,5 +7,7 @@ export interface TextPreferencesMenuProps {
   setFontStyle: (value: string) => void;
   viewMode: string;
   setViewMode: (value: string) => void;
+  hideGuitarTabs?: boolean;
+  setHideGuitarTabs?: (value: boolean) => void;
   title?: string;
 }

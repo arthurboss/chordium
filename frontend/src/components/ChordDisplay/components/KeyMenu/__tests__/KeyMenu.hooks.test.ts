@@ -48,8 +48,8 @@ describe('useKeyMenu', () => {
         result.current.handleDecrement();
       });
 
-      expect(defaultProps.setTranspose).toHaveBeenCalledWith(0);
-      expect(result.current.uiTransposeLevel).toBe(-1); // uiTransposeLevel starts at 0 and decrements
+      expect(defaultProps.setTranspose).toHaveBeenCalledWith(-1);
+      expect(result.current.uiTransposeLevel).toBe(-1); // uiTransposeLevel reflects actual transpose level
       expect(result.current.isAltered).toBe(true); // isAltered is based on uiTransposeLevel !== 0
       expect(result.current.animationDirection).toBe('down');
     });
@@ -140,7 +140,7 @@ describe('useKeyMenu', () => {
     });
   });
 
-  // Note: Capo-transpose linking logic is now handled in DesktopControls component
+  // Note: Capo-transpose linking logic is now handled in ControlsBar component
   // The KeyMenu hook only manages its own transpose limits
 
   describe('animation direction', () => {
