@@ -1,5 +1,5 @@
 import ErrorState from "@/components/ErrorState";
-import NavigationCard from "@/components/NavigationCard";
+import PageHeader from "@/components/PageHeader";
 import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
 
 interface ChordViewerErrorProps {
@@ -16,7 +16,7 @@ export function ChordViewerError({ error, navigation, onBack }: ChordViewerError
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-        <NavigationCard onBack={onBack} />
+        <PageHeader onBack={onBack} />
         <ErrorState error={error} />
       </main>
     </div>

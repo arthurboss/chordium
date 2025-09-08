@@ -7,7 +7,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@music/*": ["./src/music/*"]
     },
     "strict": true,
     "skipLibCheck": true,

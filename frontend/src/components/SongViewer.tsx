@@ -1,11 +1,10 @@
-import { Button } from "@/components/ui/button";
 import ChordDisplay from "@/components/ChordDisplay";
-import NavigationCard from "@/components/NavigationCard";
+import PageHeader from "@/components/PageHeader";
+import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
 import { useChordSheets } from "@/storage/hooks/use-chord-sheets";
-import { Save } from "lucide-react";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -44,7 +43,7 @@ const SongViewer = ({
 
     // If this is from myChordSheets, look up the chord content from stored data
     if (isFromMyChordSheets && songObj.artist && songObj.title) {
-      const storedChordSheet = myChordSheets.find(stored => 
+      const storedChordSheet = myChordSheets.find(stored =>
         stored.artist === songObj.artist && stored.title === songObj.title
       );
       return storedChordSheet?.songChords ?? '';
@@ -53,36 +52,33 @@ const SongViewer = ({
     return '';
   }, [songObj, directChordContent, isFromMyChordSheets, myChordSheets]);
 
+  const handleAction = () => {
+    if (isFromMyChordSheets && !hideDeleteButton) {
+      onDelete(songObj.path);
+    } else if (!hideSaveButton && !isFromMyChordSheets && onSave) {
+      onSave();
+    }
+  };
+
+  const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
+
   return (
-    <div className="animate-fade-in">
-      <NavigationCard
+    <div className="animate-fade-in flex flex-col">
+      <PageHeader
         onBack={onBack}
-        onDelete={isFromMyChordSheets && !hideDeleteButton ? () => onDelete(songObj.path) : undefined}
-        showDeleteButton={isFromMyChordSheets && !hideDeleteButton}
-      >
-        {/* Show Save button for search results only */}
-        {!hideSaveButton && !isFromMyChordSheets && onSave && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onSave}
-            tabIndex={0}
-            aria-label="save to my chord sheets"
-            className="ml-auto"
-          >
-            <Save className="h-4 w-4 text-primary" />
-            Save
-          </Button>
-        )}
-      </NavigationCard>
-      <div className="mt-6">
-        <ChordDisplay
-          ref={chordDisplayRef}
-          chordSheet={chordSheet}
-          content={chordContentToDisplay}
-          onSave={onUpdate}
-        />
+        onAction={shouldShowActionButton && handleAction}
+        isSaved={shouldShowActionButton && isFromMyChordSheets}
+        title={chordSheet.title}
+      />
+      <div className="py-2 sm:py-4 px-4">
+        <ChordMetadata chordSheet={chordSheet} />
       </div>
+      <ChordDisplay
+        ref={chordDisplayRef}
+        chordSheet={chordSheet}
+        content={chordContentToDisplay}
+        onSave={onUpdate}
+      />
     </div>
   );
 };

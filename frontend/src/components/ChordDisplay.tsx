@@ -2,9 +2,8 @@ import { forwardRef, useEffect } from 'react';
 import type { ChordSheet } from '@/types/chordSheet';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
-import ChordSheetControls from './ChordDisplay/ChordSheetControls';
+import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
-import ChordHeader from './ChordDisplay/ChordHeader';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
@@ -31,6 +30,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   const { 
     transpose, 
     setTranspose,
+    defaultTranspose,
+    capo,
+    setCapo,
+    defaultCapo,
     fontSize, 
     setFontSize,
     fontSpacing,
@@ -41,9 +44,10 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     setViewMode,
     hideGuitarTabs,
     setHideGuitarTabs,
-    processedContent,
-    transposeOptions
-  } = useChordDisplaySettings(content);
+    capoTransposeLinked,
+    setCapoTransposeLinked,
+    processedContent
+  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
   
   const {
     isEditing,
@@ -83,13 +87,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
 
   return (
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
-      <ChordHeader 
-        title={chordSheet.title}
-        artist={chordSheet.artist}
-        songKey={chordSheet.songKey}
-        tuning={Array.isArray(chordSheet.guitarTuning) ? chordSheet.guitarTuning.join('-') : chordSheet.guitarTuning}
-        capo={chordSheet.guitarCapo !== undefined ? chordSheet.guitarCapo.toString() : undefined}
-      />
       <ChordContent
         processedContent={processedContent}
         fontSize={fontSize}
@@ -99,10 +96,14 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         hideGuitarTabs={hideGuitarTabs}
         renderChord={renderChord}
       />
-      <ChordSheetControls
+      <StickyControlsBar
         transpose={transpose}
         setTranspose={setTranspose}
-        transposeOptions={transposeOptions}
+        defaultTranspose={defaultTranspose}
+        songKey={chordSheet.songKey}
+        capo={capo}
+        setCapo={setCapo}
+        defaultCapo={defaultCapo}
         fontSize={fontSize}
         setFontSize={setFontSize}
         fontSpacing={fontSpacing}
@@ -117,6 +118,8 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         setAutoScroll={toggleAutoScroll}
         scrollSpeed={scrollSpeed}
         setScrollSpeed={setScrollSpeed}
+        capoTransposeLinked={capoTransposeLinked}
+        setCapoTransposeLinked={setCapoTransposeLinked}
         setIsEditing={setIsEditing}
         handleDownload={handleDownload}
       />
