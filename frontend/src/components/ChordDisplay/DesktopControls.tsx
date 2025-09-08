@@ -7,6 +7,7 @@ import CapoTransposeLink from './components/CapoTransposeLink';
 import { ChordSheetControlsProps } from './types';
 import StickyBottomContainer from '../StickyBottomContainer';
 import { useAtBottom } from '@/hooks/useAtBottom';
+import { useCapoTranspose } from '@/hooks/useCapoTranspose';
 
 const DesktopControls: React.FC<ChordSheetControlsProps> = ({
   transpose,
@@ -33,61 +34,19 @@ const DesktopControls: React.FC<ChordSheetControlsProps> = ({
 }) => {
   const isAtBottom = useAtBottom();
 
-  // Handle capo-transpose linking logic
-  const handleCapoChange = (newCapo: number) => {
-    setCapo(newCapo);
-
-    // If linked, adjust transpose inversely
-    if (capoTransposeLinked) {
-      const capoDifference = newCapo - capo;
-      const newTranspose = transpose - capoDifference;
-
-      // Clamp transpose to valid range (-11 to +11)
-      const clampedTranspose = Math.max(-11, Math.min(11, newTranspose));
-
-      setTranspose(clampedTranspose);
-    }
-  };
-
-  const handleTransposeChange = (newTranspose: number) => {
-    setTranspose(newTranspose);
-
-    // If linked, adjust capo inversely
-    if (capoTransposeLinked) {
-      const transposeDifference = newTranspose - transpose;
-      const newCapo = capo - transposeDifference;
-
-      // Clamp capo to valid range (0-11)
-      const clampedCapo = Math.max(0, Math.min(11, newCapo));
-
-      setCapo(clampedCapo);
-    }
-  };
-
-  // Calculate disable states for buttons based on linking
-  const getCapoDisableStates = () => {
-    if (!capoTransposeLinked) {
-      return { disableIncrement: capo >= 11, disableDecrement: capo <= 0 };
-    }
-
-    // When linked, consider both capo and transpose limits
-    return {
-      disableIncrement: capo >= 11 || transpose <= -11,
-      disableDecrement: capo <= 0 || transpose >= 11
-    };
-  };
-
-  const getTransposeDisableStates = () => {
-    if (!capoTransposeLinked) {
-      return { disableIncrement: transpose >= 11, disableDecrement: transpose <= -11 };
-    }
-
-    // When linked, consider both capo and transpose limits
-    return {
-      disableIncrement: transpose >= 11 || capo <= 0,
-      disableDecrement: transpose <= -11 || capo >= 11
-    };
-  };
+  // Use extracted capo-transpose logic
+  const {
+    handleCapoChange,
+    handleTransposeChange,
+    getCapoDisableStates,
+    getTransposeDisableStates,
+  } = useCapoTranspose({
+    capo,
+    setCapo,
+    transpose,
+    setTranspose,
+    capoTransposeLinked,
+  });
 
   const handleToggleLink = () => {
     if (setCapoTransposeLinked) {
