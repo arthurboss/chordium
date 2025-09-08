@@ -1,6 +1,6 @@
-import { formatKeyDisplay, getMaxTransposeLevel, getMinTransposeLevel } from '../KeyMenu.utils';
+import { formatKeyDisplay, getMaxTransposeLevel, getMinTransposeLevel } from '../TransposeMenu.utils';
 
-describe('KeyMenu Utils', () => {
+describe('TransposeMenu Utils', () => {
   describe('formatKeyDisplay', () => {
     it('should return original song key when no transpose (uiLevel === 0)', () => {
       const result = formatKeyDisplay(0, 0, 'C');
