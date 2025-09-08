@@ -2,7 +2,7 @@ import { forwardRef, useEffect } from 'react';
 import type { ChordSheet } from '@/types/chordSheet';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
-import StickyControlsBar from './ChordDisplay/StickyControlsBar';
+import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
 import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';

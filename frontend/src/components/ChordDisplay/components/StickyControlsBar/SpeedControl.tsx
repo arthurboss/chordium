@@ -1,5 +1,5 @@
 import React from 'react';
-import { Slider } from '../ui/slider';
+import { Slider } from '../../../ui/slider';
 
 interface SpeedControlProps {
   autoScroll: boolean;

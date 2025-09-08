@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../../ui/button';
+import { Button } from '../button';
 import { Undo2 } from 'lucide-react';
 import { INCREMENT_DECREMENT_BUTTON_STYLES, INCREMENT_DECREMENT_BUTTON_LABELS } from './IncrementDecrementButton.constants';
 import type { IncrementDecrementButtonProps } from './IncrementDecrementButton.types';

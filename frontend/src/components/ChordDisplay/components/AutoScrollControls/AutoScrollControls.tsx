@@ -1,6 +1,6 @@
 import React from 'react';
-import PlayButton from '../../PlayButton';
-import SpeedControl from '../../SpeedControl';
+import PlayButton from '../StickyControlsBar/PlayButton';
+import SpeedControl from '../StickyControlsBar/SpeedControl';
 import type { AutoScrollControlsProps } from './AutoScrollControls.types';
 
 /**

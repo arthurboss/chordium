@@ -1,5 +1,5 @@
 import React from 'react';
-import IncrementDecrementButton from '../IncrementDecrementButton';
+import IncrementDecrementButton from '@/components/ui/IncrementDecrementButton';
 import { useCapoMenu } from './CapoMenu.hooks';
 import { formatCapoDisplay } from './CapoMenu.utils';
 import type { CapoMenuProps } from './CapoMenu.types';

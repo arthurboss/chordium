@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../../ui/button';
 import { Music } from 'lucide-react';
-import { ChordSheetControlsProps } from './types';
-import StickyBottomContainer from '../StickyBottomContainer';
+import { ChordSheetControlsProps } from '../../types';
+import StickyBottomContainer from '../../../StickyBottomContainer';
 import { useAtBottom } from '@/hooks/useAtBottom';
 import { useCapoTranspose } from '@/hooks/useCapoTranspose';
-import CapoMenu from './components/CapoMenu';
-import KeyMenu from './components/KeyMenu';
-import CapoTransposeLink from './components/CapoTransposeLink';
-import TextPreferencesMenu from './components/TextPreferencesMenu';
-import AutoScrollControls from './components/AutoScrollControls';
+import CapoMenu from './CapoMenu';
+import KeyMenu from './KeyMenu';
+import CapoTransposeLink from './CapoTransposeLink';
+import TextPreferencesMenu from '../TextPreferencesMenu';
+import AutoScrollControls from '../AutoScrollControls';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 
@@ -216,7 +216,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
                   </Button>
                 </div>
               </div>
-              <div className="flex items-start justify-center">
+              <div className="flex items-start justify-center h-full">
                 <div className="flex flex-col items-center h-full">
                   <span className="text-xs text-muted-foreground mb-1">Speed</span>
                   <div className="transition-all duration-200 animate-in slide-in-from-right-16 flex-1 flex items-center justify-center px-2">

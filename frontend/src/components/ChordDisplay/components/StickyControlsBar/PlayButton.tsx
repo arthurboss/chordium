@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../ui/button';
+import { Button } from '../../../ui/button';
 import { Pause, Play } from 'lucide-react';
 
 interface PlayButtonProps {

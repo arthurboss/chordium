@@ -1,5 +1,5 @@
 import React from 'react';
-import IncrementDecrementButton from '../IncrementDecrementButton';
+import IncrementDecrementButton from '@/components/ui/IncrementDecrementButton';
 import { useKeyMenu } from './KeyMenu.hooks';
 import { formatKeyDisplay } from './KeyMenu.utils';
 import { ALL_POSSIBLE_KEY_NAMES } from '@/music/constants/musicalKeys';
