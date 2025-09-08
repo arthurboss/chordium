@@ -1,4 +1,4 @@
-export interface TextPreferencesMenuProps {
+export interface TextStyleMenuProps {
   fontSize: number;
   setFontSize: (value: number) => void;
   fontSpacing: number;

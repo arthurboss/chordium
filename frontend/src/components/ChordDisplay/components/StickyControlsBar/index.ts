@@ -4,3 +4,4 @@ export { default as SpeedControl } from './SpeedControl';
 export { default as KeyMenu } from './KeyMenu';
 export { default as CapoMenu } from './CapoMenu';
 export { default as CapoTransposeLink } from './CapoTransposeLink';
+export { default as TextStyleMenu } from './TextStyleMenu';

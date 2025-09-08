@@ -8,7 +8,7 @@ import { useCapoTranspose } from '@/hooks/useCapoTranspose';
 import CapoMenu from './CapoMenu';
 import KeyMenu from './KeyMenu';
 import CapoTransposeLink from './CapoTransposeLink';
-import TextPreferencesMenu from '../TextPreferencesMenu';
+import TextStyleMenu from './TextStyleMenu';
 import AutoScrollControls from '../AutoScrollControls';
 import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
@@ -109,7 +109,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
       >
         {/* Text Preferences */}
         <div className="flex flex-col">
-          <TextPreferencesMenu
+          <TextStyleMenu
             fontSize={fontSize} setFontSize={setFontSize}
             fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
             fontStyle={fontStyle} setFontStyle={setFontStyle}
@@ -156,7 +156,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
               <div className="flex items-center gap-2">
                 <div className="flex flex-col items-center">
                   <span className="text-xs text-muted-foreground mb-1">Style</span>
-                  <TextPreferencesMenu
+                  <TextStyleMenu
                     fontSize={fontSize} setFontSize={setFontSize}
                     fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
                     fontStyle={fontStyle} setFontStyle={setFontStyle}

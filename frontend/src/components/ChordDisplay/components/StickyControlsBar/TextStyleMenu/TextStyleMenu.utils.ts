@@ -1,4 +1,4 @@
-import { TEXT_PREFERENCES_VALUES } from './TextPreferencesMenu.constants';
+import { TEXT_PREFERENCES_VALUES } from './TextStyleMenu.constants';
 
 /**
  * Gets the display text for font spacing multiplier
