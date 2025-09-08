@@ -6,7 +6,7 @@ import StickyBottomContainer from '../../../StickyBottomContainer';
 import { useAtBottom } from '@/hooks/useAtBottom';
 import { useCapoTranspose } from '@/hooks/useCapoTranspose';
 import CapoMenu from './CapoMenu';
-import KeyMenu from './KeyMenu';
+import TransposeMenu from './TransposeMenu';
 import CapoTransposeLink from './CapoTransposeLink';
 import TextStyleMenu from './TextStyleMenu';
 import AutoScrollControls from '../AutoScrollControls';
@@ -87,7 +87,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
         />
       </div>
       <div className='flex flex-col items-center'>
-        <KeyMenu
+        <TransposeMenu
           transpose={transpose}
           setTranspose={handleTransposeChange}
           defaultTranspose={defaultTranspose}

@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { useKeyMenu } from '../KeyMenu.hooks';
-import type { KeyMenuProps } from '../KeyMenu.types';
+import { useTransposeMenu } from '../TransposeMenu.hooks';
+import type { TransposeMenuProps } from '../TransposeMenu.types';
 import { vi } from 'vitest';
 
-describe('useKeyMenu', () => {
-  const defaultProps: KeyMenuProps = {
+describe('useTransposeMenu', () => {
+  const defaultProps: TransposeMenuProps = {
     transpose: 0,
     setTranspose: vi.fn(),
     defaultTranspose: 0,
@@ -18,7 +18,7 @@ describe('useKeyMenu', () => {
 
   describe('basic functionality', () => {
     it('should initialize with correct default values', () => {
-      const { result } = renderHook(() => useKeyMenu(defaultProps));
+      const { result } = renderHook(() => useTransposeMenu(defaultProps));
 
       expect(result.current.uiTransposeLevel).toBe(0);
       expect(result.current.isAltered).toBe(false);
@@ -28,7 +28,7 @@ describe('useKeyMenu', () => {
     });
 
     it('should increment transpose correctly', () => {
-      const { result } = renderHook(() => useKeyMenu(defaultProps));
+      const { result } = renderHook(() => useTransposeMenu(defaultProps));
 
       act(() => {
         result.current.handleIncrement();
@@ -42,7 +42,7 @@ describe('useKeyMenu', () => {
 
     it('should decrement transpose correctly', () => {
       const props = { ...defaultProps, transpose: 1 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       act(() => {
         result.current.handleDecrement();
@@ -56,7 +56,7 @@ describe('useKeyMenu', () => {
 
     it('should reset to default transpose', () => {
       const props = { ...defaultProps, transpose: 5 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       act(() => {
         result.current.handleReset();
@@ -71,7 +71,7 @@ describe('useKeyMenu', () => {
   describe('transpose limits', () => {
     it('should disable increment when at max transpose level (+11)', () => {
       const props = { ...defaultProps, transpose: 0 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       // Simulate reaching max level by incrementing 11 times
       for (let i = 0; i < 11; i++) {
@@ -86,7 +86,7 @@ describe('useKeyMenu', () => {
 
     it('should disable decrement when at min transpose level (-11)', () => {
       const props = { ...defaultProps, transpose: 0 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       // Simulate reaching min level by decrementing 11 times
       for (let i = 0; i < 11; i++) {
@@ -101,7 +101,7 @@ describe('useKeyMenu', () => {
 
     it('should reset to default when incrementing at max level', () => {
       const props = { ...defaultProps, transpose: 0 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       // First reach max level
       for (let i = 0; i < 11; i++) {
@@ -121,7 +121,7 @@ describe('useKeyMenu', () => {
 
     it('should reset to default when decrementing at min level', () => {
       const props = { ...defaultProps, transpose: 0 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       // First reach min level
       for (let i = 0; i < 11; i++) {
@@ -145,7 +145,7 @@ describe('useKeyMenu', () => {
 
   describe('animation direction', () => {
     it('should set animation direction to up when incrementing', () => {
-      const { result } = renderHook(() => useKeyMenu(defaultProps));
+      const { result } = renderHook(() => useTransposeMenu(defaultProps));
 
       act(() => {
         result.current.handleIncrement();
@@ -156,7 +156,7 @@ describe('useKeyMenu', () => {
 
     it('should set animation direction to down when decrementing', () => {
       const props = { ...defaultProps, transpose: 1 };
-      const { result } = renderHook(() => useKeyMenu(props));
+      const { result } = renderHook(() => useTransposeMenu(props));
 
       act(() => {
         result.current.handleDecrement();

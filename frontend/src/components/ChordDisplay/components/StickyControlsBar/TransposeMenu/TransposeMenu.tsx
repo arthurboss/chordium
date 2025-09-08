@@ -1,19 +1,19 @@
 import React from 'react';
 import IncrementDecrementButton from '@/components/ui/IncrementDecrementButton';
-import { useKeyMenu } from './KeyMenu.hooks';
-import { formatKeyDisplay } from './KeyMenu.utils';
+import { useTransposeMenu } from './TransposeMenu.hooks';
+import { formatKeyDisplay } from './TransposeMenu.utils';
 import { ALL_POSSIBLE_KEY_NAMES } from '@/music/constants/musicalKeys';
-import type { KeyMenuProps } from './KeyMenu.types';
+import type { TransposeMenuProps } from './TransposeMenu.types';
 
 /**
- * KeyMenu component for transposing chord sheets
+ * TransposeMenu component for transposing chord sheets
  * Provides increment/decrement buttons and displays current key with transpose level
  * 
  * @param transpose - Current transpose value in semitones
  * @param setTranspose - Function to update transpose value
  * @param defaultTranspose - Original song key value (defaults to 0)
  */
-const KeyMenu: React.FC<KeyMenuProps> = ({
+const TransposeMenu: React.FC<TransposeMenuProps> = ({
   transpose,
   setTranspose,
   defaultTranspose = 0,
@@ -31,7 +31,7 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
     animationDirection,
     disableIncrement: internalDisableIncrement,
     disableDecrement: internalDisableDecrement
-  } = useKeyMenu({ transpose, setTranspose, defaultTranspose });
+  } = useTransposeMenu({ transpose, setTranspose, defaultTranspose });
 
   // Use external disable states if provided, otherwise use internal ones
   const disableIncrement = externalDisableIncrement ?? internalDisableIncrement;
@@ -64,4 +64,4 @@ const KeyMenu: React.FC<KeyMenuProps> = ({
   );
 };
 
-export default KeyMenu;
+export default TransposeMenu;

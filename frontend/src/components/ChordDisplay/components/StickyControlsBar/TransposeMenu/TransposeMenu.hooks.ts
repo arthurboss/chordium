@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
-import { getMaxTransposeLevel, getMinTransposeLevel } from './KeyMenu.utils';
-import type { KeyMenuProps } from './KeyMenu.types';
+import { getMaxTransposeLevel, getMinTransposeLevel } from './TransposeMenu.utils';
+import type { TransposeMenuProps } from './TransposeMenu.types';
 
 /**
- * Custom hook for managing KeyMenu state and actions
+ * Custom hook for managing TransposeMenu state and actions
  * 
  * @param transpose - Current transpose value in semitones
  * @param setTranspose - Function to update transpose value
  * @param defaultTranspose - Original song key value (defaults to 0)
  * @returns Object with state and action handlers
  */
-export const useKeyMenu = ({ 
+export const useTransposeMenu = ({ 
   transpose, 
   setTranspose, 
   defaultTranspose = 0
-}: KeyMenuProps) => {
+}: TransposeMenuProps) => {
   // Track the UI transpose level (separate from actual transpose logic)
   const [uiTransposeLevel, setUiTransposeLevel] = useState(transpose - defaultTranspose);
   const [animationDirection, setAnimationDirection] = useState<'up' | 'down'>('up');

@@ -1,4 +1,4 @@
-export interface KeyMenuProps {
+export interface TransposeMenuProps {
   transpose: number;
   setTranspose: (value: number) => void;
   defaultTranspose?: number;
