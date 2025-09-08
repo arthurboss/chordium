@@ -40,11 +40,11 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
     opacity: '1',
   };
   const desktopStyles = {
-    visibility: 'hidden sm:grid',
-    placement: 'items-end gap-4 [grid-template-columns:max-content_auto_1fr]',
+    visibility: 'hidden sm:flex sm:flex-row',
+    placement: 'gap-4',
   };
 
-  let baseStyles = `select-none ${commonStyles.placement} ${commonStyles.animation} ${commonStyles.background} ${commonStyles.margins} ${commonStyles.expanded}`;
+  let baseStyles = `select-none ${commonStyles.placement} ${commonStyles.animation} ${commonStyles.background} ${commonStyles.margins}`;
 
   if (mobileOnly) baseStyles += ` ${mobileStyles.visibility} ${mobileStyles.display} ${mobileStyles.border}`;
   if (desktopOnly) baseStyles += ` ${desktopStyles.visibility} ${desktopStyles.placement} p-4 pt-2`;

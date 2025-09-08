@@ -107,27 +107,28 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
         isAtBottom={isAtBottom}
         desktopOnly
       >
-        {/* Text Preferences */}
-        <div className="flex flex-col">
-          <TextStyleMenu
-            fontSize={fontSize} setFontSize={setFontSize}
-            fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-            fontStyle={fontStyle} setFontStyle={setFontStyle}
-            viewMode={viewMode} setViewMode={setViewMode}
-            hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
-          />
-        </div>
-        {/* Auto Scroll Controls */}
-        <div className='flex flex-col items-start'>
-          <AutoScrollControls
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
-            scrollSpeed={scrollSpeed}
-            setScrollSpeed={setScrollSpeed}
-          />
+        {/* Style and Scroll Controls - Left Side */}
+        <div className="flex items-start gap-4">
+          <div className="flex flex-col">
+            <TextStyleMenu
+              fontSize={fontSize} setFontSize={setFontSize}
+              fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
+              fontStyle={fontStyle} setFontStyle={setFontStyle}
+              viewMode={viewMode} setViewMode={setViewMode}
+              hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
+            />
+          </div>
+          <div className='flex flex-col items-start'>
+            <AutoScrollControls
+              autoScroll={autoScroll}
+              setAutoScroll={setAutoScroll}
+              scrollSpeed={scrollSpeed}
+              setScrollSpeed={setScrollSpeed}
+            />
+          </div>
         </div>
 
-        {/* Musical Controls Sub-Container */}
+        {/* Musical Controls Sub-Container - Right Side */}
         <div className="flex items-end gap-1 justify-end">
           <MusicalControls />
         </div>

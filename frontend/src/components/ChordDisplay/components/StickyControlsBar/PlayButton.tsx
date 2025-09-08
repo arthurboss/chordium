@@ -10,11 +10,11 @@ interface PlayButtonProps {
   style?: React.CSSProperties;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className, style }) => (
+const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className = '', style }) => (
   <Button 
     variant="outline"
     size="icon" 
-    className={(className || '') + ' flex items-center gap-2 px-2'}
+    className={`flex items-center ${className}`}
     onClick={() => setAutoScroll(!autoScroll)}
     title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
     style={style}
