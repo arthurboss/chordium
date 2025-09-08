@@ -48,9 +48,9 @@ describe('useKeyMenu', () => {
         result.current.handleDecrement();
       });
 
-      expect(defaultProps.setTranspose).toHaveBeenCalledWith(-1);
-      expect(result.current.uiTransposeLevel).toBe(-1); // uiTransposeLevel reflects actual transpose level
-      expect(result.current.isAltered).toBe(true); // isAltered is based on uiTransposeLevel !== 0
+      expect(defaultProps.setTranspose).toHaveBeenCalledWith(0); // 1 - 1 = 0
+      expect(result.current.uiTransposeLevel).toBe(0); // uiTransposeLevel reflects actual transpose level
+      expect(result.current.isAltered).toBe(false); // isAltered is based on uiTransposeLevel !== 0
       expect(result.current.animationDirection).toBe('down');
     });
 

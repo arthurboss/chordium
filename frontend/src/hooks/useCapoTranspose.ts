@@ -65,16 +65,13 @@ export const useCapoTranspose = ({
   }, [capo, transpose, capoTransposeLinked]);
 
   const getTransposeDisableStates = useCallback(() => {
-    if (!capoTransposeLinked) {
-      return { disableIncrement: transpose >= 11, disableDecrement: transpose <= -11 };
-    }
-
-    // When linked, consider both capo and transpose limits
-    return {
-      disableIncrement: transpose >= 11 || capo <= 0,
-      disableDecrement: transpose <= -11 || capo >= 11
+    // Transpose buttons should only be disabled by transpose limits, not capo limits
+    // This allows users to continue transposing even when capo hits its physical limits
+    return { 
+      disableIncrement: transpose >= 11, 
+      disableDecrement: transpose <= -11 
     };
-  }, [capo, transpose, capoTransposeLinked]);
+  }, [transpose]);
 
   return {
     handleCapoChange,

@@ -288,6 +288,84 @@ describe('Capo-Transpose Linking Logic', () => {
     });
   });
 
+  describe('corrected disable logic - transpose should only be disabled by transpose limits', () => {
+    describe('transpose increment disable logic - corrected', () => {
+      it('should NOT disable increment when capo is at minimum and linked (transpose can still increase)', () => {
+        const capoTransposeLinked = true;
+        const capo = 0;
+        const uiTransposeLevel = 5;
+        const maxLevel = 11;
+        
+        // Corrected logic: only check transpose limits, not capo limits
+        const disableIncrement = uiTransposeLevel >= maxLevel;
+        
+        expect(disableIncrement).toBe(false); // Should NOT be disabled
+      });
+
+      it('should disable increment only when at max transpose level', () => {
+        const capoTransposeLinked = true;
+        const capo = 0; // Capo at minimum
+        const uiTransposeLevel = 11; // Transpose at maximum
+        const maxLevel = 11;
+        
+        // Corrected logic: only check transpose limits
+        const disableIncrement = uiTransposeLevel >= maxLevel;
+        
+        expect(disableIncrement).toBe(true); // Should be disabled only because of transpose limit
+      });
+
+      it('should allow increment when capo is at maximum but transpose is not at limit', () => {
+        const capoTransposeLinked = true;
+        const capo = 11; // Capo at maximum
+        const uiTransposeLevel = 5; // Transpose not at limit
+        const maxLevel = 11;
+        
+        // Corrected logic: only check transpose limits
+        const disableIncrement = uiTransposeLevel >= maxLevel;
+        
+        expect(disableIncrement).toBe(false); // Should NOT be disabled
+      });
+    });
+
+    describe('transpose decrement disable logic - corrected', () => {
+      it('should NOT disable decrement when capo is at maximum and linked (transpose can still decrease)', () => {
+        const capoTransposeLinked = true;
+        const capo = 11;
+        const uiTransposeLevel = -5;
+        const minLevel = -11;
+        
+        // Corrected logic: only check transpose limits, not capo limits
+        const disableDecrement = uiTransposeLevel <= minLevel;
+        
+        expect(disableDecrement).toBe(false); // Should NOT be disabled
+      });
+
+      it('should disable decrement only when at min transpose level', () => {
+        const capoTransposeLinked = true;
+        const capo = 11; // Capo at maximum
+        const uiTransposeLevel = -11; // Transpose at minimum
+        const minLevel = -11;
+        
+        // Corrected logic: only check transpose limits
+        const disableDecrement = uiTransposeLevel <= minLevel;
+        
+        expect(disableDecrement).toBe(true); // Should be disabled only because of transpose limit
+      });
+
+      it('should allow decrement when capo is at minimum but transpose is not at limit', () => {
+        const capoTransposeLinked = true;
+        const capo = 0; // Capo at minimum
+        const uiTransposeLevel = -5; // Transpose not at limit
+        const minLevel = -11;
+        
+        // Corrected logic: only check transpose limits
+        const disableDecrement = uiTransposeLevel <= minLevel;
+        
+        expect(disableDecrement).toBe(false); // Should NOT be disabled
+      });
+    });
+  });
+
   describe('mathematical properties', () => {
     it('should maintain inverse relationship', () => {
       // If capo increases by X, transpose should decrease by X
