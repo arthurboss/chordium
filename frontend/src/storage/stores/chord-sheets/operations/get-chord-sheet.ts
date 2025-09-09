@@ -4,6 +4,8 @@
 
 import type { Song } from "@chordium/types";
 import type { StoredChordSheet } from "../../../types/chord-sheet";
+import type { StoredChordSheetMetadata } from "../../../types/chord-sheet-metadata";
+import type { StoredChordSheetContent } from "../../../types/chord-sheet-content";
 import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../database/connection";
 import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
@@ -27,8 +29,8 @@ export default async function getChordSheet(
   await getDatabase();
 
   // First try new split stores: metadata + content
-  const metadata = await executeReadTransaction<any>(STORES.SONGS_METADATA, (store) => store.get(path));
-  const content = await executeReadTransaction<any>(STORES.CHORD_SHEETS, (store) => store.get(path));
+  const metadata = await executeReadTransaction<StoredChordSheetMetadata | undefined>(STORES.SONGS_METADATA, (store) => store.get(path));
+  const content = await executeReadTransaction<StoredChordSheetContent | undefined>(STORES.CHORD_SHEETS, (store) => store.get(path));
   if (metadata && content) {
     return combineChordSheet(metadata, content);
   }

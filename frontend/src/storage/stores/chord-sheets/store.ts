@@ -11,15 +11,16 @@ import {
   deleteChordSheet,
   deleteAllChordSheets,
 } from "./operations";
+import type { ChordSheetListItem } from "./operations/get-all-saved";
 
 /**
  * Manages chord sheet storage operations
  */
 export class ChordSheetStore {
   /**
-   * Get all saved chord sheets
+   * Get all saved chord sheets (minimal data for list view)
    */
-  async getAllSaved(): Promise<StoredChordSheet[]> {
+  async getAllSaved(): Promise<ChordSheetListItem[]> {
     return getAllSavedChordSheets();
   }
 
