@@ -1,11 +1,10 @@
 import ChordDisplay from "@/components/ChordDisplay";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
-import { RefObject, useMemo, useEffect, useState } from "react";
+import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
-import { useChordSheets } from "@/storage/hooks/use-chord-sheets";
-import { getChordSheet } from "@/storage/stores/chord-sheets/operations";
+import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -33,18 +32,11 @@ const SongViewer = ({
   isFromMyChordSheets = false
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
-  const [storedChordContent, setStoredChordContent] = useState<string>('');
-
-  // Load chord content from storage when viewing a saved chord sheet
-  useEffect(() => {
-    if (isFromMyChordSheets && songObj.path) {
-      getChordSheet(songObj.path).then(storedSheet => {
-        if (storedSheet?.songChords) {
-          setStoredChordContent(storedSheet.songChords);
-        }
-      });
-    }
-  }, [isFromMyChordSheets, songObj.path]);
+  
+  // Use lazy loading for saved chord sheets
+  const { content: lazyContent, isContentLoading } = useLazyChordSheet({ 
+    path: isFromMyChordSheets ? songObj.path : '' 
+  });
 
   // Determine the chord content to display
   const chordContentToDisplay = useMemo(() => {
@@ -53,13 +45,13 @@ const SongViewer = ({
       return directChordContent;
     }
 
-    // If this is from myChordSheets, use the loaded stored content
+    // If this is from myChordSheets, use the lazy loaded content
     if (isFromMyChordSheets) {
-      return storedChordContent;
+      return lazyContent || '';
     }
 
     return '';
-  }, [directChordContent, isFromMyChordSheets, storedChordContent]);
+  }, [directChordContent, isFromMyChordSheets, lazyContent]);
 
   const handleAction = () => {
     if (isFromMyChordSheets && !hideDeleteButton) {
