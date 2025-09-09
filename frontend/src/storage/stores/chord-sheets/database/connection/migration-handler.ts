@@ -35,6 +35,15 @@ export function handleIndexedDBMigrations(db: IDBDatabase, oldVersion: number, n
         searchCacheStore.createIndex('expiresAt', 'expiresAt', { unique: false });
         break;
       }
+      case 3: {
+        // Migration to v3: True lazy loading with separate metadata and content stores
+        createSchema(db, 3);
+        
+        // Note: Data migration will be handled asynchronously after schema creation
+        // The actual data migration happens in the application layer to avoid
+        // blocking the database upgrade transaction
+        break;
+      }
       // Add future migrations here
       default:
         break;

@@ -7,7 +7,8 @@
  */
 
 import type { SearchType } from "@chordium/types";
-import type { StoredChordSheet } from "./chord-sheet";
+import type { StoredChordSheetMetadata } from "./chord-sheet-metadata";
+import type { StoredChordSheetContent } from "./chord-sheet-content";
 import type { SearchCacheEntry } from "./search-cache";
 
 /**
@@ -18,9 +19,9 @@ import type { SearchCacheEntry } from "./search-cache";
  * path identifiers.
  */
 export interface ChordiumDBSchema {
-  chordSheets: {
+  songsMetadata: {
     path: string; // Song.path format: "artist-path/song-path"
-    value: StoredChordSheet;
+    value: StoredChordSheetMetadata;
     indexes: {
       /** Index on artist for artist-based queries */
       artist: string;
@@ -28,10 +29,20 @@ export interface ChordiumDBSchema {
       title: string;
       /** Index on saved status for filtering saved vs cached items */
       "storage.saved": boolean;
-      /** Index on timestamp for temporal queries and cleanup */
-      "storage.timestamp": number;
       /** Index on last access time for LRU cleanup logic */
       "storage.lastAccessed": number;
+      /** Index on timestamp for temporal queries and cleanup */
+      "storage.timestamp": number;
+      /** Index on expiration for TTL cleanup */
+      "storage.expiresAt": number | null;
+    };
+  };
+  chordSheets: {
+    path: string; // Song.path format: "artist-path/song-path" (links to metadata)
+    value: StoredChordSheetContent;
+    indexes: {
+      /** Index on timestamp for temporal queries */
+      "storage.timestamp": number;
       /** Index on expiration for TTL cleanup */
       "storage.expiresAt": number | null;
     };

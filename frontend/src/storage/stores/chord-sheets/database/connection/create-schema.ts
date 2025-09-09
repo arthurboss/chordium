@@ -10,17 +10,17 @@ import { INDEXES } from '../../../../core/config/indexes';
  * @param version - Schema version to create/migrate to
  */
 export default function createSchema(db: IDBDatabase, version: number): void {
-  // v1: Initial schema
+  // v1: Initial schema creation
   if (version === 1) {
     if (!db.objectStoreNames.contains(STORES.CHORD_SHEETS)) {
       const chordSheetsStore = db.createObjectStore(STORES.CHORD_SHEETS, { keyPath: 'path' });
-      const chordSheetsIndexes = INDEXES.chordSheets;
-      chordSheetsStore.createIndex('artist', chordSheetsIndexes.artist, { unique: false });
-      chordSheetsStore.createIndex('title', chordSheetsIndexes.title, { unique: false });
-      chordSheetsStore.createIndex('saved', chordSheetsIndexes.saved, { unique: false });
-      chordSheetsStore.createIndex('lastAccessed', chordSheetsIndexes.lastAccessed, { unique: false });
-      chordSheetsStore.createIndex('timestamp', chordSheetsIndexes.timestamp, { unique: false });
-      chordSheetsStore.createIndex('expiresAt', chordSheetsIndexes.expiresAt, { unique: false });
+      // v1 had full chord sheet data with metadata indexes
+      chordSheetsStore.createIndex('artist', 'artist', { unique: false });
+      chordSheetsStore.createIndex('title', 'title', { unique: false });
+      chordSheetsStore.createIndex('saved', 'storage.saved', { unique: false });
+      chordSheetsStore.createIndex('lastAccessed', 'storage.lastAccessed', { unique: false });
+      chordSheetsStore.createIndex('timestamp', 'storage.timestamp', { unique: false });
+      chordSheetsStore.createIndex('expiresAt', 'storage.expiresAt', { unique: false });
     }
     if (!db.objectStoreNames.contains(STORES.SEARCH_CACHE)) {
       const searchCacheStore = db.createObjectStore(STORES.SEARCH_CACHE, { keyPath: 'searchKey' });
@@ -32,13 +32,26 @@ export default function createSchema(db: IDBDatabase, version: number): void {
     }
   }
 
-  // v2: Example migration (add new index, store, etc.)
-  if (version === 2) {
-    // Example: add a new index to an existing store (if not already present)
-    // const store = db.transaction.objectStore(STORES.CHORD_SHEETS);
-    // if (!store.indexNames.contains('newIndex')) {
-    //   store.createIndex('newIndex', 'newIndex', { unique: false });
-    // }
-    // Add further migration logic as needed
+  // v3: Lazy loading schema creation (separate metadata and content stores)
+  if (version === 3) {
+    // Create metadata store
+    if (!db.objectStoreNames.contains(STORES.SONGS_METADATA)) {
+      const metadataStore = db.createObjectStore(STORES.SONGS_METADATA, { keyPath: 'path' });
+      const metadataIndexes = INDEXES.songsMetadata;
+      metadataStore.createIndex('artist', metadataIndexes.artist, { unique: false });
+      metadataStore.createIndex('title', metadataIndexes.title, { unique: false });
+      metadataStore.createIndex('saved', metadataIndexes.saved, { unique: false });
+      metadataStore.createIndex('lastAccessed', metadataIndexes.lastAccessed, { unique: false });
+      metadataStore.createIndex('timestamp', metadataIndexes.timestamp, { unique: false });
+      metadataStore.createIndex('expiresAt', metadataIndexes.expiresAt, { unique: false });
+    }
+    
+    // Create content store (reuse chordSheets name for content)
+    if (!db.objectStoreNames.contains(STORES.CHORD_SHEETS)) {
+      const contentStore = db.createObjectStore(STORES.CHORD_SHEETS, { keyPath: 'path' });
+      const contentIndexes = INDEXES.chordSheets;
+      contentStore.createIndex('timestamp', contentIndexes.timestamp, { unique: false });
+      contentStore.createIndex('expiresAt', contentIndexes.expiresAt, { unique: false });
+    }
   }
 }

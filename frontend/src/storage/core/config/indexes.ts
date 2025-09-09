@@ -9,12 +9,18 @@
  * Index configurations for each object store
  */
 export const INDEXES = {
-  /** Chord sheets store indexes */
-  chordSheets: {
+  /** Songs metadata store indexes */
+  songsMetadata: {
     artist: "artist",
     title: "title", 
     saved: "saved",
     lastAccessed: "lastAccessed",
+    timestamp: "timestamp",
+    expiresAt: "expiresAt",
+  },
+  
+  /** Chord sheets store indexes */
+  chordSheets: {
     timestamp: "timestamp",
     expiresAt: "expiresAt",
   },
