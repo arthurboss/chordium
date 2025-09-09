@@ -1,6 +1,7 @@
 import type { ChordSheet, Song } from "@chordium/types";
-import { createStoredChordSheet } from "../utils/factories";
 import { executeWriteTransaction } from "../../../core/transactions";
+import { splitChordSheet } from "../utils/split-chord-sheet";
+import { STORES } from "../../../core/config/stores";
 
 /**
  * @param chordSheet - Chord sheet content to save
@@ -15,7 +16,23 @@ export default async function storeChordSheet(
   saved: boolean,
   path: Song["path"]
 ): Promise<void> {
-  const storedChordSheet = createStoredChordSheet(chordSheet, path, { saved });
+  // Build a legacy-like stored object to leverage splitter
+  const legacyLike = {
+    ...chordSheet,
+    path,
+    storage: {
+      timestamp: Date.now(),
+      version: 1,
+      expiresAt: saved ? null : Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days default
+      saved,
+      lastAccessed: Date.now(),
+      accessCount: 1,
+    },
+  } as any;
 
-  await executeWriteTransaction("chordSheets", (store) => store.put(storedChordSheet));
+  const { metadata, content } = splitChordSheet(legacyLike);
+
+  // Persist metadata and content in their respective stores
+  await executeWriteTransaction(STORES.SONGS_METADATA, (store) => store.put(metadata));
+  await executeWriteTransaction(STORES.CHORD_SHEETS, (store) => store.put(content));
 }

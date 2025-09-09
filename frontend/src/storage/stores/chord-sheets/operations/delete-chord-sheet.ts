@@ -1,18 +1,22 @@
 import type { StoredChordSheet } from "../../../types/chord-sheet";
 import { executeWriteTransaction } from "../../../core/transactions";
+import { STORES } from "../../../core/config/stores";
 
 /**
- * @param path - Song identifier to remove
- * @throws {DatabaseOperationError} When storage operation fails
+ * Deletes a chord sheet entirely from cache:
+ * - Removes metadata from songsMetadata
+ * - Removes content from chordSheets
  */
-export default async function deleteChordSheet(
-  path: StoredChordSheet["path"]
-): Promise<void> {
+export default async function deleteChordSheet(path: StoredChordSheet["path"]): Promise<void> {
   if (!path) {
     throw new Error("Path is required for delete operation");
   }
 
-  return executeWriteTransaction("chordSheets", (store) => {
+  await executeWriteTransaction(STORES.SONGS_METADATA, (store) => {
+    return store.delete(path);
+  });
+
+  await executeWriteTransaction(STORES.CHORD_SHEETS, (store) => {
     return store.delete(path);
   });
 }

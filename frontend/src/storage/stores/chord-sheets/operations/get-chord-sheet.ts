@@ -7,6 +7,8 @@ import type { StoredChordSheet } from "../../../types/chord-sheet";
 import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../database/connection";
 import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
+import { STORES } from "../../../core/config/stores";
+import { combineChordSheet } from "../utils/split-chord-sheet";
 
 /**
  * Gets a stored chord sheet by its unique path identifier with enhanced lookup
@@ -24,22 +26,28 @@ export default async function getChordSheet(
   // Ensure database initialization to prevent race conditions
   await getDatabase();
 
-  // Try direct path lookup first
-  let result = await executeReadTransaction<StoredChordSheet | undefined>(
+  // First try new split stores: metadata + content
+  const metadata = await executeReadTransaction<any>(STORES.SONGS_METADATA, (store) => store.get(path));
+  const content = await executeReadTransaction<any>(STORES.CHORD_SHEETS, (store) => store.get(path));
+  if (metadata && content) {
+    return combineChordSheet(metadata, content);
+  }
+
+  // Backward compatibility: check legacy store if still present
+  let legacy = await executeReadTransaction<StoredChordSheet | undefined>(
     "chordSheets",
     (store) => store.get(path)
   );
 
-  // If not found, try sample path resolution for format differences
-  if (!result) {
+  if (!legacy) {
     const resolvedPath = resolveSampleChordSheetPath(path);
     if (resolvedPath !== path) {
-      result = await executeReadTransaction<StoredChordSheet | undefined>(
+      legacy = await executeReadTransaction<StoredChordSheet | undefined>(
         "chordSheets",
         (store) => store.get(resolvedPath)
       );
     }
   }
 
-  return result || null;
+  return legacy || null;
 }
