@@ -1,6 +1,7 @@
 import { useEffect, useTransition } from "react";
 import { getChordSheetFromCache } from "@/storage/utils/getChordSheetFromCache";
 import { fetchAndStoreChordSheet } from "@/storage/utils/fetchAndStoreChordSheet";
+import { fetchChordSheetMetadataFromAPI } from "@/services/api/fetch-chord-sheet";
 import type { UseChordSheetLoadingOptions } from "./use-chord-sheet-loading.types";
 
 /**
@@ -25,7 +26,7 @@ export function useChordSheetLoading({
     let cancelled = false;
 
     /**
-     * Loads chord sheet from cache, falls back to API if not found.
+     * Loads chord sheet from cache, falls back to progressive API loading if not found.
      */
     const load = async () => {
       try {
@@ -36,11 +37,33 @@ export function useChordSheetLoading({
           }
           return;
         }
-        // Not found in cache, try API and store
-        result = await fetchAndStoreChordSheet(path);
-        if (result) {
+        
+        // Not found in cache, try progressive loading
+        // First, try to load just metadata for fast UI display
+        const metadata = await fetchChordSheetMetadataFromAPI(path);
+        if (metadata) {
+          // Create a partial chord sheet with metadata only
+          const partialChordSheet = {
+            ...metadata,
+            songChords: '', // Empty content for now
+            path
+          };
+          
           if (!cancelled) {
-            startTransition(() => onLoaded(result));
+            startTransition(() => onLoaded(partialChordSheet));
+          }
+          
+          // Then fetch and store the complete chord sheet in the background
+          // This will update the cache for future requests
+          try {
+            const completeResult = await fetchAndStoreChordSheet(path);
+            if (completeResult && !cancelled) {
+              // Optionally update the loaded result with complete data
+              startTransition(() => onLoaded(completeResult));
+            }
+          } catch (backgroundErr) {
+            // Background fetch failed, but we already have metadata
+            console.warn('Background fetch failed:', backgroundErr);
           }
         } else if (!cancelled) {
           startTransition(() => onError("Chord sheet not found"));

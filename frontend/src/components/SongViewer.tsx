@@ -21,6 +21,8 @@ interface SongViewerProps {
   // Progressive loading props
   useProgressiveLoading?: boolean;
   onLoadContent?: () => void;
+  loadContent?: () => Promise<void>;
+  isContentLoading?: boolean;
 }
 
 const SongViewer = ({
@@ -35,7 +37,9 @@ const SongViewer = ({
   hideSaveButton = false,
   isFromMyChordSheets = false,
   useProgressiveLoading = false,
-  onLoadContent
+  onLoadContent,
+  loadContent,
+  isContentLoading
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   
@@ -82,7 +86,9 @@ const SongViewer = ({
 
   // Handle content loading
   const handleLoadContent = () => {
-    if (useProgressiveLoading && !progressiveResult.content) {
+    if (useProgressiveLoading && loadContent) {
+      loadContent();
+    } else if (useProgressiveLoading && !progressiveResult.content) {
       progressiveResult.loadContent();
     }
     onLoadContent?.();
@@ -99,8 +105,8 @@ const SongViewer = ({
   const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
 
   // Determine loading states
-  const isContentLoading = useProgressiveLoading 
-    ? progressiveResult.isLoadingContent 
+  const finalIsContentLoading = useProgressiveLoading 
+    ? (isContentLoading ?? progressiveResult.isLoadingContent)
     : isLazyContentLoading;
 
   return (
@@ -119,7 +125,7 @@ const SongViewer = ({
         chordSheet={chordSheetToDisplay}
         content={chordContentToDisplay}
         onSave={onUpdate}
-        isLoading={isContentLoading}
+        isLoading={finalIsContentLoading}
         onLoadContent={useProgressiveLoading ? handleLoadContent : undefined}
       />
     </div>

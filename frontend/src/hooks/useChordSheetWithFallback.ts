@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSingleChordSheet } from '@/storage/hooks/use-single-chord-sheet';
 import { combineChordSheet } from './useProgressiveChordSheet';
-import type { StoredChordSheet, ChordSheet } from '@/storage/types';
-import type { SongMetadata, ChordSheetContent } from '@chordium/types';
+import type { StoredChordSheet } from '@/storage/types';
+import type { SongMetadata, ChordSheet, ChordSheetContent } from '@chordium/types';
 
 export interface ChordSheetWithFallbackState {
   chordSheet: StoredChordSheet | null;
@@ -15,6 +15,7 @@ export interface ChordSheetWithFallbackState {
 
 export interface ChordSheetWithFallbackActions {
   loadFromAPI: () => Promise<void>;
+  loadContent: () => Promise<void>;
   reset: () => void;
 }
 
@@ -23,7 +24,7 @@ export interface ChordSheetWithFallbackActions {
  * and falls back to progressive API loading if not found locally
  */
 export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackState & ChordSheetWithFallbackActions {
-  // Try to load from IndexedDB first
+  // Try to load from IndexedDB first (but don't use it for API fallback)
   const localResult = useSingleChordSheet({ path });
   
   const [isFromAPI, setIsFromAPI] = useState(false);
@@ -31,6 +32,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const [metadata, setMetadata] = useState<SongMetadata | null>(null);
   const [content, setContent] = useState<ChordSheetContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
   // Combine API metadata and content into a StoredChordSheet when metadata is available
   useEffect(() => {
@@ -38,15 +40,19 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
       const apiChordSheet: ChordSheet = combineChordSheet(metadata, content || { songChords: '' });
       const storedChordSheet: StoredChordSheet = {
         ...apiChordSheet,
+        path,
         storage: {
           saved: false,
           timestamp: Date.now(),
+          version: 1,
           expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours TTL
+          lastAccessed: Date.now(),
+          accessCount: 1,
         }
       };
       setCombinedChordSheet(storedChordSheet);
     }
-  }, [metadata, content, isFromAPI]);
+  }, [metadata, content, isFromAPI, path]);
 
   const loadFromAPI = useCallback(async () => {
     if (!path) return;
@@ -55,7 +61,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     setCombinedChordSheet(null);
     setError(null);
     
-    // Manually call the API functions with the correct path
+    // Load metadata first (fast, non-blocking)
     try {
       const { fetchSongMetadataFromAPI } = await import('@/services/api/fetch-song-metadata');
       const fetchedMetadata = await fetchSongMetadataFromAPI(path);
@@ -67,12 +73,32 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     }
   }, [path]);
 
+  const loadContent = useCallback(async () => {
+    if (!path || content || isLoadingContent) return;
+    
+    setIsLoadingContent(true);
+    setError(null);
+    
+    try {
+      const { fetchChordSheetContentFromAPI } = await import('@/services/api/fetch-chord-sheet-content');
+      const fetchedContent = await fetchChordSheetContentFromAPI(path);
+      setContent(fetchedContent);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
+      setError(errorMessage);
+      console.error('Error loading content:', err);
+    } finally {
+      setIsLoadingContent(false);
+    }
+  }, [path, content, isLoadingContent]);
+
   const reset = useCallback(() => {
     setIsFromAPI(false);
     setCombinedChordSheet(null);
     setMetadata(null);
     setContent(null);
     setError(null);
+    setIsLoadingContent(false);
   }, []);
 
   // Determine the final state
@@ -88,8 +114,9 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     error: finalError,
     isFromAPI,
     isMetadataLoading: isFromAPI && !metadata,
-    isContentLoading: false, // We're not loading content yet
+    isContentLoading: isLoadingContent,
     loadFromAPI,
+    loadContent,
     reset,
   };
 }

@@ -120,6 +120,8 @@ const ChordViewer = () => {
           hideSaveButton={isSaved}
           isFromMyChordSheets={isSaved}
           useProgressiveLoading={chordSheetResult.isFromAPI}
+          loadContent={chordSheetResult.loadContent}
+          isContentLoading={chordSheetResult.isContentLoading}
         />
       </main>
     </div>
