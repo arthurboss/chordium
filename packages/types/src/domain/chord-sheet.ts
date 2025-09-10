@@ -1,7 +1,3 @@
-import type { SongMetadata } from "./song-metadata.js";
-import type { ChordSheetContent } from "./chord-sheet-content.js";
-
-export interface ChordSheet extends SongMetadata, ChordSheetContent {}
-
-// Re-export for convenience
-export type { ChordSheetContent };
+export interface ChordSheet {
+  songChords: string; // The actual chord sheet content, can be a string of chords or lyrics with chords
+}

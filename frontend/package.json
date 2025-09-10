@@ -20,7 +20,7 @@
     "test:watch": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest"
   },
   "dependencies": {
-    "@chordium/types": "^0.5.0",
+    "@chordium/types": "^1.0.0",
     "@hookform/resolvers": "5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
