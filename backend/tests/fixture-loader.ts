@@ -21,7 +21,7 @@ const FIXTURES_DIR = path.join(__dirname, 'fixtures');
  */
 interface ChordSheetFixture {
   path: string;
-  content: string;
+  songChords: string;
   title: string;
   artist: string;
 }
@@ -125,22 +125,27 @@ export class BackendFixtureLoader {
         return null;
       }
 
-      // Load from shared fixtures directory
-      const songFilePath = path.join(__dirname, '../../shared/fixtures/chord-sheet/', fileName);
-      const fileContent = fs.readFileSync(songFilePath, 'utf8');
-      const songData = JSON.parse(fileContent);
+      // Load metadata from shared fixtures directory
+      const metadataPath = path.join(process.cwd(), '../shared/fixtures/chord-sheet/metadata/', fileName);
+      const metadataContent = fs.readFileSync(metadataPath, 'utf8');
+      const metadata = JSON.parse(metadataContent);
 
-      // Generate path from artist and title since it's not in the ChordSheet interface
-      const artistSlug = songData.artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
-      const titleSlug = songData.title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
+      // Load content from shared fixtures directory
+      const contentPath = path.join(process.cwd(), '../shared/fixtures/chord-sheet/content/', fileName);
+      const contentData = fs.readFileSync(contentPath, 'utf8');
+      const content = JSON.parse(contentData);
+
+      // Generate path from artist and title
+      const artistSlug = metadata.artist.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
+      const titleSlug = metadata.title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-)|(-$)/g, '');
       const generatedPath = `${artistSlug}/${titleSlug}`;
 
       // Return in the format expected by tests
       return {
         path: generatedPath,
-        content: songData.songChords || songData.chords || songData.lyrics || '',
-        title: songData.title,
-        artist: songData.artist
+        songChords: content.songChords || '',
+        title: metadata.title,
+        artist: metadata.artist
       };
     } catch (error) {
       console.error(`Failed to load chord sheet for ${songKey}:`, error);

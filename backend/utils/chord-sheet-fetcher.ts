@@ -1,7 +1,7 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
-import { extractChordSheet, extractSongMetadata, extractChordSheetContent } from "./dom-extractors.js";
-import type { ChordSheet, SongMetadata, ChordSheetContent } from "../../shared/types/index.js";
+import { extractChordSheet, extractSongMetadata } from "./dom-extractors.js";
+import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
 import type { LoadStrategy } from "../types/cifraclub.types.js";
@@ -85,9 +85,10 @@ async function attemptChordSheetLoad(
       logger.info(
         `📏 Extracted chords length: ${chordSheet?.songChords ? chordSheet.songChords.length : 0} characters`
       );
-      logger.info(
-        `🎵 Key: ${chordSheet?.songKey || "not found"}, Capo: ${chordSheet?.guitarCapo || "not found"}, Tuning: ${chordSheet?.guitarTuning || "not found"}`
-      );
+      // Note: songKey, guitarCapo, guitarTuning are now in metadata, not chord sheet content
+      // logger.info(
+      //   `🎵 Key: ${chordSheet?.songKey || "not found"}, Capo: ${chordSheet?.guitarCapo || "not found"}, Tuning: ${chordSheet?.guitarTuning || "not found"}`
+      // );
 
       if (!chordSheet?.songChords) {
         logger.warn(
@@ -146,7 +147,7 @@ export async function fetchChordSheet(songUrl: string): Promise<ChordSheet> {
  */
 interface ProgressiveCacheEntry {
   metadata: SongMetadata;
-  content?: ChordSheetContent;
+  content?: ChordSheet;
   timestamp: number;
 }
 
@@ -159,7 +160,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  */
 export async function fetchWithProgressiveExtraction(songUrl: string): Promise<{
   getMetadata: () => Promise<SongMetadata>;
-  getContent: () => Promise<ChordSheetContent>;
+  getContent: () => Promise<ChordSheet>;
 }> {
   logger.info(`🔍 PROGRESSIVE SCRAPING START: Fetching from: ${songUrl}`);
 
@@ -282,7 +283,7 @@ async function attemptMetadataLoad(
 /**
  * Fetches only content from a cached page or loads page for content only
  */
-async function fetchContentOnly(songUrl: string): Promise<ChordSheetContent> {
+async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
   logger.info(`🔍 Fetching content only for: ${songUrl}`);
 
   return puppeteerService.withPage(async (page: Page) => {
@@ -318,7 +319,7 @@ async function fetchContentOnly(songUrl: string): Promise<ChordSheetContent> {
         await delay(strategy.waitAfter);
 
         // Extract content only
-        const content = await page.evaluate(extractChordSheetContent);
+        const content = await page.evaluate(extractChordSheet);
         logger.info(`📝 Content extracted using ${strategy.name} strategy`);
 
         return content;

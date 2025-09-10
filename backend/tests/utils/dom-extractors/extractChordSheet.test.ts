@@ -63,11 +63,6 @@ Em7                   G
 I don't believe that anybody
        Dsus4       A7sus4          Em7  G  Dsus4  A7sus4
 Feels the way I do about you now`,
-      songKey: '',
-      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-      guitarCapo: 0,
-      title: 'Wonderwall',
-      artist: 'Oasis'
     });
   });
 
@@ -78,11 +73,6 @@ Feels the way I do about you now`,
 
     expect(result).toEqual({
       songChords: '',
-      songKey: '',
-      guitarTuning: ['E', 'A', 'D', 'G', 'B', 'E'],
-      guitarCapo: 0,
-      title: 'Default Song',
-      artist: 'Default Artist'
     });
   });
 });

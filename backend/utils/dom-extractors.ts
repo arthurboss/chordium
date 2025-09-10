@@ -3,7 +3,7 @@
  * These functions run in the browser context via Puppeteer's page.evaluate()
  */
 
-import type { Song, ChordSheet, SongMetadata, ChordSheetContent, GuitarTuning } from "../../shared/types/index.js";
+import type { Song, ChordSheet, SongMetadata, GuitarTuning } from "../../shared/types/index.js";
 
 /**
  * Search result from DOM extraction
@@ -179,10 +179,11 @@ export function extractArtistSongs(): Song[] {
 }
 
 /**
- * Extracts chord sheet data from CifraClub song page DOM
+ * Extracts full chord sheet data from CifraClub song page DOM (metadata + content)
  * Enhanced with better error handling and multiple fallback strategies
+ * @deprecated Use extractSongMetadata() and extractChordSheet() separately for progressive loading
  */
-export function extractChordSheet(): ChordSheet {
+export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
   const songChords = preElement ? preElement.textContent || "" : "";
 
@@ -288,7 +289,7 @@ export function extractChordSheet(): ChordSheet {
     guitarCapo,
     title: title || "",
     artist: artist || "Unknown Artist",
-  };
+  } as ChordSheet & SongMetadata;
 }
 
 /**
@@ -433,10 +434,10 @@ export function extractSongMetadata(): SongMetadata {
 }
 
 /**
- * Extracts chord sheet content from CifraClub song page DOM (content only)
+ * Extracts chord sheet from CifraClub song page DOM (content only)
  * This function extracts only the chord content from the pre element
  */
-export function extractChordSheetContent(): ChordSheetContent {
+export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
   const songChords = preElement ? preElement.textContent || "" : "";
 

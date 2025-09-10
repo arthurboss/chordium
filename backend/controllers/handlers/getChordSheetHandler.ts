@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import cifraClubService from "../../services/cifraclub.service.js";
 import logger from "../../utils/logger.js";
-import { ErrorResponse, GetChordSheetQuery, ChordSheetContent } from "../../../shared/types/index.js";
+import { ErrorResponse, GetChordSheetQuery, ChordSheet } from "../../../shared/types/index.js";
 
 /**
  * Handles requests to fetch chord sheet content for a given artist/song path.
@@ -10,8 +10,8 @@ import { ErrorResponse, GetChordSheetQuery, ChordSheetContent } from "../../../s
  * @param res - Express response object
  */
 export async function getChordSheetHandler(
-  req: Request<{}, ChordSheetContent | ErrorResponse, {}, GetChordSheetQuery>,
-  res: Response<ChordSheetContent | ErrorResponse>
+  req: Request<Record<string, never>, ChordSheet | ErrorResponse, Record<string, never>, GetChordSheetQuery>,
+  res: Response<ChordSheet | ErrorResponse>
 ): Promise<void> {
   try {
     const { url: pathParam } = req.query;
