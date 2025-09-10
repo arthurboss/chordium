@@ -8,6 +8,7 @@ export * from './domain/artist.js';
 export * from './domain/song.js';
 export * from './domain/song-metadata.js';
 export * from './domain/chord-sheet.js';
+export * from './domain/chord-sheet-content.js';
 
 // Metadata types
 export * from './metadata/note.js';
