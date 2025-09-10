@@ -1,12 +1,12 @@
-import type { ChordSheetContent } from "@chordium/types";
+import type { ChordSheet } from "@chordium/types";
 
 /**
- * Fetches chord sheet content from the backend API using the path
+ * Fetches chord sheet from the backend API using the path
  * 
  * @param path - The chord sheet path (e.g., "radiohead/creep")
- * @returns Promise resolving to chord sheet content or null if not found
+ * @returns Promise resolving to chord sheet or null if not found
  */
-export async function fetchChordSheetContentFromAPI(path: string): Promise<ChordSheetContent | null> {
+export async function fetchChordSheetFromAPI(path: string): Promise<ChordSheet | null> {
   try {
     const params = new URLSearchParams({
       url: path.trim()
@@ -28,8 +28,8 @@ export async function fetchChordSheetContentFromAPI(path: string): Promise<Chord
       throw new Error('Invalid API response format');
     }
 
-    // The API should return a chord sheet content object that matches our ChordSheetContent type
-    return data as ChordSheetContent;
+    // The API should return a chord sheet object that matches our ChordSheet type
+    return data as ChordSheet;
     
   } catch (error) {
     if (import.meta.env.DEV) {

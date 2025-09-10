@@ -1,4 +1,3 @@
-import type { StoredChordSheet } from "../../../types/chord-sheet";
 import { executeWriteTransaction } from "../../../core/transactions";
 import { STORES } from "../../../core/config/stores";
 
@@ -7,7 +6,7 @@ import { STORES } from "../../../core/config/stores";
  * - Removes metadata from songsMetadata
  * - Removes content from chordSheets
  */
-export default async function deleteChordSheet(path: StoredChordSheet["path"]): Promise<void> {
+export default async function deleteChordSheet(path: string): Promise<void> {
   if (!path) {
     throw new Error("Path is required for delete operation");
   }

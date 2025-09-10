@@ -7,8 +7,8 @@
  */
 
 import type { SearchType } from "@chordium/types";
-import type { StoredChordSheetMetadata } from "./chord-sheet-metadata";
-import type { StoredChordSheetContent } from "./chord-sheet-content";
+import type { StoredSongMetadata } from "./stored-song-metadata";
+import type { StoredChordSheet } from "./stored-chord-sheet";
 import type { SearchCacheEntry } from "./search-cache";
 
 /**
@@ -21,7 +21,7 @@ import type { SearchCacheEntry } from "./search-cache";
 export interface ChordiumDBSchema {
   songsMetadata: {
     path: string; // Song.path format: "artist-path/song-path"
-    value: StoredChordSheetMetadata;
+    value: StoredSongMetadata;
     indexes: {
       /** Index on artist for artist-based queries */
       artist: string;
@@ -39,7 +39,7 @@ export interface ChordiumDBSchema {
   };
   chordSheets: {
     path: string; // Song.path format: "artist-path/song-path" (links to metadata)
-    value: StoredChordSheetContent;
+    value: StoredChordSheet;
     indexes: Record<string, never>; // No indexes needed - content store is controlled by metadata store
   };
   searchCache: {

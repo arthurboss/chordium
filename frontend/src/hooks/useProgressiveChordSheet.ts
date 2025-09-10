@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchSongMetadataFromAPI } from '@/services/api/fetch-song-metadata';
-import { fetchChordSheetContentFromAPI } from '@/services/api/fetch-chord-sheet-content';
-import type { SongMetadata, ChordSheetContent, ChordSheet } from '@chordium/types';
+import { fetchChordSheetFromAPI } from '@/services/api/fetch-chord-sheet';
+import type { SongMetadata, ChordSheet } from '@chordium/types';
 
 export interface ProgressiveChordSheetState {
   metadata: SongMetadata | null;
-  content: ChordSheetContent | null;
+  content: ChordSheet | null;
   isLoadingMetadata: boolean;
   isLoadingContent: boolean;
   error: string | null;
@@ -25,7 +25,7 @@ export interface ProgressiveChordSheetActions {
  */
 export function useProgressiveChordSheet(path: string): ProgressiveChordSheetState & ProgressiveChordSheetActions {
   const [metadata, setMetadata] = useState<SongMetadata | null>(null);
-  const [content, setContent] = useState<ChordSheetContent | null>(null);
+  const [content, setContent] = useState<ChordSheet | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export function useProgressiveChordSheet(path: string): ProgressiveChordSheetSta
     setError(null);
     
     try {
-      const fetchedContent = await fetchChordSheetContentFromAPI(path);
+      const fetchedContent = await fetchChordSheetFromAPI(path);
       setContent(fetchedContent);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
@@ -108,7 +108,7 @@ export function useProgressiveChordSheet(path: string): ProgressiveChordSheetSta
 /**
  * Helper function to combine metadata and content into a complete ChordSheet
  */
-export function combineChordSheet(metadata: SongMetadata, content: ChordSheetContent): ChordSheet {
+export function combineChordSheet(metadata: SongMetadata, content: ChordSheet): ChordSheet & SongMetadata {
   return {
     ...metadata,
     ...content,

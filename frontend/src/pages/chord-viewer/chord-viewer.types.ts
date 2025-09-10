@@ -1,10 +1,10 @@
-import type { ChordSheet } from "@/types/chordSheet";
+import type { ChordSheet, SongMetadata } from "@chordium/types";
 
 /**
  * Complete chord sheet data structure for display
  */
 export interface ChordSheetData {
-  chordSheet: ChordSheet;
+  chordSheet: ChordSheet & SongMetadata;
   path: string;
 }
 

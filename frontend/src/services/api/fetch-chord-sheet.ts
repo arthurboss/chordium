@@ -1,111 +1,39 @@
 import type { ChordSheet } from "@chordium/types";
 
 /**
- * Fetches a complete chord sheet from the backend API (for storage purposes)
- * This fetches both metadata and content simultaneously, or uses provided metadata
+ * Fetches chord sheet from the backend API using the path
  * 
  * @param path - The chord sheet path (e.g., "radiohead/creep")
- * @param existingMetadata - Optional metadata to avoid redundant API call
- * @returns Promise resolving to chord sheet data or null if not found
+ * @returns Promise resolving to chord sheet or null if not found
  */
-export async function fetchChordSheetFromAPI(path: string, existingMetadata?: Partial<ChordSheet>): Promise<ChordSheet | null> {
+export async function fetchChordSheetFromAPI(path: string): Promise<ChordSheet | null> {
   try {
-    // If we already have metadata, only fetch content
-    if (existingMetadata) {
-      const contentResponse = await fetch(`/api/cifraclub-chord-sheet?url=${encodeURIComponent(path.trim())}`);
-      
-      if (!contentResponse.ok) {
-        if (contentResponse.status === 404) {
-          return null; // Chord sheet not found
-        }
-        throw new Error(`API request failed: ${contentResponse.status} ${contentResponse.statusText}`);
-      }
+    const params = new URLSearchParams({
+      url: path.trim()
+    });
 
-      const content = await contentResponse.json();
-      
-      // Validate the response
-      if (!content || typeof content !== 'object') {
-        throw new Error('Invalid API response format');
-      }
-
-      // Combine existing metadata with new content
-      const chordSheet: ChordSheet = {
-        ...existingMetadata,
-        ...content
-      };
-
-      return chordSheet;
-    }
-
-    // For storage purposes, fetch both metadata and content simultaneously
-    const [metadataResponse, contentResponse] = await Promise.all([
-      fetch(`/api/cifraclub-song-metadata?url=${encodeURIComponent(path.trim())}`),
-      fetch(`/api/cifraclub-chord-sheet?url=${encodeURIComponent(path.trim())}`)
-    ]);
-    
-    if (!metadataResponse.ok || !contentResponse.ok) {
-      if (metadataResponse.status === 404 || contentResponse.status === 404) {
-        return null; // Chord sheet not found
-      }
-      throw new Error(`API request failed: ${metadataResponse.status} ${contentResponse.status}`);
-    }
-
-    const [metadata, content] = await Promise.all([
-      metadataResponse.json(),
-      contentResponse.json()
-    ]);
-    
-    // Validate the responses
-    if (!metadata || typeof metadata !== 'object' || !content || typeof content !== 'object') {
-      throw new Error('Invalid API response format');
-    }
-
-    // Combine metadata and content into a complete ChordSheet
-    const chordSheet: ChordSheet = {
-      ...metadata,
-      ...content
-    };
-
-    return chordSheet;
-    
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.error('Error fetching chord sheet from API:', error);
-    }
-    throw error;
-  }
-}
-
-/**
- * Fetches only metadata from the backend API (for progressive loading)
- * This is used for initial UI display without blocking on content
- * 
- * @param path - The chord sheet path (e.g., "radiohead/creep")
- * @returns Promise resolving to metadata or null if not found
- */
-export async function fetchChordSheetMetadataFromAPI(path: string): Promise<Partial<ChordSheet> | null> {
-  try {
-    const response = await fetch(`/api/cifraclub-song-metadata?url=${encodeURIComponent(path.trim())}`);
+    const response = await fetch(`/api/cifraclub-chord-sheet?${params}`);
     
     if (!response.ok) {
       if (response.status === 404) {
-        return null; // Chord sheet not found
+        return null; // Chord sheet content not found
       }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
-    const metadata = await response.json();
+    const data = await response.json();
     
-    // Validate the response
-    if (!metadata || typeof metadata !== 'object') {
+    // Validate the response has the expected content structure
+    if (!data || typeof data !== 'object') {
       throw new Error('Invalid API response format');
     }
 
-    return metadata;
+    // The API should return a chord sheet object that matches our ChordSheet type
+    return data as ChordSheet;
     
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('Error fetching chord sheet metadata from API:', error);
+      console.error('Error fetching chord sheet content from API:', error);
     }
     throw error;
   }

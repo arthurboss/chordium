@@ -5,4 +5,3 @@ export { hasChordSheetContent } from './has-chord-sheet-content';
 export { getChordContent } from './get-chord-content';
 export { getTuningDisplay } from './get-tuning-display';
 export { getCapoDisplay } from './get-capo-display';
-export { getMetadata } from './get-metadata';

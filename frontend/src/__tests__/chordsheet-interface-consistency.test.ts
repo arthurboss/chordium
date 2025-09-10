@@ -1,8 +1,10 @@
  import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChordSheet } from '@/types/chordSheet';
 import { GUITAR_TUNINGS } from '@/constants/guitar-tunings';
-import wonderwall from '../../../shared/fixtures/chord-sheet/oasis-wonderwall.json';
-import hotelCalifornia from '../../../shared/fixtures/chord-sheet/eagles-hotel_california.json';
+import wonderwallMetadata from '../../../shared/fixtures/chord-sheet/metadata/oasis-wonderwall.json';
+import wonderwallContent from '../../../shared/fixtures/chord-sheet/content/oasis-wonderwall.json';
+import hotelCaliforniaMetadata from '../../../shared/fixtures/chord-sheet/metadata/eagles-hotel_california.json';
+import hotelCaliforniaContent from '../../../shared/fixtures/chord-sheet/content/eagles-hotel_california.json';
 import { GuitarTuning } from '../types/guitarTuning';
 
 // Mock fetch to load real sample songs
@@ -15,10 +17,15 @@ describe('ChordSheet Interface Consistency', () => {
 
   it('should validate real Oasis Wonderwall chord sheet', async () => {
     const chordSheet: ChordSheet = {
-      ...wonderwall,
-      guitarTuning: wonderwall.guitarTuning as GuitarTuning,
+      ...wonderwallMetadata,
+      ...wonderwallContent,
+      guitarTuning: wonderwallMetadata.guitarTuning as GuitarTuning,
     };
-    expect(chordSheet).toEqual({ ...wonderwall, guitarTuning: wonderwall.guitarTuning as GuitarTuning });
+    expect(chordSheet).toEqual({ 
+      ...wonderwallMetadata, 
+      ...wonderwallContent, 
+      guitarTuning: wonderwallMetadata.guitarTuning as GuitarTuning 
+    });
     expect(chordSheet).toHaveProperty('title', 'Wonderwall');
     expect(chordSheet).toHaveProperty('guitarCapo', 2);
     expect(chordSheet.songChords).toContain('[Intro]');
@@ -29,12 +36,16 @@ describe('ChordSheet Interface Consistency', () => {
 
   it('should validate real Eagles Hotel California chord sheet', async () => {
     const chordSheet: ChordSheet = {
-      ...hotelCalifornia,
-      guitarTuning: hotelCalifornia.guitarTuning as GuitarTuning,
+      ...hotelCaliforniaMetadata,
+      ...hotelCaliforniaContent,
+      guitarTuning: hotelCaliforniaMetadata.guitarTuning as GuitarTuning,
     };
-    expect(chordSheet).toEqual({ ...hotelCalifornia, guitarTuning: hotelCalifornia.guitarTuning as GuitarTuning });
+    expect(chordSheet).toEqual({ 
+      ...hotelCaliforniaMetadata, 
+      ...hotelCaliforniaContent, 
+      guitarTuning: hotelCaliforniaMetadata.guitarTuning as GuitarTuning 
+    });
     expect(chordSheet).toHaveProperty('title', 'Hotel California');
-
   });
 
   it('should confirm ChordSheet interface has all required fields', () => {

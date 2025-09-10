@@ -1,4 +1,4 @@
-import type { StoredChordSheetMetadata } from "../../../types/chord-sheet-metadata";
+import type { StoredSongMetadata } from "../../../types/stored-song-metadata";
 import { executeReadTransaction } from "../../../core/transactions";
 import { STORES } from "../../../core/config/stores";
 
@@ -19,7 +19,7 @@ export default async function getAllSavedChordSheets(): Promise<
   ChordSheetListItem[]
 > {
   // Read only the fields we actually need for the list view
-  const savedMetadata = await executeReadTransaction<StoredChordSheetMetadata[]>(STORES.SONGS_METADATA, (store) =>
+  const savedMetadata = await executeReadTransaction<StoredSongMetadata[]>(STORES.SONGS_METADATA, (store) =>
     store.getAll()
   ).then((allRecords) =>
     allRecords.filter((record) => record.storage?.saved === true)

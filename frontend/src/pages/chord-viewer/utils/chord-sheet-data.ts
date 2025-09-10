@@ -1,20 +1,28 @@
-import type { ChordSheet } from "@/types/chordSheet";
+import type { ChordSheet, SongMetadata } from "@chordium/types";
 import type { ChordSheetData } from "../chord-viewer.types";
 
 /**
  * Creates a complete chord sheet data object for display
- * Simply combines the backend ChordSheet with the storage path
+ * Combines metadata and content into a single ChordSheet object for backward compatibility
  * 
- * @param chordSheet - ChordSheet data from backend (already has title/artist)
+ * @param metadata - Song metadata (title, artist, etc.)
+ * @param content - Chord sheet content (songChords)
  * @param path - Storage path for the chord sheet
  * @returns Complete chord sheet data structure
  */
 export function createChordSheetData(
-  chordSheet: ChordSheet,
+  metadata: SongMetadata,
+  content: ChordSheet,
   path: string
 ): ChordSheetData {
+  // Create a combined ChordSheet object for backward compatibility
+  const combinedChordSheet: ChordSheet & SongMetadata = {
+    ...metadata,
+    ...content
+  };
+  
   return { 
-    chordSheet, 
+    chordSheet: combinedChordSheet, 
     path 
   };
 }

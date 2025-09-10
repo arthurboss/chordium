@@ -1,4 +1,4 @@
-import type { StoredChordSheet } from "../../../../types";
+import type { StoredSongMetadata } from "../../../../types";
 import type { CleanupStrategy } from "../types";
 import { calculateAccessFrequencyPriority } from "../access-frequency";
 import { daysSince } from "../../../../utils/time-constants";
@@ -10,13 +10,13 @@ import { daysSince } from "../../../../utils/time-constants";
  * - How recently the item was accessed (recency)
  * - How frequently the item is accessed (frequency)
  *
- * @param item The cached chord sheet to evaluate
+ * @param metadata The cached chord sheet metadata to evaluate
  * @returns Strategy with priority and removal permission
  */
 export function calculateCachedChordSheetStrategy(
-  item: StoredChordSheet
+  metadata: StoredSongMetadata
 ): CleanupStrategy {
-  if (item.storage.saved) {
+  if (metadata.storage.saved) {
     throw new Error("calculateCachedChordSheetStrategy called on saved item");
   }
 
@@ -24,7 +24,7 @@ export function calculateCachedChordSheetStrategy(
   const reasons: string[] = [];
 
   // LRU Logic: Recently accessed items get higher priority (kept longer)
-  const daysSinceLastAccess = daysSince(item.storage.lastAccessed);
+  const daysSinceLastAccess = daysSince(metadata.storage.lastAccessed);
 
   if (daysSinceLastAccess < 1) {
     priority += 50;
@@ -43,7 +43,7 @@ export function calculateCachedChordSheetStrategy(
 
   // Access frequency bonus: Use shared utility
   const accessFrequency = calculateAccessFrequencyPriority(
-    item.storage.accessCount
+    metadata.storage.accessCount
   );
   priority += accessFrequency.priority;
   if (accessFrequency.reason) {

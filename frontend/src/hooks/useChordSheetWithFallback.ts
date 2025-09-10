@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { combineChordSheet } from './useProgressiveChordSheet';
-import type { StoredChordSheet } from '@/storage/types';
-import type { SongMetadata, ChordSheet, ChordSheetContent } from '@chordium/types';
+import type { SongMetadata, ChordSheet } from '@chordium/types';
+import type { StoredSongMetadata, StoredChordSheet } from '@/storage/types';
+import { fetchSongMetadataFromAPI } from '@/services/api/fetch-song-metadata';
+import { fetchChordSheetFromAPI } from '@/services/api/fetch-chord-sheet';
+import { storeChordSheet } from '@/storage/stores/chord-sheets/operations';
 
 export interface ChordSheetWithFallbackState {
-  chordSheet: StoredChordSheet | null;
+  metadata: StoredSongMetadata | null;
+  content: StoredChordSheet | null;
+  chordSheet: ChordSheet | null; // Combined for backward compatibility
   isLoading: boolean;
   error: string | null;
   isFromAPI: boolean;
-  isMetadataLoading: boolean;
   isContentLoading: boolean;
 }
 
@@ -24,14 +27,14 @@ export interface ChordSheetWithFallbackActions {
  */
 export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackState & ChordSheetWithFallbackActions {
   // Check if chord sheet exists locally (without triggering API fallback)
-  const [localChordSheet, setLocalChordSheet] = useState<StoredChordSheet | null>(null);
+  const [localMetadata, setLocalMetadata] = useState<StoredSongMetadata | null>(null);
+  const [localContent, setLocalContent] = useState<StoredChordSheet | null>(null);
   const [isCheckingLocal, setIsCheckingLocal] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
   
   const [isFromAPI, setIsFromAPI] = useState(false);
-  const [combinedChordSheet, setCombinedChordSheet] = useState<StoredChordSheet | null>(null);
-  const [metadata, setMetadata] = useState<SongMetadata | null>(null);
-  const [content, setContent] = useState<ChordSheetContent | null>(null);
+  const [apiMetadata, setApiMetadata] = useState<SongMetadata | null>(null);
+  const [apiContent, setApiContent] = useState<ChordSheet | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
@@ -44,9 +47,14 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
       }
       
       try {
-        const { getChordSheetFromCache } = await import('@/storage/utils/getChordSheetFromCache');
-        const localData = await getChordSheetFromCache(path);
-        setLocalChordSheet(localData);
+        const { getChordSheetMetadata, getChordSheetContent } = await import('@/storage/stores/chord-sheets/operations');
+        const [metadata, content] = await Promise.all([
+          getChordSheetMetadata(path),
+          getChordSheetContent(path)
+        ]);
+        
+        setLocalMetadata(metadata);
+        setLocalContent(content);
         setLocalError(null);
       } catch (err) {
         setLocalError(err instanceof Error ? err.message : 'Failed to check local data');
@@ -58,119 +66,117 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     checkLocalData();
   }, [path]);
 
-  // Combine API metadata and content into a StoredChordSheet when metadata is available
-  useEffect(() => {
-    if (metadata && isFromAPI) {
-      const apiChordSheet: ChordSheet = combineChordSheet(metadata, content || { songChords: '' });
-      const storedChordSheet: StoredChordSheet = {
-        ...apiChordSheet,
-        path,
-        storage: {
-          saved: false,
-          timestamp: Date.now(),
-          version: 1,
-          expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours TTL
-          lastAccessed: Date.now(),
-          accessCount: 1,
-        }
-      };
-      setCombinedChordSheet(storedChordSheet);
-    }
-  }, [metadata, content, isFromAPI, path]);
-
-  const loadFromAPI = useCallback(async () => {
-    if (!path) return;
+  // Load metadata from API
+  const loadMetadata = useCallback(async () => {
+    if (!path || apiMetadata) return;
     
-    setIsFromAPI(true);
-    setCombinedChordSheet(null);
-    setError(null);
-    
-    // Load metadata first (fast, non-blocking)
     try {
-      const { fetchSongMetadataFromAPI } = await import('@/services/api/fetch-song-metadata');
-      const fetchedMetadata = await fetchSongMetadataFromAPI(path);
-      setMetadata(fetchedMetadata);
+      const metadata = await fetchSongMetadataFromAPI(path);
+      setApiMetadata(metadata);
+      setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load metadata';
       setError(errorMessage);
-      console.error('Error loading metadata:', err);
     }
-  }, [path]);
+  }, [path, apiMetadata]);
 
+  // Load content from API
   const loadContent = useCallback(async () => {
-    if (!path || content || isLoadingContent) return;
+    if (!path || apiContent || isLoadingContent) return;
     
     setIsLoadingContent(true);
-    setError(null);
-    
     try {
-      const { fetchChordSheetContentFromAPI } = await import('@/services/api/fetch-chord-sheet-content');
-      const fetchedContent = await fetchChordSheetContentFromAPI(path);
-      setContent(fetchedContent);
-      
-      // Store the complete chord sheet in IndexedDB for future use
-      if (metadata && fetchedContent) {
-        try {
-          const storeChordSheet = (await import('@/storage/stores/chord-sheets/operations/store-chord-sheet')).default;
-          
-          // Combine metadata and content directly (no additional API call needed)
-          const completeChordSheet: StoredChordSheet = {
-            ...metadata,
-            path,
-            songChords: fetchedContent.songChords,
-            storage: {
-              saved: false,
-              timestamp: Date.now(),
-              version: 1,
-              expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours TTL
-              lastAccessed: Date.now(),
-              accessCount: 1,
-            }
-          };
-          
-          await storeChordSheet(completeChordSheet, false, path);
-        } catch (storeErr) {
-          console.warn('Failed to store complete chord sheet:', storeErr);
-        }
-      }
+      const content = await fetchChordSheetFromAPI(path);
+      setApiContent(content);
+      setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
       setError(errorMessage);
-      console.error('Error loading content:', err);
     } finally {
       setIsLoadingContent(false);
     }
-  }, [path, content, isLoadingContent, metadata]);
+  }, [path, apiContent, isLoadingContent]);
+
+  // Load from API (metadata first, then content)
+  const loadFromAPI = useCallback(async () => {
+    if (!path || isFromAPI) return;
+    
+    setIsFromAPI(true);
+    await loadMetadata();
+  }, [path, isFromAPI, loadMetadata]);
 
   // Automatically load content after metadata loads
   useEffect(() => {
-    if (metadata && !content && !isLoadingContent && isFromAPI) {
+    if (apiMetadata && !apiContent && !isLoadingContent && isFromAPI) {
       loadContent();
     }
-  }, [metadata, content, isLoadingContent, isFromAPI, loadContent]);
+  }, [apiMetadata, apiContent, isLoadingContent, isFromAPI, loadContent]);
+
+  // Store complete chord sheet when both metadata and content are available
+  useEffect(() => {
+    const storeCompleteChordSheet = async () => {
+      if (apiMetadata && apiContent && isFromAPI) {
+        try {
+          await storeChordSheet(apiMetadata, apiContent, false, path);
+        } catch (err) {
+          console.error('Failed to store complete chord sheet:', err);
+        }
+      }
+    };
+    
+    storeCompleteChordSheet();
+  }, [apiMetadata, apiContent, isFromAPI, path]);
 
   const reset = useCallback(() => {
-    setIsFromAPI(false);
-    setCombinedChordSheet(null);
-    setMetadata(null);
-    setContent(null);
+    setLocalMetadata(null);
+    setLocalContent(null);
+    setApiMetadata(null);
+    setApiContent(null);
     setError(null);
+    setIsFromAPI(false);
     setIsLoadingContent(false);
+    setLocalError(null);
   }, []);
 
-  // Determine the final state
-  const isLoading = isCheckingLocal || (isFromAPI && !metadata);
+  // Determine final state
+  const finalMetadata: StoredSongMetadata | null = localMetadata || (apiMetadata ? {
+    ...apiMetadata,
+    path,
+    storage: {
+      timestamp: Date.now(),
+      version: 1,
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours TTL
+      saved: false,
+      lastAccessed: Date.now(),
+      accessCount: 1,
+      contentAvailable: true,
+    },
+  } : null);
+
+  const finalContent: StoredChordSheet | null = localContent || (apiContent ? {
+    path,
+    songChords: apiContent.songChords,
+  } : null);
+
+  const finalChordSheet = (finalMetadata && finalContent) ? {
+    title: finalMetadata.title,
+    artist: finalMetadata.artist,
+    songKey: finalMetadata.songKey,
+    guitarTuning: finalMetadata.guitarTuning,
+    guitarCapo: finalMetadata.guitarCapo,
+    songChords: finalContent.songChords,
+  } : null;
+
+  const isLoading = isCheckingLocal || (isFromAPI && !apiMetadata);
   const finalError = localError || error;
-  
-  // Return local data if available, otherwise return API data
-  const finalChordSheet = localChordSheet || combinedChordSheet;
 
   return {
+    metadata: finalMetadata,
+    content: finalContent,
     chordSheet: finalChordSheet,
     isLoading,
     error: finalError,
     isFromAPI,
-    isMetadataLoading: isFromAPI && !metadata,
     isContentLoading: isLoadingContent,
     loadFromAPI,
     loadContent,
