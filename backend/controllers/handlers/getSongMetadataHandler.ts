@@ -1,22 +1,22 @@
 import { Request, Response } from "express";
 import cifraClubService from "../../services/cifraclub.service.js";
 import logger from "../../utils/logger.js";
-import { ErrorResponse, GetChordSheetQuery, ChordSheetContent } from "../../../shared/types/index.js";
+import { ErrorResponse, GetChordSheetQuery, SongMetadata } from "../../../shared/types/index.js";
 
 /**
- * Handles requests to fetch chord sheet content for a given artist/song path.
+ * Handles requests to fetch song metadata for a given artist/song path.
  * 
  * @param req - Express request object with url query parameter containing path
  * @param res - Express response object
  */
-export async function getChordSheetHandler(
-  req: Request<{}, ChordSheetContent | ErrorResponse, {}, GetChordSheetQuery>,
-  res: Response<ChordSheetContent | ErrorResponse>
+export async function getSongMetadataHandler(
+  req: Request<{}, SongMetadata | ErrorResponse, {}, GetChordSheetQuery>,
+  res: Response<SongMetadata | ErrorResponse>
 ): Promise<void> {
   try {
     const { url: pathParam } = req.query;
 
-    // Fetches chord sheet content for a given artist/song path from CifraClub.
+    // Fetches song metadata for a given artist/song path from CifraClub.
     // Expected path format: "artist/song" (e.g., "radiohead/creep")
     if (!pathParam || typeof pathParam !== "string") {
       logger.warn("⚠️ Missing or invalid song path parameter");
@@ -43,35 +43,40 @@ export async function getChordSheetHandler(
     // Construct CifraClub URL from artist and song
     const cifraClubUrl = `https://www.cifraclub.com.br/${encodeURIComponent(artist)}/${encodeURIComponent(song)}/`;
 
-    logger.info(`🎵 Fetching chord sheet content for: ${artist} - ${song}`);
+    logger.info(`🎵 Fetching song metadata for: ${artist} - ${song}`);
     logger.info(`🔗 CifraClub URL: ${cifraClubUrl}`);
-    logger.info(`📊 Flow Step 1: Backend received chord sheet content request for path: ${pathParam}`);
+    logger.info(`📊 Flow Step 1: Backend received metadata request for path: ${pathParam}`);
 
-    const chordSheetContent = await cifraClubService.getChordSheet(cifraClubUrl);
+    const metadata = await cifraClubService.getSongMetadata(cifraClubUrl);
 
-    if (!chordSheetContent?.songChords) {
+    if (!metadata?.title || !metadata?.artist) {
       logger.error(
-        `❌ Flow Step 2: No chord sheet content returned from CifraClub service for ${cifraClubUrl}`
+        `❌ Flow Step 2: No metadata returned from CifraClub service for ${cifraClubUrl}`
       );
       res.status(404).json({ 
-        error: "Chord sheet content not found",
-        details: `No chord sheet content found for ${artist} - ${song} at ${cifraClubUrl}`
+        error: "Song metadata not found",
+        details: `No metadata found for ${artist} - ${song} at ${cifraClubUrl}`
       });
       return;
     }
 
-    logger.info(`✅ Flow Step 2: Chord sheet content extracted successfully`);
-    logger.info(`📏 Chords length: ${chordSheetContent.songChords.length} characters`);
-    logger.info(`📤 Flow Step 3: Sending ChordSheetContent response to frontend`);
+    logger.info(`✅ Flow Step 2: Song metadata extracted successfully`);
+    logger.info(
+      `📝 Title: "${metadata.title}", Artist: "${metadata.artist}"`
+    );
+    logger.info(
+      `🎵 Metadata - Key: ${metadata.songKey || "none"}, Capo: ${metadata.guitarCapo || "none"}, Tuning: ${metadata.guitarTuning ? JSON.stringify(metadata.guitarTuning) : "none"}`
+    );
+    logger.info(`📤 Flow Step 3: Sending SongMetadata response to frontend`);
 
-    res.json(chordSheetContent);
+    res.json(metadata);
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error("❌ Error fetching chord sheet content:", error);
+    logger.error("❌ Error fetching song metadata:", error);
 
     res
       .status(500)
-      .json({ error: "Failed to fetch chord sheet content", details: errorMessage });
+      .json({ error: "Failed to fetch song metadata", details: errorMessage });
   }
 }

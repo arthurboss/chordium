@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
-import { useSingleChordSheet } from "@/storage/hooks/use-single-chord-sheet";
+import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
 import type { RouteParams } from "./chord-viewer.types";
 
 // Utils
@@ -31,8 +31,8 @@ const ChordViewer = () => {
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
 
-  // Fetch single chord sheet data from IndexedDB
-  const chordSheetResult = useSingleChordSheet({ path });
+  // Fetch chord sheet data with API fallback
+  const chordSheetResult = useChordSheetWithFallback(path);
 
   // Create complete chord sheet data object (only if chord sheet exists)
   const chordSheetData = chordSheetResult.chordSheet
@@ -48,6 +48,13 @@ const ChordViewer = () => {
   useEffect(() => {
     setIsSaved(chordSheetResult.chordSheet?.storage?.saved ?? false);
   }, [chordSheetResult.chordSheet?.storage?.saved]);
+
+  // Auto-load from API if not found locally
+  useEffect(() => {
+    if (!chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
+      chordSheetResult.loadFromAPI();
+    }
+  }, [chordSheetResult.chordSheet, chordSheetResult.isFromAPI, chordSheetResult.isLoading, path, chordSheetResult.loadFromAPI]);
 
   // Navigation handlers
   const navigation = useNavigation();
@@ -112,6 +119,7 @@ const ChordViewer = () => {
           hideDeleteButton={!isSaved}
           hideSaveButton={isSaved}
           isFromMyChordSheets={isSaved}
+          useProgressiveLoading={chordSheetResult.isFromAPI}
         />
       </main>
     </div>
