@@ -3,12 +3,12 @@
  */
 
 import type { ChordSheet } from '@chordium/types';
-import type { StoredChordSheet } from '../../types/chord-sheet';
+import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/get-all-saved';
 
 /**
  * Interface for chord sheet storage operations
  */
 export interface IChordSheetStorage {
-  getAllSaved(): Promise<StoredChordSheet[]>;
+  getAllSaved(): Promise<ChordSheetListItem[]>;
   store(path: string, chordSheet: ChordSheet, saved: boolean): Promise<void>;
 }
