@@ -16,10 +16,9 @@ interface ChordDisplayProps {
   content: string;
   onSave?: (content: string) => void;
   isLoading?: boolean;
-  onLoadContent?: () => void;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, onLoadContent }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading }, ref) => {
   
   // Use custom hooks for different concerns
   const { 
@@ -98,7 +97,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         hideGuitarTabs={hideGuitarTabs}
         renderChord={renderChord}
         isLoading={isLoading}
-        onLoadContent={onLoadContent}
       />
       <StickyControlsBar
         transpose={transpose}

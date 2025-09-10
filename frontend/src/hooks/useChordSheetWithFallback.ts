@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSingleChordSheet } from '@/storage/hooks/use-single-chord-sheet';
 import { combineChordSheet } from './useProgressiveChordSheet';
 import type { StoredChordSheet } from '@/storage/types';
 import type { SongMetadata, ChordSheet, ChordSheetContent } from '@chordium/types';
@@ -24,8 +23,10 @@ export interface ChordSheetWithFallbackActions {
  * and falls back to progressive API loading if not found locally
  */
 export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackState & ChordSheetWithFallbackActions {
-  // Try to load from IndexedDB first (but don't use it for API fallback)
-  const localResult = useSingleChordSheet({ path });
+  // Check if chord sheet exists locally (without triggering API fallback)
+  const [localChordSheet, setLocalChordSheet] = useState<StoredChordSheet | null>(null);
+  const [isCheckingLocal, setIsCheckingLocal] = useState(true);
+  const [localError, setLocalError] = useState<string | null>(null);
   
   const [isFromAPI, setIsFromAPI] = useState(false);
   const [combinedChordSheet, setCombinedChordSheet] = useState<StoredChordSheet | null>(null);
@@ -33,6 +34,29 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const [content, setContent] = useState<ChordSheetContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+
+  // Check for local data without triggering API fallback
+  useEffect(() => {
+    const checkLocalData = async () => {
+      if (!path) {
+        setIsCheckingLocal(false);
+        return;
+      }
+      
+      try {
+        const { getChordSheetFromCache } = await import('@/storage/utils/getChordSheetFromCache');
+        const localData = await getChordSheetFromCache(path);
+        setLocalChordSheet(localData);
+        setLocalError(null);
+      } catch (err) {
+        setLocalError(err instanceof Error ? err.message : 'Failed to check local data');
+      } finally {
+        setIsCheckingLocal(false);
+      }
+    };
+    
+    checkLocalData();
+  }, [path]);
 
   // Combine API metadata and content into a StoredChordSheet when metadata is available
   useEffect(() => {
@@ -83,6 +107,32 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
       const { fetchChordSheetContentFromAPI } = await import('@/services/api/fetch-chord-sheet-content');
       const fetchedContent = await fetchChordSheetContentFromAPI(path);
       setContent(fetchedContent);
+      
+      // Store the complete chord sheet in IndexedDB for future use
+      if (metadata && fetchedContent) {
+        try {
+          const storeChordSheet = (await import('@/storage/stores/chord-sheets/operations/store-chord-sheet')).default;
+          
+          // Combine metadata and content directly (no additional API call needed)
+          const completeChordSheet: StoredChordSheet = {
+            ...metadata,
+            path,
+            songChords: fetchedContent.songChords,
+            storage: {
+              saved: false,
+              timestamp: Date.now(),
+              version: 1,
+              expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours TTL
+              lastAccessed: Date.now(),
+              accessCount: 1,
+            }
+          };
+          
+          await storeChordSheet(completeChordSheet, false, path);
+        } catch (storeErr) {
+          console.warn('Failed to store complete chord sheet:', storeErr);
+        }
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
       setError(errorMessage);
@@ -90,7 +140,14 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     } finally {
       setIsLoadingContent(false);
     }
-  }, [path, content, isLoadingContent]);
+  }, [path, content, isLoadingContent, metadata]);
+
+  // Automatically load content after metadata loads
+  useEffect(() => {
+    if (metadata && !content && !isLoadingContent && isFromAPI) {
+      loadContent();
+    }
+  }, [metadata, content, isLoadingContent, isFromAPI, loadContent]);
 
   const reset = useCallback(() => {
     setIsFromAPI(false);
@@ -102,11 +159,11 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   }, []);
 
   // Determine the final state
-  const isLoading = localResult.isLoading || (isFromAPI && !metadata);
-  const finalError = localResult.error || error;
+  const isLoading = isCheckingLocal || (isFromAPI && !metadata);
+  const finalError = localError || error;
   
   // Return local data if available, otherwise return API data
-  const finalChordSheet = localResult.chordSheet || combinedChordSheet;
+  const finalChordSheet = localChordSheet || combinedChordSheet;
 
   return {
     chordSheet: finalChordSheet,

@@ -1,9 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
-import type { UseSingleChordSheetParams } from "./use-single-chord-sheet.types";
 import type { StoredChordSheetMetadata, StoredChordSheet } from "../types";
+import type { ChordSheetContent } from "@chordium/types";
 import getChordSheetMetadata from "../stores/chord-sheets/operations/get-chord-sheet-metadata";
 import getChordSheetContent from "../stores/chord-sheets/operations/get-chord-sheet-content";
-import { fetchAndStoreChordSheet } from "../utils/fetchAndStoreChordSheet";
 import { combineChordSheet } from "../stores/chord-sheets/utils/split-chord-sheet";
 import { LazyLoadingMigrationService } from "../services/migration/lazy-loading-migration.service";
 
@@ -33,7 +32,7 @@ interface UseLazyChordSheetResult {
  * @param path - Unique chord sheet identifier
  * @returns Enhanced result with metadata, content, loading states, and lazy loading controls
  */
-export function useLazyChordSheet({ path }: UseSingleChordSheetParams): UseLazyChordSheetResult {
+export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheetResult {
   const [chordSheet, setChordSheet] = useState<StoredChordSheetMetadata | StoredChordSheet | null>(null);
   const [metadata, setMetadata] = useState<ChordSheetMetadata | null>(null);
   const [content, setContent] = useState<string | null>(null);
@@ -108,20 +107,63 @@ export function useLazyChordSheet({ path }: UseSingleChordSheetParams): UseLazyC
             loadContent();
           }
         } else {
-          // NOT CACHED: Fetch from API (full ChordSheet)
-          const result = await fetchAndStoreChordSheet(path);
-          if (result) {
-            if (!cancelled) {
+          // NOT CACHED: Use progressive loading (metadata first, then content)
+          try {
+            const { fetchChordSheetMetadataFromAPI } = await import('@/services/api/fetch-chord-sheet');
+            const metadata = await fetchChordSheetMetadataFromAPI(path);
+            
+            if (metadata && !cancelled) {
               setIsFromCache(false);
-              setMetadata(extractMetadata(result));
-              setContent(result.songChords); // API always loads full content
-              setChordSheet(result); // API returns StoredChordSheet
+              // Create metadata object for extractMetadata
+              const metadataForExtraction = {
+                title: metadata.title || '',
+                artist: metadata.artist || '',
+                songKey: metadata.songKey || '',
+                guitarTuning: metadata.guitarTuning || ['E', 'A', 'D', 'G', 'B', 'E'],
+                guitarCapo: metadata.guitarCapo || 0,
+                path,
+                storage: {
+                  saved: false,
+                  timestamp: Date.now(),
+                  version: 1,
+                  expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+                  lastAccessed: Date.now(),
+                  accessCount: 1,
+                  contentAvailable: false, // Content will be loaded later
+                }
+              };
+              setMetadata(extractMetadata(metadataForExtraction));
+              // Create a minimal StoredChordSheet from metadata
+              const minimalChordSheet: StoredChordSheet = {
+                title: metadata.title || '',
+                artist: metadata.artist || '',
+                songKey: metadata.songKey || '',
+                guitarTuning: metadata.guitarTuning || ['E', 'A', 'D', 'G', 'B', 'E'],
+                guitarCapo: metadata.guitarCapo || 0,
+                path,
+                songChords: '', // Will be loaded later
+                storage: {
+                  saved: false,
+                  timestamp: Date.now(),
+                  version: 1,
+                  expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+                  lastAccessed: Date.now(),
+                  accessCount: 1,
+                }
+              };
+              setChordSheet(minimalChordSheet);
               setError(null);
               setIsLoading(false);
-            }
-          } else {
-            if (!cancelled) {
+              
+              // Load content naturally (async, non-blocking)
+              loadContent();
+            } else if (!cancelled) {
               setError("Chord sheet not found");
+              setIsLoading(false);
+            }
+          } catch (err) {
+            if (!cancelled) {
+              setError(err instanceof Error ? err.message : "Failed to load chord sheet");
               setIsLoading(false);
             }
           }

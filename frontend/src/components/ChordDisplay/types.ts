@@ -18,7 +18,6 @@ export interface ChordContentProps {
   hideGuitarTabs: boolean;
   renderChord: (chord: string) => React.ReactElement;
   isLoading?: boolean;
-  onLoadContent?: () => void;
 }
 
 export interface ChordSheetControlsProps {

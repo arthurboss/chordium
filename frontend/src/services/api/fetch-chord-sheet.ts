@@ -2,13 +2,41 @@ import type { ChordSheet } from "@chordium/types";
 
 /**
  * Fetches a complete chord sheet from the backend API (for storage purposes)
- * This fetches both metadata and content simultaneously
+ * This fetches both metadata and content simultaneously, or uses provided metadata
  * 
  * @param path - The chord sheet path (e.g., "radiohead/creep")
+ * @param existingMetadata - Optional metadata to avoid redundant API call
  * @returns Promise resolving to chord sheet data or null if not found
  */
-export async function fetchChordSheetFromAPI(path: string): Promise<ChordSheet | null> {
+export async function fetchChordSheetFromAPI(path: string, existingMetadata?: Partial<ChordSheet>): Promise<ChordSheet | null> {
   try {
+    // If we already have metadata, only fetch content
+    if (existingMetadata) {
+      const contentResponse = await fetch(`/api/cifraclub-chord-sheet?url=${encodeURIComponent(path.trim())}`);
+      
+      if (!contentResponse.ok) {
+        if (contentResponse.status === 404) {
+          return null; // Chord sheet not found
+        }
+        throw new Error(`API request failed: ${contentResponse.status} ${contentResponse.statusText}`);
+      }
+
+      const content = await contentResponse.json();
+      
+      // Validate the response
+      if (!content || typeof content !== 'object') {
+        throw new Error('Invalid API response format');
+      }
+
+      // Combine existing metadata with new content
+      const chordSheet: ChordSheet = {
+        ...existingMetadata,
+        ...content
+      };
+
+      return chordSheet;
+    }
+
     // For storage purposes, fetch both metadata and content simultaneously
     const [metadataResponse, contentResponse] = await Promise.all([
       fetch(`/api/cifraclub-song-metadata?url=${encodeURIComponent(path.trim())}`),

@@ -12,7 +12,6 @@ const ChordContent: React.FC<ChordContentProps> = ({
   hideGuitarTabs,
   renderChord,
   isLoading,
-  onLoadContent,
 }) => {
   // Determine font family based on fontStyle prop
   let fontFamily = undefined;
@@ -29,14 +28,6 @@ const ChordContent: React.FC<ChordContentProps> = ({
         <div className="flex flex-col items-center justify-center py-8 text-gray-500">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
           <p className="text-sm">Loading chord content...</p>
-          {onLoadContent && (
-            <button 
-              onClick={onLoadContent}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-              Load Content
-            </button>
-          )}
         </div>
       ) : (
         processedContent.map((section, sectionIndex) => (

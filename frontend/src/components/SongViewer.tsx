@@ -5,7 +5,6 @@ import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
-import { useProgressiveChordSheet, combineChordSheet } from "@/hooks/useProgressiveChordSheet";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -20,7 +19,6 @@ interface SongViewerProps {
   isFromMyChordSheets?: boolean;
   // Progressive loading props
   useProgressiveLoading?: boolean;
-  onLoadContent?: () => void;
   loadContent?: () => Promise<void>;
   isContentLoading?: boolean;
 }
@@ -37,16 +35,11 @@ const SongViewer = ({
   hideSaveButton = false,
   isFromMyChordSheets = false,
   useProgressiveLoading = false,
-  onLoadContent,
   loadContent,
   isContentLoading
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   
-  // Progressive loading for API-fetched chord sheets
-  const progressiveResult = useProgressiveChordSheet(
-    useProgressiveLoading ? songObj.path : ''
-  );
   
   // Use lazy loading for saved chord sheets
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({ 
@@ -60,38 +53,27 @@ const SongViewer = ({
       return directChordContent;
     }
 
-    // If using progressive loading, use the API content
-    if (useProgressiveLoading && progressiveResult.content) {
-      return progressiveResult.content.songChords;
-    }
-
     // If this is from myChordSheets, use the lazy loaded content
     if (isFromMyChordSheets) {
       return lazyContent || '';
     }
 
-    return '';
-  }, [directChordContent, useProgressiveLoading, progressiveResult.content, isFromMyChordSheets, lazyContent]);
+    // For progressive loading, content is handled by useChordSheetWithFallback
+    // and passed via chordContent prop or chordSheet.songChords
+    return chordSheet.songChords || '';
+  }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
   // Determine the chord sheet to display (metadata)
   const chordSheetToDisplay = useMemo(() => {
-    // If using progressive loading and we have metadata, use it
-    if (useProgressiveLoading && progressiveResult.metadata) {
-      return combineChordSheet(progressiveResult.metadata, { songChords: '' });
-    }
-    
-    // Otherwise use the provided chord sheet
+    // Always use the provided chord sheet (handled by useChordSheetWithFallback)
     return chordSheet;
-  }, [useProgressiveLoading, progressiveResult.metadata, chordSheet]);
+  }, [chordSheet]);
 
   // Handle content loading
   const handleLoadContent = () => {
     if (useProgressiveLoading && loadContent) {
       loadContent();
-    } else if (useProgressiveLoading && !progressiveResult.content) {
-      progressiveResult.loadContent();
     }
-    onLoadContent?.();
   };
 
   const handleAction = () => {
@@ -106,7 +88,7 @@ const SongViewer = ({
 
   // Determine loading states
   const finalIsContentLoading = useProgressiveLoading 
-    ? (isContentLoading ?? progressiveResult.isLoadingContent)
+    ? isContentLoading
     : isLazyContentLoading;
 
   return (
@@ -126,7 +108,6 @@ const SongViewer = ({
         content={chordContentToDisplay}
         onSave={onUpdate}
         isLoading={finalIsContentLoading}
-        onLoadContent={useProgressiveLoading ? handleLoadContent : undefined}
       />
     </div>
   );
