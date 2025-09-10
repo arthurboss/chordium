@@ -40,12 +40,7 @@ export interface ChordiumDBSchema {
   chordSheets: {
     path: string; // Song.path format: "artist-path/song-path" (links to metadata)
     value: StoredChordSheetContent;
-    indexes: {
-      /** Index on timestamp for temporal queries */
-      "storage.timestamp": number;
-      /** Index on expiration for TTL cleanup */
-      "storage.expiresAt": number | null;
-    };
+    indexes: Record<string, never>; // No indexes needed - content store is controlled by metadata store
   };
   searchCache: {
     /**

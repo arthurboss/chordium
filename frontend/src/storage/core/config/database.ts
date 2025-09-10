@@ -20,4 +20,4 @@ export const DB_NAME = "chordium-v1";
  * Increment this when making schema changes (adding/removing stores, indexes, etc.)
  * to trigger the onupgradeneeded event for migration.
  */
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;

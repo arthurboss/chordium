@@ -154,12 +154,7 @@ export function useLazyChordSheet({ path }: UseSingleChordSheetParams): UseLazyC
     if (content) {
       return combineChordSheet(chordSheet, { 
         path, 
-        songChords: content, 
-        storage: {
-          timestamp: chordSheet.storage.timestamp,
-          version: chordSheet.storage.version,
-          expiresAt: chordSheet.storage.expiresAt,
-        }
+        songChords: content
       });
     }
     

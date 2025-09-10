@@ -29,11 +29,6 @@ export function splitChordSheet(chordSheet: StoredChordSheet): {
   const content: StoredChordSheetContent = {
     path: chordSheet.path,
     songChords,
-    storage: {
-      timestamp: chordSheet.storage.timestamp,
-      version: chordSheet.storage.version,
-      expiresAt: chordSheet.storage.expiresAt,
-    },
   };
 
   return { metadata, content };

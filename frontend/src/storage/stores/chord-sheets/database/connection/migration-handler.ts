@@ -8,6 +8,7 @@
  */
 // Types are provided by the DOM, no need to import from 'idb'.
 import createSchema from './create-schema';
+import { STORES } from '../../../../core/config/stores';
 
 /**
  * Handles all IndexedDB migrations from oldVersion to newVersion.
@@ -42,6 +43,17 @@ export function handleIndexedDBMigrations(db: IDBDatabase, oldVersion: number, n
         // Note: Data migration will be handled asynchronously after schema creation
         // The actual data migration happens in the application layer to avoid
         // blocking the database upgrade transaction
+        break;
+      }
+      case 4: {
+        // Migration to v4: Remove storage indexes from chordSheets content store
+        // Content store is now controlled by metadata store, no indexes needed
+        if (db.objectStoreNames.contains(STORES.CHORD_SHEETS)) {
+          // Delete and recreate the content store without indexes
+          db.deleteObjectStore(STORES.CHORD_SHEETS);
+          const contentStore = db.createObjectStore(STORES.CHORD_SHEETS, { keyPath: 'path' });
+          // No indexes needed - content store is controlled by metadata store
+        }
         break;
       }
       // Add future migrations here

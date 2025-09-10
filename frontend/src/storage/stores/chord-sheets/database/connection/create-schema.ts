@@ -49,9 +49,7 @@ export default function createSchema(db: IDBDatabase, version: number): void {
     // Create content store (reuse chordSheets name for content)
     if (!db.objectStoreNames.contains(STORES.CHORD_SHEETS)) {
       const contentStore = db.createObjectStore(STORES.CHORD_SHEETS, { keyPath: 'path' });
-      const contentIndexes = INDEXES.chordSheets;
-      contentStore.createIndex('timestamp', contentIndexes.timestamp, { unique: false });
-      contentStore.createIndex('expiresAt', contentIndexes.expiresAt, { unique: false });
+      // No indexes needed - content store is controlled by metadata store
     }
   }
 }
