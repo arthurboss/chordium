@@ -4,7 +4,7 @@ import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
-import { useChordSheets } from "@/storage/hooks/use-chord-sheets";
+import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -17,6 +17,10 @@ interface SongViewerProps {
   hideDeleteButton?: boolean;
   hideSaveButton?: boolean;
   isFromMyChordSheets?: boolean;
+  // Progressive loading props
+  useProgressiveLoading?: boolean;
+  loadContent?: () => Promise<void>;
+  isContentLoading?: boolean;
 }
 
 const SongViewer = ({
@@ -29,10 +33,18 @@ const SongViewer = ({
   onUpdate,
   hideDeleteButton = false,
   hideSaveButton = false,
-  isFromMyChordSheets = false
+  isFromMyChordSheets = false,
+  useProgressiveLoading = false,
+  loadContent,
+  isContentLoading
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
-  const { myChordSheets } = useChordSheets();
+  
+  
+  // Use lazy loading for saved chord sheets
+  const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({ 
+    path: isFromMyChordSheets ? songObj.path : '' 
+  });
 
   // Determine the chord content to display
   const chordContentToDisplay = useMemo(() => {
@@ -41,16 +53,28 @@ const SongViewer = ({
       return directChordContent;
     }
 
-    // If this is from myChordSheets, look up the chord content from stored data
-    if (isFromMyChordSheets && songObj.artist && songObj.title) {
-      const storedChordSheet = myChordSheets.find(stored =>
-        stored.artist === songObj.artist && stored.title === songObj.title
-      );
-      return storedChordSheet?.songChords ?? '';
+    // If this is from myChordSheets, use the lazy loaded content
+    if (isFromMyChordSheets) {
+      return lazyContent || '';
     }
 
-    return '';
-  }, [songObj, directChordContent, isFromMyChordSheets, myChordSheets]);
+    // For progressive loading, content is handled by useChordSheetWithFallback
+    // and passed via chordContent prop or chordSheet.songChords
+    return chordSheet.songChords || '';
+  }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
+
+  // Determine the chord sheet to display (metadata)
+  const chordSheetToDisplay = useMemo(() => {
+    // Always use the provided chord sheet (handled by useChordSheetWithFallback)
+    return chordSheet;
+  }, [chordSheet]);
+
+  // Handle content loading
+  const handleLoadContent = () => {
+    if (useProgressiveLoading && loadContent) {
+      loadContent();
+    }
+  };
 
   const handleAction = () => {
     if (isFromMyChordSheets && !hideDeleteButton) {
@@ -62,22 +86,28 @@ const SongViewer = ({
 
   const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
 
+  // Determine loading states
+  const finalIsContentLoading = useProgressiveLoading 
+    ? isContentLoading
+    : isLazyContentLoading;
+
   return (
     <div className="animate-fade-in flex flex-col">
       <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
         isSaved={shouldShowActionButton && isFromMyChordSheets}
-        title={chordSheet.title}
+        title={chordSheetToDisplay.title}
       />
       <div className="py-2 sm:py-4 px-4">
-        <ChordMetadata chordSheet={chordSheet} />
+        <ChordMetadata chordSheet={chordSheetToDisplay} />
       </div>
       <ChordDisplay
         ref={chordDisplayRef}
-        chordSheet={chordSheet}
+        chordSheet={chordSheetToDisplay}
         content={chordContentToDisplay}
         onSave={onUpdate}
+        isLoading={finalIsContentLoading}
       />
     </div>
   );

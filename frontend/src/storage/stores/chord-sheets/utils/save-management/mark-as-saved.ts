@@ -1,11 +1,11 @@
 /**
- * Save status management for StoredChordSheet objects
+ * Save status management for StoredSongMetadata objects
  * 
  * Single responsibility: Manages the saved/unsaved state transitions.
  * Handles only save status concerns and related TTL logic.
  */
 
-import type { StoredChordSheet } from "../../../../types/chord-sheet";
+import type { StoredSongMetadata } from "../../../../types/stored-song-metadata";
 import { updateAccess } from "../access-tracking";
 
 /**
@@ -14,14 +14,14 @@ import { updateAccess } from "../access-tracking";
  * Saved items are permanent user storage and bypass TTL cleanup.
  * Updates access time to reflect the save action.
  * 
- * @param storedChordSheet - Chord sheet to mark as saved
- * @returns Updated StoredChordSheet with saved status
+ * @param metadata - Chord sheet metadata to mark as saved
+ * @returns Updated StoredSongMetadata with saved status
  */
 export function markAsSaved(
-  storedChordSheet: StoredChordSheet
-): StoredChordSheet {
+  metadata: StoredSongMetadata
+): StoredSongMetadata {
   // First update access time, then set saved status
-  const accessUpdated = updateAccess(storedChordSheet);
+  const accessUpdated = updateAccess(metadata);
   
   return {
     ...accessUpdated,

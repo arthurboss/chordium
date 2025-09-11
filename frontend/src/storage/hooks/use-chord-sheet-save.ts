@@ -23,8 +23,14 @@ export function useChordSheetSave(
     
     try {
       // Store chord sheet with saved: true (creates new or updates existing to saved: true)
-      await storeChordSheet(chordSheetData.chordSheet, true, chordSheetData.path);
-      showSaveSuccessNotification(chordSheetData.chordSheet.title);
+      const { title, artist, songKey, guitarTuning, guitarCapo, songChords } = chordSheetData.chordSheet;
+      await storeChordSheet(
+        { title, artist, songKey, guitarTuning, guitarCapo },
+        { songChords },
+        true,
+        chordSheetData.path
+      );
+      showSaveSuccessNotification(title);
       
       // Refresh chord sheet state to update isSaved flag
       if (refetch) {

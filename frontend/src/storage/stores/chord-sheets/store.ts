@@ -2,24 +2,28 @@
  * Chord sheet storage interface for user's local data
  */
 
-import type { ChordSheet, Song } from "@chordium/types";
-import type { StoredChordSheet } from "../../types";
+import type { ChordSheet, Song, SongMetadata } from "@chordium/types";
+import type { StoredSongMetadata } from "../../types/stored-song-metadata";
+import type { StoredChordSheet } from "../../types/stored-chord-sheet";
 import {
-  getChordSheet,
+  getChordSheetMetadata,
+  getChordSheetContent,
+  getChordSheetSplit,
   getAllSavedChordSheets,
   storeChordSheet,
   deleteChordSheet,
   deleteAllChordSheets,
 } from "./operations";
+import type { ChordSheetListItem } from "./operations/get-all-saved";
 
 /**
  * Manages chord sheet storage operations
  */
 export class ChordSheetStore {
   /**
-   * Get all saved chord sheets
+   * Get all saved chord sheets (minimal data for list view)
    */
-  async getAllSaved(): Promise<StoredChordSheet[]> {
+  async getAllSaved(): Promise<ChordSheetListItem[]> {
     return getAllSavedChordSheets();
   }
 
@@ -27,24 +31,39 @@ export class ChordSheetStore {
    * Store a chord sheet with metadata
    */
   async store(
-    chordSheet: ChordSheet,
+    metadata: SongMetadata,
+    content: ChordSheet,
     saved: boolean,
     path: Song["path"]
   ): Promise<void> {
-    return storeChordSheet(chordSheet, saved, path);
+    return storeChordSheet(metadata, content, saved, path);
   }
 
   /**
-   * Get a specific chord sheet
+   * Get chord sheet metadata only
    */
-  async get(path: Song["path"]): Promise<StoredChordSheet | null> {
-    return getChordSheet(path);
+  async getMetadata(path: Song["path"]): Promise<StoredSongMetadata | null> {
+    return getChordSheetMetadata(path);
+  }
+
+  /**
+   * Get chord sheet content only
+   */
+  async getContent(path: Song["path"]): Promise<StoredChordSheet | null> {
+    return getChordSheetContent(path);
+  }
+
+  /**
+   * Get both metadata and content for a chord sheet
+   */
+  async getSplit(path: Song["path"]): Promise<{ metadata: StoredSongMetadata; content: StoredChordSheet } | null> {
+    return getChordSheetSplit(path);
   }
 
   /**
    * Delete a chord sheet
    */
-  async delete(path: StoredChordSheet["path"]): Promise<void> {
+  async delete(path: string): Promise<void> {
     return deleteChordSheet(path);
   }
 

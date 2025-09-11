@@ -6,6 +6,7 @@
 // Domain types
 export * from './domain/artist.js';
 export * from './domain/song.js';
+export * from './domain/song-metadata.js';
 export * from './domain/chord-sheet.js';
 
 // Metadata types

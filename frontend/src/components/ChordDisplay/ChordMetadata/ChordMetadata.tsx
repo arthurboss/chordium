@@ -11,19 +11,26 @@ import type { ChordMetadataProps } from './ChordMetadata.types';
  * @param chordSheet - Chord sheet object containing all metadata
  */
 const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
-  const tuning = Array.isArray(chordSheet.guitarTuning)
-    ? chordSheet.guitarTuning.join('-')
-    : chordSheet.guitarTuning;
+  // Handle undefined/null values gracefully
+  const tuning = chordSheet.guitarTuning 
+    ? (Array.isArray(chordSheet.guitarTuning)
+        ? chordSheet.guitarTuning.join('-')
+        : chordSheet.guitarTuning)
+    : 'Standard';
+
+  const capoValue = chordSheet.guitarCapo !== undefined && chordSheet.guitarCapo !== null
+    ? chordSheet.guitarCapo.toString()
+    : 'None';
 
   return (
     <div className='grid [grid-template-columns:max-content_1fr] sm:[grid-template-columns:repeat(4,_min-content)] gap-y-1 gap-x-4 w-full sm:justify-between text-xs'>
       <MetadataBadge
         label="Artist:"
-        value={chordSheet.artist}
+        value={chordSheet.artist || 'Unknown'}
       />
       <MetadataBadge
         label="Song Key:"
-        value={chordSheet.songKey}
+        value={chordSheet.songKey || 'Unknown'}
       />
       <MetadataBadge
         label="Guitar Tuning:"
@@ -31,7 +38,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
       />
       <MetadataBadge
         label="Guitar Capo:"
-        value={chordSheet.guitarCapo.toString()}
+        value={capoValue}
       />
     </div>
   );

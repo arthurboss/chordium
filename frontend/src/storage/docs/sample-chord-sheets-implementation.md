@@ -128,7 +128,7 @@ await service.loadSampleChordSheets();
 ### useChordSheets Hook
 
 Returns:
-- `myChordSheets: StoredChordSheet[]` - All saved chord sheets
+- `myChordSheets: ChordSheetListItem[]` - All saved chord sheets (minimal data for list view)
 - `setMyChordSheets: Function` - Update chord sheets state
 - `refreshMyChordSheets: Function` - Refresh from storage
 - `isLoading: boolean` - Combined loading state

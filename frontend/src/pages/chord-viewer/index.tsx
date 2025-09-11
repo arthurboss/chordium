@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
-import { useSingleChordSheet } from "@/storage/hooks/use-single-chord-sheet";
+import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
 import type { RouteParams } from "./chord-viewer.types";
 
 // Utils
@@ -31,23 +31,42 @@ const ChordViewer = () => {
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
 
-  // Fetch single chord sheet data from IndexedDB
-  const chordSheetResult = useSingleChordSheet({ path });
+  // Fetch chord sheet data with API fallback
+  const chordSheetResult = useChordSheetWithFallback(path);
 
-  // Create complete chord sheet data object (only if chord sheet exists)
-  const chordSheetData = chordSheetResult.chordSheet
-    ? createChordSheetData(chordSheetResult.chordSheet, path)
+  // Create complete chord sheet data object (only if metadata exists)
+  const chordSheetData = chordSheetResult.metadata
+    ? createChordSheetData(
+        {
+          title: chordSheetResult.metadata.title,
+          artist: chordSheetResult.metadata.artist,
+          songKey: chordSheetResult.metadata.songKey,
+          guitarTuning: chordSheetResult.metadata.guitarTuning,
+          guitarCapo: chordSheetResult.metadata.guitarCapo,
+        },
+        {
+          songChords: chordSheetResult.content?.songChords || '',
+        },
+        path
+      )
     : null;
 
   // Local state for saved status to update UI immediately after save
   const [isSaved, setIsSaved] = useState(
-    chordSheetResult.chordSheet?.storage?.saved ?? false
+    chordSheetResult.metadata?.storage?.saved ?? false
   );
 
   // Keep isSaved in sync with chordSheetResult
   useEffect(() => {
-    setIsSaved(chordSheetResult.chordSheet?.storage?.saved ?? false);
-  }, [chordSheetResult.chordSheet?.storage?.saved]);
+    setIsSaved(chordSheetResult.metadata?.storage?.saved ?? false);
+  }, [chordSheetResult.metadata?.storage?.saved]);
+
+  // Auto-load from API if not found locally
+  useEffect(() => {
+    if (!chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
+      chordSheetResult.loadFromAPI();
+    }
+  }, [chordSheetResult, path]);
 
   // Navigation handlers
   const navigation = useNavigation();
@@ -81,7 +100,7 @@ const ChordViewer = () => {
         onBack={handleBack}
       />
     );
-  } else if (!chordSheetData) {
+  } else if (!chordSheetResult.metadata) {
     return (
       <ChordViewerError
         error="Chord sheet not found"
@@ -103,7 +122,7 @@ const ChordViewer = () => {
             },
             chordSheet: chordSheetData.chordSheet
           }}
-          chordContent={chordSheetResult.chordSheet?.songChords ?? ''}
+          chordContent={chordSheetResult.content?.songChords ?? ''}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
           onDelete={handleDelete}
@@ -112,6 +131,9 @@ const ChordViewer = () => {
           hideDeleteButton={!isSaved}
           hideSaveButton={isSaved}
           isFromMyChordSheets={isSaved}
+          useProgressiveLoading={chordSheetResult.isFromAPI}
+          loadContent={chordSheetResult.loadContent}
+          isContentLoading={chordSheetResult.isContentLoading}
         />
       </main>
     </div>

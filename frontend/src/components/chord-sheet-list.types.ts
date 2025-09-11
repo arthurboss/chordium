@@ -1,8 +1,8 @@
-import type { StoredChordSheet } from "@/storage/types";
+import type { StoredSongMetadata } from "@/storage/types";
 
 export interface ChordSheetListProps {
-  chordSheets: StoredChordSheet[];
-  onChordSheetSelect: (storedChordSheet: StoredChordSheet) => void;
+  chordSheets: StoredSongMetadata[];
+  onChordSheetSelect: (metadata: StoredSongMetadata) => void;
   onDeleteChordSheet: (chordSheetPath: string) => void;
   onUploadClick: () => void;
   tabState?: { scroll: number };

@@ -1,11 +1,11 @@
 /**
- * Unsave status management for StoredChordSheet objects
+ * Unsave status management for StoredSongMetadata objects
  * 
  * Single responsibility: Converts saved items back to cached items with TTL.
  * Handles only the unsave transition and TTL assignment.
  */
 
-import type { StoredChordSheet } from "../../../../types/chord-sheet";
+import type { StoredSongMetadata } from "../../../../types/stored-song-metadata";
 import { calculateCacheExpiration } from "../../../../core/ttl/cache-expiration";
 import { updateAccess } from "../access-tracking";
 
@@ -15,14 +15,14 @@ import { updateAccess } from "../access-tracking";
  * Converts a permanently saved item back to a cached item that will
  * be subject to TTL cleanup. Updates access time to reflect the action.
  * 
- * @param storedChordSheet - Saved chord sheet to convert to cached
- * @returns Updated StoredChordSheet with cached status and TTL
+ * @param metadata - Saved chord sheet metadata to convert to cached
+ * @returns Updated StoredSongMetadata with cached status and TTL
  */
 export function markAsUnsaved(
-  storedChordSheet: StoredChordSheet
-): StoredChordSheet {
+  metadata: StoredSongMetadata
+): StoredSongMetadata {
   // First update access time, then set unsaved status
-  const accessUpdated = updateAccess(storedChordSheet);
+  const accessUpdated = updateAccess(metadata);
   
   return {
     ...accessUpdated,

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Song } from "../types/song";
-import type { StoredChordSheet } from "@/storage/types";
+import type { StoredSongMetadata } from "@/storage/types";
 import type { ChordSheet } from "@chordium/types";
 import ChordSheetList from "./chord-sheet-list";
 import { SearchTab } from "@/search";
@@ -18,7 +18,7 @@ import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
 interface TabContainerProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  myChordSheets: StoredChordSheet[];
+  myChordSheets: StoredSongMetadata[];
   setMySongs: () => Promise<void>; // This is actually the refresh function
   selectedSong: Song | null;
   setSelectedSong: React.Dispatch<React.SetStateAction<Song | null>>;
@@ -82,32 +82,32 @@ const TabContainer = ({
     }
   };
 
-  const handleSongSelect = (storedChordSheet: StoredChordSheet) => {
+  const handleSongSelect = (metadata: StoredSongMetadata) => {
     // For My Chord Sheets: Navigate directly to chord sheet page
-    if (storedChordSheet.artist && storedChordSheet.title) {
+    if (metadata.artist && metadata.title) {
       // Create URL-friendly slugs using Unicode-aware function
-      const artistSlug = toSlug(storedChordSheet.artist);
-      const songSlug = toSlug(storedChordSheet.title);
+      const artistSlug = toSlug(metadata.artist);
+      const songSlug = toSlug(metadata.title);
 
       const targetUrl = `/${artistSlug}/${songSlug}`;
       // Pass a minimal Song object for navigation state
       navigate(targetUrl, {
         state: {
           song: {
-            path: storedChordSheet.path,
-            title: storedChordSheet.title,
-            artist: storedChordSheet.artist
+            path: metadata.path,
+            title: metadata.title,
+            artist: metadata.artist
           }
         }
       });
     } else {
       // Fallback for chord sheets without proper artist/title structure
-      navigate(`/${encodeURIComponent(storedChordSheet.path)}`, {
+      navigate(`/${encodeURIComponent(metadata.path)}`, {
         state: {
           song: {
-            path: storedChordSheet.path,
-            title: storedChordSheet.title,
-            artist: storedChordSheet.artist
+            path: metadata.path,
+            title: metadata.title,
+            artist: metadata.artist
           }
         }
       });
@@ -143,28 +143,31 @@ const TabContainer = ({
       // Map string tuning to enum value
       const mappedTuning = mapStringToGuitarTuning(meta.guitarTuning);
 
-      // Create a ChordSheet object with user-confirmed metadata
-      const chordSheet: ChordSheet = {
+      // Create metadata and content objects
+      const metadata = {
         title: meta.title || "Untitled Song",
         artist: meta.artist || "Unknown Artist",
-        songChords: meta.content,
         songKey: meta.songKey || "",
         guitarTuning: mappedTuning,
         guitarCapo
       };
 
+      const content: ChordSheet = {
+        songChords: meta.content
+      };
+
       // Create a path for the chord sheet using artist and title
-      const artistSlug = toSlug(chordSheet.artist);
-      const titleSlug = toSlug(chordSheet.title);
+      const artistSlug = toSlug(metadata.artist);
+      const titleSlug = toSlug(metadata.title);
       const path = `${artistSlug}/${titleSlug}`;
 
       // Store the chord sheet in IndexedDB as a saved chord sheet
-      await storeChordSheet(chordSheet, true, path);
+      await storeChordSheet(metadata, content, true, path);
 
       // Show success notification
       toast({
         title: "Chord sheet saved",
-        description: `"${chordSheet.title}" has been saved to My Chord Sheets`,
+        description: `"${metadata.title}" has been saved to My Chord Sheets`,
       });
 
       // Refresh the chord sheets list to show the new addition
@@ -175,8 +178,8 @@ const TabContainer = ({
         state: {
           song: {
             path,
-            title: chordSheet.title,
-            artist: chordSheet.artist
+            title: metadata.title,
+            artist: metadata.artist
           }
         }
       });

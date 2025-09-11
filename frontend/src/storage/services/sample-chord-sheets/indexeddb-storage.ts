@@ -8,7 +8,7 @@
  */
 
 import type { ChordSheet } from '@chordium/types';
-import type { StoredChordSheet } from '../../types';
+import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/get-all-saved';
 import type { IChordSheetStorage } from './types';
 import { ChordSheetStore } from '../../stores/chord-sheets/store';
 
@@ -29,9 +29,9 @@ export class IndexedDBStorage implements IChordSheetStorage {
   /**
    * Get all saved chord sheets
    * 
-   * @returns Promise resolving to array of saved chord sheets
+   * @returns Promise resolving to array of saved chord sheet list items
    */
-  async getAllSaved(): Promise<StoredChordSheet[]> {
+  async getAllSaved(): Promise<ChordSheetListItem[]> {
     return this.chordSheetStore.getAllSaved();
   }
 

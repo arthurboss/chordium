@@ -1,4 +1,4 @@
-import type { StoredChordSheet } from "../../../../types";
+import type { StoredSongMetadata } from "../../../../types";
 import type { CleanupStrategy } from "../types";
 import {
   calculateSavedChordSheetStrategy,
@@ -12,17 +12,17 @@ import { calculateCachedChordSheetStrategy } from "./cached-strategy";
  * Routes to appropriate strategy based on whether item is saved or cached.
  * CRITICAL: Saved items are NEVER automatically removed (user does it manually)
  *
- * @param item The stored chord sheet to evaluate
+ * @param metadata The stored chord sheet metadata to evaluate
  * @returns Cleanup strategy with priority and removal permission
  */
 export function calculateChordSheetCleanupPriority(
-  item: StoredChordSheet
+  metadata: StoredSongMetadata
 ): CleanupStrategy {
   // Saved items use simple strategy: never remove
-  if (isSavedChordSheet(item)) {
-    return calculateSavedChordSheetStrategy(item);
+  if (isSavedChordSheet(metadata)) {
+    return calculateSavedChordSheetStrategy(metadata);
   }
 
   // Cached items use complex LRU strategy
-  return calculateCachedChordSheetStrategy(item);
+  return calculateCachedChordSheetStrategy(metadata);
 }

@@ -9,7 +9,10 @@
  * Object store names used in the database
  */
 export const STORES = {
-  /** Chord sheets storage - contains cached and saved chord sheets */
+  /** Songs metadata storage */
+  SONGS_METADATA: "songsMetadata",
+  
+  /** Chord sheets storage */
   CHORD_SHEETS: "chordSheets",
   
   /** Search cache storage - contains cached search results */

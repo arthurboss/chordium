@@ -1,7 +1,7 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
-import { extractChordSheet } from "./dom-extractors.js";
-import type { ChordSheet } from "../../shared/types/index.js";
+import { extractChordSheet, extractSongMetadata } from "./dom-extractors.js";
+import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
 import type { LoadStrategy } from "../types/cifraclub.types.js";
@@ -85,9 +85,10 @@ async function attemptChordSheetLoad(
       logger.info(
         `📏 Extracted chords length: ${chordSheet?.songChords ? chordSheet.songChords.length : 0} characters`
       );
-      logger.info(
-        `🎵 Key: ${chordSheet?.songKey || "not found"}, Capo: ${chordSheet?.guitarCapo || "not found"}, Tuning: ${chordSheet?.guitarTuning || "not found"}`
-      );
+      // Note: songKey, guitarCapo, guitarTuning are now in metadata, not chord sheet content
+      // logger.info(
+      //   `🎵 Key: ${chordSheet?.songKey || "not found"}, Capo: ${chordSheet?.guitarCapo || "not found"}, Tuning: ${chordSheet?.guitarTuning || "not found"}`
+      // );
 
       if (!chordSheet?.songChords) {
         logger.warn(
@@ -137,5 +138,208 @@ export async function fetchChordSheet(songUrl: string): Promise<ChordSheet> {
 
   return puppeteerService.withPage(async (page: Page) => {
     return await attemptChordSheetLoad(page, songUrl);
+  });
+}
+
+/**
+ * In-memory cache for progressive extraction
+ * Key: songUrl, Value: { metadata, content, timestamp }
+ */
+interface ProgressiveCacheEntry {
+  metadata: SongMetadata;
+  content?: ChordSheet;
+  timestamp: number;
+}
+
+const progressiveCache = new Map<string, ProgressiveCacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Progressive extraction fetcher with in-memory caching
+ * Loads page once, extracts metadata immediately, then content in background
+ */
+export async function fetchWithProgressiveExtraction(songUrl: string): Promise<{
+  getMetadata: () => Promise<SongMetadata>;
+  getContent: () => Promise<ChordSheet>;
+}> {
+  logger.info(`🔍 PROGRESSIVE SCRAPING START: Fetching from: ${songUrl}`);
+
+  // Check cache first
+  const cached = progressiveCache.get(songUrl);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    logger.info(`📦 Using cached data for: ${songUrl}`);
+    return {
+      getMetadata: async () => cached.metadata,
+      getContent: async () => {
+        if (cached.content) {
+          return cached.content;
+        }
+        // If content not cached, fetch it
+        return await fetchContentOnly(songUrl);
+      }
+    };
+  }
+
+  // Load page and extract metadata immediately
+  const metadata = await puppeteerService.withPage(async (page: Page) => {
+    return await attemptMetadataLoad(page, songUrl);
+  });
+
+  // Cache metadata
+  progressiveCache.set(songUrl, {
+    metadata,
+    timestamp: Date.now()
+  });
+
+  logger.info(`✅ Metadata extracted and cached for: ${songUrl}`);
+
+  // Return functions that can fetch metadata immediately and content on demand
+  return {
+    getMetadata: async () => metadata,
+    getContent: async () => {
+      // Check if content is already cached
+      const cached = progressiveCache.get(songUrl);
+      if (cached?.content) {
+        return cached.content;
+      }
+
+      // Fetch content and cache it
+      const content = await fetchContentOnly(songUrl);
+      progressiveCache.set(songUrl, {
+        ...cached!,
+        content,
+        timestamp: Date.now()
+      });
+
+      logger.info(`✅ Content extracted and cached for: ${songUrl}`);
+      return content;
+    }
+  };
+}
+
+/**
+ * Attempts to load a page and extract only metadata (fast)
+ */
+async function attemptMetadataLoad(
+  page: Page,
+  songUrl: string
+): Promise<SongMetadata> {
+  const strategies: LoadStrategy[] = [
+    {
+      name: "fast",
+      waitUntil: "domcontentloaded",
+      timeout: 30000, // Shorter timeout for metadata
+      waitAfter: 1000, // Shorter wait for metadata
+    },
+    {
+      name: "standard",
+      waitUntil: "load",
+      timeout: 45000,
+      waitAfter: 2000,
+    },
+  ];
+
+  let lastError: Error = new Error("No strategies attempted");
+
+  for (const [index, strategy] of strategies.entries()) {
+    try {
+      logger.info(
+        `🌐 Loading page for metadata with ${strategy.name} strategy (attempt ${index + 1}/${strategies.length})`
+      );
+
+      page.setDefaultNavigationTimeout(strategy.timeout);
+      await page.goto(songUrl, {
+        waitUntil: strategy.waitUntil,
+        timeout: strategy.timeout,
+      });
+
+      await delay(strategy.waitAfter);
+
+      // Extract metadata only (no pre element reading)
+      const metadata = await page.evaluate(extractSongMetadata);
+      logger.info(`📝 Metadata extracted using ${strategy.name} strategy`);
+
+      return metadata;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      logger.warn(
+        `${strategy.name} strategy failed for metadata ${songUrl}:`,
+        lastError.message
+      );
+
+      if (index < strategies.length - 1) {
+        const waitTime = Math.min(1000 * (index + 1), 3000);
+        logger.info(`Waiting ${waitTime}ms before trying next strategy...`);
+        await delay(waitTime);
+      }
+    }
+  }
+
+  throw new Error(
+    `Unable to load metadata from page: ${lastError.message}`
+  );
+}
+
+/**
+ * Fetches only content from a cached page or loads page for content only
+ */
+async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
+  logger.info(`🔍 Fetching content only for: ${songUrl}`);
+
+  return puppeteerService.withPage(async (page: Page) => {
+    const strategies: LoadStrategy[] = [
+      {
+        name: "fast",
+        waitUntil: "domcontentloaded",
+        timeout: 30000,
+        waitAfter: 2000,
+      },
+      {
+        name: "standard",
+        waitUntil: "load",
+        timeout: 45000,
+        waitAfter: 3000,
+      },
+    ];
+
+    let lastError: Error = new Error("No strategies attempted");
+
+    for (const [index, strategy] of strategies.entries()) {
+      try {
+        logger.info(
+          `🌐 Loading page for content with ${strategy.name} strategy (attempt ${index + 1}/${strategies.length})`
+        );
+
+        page.setDefaultNavigationTimeout(strategy.timeout);
+        await page.goto(songUrl, {
+          waitUntil: strategy.waitUntil,
+          timeout: strategy.timeout,
+        });
+
+        await delay(strategy.waitAfter);
+
+        // Extract content only
+        const content = await page.evaluate(extractChordSheet);
+        logger.info(`📝 Content extracted using ${strategy.name} strategy`);
+
+        return content;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        logger.warn(
+          `${strategy.name} strategy failed for content ${songUrl}:`,
+          lastError.message
+        );
+
+        if (index < strategies.length - 1) {
+          const waitTime = Math.min(1000 * (index + 1), 3000);
+          logger.info(`Waiting ${waitTime}ms before trying next strategy...`);
+          await delay(waitTime);
+        }
+      }
+    }
+
+    throw new Error(
+      `Unable to load content from page: ${lastError.message}`
+    );
   });
 }

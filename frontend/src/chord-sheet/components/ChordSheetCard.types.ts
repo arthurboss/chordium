@@ -1,10 +1,10 @@
-import type { StoredChordSheet } from "@/storage/types";
+import type { StoredSongMetadata } from "@/storage/types";
 
 /**
  * Props for the ChordSheetCard component.
  */
 export interface ChordSheetCardProps {
-  chordSheet: StoredChordSheet;
-  onView: (chordSheet: StoredChordSheet) => void;
-  onDelete: (chordSheet: StoredChordSheet) => void;
+  metadata: StoredSongMetadata;
+  onView: (metadata: StoredSongMetadata) => void;
+  onDelete: (metadata: StoredSongMetadata) => void;
 }

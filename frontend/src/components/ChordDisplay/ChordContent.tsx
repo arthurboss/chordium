@@ -11,6 +11,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   viewMode,
   hideGuitarTabs,
   renderChord,
+  isLoading,
 }) => {
   // Determine font family based on fontStyle prop
   let fontFamily = undefined;
@@ -23,7 +24,13 @@ const ChordContent: React.FC<ChordContentProps> = ({
       className="bg-white dark:bg-[--card] mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
-      {processedContent.map((section, sectionIndex) => (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
+          <p className="text-sm">Loading chord content...</p>
+        </div>
+      ) : (
+        processedContent.map((section, sectionIndex) => (
         <div key={sectionIndex}>
           {section.title && (
             <h2 className="section-header">{section.title}</h2>
@@ -87,8 +94,9 @@ const ChordContent: React.FC<ChordContentProps> = ({
             })}
           </div>
         </div>
-      ))}
-      {processedContent.length === 0 && (
+      ))
+      )}
+      {!isLoading && processedContent.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           No chord content to display
         </div>

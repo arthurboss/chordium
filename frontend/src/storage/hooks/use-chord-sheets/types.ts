@@ -1,11 +1,11 @@
-import type { StoredChordSheet } from "@/storage/types";
+import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
 import type React from "react";
 
 export interface UseChordSheetsResult {
-  /** Current saved chord sheets */
-  myChordSheets: StoredChordSheet[];
+  /** Current saved chord sheets (minimal data for list view) */
+  myChordSheets: ChordSheetListItem[];
   /** Function to update chord sheets state */
-  setMyChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+  setMyChordSheets: React.Dispatch<React.SetStateAction<ChordSheetListItem[]>>;
   /** Function to refresh chord sheets from storage */
   refreshMyChordSheets: () => Promise<void>;
   /** Overall loading state (combines sample loading and chord sheets loading) */
@@ -15,12 +15,12 @@ export interface UseChordSheetsResult {
 }
 
 export interface UseChordSheetsState {
-  chordSheets: StoredChordSheet[];
-  setChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+  chordSheets: ChordSheetListItem[];
+  setChordSheets: React.Dispatch<React.SetStateAction<ChordSheetListItem[]>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   error: Error | null;
   setError: React.Dispatch<React.SetStateAction<Error | null>>;
-  optimisticChordSheets: StoredChordSheet[];
-  setOptimisticChordSheets: React.Dispatch<React.SetStateAction<StoredChordSheet[]>>;
+  optimisticChordSheets: ChordSheetListItem[];
+  setOptimisticChordSheets: React.Dispatch<React.SetStateAction<ChordSheetListItem[]>>;
 }
