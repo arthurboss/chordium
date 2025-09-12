@@ -17,7 +17,6 @@ This directory contains static files served by the main Chordium application.
 
 The following files are now served from the external repository:
 
-- `manifest.json` - PWA manifest
 - `favicon.ico` - Browser favicon
 - `favicon-*.png` - Various favicon sizes (16x16, 32x32, 48x48, 180x180, 192x192, 512x512)
 - `icon-maskable-512.png` - PWA maskable icon
@@ -30,4 +29,5 @@ These assets are hosted separately to avoid Vercel Authentication conflicts. The
 
 - **App-specific files** (like `robots.txt`): Add to this directory
 - **PWA/favicon assets**: Add to the [chordium-static](https://github.com/arthurboss/chordium-static) repository
+- **PWA manifest**: Configured in `vite.config.ts` via VitePWA plugin
 
