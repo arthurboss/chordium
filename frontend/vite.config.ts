@@ -141,8 +141,14 @@ export default defineConfig(({ mode }) => {
     preview: {
       port: 4173,
       host: "::",
-      // Ensure no proxy in preview mode
-      proxy: undefined,
+      // Enable proxy in preview mode for local testing
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     build: {
       // Enable tree shaking
