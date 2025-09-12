@@ -14,9 +14,7 @@ Chordium focuses on providing a distraction-free experience for learning and pra
 
 _Experience Chordium's clean interface, smart search, and intuitive chord display in action._
 
-🟢 Try it live: [chordium.vercel.app](https://chordium.vercel.app)
-
-📊 **Backend Status**: [Monitor API uptime](https://stats.uptimerobot.com/sIX45GbfwC)
+🎵 **[Try it live](https://chordium.vercel.app)** | **Backend:** <img src="https://img.shields.io/uptimerobot/status/m801354672-a38337401e6a3b2dc13e16b9" alt="Uptime Robot status" style="vertical-align: middle;" />
 
 ## 🎯 Features
 
