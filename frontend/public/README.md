@@ -30,3 +30,4 @@ These assets are hosted separately to avoid Vercel Authentication conflicts. The
 
 - **App-specific files** (like `robots.txt`): Add to this directory
 - **PWA/favicon assets**: Add to the [chordium-static](https://github.com/arthurboss/chordium-static) repository
+
