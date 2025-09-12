@@ -16,6 +16,8 @@ _Experience Chordium's clean interface, smart search, and intuitive chord displa
 
 🟢 Try it live: [chordium.vercel.app](https://chordium.vercel.app)
 
+📊 **Backend Status**: [Monitor API uptime](https://stats.uptimerobot.com/sIX45GbfwC)
+
 ## 🎯 Features
 
 Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter:

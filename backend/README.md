@@ -22,6 +22,7 @@ This backend is configured for deployment on [Render](https://render.com):
 - **Environment**: Node.js with Puppeteer support
 - **Database**: Supabase integration
 - **Caching**: AWS S3 for performance
+- **Status Monitoring & Keep-Alive**: [Backend Status Page](https://stats.uptimerobot.com/sIX45GbfwC)
 
 For deployment configuration, see:
 
