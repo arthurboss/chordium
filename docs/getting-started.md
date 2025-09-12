@@ -31,6 +31,33 @@ See individual README files for detailed documentation:
 - [Frontend README](../frontend/README.md) - Frontend development and PWA features
 - [Backend README](../backend/README.md) - API development and deployment
 
+## Static Assets Architecture
+
+Chordium uses a **dual-repository architecture** for static assets to avoid Vercel Authentication conflicts:
+
+### Main Repository (This Repo)
+- **Application code** - React frontend, Node.js backend, shared types
+- **App-specific assets** - `robots.txt`, build artifacts
+- **Protected by Vercel Authentication** - Secure deployment
+
+### External Repository
+- **Repository**: [`chordium-static`](https://github.com/arthurboss/chordium-static)
+- **Purpose**: PWA static assets served publicly via GitHub Pages
+- **URL**: https://arthurboss.github.io/chordium-static/
+- **Contents**: 
+  - `manifest.json` - PWA manifest
+  - `favicon.ico` and favicon variants
+  - PWA icons (`icon-maskable-512.png`)
+  - Other static assets referenced by the manifest
+
+### Why This Architecture?
+
+This setup ensures PWA functionality works correctly while keeping the main application secure:
+- ✅ **No authentication conflicts** - Static assets served from GitHub Pages
+- ✅ **Secure main app** - Vercel Authentication enabled for application routes
+- ✅ **Clean separation** - App code vs static assets
+- ✅ **Easy maintenance** - Update static assets in dedicated repository
+
 
 The frontend will be available at http://localhost:8080.
 
@@ -100,6 +127,10 @@ npm run setup:pwa
 # PWA development (HTTPS, full PWA features + backend)
 npm run dev:pwa
 ```
+
+### Static Assets
+
+PWA static assets (manifest, favicons, icons) are served from the external [`chordium-static`](https://github.com/arthurboss/chordium-static) repository via GitHub Pages. This ensures PWA functionality works correctly without Vercel Authentication conflicts.
 
 For detailed PWA development workflow, see [Frontend README](../frontend/README.md).
 
