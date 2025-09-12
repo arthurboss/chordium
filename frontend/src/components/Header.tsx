@@ -18,7 +18,7 @@ const Header = () => (
         aria-label="Chordium home"
       >
         <img
-          src="/favicon-192.png"
+          src="https://arthurboss.github.io/chordium-static/favicon-192.png"
           alt="Chordium logo"
           width={32}
           height={32}
