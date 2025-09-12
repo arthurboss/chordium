@@ -33,22 +33,22 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       // Only strip data-testid attributes in production mode
-      isProduction && stripTestAttributes(),
-      isProduction && visualizer({
+      ...(isProduction ? [stripTestAttributes()] : []),
+      ...(isProduction ? [visualizer({
         open: true,
         gzipSize: true,
         brotliSize: true,
         filename: 'dist/stats.html', // Output file
         template: 'treemap', // or 'sunburst', 'network'
-      }),
-      isProduction && viteCompression({
+      })] : []),
+      ...(isProduction ? [viteCompression({
         verbose: true,
         disable: false,
         threshold: 10240, // Only compress files larger than 10kb
         algorithm: 'brotliCompress',
         ext: '.br',
         deleteOriginFile: false,
-      }),
+      })] : []),
       // Optionally, keep Gzip for wider compatibility or if specific CDNs prefer it as a fallback
       // isProduction && viteCompression({
       //   verbose: true,
@@ -57,87 +57,86 @@ export default defineConfig(({ mode }) => {
       //   algorithm: 'gzip',
       //   ext: '.gz',
       // }),
-      // Temporarily disable PWA to test manifest.json access
-      // VitePWA({
-      //   registerType: 'autoUpdate',
-      //   manifest: undefined, // Uses public/manifest.json if present
-      //   workbox: {
-      //     cleanupOutdatedCaches: true,
-      //     clientsClaim: true,
-      //     skipWaiting: true,
-      //     globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
-      //     // Re-enable navigateFallback but with better caching
-      //     navigateFallback: '/index.html',
-      //     navigateFallbackAllowlist: [/^(?!\/__).*/],
-      //     runtimeCaching: [
-      //       {
-      //         // Cache the manifest file with CacheFirst strategy
-      //         urlPattern: /manifest\.json$/,
-      //         handler: 'CacheFirst',
-      //         options: {
-      //           cacheName: 'chordium-v1-manifest',
-      //           expiration: {
-      //             maxEntries: 1,
-      //             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-      //           },
-      //           cacheableResponse: {
-      //             statuses: [0, 200],
-      //           },
-      //         },
-      //       },
-      //       {
-      //         // Cache the main app files with CacheFirst strategy
-      //         urlPattern: /\.(?:js|css|html)$/,
-      //         handler: 'CacheFirst',
-      //         options: {
-      //           cacheName: 'chordium-v1-app-assets',
-      //           expiration: {
-      //             maxEntries: 100,
-      //             maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-      //           },
-      //           cacheableResponse: {
-      //             statuses: [0, 200],
-      //           },
-      //         },
-      //       },
-      //       {
-      //         urlPattern: /\/api\//,
-      //         handler: 'NetworkFirst',
-      //         options: {
-      //           cacheName: 'chordium-v1-api-responses',
-      //           networkTimeoutSeconds: 10,
-      //           expiration: {
-      //             maxEntries: 50,
-      //             maxAgeSeconds: 60 * 60 * 24, // 1 day
-      //           },
-      //           cacheableResponse: {
-      //             statuses: [0, 200],
-      //           },
-      //         },
-      //       },
-      //       {
-      //         urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
-      //         handler: 'CacheFirst',
-      //         options: {
-      //           cacheName: 'chordium-v1-images',
-      //           expiration: {
-      //             maxEntries: 60,
-      //             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-      //           },
-      //           cacheableResponse: {
-      //             statuses: [0, 200],
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      //   devOptions: {
-      //     enabled: true, // Enable PWA in development
-      //     type: 'module', // Use ES modules for better development experience
-      //     navigateFallback: '/index.html',
-      //   },
-      // }),
-    ].filter(Boolean),
+      VitePWA({
+        registerType: 'autoUpdate',
+        manifest: undefined, // Uses external manifest from chordium-static
+        workbox: {
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
+          // Re-enable navigateFallback but with better caching
+          navigateFallback: '/index.html',
+          navigateFallbackAllowlist: [/^(?!\/__).*/],
+          runtimeCaching: [
+            {
+              // Cache the manifest file with CacheFirst strategy
+              urlPattern: /manifest\.json$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'chordium-v1-manifest',
+                expiration: {
+                  maxEntries: 1,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              // Cache the main app files with CacheFirst strategy
+              urlPattern: /\.(?:js|css|html)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'chordium-v1-app-assets',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\/api\//,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'chordium-v1-api-responses',
+                networkTimeoutSeconds: 10,
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24, // 1 day
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'chordium-v1-images',
+                expiration: {
+                  maxEntries: 60,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
+        },
+        devOptions: {
+          enabled: true, // Enable PWA in development
+          type: 'module', // Use ES modules for better development experience
+          navigateFallback: '/index.html',
+        },
+      }),
+    ] as any,
     preview: {
       port: 4173,
       host: "::",
