@@ -59,7 +59,96 @@ export default defineConfig(({ mode }) => {
       // }),
       VitePWA({
         registerType: 'autoUpdate',
-        manifest: undefined, // Uses external manifest from chordium-static
+        manifest: {
+          name: 'Chordium',
+          short_name: 'Chordium',
+          description: 'A modern, minimalist chord viewer app for guitar players.',
+          start_url: '/',
+          scope: '/',
+          display: 'standalone',
+          background_color: '#ffffff',
+          theme_color: '#9b87f5',
+          icons: [
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-16.png',
+              sizes: '16x16',
+              type: 'image/png'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-32.png',
+              sizes: '32x32',
+              type: 'image/png'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-48.png',
+              sizes: '48x48',
+              type: 'image/png'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-180.png',
+              sizes: '180x180',
+              type: 'image/png',
+              purpose: 'any maskable'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/favicon-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'https://arthurboss.github.io/chordium-static/icon-maskable-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            }
+          ],
+          shortcuts: [
+            {
+              name: 'Search',
+              short_name: 'Search',
+              description: 'Find guitar chords',
+              url: '/search',
+              icons: [
+                {
+                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  sizes: '192x192',
+                  type: 'image/png'
+                }
+              ]
+            },
+            {
+              name: 'Upload',
+              short_name: 'Upload',
+              description: 'Upload a new chord sheet',
+              url: '/upload',
+              icons: [
+                {
+                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  sizes: '192x192',
+                  type: 'image/png'
+                }
+              ]
+            },
+            {
+              name: 'My Chord Sheets',
+              short_name: 'My Songs',
+              description: 'View your saved chord sheets',
+              url: '/my-chord-sheets',
+              icons: [
+                {
+                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  sizes: '192x192',
+                  type: 'image/png'
+                }
+              ]
+            }
+          ]
+        },
         workbox: {
           cleanupOutdatedCaches: true,
           clientsClaim: true,
