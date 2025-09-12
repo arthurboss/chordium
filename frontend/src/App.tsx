@@ -9,6 +9,7 @@ import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 import SmallScreenWarning from "@/components/SmallScreenWarning";
+import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -130,6 +131,9 @@ const router = createBrowserRouter([
 
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
+  // Initialize service worker update handling
+  useServiceWorkerUpdate();
+  
   // App initialization logic can be added here if needed
   return <>{children}</>;
 };
