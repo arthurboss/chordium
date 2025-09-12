@@ -17,7 +17,7 @@ export function getApiBaseUrl(): string {
   }
   
   // Fallback for production builds without VITE_API_URL
-  if (import.meta.env.DEV) {
+  if (!import.meta.env.DEV) {
     console.warn('[API] VITE_API_URL not set! Using hardcoded fallback.');
   }
   return 'https://chordium-backend.onrender.com';
