@@ -36,8 +36,24 @@ class App {
     this.app.use('/api', apiRoutes);
 
     // Health check endpoint
-    this.app.get('/health', (req, res) => {
-      res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    this.app.get('/health', async (req, res) => {
+      try {
+        const puppeteerHealthy = puppeteerService.isHealthy();
+        res.json({ 
+          status: 'ok', 
+          timestamp: new Date().toISOString(),
+          services: {
+            puppeteer: puppeteerHealthy ? 'healthy' : 'disconnected'
+          }
+        });
+      } catch (error) {
+        logger.error('Health check failed:', error);
+        res.status(500).json({ 
+          status: 'error', 
+          timestamp: new Date().toISOString(),
+          error: 'Health check failed'
+        });
+      }
     });
 
     // Friendly root route

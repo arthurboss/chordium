@@ -60,7 +60,10 @@ function createConfig(): Config {
         '--disable-sync',
         '--no-first-run',
         '--no-default-browser-check'
-      ]
+      ],
+      keepAlive: 10 * 60 * 1000, // 10 minutes
+      maxRetries: 3,
+      retryDelay: 2000
     },
 
     // Supabase configuration
