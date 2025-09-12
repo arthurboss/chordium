@@ -166,71 +166,69 @@ npm run build
 
 **Problem**: Render's free tier puts services to sleep after 15 minutes of inactivity, causing "cold starts" when users visit your app.
 
-**Solution**: Chordium implements an automatic keep-alive system that pings the backend when users load the frontend.
+**Solution**: Chordium uses UptimeRobot for both monitoring and keep-alive functionality, ensuring the backend stays warm and providing public status transparency.
 
 #### How It Works
 
-1. **Frontend Keep-Alive Service** (`src/services/keep-alive.service.ts`):
-   - Automatically pings the backend `/health` endpoint when the app loads
-   - Only runs in production (skipped in development)
-   - Uses a fire-and-forget approach that won't block app startup
-   - Includes timeout protection and graceful error handling
-
-2. **App Integration** (`src/App.tsx`):
-   - `AppInitializer` component triggers the keep-alive on app mount
-   - Conditional execution based on environment (production only)
+**UptimeRobot Monitoring**:
+- Continuously monitors the backend `/health` endpoint
+- Pings every 5 minutes to keep the backend warm
+- Provides public status page for transparency
+- Sends alerts when the backend is down
+- Prevents cold starts automatically without any frontend code
 
 #### Benefits
 
-- **Faster User Experience**: Backend is pre-warmed when users visit your site
-- **Invisible to Users**: Happens in the background during app initialization
-- **Development Friendly**: Automatically disabled in local development
-- **Robust**: Graceful failure handling ensures app stability
+- **Faster User Experience**: Backend is pre-warmed by UptimeRobot monitoring
+- **Public Transparency**: Status page shows real-time backend health
+- **Cost Effective**: UptimeRobot free tier provides monitoring and keep-alive
+- **Zero Frontend Code**: No additional JavaScript or app complexity
+- **Reliable**: External service ensures consistent monitoring
+- **Simple**: Single solution for both monitoring and keep-alive
 
 #### Configuration
 
-The keep-alive service uses your existing configuration:
+UptimeRobot is configured independently of the application:
 
-- **Backend URL**: Automatically determined via `getApiBaseUrl()` utility
-- **Environment Detection**: Uses Vite's `import.meta.env.PROD` flag
-- **Timeout**: 10-second timeout prevents hanging requests
+- **Backend URL**: Configured directly in UptimeRobot dashboard
+- **Monitoring Frequency**: Set to 5-minute intervals (free tier)
+- **Alert Settings**: Email/SMS notifications when backend is down
 
-#### Future Enhancements
+#### UptimeRobot Configuration
 
-For more aggressive cold start prevention, consider:
+UptimeRobot provides both monitoring and keep-alive functionality:
 
-- **GitHub Actions Cron Job**: Berlin-timezone optimized pings
-  - **Peak hours** (6 PM Berlin - 7 AM Berlin): Every 13 minutes 
-  - **Off-peak hours** (7 AM Berlin - 6 PM Berlin): Every 30 minutes
-  - **Extended Coverage**: São Paulo users covered until 3 AM local time
-  - **Monthly usage**: ~246 hours from cron job pings
-  - **Setup**: Add `BACKEND_URL` secret in GitHub repository settings
+- **Monitoring Frequency**: Every 5 minutes (free tier)
+- **Public Status Page**: [Backend Status](https://stats.uptimerobot.com/sIX45GbfwC)
+- **Alert Notifications**: Email/SMS when backend is down
+- **Cost**: Free tier covers basic monitoring needs
+- **Coverage**: 24/7 monitoring with public transparency
 
 #### Render Usage for Alpha Version
 
 | Component | Monthly Hours | Details |
 |-----------|---------------|---------|
-| **Cron Job Keep-Alive** | ~246 hours | Enhanced: 13-min peak, 30-min off-peak |
+| **UptimeRobot Keep-Alive** | ~223 hours | 5-minute intervals, 24/7 monitoring |
 | **Alpha Users** (~10) | ~15-30 hours | Light testing usage |
-| **Total Usage** | **~261-276 hours** | **35-37% of free tier** ✅ |
+| **Total Usage** | **~238-253 hours** | **32-34% of free tier** ✅ |
 
-**Enhanced Time Window Strategy**:
+**UptimeRobot Strategy**:
 
-- **Peak** (13 hours): 6 PM Berlin - 7 AM Berlin → Every 13 minutes
-- **Off-Peak** (11 hours): 7 AM Berlin - 6 PM Berlin → Every 30 minutes  
-- **Coverage**: São Paulo 2 PM - 3 AM, Berlin 6 PM - 7 AM
-- **Benefit**: Better off-peak responsiveness while staying within free tier
-- **Total Pings**: 82 per day (60 peak + 22 off-peak)
+- **Monitoring**: Every 5 minutes, 24/7 coverage
+- **Keep-Alive**: Prevents cold starts automatically
+- **Public Status**: Real-time transparency for users
+- **Cost**: Free tier provides sufficient monitoring
+- **Total Pings**: ~8,640 per month (5-minute intervals)
 
 #### Usage Progression for Planning
 
 | Phase | Users | Monthly Hours | Free Tier % | Recommendation |
 |-------|-------|---------------|-------------|----------------|
-| **Alpha** | ~10 | ~261-276 hours | 35-37% | ✅ Perfect on free tier |
-| **Beta** | ~100 | ~350-400 hours | 47-53% | ✅ Still good on free tier |
+| **Alpha** | ~10 | ~238-253 hours | 32-34% | ✅ Perfect on free tier |
+| **Beta** | ~100 | ~300-350 hours | 40-47% | ✅ Still good on free tier |
 | **Production** | ~500+ | ~500-800+ hours | 67-107% | ⚠️ Consider paid tier ($7/month) |
 
-- **Uptime Monitoring**: Services like UptimeRobot or Pingdom
+- **UptimeRobot**: Provides both monitoring and keep-alive functionality
 - **Render Paid Tier**: Eliminates cold starts entirely ($7/month)
 
 ### Troubleshooting Backend
@@ -273,6 +271,7 @@ After deployment:
 2. Check performance metrics
 3. Monitor API calls and errors
 4. Set up alerts for build failures
+5. **Backend Status**: [UptimeRobot Status Page](https://stats.uptimerobot.com/sIX45GbfwC)
 
 ## Custom Domain (Optional)
 

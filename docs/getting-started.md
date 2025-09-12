@@ -63,6 +63,8 @@ The frontend will be available at http://localhost:8080.
 
 The backend will be available at http://localhost:3001.
 
+📊 **Production Backend Status**: [Monitor API uptime](https://stats.uptimerobot.com/sIX45GbfwC)
+
 ## Monorepo Commands
 
 ```bash
