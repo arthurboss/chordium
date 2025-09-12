@@ -170,38 +170,29 @@ npm run build
 
 #### How It Works
 
-1. **UptimeRobot Monitoring**:
-   - Continuously monitors the backend `/health` endpoint
-   - Pings every 5 minutes to keep the backend warm
-   - Provides public status page for transparency
-   - Sends alerts when the backend is down
-
-2. **Frontend Keep-Alive Service** (`src/services/keep-alive.service.ts`):
-   - Automatically pings the backend `/health` endpoint when the app loads
-   - Only runs in production (skipped in development)
-   - Uses a fire-and-forget approach that won't block app startup
-   - Includes timeout protection and graceful error handling
-
-3. **App Integration** (`src/App.tsx`):
-   - `AppInitializer` component triggers the keep-alive on app mount
-   - Conditional execution based on environment (production only)
+**UptimeRobot Monitoring**:
+- Continuously monitors the backend `/health` endpoint
+- Pings every 5 minutes to keep the backend warm
+- Provides public status page for transparency
+- Sends alerts when the backend is down
+- Prevents cold starts automatically without any frontend code
 
 #### Benefits
 
 - **Faster User Experience**: Backend is pre-warmed by UptimeRobot monitoring
 - **Public Transparency**: Status page shows real-time backend health
 - **Cost Effective**: UptimeRobot free tier provides monitoring and keep-alive
-- **Invisible to Users**: Happens in the background during app initialization
-- **Development Friendly**: Automatically disabled in local development
-- **Robust**: Graceful failure handling ensures app stability
+- **Zero Frontend Code**: No additional JavaScript or app complexity
+- **Reliable**: External service ensures consistent monitoring
+- **Simple**: Single solution for both monitoring and keep-alive
 
 #### Configuration
 
-The keep-alive service uses your existing configuration:
+UptimeRobot is configured independently of the application:
 
-- **Backend URL**: Automatically determined via `getApiBaseUrl()` utility
-- **Environment Detection**: Uses Vite's `import.meta.env.PROD` flag
-- **Timeout**: 10-second timeout prevents hanging requests
+- **Backend URL**: Configured directly in UptimeRobot dashboard
+- **Monitoring Frequency**: Set to 5-minute intervals (free tier)
+- **Alert Settings**: Email/SMS notifications when backend is down
 
 #### UptimeRobot Configuration
 

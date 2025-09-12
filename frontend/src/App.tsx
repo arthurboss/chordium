@@ -5,7 +5,6 @@ import { lazy, Suspense, useEffect } from 'react';
 import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
-import { KeepAliveService } from "@/services/keep-alive.service";
 // import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
@@ -131,13 +130,7 @@ const router = createBrowserRouter([
 
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    // Only initialize keep-alive service in production
-    if (import.meta.env.PROD) {
-      KeepAliveService.initializeOnAppStart();
-    }
-  }, []);
-
+  // App initialization logic can be added here if needed
   return <>{children}</>;
 };
 
