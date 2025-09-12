@@ -64,7 +64,10 @@ const productionConfig: Partial<Config> = {
       '--no-first-run',
       '--no-default-browser-check',
       '--no-zygote'
-    ]
+    ],
+    keepAlive: 10 * 60 * 1000, // 10 minutes
+    maxRetries: 3,
+    retryDelay: 2000
   }
 };
 

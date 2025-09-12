@@ -11,6 +11,9 @@ export interface CorsConfig {
 export interface PuppeteerConfig {
   headless: boolean;
   args: string[];
+  keepAlive?: number; // Keep browser alive for this many milliseconds (default: 10 minutes)
+  maxRetries?: number; // Maximum retry attempts for browser operations (default: 3)
+  retryDelay?: number; // Delay between retry attempts in milliseconds (default: 2000)
 }
 
 export interface SupabaseConfig {

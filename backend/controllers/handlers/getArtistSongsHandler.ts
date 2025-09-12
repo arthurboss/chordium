@@ -101,14 +101,27 @@ async function getArtistSongsHandler(
         );
       }
       // Special handling for Puppeteer protocol errors
-      if (errMsg.includes("Protocol error: Connection closed.")) {
+      if (errMsg.includes("Protocol error: Connection closed.") ||
+          errMsg.includes("Connection closed") ||
+          errMsg.includes("Target closed") ||
+          errMsg.includes("Session closed")) {
         logger.error(
-          `Puppeteer Protocol error for ${normalizedArtistPath}: Connection closed. This may be due to the target site blocking scraping, browser crash, or resource exhaustion.`
+          `Puppeteer browser error for ${normalizedArtistPath}: ${errMsg}. Attempting browser recovery...`
         );
+        
+        // Attempt to restart the browser for future requests
+        try {
+          const puppeteerService = (await import("../../services/puppeteer.service.js")).default;
+          await puppeteerService.forceRestart();
+          logger.info(`Browser restarted successfully after error for ${normalizedArtistPath}`);
+        } catch (restartError) {
+          logger.error(`Failed to restart browser after error for ${normalizedArtistPath}:`, restartError);
+        }
+        
         res.status(502).json({
           error: "Bad Gateway",
           details:
-            "The scraping browser was unexpectedly closed. This may be due to the target site blocking scraping, a browser crash, or server resource exhaustion. Please try again later or check backend logs for details.",
+            "The scraping browser encountered an error and has been restarted. Please try your request again.",
         });
         return;
       }
