@@ -20,6 +20,12 @@ export function getApiBaseUrl(): string {
     alert(`[DEBUG] API Base URL Debug Info: ${JSON.stringify(debugInfo, null, 2)}`);
   }
   
+  // TEMPORARY: Force return the backend URL to test if that fixes the issue
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    alert('[DEBUG] FORCING backend URL for testing');
+    return 'https://chordium-backend.onrender.com';
+  }
+  
   // If VITE_API_URL is set, always use it (production, preview, or dev override)
   if (apiUrl) {
     if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
