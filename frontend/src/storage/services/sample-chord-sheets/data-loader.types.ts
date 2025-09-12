@@ -2,12 +2,13 @@
  * Types for sample chord sheet data loading
  */
 
-import type { ChordSheet } from '@chordium/types';
+import type { ChordSheet, SongMetadata } from '@chordium/types';
 
 /**
- * Sample chord sheet with associated path for storage
+ * Sample chord sheet with separate metadata and content
  */
 export interface SampleChordSheetRecord {
   path: string;
-  chordSheet: ChordSheet;
+  metadata: SongMetadata;
+  content: ChordSheet;
 }

@@ -15,10 +15,10 @@ import type { SampleChordSheetRecord } from './data-loader.types';
  * Dynamically imports sample chord sheet metadata and creates records with
  * the correct path format for IndexedDB storage.
  * 
- * @returns Promise resolving to array of SampleChordSheetRecord objects with metadata only
+ * @returns Promise resolving to array of objects with path and metadata
  * @throws {Error} When sample metadata cannot be loaded
  */
-export const loadSampleMetadata = async (): Promise<SampleChordSheetRecord[]> => {
+export const loadSampleMetadata = async (): Promise<Array<{ path: string; metadata: SongMetadata }>> => {
   try {
     const [wonderwallMetadata, hotelCaliforniaMetadata] = await Promise.all([
       import('../../data/samples/chord-sheets/metadata/oasis-wonderwall.json'),
@@ -28,11 +28,11 @@ export const loadSampleMetadata = async (): Promise<SampleChordSheetRecord[]> =>
     return [
       {
         path: 'oasis/wonderwall',
-        chordSheet: wonderwallMetadata.default as SongMetadata & ChordSheet
+        metadata: wonderwallMetadata.default as SongMetadata
       },
       {
         path: 'eagles/hotel-california',
-        chordSheet: hotelCaliforniaMetadata.default as SongMetadata & ChordSheet
+        metadata: hotelCaliforniaMetadata.default as SongMetadata
       }
     ];
   } catch (error) {
@@ -93,11 +93,9 @@ export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
       metadataRecords.map(async (record) => {
         const content = await loadSampleContent(record.path);
         return {
-          ...record,
-          chordSheet: {
-            ...record.chordSheet,
-            ...content
-          } as ChordSheet
+          path: record.path,
+          metadata: record.metadata,
+          content: content
         };
       })
     );

@@ -13,6 +13,6 @@ export const storeSampleChordSheets = async (
   storage: IChordSheetStorage
 ): Promise<void> => {
   for (const sample of samples) {
-    await storage.store(sample.path, sample.chordSheet, true); // Sample chord sheets are saved
+    await storage.store(sample.metadata, sample.content, true, sample.path); // Sample chord sheets are saved
   }
 };

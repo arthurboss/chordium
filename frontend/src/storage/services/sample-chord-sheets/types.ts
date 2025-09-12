@@ -2,7 +2,7 @@
  * Types for sample chord sheets service
  */
 
-import type { ChordSheet } from '@chordium/types';
+import type { ChordSheet, Song, SongMetadata } from '@chordium/types';
 import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/get-all-saved';
 
 /**
@@ -10,5 +10,5 @@ import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/ge
  */
 export interface IChordSheetStorage {
   getAllSaved(): Promise<ChordSheetListItem[]>;
-  store(path: string, chordSheet: ChordSheet, saved: boolean): Promise<void>;
+  store(metadata: SongMetadata, content: ChordSheet, saved: boolean, path: Song["path"]): Promise<void>;
 }

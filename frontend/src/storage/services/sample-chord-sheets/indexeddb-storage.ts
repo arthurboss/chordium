@@ -7,7 +7,7 @@
  * dependencies.
  */
 
-import type { ChordSheet } from '@chordium/types';
+import type { ChordSheet, Song, SongMetadata } from '@chordium/types';
 import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/get-all-saved';
 import type { IChordSheetStorage } from './types';
 import { ChordSheetStore } from '../../stores/chord-sheets/store';
@@ -38,17 +38,19 @@ export class IndexedDBStorage implements IChordSheetStorage {
   /**
    * Store a chord sheet in IndexedDB
    * 
-   * @param path - The storage path (Song.path format)
-   * @param chordSheet - The chord sheet data to store
+   * @param metadata - Song metadata to store
+   * @param content - Chord sheet content to store
    * @param saved - Whether this is a user-saved chord sheet
+   * @param path - The storage path (Song.path format)
    * @returns Promise that resolves when storage is complete
    */
   async store(
-    path: string,
-    chordSheet: ChordSheet,
-    saved: boolean
+    metadata: SongMetadata,
+    content: ChordSheet,
+    saved: boolean,
+    path: Song["path"]
   ): Promise<void> {
-    return this.chordSheetStore.store(chordSheet, saved, path);
+    return this.chordSheetStore.store(metadata, content, saved, path);
   }
 }
 
