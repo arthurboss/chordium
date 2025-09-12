@@ -61,6 +61,11 @@ const ChordViewer = () => {
     setIsSaved(chordSheetResult.metadata?.storage?.saved ?? false);
   }, [chordSheetResult.metadata?.storage?.saved]);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Auto-load from API if not found locally
   useEffect(() => {
     if (!chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
