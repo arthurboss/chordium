@@ -9,19 +9,14 @@
 
 ## File Organization
 
-### **Modularity & Structure**
-
 - Code must be as modular as possible with minimal exports per file
 - Break large files into smaller, focused modules
 - Related functionality grouped in subfolders
-- Use consistent naming conventions
 - **Archive Policy**: NEVER keep deprecated code - Archive to `_archive/` folders with preserved structure, no compatibility layers
 
 ## Type Management
 
 ### **REQUIRED: Separate Type Files**
-
-All interfaces, types, and type definitions MUST be extracted into separate `.types.ts` files.
 
 - **Never define types inline** with implementation code
 - Extract ALL interfaces and types for components/functions into dedicated `*.types.ts` files
@@ -80,6 +75,57 @@ export function useFormSubmission() {
 }
 ```
 
+## Naming Conventions
+
+### **PascalCase for:**
+- React components: `UserProfile.tsx`
+- Component directories: `UserProfile/`
+- Type definition files: `UserProfile.types.ts`
+- Test files for components: `UserProfile.test.tsx`
+
+### **kebab-case for:**
+- Utility functions: `date-utils.ts`, `api-client.ts`
+- Configuration files: `vite.config.ts`, `tailwind.config.ts`
+- Service files: `auth-service.ts`, `storage-service.ts`
+- Constants files: `api-endpoints.ts`, `app-constants.ts`
+- Build/script files: `build-script.js`, `deploy-config.js`
+
+### **camelCase for:**
+- Hook files: `useLocalStorage.ts`, `useApiFetch.ts`
+
+### **Other Naming:**
+- **Constants**: `UPPER_SNAKE_CASE`
+
+## Index Files (`index.ts`)
+
+- **EXPORTS ONLY**: Never define components, functions, or logic
+- **Barrel exports**: Re-export from other files in the directory
+- **Type exports**: Always export types alongside components
+- **Single entry point**: One index.ts per directory
+
+```typescript
+// ✅ CORRECT: Exports only
+export { ComponentName } from './ComponentName';
+export type { ComponentNameProps } from './ComponentName.types';
+
+// ❌ FORBIDDEN: No definitions in index files
+export const ComponentName = () => { /* ... */ };
+export function utilityFunction() { /* ... */ }
+```
+
+## Imports Order
+
+```typescript
+// 1. External libraries
+import { useState, use } from "react";
+// 2. Global types
+import type { Song } from "@chordium/types";
+// 3. Local types
+import type { FeatureData } from "./feature.types";
+// 4. Utilities
+import { apiClient } from "@/services/api";
+```
+
 ## Documentation
 
 ### **JSDoc**
@@ -102,68 +148,6 @@ export function useFormSubmission() {
 - Avoid obvious comments: `let count = 0; // Initialize count`
 - Use meaningful comments: `// Cache hit counter for performance monitoring`
 
-## Code Standards
-
-### **Naming**
-
-- **Component Files**: `PascalCase` (matches component name)
-- **Component Directories**: `PascalCase` (matches component name)
-- **Non-Component Files**: `kebab-case` (utilities, services, configs)
-- **Functions**: `camelCase`
-- **Constants**: `UPPER_SNAKE_CASE`
-- **Types**: `PascalCase`
-
-### **File Naming Guidelines**
-
-#### **Use PascalCase for:**
-- React components: `UserProfile.tsx`
-- Component directories: `UserProfile/`
-- Type definition files: `UserProfile.types.ts`
-- Test files for components: `UserProfile.test.tsx`
-
-#### **Use kebab-case for:**
-- Utility functions: `date-utils.ts`, `api-client.ts`
-- Configuration files: `vite.config.ts`, `tailwind.config.ts`
-- Service files: `auth-service.ts`, `storage-service.ts`
-- Hook files: `use-local-storage.ts`, `use-api-fetch.ts`
-- Constants files: `api-endpoints.ts`, `app-constants.ts`
-- Build/script files: `build-script.js`, `deploy-config.js`
-
-#### **Index Files (`index.ts`):**
-- **EXPORTS ONLY**: Never define components, functions, or logic
-- **Barrel exports**: Re-export from other files in the directory
-- **Type exports**: Always export types alongside components
-- **Single entry point**: One index.ts per directory
-
-```typescript
-// ✅ CORRECT: Exports only
-export { ComponentName } from './ComponentName';
-export type { ComponentNameProps } from './ComponentName.types';
-
-// ❌ FORBIDDEN: No definitions in index files
-export const ComponentName = () => { /* ... */ };
-export function utilityFunction() { /* ... */ }
-```
-
-### **Imports**
-
-```typescript
-// 1. External libraries
-import { useState, use } from "react";
-// 2. Global types
-import type { Song } from "@chordium/types";
-// 3. Local types
-import type { FeatureData } from "./feature.types";
-// 4. Utilities
-import { apiClient } from "@/services/api";
-```
-
-### **Error Handling**
-
-- Custom error types in `types/errors.ts`
-- Descriptive error messages
-- Handle at appropriate boundaries
-
 ## Testing
 
 - **Modular tests**: Match source structure
@@ -171,31 +155,25 @@ import { apiClient } from "@/services/api";
 - **Cover edge cases**: Success, error, and boundary conditions
 - **Shared utilities**: Avoid test code duplication
 
-## Implementation
-
-### **Performance**
+## Performance
 
 - Use React.memo, useMemo, useCallback appropriately
-- **React 19**: Prefer `use()` hook for promises and context consumption
-- **React 19**: Use `useOptimistic()` for optimistic updates
-- **React 19**: Use `useActionState()` for form actions and async state
 - Implement pagination for large datasets
 - Cache where beneficial
 
-### **Accessibility**
+## Error Handling
 
-- WCAG compliance
-- Proper ARIA labels
-- Keyboard navigation
-- Screen reader compatibility
-
-### **API Integration**
-
+- Custom error types in `types/errors.ts`
+- Descriptive error messages
+- Handle at appropriate boundaries
 - Try-catch blocks
 - Retry logic for failures
 - Consistent error formats
 - Graceful network error handling
 
----
+## Accessibility
 
-*These standards ensure maintainable, testable code following industry best practices.*
+- WCAG compliance
+- Proper ARIA labels
+- Keyboard navigation
+- Screen reader compatibility
