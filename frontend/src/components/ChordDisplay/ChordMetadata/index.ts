@@ -1,4 +1,4 @@
-export { default } from './ChordMetadata';
+export { ChordMetadata } from './ChordMetadata';
 export type { ChordMetadataProps } from './ChordMetadata.types';
-export { default as MetadataBadge } from './MetadataBadge';
+export { MetadataBadge } from './MetadataBadge';
 export type { MetadataBadgeProps } from './MetadataBadge.types';

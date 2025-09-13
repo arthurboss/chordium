@@ -10,7 +10,7 @@ import type { MetadataBadgeProps } from './MetadataBadge.types';
  * @param label - Label text to display (e.g., "Artist:", "Tuning:")
  * @param value - Value text to display
  */
-const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value }) => {
+export const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value }) => {
   return (
     <div className="whitespace-nowrap">
       <span className="font-medium text-muted-foreground">{label}</span>
@@ -18,5 +18,3 @@ const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value }) => {
     </div>
   );
 };
-
-export default MetadataBadge;

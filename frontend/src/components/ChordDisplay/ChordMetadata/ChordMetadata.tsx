@@ -1,5 +1,5 @@
 import React from 'react';
-import MetadataBadge from './MetadataBadge';
+import { MetadataBadge } from './MetadataBadge';
 import type { ChordMetadataProps } from './ChordMetadata.types';
 
 /**
@@ -10,7 +10,7 @@ import type { ChordMetadataProps } from './ChordMetadata.types';
  * 
  * @param chordSheet - Chord sheet object containing all metadata
  */
-const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
+export const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
   // Handle undefined/null values gracefully
   const tuning = chordSheet.guitarTuning 
     ? (Array.isArray(chordSheet.guitarTuning)
@@ -43,5 +43,3 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
     </div>
   );
 };
-
-export default ChordMetadata;
