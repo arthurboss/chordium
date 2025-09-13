@@ -6,7 +6,7 @@ interface TitleSectionProps {
 /**
  * Reusable title section component with responsive styling
  */
-const TitleSection = ({ title, isMobile = false }: TitleSectionProps) => (
+export const TitleSection = ({ title, isMobile = false }: TitleSectionProps) => (
   title ? (
     <div className={`flex flex-col ${isMobile ? 'min-w-0' : 'flex-1 min-w-0 text-center'}`}>
       <h1 className="text-lg font-semibold truncate" title={title}>
@@ -15,5 +15,3 @@ const TitleSection = ({ title, isMobile = false }: TitleSectionProps) => (
     </div>
   ) : null
 );
-
-export default TitleSection;

@@ -1,5 +1,5 @@
 import ErrorState from "@/components/ErrorState";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import type { ChordViewerNavigationMethods } from "../chord-viewer.types";
 
 interface ChordViewerErrorProps {

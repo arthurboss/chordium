@@ -1,5 +1,5 @@
 import ChordDisplay from "@/components/ChordDisplay";
-import PageHeader from "@/components/PageHeader";
+import { PageHeader } from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";

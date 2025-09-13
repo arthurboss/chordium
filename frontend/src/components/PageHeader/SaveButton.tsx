@@ -8,7 +8,7 @@ interface SaveButtonProps {
 /**
  * Reusable save button component
  */
-const SaveButton = ({ onSave }: SaveButtonProps) => (
+export const SaveButton = ({ onSave }: SaveButtonProps) => (
   <Button
     variant="outline"
     size="sm"
@@ -21,5 +21,3 @@ const SaveButton = ({ onSave }: SaveButtonProps) => (
     <span className="hidden sm:inline">Save</span>
   </Button>
 );
-
-export default SaveButton;

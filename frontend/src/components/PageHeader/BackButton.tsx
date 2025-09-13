@@ -8,7 +8,7 @@ interface BackButtonProps {
 /**
  * Reusable back button component for navigation
  */
-const BackButton = ({ onBack }: BackButtonProps) => (
+export const BackButton = ({ onBack }: BackButtonProps) => (
   <Button
     variant="outline"
     size="sm"
@@ -21,5 +21,3 @@ const BackButton = ({ onBack }: BackButtonProps) => (
     <span className="hidden sm:inline">Back</span>
   </Button>
 );
-
-export default BackButton;

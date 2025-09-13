@@ -8,7 +8,7 @@ interface DeleteButtonProps {
 /**
  * Reusable delete button component
  */
-const DeleteButton = ({ onDelete }: DeleteButtonProps) => (
+export const DeleteButton = ({ onDelete }: DeleteButtonProps) => (
   <Button
     size="sm"
     variant="outline"
@@ -24,5 +24,3 @@ const DeleteButton = ({ onDelete }: DeleteButtonProps) => (
     <span className="hidden sm:inline">Delete</span>
   </Button>
 );
-
-export default DeleteButton;
