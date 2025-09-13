@@ -5,11 +5,10 @@
 - **Test-Driven Development**: Write tests first, comprehensive coverage required
 - **Single Responsibility**: Each function/module does one thing well
 - **Don't Repeat Yourself**: Extract common functionality into reusable utilities
-- **Modularity**: Small, focused files with minimal exports
+- **Modularity**: Small, focused files with minimal exports per file
 
 ## File Organization
 
-- Code must be as modular as possible with minimal exports per file
 - Break large files into smaller, focused modules
 - Related functionality grouped in subfolders
 - **Archive Policy**: NEVER keep deprecated code - Archive to `_archive/` folders with preserved structure, no compatibility layers
@@ -20,7 +19,6 @@
 
 - **Never define types inline** with implementation code
 - Extract ALL interfaces and types for components/functions into dedicated `*.types.ts` files
-- Use consistent naming: `component-name.types.ts`
 - Import types using `import type` syntax
 
 ### **Type Priority**
@@ -31,49 +29,8 @@
 
 ### **Type Examples**
 
-```typescript
-// ❌ FORBIDDEN: Inline type definitions
-export function useFeatureHook(): {
-  data: FeatureData[];
-  loading: boolean;
-} { /* ... */ }
+See [Type Management Examples](#type-management-examples) section.
 
-// ✅ REQUIRED: Import types from separate file
-import type { UseFeatureHookResult } from "./use-feature-hook.types";
-export function useFeatureHook(): UseFeatureHookResult { /* ... */ }
-```
-
-### **React 19 Hook Patterns**
-
-```typescript
-// ✅ Use the new `use()` hook for promises
-import { use } from "react";
-import type { UserData } from "./user.types";
-
-export function useUserData(userPromise: Promise<UserData>) {
-  const userData = use(userPromise);
-  return userData;
-}
-
-// ✅ Use `useOptimistic()` for immediate UI updates
-import { useOptimistic } from "react";
-
-export function useOptimisticLikes(initialLikes: number) {
-  const [optimisticLikes, addOptimisticLike] = useOptimistic(
-    initialLikes,
-    (state, increment: number) => state + increment
-  );
-  return { optimisticLikes, addOptimisticLike };
-}
-
-// ✅ Use `useActionState()` for form handling
-import { useActionState } from "react";
-
-export function useFormSubmission() {
-  const [state, formAction] = useActionState(submitForm, null);
-  return { state, formAction };
-}
-```
 
 ## Naming Conventions
 
@@ -96,35 +53,37 @@ export function useFormSubmission() {
 ### **Other Naming:**
 - **Constants**: `UPPER_SNAKE_CASE`
 
-## Index Files (`index.ts`)
+## Export Conventions
+
+### **PREFER: Named Exports**
+
+- **Use named exports** for all components, hooks, and utilities
+- **Avoid default exports** except for specific cases
+
+### **Named Export Examples**
+
+See [Export Convention Examples](#export-convention-examples) section.
+
+### **Default Export Exceptions**
+
+See [Export Convention Examples](#export-convention-examples) section.
+
+### **Index Files (`index.ts`)**
 
 - **EXPORTS ONLY**: Never define components, functions, or logic
-- **Barrel exports**: Re-export from other files in the directory
-- **Type exports**: Always export types alongside components
 - **Single entry point**: One index.ts per directory
 
-```typescript
-// ✅ CORRECT: Exports only
-export { ComponentName } from './ComponentName';
-export type { ComponentNameProps } from './ComponentName.types';
+See [Index Files Examples](#index-files-examples) section.
 
-// ❌ FORBIDDEN: No definitions in index files
-export const ComponentName = () => { /* ... */ };
-export function utilityFunction() { /* ... */ }
-```
+### **Imports Order**
 
-## Imports Order
+See [Import Order Examples](#import-order-examples) section.
 
-```typescript
-// 1. External libraries
-import { useState, use } from "react";
-// 2. Global types
-import type { Song } from "@chordium/types";
-// 3. Local types
-import type { FeatureData } from "./feature.types";
-// 4. Utilities
-import { apiClient } from "@/services/api";
-```
+## React Patterns
+
+### **React 19 Hook Patterns**
+
+See [React 19 Hook Examples](#react-19-hook-examples) section.
 
 ## Documentation
 
@@ -133,15 +92,7 @@ import { apiClient } from "@/services/api";
 - Document **what** and **why**, not **how**
 - Include parameters, return types, and errors
 
-```typescript
-/**
- * Fetches user data with caching
- * 
- * @param userId - Unique user identifier
- * @returns User data or null if not found
- * @throws {APIError} Network request fails
- */
-```
+See [JSDoc Examples](#jsdoc-examples) section.
 
 ### **Comments**
 
@@ -177,3 +128,109 @@ import { apiClient } from "@/services/api";
 - Proper ARIA labels
 - Keyboard navigation
 - Screen reader compatibility
+
+## Examples
+
+### **Type Management Examples**
+
+```typescript
+// ❌ FORBIDDEN: Inline type definitions
+export function useFeatureHook(): {
+  data: FeatureData[];
+  loading: boolean;
+} { /* ... */ }
+
+// ✅ REQUIRED: Import types from separate file
+import type { UseFeatureHookResult } from "./use-feature-hook.types";
+export function useFeatureHook(): UseFeatureHookResult { /* ... */ }
+```
+
+### **Export Convention Examples**
+
+```typescript
+// ✅ PREFERRED: Named exports
+export const MyComponent = () => { ... };
+export const useMyHook = () => { ... };
+export const myUtility = () => { ... };
+
+// Import
+import { MyComponent, useMyHook, myUtility } from './MyModule';
+
+// ✅ ALLOWED: Main library/framework exports
+export default class MyFramework { ... }
+
+// ✅ ALLOWED: Single-purpose utility modules
+export default function formatDate(date: Date) { ... }
+
+// ✅ ALLOWED: Configuration objects
+export default { apiUrl: '...', timeout: 5000 };
+```
+
+### **Index Files Examples**
+
+```typescript
+// ✅ CORRECT: Exports only
+export { ComponentName } from './ComponentName';
+export type { ComponentNameProps } from './ComponentName.types';
+
+// ❌ FORBIDDEN: No definitions in index files
+export const ComponentName = () => { /* ... */ };
+export function utilityFunction() { /* ... */ }
+```
+
+### **Import Order Examples**
+
+```typescript
+// 1. External libraries
+import { useState, use } from "react";
+// 2. Global types
+import type { Song } from "@chordium/types";
+// 3. Local types
+import type { FeatureData } from "./feature.types";
+// 4. Utilities
+import { apiClient } from "@/services/api";
+```
+
+### **React 19 Hook Examples**
+
+```typescript
+// ✅ Use the new `use()` hook for promises
+import { use } from "react";
+import type { UserData } from "./user.types";
+
+export function useUserData(userPromise: Promise<UserData>) {
+  const userData = use(userPromise);
+  return userData;
+}
+
+// ✅ Use `useOptimistic()` for immediate UI updates
+import { useOptimistic } from "react";
+
+export function useOptimisticLikes(initialLikes: number) {
+  const [optimisticLikes, addOptimisticLike] = useOptimistic(
+    initialLikes,
+    (state, increment: number) => state + increment
+  );
+  return { optimisticLikes, addOptimisticLike };
+}
+
+// ✅ Use `useActionState()` for form handling
+import { useActionState } from "react";
+
+export function useFormSubmission() {
+  const [state, formAction] = useActionState(submitForm, null);
+  return { state, formAction };
+}
+```
+
+### **JSDoc Examples**
+
+```typescript
+/**
+ * Fetches user data with caching
+ * 
+ * @param userId - Unique user identifier
+ * @returns User data or null if not found
+ * @throws {APIError} Network request fails
+ */
+```
