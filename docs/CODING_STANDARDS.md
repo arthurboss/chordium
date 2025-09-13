@@ -106,10 +106,28 @@ export function useFormSubmission() {
 
 ### **Naming**
 
-- **Files/Folders**: `kebab-case`
+- **Component Files**: `PascalCase` (matches component name)
+- **Component Directories**: `PascalCase` (matches component name)
+- **Non-Component Files**: `kebab-case` (utilities, services, configs)
 - **Functions**: `camelCase`
 - **Constants**: `UPPER_SNAKE_CASE`
 - **Types**: `PascalCase`
+
+### **File Naming Guidelines**
+
+#### **Use PascalCase for:**
+- React components: `UserProfile.tsx`
+- Component directories: `UserProfile/`
+- Type definition files: `UserProfile.types.ts`
+- Test files for components: `UserProfile.test.tsx`
+
+#### **Use kebab-case for:**
+- Utility functions: `date-utils.ts`, `api-client.ts`
+- Configuration files: `vite.config.ts`, `tailwind.config.ts`
+- Service files: `auth-service.ts`, `storage-service.ts`
+- Hook files: `use-local-storage.ts`, `use-api-fetch.ts`
+- Constants files: `api-endpoints.ts`, `app-constants.ts`
+- Build/script files: `build-script.js`, `deploy-config.js`
 
 ### **Imports**
 
