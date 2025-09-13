@@ -129,6 +129,22 @@ export function useFormSubmission() {
 - Constants files: `api-endpoints.ts`, `app-constants.ts`
 - Build/script files: `build-script.js`, `deploy-config.js`
 
+#### **Index Files (`index.ts`):**
+- **EXPORTS ONLY**: Never define components, functions, or logic
+- **Barrel exports**: Re-export from other files in the directory
+- **Type exports**: Always export types alongside components
+- **Single entry point**: One index.ts per directory
+
+```typescript
+// ✅ CORRECT: Exports only
+export { ComponentName } from './ComponentName';
+export type { ComponentNameProps } from './ComponentName.types';
+
+// ❌ FORBIDDEN: No definitions in index files
+export const ComponentName = () => { /* ... */ };
+export function utilityFunction() { /* ... */ }
+```
+
 ### **Imports**
 
 ```typescript
