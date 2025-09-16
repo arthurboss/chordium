@@ -11,6 +11,7 @@ import { extractNavigationData } from "./utils/navigation-data";
 
 // Hooks
 import { useNavigation } from "@/hooks/navigation";
+import { useSmartBackNavigation } from "@/hooks/navigation/useSmartBackNavigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components
@@ -75,10 +76,7 @@ const ChordViewer = () => {
 
   // Navigation handlers
   const navigation = useNavigation();
-
-  const handleBack = () => {
-    return navigation.navigateBack();
-  };
+  const handleBack = useSmartBackNavigation();
 
   // Chord sheet operations using focused hooks
   const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData);
