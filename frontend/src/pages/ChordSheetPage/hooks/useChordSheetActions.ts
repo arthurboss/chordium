@@ -1,4 +1,5 @@
 import { useNavigation } from "@/hooks/navigation";
+import { useSmartBackNavigation } from "@/hooks/navigation/useSmartBackNavigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 import type { ChordSheetData } from "../../chord-viewer/chord-viewer.types";
 
@@ -14,22 +15,10 @@ export const useChordSheetActions = (
   setIsSaved: (saved: boolean) => void
 ) => {
   const navigation = useNavigation();
+  const handleSmartBack = useSmartBackNavigation();
 
-  // Navigation handlers
-  const handleBack = () => {
-    return navigation.navigateBack();
-  };
-
-  // Smart back navigation for pre-render mode
-  const handlePreRenderBack = () => {
-    // If user has browser history, use normal back navigation
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      // If user landed directly on URL, navigate to search
-      window.location.href = '/search';
-    }
-  };
+  // Single smart back handler for all contexts
+  const handleBack = handleSmartBack;
 
   // Chord sheet operations using focused hooks
   const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData);
@@ -47,7 +36,6 @@ export const useChordSheetActions = (
 
   return {
     handleBack,
-    handlePreRenderBack,
     handleSave,
     handleDelete
   };
