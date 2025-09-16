@@ -1,6 +1,8 @@
 import type { RefObject } from "react";
 import type { Song } from "@/types/song";
 import type { ChordSheet, SongMetadata } from "@chordium/types";
+import type { RouteParams, ChordSheetData } from "../chord-viewer/chord-viewer.types";
+import type { ChordSheetWithFallbackState, ChordSheetWithFallbackActions } from "@/hooks/useChordSheetWithFallback";
 
 /**
  * Props for the ChordSheetPage component
@@ -9,15 +11,6 @@ export interface ChordSheetPageProps {
   isPrerenderMode?: boolean;
 }
 
-/**
- * Props for the pre-rendered structure
- */
-export interface PreRenderedStructureProps {
-  title: string;
-  artist: string;
-  chordDisplayRef: RefObject<HTMLDivElement>;
-  onBack: () => void;
-}
 
 /**
  * Props for the main content structure
@@ -43,9 +36,9 @@ export interface ContentStructureProps {
  */
 export interface UseChordSheetDataReturn {
   path: string;
-  routeParams: any;
-  chordSheetResult: any;
-  chordSheetData: any;
+  routeParams: RouteParams;
+  chordSheetResult: ChordSheetWithFallbackState & ChordSheetWithFallbackActions;
+  chordSheetData: ChordSheetData | null;
   isSaved: boolean;
   setIsSaved: (saved: boolean) => void;
 }
@@ -55,7 +48,6 @@ export interface UseChordSheetDataReturn {
  */
 export interface UseChordSheetActionsReturn {
   handleBack: () => void;
-  handlePreRenderBack: () => void;
   handleSave: () => Promise<void>;
   handleDelete: (songPath: string) => void;
 }

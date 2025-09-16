@@ -1,6 +1,6 @@
 import ChordDisplay from "@/components/ChordDisplay";
-import PageHeader from "@/components/PageHeader";
-import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
+import { PageHeader } from "@/components/PageHeader";
+import { ChordMetadata } from "@/components/ChordDisplay/ChordMetadata";
 import type { ContentStructureProps } from "../ChordSheetPage.types";
 
 /**
