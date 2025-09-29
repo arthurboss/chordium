@@ -120,6 +120,7 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
               guitarCapo: uploadedGuitarCapo
             }}
             content={uploadedContent}
+            showControlsBar={false}
           />
         </div>
       )}

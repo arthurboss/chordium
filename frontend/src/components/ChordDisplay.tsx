@@ -16,26 +16,27 @@ interface ChordDisplayProps {
   content: string;
   onSave?: (content: string) => void;
   isLoading?: boolean;
+  showControlsBar?: boolean;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading }, ref) => {
-  
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true }, ref) => {
+
   // Use custom hooks for different concerns
-  const { 
-    autoScroll, 
-    scrollSpeed, 
-    setScrollSpeed, 
-    toggleAutoScroll 
+  const {
+    autoScroll,
+    scrollSpeed,
+    setScrollSpeed,
+    toggleAutoScroll
   } = useAutoScroll();
-  
-  const { 
-    transpose, 
+
+  const {
+    transpose,
     setTranspose,
     defaultTranspose,
     capo,
     setCapo,
     defaultCapo,
-    fontSize, 
+    fontSize,
     setFontSize,
     fontSpacing,
     setFontSpacing,
@@ -49,7 +50,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     setCapoTransposeLinked,
     processedContent
   } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
-  
+
   const {
     isEditing,
     setIsEditing,
@@ -58,23 +59,23 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     updateEditContent,
     handleSaveEdits: saveEdits
   } = useChordEditor(content, onSave);
-  
+
   // Update edit content when content prop changes
   useEffect(() => {
     updateEditContent(content);
   }, [content, updateEditContent]);
-  
+
   // Handle saving edits (with toast notification)
   const handleSaveEdits = () => {
     saveEdits();
   };
-  
+
   // Handle download of chord sheet
   const handleDownload = () => {
     const result = downloadTextFile(content, chordSheet.title || "chord-sheet");
     toast(result);
   };
-  
+
   if (isEditing) {
     return (
       <ChordEdit
@@ -98,33 +99,35 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         renderChord={renderChord}
         isLoading={isLoading}
       />
-      <StickyControlsBar
-        transpose={transpose}
-        setTranspose={setTranspose}
-        defaultTranspose={defaultTranspose}
-        songKey={chordSheet.songKey}
-        capo={capo}
-        setCapo={setCapo}
-        defaultCapo={defaultCapo}
-        fontSize={fontSize}
-        setFontSize={setFontSize}
-        fontSpacing={fontSpacing}
-        setFontSpacing={setFontSpacing}
-        fontStyle={fontStyle}
-        setFontStyle={setFontStyle}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        hideGuitarTabs={hideGuitarTabs}
-        setHideGuitarTabs={setHideGuitarTabs}
-        autoScroll={autoScroll}
-        setAutoScroll={toggleAutoScroll}
-        scrollSpeed={scrollSpeed}
-        setScrollSpeed={setScrollSpeed}
-        capoTransposeLinked={capoTransposeLinked}
-        setCapoTransposeLinked={setCapoTransposeLinked}
-        setIsEditing={setIsEditing}
-        handleDownload={handleDownload}
-      />
+      {showControlsBar && (
+        <StickyControlsBar
+          transpose={transpose}
+          setTranspose={setTranspose}
+          defaultTranspose={defaultTranspose}
+          songKey={chordSheet.songKey}
+          capo={capo}
+          setCapo={setCapo}
+          defaultCapo={defaultCapo}
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          fontSpacing={fontSpacing}
+          setFontSpacing={setFontSpacing}
+          fontStyle={fontStyle}
+          setFontStyle={setFontStyle}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          hideGuitarTabs={hideGuitarTabs}
+          setHideGuitarTabs={setHideGuitarTabs}
+          autoScroll={autoScroll}
+          setAutoScroll={toggleAutoScroll}
+          scrollSpeed={scrollSpeed}
+          setScrollSpeed={setScrollSpeed}
+          capoTransposeLinked={capoTransposeLinked}
+          setCapoTransposeLinked={setCapoTransposeLinked}
+          setIsEditing={setIsEditing}
+          handleDownload={handleDownload}
+        />
+      )}
     </div>
   );
 });
