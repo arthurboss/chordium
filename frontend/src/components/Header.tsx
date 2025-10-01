@@ -1,19 +1,15 @@
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { ShareSession } from "@/features/jam-session";
 
 const Header = () => (
-  <header className="py-1.5 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
-    <div className="flex justify-between px-4 max-w-3xl mx-auto">
+  <header className="sticky top-0 z-50 border-b bg-background/80 shadow-sm backdrop-blur-sm dark:bg-[--card]">
+    <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-2">
+      {/* Logo */}
       <Link
         to="/"
-        className="flex items-center hover:opacity-90 transition-opacity rounded-md"
+        className="flex items-center rounded-md transition-opacity hover:opacity-90"
         tabIndex={0}
         aria-label="Chordium home"
       >
@@ -22,29 +18,19 @@ const Header = () => (
           alt="Chordium logo"
           width={32}
           height={32}
-          className="mr-1"
+          className="mr-2"
         />
-        <h1 className="font-semibold text-lg m-0">Chordium</h1>
+        <h1 className="text-lg font-semibold">Chordium</h1>
       </Link>
 
+      {/* Navigation */}
       <div className="flex items-center gap-2">
+        <ShareSession />
         <OfflineIndicator />
-        <DropdownMenu>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/search" className="w-full cursor-pointer">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Link>
-            </DropdownMenuItem>
-
-          </DropdownMenuContent>
-        </DropdownMenu>
         <ThemeToggle />
       </div>
     </div>
   </header>
 );
-
 
 export default Header;
