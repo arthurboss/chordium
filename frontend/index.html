@@ -1,82 +1,131 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chordium</title>
-    <meta
-      name="description"
-      content="View guitar chords without visual distractions."
-    />
-    <meta name="author" content="arthurboss" />
-    <link rel="icon" href="https://arthurboss.github.io/chordium-static/favicon.ico" type="image/x-icon" />
-    <link rel="icon" type="image/png" sizes="16x16" href="https://arthurboss.github.io/chordium-static/favicon-16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="https://arthurboss.github.io/chordium-static/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="48x48" href="https://arthurboss.github.io/chordium-static/favicon-48.png" />
-    <link rel="icon" type="image/png" sizes="180x180" href="https://arthurboss.github.io/chordium-static/favicon-180.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="https://arthurboss.github.io/chordium-static/favicon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="https://arthurboss.github.io/chordium-static/favicon-512.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="https://arthurboss.github.io/chordium-static/favicon-180.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="https://arthurboss.github.io/chordium-static/favicon-192.png" />
-    <link rel="apple-touch-icon" sizes="512x512" href="https://arthurboss.github.io/chordium-static/favicon-512.png" />
 
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#9b87f5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="application-name" content="Chordium" />
-    <meta name="apple-mobile-web-app-title" content="Chordium" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="msapplication-TileColor" content="#9b87f5" />
-    <meta name="msapplication-config" content="/browserconfig.xml" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>chordium</title>
+  <meta name="description" content="View guitar chords without visual distractions." />
+  <meta name="author" content="arthurboss" />
 
-    <script>
-      // Helper function to apply theme based on system preference
-      function getSystemThemePreference() {
-        return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+  <!-- Favicon -->
+  <link rel="icon" href="https://arthurboss.github.io/chordium-static/favicon.ico" type="image/x-icon" />
+  <link rel="icon" type="image/png" sizes="16x16" href="https://arthurboss.github.io/chordium-static/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://arthurboss.github.io/chordium-static/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="https://arthurboss.github.io/chordium-static/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="180x180"
+    href="https://arthurboss.github.io/chordium-static/favicon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192"
+    href="https://arthurboss.github.io/chordium-static/favicon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512"
+    href="https://arthurboss.github.io/chordium-static/favicon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://arthurboss.github.io/chordium-static/favicon-180.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="https://arthurboss.github.io/chordium-static/favicon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="https://arthurboss.github.io/chordium-static/favicon-512.png" />
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#9b87f5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Chordium" />
+  <meta name="apple-mobile-web-app-title" content="Chordium" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="msapplication-TileColor" content="#9b87f5" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+
+  <!-- schema for AEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Chordium",
+    "url": "https://chordium.vercel.app/",
+    "description": "A minimalist chord viewer app for guitar players.",
+    "author": {
+      "@type": "Person",
+      "name": "Arthur Boss",
+      "url": "https://github.com/arthurboss",
+      "sameAs": [
+        "https://www.linkedin.com/in/arthurboss/"
+      ]
+    },
+    "license": "https://github.com/arthurboss/chordium/blob/main/LICENSE",
+    "sameAs": ["https://github.com/arthurboss/chordium"],
+    "inLanguage": "en",
+    "featureList": [
+      "Chord Sheet reader",
+      "Chord Sheet upload",
+      "Chord Sheet search",
+      "Dark/light theme",
+      "Offline support"
+    ],
+    "isAccessibleForFree": true,
+    "operatingSystem": "All",
+    "browserRequirements": "Requires modern web browser",
+    "image": "https://arthurboss.github.io/chordium-static/favicon-512.png",
+    "screenshot": [
+      {
+        "@type": "ImageObject",
+        "contentUrl": "https://arthurboss.github.io/chordium-static/screenshots/chord_sheet_viewer-dark_mode-desktop.png",
+        "caption": "Chordium desktop view showing a chord sheet in dark mode"
+      },
+      {
+        "@type": "ImageObject",
+        "contentUrl": "https://arthurboss.github.io/chordium-static/screenshots/chord_sheet_viewer-light_mode-mobile.png",
+        "caption": "Chordium mobile view showing a chord sheet in light mode"
+      }
+    ]
+  }
+  </script>
+
+  <script>
+    // Helper function to apply theme based on system preference
+    function getSystemThemePreference() {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    // Apply theme on page load
+    (function () {
+      // Clear theme from localStorage on first load to start fresh
+      // Use the theme key itself as the flag - if it doesn't exist, it's first time
+      const savedTheme = localStorage.getItem("chordium-theme");
+      if (savedTheme === null) {
+        // First time - don't set any theme, let it follow system preference
+        // This replaces the old flag-based approach
       }
 
-      // Apply theme on page load
-      (function () {
-        // Clear theme from localStorage on first load to start fresh
-        // Use the theme key itself as the flag - if it doesn't exist, it's first time
-        const savedTheme = localStorage.getItem("chordium-theme");
-        if (savedTheme === null) {
-          // First time - don't set any theme, let it follow system preference
-          // This replaces the old flag-based approach
-        }
+      // Get current theme from localStorage or system preference
+      const theme = savedTheme || getSystemThemePreference();
 
-        // Get current theme from localStorage or system preference
-        const theme = savedTheme || getSystemThemePreference();
+      // Apply theme
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
 
-        // Apply theme
-        if (theme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-
-        // Setup listener for system theme changes
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-        mediaQuery.addEventListener("change", (e) => {
-          // Only apply system theme if user hasn't manually set a preference
-          if (!localStorage.getItem("chordium-theme")) {
-            if (e.matches) {
-              document.documentElement.classList.add("dark");
-            } else {
-              document.documentElement.classList.remove("dark");
-            }
+      // Setup listener for system theme changes
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      mediaQuery.addEventListener("change", (e) => {
+        // Only apply system theme if user hasn't manually set a preference
+        if (!localStorage.getItem("chordium-theme")) {
+          if (e.matches) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
           }
-        });
-      })();
-    </script>
-  </head>
+        }
+      });
+    })();
+  </script>
+</head>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
