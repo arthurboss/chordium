@@ -15,9 +15,11 @@ const RootLayout = () => {
       <Toaster />
       <Sonner />
       <QueryErrorBoundary>
-        <Header />
-        <Outlet />
-        <Footer />
+        <div className="h-[100vh] grid grid-rows-[auto_1fr_auto]">
+          <Header />
+          <Outlet />
+          <Footer />
+        </div>
       </QueryErrorBoundary>
     </>
   );
