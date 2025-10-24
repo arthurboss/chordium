@@ -1,5 +1,7 @@
 # Chordium Development Standards
 
+## WRITE TESTS MYSELF AS A MEAN OF DOCUMENTATION TO ASK FOR AI TO GENERATE FEATURES?
+
 ## Core Principles
 
 - **Test-Driven Development**: Write tests first, comprehensive coverage required
