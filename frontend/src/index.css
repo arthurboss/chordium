@@ -1,19 +1,99 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../tailwind.config.ts';
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+/* Custom utilities */
+@utility chord {
+  @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
+}
+@utility chord-line {
+  @apply font-mono whitespace-normal mb-1 wrap-break-word;
+}
+@utility lyrics-line {
+  @apply mb-3 wrap-break-word;
+}
+@utility section-header {
+  @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
+}
 
 @layer base {
   :root {
-    --background: 240 5% 96%;
-    --foreground: 240 10% 3.9%;
+    /* Theme variables */
+    --color-background: 240 5% 96%;
+    --color-foreground: 240 10% 3.9%;
+    --color-card: 0 0% 100%;
+    --color-card-foreground: 240 10% 3.9%;
+    --color-popover: 0 0% 100%;
+    --color-popover-foreground: 240 10% 3.9%;
+    --color-primary: 270 84% 75%;
+    
+    /* Set default border color */
+    --color-border: 240 5.9% 90%;
+  }
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+  /* Base styles */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    @apply border-border;
+  }
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+  body {
+    @apply bg-background text-foreground;
+  }
 
-    --primary: 270 84% 75%;
+  a:focus-visible {
+    @apply outline-hidden ring-1 ring-ring ring-offset-2;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
+    -webkit-text-fill-color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: hsl(var(--foreground));
+  }
+
+  /* Ensure the clear button inside the input matches the autofill border */
+  input:-webkit-autofill ~ button[aria-label="Clear input"] {
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--ring));
+  }
+}
+
+/* Theme variables */
+@layer base {
+  :root {
+    --background: var(--color-gray-50);
+    --foreground: var(--color-gray-900);
+    --card: var(--color-white);
+    --card-foreground: var(--color-gray-900);
+    --popover: var(--color-white);
+    --popover-foreground: var(--color-gray-900);
+    --primary: var(--color-purple-400);
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -78,7 +158,7 @@
   }
 
   a:focus-visible {
-    @apply outline-none ring-1 ring-ring ring-offset-2;
+    @apply outline-hidden ring-1 ring-ring ring-offset-2;
   }
 
   input:-webkit-autofill,
@@ -99,24 +179,6 @@
   }
 }
 
-@layer components {
-  .chord {
-    @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
-  }
-
-  .chord-line {
-    @apply font-mono whitespace-normal mb-1 break-words;
-  }
-
-  .lyrics-line {
-    @apply mb-3 break-words;
-  }
-
-  .section-header {
-    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
-  }
-}
-
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .chord-line {
@@ -132,7 +194,7 @@
   }
 
   .lyrics-line {
-    @apply mb-2 break-words;
+    @apply mb-2 wrap-break-word;
     max-width: 100%;
   }
 

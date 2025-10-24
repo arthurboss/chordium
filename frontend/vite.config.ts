@@ -6,12 +6,13 @@ import * as os from "os";
 import { visualizer } from 'rollup-plugin-visualizer';
 import stripTestAttributes from "./src/utils/vite-strip-test-attributes";
 import viteCompression from 'vite-plugin-compression';
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isHttps = process.env.VITE_HTTPS_ENABLED === 'true';
-  
+
   return {
     server: {
       host: "::",
@@ -32,6 +33,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      tailwindcss(),
       // Only strip data-testid attributes in production mode
       ...(isProduction ? [stripTestAttributes()] : []),
       ...(isProduction ? [visualizer({
