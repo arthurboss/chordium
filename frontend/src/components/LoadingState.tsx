@@ -6,9 +6,6 @@ interface LoadingStateProps {
 }
 /**
  * LoadingState component to display a loading animation with optional message.
- * @param {LoadingStateProps} props - Component properties.
- * @param {string} [props.message] - Optional message to display during loading.
- * @returns {JSX.Element} The rendered component.
  */
 const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
   <div className="p-8 text-center">
