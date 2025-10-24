@@ -2,41 +2,9 @@
 
 @config '../tailwind.config.ts';
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-/* Custom utilities */
-@utility chord {
-  @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
-}
-@utility chord-line {
-  @apply font-mono whitespace-normal mb-1 wrap-break-word;
-}
-@utility lyrics-line {
-  @apply mb-3 wrap-break-word;
-}
-@utility section-header {
-  @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
-}
-
-@layer base {
+  /* Theme variables */
   :root {
-    /* Theme variables */
     --color-background: 240 5% 96%;
     --color-foreground: 240 10% 3.9%;
     --color-card: 0 0% 100%;
@@ -44,49 +12,9 @@
     --color-popover: 0 0% 100%;
     --color-popover-foreground: 240 10% 3.9%;
     --color-primary: 270 84% 75%;
-    
-    /* Set default border color */
+
     --color-border: 240 5.9% 90%;
-  }
 
-  /* Base styles */
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  a:focus-visible {
-    @apply outline-hidden ring-1 ring-ring ring-offset-2;
-  }
-
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    -webkit-text-fill-color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
-    transition: background-color 5000s ease-in-out 0s;
-    caret-color: hsl(var(--foreground));
-  }
-
-  /* Ensure the clear button inside the input matches the autofill border */
-  input:-webkit-autofill ~ button[aria-label="Clear input"] {
-    color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
-  }
-}
-
-/* Theme variables */
-@layer base {
-  :root {
     --background: var(--color-gray-50);
     --foreground: var(--color-gray-900);
     --card: var(--color-white);
@@ -95,61 +23,50 @@
     --popover-foreground: var(--color-gray-900);
     --primary: var(--color-purple-400);
     --primary-foreground: 0 0% 98%;
-
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 270 84% 75%;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 240 3.7% 15.9%;
     --foreground: 0 0% 98%;
-
     --card: rgb(30, 30, 33);
     --card-foreground: 0 0% 98%;
-
     --chord-content-bg-dark: hsl(240, 3.7%, 12%);
-
     --popover: 240 3.7% 10%;
     --popover-foreground: 0 0% 98%;
-
     --primary: 270 84% 75%;
     --primary-foreground: 240 5.9% 10%;
-
     --secondary: 240 3.7% 20%;
     --secondary-foreground: 0 0% 98%;
-
     --muted: 240 3.7% 25%;
     --muted-foreground: 240 5% 64.9%;
-
     --accent: 240 3.7% 20%;
     --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 240 3.7% 25%;
     --input: 240 3.7% 25%;
     --ring: 270 84% 75%;
   }
-}
 
-@layer base {
-  * {
+  /* Base styles */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
     @apply border-border;
   }
 
@@ -161,6 +78,7 @@
     @apply outline-hidden ring-1 ring-ring ring-offset-2;
   }
 
+  /* Input autofill styles */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
@@ -172,19 +90,34 @@
     caret-color: hsl(var(--foreground));
   }
 
-  /* Ensure the clear button inside the input matches the autofill border */
-  input:-webkit-autofill ~ button[aria-label="Clear input"] {
+  input:-webkit-autofill~button[aria-label="Clear input"] {
     color: hsl(var(--foreground));
     border: 1px solid hsl(var(--ring));
   }
 }
 
+/* Custom utilities */
+@utility chord {
+  @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
+}
+
+@utility chord-line {
+  @apply font-mono whitespace-normal mb-1 break-words;
+}
+
+@utility lyrics-line {
+  @apply mb-3 break-words;
+}
+
+@utility section-header {
+  @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
+}
+
 /* Mobile optimizations */
 @media (max-width: 640px) {
   .chord-line {
-    @apply text-sm mb-0.5 break-all;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    @apply text-sm mb-0.5;
+    @apply break-words;
     max-width: 100%;
   }
 
@@ -194,7 +127,7 @@
   }
 
   .lyrics-line {
-    @apply mb-2 wrap-break-word;
+    @apply mb-2 break-words;
     max-width: 100%;
   }
 
@@ -209,32 +142,34 @@
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
+  height: 100vh;
   max-width: 100%;
+  overflow-x: hidden;
+
+  margin: 0;
+  padding: 0;
+
+  /* Theme transition animation */
+  transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 pre,
 code,
 .chord-line,
 .lyrics-line {
+  @apply break-words;
   white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: break-word;
 }
 
 a:focus-visible {
   box-shadow: 0 0 0 1px hsl(var(--ring));
   border-radius: var(--radius);
-}
-
-/* Theme transition animation */
-html {
-  transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-[role="menuitem"] {
-  cursor: pointer;
 }
 
 /* Theme toggle animation */
