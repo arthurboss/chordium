@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @config '../tailwind.config.ts';
 
@@ -70,12 +70,60 @@
     @apply border-border;
   }
 
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    height: 100vh;
+    max-width: 100%;
+    overflow-x: hidden;
+
+    margin: 0;
+    padding: 0;
+
+    /* Theme transition animation */
+    transition:
+      color 0.3s ease,
+      background-color 0.3s ease;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
 
+  #root {
+    height: 100%;
+  }
+
+  button,
+  a {
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--primary);
+    }
+
+    .dark & {
+      &:hover {
+        border-color: hsl(var(--primary));
+      }
+    }
+  }
+
   a:focus-visible {
     @apply outline-hidden ring-1 ring-ring ring-offset-2;
+    box-shadow: 0 0 0 1px hsl(var(--ring));
+    border-radius: var(--radius);
+  }
+
+  pre,
+  code,
+  .chord-line,
+  .lyrics-line {
+    @apply break-words;
+    white-space: pre-wrap;
   }
 
   /* Input autofill styles */
@@ -90,7 +138,7 @@
     caret-color: hsl(var(--foreground));
   }
 
-  input:-webkit-autofill~button[aria-label="Clear input"] {
+  input:-webkit-autofill ~ button[aria-label="Clear input"] {
     color: hsl(var(--foreground));
     border: 1px solid hsl(var(--ring));
   }
@@ -140,43 +188,4 @@
     max-width: 100%;
     overflow-x: hidden;
   }
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100vh;
-  max-width: 100%;
-  overflow-x: hidden;
-
-  margin: 0;
-  padding: 0;
-
-  /* Theme transition animation */
-  transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-pre,
-code,
-.chord-line,
-.lyrics-line {
-  @apply break-words;
-  white-space: pre-wrap;
-}
-
-a:focus-visible {
-  box-shadow: 0 0 0 1px hsl(var(--ring));
-  border-radius: var(--radius);
-}
-
-/* Theme toggle animation */
-.theme-toggle-icon {
-  transition: transform 0.2s ease;
-}
-
-.theme-toggle-icon:hover {
-  transform: rotate(15deg);
 }

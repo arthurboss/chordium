@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Song } from "../types/song";
@@ -33,13 +33,7 @@ const TabContainer = ({
   setSelectedSong
 }: TabContainerProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const chordDisplayRef = useRef<HTMLDivElement>(null);
-
-  // Debug log to see if TabContainer is rendered
-
-
-  // No more URL tracking - we'll reconstruct from search query when needed
 
   // Scroll to chord display when needed
   useEffect(() => {
@@ -54,7 +48,7 @@ const TabContainer = ({
       const storedQuery = sessionStorage.getItem('chordium_search_query');
       if (storedQuery) {
         const { lastRoute } = JSON.parse(storedQuery);
-        
+
         if (lastRoute) {
           // Navigate to the stored route (search with query or artist page)
           navigate(lastRoute);
@@ -64,7 +58,7 @@ const TabContainer = ({
     } catch (error) {
       console.warn('Failed to restore route from session storage:', error);
     }
-    
+
     // Fallback: go to basic search page
     navigate("/search");
   };
@@ -136,7 +130,7 @@ const TabContainer = ({
     guitarTuning: string;
     guitarCapo: number;
   }) => {
-  try {
+    try {
       // Use the provided guitarCapo value
       const guitarCapo = meta.guitarCapo || 0;
 
@@ -246,7 +240,7 @@ const TabContainer = ({
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList
-        className="grid w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
+        className="grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]"
         role="tablist"
         {...cyAttr("tabs-list")}
       >

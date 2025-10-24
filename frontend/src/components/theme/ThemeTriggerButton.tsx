@@ -11,18 +11,18 @@ interface ThemeTriggerButtonProps {
 export const ThemeTriggerButton = memo(forwardRef<HTMLButtonElement, ThemeTriggerButtonProps>(
   ({ isDark, onClick }, ref) => {
     return (
-      <Button 
+      <Button
         ref={ref}
-        variant="ghost" 
-        size="icon" 
+        variant="ghost"
+        size="icon"
         aria-label="Toggle theme"
         title="Theme settings"
-        className="border"
+        className="border group"
         tabIndex={0}
         onClick={onClick}
         {...cyAttr("theme-toggle-button")}
       >
-        <span className="theme-toggle-icon">
+        <span className="theme-toggle-icon transition-transform duration-200 group-hover:rotate-30">
           {getThemeToggleIcon(isDark)}
         </span>
         <span className="sr-only">Theme settings</span>
