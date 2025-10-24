@@ -16,7 +16,7 @@ const DeleteButton = ({ onDelete }: DeleteButtonProps) => (
       e.stopPropagation();
       onDelete();
     }}
-    className="flex-shrink-0 hover:border-red-500/20 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30"
+    className="shrink-0 hover:border-red-500/20 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30"
     tabIndex={0}
     aria-label="delete-button"
   >

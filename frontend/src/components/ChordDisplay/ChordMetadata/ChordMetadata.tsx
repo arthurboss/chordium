@@ -23,7 +23,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
     : 'None';
 
   return (
-    <div className='grid [grid-template-columns:max-content_1fr] sm:[grid-template-columns:repeat(4,_min-content)] gap-y-1 gap-x-4 w-full sm:justify-between text-xs'>
+    <div className='grid grid-cols-[max-content_1fr] sm:grid-cols-[repeat(4,min-content)] gap-y-1 gap-x-4 w-full sm:justify-between text-xs'>
       <MetadataBadge
         label="Artist:"
         value={chordSheet.artist || 'Unknown'}

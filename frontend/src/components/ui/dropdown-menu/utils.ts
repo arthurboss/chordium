@@ -21,8 +21,8 @@ export const dropdownAnimationClasses = {
  * Common dropdown menu style classes
  */
 export const dropdownStyleClasses = {
-  content: "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground",
-  item: "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  content: "z-50 min-w-32 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground",
+  item: "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
   insetItem: "pl-8",
   indicator: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
   label: "px-2 py-1.5 text-sm font-semibold",

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Header = () => (
-  <header className="py-1.5 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
+  <header className="py-1.5 border-b shadow-xs bg-background/80 dark:bg-(--card) backdrop-blur-xs sticky top-0 z-50">
     <div className="flex justify-between px-4 max-w-3xl mx-auto">
       <Link
         to="/"

@@ -54,7 +54,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
           <div className={TEXT_STYLE_MENU_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.viewMode}</div>
           <div className={TEXT_STYLE_MENU_STYLES.buttonGroup}>
             <Button 
-              variant={isViewModeActive(viewMode, 'normal') ? 'default' : 'outline'} 
+              variant={isViewModeActive(viewMode, 'normal') ? 'default' : 'outline-solid'} 
               size="sm" 
               className={TEXT_STYLE_MENU_STYLES.viewModeButton} 
               onClick={() => setViewMode('normal')} 
@@ -63,7 +63,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
               <Text size={18} className="text-foreground" />
             </Button>
             <Button 
-              variant={isViewModeActive(viewMode, 'chords-only') ? 'default' : 'outline'} 
+              variant={isViewModeActive(viewMode, 'chords-only') ? 'default' : 'outline-solid'} 
               size="sm" 
               className={TEXT_STYLE_MENU_STYLES.viewModeButton} 
               onClick={() => setViewMode('chords-only')} 
@@ -72,7 +72,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
               <Music size={18} className="text-foreground" />
             </Button>
             <Button 
-              variant={isViewModeActive(viewMode, 'lyrics-only') ? 'default' : 'outline'} 
+              variant={isViewModeActive(viewMode, 'lyrics-only') ? 'default' : 'outline-solid'} 
               size="sm" 
               className={TEXT_STYLE_MENU_STYLES.viewModeButton} 
               onClick={() => setViewMode('lyrics-only')} 
@@ -95,7 +95,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
           <div className={TEXT_STYLE_MENU_STYLES.sectionTitle}>{TEXT_PREFERENCES_LABELS.fontStyle}</div>
           <div className={TEXT_STYLE_MENU_STYLES.buttonGroup}>
             <Button 
-              variant={isFontStyleActive(fontStyle, 'serif') ? 'default' : 'outline'} 
+              variant={isFontStyleActive(fontStyle, 'serif') ? 'default' : 'outline-solid'} 
               size="sm" 
               className={TEXT_STYLE_MENU_STYLES.fontStyleButton} 
               onClick={() => setFontStyle('serif')}
@@ -103,7 +103,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
               {TEXT_PREFERENCES_LABELS.serif}
             </Button>
             <Button 
-              variant={isFontStyleActive(fontStyle, 'sans-serif') ? 'default' : 'outline'} 
+              variant={isFontStyleActive(fontStyle, 'sans-serif') ? 'default' : 'outline-solid'} 
               size="sm" 
               className={TEXT_STYLE_MENU_STYLES.fontStyleButton} 
               onClick={() => setFontStyle('sans-serif')}

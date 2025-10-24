@@ -24,7 +24,7 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
 }) => {
   const commonStyles = {
     placement: 'sticky bottom-4 z-40',
-    background: 'bg-background/70 dark:bg-background/70 backdrop-blur-sm',
+    background: 'bg-background/70 dark:bg-background/70 backdrop-blur-xs',
     margins: 'mb-4 mt-0 p-2' + ` ${isAtBottom ? 'mx-0' : 'mx-4'}`,
     animation: 'transition-all duration-300 ease-in-out'
   }

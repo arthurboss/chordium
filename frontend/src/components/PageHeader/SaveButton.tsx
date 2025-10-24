@@ -13,7 +13,7 @@ const SaveButton = ({ onSave }: SaveButtonProps) => (
     variant="outline"
     size="sm"
     onClick={onSave}
-    className="flex-shrink-0"
+    className="shrink-0"
     tabIndex={0}
     aria-label="save to my chord sheets"
   >

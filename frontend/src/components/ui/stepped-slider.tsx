@@ -53,7 +53,7 @@ const SteppedSlider = React.forwardRef<
         <SliderPrimitive.Track className={`${trackHeight} w-full grow overflow-hidden bg-transparent cursor-pointer`}>
           <SliderPrimitive.Range className="absolute h-full bg-primary/40 z-10" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer z-20" />
+        <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer z-20" />
       </SliderPrimitive.Root>
 
       {/* Step Indicators */}

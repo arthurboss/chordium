@@ -246,7 +246,7 @@ const TabContainer = ({
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList
-        className="grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]"
+        className="grid w-full grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
         role="tablist"
         {...cyAttr("tabs-list")}
       >

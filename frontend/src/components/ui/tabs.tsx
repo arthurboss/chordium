@@ -93,14 +93,14 @@ const TabsList = React.forwardRef<
     <TabsPrimitive.List
       ref={combinedRef}
       className={cn(
-        "relative inline-flex h-12 items-center justify-center content-center rounded-md p-1.5 text-muted-foreground border bg-card dark:bg-[var(--card)]",
+        "relative inline-flex h-12 items-center justify-center content-center rounded-md p-1.5 text-muted-foreground border bg-card dark:bg-(--card)",
         className
       )}
       {...props}
     >
       <span
         aria-hidden="true"
-        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background border transition-all duration-200 ease-in-out"
+        className="absolute top-1.5 bottom-1.5 rounded-sm bg-background border transition-all duration-200 ease-in-out"
         style={indicatorStyle}
       />
       {children}
@@ -131,7 +131,7 @@ const TabsTrigger = React.forwardRef<
     <TabsPrimitive.Trigger
       ref={ref}
       className={cn(
-        "relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
+        "relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
         className
       )}
       onKeyDown={handleKeyDown}
@@ -148,7 +148,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ",
+      "mt-2 ring-offset-background focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring ",
       className
     )}
     {...props}

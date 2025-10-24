@@ -2,7 +2,7 @@ import GitHubIcon from "./icons/GitHubIcon";
 
 const Footer = () => {
   return (
-    <footer className="mt-auto border-t dark:bg-[--card]">
+    <footer className="mt-auto border-t dark:bg-(--card)">
       <div className="flex justify-end sm:justify-center py-1 px-4 max-w-3xl mx-auto">
         <a
           href="https://github.com/arthurboss/chordium"

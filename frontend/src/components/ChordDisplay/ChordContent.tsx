@@ -21,7 +21,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   // Default: do not override
   return (
     <div 
-      className="bg-white dark:bg-[--card] mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
+      className="bg-white dark:bg-(--card) mb-4 p-4 sm:p-6 rounded-lg shadow-xs border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
       {isLoading ? (
@@ -42,7 +42,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
               if (viewMode === "chords-only" && line.type === 'lyrics') return null;
               if (line.type === 'tab') {
                 return (
-                  <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 wrap-break-word" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                     {line.content}
                   </pre>
                 );
@@ -78,13 +78,13 @@ const ChordContent: React.FC<ChordContentProps> = ({
                   );
                 }
                 return (
-                  <div key={lineIndex} className="chord-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <div key={lineIndex} className="chord-line wrap-break-word" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                     {parts.length > 0 ? parts : line.content}
                   </div>
                 );
               } else if (line.type === 'lyrics') {
                 return (
-                  <div key={lineIndex} className="lyrics-line break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
+                  <div key={lineIndex} className="lyrics-line wrap-break-word" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
                     {line.content}
                   </div>
                 );

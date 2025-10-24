@@ -3,7 +3,7 @@
  */
 
 export const TEXT_STYLE_MENU_STYLES = {
-  triggerButton: "h-8 px-2 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-0 hover:text-primary",
+  triggerButton: "h-8 px-2 flex items-center gap-2 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary",
   settingsIcon: "text-foreground",
   buttonText: "font-medium text-sm",
   dropdownContent: "align-end",

@@ -80,7 +80,7 @@ const SearchBar = ({
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <div className="flex-grow" />
+          <div className="grow" />
 
           <RoundTrashButton
             onClick={onClearSearch}

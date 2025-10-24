@@ -28,7 +28,7 @@ const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
           autoScroll={autoScroll}
           setAutoScroll={setAutoScroll}
           size={16}
-          className={`h-8 w-full px-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-0 hover:text-primary ${autoScroll && 'max-w-[2rem] text-primary'}`}
+          className={`h-8 w-full px-2 transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary ${autoScroll && 'max-w-8 text-primary'}`}
         />
         {/* Speed controls only show when playing, always between PlayButton and Transpose */}
         {autoScroll && (
