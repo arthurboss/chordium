@@ -14,8 +14,8 @@ import { useNavigation } from "@/hooks/navigation";
 import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
 
 // Components
-import { ChordViewerLoading } from "./components/chord-viewer-loading";
 import { ChordViewerError } from "./components/chord-viewer-error";
+import LoadingState from "@/components/LoadingState";
 
 /**
  * ChordViewer page component
@@ -37,18 +37,18 @@ const ChordViewer = () => {
   // Create complete chord sheet data object (only if metadata exists)
   const chordSheetData = chordSheetResult.metadata
     ? createChordSheetData(
-        {
-          title: chordSheetResult.metadata.title,
-          artist: chordSheetResult.metadata.artist,
-          songKey: chordSheetResult.metadata.songKey,
-          guitarTuning: chordSheetResult.metadata.guitarTuning,
-          guitarCapo: chordSheetResult.metadata.guitarCapo,
-        },
-        {
-          songChords: chordSheetResult.content?.songChords || '',
-        },
-        path
-      )
+      {
+        title: chordSheetResult.metadata.title,
+        artist: chordSheetResult.metadata.artist,
+        songKey: chordSheetResult.metadata.songKey,
+        guitarTuning: chordSheetResult.metadata.guitarTuning,
+        guitarCapo: chordSheetResult.metadata.guitarCapo,
+      },
+      {
+        songChords: chordSheetResult.content?.songChords || '',
+      },
+      path
+    )
     : null;
 
   // Local state for saved status to update UI immediately after save
@@ -96,7 +96,7 @@ const ChordViewer = () => {
 
   // Unified guard logic: Only show loading, error, or missing data when not loading
   if (chordSheetResult.isLoading) {
-    return <ChordViewerLoading />;
+    return <LoadingState />
   } else if (chordSheetResult.error) {
     return (
       <ChordViewerError
@@ -116,32 +116,30 @@ const ChordViewer = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-        <SongViewer
-          song={{
-            song: {
-              title: chordSheetData.chordSheet.title,
-              artist: chordSheetData.chordSheet.artist,
-              path: chordSheetData.path
-            },
-            chordSheet: chordSheetData.chordSheet
-          }}
-          chordContent={chordSheetResult.content?.songChords ?? ''}
-          chordDisplayRef={chordDisplayRef}
-          onBack={handleBack}
-          onDelete={handleDelete}
-          onSave={handleSave}
-          onUpdate={() => { }}
-          hideDeleteButton={!isSaved}
-          hideSaveButton={isSaved}
-          isFromMyChordSheets={isSaved}
-          useProgressiveLoading={chordSheetResult.isFromAPI}
-          loadContent={chordSheetResult.loadContent}
-          isContentLoading={chordSheetResult.isContentLoading}
-        />
-      </main>
-    </div>
+    <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+      <SongViewer
+        song={{
+          song: {
+            title: chordSheetData.chordSheet.title,
+            artist: chordSheetData.chordSheet.artist,
+            path: chordSheetData.path
+          },
+          chordSheet: chordSheetData.chordSheet
+        }}
+        chordContent={chordSheetResult.content?.songChords ?? ''}
+        chordDisplayRef={chordDisplayRef}
+        onBack={handleBack}
+        onDelete={handleDelete}
+        onSave={handleSave}
+        onUpdate={() => { }}
+        hideDeleteButton={!isSaved}
+        hideSaveButton={isSaved}
+        isFromMyChordSheets={isSaved}
+        useProgressiveLoading={chordSheetResult.isFromAPI}
+        loadContent={chordSheetResult.loadContent}
+        isContentLoading={chordSheetResult.isContentLoading}
+      />
+    </main>
   );
 };
 
