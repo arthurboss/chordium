@@ -14,14 +14,43 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
+			extend: {
 			colors: {
-				// All colors migrated to OKLCH
-				border: 'oklch(var(--border))',
-				input: 'oklch(var(--input))',
-				ring: 'oklch(var(--ring))',
+				// ===== Foundation palette (mirrors CSS tokens for designers) =====
+				palette: {
+					neutral: {
+						'0': 'oklch(var(--neutral-0))',
+						'5': 'oklch(var(--neutral-5))',
+						'20': 'oklch(var(--neutral-20))',
+						'40': 'oklch(var(--neutral-40))',
+						'70': 'oklch(var(--neutral-70))',
+						'85': 'oklch(var(--neutral-85))',
+						'90': 'oklch(var(--neutral-90))'
+					},
+					brand: {
+						'50': 'oklch(var(--brand-50))',
+						contrast: 'oklch(var(--brand-contrast))'
+					},
+					accent: {
+						'50': 'oklch(var(--accent-50))',
+						contrast: 'oklch(var(--accent-contrast))'
+					},
+					feedback: {
+						error: 'oklch(var(--error-60))',
+						'error-contrast': 'oklch(var(--error-contrast))'
+					}
+				},
+				// ===== Semantic aliases used across the UI =====
 				background: 'oklch(var(--background))',
 				foreground: 'oklch(var(--foreground))',
+				card: {
+					DEFAULT: 'oklch(var(--card))',
+					foreground: 'oklch(var(--card-foreground))'
+				},
+				popover: {
+					DEFAULT: 'oklch(var(--popover))',
+					foreground: 'oklch(var(--popover-foreground))'
+				},
 				primary: {
 					DEFAULT: 'oklch(var(--primary))',
 					foreground: 'oklch(var(--primary-foreground))'
@@ -29,10 +58,6 @@ export default {
 				secondary: {
 					DEFAULT: 'oklch(var(--secondary))',
 					foreground: 'oklch(var(--secondary-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'oklch(var(--destructive))',
-					foreground: 'oklch(var(--destructive-foreground))'
 				},
 				muted: {
 					DEFAULT: 'oklch(var(--muted))',
@@ -42,14 +67,14 @@ export default {
 					DEFAULT: 'oklch(var(--accent))',
 					foreground: 'oklch(var(--accent-foreground))'
 				},
-				popover: {
-					DEFAULT: 'oklch(var(--popover))',
-					foreground: 'oklch(var(--popover-foreground))'
+				destructive: {
+					DEFAULT: 'oklch(var(--destructive))',
+					foreground: 'oklch(var(--destructive-foreground))'
 				},
-				card: {
-					DEFAULT: 'oklch(var(--card))',
-					foreground: 'oklch(var(--card-foreground))'
-				},
+				border: 'oklch(var(--border))',
+				input: 'oklch(var(--input))',
+				ring: 'oklch(var(--ring))',
+				// ===== Component-specific palettes =====
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -60,6 +85,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Legacy chord palette still used in utilities
 				chord: {
 					DEFAULT: '#9b87f5',
 					light: '#e5deff',

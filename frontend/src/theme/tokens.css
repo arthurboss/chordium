@@ -1,0 +1,91 @@
+@layer base {
+  :root {
+    /* ===== Foundation tokens (light theme) ===== */
+    /* Neutral ramp */
+    --neutral-0: 1 0 0;
+    --neutral-5: 0.9872 0.0011 264.55;
+    --neutral-20: 0.9676 0.0013 286.37;
+    --neutral-40: 0.9197 0.004 286.32;
+    --neutral-70: 0.5519 0.0137 285.94;
+    --neutral-85: 0.2103 0.0059 285.88;
+    --neutral-90: 0.2072 0.0395 265.52;
+
+    /* Brand & accent */
+    --brand-50: 0.7264 0.1588 305.88;
+    --brand-contrast: 0.9848 0 0;
+    --accent-50: 0.9676 0.0013 286.37;
+    --accent-contrast: 0.2103 0.0059 285.88;
+
+    /* Status */
+    --error-60: 0.6368 0.2078 25.33;
+    --error-contrast: 0.9848 0 0;
+
+    /* ===== Semantic tokens (light theme) ===== */
+    --background: var(--neutral-5);
+    --foreground: var(--neutral-90);
+    --card: var(--neutral-0);
+    --card-foreground: var(--neutral-90);
+    --popover: var(--neutral-0);
+    --popover-foreground: var(--neutral-90);
+    --primary: var(--brand-50);
+    --primary-foreground: var(--brand-contrast);
+    --secondary: var(--neutral-20);
+    --secondary-foreground: var(--neutral-85);
+    --muted: var(--neutral-20);
+    --muted-foreground: var(--neutral-70);
+    --accent: var(--accent-50);
+    --accent-foreground: var(--accent-contrast);
+    --destructive: var(--error-60);
+    --destructive-foreground: var(--error-contrast);
+    --border: var(--neutral-40);
+    --input: var(--neutral-40);
+    --ring: var(--brand-50);
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* ===== Foundation tokens (dark theme) ===== */
+    /* Neutral ramp */
+    --neutral-0: 0.9848 0 0;
+    --neutral-5: 0.7119 0.0129 286.07;
+    --neutral-20: 0.3633 0.008 285.99;
+    --neutral-40: 0.3151 0.0067 286.01;
+    --neutral-60: 0.2741 0.0055 286.03;
+    --neutral-70: 0.2363 0.0057 285.96;
+    --neutral-80: 0.2337 0.0043 286.06;
+    --neutral-85: 0.2123 0.0037 286.08;
+    --neutral-90: 0.2103 0.0059 285.88;
+
+    /* Brand & accent */
+    --brand-50: 0.7264 0.1588 305.88;
+    --brand-contrast: 0.2103 0.0059 285.88;
+    --accent-50: 0.3151 0.0067 286.01;
+    --accent-contrast: 0.9848 0 0;
+
+    /* Status */
+    --error-60: 0.3959 0.1331 25.72;
+    --error-contrast: 0.9848 0 0;
+
+    /* ===== Semantic tokens (dark theme) ===== */
+    --background: var(--neutral-60);
+    --foreground: var(--neutral-0);
+    --card: var(--neutral-70);
+    --card-foreground: var(--neutral-0);
+    --chord-content-bg-dark: var(--neutral-80);
+    --popover: var(--neutral-85);
+    --popover-foreground: var(--neutral-0);
+    --primary: var(--brand-50);
+    --primary-foreground: var(--brand-contrast);
+    --secondary: var(--neutral-40);
+    --secondary-foreground: var(--neutral-0);
+    --muted: var(--neutral-20);
+    --muted-foreground: var(--neutral-5);
+    --accent: var(--accent-50);
+    --accent-foreground: var(--accent-contrast);
+    --destructive: var(--error-60);
+    --destructive-foreground: var(--error-contrast);
+    --border: var(--neutral-20);
+    --input: var(--neutral-20);
+    --ring: var(--brand-50);
+  }
+}

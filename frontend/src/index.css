@@ -2,53 +2,9 @@
 
 @config '../tailwind.config.ts';
 
+@import "./theme/tokens.css";
+
 @layer base {
-  :root {
-    --background: 0.9872 0.0011 264.55;
-    --foreground: 0.2072 0.0395 265.52;
-    --card: 1 0 0;
-    --card-foreground: 0.2072 0.0395 265.52;
-    --popover: 1 0 0;
-    --popover-foreground: 0.2072 0.0395 265.52;
-    --primary: 0.7264 0.1588 305.88;
-    --primary-foreground: 0.9848 0 0;
-    --secondary: 0.9676 0.0013 286.37;
-    --secondary-foreground: 0.2103 0.0059 285.88;
-    --muted: 0.9676 0.0013 286.37;
-    --muted-foreground: 0.5519 0.0137 285.94;
-    --accent: 0.9676 0.0013 286.37;
-    --accent-foreground: 0.2103 0.0059 285.88;
-    --destructive: 0.6368 0.2078 25.33;
-    --destructive-foreground: 0.9848 0 0;
-    --border: 0.9197 0.004 286.32;
-    --input: 0.9197 0.004 286.32;
-    --ring: 0.7264 0.1588 305.88;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 0.2741 0.0055 286.03;
-    --foreground: 0.9848 0 0;
-    --card: 0.2363 0.0057 285.96;
-    --card-foreground: 0.9848 0 0;
-    --chord-content-bg-dark: 0.2337 0.0043 286.06;
-    --popover: 0.2123 0.0037 286.08;
-    --popover-foreground: 0.9848 0 0;
-    --primary: 0.7264 0.1588 305.88;
-    --primary-foreground: 0.2103 0.0059 285.88;
-    --secondary: 0.3151 0.0067 286.01;
-    --secondary-foreground: 0.9848 0 0;
-    --muted: 0.3633 0.008 285.99;
-    --muted-foreground: 0.7119 0.0129 286.07;
-    --accent: 0.3151 0.0067 286.01;
-    --accent-foreground: 0.9848 0 0;
-    --destructive: 0.3959 0.1331 25.72;
-    --destructive-foreground: 0.9848 0 0;
-    --border: 0.3633 0.008 285.99;
-    --input: 0.3633 0.008 285.99;
-    --ring: 0.7264 0.1588 305.88;
-  }
-
   /* Base styles */
   *,
   ::after,
