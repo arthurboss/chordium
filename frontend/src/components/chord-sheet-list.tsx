@@ -24,7 +24,7 @@ const ChordSheetList = ({
           {[...chordSheets].reverse().map((storedChordSheet, index) => (
             <ChordSheetCard
               key={`${storedChordSheet.path}-${index}`}
-              chordSheet={storedChordSheet}
+              metadata={storedChordSheet}
               onView={onChordSheetSelect}
               onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
             />
