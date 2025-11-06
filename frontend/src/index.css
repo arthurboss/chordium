@@ -3,13 +3,12 @@
 @config '../tailwind.config.ts';
 
 @layer base {
-  /* Theme variables - All colors use OKLCH (converted using culori) */
   :root {
     --background: 0.9872 0.0011 264.55;
     --foreground: 0.2072 0.0395 265.52;
-    --card: 1.0000 0 0;
+    --card: 1 0 0;
     --card-foreground: 0.2072 0.0395 265.52;
-    --popover: 1.0000 0 0;
+    --popover: 1 0 0;
     --popover-foreground: 0.2072 0.0395 265.52;
     --primary: 0.7264 0.1588 305.88;
     --primary-foreground: 0.9848 0 0;
@@ -21,8 +20,8 @@
     --accent-foreground: 0.2103 0.0059 285.88;
     --destructive: 0.6368 0.2078 25.33;
     --destructive-foreground: 0.9848 0 0;
-    --border: 0.9197 0.0040 286.32;
-    --input: 0.9197 0.0040 286.32;
+    --border: 0.9197 0.004 286.32;
+    --input: 0.9197 0.004 286.32;
     --ring: 0.7264 0.1588 305.88;
     --radius: 0.5rem;
   }
@@ -39,14 +38,14 @@
     --primary-foreground: 0.2103 0.0059 285.88;
     --secondary: 0.3151 0.0067 286.01;
     --secondary-foreground: 0.9848 0 0;
-    --muted: 0.3633 0.0080 285.99;
+    --muted: 0.3633 0.008 285.99;
     --muted-foreground: 0.7119 0.0129 286.07;
     --accent: 0.3151 0.0067 286.01;
     --accent-foreground: 0.9848 0 0;
     --destructive: 0.3959 0.1331 25.72;
     --destructive-foreground: 0.9848 0 0;
-    --border: 0.3633 0.0080 285.99;
-    --input: 0.3633 0.0080 285.99;
+    --border: 0.3633 0.008 285.99;
+    --input: 0.3633 0.008 285.99;
     --ring: 0.7264 0.1588 305.88;
   }
 
@@ -141,7 +140,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -150,7 +150,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(-25%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -161,7 +162,8 @@
 }
 
 @keyframes ping {
-  75%, 100% {
+  75%,
+  100% {
     transform: scale(2);
     opacity: 0;
   }
