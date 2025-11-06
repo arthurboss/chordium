@@ -21,7 +21,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   // Default: do not override
   return (
     <div 
-      className="bg-white dark:bg-(--card) mb-4 p-4 sm:p-6 rounded-lg shadow-xs border"
+      className="bg-card mb-4 p-4 sm:p-6 rounded-lg shadow-xs border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
       {isLoading ? (

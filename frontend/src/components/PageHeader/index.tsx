@@ -20,7 +20,7 @@ const PageHeader = memo(({
 }: PageHeaderProps) => {
 
   return (
-    <Card className="flex flex-row items-center gap-2 p-4 rounded-lg border bg-card dark:bg-(--card) text-card-foreground shadow-xs">
+    <Card className="flex flex-row items-center gap-2 p-4 rounded-lg border bg-card text-card-foreground shadow-xs">
       {/* Mobile layout: Title first, then buttons at far right */}
       <div className="flex sm:hidden flex-row items-center justify-between w-full gap-1">
         <TitleSection title={title} isMobile={true} />

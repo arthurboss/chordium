@@ -3,61 +3,51 @@
 @config '../tailwind.config.ts';
 
 @layer base {
-  /* Theme variables */
+  /* Theme variables - All colors use OKLCH (converted using culori) */
   :root {
-    --color-background: 240 5% 96%;
-    --color-foreground: 240 10% 3.9%;
-    --color-card: 0 0% 100%;
-    --color-card-foreground: 240 10% 3.9%;
-    --color-popover: 0 0% 100%;
-    --color-popover-foreground: 240 10% 3.9%;
-    --color-primary: 270 84% 75%;
-
-    --color-border: 240 5.9% 90%;
-
-    --background: var(--color-gray-50);
-    --foreground: var(--color-gray-900);
-    --card: var(--color-white);
-    --card-foreground: var(--color-gray-900);
-    --popover: var(--color-white);
-    --popover-foreground: var(--color-gray-900);
-    --primary: var(--color-purple-400);
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 270 84% 75%;
+    --background: 0.9872 0.0011 264.55;
+    --foreground: 0.2072 0.0395 265.52;
+    --card: 1.0000 0 0;
+    --card-foreground: 0.2072 0.0395 265.52;
+    --popover: 1.0000 0 0;
+    --popover-foreground: 0.2072 0.0395 265.52;
+    --primary: 0.7264 0.1588 305.88;
+    --primary-foreground: 0.9848 0 0;
+    --secondary: 0.9676 0.0013 286.37;
+    --secondary-foreground: 0.2103 0.0059 285.88;
+    --muted: 0.9676 0.0013 286.37;
+    --muted-foreground: 0.5519 0.0137 285.94;
+    --accent: 0.9676 0.0013 286.37;
+    --accent-foreground: 0.2103 0.0059 285.88;
+    --destructive: 0.6368 0.2078 25.33;
+    --destructive-foreground: 0.9848 0 0;
+    --border: 0.9197 0.0040 286.32;
+    --input: 0.9197 0.0040 286.32;
+    --ring: 0.7264 0.1588 305.88;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 3.7% 15.9%;
-    --foreground: 0 0% 98%;
-    --card: rgb(30, 30, 33);
-    --card-foreground: 0 0% 98%;
-    --chord-content-bg-dark: hsl(240, 3.7%, 12%);
-    --popover: 240 3.7% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 270 84% 75%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 20%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 25%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 20%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 25%;
-    --input: 240 3.7% 25%;
-    --ring: 270 84% 75%;
+    --background: 0.2741 0.0055 286.03;
+    --foreground: 0.9848 0 0;
+    --card: 0.2363 0.0057 285.96;
+    --card-foreground: 0.9848 0 0;
+    --chord-content-bg-dark: 0.2337 0.0043 286.06;
+    --popover: 0.2123 0.0037 286.08;
+    --popover-foreground: 0.9848 0 0;
+    --primary: 0.7264 0.1588 305.88;
+    --primary-foreground: 0.2103 0.0059 285.88;
+    --secondary: 0.3151 0.0067 286.01;
+    --secondary-foreground: 0.9848 0 0;
+    --muted: 0.3633 0.0080 285.99;
+    --muted-foreground: 0.7119 0.0129 286.07;
+    --accent: 0.3151 0.0067 286.01;
+    --accent-foreground: 0.9848 0 0;
+    --destructive: 0.3959 0.1331 25.72;
+    --destructive-foreground: 0.9848 0 0;
+    --border: 0.3633 0.0080 285.99;
+    --input: 0.3633 0.0080 285.99;
+    --ring: 0.7264 0.1588 305.88;
   }
 
   /* Base styles */
@@ -66,7 +56,6 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
     @apply border-border;
   }
 
@@ -107,14 +96,14 @@
 
     .dark & {
       &:hover {
-        border-color: hsl(var(--primary));
+        border-color: var(--primary);
       }
     }
   }
 
   a:focus-visible {
     @apply outline-hidden ring-1 ring-ring ring-offset-2;
-    box-shadow: 0 0 0 1px hsl(var(--ring));
+    box-shadow: 0 0 0 1px oklch(var(--ring));
     border-radius: var(--radius);
   }
 
@@ -130,17 +119,17 @@
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    -webkit-text-fill-color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
+    -webkit-box-shadow: 0 0 0 1000px oklch(0.7264 0.1588 305.88 / 0.1) inset;
+    box-shadow: 0 0 0 1000px oklch(0.7264 0.1588 305.88 / 0.1) inset;
+    -webkit-text-fill-color: oklch(var(--foreground));
+    border: 1px solid oklch(var(--ring));
     transition: background-color 5000s ease-in-out 0s;
-    caret-color: hsl(var(--foreground));
+    caret-color: oklch(var(--foreground));
   }
 
   input:-webkit-autofill ~ button[aria-label="Clear input"] {
-    color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
+    color: oklch(var(--foreground));
+    border: 1px solid oklch(var(--ring));
   }
 }
 
