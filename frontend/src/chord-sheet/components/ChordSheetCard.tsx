@@ -9,7 +9,7 @@ import { cyAttr } from "@/utils/test-utils";
  */
 const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
   return (
-    <Card className="h-18 w-full overflow-hidden cursor-pointer hover:border-primary/70 hover:text-primary transition-colors duration-300" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
+    <Card className="w-full overflow-hidden cursor-pointer hover:border-primary/70 hover:text-primary transition-colors duration-300" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
       <CardContent
         className="flex-1 flex flex-col justify-between p-4"
         onClick={() => onView(chordSheet)}
