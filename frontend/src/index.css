@@ -144,6 +144,40 @@
   }
 }
 
+/* Standard animation keyframes (replacing tailwindcss-animate plugin) */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
 /* Custom utilities */
 @utility chord {
   @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];

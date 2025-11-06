@@ -1,5 +1,3 @@
-import type { Config } from "tailwindcss";
-
 export default {
 	darkMode: ["class"],
 	content: [
@@ -99,6 +97,10 @@ export default {
 				}
 			},
 			animation: {
+				'spin': 'spin 1s linear infinite',
+				'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'bounce': 'bounce 1s infinite',
+				'ping': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out'
@@ -131,10 +133,6 @@ export default {
 				],
 			}
 		}
-	},
-	plugins: [
-		require("tailwindcss-animate"),
-		require('tailwind-scrollbar')({ nocompatible: true }) // Add this line
-	],
-} satisfies Config;
+	}
+};
 
