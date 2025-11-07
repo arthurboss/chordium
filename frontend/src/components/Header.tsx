@@ -1,12 +1,6 @@
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 
 const Header = () => (
   <header className="py-1.5 border-b shadow-xs bg-card/80 backdrop-blur-xs sticky">
@@ -29,22 +23,10 @@ const Header = () => (
 
       <div className="flex items-center gap-2">
         <OfflineIndicator />
-        <DropdownMenu>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to="/search" className="w-full cursor-pointer">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Link>
-            </DropdownMenuItem>
-
-          </DropdownMenuContent>
-        </DropdownMenu>
         <ThemeToggle />
       </div>
     </div>
   </header>
 );
-
 
 export default Header;
