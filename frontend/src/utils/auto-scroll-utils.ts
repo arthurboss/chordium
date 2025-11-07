@@ -70,6 +70,107 @@ export function alignChordDisplayToTop() {
   }
 }
 
+// Smooth-scroll helper that returns a Promise resolved when scrolling completes
+function smoothScrollTo(
+  scroller: HTMLElement | Element,
+  target: number
+): Promise<void> {
+  return new Promise((resolve) => {
+    try {
+      const isElement = scroller instanceof HTMLElement;
+      const getScroll = () =>
+        isElement
+          ? scroller.scrollTop
+          : document.scrollingElement?.scrollTop || globalThis.scrollY;
+
+      if (isElement && typeof scroller.scrollTo === "function") {
+        scroller.scrollTo({ top: target, behavior: "smooth" });
+      } else {
+        globalThis.scrollTo?.({
+          top: target,
+          behavior: "smooth",
+        } as ScrollToOptions);
+      }
+
+      let settled = false;
+
+      const checkDone = () => {
+        const cur = getScroll();
+        if (Math.abs(cur - target) <= 1) {
+          cleanup();
+          resolve();
+        }
+      };
+
+      const onScroll = () => {
+        checkDone();
+      };
+
+      const cleanup = () => {
+        if (isElement) {
+          scroller.removeEventListener("scroll", onScroll);
+        } else {
+          globalThis.removeEventListener("scroll", onScroll);
+        }
+        if (!settled) {
+          settled = true;
+        }
+      };
+
+      if (isElement) {
+        scroller.addEventListener("scroll", onScroll, { passive: true });
+      } else {
+        globalThis.addEventListener("scroll", onScroll, { passive: true });
+      }
+
+      // Safety timeout: resolve after reasonable delay even if scroll event not fired
+      const dist = Math.abs(getScroll() - target);
+      const timeoutMs = Math.min(3000, 600 + dist * 3);
+      setTimeout(() => {
+        cleanup();
+        resolve();
+      }, timeoutMs);
+    } catch {
+      // If anything fails, resolve so caller can proceed
+      resolve();
+    }
+  });
+}
+
+// Align chord display to top with optional smooth animation. When smooth is
+// true, returns a Promise that resolves when the animation finishes.
+export function alignChordDisplayToTopSmooth(smooth = false): Promise<void> {
+  const chord = document.querySelector("#chord-display");
+  if (!chord) return Promise.resolve();
+  const scrollerEl = findScrollableAncestor(chord);
+  const scroller = (scrollerEl as HTMLElement) || document.documentElement;
+
+  let offset = 0;
+  let el: Element | null = chord;
+  while (el && el !== scroller && el instanceof HTMLElement) {
+    offset += el.offsetTop || 0;
+    el = el.offsetParent || null;
+  }
+
+  const target = Math.max(0, offset - (NAVBAR_HEIGHT || 0));
+
+  if (smooth) {
+    return smoothScrollTo(scroller, target);
+  }
+
+  if (
+    scroller instanceof HTMLElement &&
+    typeof scroller.scrollTo === "function"
+  ) {
+    scroller.scrollTo({ top: target, behavior: "auto" });
+  } else if (scroller instanceof HTMLElement) {
+    scroller.scrollTop = target;
+  } else {
+    globalThis.scrollTo?.({ top: target, behavior: "auto" } as ScrollToOptions);
+  }
+  return Promise.resolve();
+}
+
 // Start an RAF-driven auto-scroll loop. Returns a cleanup function that stops scrolling.
 export function performAutoScroll(
   scrollSpeed: number,
@@ -84,14 +185,14 @@ export function performAutoScroll(
     : document.scrollingElement;
   const scroller = (scrollerEl as HTMLElement) || document.documentElement;
 
-  // Lookup table for pixel-per-second values (1–10). 
+  // Lookup table for pixel-per-second values (1–10).
   // We use an array instead of a Map for faster numeric indexing.
   // The curve below is intentionally gentle at higher speeds.
   const SPEED_MAP = [
     0,
-    2,  // 1
-    4,  // 2
-    7,  // 3
+    2, // 1
+    4, // 2
+    7, // 3
     11, // 4
     16, // 5
     22, // 6
@@ -180,7 +281,7 @@ export function performAutoScroll(
 }
 
 // Toggle helper: if enabling and `startFromChordDisplay` is true, align first.
-export function handleAutoScrollToggle(
+export async function handleAutoScrollToggle(
   enable: boolean | undefined,
   autoScroll: boolean,
   setAutoScroll: (v: boolean) => void,
@@ -192,6 +293,47 @@ export function handleAutoScrollToggle(
     return;
   }
 
-  if (startFromChordDisplay) alignChordDisplayToTop();
+  // If caller requested starting from the chord display, or if the page is
+  // currently scrolled to the bottom (which can happen if the caller's
+  // `isAtBottom` value was stale), align the chord display to the top before
+  // enabling auto-scroll. Use the smooth alignment helper and await it so the
+  // auto-scroll starts after the animation finishes.
+  try {
+    const chord = document.querySelector("#chord-display");
+    const scrollerEl = chord
+      ? findScrollableAncestor(chord)
+      : document.scrollingElement;
+    const scroller = (scrollerEl as HTMLElement) || document.documentElement;
+    const viewport =
+      scroller === document.documentElement ||
+      !(scroller instanceof HTMLElement)
+        ? globalThis.innerHeight
+        : scroller.clientHeight;
+    let scrollTop: number;
+    if (scroller === document.documentElement) {
+      scrollTop = globalThis.scrollY;
+    } else if (scroller instanceof HTMLElement) {
+      scrollTop = scroller.scrollTop || 0;
+    } else {
+      scrollTop = 0;
+    }
+    const total =
+      scroller instanceof HTMLElement
+        ? scroller.scrollHeight
+        : document.body.offsetHeight;
+    const bottom = viewport + scrollTop;
+    const limit = total - (FOOTER_HEIGHT || 0);
+    const atBottom = bottom >= limit - 1;
+
+    if (startFromChordDisplay || atBottom) {
+      // Wait for the smooth align to complete before enabling auto-scroll.
+      // alignChordDisplayToTopSmooth will resolve immediately if smooth is false
+      // or if the element is missing.
+      await alignChordDisplayToTopSmooth(true);
+    }
+  } catch {
+    // Ignore DOM read errors and continue enabling auto-scroll.
+  }
+
   setAutoScroll(true);
 }

@@ -46,7 +46,7 @@ export const useAutoScroll = () => {
   }, [autoScroll, scrollSpeed]);
 
   // Enhanced auto-scroll toggle handler
-  const toggleAutoScroll = (
+  const toggleAutoScroll = async (
     enable?: boolean,
     startFromChordDisplay?: boolean
   ) => {
@@ -68,17 +68,19 @@ export const useAutoScroll = () => {
     }
 
     isTogglingRef.current = true;
-    handleAutoScrollToggle(
-      enable,
-      autoScroll,
-      setAutoScroll,
-      startFromChordDisplay
-    );
-
-    // Reset the flag after a short delay
-    setTimeout(() => {
-      isTogglingRef.current = false;
-    }, 100);
+    try {
+      await handleAutoScrollToggle(
+        enable,
+        autoScroll,
+        setAutoScroll,
+        startFromChordDisplay
+      );
+    } finally {
+      // Reset the flag after a short delay regardless of success/failure
+      setTimeout(() => {
+        isTogglingRef.current = false;
+      }, 100);
+    }
   };
 
   return {
