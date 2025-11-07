@@ -1,187 +1,162 @@
-import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from './layout';
+import type { RefObject } from "react";
+import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from "./layout";
 
-// Default scroll speed for auto-scroll
 export const DEFAULT_SCROLL_SPEED = 3;
 
-// Interface for auto-scroll state references
 export interface AutoScrollRefs {
-  scrollTimerRef: React.MutableRefObject<number | null>;
-  lastScrollTimeRef: React.MutableRefObject<number>;
-  accumulatedScrollRef: React.MutableRefObject<number>;
+  scrollTimerRef: RefObject<number | null>;
+  lastScrollTimeRef: RefObject<number>;
+  accumulatedScrollRef: RefObject<number>;
+  firstFrameRef?: RefObject<boolean>;
 }
 
-/**
- * Helper to get the title/artist element
- * @returns The title/artist DOM element or null
- */
-export function getTitleArtistElement(): Element | null {
-  return document.querySelector('#chord-display .mb-4');
+// Find the nearest ancestor that can scroll vertically. If none is found,
+// fall back to the document scrolling element.
+function findScrollableAncestor(el: Element | null): HTMLElement | Element {
+  let node: Element | null = el;
+  while (node && node !== document.documentElement) {
+    const maybe = node as HTMLElement;
+    const style = globalThis.getComputedStyle(maybe as Element);
+    const overflowY = style.overflowY;
+    if (
+      (overflowY === "auto" ||
+        overflowY === "scroll" ||
+        overflowY === "overlay") &&
+      maybe.scrollHeight > maybe.clientHeight
+    ) {
+      return maybe;
+    }
+    node = node.parentElement;
+  }
+  return document.scrollingElement || document.documentElement;
 }
 
-/**
- * Enhanced auto-scroll toggle logic
- * @param enable - Whether to enable or disable auto-scroll
- * @param autoScroll - Current auto-scroll state
- * @param setAutoScroll - Function to set auto-scroll state
- * @returns void
- */
+function scrollByOn(scroller: HTMLElement, amount: number) {
+  if (typeof scroller.scrollBy === "function") {
+    scroller.scrollBy({ top: amount, left: 0, behavior: "auto" });
+  } else if (typeof scroller.scrollTop === "number") {
+    scroller.scrollTop = (scroller.scrollTop || 0) + amount;
+  } else {
+    globalThis.scrollBy?.({ top: amount, behavior: "auto" } as ScrollToOptions);
+  }
+}
+
+// Scroll #chord-display so it sits at the top of its scroll container (accounting for navbar).
+export function alignChordDisplayToTop() {
+  const chord = document.querySelector("#chord-display");
+  if (!chord) return;
+  const scrollerEl = findScrollableAncestor(chord);
+  const scroller = (scrollerEl as HTMLElement) || document.documentElement;
+
+  // Compute offsetTop relative to the scroller
+  let offset = 0;
+  let el: Element | null = chord;
+  while (el && el !== scroller && el instanceof HTMLElement) {
+    offset += el.offsetTop || 0;
+    el = el.offsetParent || null;
+  }
+
+  const target = Math.max(0, offset - (NAVBAR_HEIGHT || 0));
+
+  if (
+    scroller instanceof HTMLElement &&
+    typeof scroller.scrollTo === "function"
+  ) {
+    scroller.scrollTo({ top: target, behavior: "auto" });
+  } else if (scroller instanceof HTMLElement) {
+    scroller.scrollTop = target;
+  } else {
+    globalThis.scrollTo?.({ top: target, behavior: "auto" } as ScrollToOptions);
+  }
+}
+
+// Start an RAF-driven auto-scroll loop. Returns a cleanup function that stops scrolling.
+export function performAutoScroll(
+  scrollSpeed: number,
+  refs: AutoScrollRefs,
+  setAutoScroll: (v: boolean) => void,
+  setScrollSpeed?: (v: number) => void
+) {
+  updateLayoutHeights();
+  const chord = document.querySelector("#chord-display");
+  const scrollerEl = chord
+    ? findScrollableAncestor(chord)
+    : document.scrollingElement;
+  const scroller = (scrollerEl as HTMLElement) || document.documentElement;
+
+  const pxPerSec = Math.max(1, scrollSpeed) * 20;
+
+  function step(ts: number) {
+    if (!refs.lastScrollTimeRef.current) refs.lastScrollTimeRef.current = ts;
+    const delta = Math.min(100, ts - (refs.lastScrollTimeRef.current || ts));
+    refs.lastScrollTimeRef.current = ts;
+
+    const px = Math.round((pxPerSec * delta) / 1000);
+    if (px > 0 && scroller instanceof HTMLElement) scrollByOn(scroller, px);
+
+    const viewport =
+      scroller === document.documentElement ||
+      !(scroller instanceof HTMLElement)
+        ? globalThis.innerHeight
+        : scroller.clientHeight;
+    let scrollTop: number;
+    if (scroller === document.documentElement) {
+      scrollTop = globalThis.scrollY;
+    } else if (scroller instanceof HTMLElement) {
+      scrollTop = scroller.scrollTop || 0;
+    } else {
+      scrollTop = 0;
+    }
+    const total =
+      scroller instanceof HTMLElement
+        ? scroller.scrollHeight
+        : document.body.offsetHeight;
+    const bottom = viewport + scrollTop;
+    const limit = total - (FOOTER_HEIGHT || 0);
+
+    if (bottom >= limit - 1) {
+      if (refs.scrollTimerRef.current)
+        cancelAnimationFrame(refs.scrollTimerRef.current);
+      refs.scrollTimerRef.current = null;
+      refs.lastScrollTimeRef.current = 0;
+      refs.accumulatedScrollRef.current = 0;
+      if (setScrollSpeed) setScrollSpeed(DEFAULT_SCROLL_SPEED);
+      setAutoScroll(false);
+      return;
+    }
+
+    refs.scrollTimerRef.current = requestAnimationFrame(step);
+  }
+
+  refs.scrollTimerRef.current = requestAnimationFrame(step);
+
+  return () => {
+    // Cleanup only cancels the RAF and resets timing refs. Do NOT mutate
+    // hook state here (setAutoScroll / setScrollSpeed) because this cleanup
+    // is invoked when dependencies change (e.g. user adjusts scrollSpeed).
+    // Mutating state here causes unintended toggles and prevents speed
+    // changes from taking effect.
+    if (refs.scrollTimerRef.current)
+      cancelAnimationFrame(refs.scrollTimerRef.current);
+    refs.scrollTimerRef.current = null;
+    refs.lastScrollTimeRef.current = 0;
+    refs.accumulatedScrollRef.current = 0;
+  };
+}
+
+// Toggle helper: if enabling and `startFromChordDisplay` is true, align first.
 export function handleAutoScrollToggle(
   enable: boolean | undefined,
   autoScroll: boolean,
-  setAutoScroll: (value: boolean) => void
-): void {
-  const shouldEnable = enable !== undefined ? enable : !autoScroll;
+  setAutoScroll: (v: boolean) => void,
+  startFromChordDisplay?: boolean
+) {
+  const shouldEnable = enable ?? !autoScroll;
   if (!shouldEnable) {
     setAutoScroll(false);
     return;
   }
-  const headerEl = getTitleArtistElement();
-  if (headerEl) {
-    const navbar = document.querySelector('header');
-    let navbarOffset = 0;
-    if (navbar) navbarOffset = navbar.getBoundingClientRect().height;
-    const targetTop = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer
-    // If viewport is above the title/artist
-    if (window.scrollY + 10 < targetTop) {
-      window.scrollTo({ top: targetTop, behavior: 'smooth' });
-      // Wait for scroll to finish before enabling auto-scroll
-      let rafId: number;
-      const waitForScroll = () => {
-        if (Math.abs(window.scrollY - targetTop) < 2) {
-          setAutoScroll(true);
-        } else {
-          rafId = requestAnimationFrame(waitForScroll);
-        }
-      };
-      waitForScroll();
-      return;
-    }
-  }
+
+  if (startFromChordDisplay) alignChordDisplayToTop();
   setAutoScroll(true);
-}
-
-/**
- * Start auto-scroll from current position
- * @param scrollSpeed - Speed of scrolling
- * @param refs - React refs for scroll state management
- * @param setAutoScroll - Function to set auto-scroll state
- * @param setScrollSpeed - Function to set scroll speed
- */
-export function startAutoScroll(
-  scrollSpeed: number,
-  refs: AutoScrollRefs,
-  setAutoScroll: (value: boolean) => void,
-  setScrollSpeed: (value: number) => void
-): void {
-  updateLayoutHeights();
-  
-  // Get refresh rate from requestAnimationFrame
-  const baseScrollAmount = scrollSpeed * 0.06;
-  // Use 60 as the reference FPS to keep speeds consistent across different displays
-  const referenceFPS = 60;
-  const referenceFrameTime = 1000 / referenceFPS;
-  
-  const doScroll = (timestamp: number) => {
-    if (!refs.lastScrollTimeRef.current) {
-      refs.lastScrollTimeRef.current = timestamp;
-    }
-    const elapsed = timestamp - refs.lastScrollTimeRef.current;
-    // Scale by reference frame time to ensure consistent speed regardless of display refresh rate
-    refs.accumulatedScrollRef.current += (elapsed / referenceFrameTime) * baseScrollAmount;
-    const scrollAmount = Math.floor(refs.accumulatedScrollRef.current);
-    refs.accumulatedScrollRef.current -= scrollAmount;
-    if (scrollAmount > 0) {
-      window.scrollBy({ top: scrollAmount, behavior: 'auto' });
-    }
-    refs.lastScrollTimeRef.current = timestamp;
-    const scrollBottom = window.innerHeight + window.scrollY;
-    const limit = document.body.offsetHeight - FOOTER_HEIGHT;
-    if (scrollBottom >= limit - 1) {
-      setAutoScroll(false);
-      setScrollSpeed(DEFAULT_SCROLL_SPEED);
-      return;
-    }
-    refs.scrollTimerRef.current = requestAnimationFrame(doScroll);
-  };
-  
-  refs.scrollTimerRef.current = requestAnimationFrame(doScroll);
-}
-
-/**
- * Perform auto-scroll actions based on whether we're at the bottom of content
- * @param scrollSpeed - Speed of scrolling
- * @param refs - React refs for scroll state management
- * @param setAutoScroll - Function to set auto-scroll state
- * @param setScrollSpeed - Function to set scroll speed
- */
-export function performAutoScroll(
-  scrollSpeed: number,
-  refs: AutoScrollRefs,
-  setAutoScroll: (value: boolean) => void,
-  setScrollSpeed: (value: number) => void
-): (() => void) | undefined {
-  const mainEl = document.getElementById('chord-display');
-  if (mainEl) {
-    const mainBottom = mainEl.offsetTop + mainEl.offsetHeight;
-    const viewportBottom = window.scrollY + window.innerHeight;
-    
-    // If we're at or past the bottom, scroll to the top of the header/title (if present), else main element
-    if (viewportBottom >= mainBottom - 2) {
-      let scrollTarget = mainEl.offsetTop;
-      const headerEl = getTitleArtistElement();
-      if (headerEl) {
-        // Scroll to the header/title if it exists
-        let navbarOffset = 0;
-        try {
-          // Use NAVBAR_HEIGHT from utils/layout
-          // (updateLayoutHeights should have run just before this)
-          // If not available, fallback to measuring the header
-          if (typeof NAVBAR_HEIGHT === 'number' && NAVBAR_HEIGHT > 0) {
-            navbarOffset = NAVBAR_HEIGHT;
-          } else {
-            const nav = document.querySelector('header');
-            if (nav) navbarOffset = nav.getBoundingClientRect().height;
-          }
-        } catch (e) {
-          // Ignore any errors when accessing NAVBAR_HEIGHT
-        }
-        scrollTarget = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer for aesthetics
-      }
-      window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-      
-      // Wait for scroll to reach the top, then start auto-scroll
-      let rafId: number;
-      const waitForTop = () => {
-        // Allow a small margin for floating point errors
-        if (Math.abs(window.scrollY - scrollTarget) < 2) {
-          startAutoScroll(scrollSpeed, refs, setAutoScroll, setScrollSpeed);
-        } else {
-          rafId = requestAnimationFrame(waitForTop);
-        }
-      };
-      
-      rafId = requestAnimationFrame(waitForTop);
-      
-      // Cleanup for this special case
-      return () => {
-        cancelAnimationFrame(rafId);
-        if (refs.scrollTimerRef.current) {
-          cancelAnimationFrame(refs.scrollTimerRef.current);
-        }
-        refs.lastScrollTimeRef.current = 0;
-        refs.accumulatedScrollRef.current = 0;
-      };
-    }
-  }
-  
-  // If not at the bottom, start auto-scroll immediately
-  startAutoScroll(scrollSpeed, refs, setAutoScroll, setScrollSpeed);
-  
-  return () => {
-    if (refs.scrollTimerRef.current) {
-      cancelAnimationFrame(refs.scrollTimerRef.current);
-    }
-    refs.lastScrollTimeRef.current = 0;
-    refs.accumulatedScrollRef.current = 0;
-  };
 }

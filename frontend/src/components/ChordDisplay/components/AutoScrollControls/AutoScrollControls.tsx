@@ -8,14 +8,14 @@ import type { AutoScrollControlsProps } from './AutoScrollControls.types';
  * Provides play/pause button and speed control
  * 
  * @param autoScroll - Current auto-scroll state
- * @param setAutoScroll - Function to update auto-scroll state
+ * @param toggleAutoScroll - Function to toggle auto-scroll state
  * @param scrollSpeed - Current scroll speed
  * @param setScrollSpeed - Function to update scroll speed
  * @param title - Title text to display above the controls
  */
 const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
   autoScroll,
-  setAutoScroll,
+  toggleAutoScroll,
   scrollSpeed,
   setScrollSpeed,
   title = "Scroll",
@@ -26,9 +26,11 @@ const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
       <div className='flex items-center'>
         <PlayButton
           autoScroll={autoScroll}
-          setAutoScroll={setAutoScroll}
+          toggleAutoScroll={toggleAutoScroll}
           size={16}
-          className={`h-8 w-full px-2 transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary ${autoScroll && 'max-w-8 text-primary'}`}
+          // Use w-auto so the button doesn't expand to cover the slider area and
+          // intercept clicks intended for the speed control.
+          className={`h-8 w-auto px-2 transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary ${autoScroll ? 'text-primary' : ''}`}
         />
         {/* Speed controls only show when playing, always between PlayButton and Transpose */}
         {autoScroll && (

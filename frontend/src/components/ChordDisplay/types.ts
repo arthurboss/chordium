@@ -1,10 +1,10 @@
 export interface ChordLine {
-  type: 'chord' | 'lyrics' | 'tab' | 'empty';
+  type: "chord" | "lyrics" | "tab" | "empty";
   content: string;
 }
 
 export interface ChordSection {
-  type: 'section';
+  type: "section";
   title: string;
   lines: ChordLine[];
 }
@@ -39,7 +39,8 @@ export interface ChordSheetControlsProps {
   hideGuitarTabs: boolean;
   setHideGuitarTabs: (v: boolean) => void;
   autoScroll: boolean;
-  setAutoScroll: (v: boolean) => void;
+  // setAutoScroll now supports optional parameters: enable and startFromChordDisplay
+  setAutoScroll: (enable?: boolean, startFromChordDisplay?: boolean) => void;
   scrollSpeed: number;
   setScrollSpeed: (v: number) => void;
   capoTransposeLinked?: boolean;

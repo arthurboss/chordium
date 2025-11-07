@@ -14,6 +14,69 @@ import PlayButton from './PlayButton';
 import SpeedControl from './SpeedControl';
 
 
+type MusicalControlsProps = {
+  capo: number;
+  defaultCapo?: number;
+  capoTransposeLinked?: boolean;
+  handleCapoChange: (v: number) => void;
+  handleTransposeChange: (v: number) => void;
+  getCapoDisableStates: () => { disableIncrement: boolean; disableDecrement: boolean };
+  getTransposeDisableStates: () => { disableIncrement: boolean; disableDecrement: boolean };
+  transpose: number;
+  defaultTranspose?: number;
+  songKey?: string;
+  onToggleLink: () => void;
+};
+
+const MusicalControls: React.FC<MusicalControlsProps> = (props) => {
+  const {
+    capo,
+    handleCapoChange,
+    defaultCapo,
+    capoTransposeLinked,
+    getCapoDisableStates,
+    handleTransposeChange,
+    getTransposeDisableStates,
+    transpose,
+    defaultTranspose,
+    songKey,
+    onToggleLink,
+  } = props;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className='flex flex-col items-center'>
+        <CapoMenu
+          capo={capo}
+          setCapo={handleCapoChange}
+          defaultCapo={defaultCapo}
+          title="Capo Fret"
+          disableIncrement={getCapoDisableStates().disableIncrement}
+          disableDecrement={getCapoDisableStates().disableDecrement}
+        />
+      </div>
+      <div className='flex flex-col items-center'>
+        <CapoTransposeLink
+          isLinked={capoTransposeLinked}
+          onToggle={onToggleLink}
+          title="Link"
+        />
+      </div>
+      <div className='flex flex-col items-center'>
+        <TransposeMenu
+          transpose={transpose}
+          setTranspose={handleTransposeChange}
+          defaultTranspose={defaultTranspose}
+          songKey={songKey}
+          title="Transpose"
+          disableIncrement={getTransposeDisableStates().disableIncrement}
+          disableDecrement={getTransposeDisableStates().disableDecrement}
+        />
+      </div>
+    </div>
+  );
+};
+
 const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   transpose,
   setTranspose,
@@ -33,7 +96,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   hideGuitarTabs,
   setHideGuitarTabs,
   autoScroll,
-  setAutoScroll,
+  setAutoScroll: toggleAutoScroll,
   scrollSpeed,
   setScrollSpeed,
   capoTransposeLinked = false,
@@ -66,39 +129,12 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
     setShowSongControls(!showSongControls);
   };
 
-  // Musical controls component (shared between mobile and desktop)
-  const MusicalControls = () => (
-    <>
-      <div className='flex flex-col items-center'>
-        <CapoMenu
-          capo={capo}
-          setCapo={handleCapoChange}
-          defaultCapo={defaultCapo}
-          title="Capo Fret"
-          disableIncrement={getCapoDisableStates().disableIncrement}
-          disableDecrement={getCapoDisableStates().disableDecrement}
-        />
-      </div>
-      <div className='flex flex-col items-center'>
-        <CapoTransposeLink
-          isLinked={capoTransposeLinked}
-          onToggle={handleToggleLink}
-          title="Link"
-        />
-      </div>
-      <div className='flex flex-col items-center'>
-        <TransposeMenu
-          transpose={transpose}
-          setTranspose={handleTransposeChange}
-          defaultTranspose={defaultTranspose}
-          songKey={songKey}
-          title="Transpose"
-          disableIncrement={getTransposeDisableStates().disableIncrement}
-          disableDecrement={getTransposeDisableStates().disableDecrement}
-        />
-      </div>
-    </>
-  );
+  // MusicalControls extracted above as its own component
+
+  const toggleAutoScrollWithStart = (enable?: boolean) => {
+    // If the UI thinks we're at the bottom, start auto-scroll from the chord display
+    toggleAutoScroll(enable, isAtBottom);
+  };
 
   return (
     <>
@@ -121,7 +157,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
           <div className='flex flex-col items-start'>
             <AutoScrollControls
               autoScroll={autoScroll}
-              setAutoScroll={setAutoScroll}
+              toggleAutoScroll={toggleAutoScrollWithStart}
               scrollSpeed={scrollSpeed}
               setScrollSpeed={setScrollSpeed}
             />
@@ -130,15 +166,27 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
 
         {/* Musical Controls Sub-Container - Right Side */}
         <div className="flex items-end gap-1 justify-end">
-          <MusicalControls />
+          <MusicalControls
+            capo={capo}
+            defaultCapo={defaultCapo}
+            capoTransposeLinked={capoTransposeLinked}
+            handleCapoChange={handleCapoChange}
+            handleTransposeChange={handleTransposeChange}
+            getCapoDisableStates={getCapoDisableStates}
+            getTransposeDisableStates={getTransposeDisableStates}
+            transpose={transpose}
+            defaultTranspose={defaultTranspose}
+            songKey={songKey}
+            onToggleLink={handleToggleLink}
+          />
         </div>
       </StickyBottomContainer>
 
       {/* Mobile Layout */}
-      <StickyBottomContainer 
-        isAtBottom={isAtBottom} 
-        mobileOnly 
-        expanded={showSongControls} 
+      <StickyBottomContainer
+        isAtBottom={isAtBottom}
+        mobileOnly
+        expanded={showSongControls}
         className={autoScroll ? 'flex-row' : ''}
       >
         {/* When not playing, show musical controls and text preferences */}
@@ -147,7 +195,19 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
             {/* Expanded song controls row - appears above main controls */}
             {showSongControls && (
               <div className="w-full flex items-end justify-center gap-2 mb-2 transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
-                <MusicalControls />
+                <MusicalControls
+                  capo={capo}
+                  defaultCapo={defaultCapo}
+                  capoTransposeLinked={capoTransposeLinked}
+                  handleCapoChange={handleCapoChange}
+                  handleTransposeChange={handleTransposeChange}
+                  getCapoDisableStates={getCapoDisableStates}
+                  getTransposeDisableStates={getTransposeDisableStates}
+                  transpose={transpose}
+                  defaultTranspose={defaultTranspose}
+                  songKey={songKey}
+                  onToggleLink={handleToggleLink}
+                />
               </div>
             )}
 
@@ -172,9 +232,9 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-muted-foreground mb-1">Transpose</span>
-                  <Button 
+                  <Button
                     variant="outline"
-                    size="icon" 
+                    size="icon"
                     className={`h-10 w-10 ${showSongControls ? 'bg-muted/50 text-primary' : ''}`}
                     title="Song Controls"
                     onClick={handleToggleSongControls}
@@ -183,11 +243,11 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
                   </Button>
                 </div>
               </div>
-              
+
               {/* Right: Play Button */}
               <div className="flex flex-col items-center">
                 <span className="text-xs text-muted-foreground mb-1">Play</span>
-                <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ${autoScroll ? 'bg-secondary/20 text-primary hover:bg-primary/20' : ''}`} />
+                <PlayButton autoScroll={autoScroll} toggleAutoScroll={toggleAutoScrollWithStart} size={20} className={`h-10 w-10 ${autoScroll ? 'bg-secondary/20 text-primary hover:bg-primary/20' : ''}`} />
               </div>
             </div>
           </>
@@ -198,10 +258,22 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
             {/* Expanded song controls row - appears above main controls when playing */}
             {showSongControls && (
               <div className="w-full flex items-end justify-center gap-2 mb-2 transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
-                <MusicalControls />
+                <MusicalControls
+                  capo={capo}
+                  defaultCapo={defaultCapo}
+                  capoTransposeLinked={capoTransposeLinked}
+                  handleCapoChange={handleCapoChange}
+                  handleTransposeChange={handleTransposeChange}
+                  getCapoDisableStates={getCapoDisableStates}
+                  getTransposeDisableStates={getTransposeDisableStates}
+                  transpose={transpose}
+                  defaultTranspose={defaultTranspose}
+                  songKey={songKey}
+                  onToggleLink={handleToggleLink}
+                />
               </div>
             )}
-            
+
             {/* Main controls row - transpose button, speed control, and play button */}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center mr-auto ml-0 pl-0">
@@ -226,7 +298,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="text-xs text-muted-foreground mb-1">Pause</span>
-                  <PlayButton autoScroll={autoScroll} setAutoScroll={setAutoScroll} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
+                  <PlayButton autoScroll={autoScroll} toggleAutoScroll={toggleAutoScrollWithStart} size={20} className={`h-10 w-10 ml-2 ${autoScroll ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''}`} />
                 </div>
               </div>
             </div>
