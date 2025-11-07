@@ -84,15 +84,50 @@ export function performAutoScroll(
     : document.scrollingElement;
   const scroller = (scrollerEl as HTMLElement) || document.documentElement;
 
-  const pxPerSec = Math.max(1, scrollSpeed) * 20;
+  // Lookup table for pixel-per-second values (1–10). 
+  // We use an array instead of a Map for faster numeric indexing.
+  // The curve below is intentionally gentle at higher speeds.
+  const SPEED_MAP = [
+    0,
+    2,  // 1
+    4,  // 2
+    7,  // 3
+    11, // 4
+    16, // 5
+    22, // 6
+    28, // 7
+    35, // 8
+    42, // 9
+    50, // 10
+  ];
+
+  function getPxPerSec(speed: number) {
+    if (!speed || speed <= 1) return SPEED_MAP[1];
+    if (speed >= 10) return SPEED_MAP[10];
+    const lo = Math.floor(speed);
+    const hi = Math.ceil(speed);
+    if (lo === hi) return SPEED_MAP[lo];
+    const t = speed - lo;
+    return SPEED_MAP[lo] + (SPEED_MAP[hi] - SPEED_MAP[lo]) * t;
+  }
+
+  const pxPerSec = getPxPerSec(scrollSpeed);
 
   function step(ts: number) {
     if (!refs.lastScrollTimeRef.current) refs.lastScrollTimeRef.current = ts;
     const delta = Math.min(100, ts - (refs.lastScrollTimeRef.current || ts));
     refs.lastScrollTimeRef.current = ts;
 
-    const px = Math.round((pxPerSec * delta) / 1000);
-    if (px > 0 && scroller instanceof HTMLElement) scrollByOn(scroller, px);
+    // Compute fractional pixels to allow very low speeds to accumulate over
+    // multiple frames instead of rounding to zero each frame.
+    const pxFloat = (pxPerSec * delta) / 1000;
+    refs.accumulatedScrollRef.current =
+      (refs.accumulatedScrollRef.current || 0) + pxFloat;
+    const intPx = Math.floor(refs.accumulatedScrollRef.current);
+    if (intPx > 0 && scroller instanceof HTMLElement) {
+      scrollByOn(scroller, intPx);
+      refs.accumulatedScrollRef.current -= intPx;
+    }
 
     const viewport =
       scroller === document.documentElement ||
