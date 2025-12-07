@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { processContent } from '@/utils/chord-sheet-utils';
 import { songKeyToSemitones } from '@/utils/chordUtils';
+import { useJamSession } from '@/contexts/JamSessionContext';
+import { SetStateAction, useCallback } from 'react';
 
 /**
  * Custom hook to manage chord display settings
@@ -9,7 +11,14 @@ import { songKeyToSemitones } from '@/utils/chordUtils';
  * @param initialCapo The initial capo position
  * @returns Chord display settings and handlers
  */
-export const useChordDisplaySettings = (initialContent: string, initialSongKey?: string, initialCapo?: number) => {
+export const useChordDisplaySettings = (
+  initialContent: string, 
+  initialSongKey?: string, 
+  initialCapo?: number,
+  title?: string,
+  artist?: string
+) => {
+  const { role, sessionState, broadcastState } = useJamSession();
   // Display settings - initialize transpose to 0 (no transpose by default)
   // The songKey is used for display purposes only, not for transposing the content
   const defaultTranspose = 0;
@@ -29,6 +38,35 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   useEffect(() => {
     setCapo(initialCapo || 0);
   }, [initialCapo]);
+
+  // Sync with Jam Session state (Peer)
+  useEffect(() => {
+    if (role === 'peer') {
+      setTranspose(sessionState.transpose);
+      setCapo(sessionState.capo);
+    }
+  }, [role, sessionState.transpose, sessionState.capo]);
+  
+  // Custom setters to handle broadcasting (Host)
+  const handleSetTranspose = useCallback((value: SetStateAction<number>) => {
+    setTranspose(prev => {
+      const newValue = typeof value === 'function' ? (value as Function)(prev) : value;
+      if (role === 'host') {
+        broadcastState({ transpose: newValue });
+      }
+      return newValue;
+    });
+  }, [role, broadcastState]);
+
+  const handleSetCapo = useCallback((value: SetStateAction<number>) => {
+    setCapo(prev => {
+      const newValue = typeof value === 'function' ? (value as Function)(prev) : value;
+      if (role === 'host') {
+        broadcastState({ capo: newValue });
+      }
+      return newValue;
+    });
+  }, [role, broadcastState]);
   
   const [fontSize, setFontSize] = useState(16);
   const [fontSpacing, setFontSpacing] = useState(0);
@@ -37,16 +75,30 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
   const [capoTransposeLinked, setCapoTransposeLinked] = useState(false);
   
+  
+  // Host: Broadcast content and metadata when it changes
+  useEffect(() => {
+    if (role === 'host') {
+      broadcastState({ 
+        songContent: initialContent,
+        songTitle: title,
+        songArtist: artist
+      });
+    }
+  }, [role, initialContent, title, artist, broadcastState]);
+
   // Process the content with imported utility function
-  const processedContent = processContent(initialContent, transpose);
+  // If peer, use content from session if available
+  const contentToUse = (role === 'peer' && sessionState.songContent) ? sessionState.songContent : initialContent;
+  const processedContent = processContent(contentToUse, transpose);
 
   return {
     // Settings
     transpose,
-    setTranspose,
+    setTranspose: handleSetTranspose,
     defaultTranspose,
     capo,
-    setCapo,
+    setCapo: handleSetCapo,
     defaultCapo,
     fontSize, 
     setFontSize,

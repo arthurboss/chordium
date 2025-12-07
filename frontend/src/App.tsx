@@ -10,6 +10,8 @@ import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 import SmallScreenWarning from "@/components/SmallScreenWarning";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
+import { JamSessionProvider } from "@/contexts/JamSessionContext";
+
 
 // Lazy load pages instead of direct imports
 const Home = lazy(() => import("./pages/Home"));
@@ -133,22 +135,25 @@ const router = createBrowserRouter([
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
   // Initialize service worker update handling
   useServiceWorkerUpdate();
-  
+
   // App initialization logic can be added here if needed
   return <>{children}</>;
 };
+
 
 const App = () => (
   <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppInitializer>
-          {/* Small screen warning - positioned at app level */}
-          <SmallScreenWarning />
-          <RouterProvider router={router} />
-          <OfflineToast />
-          {/* {import.meta.env.DEV && <OfflineTestPanel />} */}
-        </AppInitializer>
+        <JamSessionProvider>
+          <AppInitializer>
+            {/* Small screen warning - positioned at app level */}
+            <SmallScreenWarning />
+            <RouterProvider router={router} />
+            <OfflineToast />
+            {/* {import.meta.env.DEV && <OfflineTestPanel />} */}
+          </AppInitializer>
+        </JamSessionProvider>
       </TooltipProvider>
     </QueryClientProvider>
   </GlobalErrorBoundary>

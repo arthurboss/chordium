@@ -4,9 +4,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { JamSessionDialog } from "@/components/JamSession/JamSessionDialog";
 
 const Header = () => (
   <header className="py-1.5 border-b shadow-sm bg-background/80 dark:bg-[--card] backdrop-blur-sm sticky top-0 z-50">
@@ -29,7 +31,13 @@ const Header = () => (
 
       <div className="flex items-center gap-2">
         <OfflineIndicator />
+        <JamSessionDialog />
         <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button aria-label="Menu" className="p-2">
+              <Search className="h-5 w-5" />
+            </button>
+          </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link to="/search" className="w-full cursor-pointer">
@@ -37,7 +45,6 @@ const Header = () => (
                 Search
               </Link>
             </DropdownMenuItem>
-
           </DropdownMenuContent>
         </DropdownMenu>
         <ThemeToggle />

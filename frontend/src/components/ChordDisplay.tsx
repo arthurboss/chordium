@@ -8,6 +8,7 @@ import { renderChord } from './ChordDisplay/chord-tooltip-utils.tsx';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
+import { useScrollSync } from '@/hooks/use-scroll-sync';
 import { downloadTextFile } from '@/utils/download-utils';
 import { cyAttr } from '@/utils/test-utils';
 
@@ -22,6 +23,8 @@ interface ChordDisplayProps {
 const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true }, ref) => {
 
   // Use custom hooks for different concerns
+  useScrollSync();
+
   const {
     autoScroll,
     scrollSpeed,
@@ -49,7 +52,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     capoTransposeLinked,
     setCapoTransposeLinked,
     processedContent
-  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
+  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, chordSheet.title, chordSheet.artist);
 
   const {
     isEditing,
