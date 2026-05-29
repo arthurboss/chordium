@@ -5,6 +5,7 @@ import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
+import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
@@ -98,6 +99,11 @@ const SongViewer = ({
         onAction={shouldShowActionButton && handleAction}
         isSaved={shouldShowActionButton && isFromMyChordSheets}
         title={chordSheetToDisplay.title}
+        rightContent={
+          chordContentToDisplay
+            ? <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
+            : undefined
+        }
       />
       <div className="py-2 sm:py-4 px-4">
         <ChordMetadata chordSheet={chordSheetToDisplay} />

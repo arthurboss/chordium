@@ -1,11 +1,12 @@
 import { useRef, useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
 import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
 import type { RouteParams } from "./chord-viewer.types";
 
 // Utils
 import { resolveChordSheetPath } from "./utils/path-resolver";
+import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from "@/utils/chordSheetQR";
 import { createChordSheetData } from "./utils/chord-sheet-data";
 import { extractNavigationData } from "./utils/navigation-data";
 
@@ -30,6 +31,18 @@ const ChordViewer = () => {
   // Fall back to URL parameters if navigation state is not available
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
+
+  // Decode chord sheet from ?d= QR param if present
+  const [searchParams] = useSearchParams();
+  const [jamPayload, setJamPayload] = useState<JamPayload | null>(null);
+
+  useEffect(() => {
+    const d = searchParams.get('d');
+    if (!d) return;
+    decodeChordSheet(JAM_QR_PREFIX + d).then(payload => {
+      if (payload) setJamPayload(payload);
+    });
+  }, [searchParams]);
 
   // Fetch chord sheet data with API fallback
   const chordSheetResult = useChordSheetWithFallback(path);
@@ -66,12 +79,13 @@ const ChordViewer = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Auto-load from API if not found locally
+  // Auto-load from API if not found locally (skip when jam QR param is present)
+  const hasJamParam = searchParams.has('d');
   useEffect(() => {
-    if (!chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
+    if (!hasJamParam && !chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
       chordSheetResult.loadFromAPI();
     }
-  }, [chordSheetResult, path]);
+  }, [hasJamParam, chordSheetResult, path]);
 
   // Navigation handlers
   const navigation = useNavigation();
@@ -93,6 +107,40 @@ const ChordViewer = () => {
   );
 
 
+
+  // When the chord sheet was loaded from a QR code, build the data directly from
+  // the payload without going through the API / IndexedDB fallback chain.
+  if (jamPayload && !chordSheetResult.metadata) {
+    const jamChordSheet = {
+      title: jamPayload.title,
+      artist: jamPayload.artist,
+      songKey: jamPayload.songKey,
+      guitarTuning: jamPayload.guitarTuning ?? ['E', 'A', 'D', 'G', 'B', 'E'] as [string, string, string, string, string, string],
+      guitarCapo: jamPayload.guitarCapo,
+      songChords: jamPayload.songChords,
+    };
+
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
+          <SongViewer
+            song={{
+              song: { title: jamPayload.title, artist: jamPayload.artist, path },
+              chordSheet: jamChordSheet,
+            }}
+            chordContent={jamPayload.songChords}
+            chordDisplayRef={chordDisplayRef}
+            onBack={handleBack}
+            onDelete={handleDelete}
+            onSave={handleSave}
+            onUpdate={() => {}}
+            hideDeleteButton={true}
+            hideSaveButton={false}
+          />
+        </main>
+      </div>
+    );
+  }
 
   // Unified guard logic: Only show loading, error, or missing data when not loading
   if (chordSheetResult.isLoading) {
