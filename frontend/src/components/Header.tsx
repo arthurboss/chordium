@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
+import { ShareSession } from "@/features/jam-session";
 import ThemeToggle from "@/components/ThemeToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
-import { ShareSession } from "@/features/jam-session";
 
 const Header = () => (
   <header className="sticky top-0 z-50 border-b bg-background/80 shadow-sm backdrop-blur-sm dark:bg-[--card]">

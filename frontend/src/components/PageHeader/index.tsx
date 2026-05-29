@@ -16,7 +16,8 @@ const PageHeader = memo(({
   onBack,
   onAction,
   isSaved,
-  title
+  title,
+  rightContent
 }: PageHeaderProps) => {
 
   return (
@@ -28,16 +29,20 @@ const PageHeader = memo(({
           <BackButton onBack={onBack} />
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
+          {rightContent}
         </div>
       </div>
 
       {/* Desktop layout: Back button, title center, action button */}
-      <div className="hidden sm:flex flex-row items-center w-full">
+      <div className="hidden sm:flex flex-row items-center w-full relative">
         <BackButton onBack={onBack} />
-        <TitleSection title={title} />
-        <div className="flex items-center gap-2">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <TitleSection title={title} />
+        </div>
+        <div className="flex items-center gap-2 ml-auto">
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
+          {rightContent}
         </div>
       </div>
     </Card>

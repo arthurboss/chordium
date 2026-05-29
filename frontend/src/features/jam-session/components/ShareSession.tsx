@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { useJamSession } from '../useJamSession';
 import { toast } from 'sonner';
-import { Loader2, QrCode, Podcast } from 'lucide-react';
+import { Loader2, QrCode, ScanLine } from 'lucide-react';
 
 export function ShareSession() {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,12 +125,7 @@ export function ShareSession() {
           variant={isConnected ? "default" : "outline"}
           className="h-10 w-10"
         >
-          <span className="inline-flex items-center">
-            <Podcast className="h-4 w-4" />
-            <span className="hidden md:inline">
-              {isConnected ? `Jam (${connectedPeers.length})` : 'Jam'}
-            </span>
-          </span>
+          <ScanLine className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[calc(100vw_-_2rem)] sm:max-w-[380px]">
