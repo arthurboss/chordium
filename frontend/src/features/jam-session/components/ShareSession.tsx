@@ -82,11 +82,9 @@ export function ShareSession() {
 
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+            await videoRef.current.play();
             streamRef.current = stream;
             setHasCamera(true);
-
-            // TODO: Add QR code scanning logic here
-            // You can use a library like jsQR or ZXing for this
           }
         } catch (error) {
           console.error('Error accessing camera:', error);
@@ -187,14 +185,13 @@ export function ShareSession() {
             <>
               <div className="w-full space-y-4">
                 <div className="relative aspect-square w-full max-w-md mx-auto bg-black rounded-lg overflow-hidden">
-                  {hasCamera ? (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className={`w-full h-full object-cover ${hasCamera ? '' : 'hidden'}`}
+                  />
+                  {!hasCamera && (
                     <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white">
                       <QrCode className="w-16 h-16 text-gray-600" />
                     </div>

@@ -32,6 +32,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
   onGuitarCapoChange,
   onContinue,
 }) => {
+  const sanitize = (value: string) => value.replace(/\//g, '');
   return (
     <FormContainer>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -39,7 +40,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           id="song-title-input"
           label="Song Title"
           value={title}
-          onChange={onTitleChange}
+          onChange={(v) => onTitleChange(sanitize(v))}
           placeholder="Enter song title"
           required
         />
@@ -47,7 +48,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           id="song-artist-input"
           label="Artist"
           value={artist}
-          onChange={onArtistChange}
+          onChange={(v) => onArtistChange(sanitize(v))}
           placeholder="Enter artist name"
           required
         />
