@@ -131,6 +131,7 @@ export function ShareSession() {
       <DialogTrigger asChild>
         <Button
           variant={isConnected ? "default" : "outline"}
+          size="icon"
           className="h-10 w-10 rounded-full"
         >
           <ScanLine className="h-4 w-4" />

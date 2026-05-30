@@ -43,7 +43,7 @@ const OfflineIndicator = ({ className = "", showText = false }: OfflineIndicator
       size="icon"
       aria-label={t("offlineIndicator.ariaLabel")}
       title={t("offlineIndicator.title")}
-      className={`border h-10 w-10 rounded-full text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 ${className}`}
+      className={`h-10 w-10 rounded-full text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 ${className}`}
       onClick={handleClick}
     >
       <WifiOff className="h-4 w-4" />
