@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import type { ChordSheetListProps } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ const ChordSheetList = ({
   tabState,
   setTabState
 }: ChordSheetListProps) => {
+  const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
@@ -32,14 +34,14 @@ const ChordSheetList = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground mb-3">You haven't saved any chord sheets yet.</p>
+          <p className="text-muted-foreground mb-3">{t("chordSheetList.empty")}</p>
           <Button
             onClick={onUploadClick}
             variant="outline"
             tabIndex={0}
-            aria-label="Upload a chord sheet"
+            aria-label={t("chordSheetList.uploadAriaLabel")}
           >
-            Upload a chord sheet
+            {t("chordSheetList.uploadButton")}
           </Button>
         </div>
       )}

@@ -1,7 +1,8 @@
-import { FileUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useRef } from 'react';
-import FileInfo from '@/components/ui/file-info';
+import { FileUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import FileInfo from "@/components/ui/file-info";
 
 interface DropZoneProps {
   isDragOver: boolean;
@@ -23,10 +24,11 @@ const DropZone = ({
   handleDrop,
   selectedFile,
   onFileInputChange,
-  onClearFile
+  onClearFile,
 }: DropZoneProps) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
   };
@@ -34,32 +36,27 @@ const DropZone = ({
   return (
     <div
       className={`border-2 border-dashed rounded-lg py-5 px-6 text-center ${
-        isDragOver ? 'border-primary bg-primary/5' : 'border-border'
+        isDragOver ? "border-primary bg-primary/5" : "border-border"
       } transition-colors`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       {selectedFile ? (
-        <FileInfo 
-          fileName={selectedFile.name} 
-          onRemoveFile={onClearFile}
-        />
+        <FileInfo fileName={selectedFile.name} onRemoveFile={onClearFile} />
       ) : (
         <>
           <div className="bg-muted rounded-full p-3 inline-block mb-3">
             <FileUp className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="font-medium mb-1">Upload a chord sheet</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Drag and drop a text file here, or click to browse
-          </p>
+          <h3 className="font-medium mb-1">{t("dropZone.title")}</h3>
+          <p className="text-sm text-muted-foreground mb-4">{t("dropZone.subtitle")}</p>
           <Button
             variant="outline"
             onClick={handleBrowseClick}
             className="mx-auto"
           >
-            Browse Files
+            {t("dropZone.browse")}
           </Button>
         </>
       )}

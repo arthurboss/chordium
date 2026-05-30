@@ -1,6 +1,7 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Link, Unlink } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Link, Unlink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface CapoTransposeLinkProps {
   isLinked: boolean;
@@ -15,23 +16,26 @@ interface CapoTransposeLinkProps {
 const CapoTransposeLink: React.FC<CapoTransposeLinkProps> = ({
   isLinked,
   onToggle,
-  title = "Link Capo & Transpose"
+  title,
 }) => {
+  const { t } = useTranslation();
+  const displayTitle = title ?? t("stickyControlsBar.link");
+
   return (
     <>
       <div className="text-xs text-muted-foreground mb-1">
-        <span>{title}</span>
+        <span>{displayTitle}</span>
       </div>
       <Button
         variant="ghost"
         size="sm"
         className={`h-8 w-auto p-0 transition-colors duration-100 hover:bg-transparent ${
-          isLinked 
-            ? 'text-primary hover:text-primary/80' 
-            : 'text-muted-foreground hover:text-foreground'
+          isLinked
+            ? "text-primary hover:text-primary/80"
+            : "text-muted-foreground hover:text-foreground"
         }`}
         onClick={onToggle}
-        title={isLinked ? "Unlink Capo & Transpose" : "Link Capo & Transpose"}
+        title={isLinked ? t("stickyControlsBar.unlinkCapoTranspose") : t("stickyControlsBar.linkCapoTranspose")}
       >
         {isLinked ? <Link size={14} /> : <Unlink size={14} />}
       </Button>

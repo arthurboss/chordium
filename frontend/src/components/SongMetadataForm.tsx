@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import FormField from "@/components/ui/form-field";
 import FormContainer from "@/components/ui/FormContainer";
 import GuitarCapoField from "@/components/ui/guitar-capo-field";
@@ -32,43 +33,45 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
   onGuitarCapoChange,
   onContinue,
 }) => {
-  const sanitize = (value: string) => value.replace(/\//g, '');
+  const { t } = useTranslation();
+  const sanitize = (value: string) => value.replace(/\//g, "");
+
   return (
     <FormContainer>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField
           id="song-title-input"
-          label="Song Title"
+          label={t("songMetadataForm.songTitle")}
           value={title}
           onChange={(v) => onTitleChange(sanitize(v))}
-          placeholder="Enter song title"
+          placeholder={t("songMetadataForm.songTitlePlaceholder")}
           required
         />
         <FormField
           id="song-artist-input"
-          label="Artist"
+          label={t("songMetadataForm.artist")}
           value={artist}
           onChange={(v) => onArtistChange(sanitize(v))}
-          placeholder="Enter artist name"
+          placeholder={t("songMetadataForm.artistPlaceholder")}
           required
         />
         <FormField
           id="song-key-input"
-          label="Song Key"
+          label={t("songMetadataForm.songKey")}
           value={songKey}
           onChange={onSongKeyChange}
-          placeholder="e.g. C# minor"
+          placeholder={t("songMetadataForm.songKeyPlaceholder")}
         />
         <FormField
           id="guitar-tuning-input"
-          label="Guitar Tuning"
+          label={t("songMetadataForm.guitarTuning")}
           value={guitarTuning}
           onChange={onGuitarTuningChange}
-          placeholder="e.g. Standard tuning"
+          placeholder={t("songMetadataForm.guitarTuningPlaceholder")}
         />
         <GuitarCapoField
           id="guitar-capo-input"
-          label="Guitar Capo"
+          label={t("songMetadataForm.guitarCapo")}
           value={guitarCapo}
           onChange={onGuitarCapoChange}
         />
@@ -78,10 +81,10 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
             <Button
               onClick={onContinue}
               className="w-full h-10 shrink-0"
-              aria-label="Continue to edit"
+              aria-label={t("songMetadataForm.continueAriaLabel")}
               disabled={!title || !artist}
             >
-              <span className="">Continue</span>
+              <span>{t("songMetadataForm.continue")}</span>
               <ArrowRight className="h-5 w-5" />
             </Button>
           </div>

@@ -1,14 +1,15 @@
 import { toast } from "@/hooks/use-toast";
+import i18n from "@/i18n/config";
 
 /**
  * Shows success notification for chord sheet save
- * 
+ *
  * @param title - Title of the saved chord sheet
  */
 export function showSaveSuccessNotification(title: string): void {
   toast({
-    title: "Chord sheet saved",
-    description: `"${title}" has been added to My Chord Sheets`
+    title: i18n.t("notifications:chordSheetSaved"),
+    description: i18n.t("notifications:chordSheetSavedDesc", { title }),
   });
 }
 
@@ -17,21 +18,21 @@ export function showSaveSuccessNotification(title: string): void {
  */
 export function showSaveErrorNotification(): void {
   toast({
-    title: "Save failed",
-    description: "Failed to save chord sheet. Please try again.",
-    variant: "destructive"
+    title: i18n.t("notifications:saveFailed"),
+    description: i18n.t("notifications:saveFailedDesc"),
+    variant: "destructive",
   });
 }
 
 /**
  * Shows success notification for chord sheet deletion
- * 
+ *
  * @param title - Title of the deleted chord sheet
  */
 export function showDeleteSuccessNotification(title: string): void {
   toast({
-    title: "Chord sheet deleted",
-    description: `"${title}" has been removed from My Chord Sheets`
+    title: i18n.t("notifications:chordSheetDeleted"),
+    description: i18n.t("notifications:chordSheetDeletedDesc", { title }),
   });
 }
 
@@ -40,8 +41,8 @@ export function showDeleteSuccessNotification(title: string): void {
  */
 export function showDeleteErrorNotification(): void {
   toast({
-    title: "Delete failed",
-    description: "Failed to delete chord sheet. Please try again.",
-    variant: "destructive"
+    title: i18n.t("notifications:deleteFailed"),
+    description: i18n.t("notifications:deleteFailedDesc"),
+    variant: "destructive",
   });
 }

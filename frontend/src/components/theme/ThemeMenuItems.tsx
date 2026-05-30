@@ -1,4 +1,5 @@
 import React, { memo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ThemeMenuItem } from "./ThemeMenuItem";
 import { themeIcons } from "@/utils/theme-icons";
 import { Theme } from "@/utils/theme-utils";
@@ -10,11 +11,12 @@ interface ThemeMenuItemsProps {
   onSelectTheme: (theme: Theme) => void;
 }
 
-export const ThemeMenuItems: React.FC<ThemeMenuItemsProps> = memo(({ 
-  activeTheme, 
-  onSelectTheme 
+export const ThemeMenuItems: React.FC<ThemeMenuItemsProps> = memo(({
+  activeTheme,
+  onSelectTheme,
 }) => {
-  // Using useCallback to memoize this function reference
+  const { t } = useTranslation();
+
   const handleSelectTheme = useCallback((theme: Theme) => {
     onSelectTheme(theme);
   }, [onSelectTheme]);
@@ -22,16 +24,17 @@ export const ThemeMenuItems: React.FC<ThemeMenuItemsProps> = memo(({
   return (
     <>
       {themeIcons.map((item) => {
-        const { theme, icon, label } = item;
+        const { theme, icon } = item;
         const isActive = activeTheme === theme;
+        const label = t(`theme.${theme}` as `theme.light` | `theme.dark` | `theme.system`);
 
         return (
-          <DropdownMenuItem 
+          <DropdownMenuItem
             key={theme}
             onClick={() => handleSelectTheme(theme)}
             className={isActive ? "bg-accent" : ""}
             tabIndex={0}
-            role="menuitem" // Explicitly set the role for Cypress tests
+            role="menuitem"
             {...cyAttr(`theme-${theme}-item`)}
           >
             {icon}

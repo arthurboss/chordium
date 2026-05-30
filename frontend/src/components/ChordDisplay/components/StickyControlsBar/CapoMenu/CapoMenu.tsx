@@ -1,13 +1,14 @@
-import React from 'react';
-import IncrementDecrementButton from '@/components/ui/IncrementDecrementButton';
-import { useCapoMenu } from './CapoMenu.hooks';
-import { formatCapoDisplay } from './CapoMenu.utils';
-import type { CapoMenuProps } from './CapoMenu.types';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import IncrementDecrementButton from "@/components/ui/IncrementDecrementButton";
+import { useCapoMenu } from "./CapoMenu.hooks";
+import { formatCapoDisplay } from "./CapoMenu.utils";
+import type { CapoMenuProps } from "./CapoMenu.types";
 
 /**
  * CapoMenu component for adjusting capo position
  * Provides increment/decrement buttons and displays current capo position
- * 
+ *
  * @param capo - Current capo position
  * @param setCapo - Function to update capo position
  * @param defaultCapo - Original capo position (defaults to 0)
@@ -16,10 +17,13 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
   capo,
   setCapo,
   defaultCapo = 0,
-  title = "Capo",
+  title,
   disableIncrement: externalDisableIncrement,
-  disableDecrement: externalDisableDecrement
+  disableDecrement: externalDisableDecrement,
 }) => {
+  const { t } = useTranslation();
+  const displayTitle = title ?? t("stickyControlsBar.capoFret");
+
   const {
     uiCapoLevel,
     isAltered,
@@ -28,29 +32,25 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
     handleReset,
     disableIncrement: internalDisableIncrement,
     disableDecrement: internalDisableDecrement,
-    animationDirection
+    animationDirection,
   } = useCapoMenu({ capo, setCapo, defaultCapo });
 
-  // Use external disable states if provided, otherwise use internal ones
   const disableIncrement = externalDisableIncrement ?? internalDisableIncrement;
   const disableDecrement = externalDisableDecrement ?? internalDisableDecrement;
-
   const capoDisplay = formatCapoDisplay(capo, uiCapoLevel);
-  
-  // Generate capo digits (0-11)
   const capoDigits = Array.from({ length: 12 }, (_, i) => i.toString());
 
   return (
     <>
-      <span className="text-xs text-muted-foreground mb-1">{title}</span>
+      <span className="text-xs text-muted-foreground mb-1">{displayTitle}</span>
       <IncrementDecrementButton
         value={capoDisplay}
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
         onReset={handleReset}
         isAltered={isAltered}
-        title="Capo Position"
-        resetTitle="Reset to original capo position"
+        title={t("stickyControlsBar.capoPosition")}
+        resetTitle={t("stickyControlsBar.resetCapo")}
         disableIncrement={disableIncrement}
         disableDecrement={disableDecrement}
         animationDirection={animationDirection}

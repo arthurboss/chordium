@@ -1,6 +1,6 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
-import { SteppedSlider } from "@/components/ui/stepped-slider";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 
@@ -11,38 +11,21 @@ interface GuitarCapoFieldProps {
   onChange: (value: number) => void;
 }
 
-// Helper function to convert number to ordinal form
-const getOrdinalSuffix = (num: number): string => {
-  if (num === 0) return '';
-  if (num === 1) return 'st';
-  if (num === 2) return 'nd';
-  if (num === 3) return 'rd';
-  return 'th';
-};
+const GuitarCapoField: React.FC<GuitarCapoFieldProps> = ({ id, label, value, onChange }) => {
+  const { t } = useTranslation();
+  const isMobile = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
 
-const GuitarCapoField: React.FC<GuitarCapoFieldProps> = ({
-  id,
-  label,
-  value,
-  onChange,
-}) => {
-  // Use a media query to detect mobile
-  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches;
+  const capoLabel = (fret: number) =>
+    fret === 0 ? t("guitarCapoField.noCapo") : t("guitarCapoField.fretDisplay", { ordinal: fret });
 
   return (
     <div className="space-y-2 min-h-[64px] flex flex-col justify-center">
       {label && (
         <Label htmlFor={id} className="text-sm font-medium">
           {label}
-          {isMobile && (
-            <span className="ml-2 text-sm text-muted-foreground">
-              {value === 0 ? 'No capo' : (
-                <>
-                  <span>-</span>
-                  <span className="text-primary font-bold"> {value}{getOrdinalSuffix(value)}</span>
-                  <span> fret</span>
-                </>
-              )}
+          {isMobile && value !== 0 && (
+            <span className="ml-2 text-sm text-primary font-bold">
+              {capoLabel(value)}
             </span>
           )}
         </Label>
@@ -58,19 +41,14 @@ const GuitarCapoField: React.FC<GuitarCapoFieldProps> = ({
               onValueChange={(sliderValue) => onChange(sliderValue[0])}
             />
           ) : (
-            <Select value={String(value)} onValueChange={v => onChange(Number(v))}>
+            <Select value={String(value)} onValueChange={(v) => onChange(Number(v))}>
               <SelectTrigger id={id} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 13 }, (_, i) => (
                   <SelectItem key={i} value={String(i)}>
-                    {i === 0 ? 'No capo' : (
-                      <>
-                        <span className="text-primary font-bold">{i}{getOrdinalSuffix(i)}</span>
-                        <span> fret</span>
-                      </>
-                    )}
+                    {capoLabel(i)}
                   </SelectItem>
                 ))}
               </SelectContent>
