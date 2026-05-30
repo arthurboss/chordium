@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { USFlag, BRFlag, ESFlag } from "@/components/icons/flags";
 
 const LOCALES = [
-  { code: "en", flag: <USFlag className="!h-6 !w-6" /> },
-  { code: "pt-BR", flag: <BRFlag className="!h-6 !w-6" /> },
-  { code: "es", flag: <ESFlag className="!h-6 !w-6" /> },
+  { code: "en", flag: <USFlag className="!h-9 !w-9" /> },
+  { code: "pt-BR", flag: <BRFlag className="!h-9 !w-9" /> },
+  { code: "es", flag: <ESFlag className="!h-9 !w-9" /> },
 ] as const;
 
 const LanguageSwitcher: React.FC = () => {
