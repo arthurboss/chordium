@@ -1,3 +1,5 @@
+import i18n from "@/i18n/config";
+
 export interface ToastFunction {
   (props: {
     title: string;
@@ -11,8 +13,8 @@ export interface ToastFunction {
  */
 export const showInvalidFileFormatError = (toast: ToastFunction): void => {
   toast({
-    title: "Invalid file format",
-    description: "Please upload a text file (.txt, .text, or .chord)",
+    title: i18n.t("notifications:invalidFileFormat"),
+    description: i18n.t("notifications:invalidFileFormatDesc"),
     variant: "destructive",
   });
 };
@@ -22,8 +24,8 @@ export const showInvalidFileFormatError = (toast: ToastFunction): void => {
  */
 export const showFileReadError = (toast: ToastFunction): void => {
   toast({
-    title: "Error reading file",
-    description: "There was a problem reading the file content",
+    title: i18n.t("notifications:fileReadError"),
+    description: i18n.t("notifications:fileReadErrorDesc"),
     variant: "destructive",
   });
 };

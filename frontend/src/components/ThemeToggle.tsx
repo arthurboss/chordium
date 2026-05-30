@@ -1,40 +1,74 @@
-import React from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/utils/theme-utils";
-import ThemeTriggerButton from "@/components/theme/ThemeTriggerButton";
-import ThemeMenuItems from "@/components/theme/ThemeMenuItems";
+import React, { useState, useRef } from "react";
+import { Sun, Moon, Laptop } from "lucide-react";
+import { useTheme, Theme } from "@/utils/theme-utils";
+import { Button } from "@/components/ui/button";
 import { cyAttr } from "../utils/test-utils";
 
+const THEMES: Theme[] = ["light", "dark", "system"];
+
+const ThemeIcon = ({ theme, highlight }: { theme: Theme; highlight?: boolean }) => {
+  const className = `h-4 w-4 ${highlight ? "text-primary" : ""}`;
+  switch (theme) {
+    case "light": return <Sun className={className} />;
+    case "dark": return <Moon className={className} />;
+    case "system": return <Laptop className={className} />;
+  }
+};
+
 export const ThemeToggle: React.FC = () => {
-  const { isDark, activeTheme, setTheme } = useTheme();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const { activeTheme, setTheme } = useTheme();
+  const [showSelected, setShowSelected] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [displayTheme, setDisplayTheme] = useState<Theme>(activeTheme);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const currentIndex = THEMES.indexOf(activeTheme);
+  const nextTheme = THEMES[(currentIndex + 1) % THEMES.length];
+
+  const handleClick = () => {
+    // Fade out
+    setVisible(false);
+
+    setTimeout(() => {
+      setTheme(nextTheme);
+      setDisplayTheme(nextTheme);
+      setShowSelected(true);
+      // Fade in
+      setVisible(true);
+    }, 200);
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setTimeout(() => {
+        setShowSelected(false);
+        // Fade in
+        setVisible(true);
+      }, 200);
+    }, 2200);
+  };
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <ThemeTriggerButton 
-          isDark={isDark}
-          onClick={() => setIsOpen(!isOpen)} 
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="theme-dropdown-menu"
-        {...cyAttr("theme-dropdown-menu")}
+    <Button
+      variant="outline"
+      size="icon"
+      aria-label="Toggle theme"
+      title="Theme settings"
+      className="h-10 w-10 rounded-full"
+      onClick={handleClick}
+      {...cyAttr("theme-toggle-button")}
+    >
+      <span
+        className={`inline-flex items-center justify-center transition-all duration-200 ${
+          visible ? "scale-100 opacity-100" : "scale-0 opacity-0"
+        }`}
       >
-        <ThemeMenuItems 
-          activeTheme={activeTheme} 
-          onSelectTheme={(theme) => {
-            setTheme(theme);
-            setIsOpen(false); // Close the menu after selection
-          }} 
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+        {showSelected ? (
+          <ThemeIcon theme={displayTheme} highlight />
+        ) : (
+          <ThemeIcon theme={activeTheme} />
+        )}
+      </span>
+    </Button>
   );
 };
 

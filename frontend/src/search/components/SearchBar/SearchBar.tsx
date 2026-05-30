@@ -1,4 +1,5 @@
 import { User, Music, ArrowLeft, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,10 +20,10 @@ const SearchBar = ({
   isSearchDisabled = false,
   onClearSearch,
   clearDisabled = false,
-  artistDisabled = false
+  artistDisabled = false,
 }: SearchBarProps) => {
-  // Handle input changes and propagate to parent component
-  // No local state is maintained - this component uses the parent's state
+  const { t } = useTranslation();
+
   const handleArtistChange = (value: string) => {
     onInputChange(value, songValue);
   };
@@ -46,12 +47,12 @@ const SearchBar = ({
               value={artistValue}
               onChange={handleArtistChange}
               disabled={loading || artistLoading || artistDisabled}
-              placeholder="Search for an artist"
+              placeholder={t("searchBar.artistPlaceholder")}
               leftIcon={<User className="h-4 w-4" />}
             />
           </div>
           <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">
-            and | or
+            {t("searchBar.andOr")}
           </div>
           <div className="flex-1">
             <FormField
@@ -59,7 +60,7 @@ const SearchBar = ({
               value={songValue}
               onChange={handleSongChange}
               disabled={loading || artistLoading}
-              placeholder="Search for a song"
+              placeholder={t("searchBar.songPlaceholder")}
               leftIcon={<Music className="h-4 w-4" />}
             />
           </div>
@@ -71,33 +72,33 @@ const SearchBar = ({
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={onBackClick}
-            className="w-24"
+            className="h-10 w-10 rounded-full"
             disabled={!!(loading || artistLoading || !showBackButton || !onBackClick)}
-            {...cyAttr('back-button')}
+            aria-label={t("searchBar.back")}
+            {...cyAttr("back-button")}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
           </Button>
           <div className="flex-grow" />
 
           <RoundTrashButton
             onClick={onClearSearch}
-            aria-label="Clear search"
+            aria-label={t("searchBar.clearAriaLabel")}
             tabIndex={0}
             disabled={clearDisabled}
-            {...cyAttr('clear-search-button')}
+            {...cyAttr("clear-search-button")}
           />
           <Button
             type="submit"
-            className="w-24"
-            size="sm"
+            size="icon"
+            className="h-10 w-10 rounded-full"
             disabled={!!(loading || artistLoading || isSearchDisabled)}
-            {...cyAttr('search-submit-button')}
+            aria-label={t("searchBar.search")}
+            {...cyAttr("search-submit-button")}
           >
             <Search className="h-4 w-4" />
-            Search
           </Button>
         </div>
       </div>

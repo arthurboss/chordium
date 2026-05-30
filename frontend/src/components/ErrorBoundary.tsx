@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw, Home, Bug, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import i18n from '@/i18n/config';
 
 interface Props {
   children: ReactNode;
@@ -34,7 +35,6 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    // Generate a unique error ID for tracking
     const errorId = `err_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     return {
@@ -45,7 +45,6 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log the error
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
     this.setState({
@@ -53,12 +52,10 @@ class ErrorBoundary extends Component<Props, State> {
       errorInfo
     });
 
-    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
-    // Report to error tracking service (you can add Sentry, LogRocket, etc.)
     this.reportError(error, errorInfo);
   }
 
@@ -78,7 +75,6 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   private readonly reportError = (error: Error, errorInfo: React.ErrorInfo) => {
-    // In production, you'd send this to your error tracking service
     const errorReport = {
       message: error.message,
       stack: error.stack,
@@ -90,15 +86,7 @@ class ErrorBoundary extends Component<Props, State> {
       level: this.props.level || 'component'
     };
 
-    // For now, just log it. Later you can integrate with Sentry, LogRocket, etc.
     console.error('Error Report:', errorReport);
-    
-    // Example: Send to your backend error logging
-    // fetch('/api/errors', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(errorReport)
-    // }).catch(console.error);
   };
 
   private readonly resetErrorBoundary = () => {
@@ -130,13 +118,11 @@ ${errorInfo?.componentStack || 'No component stack available'}`;
       await navigator.clipboard.writeText(errorDetails);
       this.setState({ copied: true });
       
-      // Reset copied state after 2 seconds
       setTimeout(() => {
         this.setState({ copied: false });
       }, 2000);
     } catch (err) {
       console.error('Failed to copy error details:', err);
-      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = errorDetails;
       document.body.appendChild(textArea);
@@ -203,7 +189,6 @@ ${errorInfo?.componentStack || 'No component stack available'}
 
   render() {
     if (this.state.hasError) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
@@ -212,22 +197,24 @@ ${errorInfo?.componentStack || 'No component stack available'}
       const isGlobalError = level === 'global';
       const isPageError = level === 'page';
       
+      const t = i18n.isInitialized ? i18n.t.bind(i18n) : ((key: string) => key.split(".").pop() || key);
+
       let title: string;
       if (isGlobalError) {
-        title = 'Application Error';
+        title = t('errors:boundary.applicationError');
       } else if (isPageError) {
-        title = 'Page Error';
+        title = t('errors:boundary.pageError');
       } else {
-        title = 'Something went wrong';
+        title = t('errors:boundary.somethingWentWrong');
       }
 
       let description: string;
       if (isGlobalError) {
-        description = 'The application encountered an unexpected error and needs to be reloaded.';
+        description = t('errors:boundary.applicationErrorDesc');
       } else if (isPageError) {
-        description = 'This page encountered an error. You can try refreshing or go back to the home page.';
+        description = t('errors:boundary.pageErrorDesc');
       } else {
-        description = 'This component encountered an error. You can try again or refresh the page.';
+        description = t('errors:boundary.componentErrorDesc');
       }
 
       return (
@@ -249,9 +236,9 @@ ${errorInfo?.componentStack || 'No component stack available'}
               <Alert>
                 <Bug className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Error ID:</strong> {this.state.errorId}
+                  <strong>{t('errors:boundary.errorId')}</strong> {this.state.errorId}
                   <br />
-                  <strong>Error:</strong> {this.state.error?.message || 'Unknown error occurred'}
+                  <strong>{t('errors:boundary.error')}</strong> {this.state.error?.message || t('errors:boundary.unknownError')}
                 </AlertDescription>
               </Alert>
 
@@ -263,7 +250,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                     className="flex items-center gap-2"
                   >
                     <RefreshCw className="h-4 w-4" />
-                    Try Again
+                    {t('errors:boundary.tryAgain')}
                   </Button>
                 )}
                 
@@ -273,7 +260,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   className="flex items-center gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Reload Page
+                  {t('errors:boundary.reloadPage')}
                 </Button>
                 
                 <Button 
@@ -282,7 +269,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   className="flex items-center gap-2"
                 >
                   <Home className="h-4 w-4" />
-                  Go Home
+                  {t('errors:boundary.goHome')}
                 </Button>
               </div>
 
@@ -294,18 +281,18 @@ ${errorInfo?.componentStack || 'No component stack available'}
                   className="w-full text-muted-foreground"
                 >
                   <Bug className="h-4 w-4 mr-2" />
-                  Report this issue on GitHub
+                  {t('errors:boundary.reportIssue')}
                 </Button>
               </div>
 
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-6 p-4 bg-muted rounded-md">
                   <summary className="cursor-pointer font-medium mb-2">
-                    🐛 Development Details (Click to expand)
+                    🐛 {t('errors:boundary.devDetails')}
                   </summary>
                   <div className="space-y-2 text-sm font-mono">
                     <div className="flex justify-between items-center">
-                      <strong>Error Stack:</strong>
+                      <strong>{t('errors:boundary.errorStack')}</strong>
                       <Button 
                         onClick={this.handleCopyError} 
                         variant="ghost" 
@@ -315,12 +302,12 @@ ${errorInfo?.componentStack || 'No component stack available'}
                         {this.state.copied ? (
                           <>
                             <Check className="h-3 w-3 mr-1" />
-                            Copied!
+                            {t('errors:boundary.copied')}
                           </>
                         ) : (
                           <>
                             <Copy className="h-3 w-3 mr-1" />
-                            Copy All
+                            {t('errors:boundary.copyAll')}
                           </>
                         )}
                       </Button>
@@ -330,7 +317,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                     </pre>
                     {this.state.errorInfo && (
                       <div>
-                        <strong>Component Stack:</strong>
+                        <strong>{t('errors:boundary.componentStack')}</strong>
                         <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
                           {this.state.errorInfo.componentStack}
                         </pre>

@@ -21,11 +21,11 @@ const PageHeader = memo(({
 }: PageHeaderProps) => {
 
   return (
-    <Card className="flex flex-row items-center gap-2 p-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm">
+    <Card className="flex flex-row items-center gap-2 py-3 px-4 rounded-lg border bg-card dark:bg-[--card] text-card-foreground shadow-sm">
       {/* Mobile layout: Title first, then buttons at far right */}
-      <div className="flex sm:hidden flex-row items-center justify-between w-full gap-1">
+      <div className="flex sm:hidden flex-row items-center justify-between w-full gap-3">
         <TitleSection title={title} isMobile={true} />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <BackButton onBack={onBack} />
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
@@ -33,13 +33,15 @@ const PageHeader = memo(({
         </div>
       </div>
 
-      {/* Desktop layout: Back button, title center, action button */}
-      <div className="hidden sm:flex flex-row items-center w-full relative">
-        <BackButton onBack={onBack} />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {/* Desktop layout: Back button, title center, action buttons */}
+      <div className="hidden sm:flex flex-row items-center w-full gap-3">
+        <div className="shrink-0">
+          <BackButton onBack={onBack} />
+        </div>
+        <div className="flex-1 min-w-0">
           <TitleSection title={title} />
         </div>
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-2 shrink-0">
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
           {rightContent}
@@ -49,6 +51,6 @@ const PageHeader = memo(({
   );
 });
 
-PageHeader.displayName = 'PageHeader';
+PageHeader.displayName = PageHeader;
 
 export default PageHeader;

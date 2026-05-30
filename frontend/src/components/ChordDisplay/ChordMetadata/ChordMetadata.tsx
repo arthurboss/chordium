@@ -1,45 +1,42 @@
-import React from 'react';
-import MetadataBadge from './MetadataBadge';
-import type { ChordMetadataProps } from './ChordMetadata.types';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import MetadataBadge from "./MetadataBadge";
+import type { ChordMetadataProps } from "./ChordMetadata.types";
 
-/**
- * ChordMetadata component for displaying musical metadata
- * 
- * Renders artist and tuning information using reusable MetadataBadge components.
- * Each metadata item is displayed as a labeled badge with consistent styling.
- * 
- * @param chordSheet - Chord sheet object containing all metadata
- */
 const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
-  // Handle undefined/null values gracefully
-  const tuning = chordSheet.guitarTuning 
-    ? (Array.isArray(chordSheet.guitarTuning)
-        ? chordSheet.guitarTuning.join('-')
-        : chordSheet.guitarTuning)
-    : 'Standard';
+  const { t } = useTranslation();
 
-  const capoValue = chordSheet.guitarCapo !== undefined && chordSheet.guitarCapo !== null
-    ? chordSheet.guitarCapo.toString()
-    : 'None';
+  const tuning = chordSheet.guitarTuning
+    ? Array.isArray(chordSheet.guitarTuning)
+      ? chordSheet.guitarTuning.join("-")
+      : chordSheet.guitarTuning
+    : t("chordMetadata.standard");
+
+  const capoValue =
+    chordSheet.guitarCapo !== undefined && chordSheet.guitarCapo !== null
+      ? chordSheet.guitarCapo.toString()
+      : t("chordMetadata.none");
 
   return (
-    <div className='grid [grid-template-columns:max-content_1fr] sm:[grid-template-columns:repeat(4,_min-content)] gap-y-1 gap-x-4 w-full sm:justify-between text-xs'>
+    <div className="flex flex-col gap-1 p-0 sm:grid sm:[grid-template-columns:repeat(4,_min-content)] sm:gap-x-4 sm:gap-y-1 sm:justify-between sm:px-4 sm:py-3 w-full text-xs">
       <MetadataBadge
-        label="Artist:"
-        value={chordSheet.artist || 'Unknown'}
+        label={t("chordMetadata.artist")}
+        value={chordSheet.artist || t("chordMetadata.unknown")}
       />
-      <MetadataBadge
-        label="Song Key:"
-        value={chordSheet.songKey || 'Unknown'}
-      />
-      <MetadataBadge
-        label="Guitar Tuning:"
-        value={tuning}
-      />
-      <MetadataBadge
-        label="Guitar Capo:"
-        value={capoValue}
-      />
+      <div className="flex gap-3 whitespace-nowrap sm:contents">
+        <MetadataBadge
+          label={t("chordMetadata.songKey")}
+          value={chordSheet.songKey || "-"}
+        />
+        <MetadataBadge
+          label={t("chordMetadata.guitarCapo")}
+          value={capoValue}
+        />
+        <MetadataBadge
+          label={t("chordMetadata.guitarTuning")}
+          value={tuning}
+        />
+      </div>
     </div>
   );
 };

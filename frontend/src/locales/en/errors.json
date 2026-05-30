@@ -1,0 +1,23 @@
+{
+  "loading": "Loading...",
+  "boundary": {
+    "applicationError": "Application Error",
+    "pageError": "Page Error",
+    "somethingWentWrong": "Something went wrong",
+    "applicationErrorDesc": "The application encountered an unexpected error and needs to be reloaded.",
+    "pageErrorDesc": "This page encountered an error. You can try refreshing or go back to the home page.",
+    "componentErrorDesc": "This component encountered an error. You can try again or refresh the page.",
+    "errorId": "Error ID:",
+    "error": "Error:",
+    "unknownError": "Unknown error occurred",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page",
+    "goHome": "Go Home",
+    "reportIssue": "Report this issue on GitHub",
+    "devDetails": "Development Details (Click to expand)",
+    "errorStack": "Error Stack:",
+    "componentStack": "Component Stack:",
+    "copyAll": "Copy All",
+    "copied": "Copied!"
+  }
+}

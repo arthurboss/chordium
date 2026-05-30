@@ -1,6 +1,7 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface NavigationButtonsProps {
   onReturn: () => void;
@@ -8,21 +9,19 @@ interface NavigationButtonsProps {
 
 /**
  * Navigation buttons for the chord editor
- * Currently just has a back button
  */
-const NavigationButtons: React.FC<NavigationButtonsProps> = ({
-  onReturn
-}) => {
+const NavigationButtons: React.FC<NavigationButtonsProps> = ({ onReturn }) => {
+  const { t } = useTranslation();
+
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
+    <Button
+      variant="outline"
+      size="icon"
       onClick={onReturn}
-      aria-label="Go back"
-      className="w-24"
+      aria-label={t("navigationButtons.backAriaLabel")}
+      className="h-10 w-10 rounded-full"
     >
-      <ArrowLeft className="h-4 w-4 mr-1" />
-      Back
+      <ArrowLeft className="h-4 w-4" />
     </Button>
   );
 };

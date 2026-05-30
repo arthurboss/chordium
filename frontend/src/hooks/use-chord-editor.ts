@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import i18n from "@/i18n/config";
 
 /**
  * Custom hook to manage chord sheet editing
@@ -8,26 +9,24 @@ import { toast } from "@/hooks/use-toast";
  * @returns Editing state and handlers
  */
 export const useChordEditor = (
-  initialContent: string, 
+  initialContent: string,
   onSave?: (content: string) => void
 ) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<string>(initialContent);
 
-  // Update edit content when initial content changes
   const updateEditContent = (content: string) => {
     setEditContent(content);
   };
-  
-  // Handle saving edits
+
   const handleSaveEdits = () => {
     if (onSave) {
       onSave(editContent);
     }
     setIsEditing(false);
     toast({
-      title: "Changes saved",
-      description: "Your chord sheet has been updated"
+      title: i18n.t("notifications:changesSaved"),
+      description: i18n.t("notifications:changesSavedDesc"),
     });
   };
 
@@ -37,6 +36,6 @@ export const useChordEditor = (
     editContent,
     setEditContent,
     updateEditContent,
-    handleSaveEdits
+    handleSaveEdits,
   };
 };
