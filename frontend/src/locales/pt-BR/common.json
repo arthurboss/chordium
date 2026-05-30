@@ -2,7 +2,7 @@
   "tabs": {
     "myChordSheets": "Minhas Cifras",
     "search": "Pesquisar",
-    "upload": "Enviar"
+    "upload": "Importar"
   },
   "header": {
     "homeAriaLabel": "Início do Chordium"
@@ -22,7 +22,7 @@
     "results": "Resultados"
   },
   "dropZone": {
-    "title": "Enviar uma cifra",
+    "title": "Importar uma cifra",
     "subtitle": "Arraste e solte um arquivo de texto aqui, ou clique para navegar",
     "browse": "Procurar Arquivos"
   },
@@ -86,8 +86,8 @@
   },
   "chordSheetList": {
     "empty": "Você ainda não salvou nenhuma cifra.",
-    "uploadAriaLabel": "Enviar uma cifra",
-    "uploadButton": "Enviar uma cifra"
+    "uploadAriaLabel": "Importar uma cifra",
+    "uploadButton": "Importar uma cifra"
   },
   "offlineIndicator": {
     "ariaLabel": "Mostrar status offline",
