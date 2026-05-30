@@ -17,7 +17,8 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "test": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest run",
-    "test:watch": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest"
+    "test:watch": "NODE_OPTIONS='--max-old-space-size=8192 --expose-gc' vitest",
+    "translate": "node scripts/check-translations.mjs"
   },
   "dependencies": {
     "@chordium/types": "^1.0.0",
