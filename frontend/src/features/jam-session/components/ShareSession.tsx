@@ -82,11 +82,9 @@ export function ShareSession() {
 
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+            await videoRef.current.play();
             streamRef.current = stream;
             setHasCamera(true);
-
-            // TODO: Add QR code scanning logic here
-            // You can use a library like jsQR or ZXing for this
           }
         } catch (error) {
           console.error('Error accessing camera:', error);
