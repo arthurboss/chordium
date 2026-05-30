@@ -1,0 +1,153 @@
+{
+  "tabs": {
+    "myChordSheets": "Minhas Cifras",
+    "search": "Pesquisar",
+    "upload": "Enviar"
+  },
+  "header": {
+    "homeAriaLabel": "Início do Chordium"
+  },
+  "searchBar": {
+    "artistPlaceholder": "Pesquisar artista",
+    "songPlaceholder": "Pesquisar música",
+    "back": "Voltar",
+    "search": "Pesquisar",
+    "clearAriaLabel": "Limpar pesquisa",
+    "andOr": "e | ou"
+  },
+  "searchResults": {
+    "noResults": "Nenhum resultado encontrado.",
+    "artists": "Artistas",
+    "songs": "Músicas",
+    "results": "Resultados"
+  },
+  "dropZone": {
+    "title": "Enviar uma cifra",
+    "subtitle": "Arraste e solte um arquivo de texto aqui, ou clique para navegar",
+    "browse": "Procurar Arquivos"
+  },
+  "songMetadataForm": {
+    "songTitle": "Título da Música",
+    "songTitlePlaceholder": "Digite o título da música",
+    "artist": "Artista",
+    "artistPlaceholder": "Digite o nome do artista",
+    "songKey": "Tom da Música",
+    "songKeyPlaceholder": "ex.: Dó# menor",
+    "guitarTuning": "Afinação do Violão",
+    "guitarTuningPlaceholder": "ex.: Afinação padrão",
+    "guitarCapo": "Capotraste",
+    "continue": "Continuar",
+    "continueAriaLabel": "Continuar para editar"
+  },
+  "chordMetadata": {
+    "artist": "Artista:",
+    "songKey": "Tom:",
+    "guitarTuning": "Afinação:",
+    "guitarCapo": "Capo:",
+    "unknown": "Desconhecido",
+    "none": "Nenhum",
+    "standard": "Padrão"
+  },
+  "textStyle": {
+    "textPreferences": "Estilo",
+    "viewMode": "Modo de Exibição",
+    "fontStyle": "Estilo de Fonte",
+    "fontSize": "Tamanho da Fonte",
+    "fontSpacing": "Espaçamento",
+    "serif": "Serifada",
+    "sansSerif": "Sem Serifa",
+    "normal": "Normal",
+    "chords": "Acordes",
+    "lyrics": "Letra",
+    "showGuitarTabs": "Mostrar Tablaturas",
+    "hideGuitarTabs": "Ocultar Tablaturas",
+    "textPreferencesAriaLabel": "Preferências de Texto"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "switcher": "Idioma",
+    "en": "English",
+    "ptBR": "Português (BR)"
+  },
+  "pageHeader": {
+    "backAriaLabel": "back-button",
+    "saveAriaLabel": "salvar em minhas cifras",
+    "deleteAriaLabel": "delete-button"
+  },
+  "navigationButtons": {
+    "backAriaLabel": "Voltar"
+  },
+  "saveButton": {
+    "saveAriaLabel": "Salvar em Minhas Cifras"
+  },
+  "chordSheetList": {
+    "empty": "Você ainda não salvou nenhuma cifra.",
+    "uploadAriaLabel": "Enviar uma cifra",
+    "uploadButton": "Enviar uma cifra"
+  },
+  "offlineIndicator": {
+    "ariaLabel": "Mostrar status offline",
+    "title": "Você está offline - Clique para detalhes",
+    "srText": "Offline"
+  },
+  "jamSession": {
+    "joinSession": "Entrar na Sessão",
+    "shareSession": "Compartilhar Sessão",
+    "connected": "Conectado",
+    "sessionActive": "Sessão Ativa",
+    "connectedToSession": "Conectado à Sessão",
+    "sharePeers": "Compartilhe esta sessão com {{count}} participante",
+    "sharePeers_other": "Compartilhe esta sessão com {{count}} participantes",
+    "connectedToHost": "Conectado à sessão do anfitrião",
+    "connectedPeers": "Participantes Conectados",
+    "noPeers": "Nenhum participante conectado ainda",
+    "endSession": "Encerrar Sessão",
+    "connect": "Conectar",
+    "connecting": "Conectando...",
+    "back": "Voltar",
+    "scanQrCode": "Escanear QR Code",
+    "copy": "Copiar",
+    "copyConnectionString": "Copiar String de Conexão",
+    "pasteConnectionString": "Cole a string de conexão",
+    "orPasteConnectionString": "Ou cole a string de conexão aqui",
+    "scanToJoin": "Escaneie este QR Code para entrar na sessão",
+    "or": "ou"
+  },
+  "smallScreenWarning": {
+    "title": "Tela Muito Pequena",
+    "message": "Por favor, use um dispositivo com uma tela maior para a melhor experiência."
+  },
+  "notFound": {
+    "title": "Página Não Encontrada",
+    "message": "A página que você está procurando não existe.",
+    "hint": "Verifique a URL por erros de digitação, ou volte à página inicial para iniciar sua busca musical.",
+    "returnHome": "Voltar para o Início"
+  },
+  "footer": {
+    "source": "Código Fonte"
+  },
+  "stickyControlsBar": {
+    "capoFret": "Capotraste",
+    "link": "Vincular",
+    "transpose": "Transpor",
+    "style": "Estilo",
+    "play": "Tocar",
+    "pause": "Pausar",
+    "speed": "Velocidade",
+    "capoPosition": "Posição do Capotraste",
+    "resetCapo": "Redefinir para capotraste original",
+    "transposeSongKey": "Transpor Tom da Música",
+    "resetTranspose": "Redefinir para tom original",
+    "linkCapoTranspose": "Vincular Capotraste e Transposição",
+    "unlinkCapoTranspose": "Desvincular Capotraste e Transposição",
+    "songControls": "Controles da Música"
+  },
+  "guitarCapoField": {
+    "noCapo": "Sem capotraste",
+    "fretDisplay": "{{ordinal}}ª casa"
+  }
+}

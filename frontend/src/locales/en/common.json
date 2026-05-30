@@ -1,0 +1,153 @@
+{
+  "tabs": {
+    "myChordSheets": "Songbook",
+    "search": "Search",
+    "upload": "Upload"
+  },
+  "header": {
+    "homeAriaLabel": "Chordium home"
+  },
+  "searchBar": {
+    "artistPlaceholder": "Search for an artist",
+    "songPlaceholder": "Search for a song",
+    "back": "Back",
+    "search": "Search",
+    "clearAriaLabel": "Clear search",
+    "andOr": "and | or"
+  },
+  "searchResults": {
+    "noResults": "No results were found.",
+    "artists": "Artists",
+    "songs": "Songs",
+    "results": "Results"
+  },
+  "dropZone": {
+    "title": "Upload a chord sheet",
+    "subtitle": "Drag and drop a text file here, or click to browse",
+    "browse": "Browse Files"
+  },
+  "songMetadataForm": {
+    "songTitle": "Song Title",
+    "songTitlePlaceholder": "Enter song title",
+    "artist": "Artist",
+    "artistPlaceholder": "Enter artist name",
+    "songKey": "Song Key",
+    "songKeyPlaceholder": "e.g. C# minor",
+    "guitarTuning": "Guitar Tuning",
+    "guitarTuningPlaceholder": "e.g. Standard tuning",
+    "guitarCapo": "Guitar Capo",
+    "continue": "Continue",
+    "continueAriaLabel": "Continue to edit"
+  },
+  "chordMetadata": {
+    "artist": "Artist:",
+    "songKey": "Key:",
+    "guitarTuning": "Tuning:",
+    "guitarCapo": "Capo:",
+    "unknown": "Unknown",
+    "none": "None",
+    "standard": "Standard"
+  },
+  "textStyle": {
+    "textPreferences": "Style",
+    "viewMode": "View Mode",
+    "fontStyle": "Font Style",
+    "fontSize": "Font Size",
+    "fontSpacing": "Font Spacing",
+    "serif": "Serif",
+    "sansSerif": "Sans",
+    "normal": "Normal",
+    "chords": "Chords",
+    "lyrics": "Lyrics",
+    "showGuitarTabs": "Show Guitar Tabs",
+    "hideGuitarTabs": "Hide Guitar Tabs",
+    "textPreferencesAriaLabel": "Text Preferences"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "switcher": "Language",
+    "en": "English",
+    "ptBR": "Português (BR)"
+  },
+  "pageHeader": {
+    "backAriaLabel": "back-button",
+    "saveAriaLabel": "save to my chord sheets",
+    "deleteAriaLabel": "delete-button"
+  },
+  "navigationButtons": {
+    "backAriaLabel": "Go back"
+  },
+  "saveButton": {
+    "saveAriaLabel": "Save to My Chord Sheets"
+  },
+  "chordSheetList": {
+    "empty": "You haven't saved any chord sheets yet.",
+    "uploadAriaLabel": "Upload a chord sheet",
+    "uploadButton": "Upload a chord sheet"
+  },
+  "offlineIndicator": {
+    "ariaLabel": "Show offline status",
+    "title": "You're offline - Click for details",
+    "srText": "Offline"
+  },
+  "jamSession": {
+    "joinSession": "Join Jam Session",
+    "shareSession": "Share Jam Session",
+    "connected": "Connected",
+    "sessionActive": "Session Active",
+    "connectedToSession": "Connected to Session",
+    "sharePeers": "Share this session with {{count}} peer",
+    "sharePeers_other": "Share this session with {{count}} peers",
+    "connectedToHost": "Connected to host's session",
+    "connectedPeers": "Connected Peers",
+    "noPeers": "No peers connected yet",
+    "endSession": "End Session",
+    "connect": "Connect",
+    "connecting": "Connecting...",
+    "back": "Back",
+    "scanQrCode": "Scan QR Code",
+    "copy": "Copy",
+    "copyConnectionString": "Copy Connection String",
+    "pasteConnectionString": "Paste connection string",
+    "orPasteConnectionString": "Or paste connection string here",
+    "scanToJoin": "Scan this QR code to join the session",
+    "or": "or"
+  },
+  "smallScreenWarning": {
+    "title": "Screen Too Small",
+    "message": "Please use a device with a bigger screen for the best experience."
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist.",
+    "hint": "Check the URL for typos, or return to the home page to start your music search.",
+    "returnHome": "Return to Home"
+  },
+  "footer": {
+    "source": "Source"
+  },
+  "stickyControlsBar": {
+    "capoFret": "Capo Fret",
+    "link": "Link",
+    "transpose": "Transpose",
+    "style": "Style",
+    "play": "Play",
+    "pause": "Pause",
+    "speed": "Speed",
+    "capoPosition": "Capo Position",
+    "resetCapo": "Reset to original capo position",
+    "transposeSongKey": "Transpose Song Key",
+    "resetTranspose": "Reset to original song key",
+    "linkCapoTranspose": "Link Capo & Transpose",
+    "unlinkCapoTranspose": "Unlink Capo & Transpose",
+    "songControls": "Song Controls"
+  },
+  "guitarCapoField": {
+    "noCapo": "No capo",
+    "fretDisplay": "{{ordinal}} fret"
+  }
+}
