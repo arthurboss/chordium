@@ -39,8 +39,6 @@ export const ThemeToggle: React.FC = () => {
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      // Fade out
-      setVisible(false);
       setTimeout(() => {
         setShowSelected(false);
         // Fade in
