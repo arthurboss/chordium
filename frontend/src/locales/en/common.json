@@ -71,7 +71,8 @@
   "language": {
     "switcher": "Language",
     "en": "English",
-    "ptBR": "Português (BR)"
+    "ptBR": "Português (BR)",
+    "es": "Español"
   },
   "pageHeader": {
     "backAriaLabel": "back-button",

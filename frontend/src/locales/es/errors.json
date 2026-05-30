@@ -1,0 +1,23 @@
+{
+  "loading": "Cargando...",
+  "boundary": {
+    "applicationError": "Error de la aplicación",
+    "pageError": "Error de página",
+    "somethingWentWrong": "Algo salió mal",
+    "applicationErrorDesc": "La aplicación encontró un error inesperado y necesita recargarse.",
+    "pageErrorDesc": "Esta página encontró un error. Puedes intentar actualizar o volver a la página de inicio.",
+    "componentErrorDesc": "Este componente encontró un error. Puedes intentarlo de nuevo o actualizar la página.",
+    "errorId": "ID del error:",
+    "error": "Error:",
+    "unknownError": "Ocurrió un error desconocido",
+    "tryAgain": "Intentar de nuevo",
+    "reloadPage": "Recargar página",
+    "goHome": "Ir al inicio",
+    "reportIssue": "Reportar este problema en GitHub",
+    "devDetails": "Detalles de desarrollo (clic para expandir)",
+    "errorStack": "Pila del error:",
+    "componentStack": "Pila del componente:",
+    "copyAll": "Copiar todo",
+    "copied": "¡Copiado!"
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "tabs": {
+    "myChordSheets": "Mi cancionero",
+    "search": "Buscar",
+    "upload": "Importar"
+  },
+  "header": {
+    "homeAriaLabel": "Inicio de Chordium"
+  },
+  "searchBar": {
+    "artistPlaceholder": "Buscar artista",
+    "songPlaceholder": "Buscar canción",
+    "back": "Atrás",
+    "search": "Buscar",
+    "clearAriaLabel": "Limpiar búsqueda",
+    "andOr": "y | o"
+  },
+  "searchResults": {
+    "noResults": "No se encontraron resultados.",
+    "artists": "Artistas",
+    "songs": "Canciones",
+    "results": "Resultados"
+  },
+  "dropZone": {
+    "title": "Importar acordes",
+    "subtitle": "Arrastra un archivo de texto aquí, o haz clic para explorar",
+    "browse": "Explorar archivos"
+  },
+  "songMetadataForm": {
+    "songTitle": "Título de la canción",
+    "songTitlePlaceholder": "Escribe el título",
+    "artist": "Artista",
+    "artistPlaceholder": "Escribe el nombre del artista",
+    "songKey": "Tonalidad",
+    "songKeyPlaceholder": "p. ej. Do# menor",
+    "guitarTuning": "Afinación",
+    "guitarTuningPlaceholder": "p. ej. Afinación estándar",
+    "guitarCapo": "Cejilla",
+    "continue": "Continuar",
+    "continueAriaLabel": "Continuar para editar"
+  },
+  "chordMetadata": {
+    "artist": "Artista:",
+    "songKey": "Tono:",
+    "guitarTuning": "Afinación:",
+    "guitarCapo": "Cejilla:",
+    "unknown": "Desconocido",
+    "none": "Sin cejilla",
+    "standard": "Estándar"
+  },
+  "textStyle": {
+    "textPreferences": "Estilo",
+    "viewMode": "Modo de vista",
+    "fontStyle": "Estilo de fuente",
+    "fontSize": "Tamaño de fuente",
+    "fontSpacing": "Espaciado",
+    "serif": "Serif",
+    "sansSerif": "Sin serif",
+    "normal": "Normal",
+    "chords": "Acordes",
+    "lyrics": "Letra",
+    "showGuitarTabs": "Mostrar tablaturas",
+    "hideGuitarTabs": "Ocultar tablaturas",
+    "textPreferencesAriaLabel": "Preferencias de texto"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "switcher": "Idioma",
+    "en": "English",
+    "ptBR": "Português (BR)",
+    "es": "Español"
+  },
+  "pageHeader": {
+    "backAriaLabel": "back-button",
+    "saveAriaLabel": "guardar en mi cancionero",
+    "deleteAriaLabel": "delete-button"
+  },
+  "navigationButtons": {
+    "backAriaLabel": "Volver"
+  },
+  "saveButton": {
+    "saveAriaLabel": "Guardar en Mi cancionero"
+  },
+  "chordSheetList": {
+    "empty": "Aún no has guardado ningún acorde.",
+    "uploadAriaLabel": "Importar acordes",
+    "uploadButton": "Importar acordes"
+  },
+  "offlineIndicator": {
+    "ariaLabel": "Mostrar estado sin conexión",
+    "title": "Sin conexión - Haz clic para más detalles",
+    "srText": "Sin conexión"
+  },
+  "jamSession": {
+    "joinSession": "Unirse a la sesión",
+    "shareSession": "Compartir sesión",
+    "connected": "Conectado",
+    "sessionActive": "Sesión activa",
+    "connectedToSession": "Conectado a la sesión",
+    "sharePeers": "Comparte esta sesión con {{count}} participante",
+    "sharePeers_other": "Comparte esta sesión con {{count}} participantes",
+    "connectedToHost": "Conectado a la sesión del anfitrión",
+    "connectedPeers": "Participantes conectados",
+    "noPeers": "Aún no hay participantes conectados",
+    "endSession": "Terminar sesión",
+    "connect": "Conectar",
+    "connecting": "Conectando...",
+    "back": "Atrás",
+    "scanQrCode": "Escanear código QR",
+    "copy": "Copiar",
+    "copyConnectionString": "Copiar cadena de conexión",
+    "pasteConnectionString": "Pegar cadena de conexión",
+    "orPasteConnectionString": "O pega la cadena de conexión aquí",
+    "scanToJoin": "Escanea este código QR para unirte a la sesión",
+    "or": "o"
+  },
+  "smallScreenWarning": {
+    "title": "Pantalla demasiado pequeña",
+    "message": "Por favor, usa un dispositivo con una pantalla más grande para una mejor experiencia."
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "message": "La página que buscas no existe.",
+    "hint": "Comprueba si hay errores tipográficos en la URL, o vuelve a la página de inicio para comenzar tu búsqueda.",
+    "returnHome": "Volver al inicio"
+  },
+  "footer": {
+    "source": "Código fuente"
+  },
+  "stickyControlsBar": {
+    "capoFret": "Cejilla",
+    "link": "Vincular",
+    "transpose": "Transponer",
+    "style": "Estilo",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "speed": "Velocidad",
+    "capoPosition": "Posición de la cejilla",
+    "resetCapo": "Restablecer cejilla original",
+    "transposeSongKey": "Transponer tonalidad",
+    "resetTranspose": "Restablecer tonalidad original",
+    "linkCapoTranspose": "Vincular cejilla y transposición",
+    "unlinkCapoTranspose": "Desvincular cejilla y transposición",
+    "songControls": "Controles de canción"
+  },
+  "guitarCapoField": {
+    "noCapo": "Sin cejilla",
+    "fretDisplay": "Traste {{ordinal}}"
+  }
+}

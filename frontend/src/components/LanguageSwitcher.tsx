@@ -2,11 +2,12 @@ import React, { useState, useRef } from "react";
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { USFlag, BRFlag } from "@/components/icons/flags";
+import { USFlag, BRFlag, ESFlag } from "@/components/icons/flags";
 
 const LOCALES = [
   { code: "en", flag: <USFlag className="!h-6 !w-6" /> },
   { code: "pt-BR", flag: <BRFlag className="!h-6 !w-6" /> },
+  { code: "es", flag: <ESFlag className="!h-6 !w-6" /> },
 ] as const;
 
 const LanguageSwitcher: React.FC = () => {
