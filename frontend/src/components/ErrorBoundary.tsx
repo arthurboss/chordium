@@ -197,7 +197,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
       const isGlobalError = level === 'global';
       const isPageError = level === 'page';
       
-      const t = i18n.t.bind(i18n);
+      const t = i18n.isInitialized ? i18n.t.bind(i18n) : ((key: string) => key.split(".").pop() || key);
 
       let title: string;
       if (isGlobalError) {
