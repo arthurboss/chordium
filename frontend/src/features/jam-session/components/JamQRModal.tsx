@@ -104,12 +104,12 @@ export function JamQRModal({ chordSheet }: JamQRModalProps) {
         <Button
           variant="outline"
           size="sm"
-          className="flex-shrink-0 h-9 w-9 sm:h-8 sm:w-auto sm:px-3"
+          className="flex-shrink-0 h-10 w-10 rounded-full"
           aria-label="Start Jam — share chord sheet via QR"
           title="Start Jam"
         >
           <QrCode className="h-4 w-4" />
-          <span className="hidden sm:inline">Jam</span>
+          
         </Button>
       </DialogTrigger>
 

@@ -105,7 +105,7 @@ const SongViewer = ({
             : undefined
         }
       />
-      <div className="py-2 sm:py-4 px-4">
+      <div className="py-2 pl-1 sm:py-0 sm:px-1">
         <ChordMetadata chordSheet={chordSheetToDisplay} />
       </div>
       <ChordDisplay

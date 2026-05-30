@@ -17,7 +17,7 @@ export const ThemeTriggerButton = memo(forwardRef<HTMLButtonElement, ThemeTrigge
         size="icon" 
         aria-label="Toggle theme"
         title="Theme settings"
-        className="border"
+        className="border h-10 w-10 rounded-full"
         tabIndex={0}
         onClick={onClick}
         {...cyAttr("theme-toggle-button")}
