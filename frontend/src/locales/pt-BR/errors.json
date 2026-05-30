@@ -1,3 +1,23 @@
 {
-  "loading": "Carregando..."
+  "loading": "Carregando...",
+  "boundary": {
+    "applicationError": "Erro na Aplicação",
+    "pageError": "Erro na Página",
+    "somethingWentWrong": "Algo deu errado",
+    "applicationErrorDesc": "A aplicação encontrou um erro inesperado e precisa ser recarregada.",
+    "pageErrorDesc": "Esta página encontrou um erro. Você pode tentar atualizar ou voltar à página inicial.",
+    "componentErrorDesc": "Este componente encontrou um erro. Você pode tentar novamente ou atualizar a página.",
+    "errorId": "ID do Erro:",
+    "error": "Erro:",
+    "unknownError": "Ocorreu um erro desconhecido",
+    "tryAgain": "Tentar Novamente",
+    "reloadPage": "Recarregar Página",
+    "goHome": "Ir para o Início",
+    "reportIssue": "Reportar este problema no GitHub",
+    "devDetails": "Detalhes de Desenvolvimento (Clique para expandir)",
+    "errorStack": "Stack do Erro:",
+    "componentStack": "Stack do Componente:",
+    "copyAll": "Copiar Tudo",
+    "copied": "Copiado!"
+  }
 }
