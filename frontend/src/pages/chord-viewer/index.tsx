@@ -94,8 +94,21 @@ const ChordViewer = () => {
     return navigation.navigateBack();
   };
 
+  // Build chord sheet data from jam payload if present (for save functionality)
+  const jamChordSheetData = jamPayload ? {
+    chordSheet: {
+      title: jamPayload.title,
+      artist: jamPayload.artist,
+      songKey: jamPayload.songKey,
+      guitarTuning: (jamPayload.guitarTuning ?? ['E', 'A', 'D', 'G', 'B', 'E']) as [string, string, string, string, string, string],
+      guitarCapo: jamPayload.guitarCapo,
+      songChords: jamPayload.songChords,
+    },
+    path,
+  } : null;
+
   // Chord sheet operations using focused hooks
-  const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData);
+  const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData ?? jamChordSheetData);
   // Wrap handleSave to update local isSaved state immediately after save
   const handleSave = async () => {
     await baseHandleSave();
