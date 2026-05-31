@@ -71,7 +71,7 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
         setDebugStatus(isNative ? 'native BarcodeDetector' : 'jsQR fallback');
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, focusMode: { ideal: 'continuous' } } as any,
           audio: false,
         });
         if (!scanning) { stream.getTracks().forEach(t => t.stop()); return; }
@@ -85,6 +85,14 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
         await new Promise<void>((resolve) => { video.onloadedmetadata = () => resolve(); });
         if (!scanning) return;
         await video.play();
+
+        // Request continuous autofocus if supported
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities?.() as any;
+        if (capabilities?.focusMode?.includes('continuous')) {
+          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as any] });
+        }
+
         setHasCamera(true);
         setDebugStatus(`ready ${video.videoWidth}x${video.videoHeight} (${isNative ? 'native' : 'jsQR'})`);
 
@@ -133,5 +141,19 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
     };
   }, [active, stop]);
 
-  return { videoRef, canvasRef, hasCamera, debugStatus };
+  const triggerFocus = useCallback(() => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    const capabilities = track.getCapabilities?.() as any;
+    if (capabilities?.focusMode?.includes('single-shot')) {
+      track.applyConstraints({ advanced: [{ focusMode: 'single-shot' } as any] }).then(() => {
+        // After single-shot focuses, go back to continuous
+        setTimeout(() => {
+          track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as any] }).catch(() => {});
+        }, 1500);
+      }).catch(() => {});
+    }
+  }, []);
+
+  return { videoRef, canvasRef, hasCamera, debugStatus, triggerFocus };
 }

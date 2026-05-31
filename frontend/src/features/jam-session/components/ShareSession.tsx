@@ -19,7 +19,7 @@ export function ShareSession() {
     navigate(`${url.pathname}?d=${encodeURIComponent(url.searchParams.get('d')!)}`);
   }, [navigate]);
 
-  const { videoRef, canvasRef, hasCamera, debugStatus } = useQRScanner({
+  const { videoRef, canvasRef, hasCamera, debugStatus, triggerFocus } = useQRScanner({
     active: scanMode,
     onDetected: handleDetected,
   });
@@ -42,7 +42,7 @@ export function ShareSession() {
         <div className="flex flex-col items-center gap-4 py-4">
           {scanMode ? (
             <>
-              <JamCameraView videoRef={videoRef} canvasRef={canvasRef} hasCamera={hasCamera} debugStatus={debugStatus} />
+              <JamCameraView videoRef={videoRef} canvasRef={canvasRef} hasCamera={hasCamera} debugStatus={debugStatus} onTapFocus={triggerFocus} />
               <p className="text-sm text-muted-foreground text-center">
                 Point at a Chordium QR code
               </p>

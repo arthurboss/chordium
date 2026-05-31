@@ -6,11 +6,15 @@ interface JamCameraViewProps {
   canvasRef: RefObject<HTMLCanvasElement>;
   hasCamera: boolean;
   debugStatus?: string;
+  onTapFocus?: () => void;
 }
 
-export function JamCameraView({ videoRef, canvasRef, hasCamera, debugStatus }: JamCameraViewProps) {
+export function JamCameraView({ videoRef, canvasRef, hasCamera, debugStatus, onTapFocus }: JamCameraViewProps) {
   return (
-    <div className="relative aspect-square w-full max-w-md mx-auto bg-black rounded-lg overflow-hidden">
+    <div
+      className="relative aspect-square w-full max-w-md mx-auto bg-black rounded-lg overflow-hidden"
+      onClick={onTapFocus}
+    >
       <video
         ref={videoRef}
         autoPlay
