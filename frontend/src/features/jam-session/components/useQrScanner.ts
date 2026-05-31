@@ -3,16 +3,20 @@ import jsQR from 'jsqr';
 import { toast } from 'sonner';
 import { drawCorners, isChordiumJamUrl } from './jamScannerUtils';
 
-interface UseQrScannerOptions {
+interface UseQRScannerOptions {
   active: boolean;
   onDetected: (url: URL) => void;
 }
 
-export function useQrScanner({ active, onDetected }: UseQrScannerOptions) {
+export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [hasCamera, setHasCamera] = useState(false);
+  const [debugStatus, setDebugStatus] = useState('');
+  const onDetectedRef = useRef(onDetected);
+  onDetectedRef.current = onDetected;
+  const frameCountRef = useRef(0);
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -25,41 +29,68 @@ export function useQrScanner({ active, onDetected }: UseQrScannerOptions) {
 
     let rafId: number;
     let scanning = true;
-    const offscreen = document.createElement('canvas');
-    const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
 
     const tick = () => {
+      if (!scanning) return;
+
       const video = videoRef.current;
-      const overlay = canvasRef.current;
-      if (!scanning || !video || video.readyState < video.HAVE_ENOUGH_DATA) {
+
+      if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
         rafId = requestAnimationFrame(tick);
         return;
       }
 
-      offscreen.width = video.videoWidth;
-      offscreen.height = video.videoHeight;
-      offCtx?.drawImage(video, 0, 0);
-      const imageData = offCtx?.getImageData(0, 0, offscreen.width, offscreen.height);
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      frameCountRef.current++;
 
-      if (imageData && overlay) {
+      // Update debug status every 30 frames (~0.5s)
+      if (frameCountRef.current % 30 === 0) {
+        setDebugStatus(`scanning... ${w}x${h} frame#${frameCountRef.current}`);
+      }
+
+      const offscreen = document.createElement('canvas');
+      offscreen.width = w;
+      offscreen.height = h;
+      const offCtx = offscreen.getContext('2d');
+      if (!offCtx) { rafId = requestAnimationFrame(tick); return; }
+      offCtx.drawImage(video, 0, 0, w, h);
+
+      let imageData: ImageData;
+      try {
+        imageData = offCtx.getImageData(0, 0, w, h);
+      } catch {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
+
+      const overlay = canvasRef.current;
+      if (overlay) {
         const overlayCtx = overlay.getContext('2d');
-        overlay.width = offscreen.width;
-        overlay.height = offscreen.height;
-        overlayCtx?.clearRect(0, 0, overlay.width, overlay.height);
-
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if (code?.data) {
-          if (overlayCtx) drawCorners(overlayCtx, code.location);
-          const url = isChordiumJamUrl(code.data);
-          if (url) {
-            scanning = false;
-            setTimeout(() => onDetected(url), 300);
-          } else {
-            scanning = false;
-            toast.error('Not a Chordium QR code');
-          }
-          return;
+        if (overlayCtx) {
+          overlay.width = w;
+          overlay.height = h;
+          overlayCtx.clearRect(0, 0, w, h);
         }
+      }
+
+      const code = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
+
+      if (code?.data) {
+        setDebugStatus('QR found: ' + code.data.slice(0, 40));
+        const overlay = canvasRef.current;
+        if (overlay) {
+          const overlayCtx = overlay.getContext('2d');
+          if (overlayCtx) drawCorners(overlayCtx, code.location);
+        }
+        scanning = false;
+        const url = isChordiumJamUrl(code.data);
+        if (url) {
+          setTimeout(() => onDetectedRef.current(url), 300);
+        } else {
+          toast.error('Not a Chordium QR code');
+        }
+        return;
       }
 
       rafId = requestAnimationFrame(tick);
@@ -67,19 +98,33 @@ export function useQrScanner({ active, onDetected }: UseQrScannerOptions) {
 
     const init = async () => {
       try {
+        setDebugStatus('requesting camera...');
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
         if (!scanning) { stream.getTracks().forEach(t => t.stop()); return; }
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          streamRef.current = stream;
-          setHasCamera(true);
-          rafId = requestAnimationFrame(tick);
-        }
-      } catch {
+
+        const video = videoRef.current;
+        if (!video) { stream.getTracks().forEach(t => t.stop()); return; }
+
+        video.srcObject = stream;
+        streamRef.current = stream;
+        setDebugStatus('waiting for metadata...');
+
+        video.onloadedmetadata = () => {
+          if (!scanning) return;
+          video.play().then(() => {
+            setHasCamera(true);
+            setDebugStatus(`camera ready ${video.videoWidth}x${video.videoHeight}`);
+            frameCountRef.current = 0;
+            rafId = requestAnimationFrame(tick);
+          }).catch(err => {
+            setDebugStatus('play error: ' + String(err));
+          });
+        };
+      } catch (err) {
+        setDebugStatus('camera error: ' + String(err));
         toast.error('Could not access camera. Please check permissions.');
         setHasCamera(false);
       }
@@ -92,7 +137,7 @@ export function useQrScanner({ active, onDetected }: UseQrScannerOptions) {
       cancelAnimationFrame(rafId);
       stop();
     };
-  }, [active, onDetected, stop]);
+  }, [active, stop]);
 
-  return { videoRef, canvasRef, hasCamera };
+  return { videoRef, canvasRef, hasCamera, debugStatus };
 }
