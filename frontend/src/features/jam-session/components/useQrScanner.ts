@@ -29,6 +29,8 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
 
     let rafId: number;
     let scanning = true;
+    const offscreen = document.createElement('canvas');
+    const offCtx = offscreen.getContext('2d');
 
     const tick = () => {
       if (!scanning) return;
@@ -49,11 +51,9 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
         setDebugStatus(`scanning... ${w}x${h} frame#${frameCountRef.current}`);
       }
 
-      const offscreen = document.createElement('canvas');
+      if (!offCtx) { rafId = requestAnimationFrame(tick); return; }
       offscreen.width = w;
       offscreen.height = h;
-      const offCtx = offscreen.getContext('2d');
-      if (!offCtx) { rafId = requestAnimationFrame(tick); return; }
       offCtx.drawImage(video, 0, 0, w, h);
 
       let imageData: ImageData;
@@ -74,7 +74,7 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
         }
       }
 
-      const code = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
+      const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
 
       if (code?.data) {
         setDebugStatus('QR found: ' + code.data.slice(0, 40));
