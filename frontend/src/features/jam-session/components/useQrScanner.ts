@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import jsQR from 'jsqr';
 import { toast } from 'sonner';
-import { drawCorners, isChordiumJamUrl } from './jamScannerUtils';
+import { isChordiumJamUrl } from './jamScannerUtils';
 
 interface UseQRScannerOptions {
   active: boolean;
@@ -16,7 +15,6 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
   const [debugStatus, setDebugStatus] = useState('');
   const onDetectedRef = useRef(onDetected);
   onDetectedRef.current = onDetected;
-  const frameCountRef = useRef(0);
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop());
@@ -29,76 +27,88 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
 
     let rafId: number;
     let scanning = true;
-    const offscreen = document.createElement('canvas');
-    const offCtx = offscreen.getContext('2d');
+    let detector: any = null;
+    let frameCount = 0;
 
-    const tick = () => {
+    // Use native BarcodeDetector if available, fall back to jsQR
+    const hasBarcodeDetector = 'BarcodeDetector' in window;
+
+    const initDetector = async () => {
+      if (hasBarcodeDetector) {
+        try {
+          detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
+          setDebugStatus('using native BarcodeDetector');
+        } catch {
+          detector = null;
+        }
+      }
+      if (!detector) {
+        const { default: jsQR } = await import('jsqr');
+        detector = { jsQR };
+        setDebugStatus('using jsQR fallback');
+      }
+    };
+
+    const tick = async () => {
       if (!scanning) return;
 
       const video = videoRef.current;
-
       if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
         rafId = requestAnimationFrame(tick);
         return;
       }
 
-      const w = video.videoWidth;
-      const h = video.videoHeight;
-      frameCountRef.current++;
-
-      // Update debug status every 30 frames (~0.5s)
-      if (frameCountRef.current % 30 === 0) {
-        setDebugStatus(`scanning... ${w}x${h} frame#${frameCountRef.current}`);
+      frameCount++;
+      if (frameCount % 30 === 0) {
+        setDebugStatus(`scanning... ${video.videoWidth}x${video.videoHeight} frame#${frameCount}`);
       }
 
-      if (!offCtx) { rafId = requestAnimationFrame(tick); return; }
-      offscreen.width = w;
-      offscreen.height = h;
-      offCtx.drawImage(video, 0, 0, w, h);
-
-      let imageData: ImageData;
       try {
-        imageData = offCtx.getImageData(0, 0, w, h);
+        let data: string | null = null;
+
+        if (detector?.detect) {
+          // Native BarcodeDetector — pass video element directly
+          const codes = await detector.detect(video);
+          if (codes.length > 0) data = codes[0].rawValue;
+        } else if (detector?.jsQR) {
+          // jsQR fallback — draw to canvas, extract imageData
+          const w = video.videoWidth;
+          const h = video.videoHeight;
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(video, 0, 0, w, h);
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const code = detector.jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
+            if (code) data = code.data;
+          }
+        }
+
+        if (data) {
+          setDebugStatus('QR found: ' + data.slice(0, 50));
+          scanning = false;
+          const url = isChordiumJamUrl(data);
+          if (url) {
+            setTimeout(() => onDetectedRef.current(url), 200);
+          } else {
+            toast.error('Not a Chordium QR code');
+          }
+          return;
+        }
       } catch {
-        rafId = requestAnimationFrame(tick);
-        return;
+        // detect() can throw on some frames — just retry
       }
 
-      const overlay = canvasRef.current;
-      if (overlay) {
-        const overlayCtx = overlay.getContext('2d');
-        if (overlayCtx) {
-          overlay.width = w;
-          overlay.height = h;
-          overlayCtx.clearRect(0, 0, w, h);
-        }
-      }
-
-      const code = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
-
-      if (code?.data) {
-        setDebugStatus('QR found: ' + code.data.slice(0, 40));
-        const overlay = canvasRef.current;
-        if (overlay) {
-          const overlayCtx = overlay.getContext('2d');
-          if (overlayCtx) drawCorners(overlayCtx, code.location);
-        }
-        scanning = false;
-        const url = isChordiumJamUrl(code.data);
-        if (url) {
-          setTimeout(() => onDetectedRef.current(url), 300);
-        } else {
-          toast.error('Not a Chordium QR code');
-        }
-        return;
-      }
-
-      rafId = requestAnimationFrame(tick);
+      if (scanning) rafId = requestAnimationFrame(tick);
     };
 
     const init = async () => {
       try {
         setDebugStatus('requesting camera...');
+        await initDetector();
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
@@ -110,14 +120,12 @@ export function useQRScanner({ active, onDetected }: UseQRScannerOptions) {
 
         video.srcObject = stream;
         streamRef.current = stream;
-        setDebugStatus('waiting for metadata...');
 
         video.onloadedmetadata = () => {
           if (!scanning) return;
           video.play().then(() => {
             setHasCamera(true);
             setDebugStatus(`camera ready ${video.videoWidth}x${video.videoHeight}`);
-            frameCountRef.current = 0;
             rafId = requestAnimationFrame(tick);
           }).catch(err => {
             setDebugStatus('play error: ' + String(err));
