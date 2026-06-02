@@ -1,6 +1,10 @@
 {
   "outputDirectory": "./dist",
   "framework": "vite",
+  "functions": {
+    "api/cifraclub-chord-sheet.ts": { "memory": 1024, "maxDuration": 60 },
+    "api/cifraclub-song-metadata.ts": { "memory": 1024, "maxDuration": 60 }
+  },
   "rewrites": [
     {
       "source": "/((?!api/|robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
