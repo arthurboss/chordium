@@ -3,8 +3,8 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/((?!api/|robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
+      "source": "/((?!robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
       "destination": "/index.html"
     }
   ]
-}
+} 
