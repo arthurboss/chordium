@@ -12,8 +12,6 @@ export function getDefaultTTL(dataSource: DataSource): number {
   switch (dataSource) {
     case "neon":
       return TTL.SEARCH_CACHE.NEON;
-    case "s3":
-      return TTL.SEARCH_CACHE.S3;
     case "cifraclub":
       return TTL.SEARCH_CACHE.CIFRACLUB;
     default:

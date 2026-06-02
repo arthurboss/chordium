@@ -21,18 +21,9 @@ export interface CifraClubConfig {
   blockedDomains: string[];
 }
 
-export interface AWSConfig {
-  accessKeyId: string | undefined;
-  secretAccessKey: string | undefined;
-  sessionToken: string | undefined;
-  region: string;
-  bucketName: string | undefined;
-}
-
 export interface Config {
   server: ServerConfig;
   cors: CorsConfig;
   puppeteer: PuppeteerConfig;
   cifraClub: CifraClubConfig;
-  aws: AWSConfig;
 }

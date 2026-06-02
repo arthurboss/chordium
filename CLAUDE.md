@@ -11,7 +11,7 @@ Turborepo monorepo with npm workspaces:
 ```
 chordium/
 ├── frontend/       # React 19 + TypeScript + Vite + Tailwind + shadcn/ui
-├── backend/        # Node.js/Express + TypeScript + AWS S3 + Puppeteer
+├── backend/        # Node.js/Express + TypeScript + Puppeteer
 ├── packages/
 │   ├── types/      # @chordium/types - shared TypeScript types (published to npm)
 │   └── e2e-tests/  # Cypress end-to-end tests
@@ -22,7 +22,7 @@ chordium/
 ## Tech Stack
 
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router 7, TanStack Query, PWA
-- **Backend:** Express, TypeScript, AWS S3, Puppeteer + Cheerio (scraping)
+- **Backend:** Express, TypeScript, Puppeteer + Cheerio (scraping)
 - **Testing:** Vitest (frontend), Jest (backend), Cypress (e2e)
 - **Build:** Turborepo, npm workspaces
 - **Linting:** ESLint 9 (flat config)

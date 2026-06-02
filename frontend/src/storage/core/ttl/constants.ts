@@ -37,8 +37,6 @@ export const TTL = {
     /** Supabase data - highly reliable, can be cached long-term */
     NEON: 30 * TIME_UNITS.DAY,
     
-    /** S3 data - highly reliable, can be cached long-term */
-    S3: 30 * TIME_UNITS.DAY,
     
     /** CifraClub data - static content, performance over freshness */
     CIFRACLUB: 30 * TIME_UNITS.DAY,

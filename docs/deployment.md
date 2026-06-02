@@ -14,16 +14,12 @@ Backend (Render)
 ├── Express Server
 ├── Puppeteer Scraping
 ├── Neon Database
-└── AWS S3 Caching
 
 Database (Neon)
 ├── Artist Data
 ├── Song Data
 └── User Data
 
-Storage (AWS S3)
-├── Cached Chord Sheets
-└── Scraped Data
 ```
 
 ## Frontend Deployment (Vercel)
@@ -116,7 +112,6 @@ npm run build
 ### Prerequisites
 - GitHub repository connected to Render
 - Neon database (via Vercel Postgres)
-- AWS S3 bucket for caching
 
 ### Environment Variables to Set in Render
 
@@ -126,11 +121,6 @@ npm run build
 
 2. **Neon Configuration**
 
-3. **AWS S3 Configuration**
-   - `AWS_ACCESS_KEY_ID`: Your AWS access key
-   - `AWS_SECRET_ACCESS_KEY`: Your AWS secret key
-   - `AWS_REGION`: Your AWS region (e.g., `us-east-1`)
-   - `AWS_S3_BUCKET`: Your S3 bucket name
 
 4. **Frontend Configuration**
    - `FRONTEND_URL`: Your Vercel frontend URL
@@ -233,7 +223,6 @@ UptimeRobot provides both monitoring and keep-alive functionality:
 
 - Check Render logs for build errors
 - Verify environment variables are set correctly
-- Ensure AWS credentials are valid
 
 ## Testing the Complete Deployment
 
@@ -299,6 +288,5 @@ Each push creates a new deployment with a unique URL for testing.
 | **Frontend (Vercel)** | Free forever | Free forever |
 | **Backend (Render)** | 750 hours/month | $7/month |
 | **Database (Neon)** | Free tier | $25/month |
-| **Storage (AWS S3)** | Free tier | ~$1-5/month |
 
 **Total monthly cost when scaling: ~$32-36** 

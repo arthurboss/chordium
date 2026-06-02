@@ -19,7 +19,7 @@ export interface RawData {
 /**
  * Data source identifier for normalization
  */
-export type DataSource = 'neon' | 'cifraclub' | 's3' | 'unknown';
+export type DataSource = 'neon' | 'cifraclub' | 'unknown';
 
 /**
  * Result from title and artist extraction operations

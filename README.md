@@ -42,7 +42,6 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 - **Node.js/Express** + **TypeScript** - RESTful API server
 - **Neon** - PostgreSQL database (via Vercel Postgres)
-- **AWS S3** - Cloud storage for cached data
 - **Puppeteer** + **Cheerio** - Web scraping and HTML parsing
 
 ### Development
