@@ -57,6 +57,7 @@
     "@tonaljs/key": "^4.11.2",
     "@tonaljs/note": "^4.12.1",
     "@types/uuid": "^10.0.0",
+    "@vercel/postgres": "^0.10.0",
     "axios": "^1.16.1",
     "caniuse-lite": "^1.0.30001715",
     "class-variance-authority": "^0.7.1",

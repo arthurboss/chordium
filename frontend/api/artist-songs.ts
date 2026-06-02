@@ -13,22 +13,19 @@ interface JsonpDoc {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { artist = "", song = "" } = req.query as Record<string, string>;
-  const query = [artist, song].filter(Boolean).join(" ").trim();
+  const { artistPath } = req.query as Record<string, string>;
 
-  if (!query) {
-    return res.status(400).json({ error: "Missing search query" });
+  if (!artistPath) {
+    return res.status(400).json({ error: "Missing artistPath parameter" });
   }
 
-  // Try Neon DB first
+  // Check Neon DB first
   try {
     const { rows } = await sql`
       SELECT title, artist, path
       FROM songs
-      WHERE title ILIKE ${"%" + query + "%"}
-         OR artist ILIKE ${"%" + query + "%"}
+      WHERE path LIKE ${artistPath + "/%"}
       ORDER BY title
-      LIMIT 50
     `;
     if (rows.length > 0) {
       return res.json(rows);
@@ -37,9 +34,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // fall through to JSONP
   }
 
-  // Fallback: CifraClub JSONP
+  // Fallback: fetch artist songs via JSONP search using artist slug
+  const artistName = artistPath
+    .split("-")
+    .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
   const response = await axios.get<string>(JSONP_URL, {
-    params: { q: query, callback: "x" },
+    params: { q: artistName, callback: "x" },
   });
 
   const jsonStr = response.data.trim().replace(/^x\(/, "").replace(/\)$/, "");
@@ -47,8 +49,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const docs: JsonpDoc[] = parsed.response?.docs ?? [];
 
   const songs = docs
-    .filter((d) => d.t === "2" && d.d && d.u)
+    .filter((d) => d.t === "2" && d.d === artistPath && d.u)
     .map((d) => ({ title: d.m, artist: d.a, path: `${d.d}/${d.u}` }));
+
+  // Seed DB in background (don't await — don't block response)
+  if (songs.length > 0) {
+    Promise.all(
+      songs.map((s) =>
+        sql`
+          INSERT INTO songs (title, artist, path)
+          VALUES (${s.title}, ${s.artist}, ${s.path})
+          ON CONFLICT (path) DO NOTHING
+        `.catch(() => {})
+      )
+    );
+  }
 
   return res.json(songs);
 }

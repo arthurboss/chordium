@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { sql } from "@vercel/postgres";
 import axios from "axios";
-import { createClient } from "@supabase/supabase-js";
 
 const JSONP_URL = "https://solr.sscdn.co/cc/h2/";
 
@@ -20,29 +20,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Missing artist query parameter" });
   }
 
-  // Try Supabase first
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data, error } = await supabase
-        .from("artists")
-        .select("*")
-        .ilike("displayName", `%${query}%`);
-
-      if (!error && data && data.length > 0) {
-        return res.json(
-          data.map((a: any) => ({
-            displayName: a.displayName,
-            path: a.path,
-            songCount: a.songCount ?? null,
-          }))
-        );
-      }
-    } catch {
-      // fall through to JSONP
+  // Try Neon DB first
+  try {
+    const { rows } = await sql`
+      SELECT display_name AS "displayName", path, song_count AS "songCount"
+      FROM artists
+      WHERE display_name ILIKE ${"%" + query + "%"}
+      LIMIT 50
+    `;
+    if (rows.length > 0) {
+      return res.json(rows);
     }
+  } catch {
+    // fall through to JSONP
   }
 
   // Fallback: CifraClub JSONP
