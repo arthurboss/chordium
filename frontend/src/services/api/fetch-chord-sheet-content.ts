@@ -1,5 +1,5 @@
 import type { ChordSheet } from "@chordium/types";
-import { getApiBaseUrl } from "@/utils/api-base-url";
+import { getRenderUrl } from "@/utils/get-render-url";
 
 /**
  * Fetches chord sheet from the backend API using the path
@@ -13,7 +13,7 @@ export async function fetchChordSheetFromAPI(path: string): Promise<ChordSheet |
       url: path.trim()
     });
 
-    const baseUrl = getApiBaseUrl();
+    const baseUrl = getRenderUrl();
     const response = await fetch(`${baseUrl}/api/cifraclub-chord-sheet?${params}`);
     
     if (!response.ok) {

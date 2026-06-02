@@ -1,5 +1,5 @@
 import type { SongMetadata } from "@chordium/types";
-import { getApiBaseUrl } from "@/utils/api-base-url";
+import { getRenderUrl } from "@/utils/get-render-url";
 
 /**
  * Fetches song metadata from the backend API using the path
@@ -13,7 +13,7 @@ export async function fetchSongMetadataFromAPI(path: string): Promise<SongMetada
       url: path.trim()
     });
 
-    const baseUrl = getApiBaseUrl();
+    const baseUrl = getRenderUrl();
     const response = await fetch(`${baseUrl}/api/cifraclub-song-metadata?${params}`);
     
     if (!response.ok) {
