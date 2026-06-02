@@ -137,7 +137,7 @@ export function extractArtistSongs(): Song[] {
       if (/^\d+$/.test(segments[1])) return;
 
       // Try to get title from the primaryLabel paragraph inside the link
-      const titleEl = link.querySelector("p[class*='primaryLabel'], p[data-desktop-size]");
+      const titleEl = link.querySelector("p[class*='primaryLabel']");
       let title = titleEl?.textContent?.trim() || "";
 
       // Fallback: convert slug to title
