@@ -7,7 +7,7 @@
  */
 import { SEARCH_TYPES, type Song } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
-import { getApiBaseUrl } from "@/utils/api-base-url";
+import { getRenderUrl } from "@/utils/get-render-url";
 import { getNormalizedSearchCacheKey } from "@/search/utils/normalization/getNormalizedSearchCacheKey";
 
 export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
@@ -28,7 +28,7 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     return cachedEntry.results as Song[];
   }
 
-  const apiUrl = `${getApiBaseUrl()}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
+  const apiUrl = `${getRenderUrl()}/api/artist-songs?artistPath=${encodeURIComponent(artistPath)}`;
   try {
     const resp = await fetch(apiUrl);
     if (!resp.ok) {
