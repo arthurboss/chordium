@@ -5,8 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "prestart": "npx puppeteer browsers install chrome",
+    "build": "tsc && npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsc && node dist/backend/server.js",
     "dev:watch": "tsc --watch & sleep 2 && nodemon --delay 1 dist/backend/server.js",
