@@ -99,12 +99,8 @@ export function extractSearchResults(): DOMSearchResult[] {
  * Extracts artist songs from CifraClub artist page DOM
  */
 export function extractArtistSongs(): Song[] {
-  const songMap = new Map<string, Song>();
-
-  // Extract artist name from page title or URL
+  // Extract artist name from page title (format: "Artist Name - Cifra Club")
   let artistName = "Unknown Artist";
-
-  // Try to get artist name from page title (format: "Artist Name - Cifra Club")
   const pageTitle = document.title;
   if (pageTitle) {
     const titleMatch = pageTitle.match(/^(.+?)\s*-\s*Cifra Club$/);
@@ -112,13 +108,9 @@ export function extractArtistSongs(): Song[] {
       artistName = titleMatch[1].trim();
     }
   }
-
-  // Fallback: extract artist from URL pathname
   if (artistName === "Unknown Artist") {
-    const pathname = window.location.pathname;
-    const pathSegments = pathname.split("/").filter(Boolean);
+    const pathSegments = window.location.pathname.split("/").filter(Boolean);
     if (pathSegments.length > 0) {
-      // Convert slug to readable name (e.g., "ac-dc" -> "AC/DC")
       artistName = pathSegments[0]
         .split("-")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -126,63 +118,45 @@ export function extractArtistSongs(): Song[] {
     }
   }
 
-  document.querySelectorAll("a.art_music-link").forEach((link) => {
+  const songs: Song[] = [];
+
+  // /musicas.html page: songs are in ol > li > a[href]
+  document.querySelectorAll("ol li a[href]").forEach((link) => {
     try {
-      const title = link.textContent?.trim() || "";
-      const url = (link as HTMLAnchorElement).href;
-      if (title && url) {
-        // Extract path from URL (e.g., "https://www.cifraclub.com.br/oasis/wonderwall/" -> "oasis/wonderwall")
-        const pathMatch = url.match(/cifraclub\.com\.br\/(.+?)\/?$/);
-        const path = pathMatch ? pathMatch[1] : url;
+      const href = (link as HTMLAnchorElement).getAttribute("href") || "";
+      if (!href) return;
 
-        // Debug: log each candidate song link and path
+      // Extract path from href (e.g., "/oasis/wonderwall/" -> "oasis/wonderwall")
+      const pathMatch = href.match(/^\/(.+?)\/?$/);
+      const path = pathMatch ? pathMatch[1] : "";
+      if (!path) return;
 
-        console.log("[DEBUG][SCRAPE] Candidate:", { title, url, path });
+      const segments = path.split("/").filter(Boolean);
+      if (segments.length !== 2) return;
+      if (segments[1].toLowerCase() === "letra") return;
+      if (/^\d+$/.test(segments[1])) return;
 
-        songMap.set(url, {
-          title: title.replace(/\s+/g, " ").trim(),
-          path,
-          artist: artistName,
-        });
+      // Try to get title from the primaryLabel paragraph inside the link
+      const titleEl = link.querySelector("p[class*='primaryLabel'], p[data-desktop-size]");
+      let title = titleEl?.textContent?.trim() || "";
+
+      // Fallback: convert slug to title
+      if (!title) {
+        title = segments[1]
+          .split("-")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
       }
+
+      songs.push({ title, path, artist: artistName });
     } catch (e) {
-      console.error("[DEBUG][SCRAPE] Error processing song:", e);
+      // skip malformed entries
     }
   });
 
-  // Debug: log all collected songs before filtering
-
-  console.log(
-    "[DEBUG][SCRAPE] All collected songs:",
-    Array.from(songMap.values())
-  );
-
-  // Filtering step: only allow valid song paths (2 segments, not numeric, not letra, etc)
-  const filtered = Array.from(songMap.values()).filter((song) => {
-    if (!song.title || !song.path) return false;
-    const segments = song.path.split("/").filter(Boolean);
-    // Only allow exactly 2 segments (artist/song)
-    if (segments.length !== 2) return false;
-    // Exclude if last segment is "letra"
-    if (segments[1].toLowerCase() === "letra") return false;
-    // Exclude if second segment is numeric (e.g., /artist/12345)
-    if (/^\d+$/.test(segments[1])) return false;
-    // Debug: log filtering decision
-
-    console.log("[DEBUG][SCRAPE][FILTER]", song, { segments });
-    return true;
-  });
-  // Debug: log final filtered songs
-
-  console.log("[DEBUG][SCRAPE] Filtered songs:", filtered);
-  return filtered;
+  return songs;
 }
 
-/**
- * Extracts full chord sheet data from CifraClub song page DOM (metadata + content)
- * Enhanced with better error handling and multiple fallback strategies
- * @deprecated Use extractSongMetadata() and extractChordSheet() separately for progressive loading
- */
 export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
   const songChords = preElement ? preElement.textContent || "" : "";

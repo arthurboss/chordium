@@ -19,7 +19,7 @@ export async function fetchArtistSongs(
     throw new Error("Invalid artist URL");
   }
 
-  const pageUrl = `${baseUrl}/${artistSlug}/`;
+  const pageUrl = `${baseUrl}/${artistSlug}/musicas.html`;
   logger.info(`Fetching songs for artist: ${artistSlug}`);
 
   return puppeteerService.withPage(async (page: Page) => {
