@@ -16,7 +16,7 @@
     "lint": "npx eslint . --ext .js,.ts",
     "lint:fix": "npx eslint . --ext .js,.ts --fix",
     "lint:ts": "tsc --noEmit",
-    "prestart": "rm -rf /opt/render/project/src/.puppeteer-cache/chrome && npx puppeteer browsers install chrome || true"
+    "prestart": "rm -rf /opt/render/project/src/.puppeteer-cache/chrome && npx puppeteer browsers install chrome"
   },
   "jest": {
     "testEnvironment": "node",
