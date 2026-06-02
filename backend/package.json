@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "tsc && npx puppeteer browsers install chrome",
+    "build": "tsc",
     "start": "node dist/backend/server.js",
     "dev": "tsc && node dist/backend/server.js",
     "dev:watch": "tsc --watch & sleep 2 && nodemon --delay 1 dist/backend/server.js",
@@ -15,7 +15,8 @@
     "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' npx jest --coverage",
     "lint": "npx eslint . --ext .js,.ts",
     "lint:fix": "npx eslint . --ext .js,.ts --fix",
-    "lint:ts": "tsc --noEmit"
+    "lint:ts": "tsc --noEmit",
+    "prestart": "npx puppeteer browsers install chrome"
   },
   "jest": {
     "testEnvironment": "node",
