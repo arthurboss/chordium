@@ -1,130 +1,84 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import SEARCH_TYPES from "../../../constants/searchTypes.js";
 
-// Mock interfaces for TypeScript typing
-interface MockPage {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  goto: jest.MockedFunction<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  evaluate: jest.MockedFunction<any>;
-}
+const mockAxiosGet = jest.fn<() => Promise<unknown>>();
 
-// Mock the dependencies before importing the module under test
-const mockPuppeteerService = {
-  withPage: jest.fn(),
-};
-
-const mockFilterResults = jest.fn();
-const mockExtractSearchResults = jest.fn();
-
-// Mock modules
-jest.unstable_mockModule("../../../services/puppeteer.service.js", () => ({
-  default: mockPuppeteerService,
+jest.unstable_mockModule("axios", () => ({
+  default: { get: mockAxiosGet },
 }));
 
-jest.unstable_mockModule("../../../utils/result-filters.js", () => ({
-  filterResults: mockFilterResults,
-}));
-
-jest.unstable_mockModule("../../../utils/dom-extractors.js", () => ({
-  extractSearchResults: mockExtractSearchResults,
-}));
-
-// Import the module after mocking
 const { performSearch } = await import(
   "../../../services/cifraclub/search-handler.js"
 );
 
-const mockPage: MockPage = {
-  goto: jest.fn(),
-  evaluate: jest.fn(),
-};
+function makeJsonp(docs: object[]) {
+  return {
+    data: `x({"response":{"numFound":${docs.length},"start":0,"docs":${JSON.stringify(docs)}}})`,
+  };
+}
+
+const ARTIST_DOC = { t: "1", m: "Oasis", a: "Oasis", d: "oasis" };
+const SONG_DOC   = { t: "2", m: "Wonderwall", a: "Oasis", d: "oasis", u: "wonderwall" };
 
 describe("CifraClub Search Handler", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockPuppeteerService.withPage.mockImplementation(async (callback: any) => {
-      return callback(mockPage);
-    });
-  });
+  beforeEach(() => { jest.clearAllMocks(); });
 
   describe("performSearch", () => {
-    it("should perform search and return filtered results", async () => {
-      const baseUrl = "https://www.cifraclub.com.br";
-      const query = "oasis";
-      const searchType = SEARCH_TYPES.ARTIST;
+    it("returns artists when searchType is ARTIST", async () => {
+      mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
 
-      const mockRawResults = [
-        {
-          title: "Oasis - Cifra Club",
-          url: "https://www.cifraclub.com.br/oasis/",
-        },
-      ];
-      const mockFilteredResults = [
+      const result = await performSearch("", "oasis", SEARCH_TYPES.ARTIST);
+
+      expect(result).toEqual([
         { displayName: "Oasis", path: "oasis", songCount: null },
-      ];
-
-      mockPage.evaluate.mockResolvedValue(mockRawResults);
-      mockFilterResults.mockReturnValue(mockFilteredResults);
-
-      const result = await performSearch(baseUrl, query, searchType);
-
-      expect(mockPage.goto).toHaveBeenCalledWith(
-        "https://www.cifraclub.com.br/?q=oasis",
-        { waitUntil: "networkidle2" }
-      );
-      expect(mockPage.evaluate).toHaveBeenCalledWith(mockExtractSearchResults);
-      expect(mockFilterResults).toHaveBeenCalledWith(
-        mockRawResults,
-        searchType
-      );
-      expect(result).toEqual(mockFilteredResults);
+      ]);
     });
 
-    it("should encode special characters in query", async () => {
-      const baseUrl = "https://www.cifraclub.com.br";
-      const query = "guns n' roses";
-      const searchType = SEARCH_TYPES.ARTIST;
+    it("returns songs when searchType is SONG", async () => {
+      mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
 
-      mockPage.evaluate.mockResolvedValue([]);
-      mockFilterResults.mockReturnValue([]);
+      const result = await performSearch("", "oasis wonderwall", SEARCH_TYPES.SONG);
 
-      await performSearch(baseUrl, query, searchType);
-
-      expect(mockPage.goto).toHaveBeenCalledWith(
-        "https://www.cifraclub.com.br/?q=guns%20n'%20roses",
-        { waitUntil: "networkidle2" }
-      );
+      expect(result).toEqual([
+        { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
+      ]);
     });
 
-    it("should handle empty search results", async () => {
-      const baseUrl = "https://www.cifraclub.com.br";
-      const query = "nonexistent";
-      const searchType = SEARCH_TYPES.ARTIST;
+    it("returns songs when searchType is ARTIST_SONG", async () => {
+      mockAxiosGet.mockResolvedValue(makeJsonp([SONG_DOC]));
 
-      mockPage.evaluate.mockResolvedValue([]);
-      mockFilterResults.mockReturnValue([]);
+      const result = await performSearch("", "oasis wonderwall", SEARCH_TYPES.ARTIST_SONG);
 
-      const result = await performSearch(baseUrl, query, searchType);
+      expect(result).toEqual([
+        { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
+      ]);
+    });
+
+    it("returns empty array when no matching docs", async () => {
+      mockAxiosGet.mockResolvedValue(makeJsonp([]));
+
+      const result = await performSearch("", "xyznonexistent", SEARCH_TYPES.SONG);
 
       expect(result).toEqual([]);
-      expect(mockFilterResults).toHaveBeenCalledWith([], searchType);
     });
 
-    it("should handle puppeteer errors", async () => {
-      const baseUrl = "https://www.cifraclub.com.br";
-      const query = "test";
-      const searchType = SEARCH_TYPES.ARTIST;
+    it("passes query to JSONP endpoint", async () => {
+      mockAxiosGet.mockResolvedValue(makeJsonp([]));
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (mockPuppeteerService.withPage as any).mockRejectedValue(
-        new Error("Navigation failed")
-      );
+      await performSearch("", "guns n roses", SEARCH_TYPES.SONG);
 
-      await expect(performSearch(baseUrl, query, searchType)).rejects.toThrow(
-        "Navigation failed"
+      expect(mockAxiosGet).toHaveBeenCalledWith(
+        "https://solr.sscdn.co/cc/h2/",
+        { params: { q: "guns n roses", callback: "x" } }
       );
+    });
+
+    it("propagates network errors", async () => {
+      mockAxiosGet.mockRejectedValue(new Error("Network Error"));
+
+      await expect(
+        performSearch("", "test", SEARCH_TYPES.ARTIST)
+      ).rejects.toThrow("Network Error");
     });
   });
 });
