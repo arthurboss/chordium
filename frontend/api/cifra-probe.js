@@ -7,11 +7,12 @@ export default async function handler(req, res) {
     artist:  "https://www.cifraclub.com.br/oasis/",
     song:    "https://www.cifraclub.com.br/oasis/wonderwall/",
     busca:   "https://www.cifraclub.com.br/busca/?q=love",
+    musicas: "https://www.cifraclub.com.br/hillsong-worship/musicas.html",
   };
 
   const url = urls[target];
   if (!url) {
-    return res.status(400).json({ error: "invalid target, use ?t=search|artist|song|busca" });
+    return res.status(400).json({ error: "invalid target, use ?t=search|artist|song|busca|musicas" });
   }
 
   const controller = new AbortController();
@@ -35,19 +36,18 @@ export default async function handler(req, res) {
     if (target === "search") {
       result.looks_valid = text.startsWith("x(");
       result.snippet = text.slice(0, 300);
+    } else if (target === "musicas") {
+      result.has_song_links = text.includes("art_music-link");
+      result.song_link_count = (text.match(/art_music-link/g) || []).length;
+      result.has_song_count = text.includes("musicas.html") || /\d+ músicas/.test(text);
+      result.snippet = text.slice(0, 500);
     } else if (target === "busca") {
-      result.has_results     = text.includes("search-result") || text.includes("gs-title") || text.includes("art_music-link");
-      result.has_song_links  = text.includes("/cifraclub-search") || (text.match(/cifraclub\.com\.br\/[a-z-]+\/[a-z-]+/g) || []).length > 0;
-      result.song_link_count = (text.match(/cifraclub\.com\.br\/[a-z-]+\/[a-z-]+/g) || []).length;
-      result.snippet         = text.slice(0, 500);
+      result.has_results = text.includes("search-result") || text.includes("gs-title");
+      result.snippet = text.slice(0, 500);
     } else {
       result.has_pre       = text.includes("<pre");
       result.has_cifra_tom = text.includes("cifra_tom");
       result.has_song_id   = /songId/.test(text);
-      if (result.has_pre) {
-        const idx = text.indexOf("<pre");
-        result.pre_snippet = text.slice(idx, idx + 300);
-      }
     }
 
     return res.status(200).json(result);
