@@ -23,9 +23,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Try Neon DB first
   try {
     const { rows } = await sql`
-      SELECT display_name AS "displayName", path, song_count AS "songCount"
+      SELECT "displayName", path, "songCount"
       FROM artists
-      WHERE display_name ILIKE ${"%" + query + "%"}
+      WHERE "displayName" ILIKE ${"%" + query + "%"}
       LIMIT 50
     `;
     if (rows.length > 0) {
