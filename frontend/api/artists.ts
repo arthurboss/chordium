@@ -10,27 +10,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Missing artist query parameter" });
   }
 
-  try {
-    const { rows } = await sql`
+  const escaped = query.replace(/[%_]/g, "\\$&");
+
+  // Fetch from Neon and JSONP in parallel
+  const [dbResult, jsonpDocs] = await Promise.allSettled([
+    sql`
       SELECT "displayName", path, "songCount"
       FROM artists
-      WHERE "displayName" ILIKE ${"%" + query.replace(/[%_]/g, "\\$&") + "%"}
+      WHERE "displayName" ILIKE ${"%" + escaped + "%"}
       LIMIT 50
-    `;
-    if (rows.length > 0) {
-      return res.json(rows);
-    }
-  } catch {
-    // fall through to JSONP
+    `,
+    fetchJsonpDocs(query),
+  ]);
+
+  const dbRows =
+    dbResult.status === "fulfilled" ? dbResult.value.rows : [];
+  const jsonpArtists =
+    jsonpDocs.status === "fulfilled"
+      ? jsonpDocs.value
+          .filter((d) => d.t === "1" && d.d)
+          .map((d) => ({ displayName: d.m, path: d.d, songCount: null }))
+      : [];
+
+  // Merge: DB first (richer data), JSONP fills gaps
+  const seen = new Set(dbRows.map((r) => r.path));
+  const newFromJsonp = jsonpArtists.filter((a) => !seen.has(a.path));
+  const merged = [...dbRows, ...newFromJsonp];
+
+  // Seed Neon with anything JSONP found that wasn't in DB
+  if (newFromJsonp.length > 0) {
+    Promise.all(
+      newFromJsonp.map((a) =>
+        sql`
+          INSERT INTO artists ("displayName", path, "songCount")
+          VALUES (${a.displayName}, ${a.path}, ${a.songCount})
+          ON CONFLICT (path) DO NOTHING
+        `.catch(() => {})
+      )
+    ).catch(() => {});
   }
 
-  try {
-    const docs = await fetchJsonpDocs(query);
-    const artists = docs
-      .filter((d) => d.t === "1" && d.d)
-      .map((d) => ({ displayName: d.m, path: d.d, songCount: null }));
-    return res.json(artists);
-  } catch (e) {
-    return res.status(502).json({ error: "Search unavailable", details: (e as Error).message });
-  }
+  return res.json(merged);
 }
