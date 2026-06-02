@@ -7,7 +7,6 @@ This document details the comprehensive fixes applied to resolve backend configu
 
 ### 1. Production Configuration Problems
 - **502 Bad Gateway errors** on artist-songs endpoint
-- **AWS credentials warnings** in production logs
 - **Environment variable loading** in compiled code
 
 ### 2. Code Review Feedback
@@ -15,7 +14,6 @@ This document details the comprehensive fixes applied to resolve backend configu
 - **Unreliable build environment detection** affecting production deployments
 
 ### 3. CI/CD Test Failures
-- **S3 configuration tests failing** in GitHub Actions
 - **Config caching issues** preventing test environment variables from being read
 - **Dynamic config loading** not working in test environment
 

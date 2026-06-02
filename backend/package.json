@@ -16,8 +16,7 @@
     "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' npx jest --coverage",
     "lint": "npx eslint . --ext .js,.ts",
     "lint:fix": "npx eslint . --ext .js,.ts --fix",
-    "lint:ts": "tsc --noEmit",
-    "test:s3-config": "NODE_OPTIONS='--experimental-vm-modules' npx jest tests/services/s3/configuration.test.js --verbose"
+    "lint:ts": "tsc --noEmit"
   },
   "jest": {
     "testEnvironment": "node",

@@ -68,8 +68,8 @@ Each workflow uses GitHub's native `paths` filtering to only run when relevant f
 
 ### Backend Tests (`backend-tests.yml`)
 - **Purpose**: Run Jest unit tests for backend services
-- **Includes**: Logger utility and comprehensive S3 caching functionality
-- **Environment**: Mock AWS and Supabase credentials
+- **Includes**: Logger utility
+- **Environment**: No external service credentials required
 - **Artifacts**: Backend test coverage reports
 
 ### Backend Build (`backend-build.yml`)
