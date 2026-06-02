@@ -35,7 +35,7 @@ describe("SearchCacheService", () => {
             song: null,
           },
           searchType: "artist" as SearchType,
-          dataSource: "supabase" as DataSource,
+          dataSource: "neon" as DataSource,
         },
         results: [{ 
           path: "hillsong-united", 
@@ -89,7 +89,7 @@ describe("SearchCacheService", () => {
         search: {
           query: { artist: "hillsong", song: null },
           searchType: "artist" as SearchType,
-          dataSource: "supabase" as DataSource,
+          dataSource: "neon" as DataSource,
         }
       });
 
@@ -98,7 +98,7 @@ describe("SearchCacheService", () => {
         mockResults,
         { artist: "hillsong", song: null },
         "artist",
-        "supabase",
+        "neon",
         {}
       );
     });
@@ -160,7 +160,7 @@ describe("SearchCacheService", () => {
           search: { 
             query: { artist: "test1", song: null }, 
             searchType: "artist" as SearchType, 
-            dataSource: "supabase" as DataSource 
+            dataSource: "neon" as DataSource 
           },
           results: [],
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },
@@ -196,7 +196,7 @@ describe("SearchCacheService", () => {
           search: { 
             query: { artist: "test1", song: null }, 
             searchType: "artist" as SearchType, 
-            dataSource: "supabase" as DataSource 
+            dataSource: "neon" as DataSource 
           },
           results: [],
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },

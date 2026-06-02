@@ -41,7 +41,7 @@ describe("storeSearchCache", () => {
         song: null,
       },
       searchType: "artist" as const,
-      dataSource: "supabase" as const,
+      dataSource: "neon" as const,
     },
     storage: {
       timestamp: Date.now(),

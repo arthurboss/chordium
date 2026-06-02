@@ -118,7 +118,7 @@ export const useSearchFetch = ({
               search: {
                 query: { artist: artistParam, song: songParam || "" },
                 searchType: searchType,
-                dataSource: "supabase",
+                dataSource: "neon",
               },
             });
           }

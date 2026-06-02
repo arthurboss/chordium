@@ -20,7 +20,7 @@ This backend is configured for deployment on [Render](https://render.com):
 
 - **Production**: Automatically deployed from GitHub
 - **Environment**: Node.js with Puppeteer support
-- **Database**: Supabase integration
+- **Database**: Neon (via Vercel Postgres)
 - **Caching**: AWS S3 for performance
 - **Status Monitoring & Keep-Alive**: [Backend Status Page](https://stats.uptimerobot.com/sIX45GbfwC)
 
@@ -56,8 +56,6 @@ npm test -- tests/services/s3/connection.test.js       # Connection testing
 
 Copy `.env.example` to `.env` and configure:
 
-- `SUPABASE_URL` - Supabase project URL
-- `SUPABASE_SERVICE_ROLE` - Supabase service role key
 - `AWS_ACCESS_KEY_ID` - AWS access key (optional, for S3 caching)
 - `AWS_SECRET_ACCESS_KEY` - AWS secret key (optional, for S3 caching)
 - `S3_BUCKET_NAME` - S3 bucket name (default: chordium)

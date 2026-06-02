@@ -35,7 +35,7 @@ export const TTL = {
    */
   SEARCH_CACHE: {
     /** Supabase data - highly reliable, can be cached long-term */
-    SUPABASE: 30 * TIME_UNITS.DAY,
+    NEON: 30 * TIME_UNITS.DAY,
     
     /** S3 data - highly reliable, can be cached long-term */
     S3: 30 * TIME_UNITS.DAY,

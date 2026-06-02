@@ -66,12 +66,6 @@ function createConfig(): Config {
       retryDelay: 2000
     },
 
-    // Supabase configuration
-    supabase: {
-      url: process.env.SUPABASE_URL,
-      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY
-    },
-
     // AWS S3 configuration
     aws: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
