@@ -27,7 +27,7 @@ describe("CifraClub Search Handler", () => {
     it("returns artists when searchType is ARTIST", async () => {
       mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
 
-      const result = await performSearch("", "oasis", SEARCH_TYPES.ARTIST);
+      const result = await performSearch("oasis", SEARCH_TYPES.ARTIST);
 
       expect(result).toEqual([
         { displayName: "Oasis", path: "oasis", songCount: null },
@@ -37,7 +37,7 @@ describe("CifraClub Search Handler", () => {
     it("returns songs when searchType is SONG", async () => {
       mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
 
-      const result = await performSearch("", "oasis wonderwall", SEARCH_TYPES.SONG);
+      const result = await performSearch("oasis wonderwall", SEARCH_TYPES.SONG);
 
       expect(result).toEqual([
         { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
@@ -47,7 +47,7 @@ describe("CifraClub Search Handler", () => {
     it("returns songs when searchType is ARTIST_SONG", async () => {
       mockAxiosGet.mockResolvedValue(makeJsonp([SONG_DOC]));
 
-      const result = await performSearch("", "oasis wonderwall", SEARCH_TYPES.ARTIST_SONG);
+      const result = await performSearch("oasis wonderwall", SEARCH_TYPES.ARTIST_SONG);
 
       expect(result).toEqual([
         { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
@@ -57,7 +57,7 @@ describe("CifraClub Search Handler", () => {
     it("returns empty array when no matching docs", async () => {
       mockAxiosGet.mockResolvedValue(makeJsonp([]));
 
-      const result = await performSearch("", "xyznonexistent", SEARCH_TYPES.SONG);
+      const result = await performSearch("xyznonexistent", SEARCH_TYPES.SONG);
 
       expect(result).toEqual([]);
     });
@@ -65,7 +65,7 @@ describe("CifraClub Search Handler", () => {
     it("passes query to JSONP endpoint", async () => {
       mockAxiosGet.mockResolvedValue(makeJsonp([]));
 
-      await performSearch("", "guns n roses", SEARCH_TYPES.SONG);
+      await performSearch("guns n roses", SEARCH_TYPES.SONG);
 
       expect(mockAxiosGet).toHaveBeenCalledWith(
         "https://solr.sscdn.co/cc/h2/",
@@ -77,7 +77,7 @@ describe("CifraClub Search Handler", () => {
       mockAxiosGet.mockRejectedValue(new Error("Network Error"));
 
       await expect(
-        performSearch("", "test", SEARCH_TYPES.ARTIST)
+        performSearch("test", SEARCH_TYPES.ARTIST)
       ).rejects.toThrow("Network Error");
     });
   });

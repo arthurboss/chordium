@@ -1,16 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql } from "@vercel/postgres";
-import axios from "axios";
-
-const JSONP_URL = "https://solr.sscdn.co/cc/h2/";
-
-interface JsonpDoc {
-  t: "1" | "2";
-  m: string;
-  a: string;
-  d: string;
-  u?: string;
-}
+import { fetchJsonpDocs } from "./_jsonp.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { artistPath } = req.query as Record<string, string>;
@@ -19,12 +9,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Missing artistPath parameter" });
   }
 
-  // Check Neon DB first
+  // Escape SQL LIKE special chars in artistPath
+  const escapedPath = artistPath.replace(/[%_]/g, "\\$&");
+
   try {
     const { rows } = await sql`
       SELECT title, artist, path
       FROM songs
-      WHERE path LIKE ${artistPath + "/%"}
+      WHERE path LIKE ${escapedPath + "/%"}
       ORDER BY title
     `;
     if (rows.length > 0) {
@@ -34,36 +26,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // fall through to JSONP
   }
 
-  // Fallback: fetch artist songs via JSONP search using artist slug
-  const artistName = artistPath
-    .split("-")
-    .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  // JSONP fallback — limited to ~5 results, only useful while DB is seeding.
+  // Full artist song lists require Puppeteer (Render) for new artists.
+  try {
+    const docs = await fetchJsonpDocs(artistPath.replace(/-/g, " "));
+    const songs = docs
+      .filter((d) => d.t === "2" && d.d === artistPath && d.u)
+      .map((d) => ({ title: d.m, artist: d.a, path: `${d.d}/${d.u}` }));
 
-  const response = await axios.get<string>(JSONP_URL, {
-    params: { q: artistName, callback: "x" },
-  });
+    // Seed DB in background — don't block response
+    if (songs.length > 0) {
+      Promise.all(
+        songs.map((s) =>
+          sql`
+            INSERT INTO songs (title, artist, path)
+            VALUES (${s.title}, ${s.artist}, ${s.path})
+            ON CONFLICT (path) DO NOTHING
+          `.catch(() => {})
+        )
+      ).catch(() => {});
+    }
 
-  const jsonStr = response.data.trim().replace(/^x\(/, "").replace(/\)$/, "");
-  const parsed = JSON.parse(jsonStr);
-  const docs: JsonpDoc[] = parsed.response?.docs ?? [];
-
-  const songs = docs
-    .filter((d) => d.t === "2" && d.d === artistPath && d.u)
-    .map((d) => ({ title: d.m, artist: d.a, path: `${d.d}/${d.u}` }));
-
-  // Seed DB in background (don't await — don't block response)
-  if (songs.length > 0) {
-    Promise.all(
-      songs.map((s) =>
-        sql`
-          INSERT INTO songs (title, artist, path)
-          VALUES (${s.title}, ${s.artist}, ${s.path})
-          ON CONFLICT (path) DO NOTHING
-        `.catch(() => {})
-      )
-    );
+    return res.json(songs);
+  } catch (e) {
+    return res.status(502).json({ error: "Artist songs unavailable", details: (e as Error).message });
   }
-
-  return res.json(songs);
 }

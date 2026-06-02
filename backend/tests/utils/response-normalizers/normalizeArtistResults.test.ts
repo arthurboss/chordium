@@ -9,11 +9,11 @@ import type { Artist } from '../../../../shared/types/index.js';
 
 describe('normalizeArtistResults', () => {
   it('should normalize Supabase artist results', () => {
-    const supabaseArtists = [
+    const neonArtists = [
       { id: 'uuid-123', displayName: 'Oasis', path: 'oasis', songCount: 25, createdAt: '2023-01-01' },
       { id: 'uuid-456', displayName: 'Radiohead', path: 'radiohead', songCount: 30, updatedAt: '2023-02-01' }
     ];
-    const result = normalizeArtistResults(supabaseArtists as unknown as Artist[], 'supabase');
+    const result = normalizeArtistResults(neonArtists as unknown as Artist[], 'neon');
     expect(result).toEqual([
       { displayName: 'Oasis', path: 'oasis', songCount: 25 },
       { displayName: 'Radiohead', path: 'radiohead', songCount: 30 }
