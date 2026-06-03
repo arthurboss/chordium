@@ -75,19 +75,10 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
             </div>
             <div className={TEXT_STYLE_MENU_STYLES.buttonGroup}>
               <Button
-                variant={isViewModeActive(viewMode, "normal") ? "default" : "outline"}
+                variant={isViewModeActive(viewMode, "chords-only") || isViewModeActive(viewMode, "normal") ? "default" : "outline"}
                 size="sm"
                 className={TEXT_STYLE_MENU_STYLES.viewModeButton}
                 onClick={() => setViewMode("normal")}
-                title={t("textStyle.normal")}
-              >
-                <Text size={18} className="text-foreground" />
-              </Button>
-              <Button
-                variant={isViewModeActive(viewMode, "chords-only") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.viewModeButton}
-                onClick={() => setViewMode("chords-only")}
                 title={t("textStyle.chords")}
               >
                 <Music size={18} className="text-foreground" />
