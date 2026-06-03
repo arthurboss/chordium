@@ -27,6 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ORDER BY title
     `;
     if (rows.length > 0) {
+      // Update songCount in background if it differs
+      sql`UPDATE artists SET "songCount" = ${rows.length} WHERE path = ${artistPath} AND ("songCount" IS NULL OR "songCount" != ${rows.length})`.catch(() => {});
       return res.json(rows);
     }
   } catch {
