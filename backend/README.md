@@ -40,7 +40,7 @@ npm test
 - `GET /api/artists?artist=<name>` - Search for artists matching a name
 - `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs (artist and/or song parameters)
 - `GET /api/artist-songs?artistPath=<path>` - Get all songs by a specific artist
-- `GET /api/cifraclub-chord-sheet?url=<encoded-url>` - Get chord sheet from URL
+- `GET /api/cifraclub-song?url=<artist/song>` - Get chord sheet + metadata in one request
 
 ## Environment
 

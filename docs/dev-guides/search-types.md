@@ -76,8 +76,8 @@
 - **Artist search input:** `"Radiohead"` | `null`
 - **Song search input:** `"creep"` | `null`
 
-- **API endpoint:** `/api/cifraclub-chord-sheet`
-- **Request URL path:** `/api/cifraclub-chord-sheet?artist=radiohead&song=creep`
+- **API endpoint:** `/api/cifraclub-song`
+- **Request URL path:** `/api/cifraclub-song?artist=radiohead&song=creep`
 - **Response example:** [`creep.json`](../../shared/fixtures/chord-sheet/radiohead-creep.json)
 - **Response type:** [`ChordSheet[]`](../../packages/types/src/domain/chord-sheet.ts)
 - **Frontend URL path:** `/search?artist=radiohead&song=creep`
