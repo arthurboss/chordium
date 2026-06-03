@@ -44,9 +44,28 @@ class ErrorBoundary extends Component<Props, State> {
     };
   }
 
+  private readonly isChunkLoadError = (error: Error): boolean => {
+    return (
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a module script failed') ||
+      error.name === 'ChunkLoadError'
+    );
+  };
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
+    if (this.isChunkLoadError(error)) {
+      const reloadKey = 'chordium_chunk_reload_attempted';
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, '1');
+        window.location.reload();
+        return;
+      }
+      // Already tried reloading once — clear the flag so future navigations can retry
+      sessionStorage.removeItem(reloadKey);
+    }
+
     this.setState({
       error,
       errorInfo

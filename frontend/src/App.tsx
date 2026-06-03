@@ -1,7 +1,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, ComponentType } from 'react';
 import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
@@ -11,9 +11,28 @@ import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 import SmallScreenWarning from "@/components/SmallScreenWarning";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 
+// Reload once on chunk load failures (stale cache after Vercel redeploy)
+const lazyWithChunkRetry = <T extends ComponentType<unknown>>(factory: () => Promise<{ default: T }>) =>
+  lazy(() =>
+    factory().catch((err: Error) => {
+      const isChunkError =
+        err.message.includes('Failed to fetch dynamically imported module') ||
+        err.message.includes('Importing a module script failed') ||
+        err.name === 'ChunkLoadError';
+      if (isChunkError) {
+        const key = 'chordium_chunk_reload_attempted';
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          window.location.reload();
+        }
+      }
+      throw err;
+    })
+  );
+
 // Lazy load pages instead of direct imports
-const Home = lazy(() => import("./pages/Home"));
-const ChordViewer = lazy(() => import("./pages/chord-viewer"));
+const Home = lazyWithChunkRetry(() => import("./pages/Home"));
+const ChordViewer = lazyWithChunkRetry(() => import("./pages/chord-viewer"));
 // Temporarily removed SmartRouteHandler to fix rendering issues
 // const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
@@ -156,3 +175,4 @@ const App = () => (
 
 
 export default App;
+
