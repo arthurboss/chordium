@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import MetadataBadge from "./MetadataBadge";
 import type { ChordMetadataProps } from "./ChordMetadata.types";
-import { normalizeNamePart } from "@/utils/chord-sheet-path";
+import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 
-const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
+const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -22,8 +22,15 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
 
   const handleArtistClick = () => {
     if (chordSheet.artist) {
-      const artistPath = `/${normalizeNamePart(chordSheet.artist)}`;
-      navigate(artistPath);
+      const artistSlug = path.split("/")[0];
+      sessionStorage.removeItem("chordium_search_query");
+      try {
+        sessionStorage.setItem(
+          ARTIST_DISPLAY_NAME_KEY,
+          JSON.stringify({ path: artistSlug, displayName: chordSheet.artist })
+        );
+      } catch {}
+      navigate(`/${artistSlug}`);
     }
   };
 

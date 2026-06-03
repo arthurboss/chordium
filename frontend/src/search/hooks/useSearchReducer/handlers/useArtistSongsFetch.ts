@@ -36,9 +36,7 @@ export const useArtistSongsFetch = ({
         if (import.meta.env.DEV) {
           console.error("[useArtistSongsFetch] ARTIST SONGS ERROR:", err);
         }
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch artist songs";
-        dispatch({ type: "ARTIST_SONGS_ERROR", error: errorMessage });
+        dispatch({ type: "ARTIST_SONGS_ERROR", error: "Could not load songs for this artist. Please try again." });
       } finally {
         setArtistSongsFetching(false);
         isArtistSongsFetching.current = false;
