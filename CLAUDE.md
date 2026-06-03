@@ -48,7 +48,7 @@ npm run clean        # Remove all node_modules and build artifacts
 
 - Node.js >= 16 required
 - ESM throughout (`"type": "module"`)
-- Frontend deploys to Vercel, backend to Render
+- Deploys entirely to Vercel (frontend + serverless API functions)
 - Shared types package: `@chordium/types`
 - Environment files: `frontend/env.example`, `backend/env.example`
 

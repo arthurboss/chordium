@@ -15,7 +15,7 @@ npm test     # Run all tests
 
 ## 🚀 Deployment
 
-This backend is configured for deployment on [Render](https://render.com):
+The backend runs as Vercel serverless functions in `frontend/api/`.
 
 - **Production**: Automatically deployed from GitHub
 - **Environment**: Node.js with Puppeteer support
@@ -24,7 +24,6 @@ This backend is configured for deployment on [Render](https://render.com):
 
 For deployment configuration, see:
 
-- [render.yaml](../render.yaml) - Render deployment config
 - [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
 
 ## Tests

@@ -23,7 +23,7 @@ chordium/
 ## Architecture
 
 ```
-Frontend (Vercel) → Backend (Render) → Database (Neon)
+Frontend + API (Vercel) → Database (Neon)
 ```
 
 ## Monorepo Organization

@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deployment for both the frontend (Vercel) and backend (Render) components of Chordium.
+This guide covers deployment for Chordium, which runs entirely on Vercel (frontend + serverless API functions + database via Neon).
 
 ## Architecture Overview
 
@@ -10,7 +10,6 @@ Frontend (Vercel)
 ├── PWA Support
 └── Calls Backend API
 
-Backend (Render)
 ├── Express Server
 ├── Puppeteer Scraping
 ├── Neon Database
@@ -107,10 +106,12 @@ npm run build
 3. Test API connectivity from the deployed frontend
 4. Check browser console for client-side errors
 
-## Backend Deployment (Render)
+## Backend Deployment
+
+The backend is now fully serverless on Vercel. All API endpoints live in .
 
 ### Prerequisites
-- GitHub repository connected to Render
+- GitHub repository
 - Neon database (via Vercel Postgres)
 
 ### Environment Variables to Set in Render
@@ -144,7 +145,7 @@ npm run build
 
 4. **Deploy**
    - Click "Create Web Service"
-   - Render will automatically deploy your backend
+   - Vercel will automatically deploy on push
 
 ### Health Check
 - Endpoint: `/health`
@@ -152,7 +153,7 @@ npm run build
 
 ### Cold Start Mitigation
 
-**Problem**: Render's free tier puts services to sleep after 15 minutes of inactivity, causing "cold starts" when users visit your app.
+**Problem**: Vercel serverless functions cold-start on first request after inactivity.
 
 **Solution**: Chordium uses UptimeRobot for both monitoring and keep-alive functionality, ensuring the backend stays warm and providing public status transparency.
 
@@ -192,7 +193,7 @@ UptimeRobot provides both monitoring and keep-alive functionality:
 - **Cost**: Free tier covers basic monitoring needs
 - **Coverage**: 24/7 monitoring with public transparency
 
-#### Render Usage for Alpha Version
+#### Vercel Usage for Alpha Version
 
 | Component | Monthly Hours | Details |
 |-----------|---------------|---------|
@@ -217,23 +218,23 @@ UptimeRobot provides both monitoring and keep-alive functionality:
 | **Production** | ~500+ | ~500-800+ hours | 67-107% | ⚠️ Consider paid tier ($7/month) |
 
 - **UptimeRobot**: Provides both monitoring and keep-alive functionality
-- **Render Paid Tier**: Eliminates cold starts entirely ($7/month)
+- **Vercel Pro Tier**: Eliminates cold starts entirely ($7/month)
 
 ### Troubleshooting Backend
 
-- Check Render logs for build errors
+- Check Vercel deployment logs for build errors
 - Verify environment variables are set correctly
 
 ## Testing the Complete Deployment
 
 ### 1. Test Backend Health
 ```bash
-curl https://your-backend.onrender.com/health
+curl https://chordium.vercel.app/health
 ```
 
 ### 2. Test API Endpoints
 ```bash
-curl https://your-backend.onrender.com/api/artists
+curl https://chordium.vercel.app/api/artists
 ```
 
 ### 3. Test Frontend
@@ -275,18 +276,3 @@ Vercel automatically deploys when you push to:
 - `main` branch → Production
 - Other branches → Preview deployments
 
-### Render (Backend)
-Render automatically deploys when you push to:
-- `main` branch → Production
-
-Each push creates a new deployment with a unique URL for testing.
-
-## Cost Breakdown
-
-| Service | Free Tier | Paid Tier |
-|---------|-----------|-----------|
-| **Frontend (Vercel)** | Free forever | Free forever |
-| **Backend (Render)** | 750 hours/month | $7/month |
-| **Database (Neon)** | Free tier | $25/month |
-
-**Total monthly cost when scaling: ~$32-36** 
