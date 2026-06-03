@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { fetchSongMetadataFromAPI } from '@/services/api/fetch-song-metadata';
-import { fetchChordSheetFromAPI } from '@/services/api/fetch-chord-sheet';
+import { fetchSongFromAPI } from '@/services/api/fetch-song';
 import type { SongMetadata, ChordSheet } from '@chordium/types';
 
 export interface ProgressiveChordSheetState {
@@ -38,8 +37,8 @@ export function useProgressiveChordSheet(path: string): ProgressiveChordSheetSta
     setError(null);
     
     try {
-      const fetchedMetadata = await fetchSongMetadataFromAPI(path);
-      setMetadata(fetchedMetadata);
+      const data = await fetchSongFromAPI(path);
+      if (data) { const { songChords, ...meta } = data; setMetadata(meta); setContent({ songChords }); }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load metadata';
       setError(errorMessage);
@@ -56,8 +55,8 @@ export function useProgressiveChordSheet(path: string): ProgressiveChordSheetSta
     setError(null);
     
     try {
-      const fetchedContent = await fetchChordSheetFromAPI(path);
-      setContent(fetchedContent);
+      const data = await fetchSongFromAPI(path);
+      if (data) { const { songChords, ...meta } = data; setMetadata(meta); setContent({ songChords }); }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
       setError(errorMessage);
