@@ -182,11 +182,11 @@ const ChordViewer = () => {
         <SongViewer
           song={{
             song: {
-              title: chordSheetData.chordSheet.title,
-              artist: chordSheetData.chordSheet.artist,
-              path: chordSheetData.path
+              title: chordSheetData!.chordSheet.title,
+              artist: chordSheetData!.chordSheet.artist,
+              path: chordSheetData!.path
             },
-            chordSheet: chordSheetData.chordSheet
+            chordSheet: chordSheetData!.chordSheet
           }}
           chordContent={chordSheetResult.content?.songChords ?? ''}
           chordDisplayRef={chordDisplayRef}
