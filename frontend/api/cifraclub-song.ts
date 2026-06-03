@@ -8,7 +8,7 @@ export const config = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { url: pathParam } = req.query as Record<string, string>;
+  const { url: pathParam, lyricsOnly } = req.query as Record<string, string>;
 
   if (!pathParam) {
     return res.status(400).json({ error: "Missing song path parameter" });
@@ -19,7 +19,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Invalid path format, expected artist/song" });
   }
 
-  const url = `https://www.cifraclub.com.br/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}/`;
+  const basePath = `https://www.cifraclub.com.br/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}/`;
+  const url = lyricsOnly === 'true' ? `${basePath}letra/` : basePath;
 
   let browser = null;
   try {

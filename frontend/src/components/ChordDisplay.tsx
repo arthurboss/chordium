@@ -17,9 +17,10 @@ interface ChordDisplayProps {
   onSave?: (content: string) => void;
   isLoading?: boolean;
   showControlsBar?: boolean;
+  onViewModeChange?: (viewMode: string) => void;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange }, ref) => {
 
   // Use custom hooks for different concerns
   const {
@@ -64,6 +65,11 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   useEffect(() => {
     updateEditContent(content);
   }, [content, updateEditContent]);
+
+  // Notify parent when view mode changes
+  useEffect(() => {
+    onViewModeChange?.(viewMode);
+  }, [viewMode, onViewModeChange]);
 
   // Handle saving edits (with toast notification)
   const handleSaveEdits = () => {

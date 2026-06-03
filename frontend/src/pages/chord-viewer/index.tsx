@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
 import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
@@ -27,8 +27,6 @@ const ChordViewer = () => {
   const routeParams = useParams() as RouteParams;
   const location = useLocation();
 
-  // Try to get the path from navigation state first (most accurate)
-  // Fall back to URL parameters if navigation state is not available
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
 
@@ -46,6 +44,13 @@ const ChordViewer = () => {
 
   // Fetch chord sheet data with API fallback
   const chordSheetResult = useChordSheetWithFallback(path);
+
+  // Track current view mode to trigger /letra fetch when switching to lyrics-only
+  const handleViewModeChange = useCallback((viewMode: string) => {
+    if (viewMode === 'lyrics-only' && !chordSheetResult.lyricsContent && !chordSheetResult.isLyricsLoading) {
+      chordSheetResult.loadLyricsContent();
+    }
+  }, [chordSheetResult]);
 
   // Create complete chord sheet data object (only if metadata exists)
   const chordSheetData = chordSheetResult.metadata
@@ -109,7 +114,6 @@ const ChordViewer = () => {
 
   // Chord sheet operations using focused hooks
   const { handleSave: baseHandleSave } = useChordSheetSave(chordSheetData ?? jamChordSheetData);
-  // Wrap handleSave to update local isSaved state immediately after save
   const handleSave = async () => {
     await baseHandleSave();
     setIsSaved(true);
@@ -118,8 +122,6 @@ const ChordViewer = () => {
     path,
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
   );
-
-
 
   // When the chord sheet was loaded from a QR code, build the data directly from
   // the payload without going through the API / IndexedDB fallback chain.
@@ -176,6 +178,11 @@ const ChordViewer = () => {
     );
   }
 
+  // Use /letra content when available (fetched on lyrics-only mode activation)
+  const displayContent = chordSheetResult.lyricsContent !== null
+    ? chordSheetResult.lyricsContent
+    : chordSheetResult.content?.songChords ?? '';
+
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
@@ -188,7 +195,7 @@ const ChordViewer = () => {
             },
             chordSheet: chordSheetData!.chordSheet
           }}
-          chordContent={chordSheetResult.content?.songChords ?? ''}
+          chordContent={displayContent}
           chordDisplayRef={chordDisplayRef}
           onBack={handleBack}
           onDelete={handleDelete}
@@ -199,7 +206,8 @@ const ChordViewer = () => {
           isFromMyChordSheets={isSaved}
           useProgressiveLoading={chordSheetResult.isFromAPI}
           loadContent={chordSheetResult.loadContent}
-          isContentLoading={chordSheetResult.isContentLoading}
+          isContentLoading={chordSheetResult.isContentLoading || chordSheetResult.isLyricsLoading}
+          onViewModeChange={handleViewModeChange}
         />
       </main>
     </div>
