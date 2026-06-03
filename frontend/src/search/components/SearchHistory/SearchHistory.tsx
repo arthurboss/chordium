@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, User, Music } from "lucide-react";
+import { Clock, User, Music, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SearchHistoryEntry } from "@/search/hooks/useSearchHistory";
 
@@ -18,11 +18,27 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect }) => {
         Recent searches
       </p>
       <div className="grid grid-cols-1 gap-y-2">
-        {history.map(({ artist, song, timestamp }) => {
-          const label = artist && song
-            ? `${artist} — ${song}`
-            : artist || song;
-          const Icon = song ? Music : User;
+        {history.map(({ artist, song, searchType, displayName, timestamp }) => {
+          let label: string;
+          let Icon: React.ElementType;
+
+          if (searchType === "artist-song") {
+            // selected artist from artist+song search: show artist display name
+            label = displayName || artist;
+            Icon = User;
+          } else if (searchType === "song" && artist && song) {
+            // artist+song query: show both terms
+            label = displayName || `${artist} — ${song}`;
+            Icon = Music;
+          } else if (searchType === "song") {
+            // song-only search
+            label = song;
+            Icon = Music;
+          } else {
+            // artist-only search: use magnifier, show the query term
+            label = artist;
+            Icon = Search;
+          }
 
           return (
             <Card
