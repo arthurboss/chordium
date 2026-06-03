@@ -55,7 +55,7 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
                onBackClick={activeArtist ? handleBackToArtistList : undefined}
                isSearchDisabled={!artistInput && !songInput}
                artistLoading={loading}
-               onClearSearch={handleClearSearch}
+               onClearSearch={() => { handleClearSearch(); refresh(); }}
                clearDisabled={clearDisabled}
                artistDisabled={!!activeArtist}
             />
