@@ -31,7 +31,7 @@ export const loadSampleMetadata = async (): Promise<Array<{ path: string; metada
         metadata: wonderwallMetadata.default as SongMetadata
       },
       {
-        path: 'eagles/hotel-california',
+        path: 'the-eagles/hotel-california',
         metadata: hotelCaliforniaMetadata.default as SongMetadata
       }
     ];
@@ -60,7 +60,7 @@ export const loadSampleContent = async (path: string): Promise<ChordSheet> => {
       case 'oasis/wonderwall':
         contentModule = await import('../../data/samples/chord-sheets/content/oasis-wonderwall.json');
         break;
-      case 'eagles/hotel-california':
+      case 'the-eagles/hotel-california':
         contentModule = await import('../../data/samples/chord-sheets/content/eagles-hotel_california.json');
         break;
       default:
