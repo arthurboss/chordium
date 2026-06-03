@@ -92,9 +92,9 @@ export const useSearchFetch = ({
           // Song search
           dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
 
-          // Cache results
+          // Cache results (only if non-empty)
           const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
-          if (cacheKey) {
+          if (cacheKey && data.length > 0) {
             await searchCacheService.storeResults({
               searchKey: cacheKey,
               results: data,
@@ -109,9 +109,9 @@ export const useSearchFetch = ({
           // Artist search
           dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
 
-          // Cache results
+          // Cache results (only if non-empty)
           const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
-          if (cacheKey) {
+          if (cacheKey && data.length > 0) {
             await searchCacheService.storeResults({
               searchKey: cacheKey,
               results: data,
