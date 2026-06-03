@@ -18,9 +18,10 @@ interface ChordDisplayProps {
   isLoading?: boolean;
   showControlsBar?: boolean;
   onViewModeChange?: (viewMode: string) => void;
+  initialViewMode?: string;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode }, ref) => {
 
   // Use custom hooks for different concerns
   const {
@@ -50,7 +51,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     capoTransposeLinked,
     setCapoTransposeLinked,
     processedContent
-  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
+  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, initialViewMode);
 
   const {
     isEditing,

@@ -22,14 +22,22 @@ router.get('/cifraclub-song', async (req, res) => {
     const { url: pathParam, lyricsOnly } = req.query as { url?: string; lyricsOnly?: string };
     if (!pathParam) { res.status(400).json({ error: 'Missing url parameter' }); return; }
     const basePath = pathParam.trim();
-    const songUrl = lyricsOnly === 'true'
-      ? `https://www.cifraclub.com.br/${basePath}/letra/`
-      : `https://www.cifraclub.com.br/${basePath}/`;
-    const [metadata, chordSheet] = await Promise.all([
-      cifraClubService.getSongMetadata(songUrl),
-      cifraClubService.getChordSheet(songUrl),
-    ]);
-    res.json({ ...metadata, ...chordSheet });
+    const songUrl = `https://www.cifraclub.com.br/${basePath}/`;
+    const letraUrl = `https://www.cifraclub.com.br/${basePath}/letra/`;
+
+    if (lyricsOnly === 'true') {
+      const [metadata, chordSheet] = await Promise.all([
+        cifraClubService.getSongMetadata(songUrl),
+        cifraClubService.getLyricsContent(letraUrl),
+      ]);
+      res.json({ ...metadata, ...chordSheet });
+    } else {
+      const [metadata, chordSheet] = await Promise.all([
+        cifraClubService.getSongMetadata(songUrl),
+        cifraClubService.getChordSheet(songUrl),
+      ]);
+      res.json({ ...metadata, ...chordSheet });
+    }
   } catch (error) {
     const status = (error as any).code === 'NOT_FOUND' ? 404 : 500;
     res.status(status).json({ error: status === 404 ? 'Song not found' : 'Failed to fetch song', details: error instanceof Error ? error.message : String(error) });

@@ -1,6 +1,6 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
-import { extractChordSheet, extractSongMetadata } from "./dom-extractors.js";
+import { extractChordSheet, extractSongMetadata, extractLyricsContent } from "./dom-extractors.js";
 import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
@@ -350,5 +350,20 @@ async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
     throw new Error(
       `Unable to load content from page: ${lastError.message}`
     );
+  });
+}
+
+/**
+ * Fetches lyrics-only content from a /letra/ URL using the lyrics extractor.
+ */
+export async function fetchLyricsContent(letraUrl: string): Promise<ChordSheet> {
+  logger.info(`🎤 Fetching lyrics content from: ${letraUrl}`);
+
+  return puppeteerService.withPage(async (page: Page) => {
+    page.setDefaultNavigationTimeout(30000);
+    await page.goto(letraUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    const content = await page.evaluate(extractLyricsContent);
+    logger.info(`📝 Lyrics extracted, length: ${content?.songChords?.length ?? 0}`);
+    return content;
   });
 }

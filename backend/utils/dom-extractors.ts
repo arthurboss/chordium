@@ -419,3 +419,13 @@ export function extractChordSheet(): ChordSheet {
     songChords,
   };
 }
+
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Lyrics pages use a div with a class containing letra instead of a <pre> element.
+ */
+export function extractLyricsContent(): ChordSheet {
+  const el = document.querySelector('[class*="letra"]');
+  const songChords = el ? el.textContent || "" : "";
+  return { songChords };
+}

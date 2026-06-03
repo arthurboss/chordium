@@ -22,6 +22,7 @@ interface SongViewerProps {
   loadContent?: () => Promise<void>;
   isContentLoading?: boolean;
   onViewModeChange?: (viewMode: string) => void;
+  initialViewMode?: string;
 }
 
 const SongViewer = ({
@@ -39,32 +40,21 @@ const SongViewer = ({
   loadContent,
   isContentLoading,
   onViewModeChange,
+  initialViewMode,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
-  
-  const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({ 
-    path: isFromMyChordSheets ? songObj.path : '' 
+
+  const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
+    path: isFromMyChordSheets ? songObj.path : ''
   });
 
   const chordContentToDisplay = useMemo(() => {
-    if (directChordContent) {
-      return directChordContent;
-    }
-    if (isFromMyChordSheets) {
-      return lazyContent || '';
-    }
+    if (directChordContent) return directChordContent;
+    if (isFromMyChordSheets) return lazyContent || '';
     return chordSheet.songChords || '';
   }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
-  const chordSheetToDisplay = useMemo(() => {
-    return chordSheet;
-  }, [chordSheet]);
-
-  const handleLoadContent = () => {
-    if (useProgressiveLoading && loadContent) {
-      loadContent();
-    }
-  };
+  const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
   const handleAction = () => {
     if (isFromMyChordSheets && !hideDeleteButton) {
@@ -74,9 +64,11 @@ const SongViewer = ({
     }
   };
 
-  const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
+  const shouldShowActionButton =
+    (isFromMyChordSheets && !hideDeleteButton) ||
+    (!hideSaveButton && !isFromMyChordSheets && !!onSave);
 
-  const finalIsContentLoading = useProgressiveLoading 
+  const finalIsContentLoading = useProgressiveLoading
     ? isContentLoading
     : isLazyContentLoading;
 
@@ -103,6 +95,7 @@ const SongViewer = ({
         onSave={onUpdate}
         isLoading={finalIsContentLoading}
         onViewModeChange={onViewModeChange}
+        initialViewMode={initialViewMode}
       />
     </div>
   );
