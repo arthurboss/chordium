@@ -1,10 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import MetadataBadge from "./MetadataBadge";
 import type { ChordMetadataProps } from "./ChordMetadata.types";
+import { normalizeNamePart } from "@/utils/chord-sheet-path";
 
 const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const tuning = chordSheet.guitarTuning
     ? Array.isArray(chordSheet.guitarTuning)
@@ -17,11 +20,20 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet }) => {
       ? chordSheet.guitarCapo.toString()
       : t("chordMetadata.none");
 
+  const handleArtistClick = () => {
+    if (chordSheet.artist) {
+      const artistPath = `/${normalizeNamePart(chordSheet.artist)}`;
+      navigate(artistPath);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1 p-0 sm:grid sm:[grid-template-columns:repeat(4,_min-content)] sm:gap-x-4 sm:gap-y-1 sm:justify-between sm:px-4 sm:py-3 w-full text-xs">
       <MetadataBadge
         label={t("chordMetadata.artist")}
         value={chordSheet.artist || t("chordMetadata.unknown")}
+        onClick={chordSheet.artist ? handleArtistClick : undefined}
+        isClickable={!!chordSheet.artist}
       />
       <div className="flex gap-3 whitespace-nowrap sm:contents">
         <MetadataBadge
