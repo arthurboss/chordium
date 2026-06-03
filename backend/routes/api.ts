@@ -28,6 +28,7 @@ router.get('/cifraclub-song', async (req, res) => {
     ]);
     res.json({ ...metadata, ...chordSheet });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch song', details: error instanceof Error ? error.message : String(error) });
+    const status = (error as any).code === "NOT_FOUND" ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Song not found' : 'Failed to fetch song', details: error instanceof Error ? error.message : String(error) });
   }
 });

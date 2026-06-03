@@ -13,7 +13,7 @@ export async function fetchSongFromAPI(path: string): Promise<SongData | null> {
 
     if (!response.ok) {
       if (response.status === 404) return null;
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      throw new Error("Failed to load chord sheet");
     }
 
     const data = await response.json();
