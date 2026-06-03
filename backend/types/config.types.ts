@@ -16,29 +16,14 @@ export interface PuppeteerConfig {
   retryDelay?: number; // Delay between retry attempts in milliseconds (default: 2000)
 }
 
-export interface SupabaseConfig {
-  url: string | undefined;
-  serviceRoleKey: string | undefined;
-}
-
 export interface CifraClubConfig {
   baseUrl: string;
   blockedDomains: string[];
-}
-
-export interface AWSConfig {
-  accessKeyId: string | undefined;
-  secretAccessKey: string | undefined;
-  sessionToken: string | undefined;
-  region: string;
-  bucketName: string | undefined;
 }
 
 export interface Config {
   server: ServerConfig;
   cors: CorsConfig;
   puppeteer: PuppeteerConfig;
-  supabase: SupabaseConfig;
   cifraClub: CifraClubConfig;
-  aws: AWSConfig;
 }

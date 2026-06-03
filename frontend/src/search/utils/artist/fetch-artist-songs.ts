@@ -39,16 +39,18 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
       throw new Error(`${resp.statusText} (${resp.status}): ${errorText}`);
     }
     const data: Song[] = await resp.json();
-    // Cache the results for future use (use normalized searchKey)
-    await searchCacheService.storeResults({
-      searchKey,
-      results: data,
-      search: {
-        query: { artist: artistPath, song: "" },
-        searchType: SEARCH_TYPES.ARTIST_SONG,
-        dataSource: "s3",
-      },
-    });
+    // Only cache non-empty results
+    if (data.length > 0) {
+      await searchCacheService.storeResults({
+        searchKey,
+        results: data,
+        search: {
+          query: { artist: artistPath, song: "" },
+          searchType: SEARCH_TYPES.ARTIST_SONG,
+          dataSource: "neon",
+        },
+      });
+    }
     return data;
   } catch (error) {
     if (import.meta.env.DEV) {

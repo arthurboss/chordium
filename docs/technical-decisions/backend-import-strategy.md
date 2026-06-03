@@ -7,13 +7,13 @@ Use relative imports (`../packages/types`) in the backend instead of npm package
 ## Context
 
 - Monorepo with shared types package (`@chordium/types`)
-- Backend deployment constraint: Render with `rootDir: backend`
+- Backend deployment constraint: monorepo `rootDir: backend`
 - Two import options: npm package vs relative imports
 - Need to balance development experience with deployment simplicity
 
 ## Problem
 
-After creating the `@chordium/types` npm package, backend deployment began failing on Render. The constraint `rootDir: backend` means:
+After creating the `@chordium/types` npm package, backend deployment began failing. The constraint `rootDir: backend` means:
 
 1. Only the backend folder is available during deployment
 2. Root `node_modules` and `package-lock.json` are not accessible
@@ -43,7 +43,7 @@ After creating the `@chordium/types` npm package, backend deployment began faili
 
 **Simplicity over consistency**: While npm package imports are more "proper," the deployment complexity isn't justified for this use case.
 
-**Platform constraints drive architecture**: Render's `rootDir` constraint makes relative imports the pragmatic choice.
+**Platform constraints drive architecture**: The `rootDir` constraint makes relative imports the pragmatic choice.
 
 **Development vs deployment separation**: Different environments can use different approaches when the trade-offs justify it.
 

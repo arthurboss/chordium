@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "prestart": "npx puppeteer browsers install chrome",
     "start": "node dist/backend/server.js",
     "dev": "tsc && node dist/backend/server.js",
     "dev:watch": "tsc --watch & sleep 2 && nodemon --delay 1 dist/backend/server.js",
@@ -17,7 +16,7 @@
     "lint": "npx eslint . --ext .js,.ts",
     "lint:fix": "npx eslint . --ext .js,.ts --fix",
     "lint:ts": "tsc --noEmit",
-    "test:s3-config": "NODE_OPTIONS='--experimental-vm-modules' npx jest tests/services/s3/configuration.test.js --verbose"
+    "prestart": "npx puppeteer browsers install chrome"
   },
   "jest": {
     "testEnvironment": "node",
@@ -55,8 +54,6 @@
     }
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.826.0",
-    "@supabase/supabase-js": "^2.55.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",

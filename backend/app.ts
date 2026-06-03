@@ -108,13 +108,10 @@ class App {
   }
 
   public async start(): Promise<Server> {
-    try {
-      // Initialize Puppeteer service
-      await puppeteerService.init();
-    } catch (error) {
-      logger.error('Failed to initialize Puppeteer service:', error);
-      process.exit(1);
-    }
+    // Initialize Puppeteer lazily — failure here should not prevent the server starting
+    puppeteerService.init().catch((error) => {
+      logger.warn('Puppeteer failed to initialize on startup — will retry on first use:', error);
+    });
     // Start the server
     const port = config.server.port;
     this.server = this.app.listen(port, () => {

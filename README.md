@@ -40,10 +40,9 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 ### Backend
 
-- **Node.js/Express** + **TypeScript** - RESTful API server
-- **Supabase** - PostgreSQL database and authentication
-- **AWS S3** - Cloud storage for cached data
-- **Puppeteer** + **Cheerio** - Web scraping and HTML parsing
+- **Vercel Serverless Functions** - API endpoints in `frontend/api/`
+- **Neon** - PostgreSQL database (via Vercel Postgres)
+- **@sparticuz/chromium** + **Puppeteer** - Headless scraping for chord sheets
 
 ### Development
 

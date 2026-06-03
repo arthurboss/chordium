@@ -15,10 +15,19 @@
     "rootDir": "../",
     "baseUrl": "../",
     "paths": {
-      "@/*": ["backend/*"],
-      "@packages/*": ["packages/*"]
+      "@/*": [
+        "backend/*"
+      ],
+      "@packages/*": [
+        "packages/*"
+      ]
     },
-    "types": ["node", "express", "cors", "jest"],
+    "types": [
+      "node",
+      "express",
+      "cors",
+      "jest"
+    ],
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "allowJs": true,
@@ -36,7 +45,8 @@
     "tests/**/*.js",
     "../frontend",
     "../frontend/**/*",
-    "../node_modules"
+    "../node_modules",
+    "../packages/types/tsup.config.ts"
   ],
   "ts-node": {
     "esm": true,

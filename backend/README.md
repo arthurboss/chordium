@@ -1,6 +1,5 @@
 # Chordium Backend
 
-Backend service for searching and retrieving chord sheets with optional S3 caching.
 
 ## Architecture Notes
 
@@ -16,17 +15,15 @@ npm test     # Run all tests
 
 ## 🚀 Deployment
 
-This backend is configured for deployment on [Render](https://render.com):
+The backend runs as Vercel serverless functions in `frontend/api/`.
 
 - **Production**: Automatically deployed from GitHub
 - **Environment**: Node.js with Puppeteer support
-- **Database**: Supabase integration
-- **Caching**: AWS S3 for performance
+- **Database**: Neon (via Vercel Postgres)
 - **Status Monitoring & Keep-Alive**: [Backend Status Page](https://stats.uptimerobot.com/sIX45GbfwC)
 
 For deployment configuration, see:
 
-- [render.yaml](../render.yaml) - Render deployment config
 - [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
 
 ## Tests
@@ -35,14 +32,7 @@ For deployment configuration, see:
 # All tests
 npm test
 
-# S3 caching tests
-npm test -- tests/services/s3/ tests/integration/s3-cache-performance.test.js tests/integration/s3-data-validation.test.js
 
-# Run specific S3 test categories
-npm test -- tests/services/s3/configuration.test.js    # Configuration & environment
-npm test -- tests/services/s3/error-handling.test.js   # Error scenarios
-npm test -- tests/services/s3/data-processing.test.js  # Data processing
-npm test -- tests/services/s3/connection.test.js       # Connection testing
 ```
 
 ## API Endpoints
@@ -50,16 +40,10 @@ npm test -- tests/services/s3/connection.test.js       # Connection testing
 - `GET /api/artists?artist=<name>` - Search for artists matching a name
 - `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs (artist and/or song parameters)
 - `GET /api/artist-songs?artistPath=<path>` - Get all songs by a specific artist
-- `GET /api/cifraclub-chord-sheet?url=<encoded-url>` - Get chord sheet from URL
+- `GET /api/cifraclub-song?url=<artist/song>` - Get chord sheet + metadata in one request
 
 ## Environment
 
 Copy `.env.example` to `.env` and configure:
 
-- `SUPABASE_URL` - Supabase project URL
-- `SUPABASE_SERVICE_ROLE` - Supabase service role key
-- `AWS_ACCESS_KEY_ID` - AWS access key (optional, for S3 caching)
-- `AWS_SECRET_ACCESS_KEY` - AWS secret key (optional, for S3 caching)
-- `S3_BUCKET_NAME` - S3 bucket name (default: chordium)
 
-S3 caching is optional - app works without AWS credentials.

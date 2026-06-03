@@ -7,7 +7,7 @@ Adopted Turborepo v2.5.5 for monorepo management while maintaining deployment si
 ## Context
 
 - Monorepo with frontend, backend, and shared types package
-- Render deployment constraint: `rootDir: backend` (backend-only deployment)
+- Monorepo constraint: `rootDir: backend`
 - Performance issues with manual `cd` commands in npm scripts
 - Need for better build caching and task orchestration
 
@@ -38,15 +38,15 @@ Adopted Turborepo v2.5.5 for monorepo management while maintaining deployment si
 ### Deployment: Relative Imports
 
 - Backend uses relative imports to shared types (not npm package)
-- Simple `npm ci && npm run build` in Render
+- Simple `npm ci && npm run build`
 - Avoids complex deployment preparation scripts
-- Works within Render's `rootDir: backend` constraint
+- Works within the `rootDir: backend` constraint
 
 ## Implementation
 
 - **turbo.json**: Complete task pipeline configuration
 - **All workflows**: Updated to use `npx turbo` commands
-- **render.yaml**: Kept simple for relative imports compatibility
+- Build config kept simple for relative imports compatibility
 - **No complex prune scripts**: Avoided over-engineering
 
 ## Decision Rationale

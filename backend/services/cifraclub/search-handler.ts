@@ -1,45 +1,60 @@
-import puppeteerService from "../puppeteer.service.js";
+import axios from "axios";
 import logger from "../../utils/logger.js";
-import { filterResults } from "../../utils/result-filters.js";
-import { extractSearchResults } from "../../utils/dom-extractors.js";
+import SEARCH_TYPES from "../../constants/searchTypes.js";
 import type { Artist, Song, SearchType } from "../../../shared/types/index.js";
-import type { Page } from "puppeteer";
 
-/**
- * Handles CifraClub search operations (simplified version without pagination)
- */
+const JSONP_SEARCH_URL = "https://solr.sscdn.co/cc/h2/";
+
+interface JsonpDoc {
+  t: "1" | "2";
+  m: string;
+  a: string;
+  d: string;
+  u?: string;
+}
+
+interface JsonpResponse {
+  response: {
+    numFound: number;
+    docs: JsonpDoc[];
+  };
+}
+
+async function fetchJsonpDocs(query: string): Promise<JsonpDoc[]> {
+  const response = await axios.get<string>(JSONP_SEARCH_URL, {
+    params: { q: query, callback: "x" },
+  });
+  const jsonStr = response.data.trim().replace(/^x\(/, "").replace(/\)$/, "");
+  const parsed: JsonpResponse = JSON.parse(jsonStr);
+  return parsed.response?.docs ?? [];
+}
+
 export async function performSearch(
-  baseUrl: string,
   query: string,
   searchType: SearchType
 ): Promise<Artist[] | Song[]> {
-  const searchUrl = `${baseUrl}/?q=${encodeURIComponent(query)}`;
-  logger.info(`Searching CifraClub for: ${query} (Type: ${searchType})`);
+  logger.info(`Searching CifraClub via JSONP for: ${query} (Type: ${searchType})`);
 
-  return puppeteerService.withPage(async (page: Page) => {
-    await page.goto(searchUrl, { waitUntil: "networkidle2" });
-    logger.debug("Search page loaded, extracting results...");
+  const docs = await fetchJsonpDocs(query);
 
-    const results = await page.evaluate(extractSearchResults);
-    logger.info(`[DATA SOURCE] Scraping (CifraClub search)`);
-    logger.info(`[SCRAPED ELEMENTS] ${JSON.stringify(results)}`);
+  logger.info(`[DATA SOURCE] JSONP (CifraClub search)`);
+  logger.debug(`Found ${docs.length} raw results`);
 
-    logger.debug(`Found ${results.length} total results`);
-    // Filter twice: once before and once after transformation for absolute safety
-    const filtered = filterResults(results as any, searchType);
-    // If song, double-check all returned objects have valid paths (2 segments, not 'letra')
-    // Defensive: check for song search type using backend enum/constants
-    const searchTypeStr = String(searchType).toLowerCase();
-    if (searchTypeStr === "song") {
-      // Defensive: filter Song objects by path segments and 'letra' exclusion
-      return (filtered as Song[]).filter((song) => {
-        if (!song.path) return false;
-        const segments = song.path.split("/").filter(Boolean);
-        if (segments.length !== 2) return false;
-        if (segments[1].toLowerCase() === "letra") return false;
-        return true;
-      });
-    }
-    return filtered;
-  });
+  if (searchType === SEARCH_TYPES.ARTIST) {
+    return docs
+      .filter((doc) => doc.t === "1" && doc.d)
+      .map((doc): Artist => ({
+        displayName: doc.m,
+        path: doc.d,
+        songCount: null,
+      }));
+  }
+
+  return docs
+    .filter((doc) => doc.t === "2" && doc.d && doc.u)
+    .map((doc): Song => ({
+      title: doc.m,
+      artist: doc.a,
+      path: `${doc.d}/${doc.u}`,
+    }));
 }

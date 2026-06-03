@@ -34,11 +34,9 @@ export const TTL = {
    * - Future cron jobs will handle data updates in backend databases
    */
   SEARCH_CACHE: {
-    /** Supabase data - highly reliable, can be cached long-term */
-    SUPABASE: 30 * TIME_UNITS.DAY,
+    /** Neon DB data - highly reliable, can be cached long-term */
+    NEON: 30 * TIME_UNITS.DAY,
     
-    /** S3 data - highly reliable, can be cached long-term */
-    S3: 30 * TIME_UNITS.DAY,
     
     /** CifraClub data - static content, performance over freshness */
     CIFRACLUB: 30 * TIME_UNITS.DAY,

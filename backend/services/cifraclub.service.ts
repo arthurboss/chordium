@@ -15,7 +15,7 @@ class CifraClubService {
     query: string,
     searchType: SearchType
   ): Promise<Artist[] | Song[]> {
-    return performSearch(this.baseUrl, query, searchType);
+    return performSearch(query, searchType);
   }
 
   async getArtistSongs(artistUrl: string): Promise<Song[]> {

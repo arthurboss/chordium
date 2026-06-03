@@ -9,7 +9,7 @@ describe('normalizeArtist', () => {
       path: 'oasis', 
       songCount: 25 
     };
-    const result = normalizeArtist(artist as any, 'supabase');
+    const result = normalizeArtist(artist as any, 'neon');
     expect(result).toEqual({
       displayName: 'Oasis',
       path: 'oasis',

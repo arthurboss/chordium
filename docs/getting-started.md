@@ -143,7 +143,7 @@ Chordium publishes a shared TypeScript types package to npm for type safety acro
 
 - **Package**: [`@chordium/types`](https://www.npmjs.com/package/@chordium/types)
 - **Purpose**: Shared type definitions for API contracts, data models, and interfaces
-- **Usage**: Currently used by frontend; backend still uses local types due to Render deployment constraints
+- **Usage**: Currently used by frontend; backend still uses local types due to monorepo import constraints
 - **Build**: Automatically built and versioned with Turborepo dependency management
 
 ```sh

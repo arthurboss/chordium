@@ -10,10 +10,8 @@ import { TTL } from "../../../core/ttl/constants";
  */
 export function getDefaultTTL(dataSource: DataSource): number {
   switch (dataSource) {
-    case "supabase":
-      return TTL.SEARCH_CACHE.SUPABASE;
-    case "s3":
-      return TTL.SEARCH_CACHE.S3;
+    case "neon":
+      return TTL.SEARCH_CACHE.NEON;
     case "cifraclub":
       return TTL.SEARCH_CACHE.CIFRACLUB;
     default:

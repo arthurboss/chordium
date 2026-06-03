@@ -75,8 +75,9 @@ export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheet
         } else {
           // NOT CACHED: Use progressive loading (metadata first, then content)
           try {
-            const { fetchSongMetadataFromAPI } = await import('@/services/api/fetch-song-metadata');
-            const apiMetadata = await fetchSongMetadataFromAPI(path);
+            const { fetchSongFromAPI } = await import('@/services/api/fetch-song');
+            const songData = await fetchSongFromAPI(path);
+            const apiMetadata = songData ? (({ songChords: _, ...m }) => m)(songData) : null;
             
             if (apiMetadata && !cancelled) {
               // Convert API metadata to stored format

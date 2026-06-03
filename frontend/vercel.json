@@ -1,10 +1,14 @@
 {
   "outputDirectory": "./dist",
   "framework": "vite",
+  "functions": {
+    "api/cifraclub-song.ts": { "memory": 1024, "maxDuration": 60 },
+    "api/artist-songs.ts": { "memory": 1024, "maxDuration": 60 }
+  },
   "rewrites": [
     {
-      "source": "/((?!robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
+      "source": "/((?!api/|robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
       "destination": "/index.html"
     }
   ]
-} 
+}

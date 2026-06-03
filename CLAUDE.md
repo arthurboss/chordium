@@ -11,7 +11,7 @@ Turborepo monorepo with npm workspaces:
 ```
 chordium/
 ├── frontend/       # React 19 + TypeScript + Vite + Tailwind + shadcn/ui
-├── backend/        # Node.js/Express + TypeScript + Supabase + AWS S3 + Puppeteer
+├── backend/        # Node.js/Express + TypeScript + Puppeteer (chord scraping only)
 ├── packages/
 │   ├── types/      # @chordium/types - shared TypeScript types (published to npm)
 │   └── e2e-tests/  # Cypress end-to-end tests
@@ -22,7 +22,9 @@ chordium/
 ## Tech Stack
 
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router 7, TanStack Query, PWA
-- **Backend:** Express, TypeScript, Supabase (PostgreSQL + auth), AWS S3, Puppeteer + Cheerio (scraping)
+- **API:** Vercel Serverless Functions in frontend/api/ — search (Neon + JSONP), chord sheets (@sparticuz/chromium)
+- **Backend:** Express, TypeScript, Puppeteer + Cheerio (local dev / chord scraping)
+- **Database:** Neon (Vercel Postgres)
 - **Testing:** Vitest (frontend), Jest (backend), Cypress (e2e)
 - **Build:** Turborepo, npm workspaces
 - **Linting:** ESLint 9 (flat config)
@@ -48,7 +50,7 @@ npm run clean        # Remove all node_modules and build artifacts
 
 - Node.js >= 16 required
 - ESM throughout (`"type": "module"`)
-- Frontend deploys to Vercel, backend to Render
+- Deploys entirely to Vercel (frontend + serverless API functions)
 - Shared types package: `@chordium/types`
 - Environment files: `frontend/env.example`, `backend/env.example`
 

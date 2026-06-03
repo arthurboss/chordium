@@ -97,7 +97,6 @@ The controller integration tests were migrated from JavaScript to TypeScript and
 #### 3. Artist Songs (`search.controller.artist-songs.test.ts`)
 - **Endpoint**: `/api/artist-songs`
 - **Tests**: 2 integration tests
-- **Features**: S3 caching, CifraClub scraping, error handling
 
 ### TypeScript Migration Benefits
 - **Type Safety**: Proper typing for Express request/response objects
