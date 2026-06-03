@@ -14,6 +14,7 @@ export interface PuppeteerConfig {
   keepAlive?: number; // Keep browser alive for this many milliseconds (default: 10 minutes)
   maxRetries?: number; // Maximum retry attempts for browser operations (default: 3)
   retryDelay?: number; // Delay between retry attempts in milliseconds (default: 2000)
+  executablePath?: string; // Override Puppeteer bundled Chrome (e.g. for ARM)
 }
 
 export interface CifraClubConfig {
