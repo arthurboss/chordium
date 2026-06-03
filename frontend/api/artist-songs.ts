@@ -18,24 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const escapedPath = artistPath.replace(/[%_]/g, "\\$&");
 
-  // Check Neon first
-  try {
-    const { rows } = await sql`
-      SELECT title, artist, path
-      FROM songs
-      WHERE path LIKE ${escapedPath + "/%"}
-      ORDER BY title
-    `;
-    if (rows.length > 0) {
-      // Update songCount in background if it differs
-      sql`UPDATE artists SET "songCount" = ${rows.length} WHERE path = ${artistPath} AND ("songCount" IS NULL OR "songCount" != ${rows.length})`.catch(() => {});
-      return res.json(rows);
-    }
-  } catch {
-    // fall through
-  }
-
-  // Scrape /musicas.html with Puppeteer + @sparticuz/chromium
+  // 1. Puppeteer first — authoritative, seeds Neon
   let browser = null;
   try {
     browser = await puppeteer.launch({
@@ -79,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }, artistPath);
 
     if (songs.length > 0) {
-      // Seed Neon in background — songs + update artist songCount
+      // Seed Neon in background — upsert songs + update songCount
       Promise.all([
         ...songs.map((s) =>
           sql`INSERT INTO songs (title, artist, path) VALUES (${s.title}, ${s.artist}, ${s.path}) ON CONFLICT (path) DO NOTHING`.catch(() => {})
@@ -89,12 +72,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(songs);
     }
   } catch {
-    // fall through to JSONP
+    // Puppeteer failed — fall through to Neon cache
   } finally {
     if (browser) await browser.close().catch(() => {});
   }
 
-  // JSONP fallback — limited to ~5 songs
+  // 2. Neon cache — fallback when Puppeteer fails
+  try {
+    const { rows } = await sql`
+      SELECT title, artist, path
+      FROM songs
+      WHERE path LIKE ${escapedPath + "/%"}
+      ORDER BY title
+    `;
+    if (rows.length > 0) {
+      return res.json(rows);
+    }
+  } catch {
+    // fall through to JSONP
+  }
+
+  // 3. JSONP last resort
   try {
     const docs = await fetchJsonpDocs(artistPath.replace(/-/g, " "));
     const songs = docs
