@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { useParams, useLocation, useSearchParams } from "react-router-dom";
+import { useParams, useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import SongViewer from "@/components/SongViewer";
 import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
 import type { RouteParams } from "./chord-viewer.types";
@@ -19,6 +19,7 @@ const ChordViewer = () => {
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const routeParams = useParams() as RouteParams;
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
@@ -26,6 +27,7 @@ const ChordViewer = () => {
   // Detect /letra route — boot directly into lyrics-only mode
   const isLetraRoute = routeParams.letra === 'letra';
   const initialViewMode = isLetraRoute ? 'lyrics-only' : 'normal';
+  const [activeViewMode, setActiveViewMode] = useState(initialViewMode);
 
   const [searchParams] = useSearchParams();
   const [jamPayload, setJamPayload] = useState<JamPayload | null>(null);
@@ -42,10 +44,18 @@ const ChordViewer = () => {
 
   // When switching to lyrics-only, fetch /letra/ content (also runs on mount for /letra route)
   const handleViewModeChange = useCallback((viewMode: string) => {
-    if (viewMode === 'lyrics-only' && !chordSheetResult.lyricsContent && !chordSheetResult.isLyricsLoading) {
-      chordSheetResult.loadLyricsContent();
+    setActiveViewMode(viewMode);
+    if (viewMode === 'lyrics-only') {
+      if (!chordSheetResult.lyricsContent && !chordSheetResult.isLyricsLoading) {
+        chordSheetResult.loadLyricsContent();
+      }
+      if (!isLetraRoute) {
+        navigate("/" + routeParams.artist + "/" + routeParams.song + "/letra", { replace: true });
+      }
+    } else if (isLetraRoute) {
+      navigate("/" + routeParams.artist + "/" + routeParams.song, { replace: true });
     }
-  }, [chordSheetResult]);
+  }, [chordSheetResult, isLetraRoute, navigate]);
 
   // For /letra route, trigger the lyrics fetch as soon as we have a path
   useEffect(() => {
@@ -167,7 +177,7 @@ const ChordViewer = () => {
   }
 
   // Use /letra content when in lyrics-only mode and it has been fetched
-  const displayContent = chordSheetResult.lyricsContent !== null
+  const displayContent = activeViewMode === 'lyrics-only' && chordSheetResult.lyricsContent !== null
     ? chordSheetResult.lyricsContent
     : chordSheetResult.content?.songChords ?? '';
 

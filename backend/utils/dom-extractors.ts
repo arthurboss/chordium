@@ -427,13 +427,17 @@ export function extractChordSheet(): ChordSheet {
  */
 /**
  * Extracts lyrics-only content from a /letra/ page DOM.
- * Targets div.letra-l (lyrics only, skipping div.letra-t which is the translation).
- * Joins <p> tags with newlines to preserve verse/section formatting.
+ * Structure: div.letra-l > p > span.l_row (lines) separated by <br>.
+ * Each p becomes a verse (newline-separated lines), verses separated by blank lines.
  */
 export function extractLyricsContent(): ChordSheet {
   const el = document.querySelector("div.letra-l");
   if (!el) return { songChords: "" };
-  const paragraphs = Array.from(el.querySelectorAll("p"));
-  const songChords = paragraphs.map(function(p) { return p.textContent || ""; }).join("\n\n");
-  return { songChords };
+  const verses = Array.from(el.querySelectorAll("p")).map(function(p) {
+    return Array.from(p.querySelectorAll("span.l_row"))
+      .map(function(row) { return (row.textContent || "").trim(); })
+      .filter(function(line) { return line.length > 0; })
+      .join("\n");
+  }).filter(function(v) { return v.length > 0; });
+  return { songChords: verses.join("\n\n") };
 }

@@ -54,9 +54,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       songChords = await page.evaluate(() => {
         const el = document.querySelector("div.letra-l");
         if (!el) return "";
-        return Array.from(el.querySelectorAll("p"))
-          .map(p => p.textContent || "")
-          .join("\n\n");
+        const verses = Array.from(el.querySelectorAll("p")).map(function(p) {
+          return Array.from(p.querySelectorAll("span.l_row"))
+            .map(function(row) { return (row.textContent || "").trim(); })
+            .filter(function(line) { return line.length > 0; })
+            .join("\n");
+        }).filter(function(v) { return v.length > 0; });
+        return verses.join("\n\n");
       });
     } else {
       const pre = await page.evaluate(() => {
