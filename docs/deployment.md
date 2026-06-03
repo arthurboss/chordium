@@ -7,14 +7,14 @@ Chordium deploys entirely on Vercel — frontend, serverless API functions, and 
 ```
 Frontend + API (Vercel)
 ├── React App (SPA)
-├── /api/artists               — Artist search (Neon + JSONP)
-├── /api/cifraclub-search      — Song search (Neon + JSONP)
-├── /api/artist-songs          — Artist song list (Neon → Puppeteer scrape → JSONP)
+├── /api/artists               — Artist search (DB + external source)
+├── /api/cifraclub-search      — Song search (DB + external source)
+├── /api/artist-songs          — Artist song list (DB → Puppeteer scrape → fallback)
 └── /api/cifraclub-song        — Chord sheet + metadata (Puppeteer via @sparticuz/chromium)
 
 Database (Neon)
-├── artists   — 352k+ artist records
-└── songs     — 7k+ song records (grows as artists are browsed)
+├── artists
+└── songs
 ```
 
 ## Deployment
@@ -64,4 +64,4 @@ npm run dev:be   # Backend (Express) only — for chord sheet testing
 - **Build failures**: Check Vercel build logs
 - **API errors**: Check Vercel function logs
 - **Chord page slow**: Expected — Puppeteer cold start takes 5–15s on first request
-- **Search returns 0 results**: Check Neon DB connection via Vercel Storage tab
+- **Search returns 0 results**: Check DB connection via Vercel Storage tab

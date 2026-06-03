@@ -24,7 +24,7 @@ chordium/
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router 7, TanStack Query, PWA
 - **API:** Vercel Serverless Functions in frontend/api/ — search (Neon + JSONP), chord sheets (@sparticuz/chromium)
 - **Backend:** Express, TypeScript, Puppeteer + Cheerio (local dev / chord scraping)
-- **Database:** Neon (Vercel Postgres) — artists + songs
+- **Database:** Neon (Vercel Postgres)
 - **Testing:** Vitest (frontend), Jest (backend), Cypress (e2e)
 - **Build:** Turborepo, npm workspaces
 - **Linting:** ESLint 9 (flat config)

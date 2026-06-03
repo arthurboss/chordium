@@ -23,10 +23,7 @@ chordium/
 ## Architecture
 
 ```
-Frontend + API (Vercel) → Neon DB
-├── /api/artists, /api/cifraclub-search  — search (Neon + JSONP)
-├── /api/artist-songs                    — song list (Neon + Puppeteer)
-└── /api/cifraclub-song                  — chord sheet (Puppeteer)
+Frontend + API (Vercel) → Database (Neon)
 ```
 
 ## Monorepo Organization
