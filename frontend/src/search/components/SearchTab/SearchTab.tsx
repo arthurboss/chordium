@@ -61,7 +61,7 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
             />
          </FormContainer>
          {!hasSearched && (
-            <SearchHistory history={history} onSelect={handleHistorySelect} />
+            <SearchHistory history={history} onSelect={handleHistorySelect} onClear={refresh} />
          )}
          {hasSearched && (
             <div {...cyAttr('search-results-area')}>

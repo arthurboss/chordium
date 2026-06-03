@@ -24,7 +24,7 @@ const ResultCard = ({
   }
 
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${result.type}-card-compact-${path}`)}>
+    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0 hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary transition-colors" {...cyAttr(`${result.type}-card-compact-${path}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
         onClick={() => onClick(result)}
