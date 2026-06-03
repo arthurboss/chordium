@@ -19,5 +19,10 @@
     "componentStack": "Stack do Componente:",
     "copyAll": "Copiar Tudo",
     "copied": "Copiado!"
+  },
+  "chordViewer": {
+    "errorTitle": "Erro",
+    "chordSheetNotFound": "Cifra não encontrada",
+    "failedToLoad": "Falha ao carregar a cifra"
   }
 }

@@ -19,5 +19,10 @@
     "componentStack": "Pila del componente:",
     "copyAll": "Copiar todo",
     "copied": "¡Copiado!"
+  },
+  "chordViewer": {
+    "errorTitle": "Error",
+    "chordSheetNotFound": "Cifra no encontrada",
+    "failedToLoad": "Error al cargar la cifra"
   }
 }

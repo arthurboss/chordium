@@ -228,14 +228,14 @@ async function attemptMetadataLoad(
     {
       name: "fast",
       waitUntil: "domcontentloaded",
-      timeout: 30000, // Shorter timeout for metadata
-      waitAfter: 1000, // Shorter wait for metadata
+      timeout: 12000,
+      waitAfter: 500,
     },
     {
       name: "standard",
       waitUntil: "load",
-      timeout: 45000,
-      waitAfter: 2000,
+      timeout: 18000,
+      waitAfter: 1000,
     },
   ];
 
@@ -255,12 +255,21 @@ async function attemptMetadataLoad(
 
       await delay(strategy.waitAfter);
 
+      // Validate that Puppeteer landed on the expected page (not a redirect to homepage)
+      const finalUrl = page.url();
+      const expectedPath = new URL(songUrl).pathname.replace(/\/+$/, "").toLowerCase();
+      const finalPath = new URL(finalUrl).pathname.replace(/\/+$/, "").toLowerCase();
+      if (!finalPath.startsWith(expectedPath)) {
+        throw Object.assign(new Error(`Song not found: page redirected to ${finalUrl}`), { code: "NOT_FOUND" });
+      }
+
       // Extract metadata only (no pre element reading)
       const metadata = await page.evaluate(extractSongMetadata);
       logger.info(`📝 Metadata extracted using ${strategy.name} strategy`);
 
       return metadata;
     } catch (error) {
+      if ((error as any).code === "NOT_FOUND") throw error;
       lastError = error instanceof Error ? error : new Error(String(error));
       logger.warn(
         `${strategy.name} strategy failed for metadata ${songUrl}:`,

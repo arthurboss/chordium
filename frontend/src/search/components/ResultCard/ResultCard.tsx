@@ -24,13 +24,13 @@ const ResultCard = ({
   }
 
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0" {...cyAttr(`${result.type}-card-compact-${path}`)}>
+    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0 hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary transition-colors" {...cyAttr(`${result.type}-card-compact-${path}`)}>
       <CardContent
         className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
         onClick={() => onClick(result)}
         {...cyAttr(`${result.type}-card-compact-content-${path}`)}
       >
-        <Icon className="h-6 w-6 text-chord" />
+        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary shrink-0"><Icon className="h-4 w-4 text-white" /></div>
         <div className="min-w-0 flex-1">
           <h3
             className="w-full block font-semibold truncate text-sm"

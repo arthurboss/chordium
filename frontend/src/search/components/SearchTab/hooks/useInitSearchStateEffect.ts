@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { fromSlug } from "@/utils/url-slug-utils";
+import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import type { Artist } from "@chordium/types";
 
 interface InitSearchStateOptions {
@@ -92,7 +93,18 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
       const artistPath = getCurrentArtistPath();
       
       if (artistPath) {
-        const artistName = fromSlug(artistPath);
+        // Prefer stored displayName (set when navigating from artist selection) over fromSlug
+        let artistName = fromSlug(artistPath);
+        try {
+          const stored = sessionStorage.getItem(ARTIST_DISPLAY_NAME_KEY);
+          if (stored) {
+            const { path: storedPath, displayName } = JSON.parse(stored);
+            if (storedPath === artistPath && displayName) {
+              artistName = displayName;
+              sessionStorage.removeItem(ARTIST_DISPLAY_NAME_KEY);
+            }
+          }
+        } catch {}
         
         setActiveArtist({
           displayName: artistName,

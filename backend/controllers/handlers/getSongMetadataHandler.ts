@@ -73,10 +73,11 @@ export async function getSongMetadataHandler(
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    if ((error as any).code === "NOT_FOUND") {
+      res.status(404).json({ error: "Song not found", details: errorMessage });
+      return;
+    }
     logger.error("❌ Error fetching song metadata:", error);
-
-    res
-      .status(500)
-      .json({ error: "Failed to fetch song metadata", details: errorMessage });
+    res.status(500).json({ error: "Failed to fetch song metadata", details: errorMessage });
   }
 }

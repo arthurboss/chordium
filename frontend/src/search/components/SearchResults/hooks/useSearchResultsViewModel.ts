@@ -56,7 +56,7 @@ export function useSearchResultsViewModel({
 
     if (searchType === 'artist') {
       if (activeArtist && artistSongs) {
-        const results = mapSongsToSearchResults(filteredArtistSongs);
+        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: activeArtist?.displayName ?? s.artist })));
         return {
           results,
           onResultClick: (item: SearchResult) => {

@@ -51,15 +51,14 @@ export const useSearchFetch = ({
           const cachedEntry = await searchCacheService.get(cacheKey);
           if (cachedEntry) {
             const { results, search } = cachedEntry;
-            if (search.searchType === "artist") {
-              // Artist search results
+            const isArtistResults = results.length === 0 || ("displayName" in results[0]);
+            if (isArtistResults) {
               dispatch({
                 type: "SEARCH_SUCCESS",
                 artists: results as Artist[],
                 songs: [],
               });
             } else {
-              // Song search results
               dispatch({
                 type: "SEARCH_SUCCESS",
                 artists: [],
