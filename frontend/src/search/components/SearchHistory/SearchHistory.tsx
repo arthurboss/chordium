@@ -17,7 +17,7 @@ import type { SearchHistoryEntry } from "@/search/hooks/useSearchHistory";
 
 interface SearchHistoryProps {
   history: SearchHistoryEntry[];
-  onSelect: (artist: string, song: string) => void;
+  onSelect: (artist: string, song: string, searchType: string, displayName: string) => void;
   onClear: () => void;
 }
 
@@ -80,11 +80,11 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
             <Card
               key={timestamp}
               className="overflow-hidden cursor-pointer w-full h-12 min-h-0 opacity-80 hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary transition-colors"
-              onClick={() => onSelect(artist, song)}
+              onClick={() => onSelect(artist, song, searchType, displayName)}
             >
               <CardContent
                 className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
-                onClick={() => onSelect(artist, song)}
+                onClick={() => onSelect(artist, song, searchType, displayName)}
               >
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary shrink-0"><Icon className="h-4 w-4 text-white" /></div>
                 <div className="min-w-0 flex-1">

@@ -36,10 +36,14 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
 
    const { history, refresh } = useSearchHistory();
 
-   function handleHistorySelect(artist: string, song: string) {
-      handleInputChange(artist, song);
+   function handleHistorySelect(artist: string, song: string, searchType: string, displayName: string) {
       refresh();
-      handleSearchSubmit(artist, song);
+      if (searchType === "artist-song") {
+        handleArtistSelect({ path: artist, displayName: displayName || artist, songCount: null });
+      } else {
+        handleInputChange(artist, song);
+        handleSearchSubmit(artist, song);
+      }
    }
 
    return (
