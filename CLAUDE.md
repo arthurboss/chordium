@@ -57,4 +57,5 @@ npm run clean        # Remove all node_modules and build artifacts
 ## Git Workflow
 
 - NEVER commit without explicit user approval
+- NEVER push directly to main/master — always use a feature branch and let the user merge via PR
 - No Co-Authored-By or Claude attribution in commits
