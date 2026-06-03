@@ -27,7 +27,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-8 text-gray-500">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
-          <p className="text-sm">Loading chord content...</p>
+          <p className="text-sm">{viewMode === "lyrics-only" ? "Loading lyrics..." : "Loading chord content..."}</p>
         </div>
       ) : (
         processedContent.map((section, sectionIndex) => (
