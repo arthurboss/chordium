@@ -3,9 +3,10 @@ import React from "react";
 import FormContainer from "@/components/ui/FormContainer";
 import SearchBar from "../SearchBar/SearchBar";
 import { SearchResults } from "../SearchResults";
+import SearchHistory from "../SearchHistory/SearchHistory";
 import { cyAttr } from "@/utils/test-utils/cy-attr";
 import { useSearchTabLogic } from "./hooks/useSearchTabLogic";
-
+import { useSearchHistory } from "@/search/hooks/useSearchHistory";
 
 import type { SearchTabProps } from "./SearchTab.types";
 
@@ -33,6 +34,14 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
       setActiveTab,
    } = logic;
 
+   const { history, refresh } = useSearchHistory();
+
+   function handleHistorySelect(artist: string, song: string) {
+      handleInputChange(artist, song);
+      refresh();
+      handleSearchSubmit(artist, song);
+   }
+
    return (
       <div className="space-y-4">
          <FormContainer>
@@ -51,6 +60,9 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
                artistDisabled={!!activeArtist}
             />
          </FormContainer>
+         {!hasSearched && (
+            <SearchHistory history={history} onSelect={handleHistorySelect} />
+         )}
          {hasSearched && (
             <div {...cyAttr('search-results-area')}>
                <SearchResults
