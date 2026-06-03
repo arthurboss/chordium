@@ -49,7 +49,8 @@ class PuppeteerService {
 
     this.browser = await puppeteer.launch({
       headless: config.puppeteer.headless,
-      args: config.puppeteer.args
+      args: config.puppeteer.args,
+      ...(config.puppeteer.executablePath ? { executablePath: config.puppeteer.executablePath } : {})
     });
     
     this.updateActivity();

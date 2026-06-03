@@ -130,7 +130,7 @@ describe('ChordSheet Path Generator', () => {
 
   describe('chordSheetPathToStoragePath', () => {
     it('should convert ID to path format', () => {
-      expect(chordSheetPathToStoragePath('eagles_hotel-california')).toBe('eagles/hotel-california');
+      expect(chordSheetPathToStoragePath('the-eagles_hotel-california')).toBe('the-eagles/hotel-california');
       expect(chordSheetPathToStoragePath('oasis_wonderwall')).toBe('oasis/wonderwall');
     });
 

@@ -2,8 +2,8 @@
  * Path resolution service for sample chord sheets
  * 
  * Handles the mapping between different ID formats:
- * - URL-based paths (from generateChordSheetPath): "eagles_hotel-california"
- * - Database paths (slash format): "eagles/hotel-california"
+ * - URL-based paths (from generateChordSheetPath): "the-eagles_hotel-california"
+ * - Database paths (slash format): "the-eagles/hotel-california"
  */
 
 import { chordSheetPathToStoragePath } from '@/utils/chord-sheet-path';

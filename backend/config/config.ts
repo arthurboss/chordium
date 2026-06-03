@@ -63,7 +63,8 @@ function createConfig(): Config {
       ],
       keepAlive: 10 * 60 * 1000, // 10 minutes
       maxRetries: 3,
-      retryDelay: 2000
+      retryDelay: 2000,
+      ...(process.env.PUPPETEER_EXECUTABLE_PATH ? { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH } : {})
     },
 
     // CifraClub specific

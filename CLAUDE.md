@@ -59,3 +59,8 @@ npm run clean        # Remove all node_modules and build artifacts
 - NEVER commit without explicit user approval
 - NEVER push directly to main/master — always use a feature branch and let the user merge via PR
 - No Co-Authored-By or Claude attribution in commits
+
+## Local Development Notes
+
+- **Search requires both frontend and backend running.** The frontend alone is not enough — search, artist songs, and chord sheet fetching all proxy through the Express backend on port 3001. Always run `npm run dev` (or `npm run dev:fe` + `npm run dev:be` in separate terminals) when working on search-related features.
+- Frontend runs on port 8080 (falls back to 8081 if taken), backend on port 3001.

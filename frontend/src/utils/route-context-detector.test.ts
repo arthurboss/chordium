@@ -15,7 +15,7 @@ describe('route-context-detector', () => {
   describe('isMyChordSheetsRoute', () => {
     it('should return true for My Chord Sheets routes', () => {
       // Arrange
-      window.location.pathname = '/my-chord-sheets/eagles/hotel-california';
+      window.location.pathname = '/my-chord-sheets/the-eagles/hotel-california';
 
       // Act
       const result = isMyChordSheetsRoute();
@@ -37,7 +37,7 @@ describe('route-context-detector', () => {
 
     it('should return false for search result routes', () => {
       // Arrange
-      window.location.pathname = '/eagles/hotel-california';
+      window.location.pathname = '/the-eagles/hotel-california';
 
       // Act
       const result = isMyChordSheetsRoute();
@@ -72,7 +72,7 @@ describe('route-context-detector', () => {
   describe('getRouteContext', () => {
     it('should return "my-chord-sheets" for My Chord Sheets routes', () => {
       // Arrange
-      window.location.pathname = '/my-chord-sheets/eagles/hotel-california';
+      window.location.pathname = '/my-chord-sheets/the-eagles/hotel-california';
 
       // Act
       const result = getRouteContext();
@@ -83,7 +83,7 @@ describe('route-context-detector', () => {
 
     it('should return "search" for search result routes', () => {
       // Arrange
-      window.location.pathname = '/eagles/hotel-california';
+      window.location.pathname = '/the-eagles/hotel-california';
 
       // Act
       const result = getRouteContext();

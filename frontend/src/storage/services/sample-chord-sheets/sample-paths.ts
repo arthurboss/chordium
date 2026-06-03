@@ -7,7 +7,7 @@
  */
 export const SAMPLE_CHORD_SHEET_PATHS = [
   'oasis/wonderwall',
-  'eagles/hotel-california'
+  'the-eagles/hotel-california'
 ] as const;
 
 /**

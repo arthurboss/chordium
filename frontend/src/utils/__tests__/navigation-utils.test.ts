@@ -53,17 +53,17 @@ describe('NavigationUtils', () => {
       
       const path = navigationUtils.generateNavigationPath(data, false);
       
-      expect(path).toBe('/eagles/hotel-california');
+      expect(path).toBe('/the-eagles/hotel-california');
     });
 
     it('should detect My Chord Sheets context from path', () => {
-      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/my-chord-sheets/eagles/hotel-california');
+      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/my-chord-sheets/the-eagles/hotel-california');
       
       expect(isMyChordSheets).toBe(true);
     });
 
     it('should detect search context from path', () => {
-      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/eagles/hotel-california');
+      const isMyChordSheets = navigationUtils.isMyChordSheetsContext('/the-eagles/hotel-california');
       
       expect(isMyChordSheets).toBe(false);
     });
