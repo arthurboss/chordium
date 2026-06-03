@@ -52,8 +52,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (lyricsOnly === 'true') {
       await page.goto(letraUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
       songChords = await page.evaluate(() => {
-        const el = document.querySelector('[class*="letra"]');
-        return el ? el.textContent || "" : "";
+        const el = document.querySelector("div.letra-l");
+        if (!el) return "";
+        return Array.from(el.querySelectorAll("p"))
+          .map(p => p.textContent || "")
+          .join("\n\n");
       });
     } else {
       const pre = await page.evaluate(() => {

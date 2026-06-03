@@ -422,10 +422,18 @@ export function extractChordSheet(): ChordSheet {
 
 /**
  * Extracts lyrics-only content from a /letra/ page DOM.
- * Lyrics pages use a div with a class containing letra instead of a <pre> element.
+ * Targets div.letra-l (lyrics only, skipping div.letra-t which is the translation).
+ * Joins <p> tags with newlines to preserve verse/section formatting.
+ */
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Targets div.letra-l (lyrics only, skipping div.letra-t which is the translation).
+ * Joins <p> tags with newlines to preserve verse/section formatting.
  */
 export function extractLyricsContent(): ChordSheet {
-  const el = document.querySelector('[class*="letra"]');
-  const songChords = el ? el.textContent || "" : "";
+  const el = document.querySelector("div.letra-l");
+  if (!el) return { songChords: "" };
+  const paragraphs = Array.from(el.querySelectorAll("p"));
+  const songChords = paragraphs.map(function(p) { return p.textContent || ""; }).join("\n\n");
   return { songChords };
 }
