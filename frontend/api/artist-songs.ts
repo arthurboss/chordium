@@ -77,12 +77,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }, artistPath);
 
     if (songs.length > 0) {
-      // Seed Neon in background
-      Promise.all(
-        songs.map((s) =>
+      // Seed Neon in background — songs + update artist songCount
+      Promise.all([
+        ...songs.map((s) =>
           sql`INSERT INTO songs (title, artist, path) VALUES (${s.title}, ${s.artist}, ${s.path}) ON CONFLICT (path) DO NOTHING`.catch(() => {})
-        )
-      ).catch(() => {});
+        ),
+        sql`UPDATE artists SET "songCount" = ${songs.length} WHERE path = ${artistPath}`.catch(() => {}),
+      ]).catch(() => {});
       return res.json(songs);
     }
   } catch {
