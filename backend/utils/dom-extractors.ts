@@ -159,7 +159,21 @@ export function extractArtistSongs(): Song[] {
 
 export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  let songChords = "";
+  if (preElement) {
+    preElement.childNodes.forEach(function(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        songChords += node.textContent || "";
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        if (el.classList.contains("tablatura")) {
+          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+        } else {
+          songChords += el.textContent || "";
+        }
+      }
+    });
+  }
 
   // Extract title and artist from page
   let title = "";
@@ -409,15 +423,29 @@ export function extractSongMetadata(): SongMetadata {
 
 /**
  * Extracts chord sheet from CifraClub song page DOM (content only)
- * This function extracts only the chord content from the pre element
+ * Extracts chord sheet content from the pre element.
+ * Tab blocks (span.tablatura) are wrapped with [TAB]/[/TAB] markers
+ * so the parser can identify them without heuristics.
  */
 export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  if (!preElement) return { songChords: "" };
 
-  return {
-    songChords,
-  };
+  let songChords = "";
+  preElement.childNodes.forEach(function(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      songChords += node.textContent || "";
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+      } else {
+        songChords += el.textContent || "";
+      }
+    }
+  });
+
+  return { songChords };
 }
 
 /**

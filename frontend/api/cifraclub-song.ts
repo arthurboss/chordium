@@ -63,11 +63,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return verses.join("\n\n");
       });
     } else {
-      const pre = await page.evaluate(() => {
+      songChords = await page.evaluate(() => {
         const el = document.querySelector("pre");
-        return el ? el.textContent || "" : "";
+        if (!el) return "";
+        let result = "";
+        el.childNodes.forEach(function(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            result += node.textContent || "";
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const child = node as Element;
+            if (child.classList.contains("tablatura")) {
+              result += "[TAB]\n" + (child.textContent || "") + "\n[/TAB]\n";
+            } else {
+              result += child.textContent || "";
+            }
+          }
+        });
+        return result;
       });
-      songChords = pre;
     }
 
     if (!songChords) {
