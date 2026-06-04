@@ -20,9 +20,10 @@ import type { SampleChordSheetRecord } from './data-loader.types';
  */
 export const loadSampleMetadata = async (): Promise<Array<{ path: string; metadata: SongMetadata }>> => {
   try {
-    const [wonderwallMetadata, hotelCaliforniaMetadata] = await Promise.all([
+    const [wonderwallMetadata, hotelCaliforniaMetadata, moreThanWordsMetadata] = await Promise.all([
       import('../../data/samples/chord-sheets/metadata/oasis-wonderwall.json'),
-      import('../../data/samples/chord-sheets/metadata/eagles-hotel_california.json')
+      import('../../data/samples/chord-sheets/metadata/eagles-hotel_california.json'),
+      import('../../data/samples/chord-sheets/metadata/extreme-more_than_words.json')
     ]);
 
     return [
@@ -33,6 +34,10 @@ export const loadSampleMetadata = async (): Promise<Array<{ path: string; metada
       {
         path: 'the-eagles/hotel-california',
         metadata: hotelCaliforniaMetadata.default as SongMetadata
+      },
+      {
+        path: 'extreme/more-than-words',
+        metadata: moreThanWordsMetadata.default as SongMetadata
       }
     ];
   } catch (error) {
@@ -62,6 +67,9 @@ export const loadSampleContent = async (path: string): Promise<ChordSheet> => {
         break;
       case 'the-eagles/hotel-california':
         contentModule = await import('../../data/samples/chord-sheets/content/eagles-hotel_california.json');
+        break;
+      case 'extreme/more-than-words':
+        contentModule = await import('../../data/samples/chord-sheets/content/extreme-more_than_words.json');
         break;
       default:
         throw new Error(`No sample content found for path: ${path}`);
