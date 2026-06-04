@@ -27,10 +27,12 @@ const ChordContent: React.FC<ChordContentProps> = ({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-8 text-gray-500">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
-          <p className="text-sm">Loading chord content...</p>
+          <p className="text-sm">{viewMode === "lyrics-only" ? "Loading lyrics..." : "Loading chord content..."}</p>
         </div>
       ) : (
-        processedContent.map((section, sectionIndex) => (
+        processedContent.map((section, sectionIndex) => {
+          if (viewMode === "chords-only" && section.isTabSection) return null;
+          return (
         <div key={sectionIndex}>
           {section.title && (
             <h2 className="section-header">{section.title}</h2>
@@ -39,7 +41,6 @@ const ChordContent: React.FC<ChordContentProps> = ({
             {section.lines.map((line: ChordLine, lineIndex: number) => {
               if (line.type === 'tab' && hideGuitarTabs) return null;
               if (viewMode === "lyrics-only" && (line.type === 'chord' || line.type === 'tab')) return null;
-              if (viewMode === "chords-only" && line.type === 'lyrics') return null;
               if (line.type === 'tab') {
                 return (
                   <pre key={lineIndex} className="font-mono text-xs overflow-x-auto whitespace-pre mb-1 break-words" style={{overflowWrap: 'break-word', maxWidth: '100%'}}>
@@ -94,7 +95,8 @@ const ChordContent: React.FC<ChordContentProps> = ({
             })}
           </div>
         </div>
-      ))
+          );
+        })
       )}
       {!isLoading && processedContent.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">

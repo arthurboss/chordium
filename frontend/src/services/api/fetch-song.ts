@@ -6,9 +6,10 @@ export interface SongData extends ChordSheet, SongMetadata {}
 /**
  * Fetches chord sheet + metadata in a single request (one browser launch).
  */
-export async function fetchSongFromAPI(path: string): Promise<SongData | null> {
+export async function fetchSongFromAPI(path: string, options?: { lyricsOnly?: boolean }): Promise<SongData | null> {
   try {
     const params = new URLSearchParams({ url: path.trim() });
+    if (options?.lyricsOnly) params.set('lyricsOnly', 'true');
     const response = await fetch(`${getApiBaseUrl()}/api/cifraclub-song?${params}`);
 
     if (!response.ok) {
@@ -24,3 +25,4 @@ export async function fetchSongFromAPI(path: string): Promise<SongData | null> {
     throw error;
   }
 }
+

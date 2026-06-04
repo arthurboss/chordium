@@ -7,6 +7,7 @@ export interface ChordSection {
   type: 'section';
   title: string;
   lines: ChordLine[];
+  isTabSection?: boolean;
 }
 
 export interface ChordContentProps {

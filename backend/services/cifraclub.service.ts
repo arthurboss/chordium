@@ -1,7 +1,7 @@
 import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
-import { fetchWithProgressiveExtraction } from "../utils/chord-sheet-fetcher.js";
+import { fetchWithProgressiveExtraction, fetchLyricsContent } from "../utils/chord-sheet-fetcher.js";
 import type { Artist, Song, ChordSheet, SongMetadata, SearchType } from "../../shared/types/index.js";
 
 class CifraClubService {
@@ -23,7 +23,6 @@ class CifraClubService {
   }
 
   async getChordSheet(songUrl: string): Promise<ChordSheet> {
-    // Return content-only using progressive extraction (no backward compatibility)
     const progressive = await fetchWithProgressiveExtraction(songUrl);
     return await progressive.getContent();
   }
@@ -31,6 +30,10 @@ class CifraClubService {
   async getSongMetadata(songUrl: string): Promise<SongMetadata> {
     const progressive = await fetchWithProgressiveExtraction(songUrl);
     return await progressive.getMetadata();
+  }
+
+  async getLyricsContent(letraUrl: string): Promise<ChordSheet> {
+    return fetchLyricsContent(letraUrl);
   }
 
 }

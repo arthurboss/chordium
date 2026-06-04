@@ -9,7 +9,7 @@ import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet };
-  chordContent?: string; // Direct chord content (for search results)
+  chordContent?: string;
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
   onDelete: (songPath: string) => void;
@@ -18,10 +18,11 @@ interface SongViewerProps {
   hideDeleteButton?: boolean;
   hideSaveButton?: boolean;
   isFromMyChordSheets?: boolean;
-  // Progressive loading props
   useProgressiveLoading?: boolean;
   loadContent?: () => Promise<void>;
   isContentLoading?: boolean;
+  onViewModeChange?: (viewMode: string) => void;
+  initialViewMode?: string;
 }
 
 const SongViewer = ({
@@ -37,45 +38,23 @@ const SongViewer = ({
   isFromMyChordSheets = false,
   useProgressiveLoading = false,
   loadContent,
-  isContentLoading
+  isContentLoading,
+  onViewModeChange,
+  initialViewMode,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
-  
-  
-  // Use lazy loading for saved chord sheets
-  const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({ 
-    path: isFromMyChordSheets ? songObj.path : '' 
+
+  const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
+    path: isFromMyChordSheets ? songObj.path : ''
   });
 
-  // Determine the chord content to display
   const chordContentToDisplay = useMemo(() => {
-    // If direct chord content is provided, use it (for search results)
-    if (directChordContent) {
-      return directChordContent;
-    }
-
-    // If this is from myChordSheets, use the lazy loaded content
-    if (isFromMyChordSheets) {
-      return lazyContent || '';
-    }
-
-    // For progressive loading, content is handled by useChordSheetWithFallback
-    // and passed via chordContent prop or chordSheet.songChords
+    if (directChordContent) return directChordContent;
+    if (isFromMyChordSheets) return lazyContent || '';
     return chordSheet.songChords || '';
   }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
-  // Determine the chord sheet to display (metadata)
-  const chordSheetToDisplay = useMemo(() => {
-    // Always use the provided chord sheet (handled by useChordSheetWithFallback)
-    return chordSheet;
-  }, [chordSheet]);
-
-  // Handle content loading
-  const handleLoadContent = () => {
-    if (useProgressiveLoading && loadContent) {
-      loadContent();
-    }
-  };
+  const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
   const handleAction = () => {
     if (isFromMyChordSheets && !hideDeleteButton) {
@@ -85,10 +64,11 @@ const SongViewer = ({
     }
   };
 
-  const shouldShowActionButton = (isFromMyChordSheets && !hideDeleteButton) || (!hideSaveButton && !isFromMyChordSheets && !!onSave);
+  const shouldShowActionButton =
+    (isFromMyChordSheets && !hideDeleteButton) ||
+    (!hideSaveButton && !isFromMyChordSheets && !!onSave);
 
-  // Determine loading states
-  const finalIsContentLoading = useProgressiveLoading 
+  const finalIsContentLoading = useProgressiveLoading
     ? isContentLoading
     : isLazyContentLoading;
 
@@ -114,6 +94,8 @@ const SongViewer = ({
         content={chordContentToDisplay}
         onSave={onUpdate}
         isLoading={finalIsContentLoading}
+        onViewModeChange={onViewModeChange}
+        initialViewMode={initialViewMode}
       />
     </div>
   );

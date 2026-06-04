@@ -159,7 +159,21 @@ export function extractArtistSongs(): Song[] {
 
 export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  let songChords = "";
+  if (preElement) {
+    preElement.childNodes.forEach(function(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        songChords += node.textContent || "";
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        if (el.classList.contains("tablatura")) {
+          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+        } else {
+          songChords += el.textContent || "";
+        }
+      }
+    });
+  }
 
   // Extract title and artist from page
   let title = "";
@@ -409,13 +423,49 @@ export function extractSongMetadata(): SongMetadata {
 
 /**
  * Extracts chord sheet from CifraClub song page DOM (content only)
- * This function extracts only the chord content from the pre element
+ * Extracts chord sheet content from the pre element.
+ * Tab blocks (span.tablatura) are wrapped with [TAB]/[/TAB] markers
+ * so the parser can identify them without heuristics.
  */
 export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  if (!preElement) return { songChords: "" };
 
-  return {
-    songChords,
-  };
+  let songChords = "";
+  preElement.childNodes.forEach(function(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      songChords += node.textContent || "";
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+      } else {
+        songChords += el.textContent || "";
+      }
+    }
+  });
+
+  return { songChords };
+}
+
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Targets div.letra-l (lyrics only, skipping div.letra-t which is the translation).
+ * Joins <p> tags with newlines to preserve verse/section formatting.
+ */
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Structure: div.letra-l > p > span.l_row (lines) separated by <br>.
+ * Each p becomes a verse (newline-separated lines), verses separated by blank lines.
+ */
+export function extractLyricsContent(): ChordSheet {
+  const el = document.querySelector("div.letra-l");
+  if (!el) return { songChords: "" };
+  const verses = Array.from(el.querySelectorAll("p")).map(function(p) {
+    return Array.from(p.querySelectorAll("span.l_row"))
+      .map(function(row) { return (row.textContent || "").trim(); })
+      .filter(function(line) { return line.length > 0; })
+      .join("\n");
+  }).filter(function(v) { return v.length > 0; });
+  return { songChords: verses.join("\n\n") };
 }
