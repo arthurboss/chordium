@@ -101,15 +101,17 @@
 
 @layer components {
   .chord {
-    @apply inline-block font-mono text-chord bg-chord-light px-1.5 py-0.5 rounded-sm font-semibold dark:bg-[#2d2947] dark:text-[#9b87f5];
+    @apply inline-block font-mono text-chord px-1.5 py-0.5 rounded-sm font-semibold dark:text-[#9b87f5];
   }
 
   .chord-line {
     @apply font-mono whitespace-normal mb-1 break-words;
+    line-height: 1;
   }
 
   .lyrics-line {
     @apply mb-3 break-words;
+    line-height: 1.1;
   }
 
   .section-header {
@@ -121,6 +123,7 @@
 @media (max-width: 640px) {
   .chord-line {
     @apply text-sm mb-0.5 break-all;
+    line-height: 1;
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: 100%;
@@ -133,6 +136,7 @@
 
   .lyrics-line {
     @apply mb-2 break-words;
+    line-height: 1.1;
     max-width: 100%;
   }
 
