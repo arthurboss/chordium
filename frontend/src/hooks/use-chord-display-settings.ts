@@ -17,7 +17,7 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
     setCapo(initialCapo || 0);
   }, [initialCapo]);
   
-  const [fontSize, setFontSize] = useState(16);
+  const [fontSize, setFontSize] = useState(14);
   const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
   const [viewMode, setViewMode] = useState(initialViewMode || 'normal');

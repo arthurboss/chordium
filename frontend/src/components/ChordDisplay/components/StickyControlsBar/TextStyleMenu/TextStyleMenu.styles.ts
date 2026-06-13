@@ -8,12 +8,12 @@ export const TEXT_STYLE_MENU_STYLES = {
   buttonText: "font-medium text-sm",
   dropdownContent: "align-end",
   sectionContainer: "px-2 py-1",
-  sectionTitle: "font-semibold text-xs mb-1",
+  sectionTitle: "font-semibold text-xs mb-2",
   buttonGroup: "flex items-center gap-2",
   viewModeButton: "min-w-[40px] flex items-center justify-center",
   fontStyleButton: "min-w-[60px]",
-  sliderSection: "px-2 py-3",
-  sliderContainer: "flex items-center gap-3",
+  sliderSection: "px-1 py-1",
+  sliderContainer: "flex items-center gap-1",
   slider: "w-32",
   valueDisplay: "w-10 text-center text-sm"
 } as const;

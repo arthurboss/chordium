@@ -6,34 +6,23 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuSeparator,
-  DropdownMenuItem,
 } from "../../../../ui/dropdown-menu";
 import { Slider } from "../../../../ui/slider";
-import { Music, Settings, Text, AlignLeft } from "lucide-react";
+import { Settings } from "lucide-react";
 import { TEXT_STYLE_MENU_STYLES } from "./TextStyleMenu.styles";
 import { TEXT_PREFERENCES_VALUES } from "./TextStyleMenu.constants";
-import {
-  getFontSpacingDisplay,
-  isViewModeActive,
-  isFontStyleActive,
-} from "./TextStyleMenu.utils";
+import { getFontSpacingDisplay, isViewModeActive } from "./TextStyleMenu.utils";
 import type { TextStyleMenuProps } from "./TextStyleMenu.types";
+import ToggleOption from "./ToggleOption";
+import { NormalModeIcon, TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
 
-/**
- * TextStyleMenu component for managing text display preferences
- * Provides controls for view mode, font style, font size, and font spacing
- */
 const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
   fontSize,
   setFontSize,
   fontSpacing,
   setFontSpacing,
-  fontStyle,
-  setFontStyle,
   viewMode,
   setViewMode,
-  hideGuitarTabs,
-  setHideGuitarTabs,
   title,
   variant = "desktop",
   buttonClassName,
@@ -50,7 +39,6 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
     buttonClassName ||
     (isMobile ? "h-10 w-10" : TEXT_STYLE_MENU_STYLES.triggerButton);
   const settingsIconClassName = isMobile ? "" : TEXT_STYLE_MENU_STYLES.settingsIcon;
-  const contentAlign = dropdownAlign;
   const contentClassName = dropdownClassName || (isMobile ? "mr-4" : "");
 
   return (
@@ -68,74 +56,30 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
             <Settings size={iconSize} className={settingsIconClassName} />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align={contentAlign} className={contentClassName}>
+        <DropdownMenuContent align={dropdownAlign} className={contentClassName}>
           <div className={TEXT_STYLE_MENU_STYLES.sectionContainer}>
             <div className={TEXT_STYLE_MENU_STYLES.sectionTitle}>
               {t("textStyle.viewMode")}
             </div>
-            <div className={TEXT_STYLE_MENU_STYLES.buttonGroup}>
-              <Button
-                variant={isViewModeActive(viewMode, "normal") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.viewModeButton}
+            <div className="flex flex-col gap-2">
+              <ToggleOption
+                active={isViewModeActive(viewMode, "normal")}
                 onClick={() => setViewMode("normal")}
-                title={t("textStyle.normal")}
-              >
-                <Text size={18} className="text-foreground" />
-              </Button>
-              <Button
-                variant={isViewModeActive(viewMode, "chords-only") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.viewModeButton}
+                icon={<NormalModeIcon className="opacity-70" />}
+                label={t("textStyle.normal")}
+              />
+              <ToggleOption
+                active={isViewModeActive(viewMode, "chords-only")}
                 onClick={() => setViewMode("chords-only")}
-                title={t("textStyle.chords")}
-              >
-                <Music size={18} className="text-foreground" />
-              </Button>
-              <Button
-                variant={isViewModeActive(viewMode, "lyrics-only") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.viewModeButton}
+                icon={<TabsModeIcon className="opacity-70" />}
+                label="Tabs"
+              />
+              <ToggleOption
+                active={isViewModeActive(viewMode, "lyrics-only")}
                 onClick={() => setViewMode("lyrics-only")}
-                title={t("textStyle.lyrics")}
-              >
-                <AlignLeft size={18} className="text-foreground" />
-              </Button>
-            </div>
-          </div>
-          <DropdownMenuSeparator />
-          {hideGuitarTabs !== undefined && setHideGuitarTabs && (
-            <>
-              <DropdownMenuItem
-                onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
-                className={hideGuitarTabs ? "bg-accent text-accent-foreground" : ""}
-              >
-                {hideGuitarTabs ? t("textStyle.showGuitarTabs") : t("textStyle.hideGuitarTabs")}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          <div className={TEXT_STYLE_MENU_STYLES.sectionContainer}>
-            <div className={TEXT_STYLE_MENU_STYLES.sectionTitle}>
-              {t("textStyle.fontStyle")}
-            </div>
-            <div className={TEXT_STYLE_MENU_STYLES.buttonGroup}>
-              <Button
-                variant={isFontStyleActive(fontStyle, "serif") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.fontStyleButton}
-                onClick={() => setFontStyle("serif")}
-              >
-                {t("textStyle.serif")}
-              </Button>
-              <Button
-                variant={isFontStyleActive(fontStyle, "sans-serif") ? "default" : "outline"}
-                size="sm"
-                className={TEXT_STYLE_MENU_STYLES.fontStyleButton}
-                onClick={() => setFontStyle("sans-serif")}
-              >
-                {t("textStyle.sansSerif")}
-              </Button>
+                icon={<LyricsModeIcon className="opacity-70" />}
+                label={t("textStyle.lyrics")}
+              />
             </div>
           </div>
           <DropdownMenuSeparator />
