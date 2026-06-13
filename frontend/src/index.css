@@ -119,8 +119,24 @@
   }
 
   #chord-display pre b {
-    @apply text-primary font-bold;
+    @apply text-primary;
+    font-size: 1rem;
+    font-weight: 500;
   }
+
+  #chord-display pre .tablatura {
+    font-family: monospace;
+    line-height: 1.2;
+  }
+
+  #chord-display pre .tablatura b {
+    color: hsl(var(--primary));
+  }
+
+  #chord-display pre .cnt {
+    font-family: monospace;
+  }
+
 
 }
 
