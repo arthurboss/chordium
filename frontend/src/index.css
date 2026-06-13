@@ -101,7 +101,7 @@
 
 @layer components {
   .chord {
-    @apply inline-block font-mono text-chord px-1.5 py-0.5 rounded-sm font-semibold dark:text-[#9b87f5];
+    @apply inline-block font-mono text-primary px-1.5 py-0.5 rounded-sm font-semibold;
   }
 
   .chord-line {
@@ -115,8 +115,13 @@
   }
 
   .section-header {
-    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-chord pl-2 dark:border-primary;
+    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-primary pl-2;
   }
+
+  #chord-display pre b {
+    @apply text-primary font-bold;
+  }
+
 }
 
 /* Mobile optimizations */
