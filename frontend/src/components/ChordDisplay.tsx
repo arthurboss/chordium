@@ -98,6 +98,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
       <ChordContent
         processedContent={processedContent}
+        rawHtml={chordSheet.rawHtml}
         fontSize={fontSize}
         fontSpacing={fontSpacing}
         fontStyle={fontStyle}

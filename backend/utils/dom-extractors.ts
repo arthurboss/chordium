@@ -445,7 +445,24 @@ export function extractChordSheet(): ChordSheet {
     }
   });
 
-  return { songChords };
+
+  function sanitizeNode(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as Element;
+    const tag = el.tagName.toLowerCase();
+    if (tag !== "b" && tag !== "span") {
+      return Array.from(el.childNodes).map(sanitizeNode).join("");
+    }
+    const classAttr = el.getAttribute("class");
+    const openTag = classAttr ? `<${tag} class="${classAttr.replace(/"/g, "&quot;")}">` : `<${tag}>`;
+    const inner = Array.from(el.childNodes).map(sanitizeNode).join("");
+    return `${openTag}${inner}</${tag}>`;
+  }
+
+  const rawHtml = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+
+  return { songChords, rawHtml };
 }
 
 /**

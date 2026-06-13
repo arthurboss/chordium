@@ -73,9 +73,7 @@ const ChordViewer = () => {
           guitarTuning: chordSheetResult.metadata.guitarTuning,
           guitarCapo: chordSheetResult.metadata.guitarCapo,
         },
-        {
-          songChords: chordSheetResult.content?.songChords || '',
-        },
+        chordSheetResult.content ?? { songChords: '' },
         path
       )
     : null;

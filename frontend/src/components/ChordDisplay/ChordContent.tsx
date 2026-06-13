@@ -5,6 +5,7 @@ const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13
 
 const ChordContent: React.FC<ChordContentProps> = ({
   processedContent,
+  rawHtml,
   fontSize,
   fontSpacing,
   fontStyle,
@@ -13,14 +14,13 @@ const ChordContent: React.FC<ChordContentProps> = ({
   renderChord,
   isLoading,
 }) => {
-  // Determine font family based on fontStyle prop
   let fontFamily = undefined;
   if (fontStyle === 'serif') fontFamily = 'serif';
   else if (fontStyle === 'sans-serif') fontFamily = 'system-ui, sans-serif';
   else if (fontStyle === 'monospace') fontFamily = 'monospace';
-  // Default: do not override
+
   return (
-    <div 
+    <div
       className="bg-white dark:bg-[--card] mb-4 p-4 sm:p-6 rounded-lg shadow-sm border"
       style={{ fontSize: `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily }}
     >
@@ -29,6 +29,12 @@ const ChordContent: React.FC<ChordContentProps> = ({
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
           <p className="text-sm">{viewMode === "lyrics-only" ? "Loading lyrics..." : "Loading chord content..."}</p>
         </div>
+      ) : rawHtml && viewMode !== "lyrics-only" ? (
+        <pre
+          className="font-inherit whitespace-pre-wrap break-words overflow-x-auto"
+          style={{ fontFamily: fontFamily ?? 'inherit', fontSize: 'inherit', letterSpacing: 'inherit' }}
+          dangerouslySetInnerHTML={{ __html: rawHtml }}
+        />
       ) : (
         processedContent.map((section, sectionIndex) => {
           if (viewMode === "chords-only" && section.isTabSection) return null;
@@ -98,7 +104,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
           );
         })
       )}
-      {!isLoading && processedContent.length === 0 && (
+      {!isLoading && !rawHtml && processedContent.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           No chord content to display
         </div>
@@ -107,4 +113,4 @@ const ChordContent: React.FC<ChordContentProps> = ({
   );
 };
 
-export default ChordContent; 
+export default ChordContent;

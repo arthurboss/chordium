@@ -21,7 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const songUrl = `https://www.cifraclub.com.br/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}/`;
   const letraUrl = `${songUrl}letra/`;
-  const targetUrl = lyricsOnly === 'true' ? letraUrl : songUrl;
 
   let browser = null;
   try {
@@ -49,6 +48,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Fetch content from the appropriate URL
     let songChords = "";
+    let rawHtml: string | undefined;
+
     if (lyricsOnly === 'true') {
       await page.goto(letraUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
       songChords = await page.evaluate(() => {
@@ -63,31 +64,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return verses.join("\n\n");
       });
     } else {
-      songChords = await page.evaluate(() => {
+      const result = await page.evaluate(() => {
         const el = document.querySelector("pre");
-        if (!el) return "";
-        let result = "";
+        if (!el) return { songChords: "", rawHtml: "" };
+
+        let chords = "";
         el.childNodes.forEach(function(node) {
           if (node.nodeType === Node.TEXT_NODE) {
-            result += node.textContent || "";
+            chords += node.textContent || "";
           } else if (node.nodeType === Node.ELEMENT_NODE) {
             const child = node as Element;
             if (child.classList.contains("tablatura")) {
-              result += "[TAB]\n" + (child.textContent || "") + "\n[/TAB]\n";
+              chords += "[TAB]\n" + (child.textContent || "") + "\n[/TAB]\n";
             } else {
-              result += child.textContent || "";
+              chords += child.textContent || "";
             }
           }
         });
-        return result;
+
+        // Sanitize: keep only text nodes, <b>, and <span> elements — strip all attributes
+        // except class on span (used by CifraClub to style chord names).
+        function sanitizeNode(node: Node): string {
+          if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
+          if (node.nodeType !== Node.ELEMENT_NODE) return "";
+          const el = node as Element;
+          const tag = el.tagName.toLowerCase();
+          if (tag !== "b" && tag !== "span") {
+            // For other elements just recurse into children
+            return Array.from(el.childNodes).map(sanitizeNode).join("");
+          }
+          const classAttr = el.getAttribute("class");
+          const openTag = classAttr ? `<${tag} class="${classAttr.replace(/"/g, "&quot;")}">` : `<${tag}>`;
+          const inner = Array.from(el.childNodes).map(sanitizeNode).join("");
+          return `${openTag}${inner}</${tag}>`;
+        }
+
+        const sanitized = Array.from(el.childNodes).map(sanitizeNode).join("");
+        return { songChords: chords, rawHtml: sanitized };
       });
+
+      songChords = result.songChords;
+      rawHtml = result.rawHtml || undefined;
     }
 
     if (!songChords) {
       return res.status(404).json({ error: "Content not found" });
     }
 
-    return res.json({ ...metadata, songChords });
+    return res.json({ ...metadata, songChords, ...(rawHtml ? { rawHtml } : {}) });
   } catch (e) {
     return res.status(502).json({ error: "Failed to fetch song", details: (e as Error).message });
   } finally {

@@ -135,6 +135,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const finalContent: StoredChordSheet | null = localContent || (apiData ? {
     path,
     songChords: apiData.songChords,
+    ...(apiData.rawHtml ? { rawHtml: apiData.rawHtml } : {}),
   } : null);
 
   const finalChordSheet = (finalMetadata && finalContent) ? {
@@ -144,6 +145,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     guitarTuning: finalMetadata.guitarTuning,
     guitarCapo: finalMetadata.guitarCapo,
     songChords: finalContent.songChords,
+    ...(finalContent.rawHtml ? { rawHtml: finalContent.rawHtml } : {}),
   } : null;
 
   return {
