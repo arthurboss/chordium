@@ -120,33 +120,72 @@
 
   #chord-display pre b {
     @apply text-primary;
-    font-size: 1rem;
     font-weight: 500;
   }
 
 
-  #chord-display pre .tablatura {
-    font-family: monospace;
-    line-height: 1.2;
-  }
-
-  #chord-display pre .tablatura b {
-    color: hsl(var(--primary));
-  }
-
-  #chord-display pre .cnt {
-    font-family: monospace;
-  }
 
 
 }
 
+/* User-controlled font size — applied to content but not to tablatura internals or section titles */
+.chord-content-card {
+  font-size: var(--content-font-size, 14px);
+}
+
 /* Section titles in raw chord sheet HTML (outside @layer to prevent Tailwind purge) */
 #chord-display pre .section-title {
+  display: block;
   font-weight: 700;
   font-size: 1.125rem;
   border-left: 4px solid hsl(var(--primary));
   padding-left: 0.5rem;
+}
+
+
+#chord-display {
+  --chord-card-px: 1rem;
+}
+
+@media (min-width: 426px) {
+  #chord-display {
+    --chord-card-px: 2rem;
+  }
+}
+
+/* Tab blocks (outside @layer: unlayered mobile rules would otherwise win on specificity) */
+#chord-display pre .tablatura {
+  font-family: "Roboto Mono", monospace;
+  font-size: clamp(10px, calc((100vw - 2 * var(--chord-card-px)) / 27), 14px);
+  line-height: 1.6;
+  display: block;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
+  overflow: hidden;
+  
+}
+
+#chord-display pre .tablatura b {
+  color: hsl(var(--primary));
+}
+
+#chord-display pre .tab-info {
+  font-size: var(--content-font-size, 14px);
+  font-family: inherit;
+  white-space: pre-wrap;
+}
+
+#chord-display pre .cnt {
+  font-family: "Roboto Mono", monospace;
+  display: block;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: pre !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
 }
 
 
@@ -179,6 +218,22 @@
     @apply whitespace-pre-wrap break-all text-[10px];
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  #chord-display pre {
+    white-space: pre-wrap;
+    word-break: normal;
+    font-size: inherit;
+    overflow-x: auto;
+  }
+
+  #chord-display pre .tablatura {
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+  max-width: 100%;
+  overflow: hidden;
+  
   }
 }
 
@@ -217,4 +272,26 @@ html {
 
 .theme-toggle-icon:hover {
   transform: rotate(15deg);
+}
+
+/* Narrow mobile: full-bleed chord viewer layout */
+@media (max-width: 425px) {
+  main.container {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+  }
+
+  .page-header-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .chord-content-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    overflow-x: auto;
+  }
 }
