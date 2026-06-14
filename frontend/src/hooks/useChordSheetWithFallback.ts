@@ -96,8 +96,8 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // Store to IndexedDB when API data arrives
   useEffect(() => {
     if (apiData && isFromAPI) {
-      const { songChords, ...metadata } = apiData;
-      storeChordSheet(metadata as SongMetadata, { songChords }, false, path).catch(() => {});
+      const { songChords, rawHtml, ...metadata } = apiData;
+      storeChordSheet(metadata as SongMetadata, { songChords, ...(rawHtml ? { rawHtml } : {}) }, false, path).catch(() => {});
     }
   }, [apiData, isFromAPI, path]);
 

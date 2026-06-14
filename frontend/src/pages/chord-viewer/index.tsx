@@ -92,7 +92,7 @@ const ChordViewer = () => {
 
   const hasJamParam = searchParams.has('d');
   useEffect(() => {
-    if (!hasJamParam && !chordSheetResult.chordSheet && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
+    if (!hasJamParam && (!chordSheetResult.chordSheet || !chordSheetResult.chordSheet.rawHtml) && !chordSheetResult.metadata?.storage?.saved && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
       chordSheetResult.loadFromAPI();
     }
   }, [hasJamParam, chordSheetResult, path]);

@@ -41,8 +41,8 @@ function pushSection(sections: ChordSection[], section: ChordSection): void {
  * heuristics apply.
  */
 export function processContent(rawContent: string, transpose: number = 0): ChordSection[] {
-  if (!rawContent) {
-    return [{ type: 'section', title: '', lines: [] }];
+  if (!rawContent || typeof rawContent !== "string") {
+    return [{ type: "section", title: "", lines: [], isTabSection: false }];
   }
 
   const rawLines = rawContent.split('\n');
