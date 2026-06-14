@@ -5,7 +5,7 @@
 import type { IChordSheetStorage } from './types';
 
 const SAMPLE_VERSION_KEY = 'chordium-sample-version';
-const CURRENT_SAMPLE_VERSION = '2';
+const CURRENT_SAMPLE_VERSION = '5';
 
 /**
  * Determines if sample chord sheets should be loaded into storage
