@@ -3,6 +3,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 export function useContainerColumns(rawHtml: string | undefined) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [maxCols, setMaxCols] = useState(0);
+  const lastCharWidth = useRef(0);
 
   const measureCols = useCallback(() => {
     if (!containerRef.current) return;
@@ -24,11 +25,13 @@ export function useContainerColumns(rawHtml: string | undefined) {
     const charWidth = measure.getBoundingClientRect().width;
     container.removeChild(measure);
 
-    if (charWidth > 0) {
+    const effectiveCharWidth = charWidth > 0 ? charWidth : lastCharWidth.current;
+    if (effectiveCharWidth > 0) {
+      lastCharWidth.current = effectiveCharWidth;
       const style = window.getComputedStyle(container);
       const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const availableWidth = container.clientWidth - padding;
-      setMaxCols(Math.floor(availableWidth / charWidth));
+      setMaxCols(Math.max(0, Math.floor(availableWidth / effectiveCharWidth)));
     }
   }, []);
 
