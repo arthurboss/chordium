@@ -460,7 +460,33 @@ export function extractChordSheet(): ChordSheet {
     return `${openTag}${inner}</${tag}>`;
   }
 
-  const rawHtml = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+  const rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+  // Wrap [Section Title] patterns in a span for styling
+  // Wrap section titles and dedent continuation lines
+  const rawHtml = (() => {
+    const lines = rawHtmlRaw.split('\n');
+    const result: string[] = [];
+    let dedentAmount = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const sectionMatch = lines[i].match(/^(<span class="tablatura">)?(\[(?:[^\]]+)\])\s?(.*)/);
+      if (sectionMatch) {
+        const prefix = sectionMatch[1] || '';
+        result.push(prefix + '<span class="section-title">' + sectionMatch[2].slice(1, -1) + '</span>');
+        dedentAmount = sectionMatch[2].length + 1;
+        if (sectionMatch[3]) result.push(sectionMatch[3]);
+      } else if (dedentAmount > 0 && lines[i].startsWith(' '.repeat(dedentAmount))) {
+        result.push(lines[i].slice(dedentAmount));
+      } else {
+        if (lines[i] === '') dedentAmount = 0;
+        result.push(lines[i]);
+      }
+    }
+    const joined = result.join('\n');
+    // Normalize spacing: 1 blank line before section titles, 0 after
+    return joined
+      .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
+      .replace(/(<\/span>)\n\n+/g, '$1\n');
+  })();
 
   return { songChords, rawHtml };
 }

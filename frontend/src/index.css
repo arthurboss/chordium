@@ -124,6 +124,7 @@
     font-weight: 500;
   }
 
+
   #chord-display pre .tablatura {
     font-family: monospace;
     line-height: 1.2;
@@ -139,6 +140,15 @@
 
 
 }
+
+/* Section titles in raw chord sheet HTML (outside @layer to prevent Tailwind purge) */
+#chord-display pre .section-title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 0.5rem;
+}
+
 
 /* Mobile optimizations */
 @media (max-width: 640px) {

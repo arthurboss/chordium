@@ -100,7 +100,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         const sanitized = Array.from(el.childNodes).map(sanitizeNode).join("");
-        return { songChords: chords, rawHtml: sanitized };
+        // Wrap [Section Title] patterns in a span for styling
+        const withSections = sanitized.replace(/^(\[(?:[^\]]+)\])/gm, '<span class="section-title">$1</span>');
+        return { songChords: chords, rawHtml: withSections };
       });
 
       songChords = result.songChords;

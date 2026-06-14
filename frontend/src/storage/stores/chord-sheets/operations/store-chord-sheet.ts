@@ -45,6 +45,7 @@ export default async function storeChordSheet(
   const storedContent: StoredChordSheet = {
     path,
     songChords: content.songChords,
+    ...(content.rawHtml ? { rawHtml: content.rawHtml } : {}),
   };
 
   // Persist metadata and content in their respective stores

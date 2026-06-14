@@ -4,7 +4,7 @@
 
 import type { IChordSheetStorage } from './types';
 import { isDevelopmentMode } from './environment';
-import { shouldLoadSamples } from './duplicate-prevention';
+import { shouldLoadSamples, markSamplesLoaded } from './duplicate-prevention';
 import { loadSampleData } from './data-loader';
 import { storeSampleChordSheets } from './storage';
 import { 
@@ -44,6 +44,7 @@ export class SampleChordSheetsService {
       const samples = await loadSampleData();
       await storeSampleChordSheets(samples, this.storage);
       
+      markSamplesLoaded();
       logLoadingSuccess(samples.length);
     } catch (error) {
       logLoadingError(error);
