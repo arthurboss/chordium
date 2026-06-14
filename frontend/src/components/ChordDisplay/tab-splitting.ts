@@ -1,4 +1,4 @@
-const MIN_CONTINUATION = 12;
+const MIN_CONTINUATION = 8;
 
 function stripHtmlTags(str: string): string {
   return str.replace(/<[^>]+>/g, '');

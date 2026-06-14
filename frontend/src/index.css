@@ -122,10 +122,6 @@
     @apply text-primary;
     font-weight: 500;
   }
-
-
-
-
 }
 
 /* User-controlled font size — applied to content but not to tablatura internals or section titles */
@@ -137,7 +133,7 @@
 #chord-display pre .section-title {
   display: block;
   font-weight: 700;
-  font-size: 1.125rem;
+  font-size: 1rem;
   border-left: 4px solid hsl(var(--primary));
   padding-left: 0.5rem;
 }
@@ -156,15 +152,14 @@
 /* Tab blocks (outside @layer: unlayered mobile rules would otherwise win on specificity) */
 #chord-display pre .tablatura {
   font-family: "Roboto Mono", monospace;
-  font-size: clamp(10px, calc((100vw - 2 * var(--chord-card-px)) / 27), 14px);
+  font-size: 14px;
   line-height: 1.6;
   display: block;
   white-space: pre;
   word-break: normal;
   overflow-wrap: normal;
   max-width: 100%;
-  overflow: hidden;
-  
+  overflow-x: auto;
 }
 
 #chord-display pre .tablatura b {
@@ -182,7 +177,7 @@
   display: block;
   line-height: 1.4;
   max-width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
   white-space: pre !important;
   word-break: normal !important;
   overflow-wrap: normal !important;
@@ -231,9 +226,8 @@
     white-space: pre;
     word-break: normal;
     overflow-wrap: normal;
-  max-width: 100%;
-  overflow: hidden;
-  
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 

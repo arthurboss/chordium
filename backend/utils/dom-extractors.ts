@@ -487,14 +487,21 @@ export function extractChordSheet(): ChordSheet {
       .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
       .replace(/(<\/span>)\n\n+/g, '$1\n')
       .replace(/(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g, (_m: string, open: string, content: string, cnt: string) => {
-        // Wrap only non-chord lines (lines without <b>) in tab-info
-        const wrapped = content.split('\n').map(line => {
-          if (line.trim() && !line.includes('<b>') && !line.includes('<span class="section-title">')) {
-            return '<span class="tab-info">' + line + '</span>';
+        const lines = content.split('\n');
+        const tabInfoLines: string[] = [];
+        const chordAnnotationLines: string[] = [];
+        for (const line of lines) {
+          if (line.includes('<b>') && !line.includes('<span class="section-title">')) {
+            chordAnnotationLines.push(line);
+          } else if (line.trim() && !line.includes('<span class="section-title">')) {
+            tabInfoLines.push('<span class="tab-info">' + line + '</span>');
+          } else {
+            tabInfoLines.push(line);
           }
-          return line;
-        }).join('\n');
-        return open + wrapped + cnt;
+        }
+        // Chord annotation lines belong inside cnt so tab-splitting can position them correctly
+        const prefix = chordAnnotationLines.length > 0 ? chordAnnotationLines.join('\n') + '\n' : '';
+        return open + tabInfoLines.join('\n') + cnt + prefix;
       });
   })();
 
