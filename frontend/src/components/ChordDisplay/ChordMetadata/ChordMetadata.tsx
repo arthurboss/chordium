@@ -35,7 +35,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path }) => {
   };
 
   return (
-    <div className="flex flex-col gap-1 p-0 sm:grid sm:[grid-template-columns:repeat(4,_min-content)] sm:gap-x-4 sm:gap-y-1 sm:justify-between sm:px-4 sm:py-3 w-full text-xs">
+    <div className="flex flex-col gap-1 px-4 py-2 sm:grid sm:[grid-template-columns:repeat(4,_min-content)] sm:gap-x-4 sm:gap-y-1 sm:justify-between min-w-0 text-xs">
       <MetadataBadge
         label={t("chordMetadata.artist")}
         value={chordSheet.artist || t("chordMetadata.unknown")}

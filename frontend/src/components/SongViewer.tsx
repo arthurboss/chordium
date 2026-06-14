@@ -73,7 +73,7 @@ const SongViewer = ({
     : isLazyContentLoading;
 
   return (
-    <div className="animate-fade-in flex flex-col">
+    <main id="page-chord-viewer" className="flex-1 container py-8 px-4 max-w-3xl mx-auto animate-fade-in flex flex-col">
       <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
@@ -85,9 +85,8 @@ const SongViewer = ({
             : undefined
         }
       />
-      <div className="py-2 pl-1 sm:py-0 sm:px-1">
-        <ChordMetadata chordSheet={chordSheetToDisplay} path={songObj.path} />
-      </div>
+      <ChordMetadata chordSheet={chordSheetToDisplay} path={songObj.path} />
+
       <ChordDisplay
         ref={chordDisplayRef}
         chordSheet={chordSheetToDisplay}
@@ -97,7 +96,7 @@ const SongViewer = ({
         onViewModeChange={onViewModeChange}
         initialViewMode={initialViewMode}
       />
-    </div>
+    </main>
   );
 };
 

@@ -17,11 +17,9 @@ const RootLayout = () => {
       <Sonner />
       <QueryErrorBoundary>
         <JamSessionProvider>
-          <div className="flex flex-col min-h-screen">
+          <div id="app-layout" className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-1">
-              <Outlet />
-            </main>
+            <Outlet />
             <Footer />
           </div>
         </JamSessionProvider>

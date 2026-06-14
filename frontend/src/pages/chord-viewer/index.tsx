@@ -133,9 +133,7 @@ const ChordViewer = () => {
     };
 
     return (
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-          <SongViewer
+      <SongViewer
             song={{
               song: { title: jamPayload.title, artist: jamPayload.artist, path },
               chordSheet: jamChordSheet,
@@ -149,8 +147,6 @@ const ChordViewer = () => {
             hideDeleteButton={true}
             hideSaveButton={false}
           />
-        </main>
-      </div>
     );
   }
 
@@ -180,34 +176,30 @@ const ChordViewer = () => {
     : chordSheetResult.content?.songChords ?? '';
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container py-8 px-4 max-w-3xl mx-auto">
-        <SongViewer
-          song={{
-            song: {
-              title: chordSheetData!.chordSheet.title,
-              artist: chordSheetData!.chordSheet.artist,
-              path: chordSheetData!.path
-            },
-            chordSheet: chordSheetData!.chordSheet
-          }}
-          chordContent={displayContent}
-          chordDisplayRef={chordDisplayRef}
-          onBack={handleBack}
-          onDelete={handleDelete}
-          onSave={handleSave}
-          onUpdate={() => {}}
-          hideDeleteButton={!isSaved}
-          hideSaveButton={isSaved}
-          isFromMyChordSheets={isSaved}
-          useProgressiveLoading={chordSheetResult.isFromAPI}
-          loadContent={chordSheetResult.loadContent}
-          isContentLoading={chordSheetResult.isContentLoading || chordSheetResult.isLyricsLoading}
-          onViewModeChange={handleViewModeChange}
-          initialViewMode={initialViewMode}
-        />
-      </main>
-    </div>
+    <SongViewer
+      song={{
+        song: {
+          title: chordSheetData!.chordSheet.title,
+          artist: chordSheetData!.chordSheet.artist,
+          path: chordSheetData!.path
+        },
+        chordSheet: chordSheetData!.chordSheet
+      }}
+      chordContent={displayContent}
+      chordDisplayRef={chordDisplayRef}
+      onBack={handleBack}
+      onDelete={handleDelete}
+      onSave={handleSave}
+      onUpdate={() => {}}
+      hideDeleteButton={!isSaved}
+      hideSaveButton={isSaved}
+      isFromMyChordSheets={isSaved}
+      useProgressiveLoading={chordSheetResult.isFromAPI}
+      loadContent={chordSheetResult.loadContent}
+      isContentLoading={chordSheetResult.isContentLoading || chordSheetResult.isLyricsLoading}
+      onViewModeChange={handleViewModeChange}
+      initialViewMode={initialViewMode}
+    />
   );
 };
 

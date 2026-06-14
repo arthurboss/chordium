@@ -50,7 +50,7 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
   if (desktopOnly) baseStyles += ` ${desktopStyles.visibility} ${desktopStyles.placement} p-4 pt-2`;
 
   return (
-    <Card className={`${baseStyles} ${className}`.trim()}>
+    <Card id="sticky-bottom-container" className={`${baseStyles} ${className}`.trim()}>
       {children}
     </Card>
   );
