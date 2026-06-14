@@ -1,7 +1,30 @@
 import { CHORD_REGEX } from '@/utils/chord-sheet-utils';
+import i18next from 'i18next';
 
 const TAB_LINE_REGEX = /^[EBGDAe][\|][-\d]/;
 const SECTION_REGEX = /^\[([^\]]+)\]$/;
+
+const SECTION_TITLE_KEYWORDS: Record<string, string> = {
+  'intro': 'sectionTitles.intro',
+  'verse': 'sectionTitles.verse',
+  'chorus': 'sectionTitles.chorus',
+  'pre-chorus': 'sectionTitles.preChorus',
+  'bridge': 'sectionTitles.bridge',
+  'outro': 'sectionTitles.outro',
+  'solo': 'sectionTitles.solo',
+  'interlude': 'sectionTitles.interlude',
+};
+
+function translateSectionTitle(title: string): string {
+  const lowerTitle = title.toLowerCase().trim();
+  for (const [keyword, i18nKey] of Object.entries(SECTION_TITLE_KEYWORDS)) {
+    if (lowerTitle.includes(keyword)) {
+      const translated = i18next.t(i18nKey, { defaultValue: keyword });
+      return title.replace(new RegExp(keyword, 'i'), translated);
+    }
+  }
+  return title;
+}
 
 function isChordLine(line: string): boolean {
   CHORD_REGEX.lastIndex = 0;
@@ -32,7 +55,8 @@ export function songChordsToRawHtml(songChords: string): string {
     // Section title: [Title]
     const sectionMatch = trimmed.match(/^\[([^\]]+)\]$/);
     if (sectionMatch) {
-      result.push('<span class="section-title">' + sectionMatch[1] + '</span>');
+      const translatedTitle = translateSectionTitle(sectionMatch[1]);
+      result.push('<span class="section-title">' + translatedTitle + '</span>');
       i++;
       continue;
     }

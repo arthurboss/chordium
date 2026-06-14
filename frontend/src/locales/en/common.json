@@ -150,5 +150,15 @@
   "guitarCapoField": {
     "noCapo": "No capo",
     "fretDisplay": "{{ordinal}} fret"
+  },
+  "sectionTitles": {
+    "intro": "Intro",
+    "verse": "Verse",
+    "chorus": "Chorus",
+    "preChorus": "Pre-Chorus",
+    "bridge": "Bridge",
+    "outro": "Outro",
+    "solo": "Solo",
+    "interlude": "Interlude"
   }
 }

@@ -150,5 +150,15 @@
   "guitarCapoField": {
     "noCapo": "Sem capotraste",
     "fretDisplay": "{{ordinal}}ª casa"
+  },
+  "sectionTitles": {
+    "intro": "Intro",
+    "verse": "Verso",
+    "chorus": "Refrão",
+    "preChorus": "Pré-Refrão",
+    "bridge": "Bridge",
+    "outro": "Outro",
+    "solo": "Solo",
+    "interlude": "Interlúdio"
   }
 }
