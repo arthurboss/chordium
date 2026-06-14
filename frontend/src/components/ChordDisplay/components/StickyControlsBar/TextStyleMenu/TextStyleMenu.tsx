@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../../../../ui/button";
 import {
@@ -32,6 +32,7 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
 }) => {
   const { t } = useTranslation();
   const displayTitle = title ?? t("textStyle.textPreferences");
+  const prevTabsMode = useRef<string>("tabs-on");
 
   const isMobile = variant === "mobile";
   const containerClassName = isMobile ? "" : "flex flex-col items-center gap-1";
@@ -40,6 +41,24 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
     (isMobile ? "h-10 w-10" : TEXT_STYLE_MENU_STYLES.triggerButton);
   const settingsIconClassName = isMobile ? "" : TEXT_STYLE_MENU_STYLES.settingsIcon;
   const contentClassName = dropdownClassName || (isMobile ? "mr-4" : "");
+
+  const handleTabsToggle = () => {
+    if (viewMode === "lyrics-only") {
+      prevTabsMode.current = "tabs-on";
+      setViewMode("tabs-on");
+    } else {
+      setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off");
+    }
+  };
+
+  const handleLyricsToggle = () => {
+    if (viewMode === "lyrics-only") {
+      setViewMode(prevTabsMode.current);
+    } else {
+      prevTabsMode.current = viewMode;
+      setViewMode("lyrics-only");
+    }
+  };
 
   return (
     <div className={containerClassName}>
@@ -63,14 +82,14 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
             </div>
             <div className="flex flex-col gap-2">
               <ToggleOption
-                active={viewMode !== "tabs-off"}
-                onClick={() => setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off")}
+                active={viewMode !== "tabs-off" && viewMode !== "lyrics-only"}
+                onClick={handleTabsToggle}
                 icon={<TabsModeIcon className="opacity-70" />}
                 label="Tabs"
               />
               <ToggleOption
                 active={isViewModeActive(viewMode, "lyrics-only")}
-                onClick={() => setViewMode("lyrics-only")}
+                onClick={handleLyricsToggle}
                 icon={<LyricsModeIcon className="opacity-70" />}
                 label={t("textStyle.lyrics")}
               />

@@ -6,6 +6,17 @@ import { songChordsToRawHtml } from './song-chords-to-raw-html';
 
 const TABLATURA_SEPARATOR = /(<\/span><\/span>)\n(?=<span class="tablatura">)/g;
 const CNT_SEPARATOR = /\n(?=<span class="cnt">)/g;
+const SECTION_TITLE_RE = /<span class="section-title">[^<]*<\/span>/g;
+
+function removeTabsFromHtml(html: string): string {
+  let result = html.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
+  result = result.replace(/(​|&ZeroWidthSpace;)/g, '');
+  result = result.replace(/<span class="section-title">[^<]*<\/span>\n(?=\s*(?:<span class="section-title">|$))/g, '');
+  result = result.replace(/^\n+|\n\n\n+/g, '\n');
+  result = result.replace(/\n+(<span class="section-title">[^<]*<\/span>)\n+/g, '\n\n$1\n');
+  result = result.replace(/^\n+/, '');
+  return result;
+}
 
 const ChordContent: React.FC<ChordContentProps> = ({
   rawHtml,
@@ -29,12 +40,25 @@ const ChordContent: React.FC<ChordContentProps> = ({
     ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '').replace(/​{2,}/g, '​').replace(/(&ZeroWidthSpace;){2,}/g, '&ZeroWidthSpace;')
     : undefined;
 
-  if (viewMode === 'tabs-off' && processedHtml) {
-    processedHtml = processedHtml.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
-    processedHtml = processedHtml.replace(/(​|&ZeroWidthSpace;)/g, '');
-    processedHtml = processedHtml.replace(/<span class="section-title">[^<]*<\/span>\n(?=\s*(?:<span class="section-title">|$))/g, '');
-    processedHtml = processedHtml.replace(/^\n+|\n\n\n+/g, '\n');
-    processedHtml = processedHtml.replace(/\n+(<span class="section-title">[^<]*<\/span>)\n+/g, '\n\n$1\n');
+  if ((viewMode === 'tabs-off' || viewMode === 'lyrics-only') && processedHtml) {
+    processedHtml = removeTabsFromHtml(processedHtml);
+  }
+
+  if (viewMode === 'lyrics-only' && processedHtml) {
+    // Remove <b> tags (chords) entirely
+    processedHtml = processedHtml.replace(/<b>[^<]*<\/b>/g, '');
+    // Trim leading whitespace (chord alignment artifacts) and drop empty lines
+    processedHtml = processedHtml
+      .split('\n')
+      .map(line => line.trimStart())
+      .filter(line => line !== '')
+      .join('\n');
+    // Remove section titles immediately followed by another section title or end of string
+    // (sections that had only chords and are now empty)
+    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n)+(<span class="section-title">)/g, '$2');
+    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n?)+$/, '');
+    // Ensure exactly one blank line before each section title; strip any leading newline
+    processedHtml = processedHtml.replace(/\n(<span class="section-title">)/g, '\n\n$1');
     processedHtml = processedHtml.replace(/^\n+/, '');
   }
 
