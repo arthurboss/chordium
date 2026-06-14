@@ -97,14 +97,11 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   return (
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
       <ChordContent
-        processedContent={processedContent}
         rawHtml={chordSheet.rawHtml}
+        songChords={chordSheet.songChords}
         fontSize={fontSize}
         fontSpacing={fontSpacing}
         fontStyle={fontStyle}
-        viewMode={viewMode}
-        hideGuitarTabs={hideGuitarTabs}
-        renderChord={renderChord}
         isLoading={isLoading}
       />
       {showControlsBar && (
@@ -122,9 +119,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
           setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
-          viewMode={viewMode}
           setViewMode={setViewMode}
-          hideGuitarTabs={hideGuitarTabs}
           setHideGuitarTabs={setHideGuitarTabs}
           autoScroll={autoScroll}
           setAutoScroll={toggleAutoScroll}

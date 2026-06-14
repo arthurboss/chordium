@@ -11,14 +11,10 @@ export interface ChordSection {
 }
 
 export interface ChordContentProps {
-  processedContent: ChordSection[];
   rawHtml?: string;
   fontSize: number;
   fontSpacing: number;
   fontStyle: string;
-  viewMode: string;
-  hideGuitarTabs: boolean;
-  renderChord: (chord: string) => React.ReactElement;
   isLoading?: boolean;
 }
 
@@ -36,9 +32,7 @@ export interface ChordSheetControlsProps {
   setFontSpacing: (v: number) => void;
   fontStyle: string;
   setFontStyle: (v: string) => void;
-  viewMode: string;
   setViewMode: (v: string) => void;
-  hideGuitarTabs: boolean;
   setHideGuitarTabs: (v: boolean) => void;
   autoScroll: boolean;
   setAutoScroll: (v: boolean) => void;
