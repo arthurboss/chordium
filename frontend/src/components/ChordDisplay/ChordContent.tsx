@@ -26,13 +26,16 @@ const ChordContent: React.FC<ChordContentProps> = ({
   const sourceHtml = rawHtml ?? (songChords ? songChordsToRawHtml(songChords) : undefined);
 
   let processedHtml = sourceHtml
-    ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '')
+    ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '').replace(/​{2,}/g, '​').replace(/(&ZeroWidthSpace;){2,}/g, '&ZeroWidthSpace;')
     : undefined;
 
   if (viewMode === 'tabs-off' && processedHtml) {
     processedHtml = processedHtml.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
+    processedHtml = processedHtml.replace(/(​|&ZeroWidthSpace;)/g, '');
     processedHtml = processedHtml.replace(/<span class="section-title">[^<]*<\/span>\n(?=\s*(?:<span class="section-title">|$))/g, '');
     processedHtml = processedHtml.replace(/^\n+|\n\n\n+/g, '\n');
+    processedHtml = processedHtml.replace(/\n+(<span class="section-title">[^<]*<\/span>)\n+/g, '\n\n$1\n');
+    processedHtml = processedHtml.replace(/^\n+/, '');
   }
 
   if (processedHtml && maxCols > 0) {
@@ -68,7 +71,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   return (
     <div
       ref={containerRef}
-      className="chord-content-card bg-white dark:bg-[--card] mb-4 px-4 py-3 rounded-lg shadow-sm border"
+      className="chord-content-card bg-white dark:bg-[--card] mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-sm border"
       style={{ "--content-font-size": `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily } as React.CSSProperties}
     >
       {content}
