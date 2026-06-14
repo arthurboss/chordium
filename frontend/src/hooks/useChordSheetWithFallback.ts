@@ -12,14 +12,11 @@ export interface ChordSheetWithFallbackState {
   error: string | null;
   isFromAPI: boolean;
   isContentLoading: boolean;
-  lyricsContent: string | null;
-  isLyricsLoading: boolean;
 }
 
 export interface ChordSheetWithFallbackActions {
   loadFromAPI: () => Promise<void>;
   loadContent: () => Promise<void>;
-  loadLyricsContent: () => Promise<void>;
   reset: () => void;
 }
 
@@ -34,8 +31,6 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const [error, setError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
-  const [lyricsContent, setLyricsContent] = useState<string | null>(null);
-  const [isLyricsLoading, setIsLyricsLoading] = useState(false);
 
   // Check IndexedDB first
   useEffect(() => {
@@ -78,21 +73,6 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // loadContent is a no-op now — kept for API compatibility
   const loadContent = useCallback(async () => {}, []);
 
-  // Fetch lyrics-only content via CifraClub /letra/ URL
-  const loadLyricsContent = useCallback(async () => {
-    if (!path || isLyricsLoading) return;
-    setIsLyricsLoading(true);
-    try {
-      const data = await fetchSongFromAPI(path, { lyricsOnly: true });
-      setLyricsContent(data?.songChords ?? null);
-    } catch (err) {
-      if (import.meta.env.DEV) console.error('Error loading lyrics content:', err);
-      setLyricsContent(null);
-    } finally {
-      setIsLyricsLoading(false);
-    }
-  }, [path, isLyricsLoading]);
-
   // Store to IndexedDB when API data arrives
   useEffect(() => {
     if (apiData && isFromAPI) {
@@ -109,8 +89,6 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     setIsFromAPI(false);
     setIsLoadingContent(false);
     setLocalError(null);
-    setLyricsContent(null);
-    setIsLyricsLoading(false);
   }, []);
 
   // Build final state
@@ -156,11 +134,8 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     error: localError || error,
     isFromAPI,
     isContentLoading: isLoadingContent,
-    lyricsContent,
-    isLyricsLoading,
     loadFromAPI,
     loadContent,
-    loadLyricsContent,
     reset,
   };
 }

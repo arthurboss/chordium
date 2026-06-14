@@ -1,33 +1,29 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { useParams, useLocation, useSearchParams, useNavigate } from "react-router-dom";
-import SongViewer from "@/components/SongViewer";
-import { useChordSheetWithFallback } from "@/hooks/useChordSheetWithFallback";
-import type { RouteParams } from "./chord-viewer.types";
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { useParams, useLocation, useSearchParams } from 'react-router-dom';
+import SongViewer from '@/components/SongViewer';
+import { useChordSheetWithFallback } from '@/hooks/useChordSheetWithFallback';
+import type { RouteParams } from './chord-viewer.types';
 
-import { resolveChordSheetPath } from "./utils/path-resolver";
-import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from "@/utils/chordSheetQR";
-import { createChordSheetData } from "./utils/chord-sheet-data";
-import { extractNavigationData } from "./utils/navigation-data";
+import { resolveChordSheetPath } from './utils/path-resolver';
+import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordSheetQR';
+import { createChordSheetData } from './utils/chord-sheet-data';
+import { extractNavigationData } from './utils/navigation-data';
 
-import { useNavigation } from "@/hooks/navigation";
-import { useChordSheetSave, useChordSheetDelete } from "@/storage/hooks";
+import { useNavigation } from '@/hooks/navigation';
+import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 
-import { ChordViewerLoading } from "./components/chord-viewer-loading";
-import { ChordViewerError } from "./components/chord-viewer-error";
+import { ChordViewerLoading } from './components/chord-viewer-loading';
+import { ChordViewerError } from './components/chord-viewer-error';
 
 const ChordViewer = () => {
   const chordDisplayRef = useRef<HTMLDivElement>(null);
   const routeParams = useParams() as RouteParams;
   const location = useLocation();
-  const navigate = useNavigate();
 
   const navigationData = extractNavigationData(location.state);
   const path = navigationData?.path || resolveChordSheetPath(routeParams);
 
-  // Detect /letra route — boot directly into lyrics-only mode
-  const isLetraRoute = routeParams.letra === 'letra';
-  const initialViewMode = isLetraRoute ? 'lyrics-only' : 'tabs-on';
-  const [activeViewMode, setActiveViewMode] = useState(initialViewMode);
+  const [activeViewMode, setActiveViewMode] = useState('tabs-on');
 
   const [searchParams] = useSearchParams();
   const [jamPayload, setJamPayload] = useState<JamPayload | null>(null);
@@ -42,27 +38,9 @@ const ChordViewer = () => {
 
   const chordSheetResult = useChordSheetWithFallback(path);
 
-  // When switching to lyrics-only, fetch /letra/ content (also runs on mount for /letra route)
   const handleViewModeChange = useCallback((viewMode: string) => {
     setActiveViewMode(viewMode);
-    if (viewMode === 'lyrics-only') {
-      if (!chordSheetResult.lyricsContent && !chordSheetResult.isLyricsLoading) {
-        chordSheetResult.loadLyricsContent();
-      }
-      if (!isLetraRoute) {
-        navigate("/" + routeParams.artist + "/" + routeParams.song + "/letra", { replace: true });
-      }
-    } else if (isLetraRoute) {
-      navigate("/" + routeParams.artist + "/" + routeParams.song, { replace: true });
-    }
-  }, [chordSheetResult, isLetraRoute, navigate]);
-
-  // For /letra route, trigger the lyrics fetch as soon as we have a path
-  useEffect(() => {
-    if (isLetraRoute && path && !chordSheetResult.lyricsContent && !chordSheetResult.isLyricsLoading) {
-      chordSheetResult.loadLyricsContent();
-    }
-  }, [isLetraRoute, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const chordSheetData = chordSheetResult.metadata
     ? createChordSheetData(
@@ -170,10 +148,7 @@ const ChordViewer = () => {
     );
   }
 
-  // Use /letra content when in lyrics-only mode and it has been fetched
-  const displayContent = activeViewMode === 'lyrics-only' && chordSheetResult.lyricsContent !== null
-    ? chordSheetResult.lyricsContent
-    : chordSheetResult.content?.songChords ?? '';
+  const displayContent = chordSheetResult.content?.songChords ?? '';
 
   return (
     <SongViewer
@@ -196,9 +171,9 @@ const ChordViewer = () => {
       isFromMyChordSheets={isSaved}
       useProgressiveLoading={chordSheetResult.isFromAPI}
       loadContent={chordSheetResult.loadContent}
-      isContentLoading={chordSheetResult.isContentLoading || chordSheetResult.isLyricsLoading}
+      isContentLoading={chordSheetResult.isContentLoading}
       onViewModeChange={handleViewModeChange}
-      initialViewMode={initialViewMode}
+      initialViewMode={activeViewMode}
     />
   );
 };

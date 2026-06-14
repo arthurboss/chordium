@@ -8,7 +8,6 @@ export interface ChordSheetData {
 export interface RouteParams extends Record<string, string | undefined> {
   artist?: string;
   song?: string;
-  letra?: string;
 }
 
 export interface ChordViewerNavigationMethods {
