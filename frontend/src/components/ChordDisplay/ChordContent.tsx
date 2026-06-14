@@ -6,7 +6,6 @@ import { songChordsToRawHtml } from './song-chords-to-raw-html';
 
 const TABLATURA_SEPARATOR = /(<\/span><\/span>)\n(?=<span class="tablatura">)/g;
 const CNT_SEPARATOR = /\n(?=<span class="cnt">)/g;
-const SECTION_TITLE_RE = /<span class="section-title">[^<]*<\/span>/g;
 
 function removeTabsFromHtml(html: string): string {
   let result = html.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
@@ -39,6 +38,20 @@ const ChordContent: React.FC<ChordContentProps> = ({
   let processedHtml = sourceHtml
     ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '').replace(/​{2,}/g, '​').replace(/(&ZeroWidthSpace;){2,}/g, '&ZeroWidthSpace;')
     : undefined;
+
+  // Ensure section titles are always on their own line (old samples may have inline content)
+  // Also trim leading whitespace from pure chord lines (no lyric to align with)
+  if (processedHtml) {
+    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>) +([^\n])/g, '$1\n$2');
+    processedHtml = processedHtml
+      .split('\n')
+      .map(line => {
+        if (line.trimStart() === line) return line;
+        const stripped = line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
+        return stripped === '' && /<b>/.test(line) ? line.trimStart() : line;
+      })
+      .join('\n');
+  }
 
   if ((viewMode === 'tabs-off' || viewMode === 'lyrics-only') && processedHtml) {
     processedHtml = removeTabsFromHtml(processedHtml);
