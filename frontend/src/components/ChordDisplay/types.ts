@@ -16,6 +16,7 @@ export interface ChordContentProps {
   fontSpacing: number;
   fontStyle: string;
   isLoading?: boolean;
+  viewMode?: string;
 }
 
 export interface ChordSheetControlsProps {
@@ -32,7 +33,9 @@ export interface ChordSheetControlsProps {
   setFontSpacing: (v: number) => void;
   fontStyle: string;
   setFontStyle: (v: string) => void;
+  viewMode: string;
   setViewMode: (v: string) => void;
+  hideGuitarTabs: boolean;
   setHideGuitarTabs: (v: boolean) => void;
   autoScroll: boolean;
   setAutoScroll: (v: boolean) => void;

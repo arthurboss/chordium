@@ -26,7 +26,7 @@ const ChordViewer = () => {
 
   // Detect /letra route — boot directly into lyrics-only mode
   const isLetraRoute = routeParams.letra === 'letra';
-  const initialViewMode = isLetraRoute ? 'lyrics-only' : 'normal';
+  const initialViewMode = isLetraRoute ? 'lyrics-only' : 'tabs-on';
   const [activeViewMode, setActiveViewMode] = useState(initialViewMode);
 
   const [searchParams] = useSearchParams();

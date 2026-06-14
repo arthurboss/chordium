@@ -26,30 +26,17 @@ const ConfigMenu: React.FC<ConfigMenuProps> = ({
       <>
         <DropdownMenuLabel>Display Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={() => setViewMode("normal")}
-          className={viewMode === "normal" ? "bg-accent text-accent-foreground" : ""}
+        <DropdownMenuItem
+          onClick={() => setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off")}
+          className={viewMode !== "tabs-off" ? "bg-accent text-accent-foreground" : ""}
         >
-          Normal
+          {viewMode === "tabs-off" ? "Show" : "Hide"} Tabs
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => setViewMode("chords-only")}
-          className={viewMode === "chords-only" ? "bg-accent text-accent-foreground" : ""}
-        >
-          Chords Only
-        </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setViewMode("lyrics-only")}
           className={viewMode === "lyrics-only" ? "bg-accent text-accent-foreground" : ""}
         >
           Lyrics Only
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={() => setHideGuitarTabs(!hideGuitarTabs)}
-          className={hideGuitarTabs ? "bg-accent text-accent-foreground" : ""}
-        >
-          {hideGuitarTabs ? "Show Guitar Tabs" : "Hide Guitar Tabs"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
       </>
