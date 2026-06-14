@@ -14,6 +14,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
   fontSpacing,
   fontStyle,
   isLoading,
+  viewMode = 'chords',
 }) => {
   const { containerRef, maxCols } = useContainerColumns(rawHtml);
 
@@ -27,6 +28,12 @@ const ChordContent: React.FC<ChordContentProps> = ({
   let processedHtml = sourceHtml
     ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '')
     : undefined;
+
+  if (viewMode === 'tabs-off' && processedHtml) {
+    processedHtml = processedHtml.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
+    processedHtml = processedHtml.replace(/<span class="section-title">[^<]*<\/span>\n(?=\s*(?:<span class="section-title">|$))/g, '');
+    processedHtml = processedHtml.replace(/^\n+|\n\n\n+/g, '\n');
+  }
 
   if (processedHtml && maxCols > 0) {
     processedHtml = processTabBlocks(processedHtml, maxCols);
