@@ -3,18 +3,53 @@ import { ChordContentProps } from './types';
 import { useContainerColumns } from './useContainerColumns';
 import { processTabBlocks } from './tab-splitting';
 import { songChordsToRawHtml } from './song-chords-to-raw-html';
+import {
+  normalizeZeroWidthSpaces,
+  fixInlineSectionTitles,
+  trimPureChordLineIndent,
+  removeTabsFromHtml,
+  removeChordsForLyricsOnly,
+} from '@/utils/chord-html';
 
-const TABLATURA_SEPARATOR = /(<\/span><\/span>)\n(?=<span class="tablatura">)/g;
-const CNT_SEPARATOR = /\n(?=<span class="cnt">)/g;
+const FONT_FAMILY: Record<string, string> = {
+  serif: 'serif',
+  'sans-serif': 'system-ui, sans-serif',
+  monospace: 'monospace',
+};
 
-function removeTabsFromHtml(html: string): string {
-  let result = html.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
-  result = result.replace(/(​|&ZeroWidthSpace;)/g, '');
-  result = result.replace(/<span class="section-title">[^<]*<\/span>\n+(?=\s*(?:<span class="section-title">|$))/g, '');
-  result = result.replace(/\n{3,}/g, '\n\n');
-  result = result.replace(/\n+(<span class="section-title">[^<]*<\/span>)\n+/g, '\n\n$1\n');
-  result = result.replace(/^\n+/, '');
+function processHtml(html: string, viewMode: string, maxCols: number): string {
+  let result = trimPureChordLineIndent(fixInlineSectionTitles(normalizeZeroWidthSpaces(html)));
+  if (viewMode === 'tabs-off' || viewMode === 'lyrics-only') result = removeTabsFromHtml(result);
+  if (viewMode === 'lyrics-only') result = removeChordsForLyricsOnly(result);
+  if (maxCols > 0) result = processTabBlocks(result, maxCols);
   return result;
+}
+
+function ChordLoadingState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4" />
+      <p className="text-sm">Loading chord content...</p>
+    </div>
+  );
+}
+
+function ChordEmptyState() {
+  return (
+    <div className="text-center py-8 text-muted-foreground">
+      No chord content to display
+    </div>
+  );
+}
+
+function ChordSheet({ html, fontFamily }: { html: string; fontFamily: string | undefined }) {
+  return (
+    <pre
+      className="font-inherit whitespace-pre-wrap break-words"
+      style={{ fontFamily: fontFamily ?? 'inherit', fontSize: 'inherit', letterSpacing: 'inherit' }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
 
 const ChordContent: React.FC<ChordContentProps> = ({
@@ -27,89 +62,9 @@ const ChordContent: React.FC<ChordContentProps> = ({
   viewMode = 'chords',
 }) => {
   const { containerRef, maxCols } = useContainerColumns(rawHtml);
-
-  let fontFamily: string | undefined = undefined;
-  if (fontStyle === 'serif') fontFamily = 'serif';
-  else if (fontStyle === 'sans-serif') fontFamily = 'system-ui, sans-serif';
-  else if (fontStyle === 'monospace') fontFamily = 'monospace';
-
+  const fontFamily = FONT_FAMILY[fontStyle];
   const sourceHtml = rawHtml ?? (songChords ? songChordsToRawHtml(songChords) : undefined);
-
-  let processedHtml = sourceHtml
-    ? sourceHtml.replace(TABLATURA_SEPARATOR, '$1​').replace(CNT_SEPARATOR, '').replace(/​{2,}/g, '​').replace(/(&ZeroWidthSpace;){2,}/g, '&ZeroWidthSpace;')
-    : undefined;
-
-  // Ensure section titles are always on their own line (old samples may have inline content)
-  // Also trim leading whitespace from pure chord lines (no lyric to align with)
-  if (processedHtml) {
-    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>) +([^\n])/g, '$1\n$2');
-    processedHtml = processedHtml
-      .split('\n')
-      .map(line => {
-        if (line.trimStart() === line) return line;
-        const stripped = line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
-        return stripped === '' && /<b>/.test(line) ? line.trimStart() : line;
-      })
-      .join('\n');
-  }
-
-  if ((viewMode === 'tabs-off' || viewMode === 'lyrics-only') && processedHtml) {
-    processedHtml = removeTabsFromHtml(processedHtml);
-  }
-
-  if (viewMode === 'lyrics-only' && processedHtml) {
-    // Drop only pure chord lines (lines whose only content is <b> tags + whitespace).
-    // Empty lines (section separators) are preserved as-is.
-    processedHtml = processedHtml
-      .split('\n')
-      .map(line => {
-        const stripped = line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
-        // Pure chord line — remove it entirely
-        if (stripped === '' && /<b>/.test(line)) return null;
-        // Lyric or empty line — strip <b> tags and leading whitespace
-        return line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
-      })
-      .filter(line => line !== null)
-      .join('\n');
-    // Remove section titles immediately followed by another section title or end of string
-    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n+)+(<span class="section-title">)/g, '$2');
-    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n*)+$/, '');
-    // Ensure exactly one blank line before each section title; strip any leading newline
-    processedHtml = processedHtml.replace(/\n(<span class="section-title">)/g, '\n\n$1');
-    // Collapse 3+ consecutive newlines to 2
-    processedHtml = processedHtml.replace(/\n{3,}/g, '\n\n');
-    processedHtml = processedHtml.replace(/^\n+/, '');
-  }
-
-  if (processedHtml && maxCols > 0) {
-    processedHtml = processTabBlocks(processedHtml, maxCols);
-  }
-
-  const preStyle = { fontFamily: fontFamily ?? 'inherit', fontSize: 'inherit', letterSpacing: 'inherit' };
-
-  let content: React.ReactNode;
-  if (isLoading) {
-    content = (
-      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-4"></div>
-        <p className="text-sm">Loading chord content...</p>
-      </div>
-    );
-  } else if (processedHtml) {
-    content = (
-      <pre
-        className="font-inherit whitespace-pre-wrap break-words"
-        style={preStyle}
-        dangerouslySetInnerHTML={{ __html: processedHtml }}
-      />
-    );
-  } else {
-    content = (
-      <div className="text-center py-8 text-muted-foreground">
-        No chord content to display
-      </div>
-    );
-  }
+  const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols) : undefined;
 
   return (
     <div
@@ -117,7 +72,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
       className="chord-content-card bg-white dark:bg-[--card] mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-sm border"
       style={{ "--content-font-size": `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily } as React.CSSProperties}
     >
-      {content}
+      {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheet html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}
     </div>
   );
 };

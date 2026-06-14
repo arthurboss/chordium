@@ -12,6 +12,7 @@ export interface ChordSection {
 
 export interface ChordContentProps {
   rawHtml?: string;
+  songChords?: string;
   fontSize: number;
   fontSpacing: number;
   fontStyle: string;
