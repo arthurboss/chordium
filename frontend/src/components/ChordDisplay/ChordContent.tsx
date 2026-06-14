@@ -11,8 +11,8 @@ const SECTION_TITLE_RE = /<span class="section-title">[^<]*<\/span>/g;
 function removeTabsFromHtml(html: string): string {
   let result = html.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
   result = result.replace(/(​|&ZeroWidthSpace;)/g, '');
-  result = result.replace(/<span class="section-title">[^<]*<\/span>\n(?=\s*(?:<span class="section-title">|$))/g, '');
-  result = result.replace(/^\n+|\n\n\n+/g, '\n');
+  result = result.replace(/<span class="section-title">[^<]*<\/span>\n+(?=\s*(?:<span class="section-title">|$))/g, '');
+  result = result.replace(/\n{3,}/g, '\n\n');
   result = result.replace(/\n+(<span class="section-title">[^<]*<\/span>)\n+/g, '\n\n$1\n');
   result = result.replace(/^\n+/, '');
   return result;
@@ -45,20 +45,26 @@ const ChordContent: React.FC<ChordContentProps> = ({
   }
 
   if (viewMode === 'lyrics-only' && processedHtml) {
-    // Remove <b> tags (chords) entirely
-    processedHtml = processedHtml.replace(/<b>[^<]*<\/b>/g, '');
-    // Trim leading whitespace (chord alignment artifacts) and drop empty lines
+    // Drop only pure chord lines (lines whose only content is <b> tags + whitespace).
+    // Empty lines (section separators) are preserved as-is.
     processedHtml = processedHtml
       .split('\n')
-      .map(line => line.trimStart())
-      .filter(line => line !== '')
+      .map(line => {
+        const stripped = line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
+        // Pure chord line — remove it entirely
+        if (stripped === '' && /<b>/.test(line)) return null;
+        // Lyric or empty line — strip <b> tags and leading whitespace
+        return line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
+      })
+      .filter(line => line !== null)
       .join('\n');
     // Remove section titles immediately followed by another section title or end of string
-    // (sections that had only chords and are now empty)
-    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n)+(<span class="section-title">)/g, '$2');
-    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n?)+$/, '');
+    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n+)+(<span class="section-title">)/g, '$2');
+    processedHtml = processedHtml.replace(/(<span class="section-title">[^<]*<\/span>\n*)+$/, '');
     // Ensure exactly one blank line before each section title; strip any leading newline
     processedHtml = processedHtml.replace(/\n(<span class="section-title">)/g, '\n\n$1');
+    // Collapse 3+ consecutive newlines to 2
+    processedHtml = processedHtml.replace(/\n{3,}/g, '\n\n');
     processedHtml = processedHtml.replace(/^\n+/, '');
   }
 
