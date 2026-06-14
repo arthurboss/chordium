@@ -485,7 +485,17 @@ export function extractChordSheet(): ChordSheet {
     // Normalize spacing: 1 blank line before section titles, 0 after
     return joined
       .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
-      .replace(/(<\/span>)\n\n+/g, '$1\n');
+      .replace(/(<\/span>)\n\n+/g, '$1\n')
+      .replace(/(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g, (_m: string, open: string, content: string, cnt: string) => {
+        // Wrap only non-chord lines (lines without <b>) in tab-info
+        const wrapped = content.split('\n').map(line => {
+          if (line.trim() && !line.includes('<b>') && !line.includes('<span class="section-title">')) {
+            return '<span class="tab-info">' + line + '</span>';
+          }
+          return line;
+        }).join('\n');
+        return open + wrapped + cnt;
+      });
   })();
 
   return { songChords, rawHtml };

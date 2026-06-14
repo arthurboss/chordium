@@ -102,7 +102,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const sanitized = Array.from(el.childNodes).map(sanitizeNode).join("");
         // Wrap [Section Title] patterns in a span for styling
         const withSections = sanitized.replace(/^(\[(?:[^\]]+)\])/gm, '<span class="section-title">$1</span>');
-        return { songChords: chords, rawHtml: withSections };
+        const withTabInfo = withSections.replace(/(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g, (_m: string, open: string, content: string, cnt: string) => {
+          const wrapped = content.split('\n').map((line: string) => {
+            if (line.trim() && !line.includes('<b>') && !line.includes('<span class="section-title">')) {
+              return '<span class="tab-info">' + line + '</span>';
+            }
+            return line;
+          }).join('\n');
+          return open + wrapped + cnt;
+        });
+        return { songChords: chords, rawHtml: withTabInfo };
       });
 
       songChords = result.songChords;
