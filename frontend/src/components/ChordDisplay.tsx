@@ -103,6 +103,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         fontSpacing={fontSpacing}
         fontStyle={fontStyle}
         isLoading={isLoading}
+        viewMode={viewMode}
       />
       {showControlsBar && (
         <StickyControlsBar
@@ -119,7 +120,9 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
           setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
+          viewMode={viewMode}
           setViewMode={setViewMode}
+          hideGuitarTabs={hideGuitarTabs}
           setHideGuitarTabs={setHideGuitarTabs}
           autoScroll={autoScroll}
           setAutoScroll={toggleAutoScroll}

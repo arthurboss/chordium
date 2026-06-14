@@ -14,7 +14,7 @@ import { TEXT_PREFERENCES_VALUES } from "./TextStyleMenu.constants";
 import { getFontSpacingDisplay, isViewModeActive } from "./TextStyleMenu.utils";
 import type { TextStyleMenuProps } from "./TextStyleMenu.types";
 import ToggleOption from "./ToggleOption";
-import { NormalModeIcon, TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
+import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
 
 const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
   fontSize,
@@ -63,14 +63,8 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
             </div>
             <div className="flex flex-col gap-2">
               <ToggleOption
-                active={isViewModeActive(viewMode, "normal")}
-                onClick={() => setViewMode("normal")}
-                icon={<NormalModeIcon className="opacity-70" />}
-                label={t("textStyle.normal")}
-              />
-              <ToggleOption
-                active={isViewModeActive(viewMode, "chords-only")}
-                onClick={() => setViewMode("chords-only")}
+                active={viewMode !== "tabs-off"}
+                onClick={() => setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off")}
                 icon={<TabsModeIcon className="opacity-70" />}
                 label="Tabs"
               />
