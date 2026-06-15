@@ -6,12 +6,6 @@ import DeleteButton from "./DeleteButton";
 import SaveButton from "./SaveButton";
 import TitleSection from "./TitleSection";
 
-/**
- * Reusable page header component with back and optional action functionality
- * 
- * Provides consistent page header UI across different pages while being flexible
- * enough to accommodate various use cases.
- */
 const PageHeader = memo(({
   onBack,
   onAction,
@@ -20,38 +14,21 @@ const PageHeader = memo(({
   titleClassName,
   rightContent
 }: PageHeaderProps) => {
-
   return (
-    <Card className="page-header-card flex flex-row items-center gap-2 py-3 px-4 rounded-lg border bg-card dark:bg-[var(--card)] text-card-foreground shadow-xs">
-      {/* Mobile layout: Title first, then buttons at far right */}
-      <div className="flex sm:hidden flex-row items-center justify-between w-full gap-3">
-        <TitleSection title={title} isMobile={true} titleClassName={titleClassName} />
-        <div className="flex items-center gap-2 shrink-0">
-          <BackButton onBack={onBack} />
-          {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
-          {isSaved === false && onAction && <SaveButton onSave={onAction} />}
-          {rightContent}
-        </div>
+    <Card className="flex flex-row items-center gap-3 py-3 px-4 rounded-lg border bg-card text-card-foreground shadow-xs">
+      <div className="shrink-0">
+        <BackButton onBack={onBack} />
       </div>
-
-      {/* Desktop layout: Back button, title center, action buttons */}
-      <div className="hidden sm:flex flex-row items-center w-full gap-3">
-        <div className="shrink-0">
-          <BackButton onBack={onBack} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <TitleSection title={title} titleClassName={titleClassName} />
-        </div>
-        <div className="flex items-center gap-2 shrink-0 min-w-8">
-          {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
-          {isSaved === false && onAction && <SaveButton onSave={onAction} />}
-          {rightContent}
-        </div>
+      <TitleSection title={title} titleClassName={titleClassName} />
+      <div className="flex items-center gap-2 shrink-0 min-w-8 ml-auto sm:ml-0">
+        {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
+        {isSaved === false && onAction && <SaveButton onSave={onAction} />}
+        {rightContent}
       </div>
     </Card>
   );
 });
 
-PageHeader.displayName = PageHeader;
+PageHeader.displayName = "PageHeader";
 
 export default PageHeader;
