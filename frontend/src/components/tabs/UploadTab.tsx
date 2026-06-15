@@ -91,7 +91,7 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <FileUploader
         onFileContent={handleFileUpload}
         externalShowMetadata={showMetadata}
