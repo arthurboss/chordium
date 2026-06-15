@@ -1,15 +1,3 @@
-import { TEXT_PREFERENCES_VALUES } from './TextStyleMenu.constants';
-
-/**
- * Gets the display text for font spacing multiplier
- * 
- * @param fontSpacing - Current font spacing value
- * @returns Display text for the spacing multiplier
- */
-export const getFontSpacingDisplay = (fontSpacing: number): string => {
-  return TEXT_PREFERENCES_VALUES.spacingMultipliers[fontSpacing as keyof typeof TEXT_PREFERENCES_VALUES.spacingMultipliers] || 'x1';
-};
-
 /**
  * Checks if a view mode is currently active
  * 

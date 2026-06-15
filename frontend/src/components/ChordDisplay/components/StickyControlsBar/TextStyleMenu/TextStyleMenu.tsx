@@ -11,7 +11,7 @@ import { Slider } from "../../../../ui/slider";
 import { Settings } from "lucide-react";
 import { TEXT_STYLE_MENU_STYLES } from "./TextStyleMenu.styles";
 import { TEXT_PREFERENCES_VALUES } from "./TextStyleMenu.constants";
-import { getFontSpacingDisplay, isViewModeActive } from "./TextStyleMenu.utils";
+import { isViewModeActive } from "./TextStyleMenu.utils";
 import type { TextStyleMenuProps } from "./TextStyleMenu.types";
 import ToggleOption from "./ToggleOption";
 import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
@@ -19,8 +19,6 @@ import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
 const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
   fontSize,
   setFontSize,
-  fontSpacing,
-  setFontSpacing,
   viewMode,
   setViewMode,
   title,
@@ -110,25 +108,6 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
                 className={TEXT_STYLE_MENU_STYLES.slider}
               />
               <span className={TEXT_STYLE_MENU_STYLES.valueDisplay}>{fontSize}px</span>
-            </div>
-          </div>
-          <DropdownMenuSeparator />
-          <div className={TEXT_STYLE_MENU_STYLES.sliderSection}>
-            <div className={TEXT_STYLE_MENU_STYLES.sectionTitle}>
-              {t("textStyle.fontSpacing")}
-            </div>
-            <div className={TEXT_STYLE_MENU_STYLES.sliderContainer}>
-              <Slider
-                value={[fontSpacing]}
-                min={TEXT_PREFERENCES_VALUES.fontSpacing.min}
-                max={TEXT_PREFERENCES_VALUES.fontSpacing.max}
-                step={TEXT_PREFERENCES_VALUES.fontSpacing.step}
-                onValueChange={(value) => setFontSpacing(value[0])}
-                className={TEXT_STYLE_MENU_STYLES.slider}
-              />
-              <span className={TEXT_STYLE_MENU_STYLES.valueDisplay}>
-                {getFontSpacingDisplay(fontSpacing)}
-              </span>
             </div>
           </div>
         </DropdownMenuContent>

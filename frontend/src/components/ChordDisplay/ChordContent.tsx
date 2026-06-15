@@ -56,7 +56,6 @@ const ChordContent: React.FC<ChordContentProps> = ({
   rawHtml,
   songChords,
   fontSize,
-  fontSpacing,
   fontStyle,
   isLoading,
   viewMode = 'chords',
@@ -70,7 +69,7 @@ const ChordContent: React.FC<ChordContentProps> = ({
     <div
       ref={containerRef}
       className="chord-content-card bg-white dark:bg-[--card] mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-sm border"
-      style={{ "--content-font-size": `${fontSize}px`, letterSpacing: `${fontSpacing}em`, fontFamily } as React.CSSProperties}
+      style={{ "--content-font-size": `${fontSize}px`, fontFamily } as React.CSSProperties}
     >
       {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheet html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}
     </div>

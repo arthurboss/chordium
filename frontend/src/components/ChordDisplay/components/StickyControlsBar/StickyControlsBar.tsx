@@ -24,8 +24,6 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   defaultCapo = 0,
   fontSize,
   setFontSize,
-  fontSpacing,
-  setFontSpacing,
   fontStyle,
   setFontStyle,
   viewMode,
@@ -104,7 +102,6 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
           <div className="flex flex-col">
             <TextStyleMenu
               fontSize={fontSize} setFontSize={setFontSize}
-              fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
               fontStyle={fontStyle} setFontStyle={setFontStyle}
               viewMode={viewMode} setViewMode={setViewMode}
               hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
@@ -146,8 +143,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
                   <span className="text-xs text-muted-foreground mb-1">{t("stickyControlsBar.style")}</span>
                   <TextStyleMenu
                     fontSize={fontSize} setFontSize={setFontSize}
-                    fontSpacing={fontSpacing} setFontSpacing={setFontSpacing}
-                    fontStyle={fontStyle} setFontStyle={setFontStyle}
+                          fontStyle={fontStyle} setFontStyle={setFontStyle}
                     viewMode={viewMode} setViewMode={setViewMode}
                     hideGuitarTabs={hideGuitarTabs} setHideGuitarTabs={setHideGuitarTabs}
                     variant="mobile"

@@ -1,8 +1,6 @@
 export interface TextStyleMenuProps {
   fontSize: number;
   setFontSize: (value: number) => void;
-  fontSpacing: number;
-  setFontSpacing: (value: number) => void;
   fontStyle: string;
   setFontStyle: (value: string) => void;
   viewMode: string;

@@ -14,7 +14,6 @@ export interface ChordContentProps {
   rawHtml?: string;
   songChords?: string;
   fontSize: number;
-  fontSpacing: number;
   fontStyle: string;
   isLoading?: boolean;
   viewMode?: string;
@@ -30,8 +29,6 @@ export interface ChordSheetControlsProps {
   defaultCapo?: number;
   fontSize: number;
   setFontSize: (v: number) => void;
-  fontSpacing: number;
-  setFontSpacing: (v: number) => void;
   fontStyle: string;
   setFontStyle: (v: string) => void;
   viewMode: string;

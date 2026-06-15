@@ -40,8 +40,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     defaultCapo,
     fontSize,
     setFontSize,
-    fontSpacing,
-    setFontSpacing,
     fontStyle,
     setFontStyle,
     viewMode,
@@ -100,7 +98,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
         rawHtml={chordSheet.rawHtml}
         songChords={chordSheet.songChords}
         fontSize={fontSize}
-        fontSpacing={fontSpacing}
         fontStyle={fontStyle}
         isLoading={isLoading}
         viewMode={viewMode}
@@ -116,8 +113,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
           defaultCapo={defaultCapo}
           fontSize={fontSize}
           setFontSize={setFontSize}
-          fontSpacing={fontSpacing}
-          setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
           viewMode={viewMode}

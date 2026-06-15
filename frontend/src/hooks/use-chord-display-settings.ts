@@ -18,7 +18,6 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   }, [initialCapo]);
   
   const [fontSize, setFontSize] = useState(14);
-  const [fontSpacing, setFontSpacing] = useState(0);
   const [fontStyle, setFontStyle] = useState('');
   const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
   const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
@@ -35,8 +34,6 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
     defaultCapo,
     fontSize, 
     setFontSize,
-    fontSpacing,
-    setFontSpacing,
     fontStyle,
     setFontStyle,
     viewMode,
