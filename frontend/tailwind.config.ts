@@ -8,7 +8,6 @@ export default {
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
 	],
-	prefix: "",
 	theme: {
 		container: {
 			center: true,
@@ -135,7 +134,6 @@ export default {
 	},
 	plugins: [
 		require("tailwindcss-animate"),
-		require('tailwind-scrollbar')({ nocompatible: true }) // Add this line
+		require('tailwind-scrollbar')({ nocompatible: true })
 	],
 } satisfies Config;
-
