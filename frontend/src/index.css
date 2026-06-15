@@ -121,6 +121,8 @@
   }
 }
 
+/* Styles for classes injected into raw HTML strings by the chord parser.
+   These cannot be Tailwind utilities because they are set via dangerouslySetInnerHTML. */
 @layer components {
   .chord {
     display: inline-block;
@@ -195,18 +197,6 @@
     white-space: pre !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
-  }
-
-  .chord-content-card {
-    font-size: var(--content-font-size, 14px);
-  }
-
-  .theme-toggle-icon {
-    transition: transform 0.2s ease;
-  }
-
-  .theme-toggle-icon:hover {
-    transform: rotate(15deg);
   }
 }
 
