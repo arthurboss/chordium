@@ -60,7 +60,7 @@ const Overlay: React.FC<OverlayProps> = ({
       data-testid="overlay-backdrop"
     >
       <div
-        className={`relative w-full h-full ${maxWidthClassName} ${containerClassName} flex-1 container px-3 py-4 sm:px-4 sm:py-6 mx-auto`}
+        className={`relative w-full h-full ${maxWidthClassName} ${containerClassName} flex-1 mx-auto px-3 py-4 sm:px-4 sm:py-6`}
         data-testid="overlay-container"
       >
         {children}

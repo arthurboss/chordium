@@ -39,7 +39,7 @@ const Home = () => {
   });
 
   return (
-    <main id="page-home" className="flex-1 w-full max-w-3xl mx-auto container px-3 py-4 sm:px-4 sm:py-6">
+    <main id="page-home" className="flex-1 w-full max-w-3xl mx-auto px-3 py-4 sm:px-4 sm:py-6">
       {/* Development Banner */}
       {process.env.NODE_ENV === 'production' && (
         <div className="text-center bg-primary/30 border-x-4 border-primary p-3 mb-4 rounded-sm shadow">
