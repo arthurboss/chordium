@@ -20,7 +20,7 @@ const ChordSheetList = ({
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
 
   return (
-    <div ref={listRef} style={{ maxHeight: "60vh", overflowY: "auto" }}>
+    <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
       {chordSheets.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {[...chordSheets].reverse().map((storedChordSheet, index) => (

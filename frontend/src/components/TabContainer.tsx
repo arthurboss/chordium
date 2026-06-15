@@ -248,20 +248,20 @@ const TabContainer = ({
       </TabsList>
 
       <div className="mt-4 sm:mt-6">
-        <div style={{ display: activeTab === "search" ? "block" : "none" }}>
+        <div className={activeTab === "search" ? "" : "hidden"}>
           <SearchTab
             setMySongs={setMySongs}
             setActiveTab={setActiveTab}
             setSelectedSong={setSelectedSong}
           />
         </div>
-        <div style={{ display: activeTab === "upload" ? "block" : "none" }}>
+        <div className={activeTab === "upload" ? "" : "hidden"}>
           <UploadTab
             chordDisplayRef={chordDisplayRef}
             onSaveUploadedSong={handleSaveUploadedChordSheet}
           />
         </div>
-        <div style={{ display: activeTab === "my-chord-sheets" ? "block" : "none" }}>
+        <div className={activeTab === "my-chord-sheets" ? "" : "hidden"}>
           <ChordSheetList
             chordSheets={myChordSheets}
             onChordSheetSelect={handleSongSelect}

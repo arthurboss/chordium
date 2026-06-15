@@ -22,12 +22,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
         <div
           key={`icon-${size}-${index}`}
           className="animate-bounce"
-          style={{
-            animationDelay: `${index * 0.2}s`,
-            animationDuration: '1s',
-            animationIterationCount: 'infinite',
-            animationTimingFunction: 'ease-in-out'
-          }}
+          style={{ animationDelay: `${index * 0.2}s` }}
         >
           <Icon
             size={size}
