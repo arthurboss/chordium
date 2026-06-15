@@ -1,6 +1,6 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
-import { extractChordSheet, extractSongMetadata } from "./dom-extractors.js";
+import { extractChordSheet, extractSongMetadata, extractLyricsContent } from "./dom-extractors.js";
 import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
@@ -352,3 +352,5 @@ async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
     );
   });
 }
+
+

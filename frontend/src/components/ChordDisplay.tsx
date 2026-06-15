@@ -17,9 +17,11 @@ interface ChordDisplayProps {
   onSave?: (content: string) => void;
   isLoading?: boolean;
   showControlsBar?: boolean;
+  onViewModeChange?: (viewMode: string) => void;
+  initialViewMode?: string;
 }
 
-const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true }, ref) => {
+const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode }, ref) => {
 
   // Use custom hooks for different concerns
   const {
@@ -38,8 +40,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     defaultCapo,
     fontSize,
     setFontSize,
-    fontSpacing,
-    setFontSpacing,
     fontStyle,
     setFontStyle,
     viewMode,
@@ -49,7 +49,7 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
     capoTransposeLinked,
     setCapoTransposeLinked,
     processedContent
-  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo);
+  } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, initialViewMode);
 
   const {
     isEditing,
@@ -64,6 +64,11 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   useEffect(() => {
     updateEditContent(content);
   }, [content, updateEditContent]);
+
+  // Notify parent when view mode changes
+  useEffect(() => {
+    onViewModeChange?.(viewMode);
+  }, [viewMode, onViewModeChange]);
 
   // Handle saving edits (with toast notification)
   const handleSaveEdits = () => {
@@ -90,14 +95,12 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
   return (
     <div ref={ref} id="chord-display" {...cyAttr('chord-display')}>
       <ChordContent
-        processedContent={processedContent}
+        rawHtml={chordSheet.rawHtml}
+        songChords={chordSheet.songChords}
         fontSize={fontSize}
-        fontSpacing={fontSpacing}
         fontStyle={fontStyle}
-        viewMode={viewMode}
-        hideGuitarTabs={hideGuitarTabs}
-        renderChord={renderChord}
         isLoading={isLoading}
+        viewMode={viewMode}
       />
       {showControlsBar && (
         <StickyControlsBar
@@ -110,8 +113,6 @@ const ChordDisplay = forwardRef<HTMLDivElement, ChordDisplayProps>(({ chordSheet
           defaultCapo={defaultCapo}
           fontSize={fontSize}
           setFontSize={setFontSize}
-          fontSpacing={fontSpacing}
-          setFontSpacing={setFontSpacing}
           fontStyle={fontStyle}
           setFontStyle={setFontStyle}
           viewMode={viewMode}

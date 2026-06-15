@@ -31,6 +31,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const [error, setError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
+
   // Check IndexedDB first
   useEffect(() => {
     const checkLocalData = async () => {
@@ -75,8 +76,8 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // Store to IndexedDB when API data arrives
   useEffect(() => {
     if (apiData && isFromAPI) {
-      const { songChords, ...metadata } = apiData;
-      storeChordSheet(metadata as SongMetadata, { songChords }, false, path).catch(() => {});
+      const { songChords, rawHtml, ...metadata } = apiData;
+      storeChordSheet(metadata as SongMetadata, { songChords, ...(rawHtml ? { rawHtml } : {}) }, false, path).catch(() => {});
     }
   }, [apiData, isFromAPI, path]);
 
@@ -112,6 +113,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   const finalContent: StoredChordSheet | null = localContent || (apiData ? {
     path,
     songChords: apiData.songChords,
+    ...(apiData.rawHtml ? { rawHtml: apiData.rawHtml } : {}),
   } : null);
 
   const finalChordSheet = (finalMetadata && finalContent) ? {
@@ -121,6 +123,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     guitarTuning: finalMetadata.guitarTuning,
     guitarCapo: finalMetadata.guitarCapo,
     songChords: finalContent.songChords,
+    ...(finalContent.rawHtml ? { rawHtml: finalContent.rawHtml } : {}),
   } : null;
 
   return {

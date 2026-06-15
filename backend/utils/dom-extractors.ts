@@ -159,7 +159,21 @@ export function extractArtistSongs(): Song[] {
 
 export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  let songChords = "";
+  if (preElement) {
+    preElement.childNodes.forEach(function(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        songChords += node.textContent || "";
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        if (el.classList.contains("tablatura")) {
+          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+        } else {
+          songChords += el.textContent || "";
+        }
+      }
+    });
+  }
 
   // Extract title and artist from page
   let title = "";
@@ -409,13 +423,109 @@ export function extractSongMetadata(): SongMetadata {
 
 /**
  * Extracts chord sheet from CifraClub song page DOM (content only)
- * This function extracts only the chord content from the pre element
+ * Extracts chord sheet content from the pre element.
+ * Tab blocks (span.tablatura) are wrapped with [TAB]/[/TAB] markers
+ * so the parser can identify them without heuristics.
  */
 export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
-  const songChords = preElement ? preElement.textContent || "" : "";
+  if (!preElement) return { songChords: "" };
 
-  return {
-    songChords,
-  };
+  let songChords = "";
+  preElement.childNodes.forEach(function(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      songChords += node.textContent || "";
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
+      } else {
+        songChords += el.textContent || "";
+      }
+    }
+  });
+
+
+  function sanitizeNode(node: Node): string {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as Element;
+    const tag = el.tagName.toLowerCase();
+    if (tag !== "b" && tag !== "span") {
+      return Array.from(el.childNodes).map(sanitizeNode).join("");
+    }
+    const classAttr = el.getAttribute("class");
+    const openTag = classAttr ? `<${tag} class="${classAttr.replace(/"/g, "&quot;")}">` : `<${tag}>`;
+    const inner = Array.from(el.childNodes).map(sanitizeNode).join("");
+    return `${openTag}${inner}</${tag}>`;
+  }
+
+  const rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+  // Wrap [Section Title] patterns in a span for styling
+  // Wrap section titles and dedent continuation lines
+  const rawHtml = (() => {
+    const lines = rawHtmlRaw.split('\n');
+    const result: string[] = [];
+    let dedentAmount = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const sectionMatch = lines[i].match(/^(<span class="tablatura">)?(\[(?:[^\]]+)\])\s?(.*)/);
+      if (sectionMatch) {
+        const prefix = sectionMatch[1] || '';
+        result.push(prefix + '<span class="section-title">' + sectionMatch[2].slice(1, -1) + '</span>');
+        dedentAmount = sectionMatch[2].length + 1;
+        if (sectionMatch[3]) result.push(sectionMatch[3]);
+      } else if (dedentAmount > 0 && lines[i].startsWith(' '.repeat(dedentAmount))) {
+        result.push(lines[i].slice(dedentAmount));
+      } else {
+        if (lines[i] === '') dedentAmount = 0;
+        result.push(lines[i]);
+      }
+    }
+    const joined = result.join('\n');
+    // Normalize spacing: 1 blank line before section titles, 0 after
+    return joined
+      .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
+      .replace(/(<\/span>)\n\n+/g, '$1\n')
+      .replace(/(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g, (_m: string, open: string, content: string, cnt: string) => {
+        const lines = content.split('\n');
+        const tabInfoLines: string[] = [];
+        const chordAnnotationLines: string[] = [];
+        for (const line of lines) {
+          if (line.includes('<b>') && !line.includes('<span class="section-title">')) {
+            chordAnnotationLines.push(line);
+          } else if (line.trim() && !line.includes('<span class="section-title">')) {
+            tabInfoLines.push('<span class="tab-info">' + line + '</span>');
+          } else {
+            tabInfoLines.push(line);
+          }
+        }
+        // Chord annotation lines belong inside cnt so tab-splitting can position them correctly
+        const prefix = chordAnnotationLines.length > 0 ? chordAnnotationLines.join('\n') + '\n' : '';
+        return open + tabInfoLines.join('\n') + cnt + prefix;
+      });
+  })();
+
+  return { songChords, rawHtml };
+}
+
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Targets div.letra-l (lyrics only, skipping div.letra-t which is the translation).
+ * Joins <p> tags with newlines to preserve verse/section formatting.
+ */
+/**
+ * Extracts lyrics-only content from a /letra/ page DOM.
+ * Structure: div.letra-l > p > span.l_row (lines) separated by <br>.
+ * Each p becomes a verse (newline-separated lines), verses separated by blank lines.
+ */
+export function extractLyricsContent(): ChordSheet {
+  const el = document.querySelector("div.letra-l");
+  if (!el) return { songChords: "" };
+  const verses = Array.from(el.querySelectorAll("p")).map(function(p) {
+    return Array.from(p.querySelectorAll("span.l_row"))
+      .map(function(row) { return (row.textContent || "").trim(); })
+      .filter(function(line) { return line.length > 0; })
+      .join("\n");
+  }).filter(function(v) { return v.length > 0; });
+  return { songChords: verses.join("\n\n") };
 }

@@ -8,7 +8,7 @@ export const config = {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { url: pathParam } = req.query as Record<string, string>;
+  const { url: pathParam, lyricsOnly } = req.query as Record<string, string>;
 
   if (!pathParam) {
     return res.status(400).json({ error: "Missing song path parameter" });
@@ -19,7 +19,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Invalid path format, expected artist/song" });
   }
 
-  const url = `https://www.cifraclub.com.br/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}/`;
+  const songUrl = `https://www.cifraclub.com.br/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}/`;
+  const letraUrl = `${songUrl}letra/`;
 
   let browser = null;
   try {
@@ -32,34 +33,96 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const page = await browser.newPage();
     await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-    const result = await page.evaluate(() => {
-      const pre = document.querySelector("pre");
-      const songChords = pre ? pre.textContent || "" : "";
-
+    // Always fetch metadata from the song page
+    await page.goto(songUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    const metadata = await page.evaluate(() => {
       const title = document.querySelector("h1.t1")?.textContent?.trim() || "";
       const artist = document.querySelector("h2.t3 a")?.textContent?.trim() || "Unknown Artist";
       const songKey = document.querySelector("span#cifra_tom a")?.textContent?.trim() || "";
       const capoText = document.querySelector("span[data-cy='song-capo'] a")?.textContent?.trim() || "";
       const capoMatch = capoText.match(/(\d+)/);
       const guitarCapo = capoMatch ? parseInt(capoMatch[1], 10) : 0;
-
-      return {
-        songChords,
-        title,
-        artist,
-        songKey,
-        guitarCapo,
-        guitarTuning: ["E", "A", "D", "G", "B", "E"] as ["E","A","D","G","B","E"],
-      };
+      return { title, artist, songKey, guitarCapo, guitarTuning: ["E", "A", "D", "G", "B", "E"] as ["E","A","D","G","B","E"] };
     });
 
-    if (!result.songChords) {
-      return res.status(404).json({ error: "Chord sheet content not found" });
+    // Fetch content from the appropriate URL
+    let songChords = "";
+    let rawHtml: string | undefined;
+
+    if (lyricsOnly === 'true') {
+      await page.goto(letraUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+      songChords = await page.evaluate(() => {
+        const el = document.querySelector("div.letra-l");
+        if (!el) return "";
+        const verses = Array.from(el.querySelectorAll("p")).map(function(p) {
+          return Array.from(p.querySelectorAll("span.l_row"))
+            .map(function(row) { return (row.textContent || "").trim(); })
+            .filter(function(line) { return line.length > 0; })
+            .join("\n");
+        }).filter(function(v) { return v.length > 0; });
+        return verses.join("\n\n");
+      });
+    } else {
+      const result = await page.evaluate(() => {
+        const el = document.querySelector("pre");
+        if (!el) return { songChords: "", rawHtml: "" };
+
+        let chords = "";
+        el.childNodes.forEach(function(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            chords += node.textContent || "";
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const child = node as Element;
+            if (child.classList.contains("tablatura")) {
+              chords += "[TAB]\n" + (child.textContent || "") + "\n[/TAB]\n";
+            } else {
+              chords += child.textContent || "";
+            }
+          }
+        });
+
+        // Sanitize: keep only text nodes, <b>, and <span> elements — strip all attributes
+        // except class on span (used by CifraClub to style chord names).
+        function sanitizeNode(node: Node): string {
+          if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
+          if (node.nodeType !== Node.ELEMENT_NODE) return "";
+          const el = node as Element;
+          const tag = el.tagName.toLowerCase();
+          if (tag !== "b" && tag !== "span") {
+            // For other elements just recurse into children
+            return Array.from(el.childNodes).map(sanitizeNode).join("");
+          }
+          const classAttr = el.getAttribute("class");
+          const openTag = classAttr ? `<${tag} class="${classAttr.replace(/"/g, "&quot;")}">` : `<${tag}>`;
+          const inner = Array.from(el.childNodes).map(sanitizeNode).join("");
+          return `${openTag}${inner}</${tag}>`;
+        }
+
+        const sanitized = Array.from(el.childNodes).map(sanitizeNode).join("");
+        // Wrap [Section Title] patterns in a span for styling
+        const withSections = sanitized.replace(/^(\[(?:[^\]]+)\])/gm, '<span class="section-title">$1</span>');
+        const withTabInfo = withSections.replace(/(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g, (_m: string, open: string, content: string, cnt: string) => {
+          const wrapped = content.split('\n').map((line: string) => {
+            if (line.trim() && !line.includes('<b>') && !line.includes('<span class="section-title">')) {
+              return '<span class="tab-info">' + line + '</span>';
+            }
+            return line;
+          }).join('\n');
+          return open + wrapped + cnt;
+        });
+        return { songChords: chords, rawHtml: withTabInfo };
+      });
+
+      songChords = result.songChords;
+      rawHtml = result.rawHtml || undefined;
     }
 
-    return res.json(result);
+    if (!songChords) {
+      return res.status(404).json({ error: "Content not found" });
+    }
+
+    return res.json({ ...metadata, songChords, ...(rawHtml ? { rawHtml } : {}) });
   } catch (e) {
     return res.status(502).json({ error: "Failed to fetch song", details: (e as Error).message });
   } finally {

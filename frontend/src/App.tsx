@@ -8,7 +8,7 @@ import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling
 // import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
-import SmallScreenWarning from "@/components/SmallScreenWarning";
+import SmallScreenWarning, { useIsTooSmall } from "@/components/SmallScreenWarning";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 
 // Reload once on chunk load failures (stale cache after Vercel redeploy)
@@ -150,10 +150,9 @@ const router = createBrowserRouter([
 
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
-  // Initialize service worker update handling
   useServiceWorkerUpdate();
-  
-  // App initialization logic can be added here if needed
+  const tooSmall = useIsTooSmall();
+  if (tooSmall) return <SmallScreenWarning />;
   return <>{children}</>;
 };
 
@@ -162,8 +161,6 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AppInitializer>
-          {/* Small screen warning - positioned at app level */}
-          <SmallScreenWarning />
           <RouterProvider router={router} />
           <OfflineToast />
           {/* {import.meta.env.DEV && <OfflineTestPanel />} */}

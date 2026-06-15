@@ -4,17 +4,7 @@
 export const TEXT_PREFERENCES_VALUES = {
   fontSizes: {
     min: 12,
-    max: 24,
+    max: 22,
     step: 1
   },
-  fontSpacing: {
-    min: 0,
-    max: 0.2,
-    step: 0.1
-  },
-  spacingMultipliers: {
-    0: "x1",
-    0.1: "x2",
-    0.2: "x3"
-  }
 } as const;

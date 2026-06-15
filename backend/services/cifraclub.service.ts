@@ -23,7 +23,6 @@ class CifraClubService {
   }
 
   async getChordSheet(songUrl: string): Promise<ChordSheet> {
-    // Return content-only using progressive extraction (no backward compatibility)
     const progressive = await fetchWithProgressiveExtraction(songUrl);
     return await progressive.getContent();
   }

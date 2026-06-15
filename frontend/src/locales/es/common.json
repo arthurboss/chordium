@@ -150,5 +150,15 @@
   "guitarCapoField": {
     "noCapo": "Sin cejilla",
     "fretDisplay": "Traste {{ordinal}}"
+  },
+  "sectionTitles": {
+    "intro": "Intro",
+    "verse": "Verso",
+    "chorus": "Estribillo",
+    "preChorus": "Pre-Estribillo",
+    "bridge": "Puente",
+    "outro": "Outro",
+    "solo": "Solo",
+    "interlude": "Interludio"
   }
 }

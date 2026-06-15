@@ -4,15 +4,14 @@
 
 import type { IChordSheetStorage } from './types';
 
+const SAMPLE_VERSION_KEY = 'chordium-sample-version';
+const CURRENT_SAMPLE_VERSION = '5';
+
 /**
  * Determines if sample chord sheets should be loaded into storage
- * 
- * Prevents loading samples multiple times in development by checking
- * if any chord sheets already exist in storage.
- * 
- * @param storage - The chord sheet storage interface
- * @returns Promise resolving to true if samples should be loaded, false if any chord sheets exist
- * @throws {DatabaseOperationError} When storage access fails
+ *
+ * Uses a version flag in localStorage to detect when samples need refreshing.
+ * Bumping CURRENT_SAMPLE_VERSION forces re-seeding on next load.
  */
 export const shouldLoadSamples = async (
   storage: IChordSheetStorage
@@ -22,12 +21,21 @@ export const shouldLoadSamples = async (
   }
 
   try {
-    const existingSheets = await storage.getAllSaved();
-    return existingSheets.length === 0;
+    const storedVersion = localStorage.getItem(SAMPLE_VERSION_KEY);
+    if (storedVersion === CURRENT_SAMPLE_VERSION) {
+      return false;
+    }
+    return true;
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.warn('Error checking for existing chord sheets, will load samples:', error);
+      console.warn('Error checking sample version, will load samples:', error);
     }
     return true;
   }
+};
+
+export const markSamplesLoaded = (): void => {
+  try {
+    localStorage.setItem(SAMPLE_VERSION_KEY, CURRENT_SAMPLE_VERSION);
+  } catch {}
 };

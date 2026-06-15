@@ -1,8 +1,6 @@
 export interface TextStyleMenuProps {
   fontSize: number;
   setFontSize: (value: number) => void;
-  fontSpacing: number;
-  setFontSpacing: (value: number) => void;
   fontStyle: string;
   setFontStyle: (value: string) => void;
   viewMode: string;
@@ -11,9 +9,10 @@ export interface TextStyleMenuProps {
   setHideGuitarTabs?: (value: boolean) => void;
   title?: string;
   // Layout customization props
-  variant?: 'desktop' | 'mobile';
+  variant?: "desktop" | "mobile";
   buttonClassName?: string;
   iconSize?: number;
-  dropdownAlign?: 'start' | 'center' | 'end';
-  dropdownClassName?: string;
+  // Inline panel control (replaces dropdown)
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }

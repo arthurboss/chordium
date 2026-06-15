@@ -10,80 +10,108 @@ export interface ChordSection {
   type: 'section';
   title: string;
   lines: ChordLine[];
+  isTabSection?: boolean;
 }
 
 // Enhanced chord regex pattern for better recognition
-export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7)?(?:\/[A-G][#b]?)?)\b/g;
+export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|4|2)?(?:\/[A-G][#b]?)?)\b/g;
+
+function isChordLine(line: string): boolean {
+  CHORD_REGEX.lastIndex = 0;
+  if (!CHORD_REGEX.test(line)) return false;
+  // Strip chord matches and check that only whitespace remains
+  CHORD_REGEX.lastIndex = 0;
+  const stripped = line.replace(CHORD_REGEX, '');
+  return stripped.trim() === '';
+}
+
+function pushSection(sections: ChordSection[], section: ChordSection): void {
+  // Only push if the section has a title or meaningful (non-empty) lines
+  const hasContent = section.lines.some(l => l.type !== 'empty');
+  if (section.title || hasContent) {
+    sections.push(section);
+  }
+}
 
 /**
- * Process chord sheet content into structured sections and lines
- * @param rawContent - Raw text of the chord sheet
- * @param transpose - Number of half steps to transpose, defaults to 0
- * @returns Array of processed chord sections
+ * Process chord sheet content into structured sections and lines.
+ * Tab blocks are delimited by [TAB]/[/TAB] markers injected by the scraper
+ * (from span.tablatura elements). Everything inside a TAB block is typed as
+ * 'tab' regardless of content. Outside TAB blocks the normal chord/lyric
+ * heuristics apply.
  */
 export function processContent(rawContent: string, transpose: number = 0): ChordSection[] {
-  if (!rawContent) {
-    return [{ type: 'section', title: '', lines: [] }];
+  if (!rawContent || typeof rawContent !== "string") {
+    return [{ type: "section", title: "", lines: [], isTabSection: false }];
   }
-  
-  const lines = rawContent.split('\n');
+
+  const rawLines = rawContent.split('\n');
   const sections: ChordSection[] = [];
   let currentSection: ChordSection = { type: 'section', title: '', lines: [] };
-  
-  for (let line of lines) {
-    // Detect section headers (e.g., [Chorus], [Verse], etc.)
-    if (line.match(/^\[.*\]$/)) {
-      if (currentSection.lines.length > 0) {
-        sections.push(currentSection);
-      }
-      currentSection = { 
-        type: 'section', 
-        title: line.replace(/[[\]]/g, ''), 
-        lines: [] 
-      };
-    } else {
-      // Process chord lines and guitar tabs
-      if (line.trim() === '') {
-        // Add empty line
+  let insideTabBlock = false;
+
+  for (let line of rawLines) {
+    const trimmed = line.trim();
+
+    if (trimmed === '[TAB]') {
+      insideTabBlock = true;
+      // Push whatever was accumulated before this TAB block
+      pushSection(sections, currentSection);
+      currentSection = { type: 'section', title: '', lines: [], isTabSection: true };
+      continue;
+    }
+
+    if (trimmed === '[/TAB]') {
+      insideTabBlock = false;
+      pushSection(sections, currentSection);
+      currentSection = { type: 'section', title: '', lines: [] };
+      continue;
+    }
+
+    const isSectionHeader = /^\[.*\]$/.test(trimmed);
+
+    if (insideTabBlock) {
+      if (isSectionHeader) {
+        pushSection(sections, currentSection);
+        currentSection = {
+          type: 'section',
+          title: trimmed.replace(/[[\]]/g, ''),
+          lines: [],
+          isTabSection: true,
+        };
+      } else if (trimmed === '') {
         currentSection.lines.push({ type: 'empty', content: ' ' });
       } else {
-        // Detect if this is a guitar tab line (contains |----|, e|---, etc.)
-        const isTabLine = line.includes('|--') || 
-                         line.includes('-|') || 
-                         line.match(/^[eADGBE]\|/) || 
-                         line.match(/^\|/) ||
-                         line.match(/^\s*\d+\s*$/) || // Numbers only (fret markers)
-                         line.match(/^[eADGBE]:/) || 
-                         line.trim().length > 0 && line.trim().split('').every(c => 
-                           ['-', '|', '/', '\\', '.', 'h', 'p', 'b', 'r', 's', 't', '(', ')', 
-                            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '\t'].includes(c));
+        currentSection.lines.push({ type: 'tab', content: line });
+      }
+      continue;
+    }
 
-        // Chord line detection - has chord patterns
-        const hasChordPattern = line.match(CHORD_REGEX);
-        const nonSpaceRatio = line.replace(/\s/g, '').length / line.length;
-        
-        if (isTabLine) {
-          currentSection.lines.push({ type: 'tab', content: line });
-        } else if ((nonSpaceRatio < 0.5 && hasChordPattern) || 
-                  (line.length < 30 && hasChordPattern && line.split(CHORD_REGEX).filter(Boolean).every(s => s.trim() === ''))) {
-          // Replace chords with transposed versions if needed
-          if (transpose !== 0) {
-            // Find chord patterns and transpose them
-            line = line.replace(CHORD_REGEX, match => transposeChord(match, transpose));
-          }
-          
-          currentSection.lines.push({ type: 'chord', content: line });
-        } else {
-          currentSection.lines.push({ type: 'lyrics', content: line });
+    // Outside tab blocks — normal section/chord/lyric parsing
+    if (isSectionHeader) {
+      pushSection(sections, currentSection);
+      currentSection = {
+        type: 'section',
+        title: trimmed.replace(/[[\]]/g, ''),
+        lines: [],
+      };
+    } else if (trimmed === '') {
+      currentSection.lines.push({ type: 'empty', content: ' ' });
+    } else {
+      if (isChordLine(line)) {
+        if (transpose !== 0) {
+          CHORD_REGEX.lastIndex = 0;
+          line = line.replace(CHORD_REGEX, match => transposeChord(match, transpose));
         }
+        currentSection.lines.push({ type: 'chord', content: line });
+      } else {
+        currentSection.lines.push({ type: 'lyrics', content: line });
       }
     }
   }
-  
-  if (currentSection.lines.length > 0) {
-    sections.push(currentSection);
-  }
-  
+
+  pushSection(sections, currentSection);
+
   return sections;
 }
 
