@@ -8,6 +8,37 @@ describe('removeChordsForLyricsOnly', () => {
     expect(result).toContain('some lyric');
   });
 
+  it('removes chord lines wrapped in parentheses', () => {
+    const input = '( <b>Bm</b>  <b>A</b>  <b>D</b> )\nsome lyric';
+    const result = removeChordsForLyricsOnly(input);
+    expect(result).not.toContain('(');
+    expect(result).not.toContain(')');
+    expect(result).toContain('some lyric');
+  });
+
+  it('removes chord lines wrapped in square brackets', () => {
+    const input = '[ <b>Am</b>  <b>Em</b> ]\nsome lyric';
+    const result = removeChordsForLyricsOnly(input);
+    expect(result).not.toContain('[');
+    expect(result).not.toContain(']');
+    expect(result).toContain('some lyric');
+  });
+
+  it('handles consecutive parenthesised chord lines', () => {
+    const input = [
+      'In the presence of my Savior',
+      '',
+      '( <b>Bm</b>  <b>A</b>  <b>D</b>  <b>A</b>  <b>Em</b> )',
+      '( <b>Bm</b>  <b>A</b>  <b>D</b>  <b>A</b>  <b>Em</b> )',
+      '',
+      'Refrão Final',
+    ].join('\n');
+    const result = removeChordsForLyricsOnly(input);
+    expect(result).not.toContain('(');
+    expect(result).toContain('In the presence of my Savior');
+    expect(result).toContain('Refrão Final');
+  });
+
   it('strips <b> tags from mixed lines and keeps the lyric text', () => {
     const result = removeChordsForLyricsOnly('<b>Am</b> a lyric with a chord above it');
     expect(result).toContain('a lyric with a chord above it');

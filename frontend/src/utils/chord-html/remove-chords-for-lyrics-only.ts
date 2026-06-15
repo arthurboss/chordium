@@ -3,8 +3,8 @@ export function removeChordsForLyricsOnly(html: string): string {
     .split('\n')
     .map(line => {
       const stripped = line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
-      if (stripped === '' && /<b>/.test(line)) return null;
-      return line.replace(/<b>[^<]*<\/b>/g, '').trimStart();
+      if (/<b>/.test(line) && /^[\s()\[\]]*$/.test(stripped)) return null;
+      return stripped;
     })
     .filter(line => line !== null)
     .join('\n');
