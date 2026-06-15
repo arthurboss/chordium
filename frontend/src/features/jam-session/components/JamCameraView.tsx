@@ -27,8 +27,8 @@ export function JamCameraView({ videoRef, canvasRef, hasCamera, debugStatus, onT
         className="absolute inset-0 w-full h-full pointer-events-none"
       />
       {!hasCamera && (
-        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+        <div className="w-full h-full flex items-center justify-center bg-foreground">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       )}
       {debugStatus && (

@@ -17,7 +17,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
   if (results.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500" data-cy="search-no-chord-sheets-found">
+      <div className="p-8 text-center text-muted-foreground" data-cy="search-no-chord-sheets-found">
         {t("searchResults.noResults")}
       </div>
     );
