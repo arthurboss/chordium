@@ -1,4 +1,4 @@
-const TABLATURA_SEPARATOR = /(<\/span><\/span>)\n(?=<span class="tablatura">)/g;
+const TABLATURA_SEPARATOR = /(<\/span><\/span>)\n+(?=<span class="tablatura">)/g;
 const CNT_SEPARATOR = /\n(?=<span class="cnt">)/g;
 
 export function normalizeZeroWidthSpaces(html: string): string {

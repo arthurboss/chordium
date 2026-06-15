@@ -18,8 +18,13 @@ describe('normalizeZeroWidthSpaces', () => {
     expect(normalizeZeroWidthSpaces(input)).toBe('a&ZeroWidthSpace;b');
   });
 
-  it('merges adjacent tablatura spans with a ZWS instead of a newline', () => {
+  it('merges adjacent tablatura spans separated by a single newline', () => {
     const input = '</span></span>\n<span class="tablatura">next';
+    expect(normalizeZeroWidthSpaces(input)).toContain('</span></span>​<span class="tablatura">next');
+  });
+
+  it('merges adjacent tablatura spans separated by a blank line', () => {
+    const input = '</span></span>\n\n<span class="tablatura">next';
     expect(normalizeZeroWidthSpaces(input)).toContain('</span></span>​<span class="tablatura">next');
   });
 
