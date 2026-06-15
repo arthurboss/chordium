@@ -9,7 +9,7 @@ const Header = () => {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 shadow-sm backdrop-blur-sm dark:bg-[--card]">
+    <header className="sticky top-0 z-50 border-b bg-background/80 shadow-xs backdrop-blur-xs dark:bg-[var(--card)]">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
         <Link
           to="/"

@@ -331,13 +331,13 @@ ${errorInfo?.componentStack || 'No component stack available'}
                         )}
                       </Button>
                     </div>
-                    <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
+                    <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded-sm border">
                       {this.state.error.stack}
                     </pre>
                     {this.state.errorInfo && (
                       <div>
                         <strong>{t('errors:boundary.componentStack')}</strong>
-                        <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
+                        <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded-sm border">
                           {this.state.errorInfo.componentStack}
                         </pre>
                       </div>

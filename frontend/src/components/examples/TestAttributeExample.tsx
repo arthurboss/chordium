@@ -9,7 +9,7 @@ export function TestAttributeExample() {
   const [count, setCount] = React.useState(0);
   
   return (
-    <div {...testAttr("test-container")} className="p-4 border rounded">
+    <div {...testAttr("test-container")} className="p-4 border rounded-sm">
       <h2 {...testAttr("test-title")} className="text-lg font-semibold">
         Test Attribute Example
       </h2>
@@ -21,7 +21,7 @@ export function TestAttributeExample() {
             {...testAttr("increment-button")}
             {...cyAttr("increment")}
             onClick={() => setCount(c => c + 1)}
-            className="px-3 py-1 bg-blue-500 text-white rounded"
+            className="px-3 py-1 bg-blue-500 text-white rounded-sm"
           >
             Increment
           </button>
@@ -30,7 +30,7 @@ export function TestAttributeExample() {
             {...testAttr("decrement-button")}
             {...cyAttr("decrement")}
             onClick={() => setCount(c => c - 1)}
-            className="px-3 py-1 bg-gray-500 text-white rounded"
+            className="px-3 py-1 bg-gray-500 text-white rounded-sm"
           >
             Decrement
           </button>
@@ -39,7 +39,7 @@ export function TestAttributeExample() {
             {...testAttr("reset-button")}
             {...e2eAttr("reset-counter")}
             onClick={() => setCount(0)}
-            className="px-3 py-1 bg-red-500 text-white rounded"
+            className="px-3 py-1 bg-red-500 text-white rounded-sm"
           >
             Reset
           </button>
