@@ -3,7 +3,7 @@ import { useSearchReducer } from '@/search';
 
 import { SearchResultsProps } from './SearchResults.types';
 
-import '@/components/custom-scrollbar.css';
+
 import ErrorState from '@/components/ErrorState';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
