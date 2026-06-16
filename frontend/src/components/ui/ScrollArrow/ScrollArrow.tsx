@@ -45,7 +45,7 @@ const ScrollArrow: React.FC<ScrollArrowProps> = ({
       <button
         type="button"
         aria-label={label}
-        className={`animate-pulse pointer-events-auto bg-transparent border-none outline-none rounded-full hover:text-primary ${className}`}
+        className={`animate-pulse pointer-events-auto bg-transparent border-none outline-hidden rounded-full hover:text-primary ${className}`}
         style={{ animation: getJumpingAnimation(direction), ...style }}
         onClick={handleClick}
       >

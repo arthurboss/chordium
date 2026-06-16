@@ -20,7 +20,7 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
 }) => {
   const base = [
     "select-none sticky bottom-4 z-40",
-    "bg-background/70 dark:bg-background/70 backdrop-blur-sm",
+    "bg-background/70 dark:bg-background/70 backdrop-blur-xs",
     "mb-4 mt-0 p-2",
     isAtBottom ? "mx-0" : "mx-4",
     "transition-all duration-300 ease-in-out",

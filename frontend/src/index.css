@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+@source ".";
 
 @layer base {
   :root {
@@ -39,10 +39,8 @@
     --background: 240 3.7% 15.9%;
     --foreground: 0 0% 98%;
 
-    --card: rgb(30, 30, 33);
+    --card: 240 4.8% 12.4%;
     --card-foreground: 0 0% 98%;
-
-    --chord-content-bg-dark: hsl(240, 3.7%, 12%);
 
     --popover: 240 3.7% 10%;
     --popover-foreground: 0 0% 98%;
@@ -66,19 +64,35 @@
     --input: 240 3.7% 25%;
     --ring: 270 84% 75%;
   }
-}
 
-@layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  html,
+  body {
+    max-width: 100%;
+  }
+
+  html {
+    transition: color 0.3s ease, background-color 0.3s ease;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role="menuitem"] {
+    cursor: pointer;
   }
 
   a:focus-visible {
-    @apply outline-none ring-1 ring-ring ring-offset-2;
+    outline: none;
+    box-shadow: 0 0 0 1px hsl(var(--ring));
+    border-radius: var(--radius);
   }
 
   input:-webkit-autofill,
@@ -92,178 +106,17 @@
     caret-color: hsl(var(--foreground));
   }
 
-  /* Ensure the clear button inside the input matches the autofill border */
   input:-webkit-autofill ~ button[aria-label="Clear input"] {
     color: hsl(var(--foreground));
     border: 1px solid hsl(var(--ring));
   }
-}
 
-@layer components {
-  .chord {
-    @apply inline-block font-mono text-primary px-1.5 py-0.5 rounded-sm font-semibold;
-  }
-
-  .chord-line {
-    @apply font-mono whitespace-normal mb-1 break-words;
-    line-height: 1;
-  }
-
+  pre,
+  code,
+  .chord-line,
   .lyrics-line {
-    @apply mb-3 break-words;
-    line-height: 1.1;
-  }
-
-  .section-header {
-    @apply font-bold text-lg mb-2 mt-4 border-l-4 border-primary pl-2;
-  }
-
-  #chord-display pre b {
-    @apply text-primary;
-    font-weight: 500;
-  }
-}
-
-/* User-controlled font size — applied to content but not to tablatura internals or section titles */
-.chord-content-card {
-  font-size: var(--content-font-size, 14px);
-}
-
-/* Section titles in raw chord sheet HTML (outside @layer to prevent Tailwind purge) */
-#chord-display pre .section-title {
-  display: block;
-  font-weight: 700;
-  font-size: 1rem;
-  border-left: 4px solid hsl(var(--primary));
-  padding-left: 0.5rem;
-}
-
-
-#chord-display {
-  --chord-card-px: 1rem;
-}
-
-@media (min-width: 426px) {
-  #chord-display {
-    --chord-card-px: 2rem;
-  }
-}
-
-/* Tab blocks (outside @layer: unlayered mobile rules would otherwise win on specificity) */
-#chord-display pre .tablatura {
-  font-family: "Roboto Mono", monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  display: block;
-  white-space: pre;
-  word-break: normal;
-  overflow-wrap: normal;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-#chord-display pre .tablatura b {
-  color: hsl(var(--primary));
-}
-
-#chord-display pre .tab-info {
-  font-size: var(--content-font-size, 14px);
-  font-family: inherit;
-  white-space: pre-wrap;
-}
-
-#chord-display pre .cnt {
-  font-family: "Roboto Mono", monospace;
-  display: block;
-  line-height: 1.4;
-  max-width: 100%;
-  overflow-x: auto;
-  white-space: pre !important;
-  word-break: normal !important;
-  overflow-wrap: normal !important;
-}
-
-
-/* Mobile optimizations */
-@media (max-width: 640px) {
-  .chord-line {
-    @apply text-sm mb-0.5 break-all;
-    line-height: 1;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%;
-  }
-
-  .chord {
-    @apply text-xs px-1 py-0.5;
-    word-break: keep-all;
-  }
-
-  .lyrics-line {
-    @apply mb-2 break-words;
-    line-height: 1.1;
-    max-width: 100%;
-  }
-
-  .section-header {
-    @apply text-base mt-3 mb-1;
-  }
-
-  pre {
-    @apply whitespace-pre-wrap break-all text-[10px];
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  #chord-display pre {
     white-space: pre-wrap;
-    word-break: normal;
-    font-size: inherit;
-    overflow-x: auto;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
-
-  #chord-display pre .tablatura {
-    white-space: pre;
-    word-break: normal;
-    overflow-wrap: normal;
-    max-width: 100%;
-    overflow-x: auto;
-  }
-}
-
-html,
-body {
-  max-width: 100%;
-}
-
-pre,
-code,
-.chord-line,
-.lyrics-line {
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: break-word;
-}
-
-a:focus-visible {
-  box-shadow: 0 0 0 1px hsl(var(--ring));
-  border-radius: var(--radius);
-}
-
-/* Theme transition animation */
-html {
-  transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-[role="menuitem"] {
-  cursor: pointer;
-}
-
-/* Theme toggle animation */
-.theme-toggle-icon {
-  transition: transform 0.2s ease;
-}
-
-.theme-toggle-icon:hover {
-  transform: rotate(15deg);
 }

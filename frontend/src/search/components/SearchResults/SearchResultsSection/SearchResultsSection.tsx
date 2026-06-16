@@ -13,7 +13,7 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
       <h2 className="text-lg font-medium mb-2 text-center">
         {title}
         {count !== undefined && (
-          <span className="ml-2 text-sm text-gray-500 font-normal">
+          <span className="ml-2 text-sm text-muted-foreground font-normal">
             ({count} result{count !== 1 ? 's' : ''})
           </span>
         )}

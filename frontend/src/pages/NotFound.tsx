@@ -25,13 +25,13 @@ const NotFound = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full text-center space-y-6">
+    <div className="min-h-dvh flex items-center justify-center bg-background px-4">
+      <div className="flex flex-col items-center max-w-md w-full gap-6">
         <AlertTriangle className="mx-auto h-16 w-16 text-orange-400" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("notFound.title")}</h1>
-          <p className="text-lg text-gray-600 mb-4">{t("notFound.message")}</p>
-          <p className="text-gray-500 mb-6">{t("notFound.hint")}</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t("notFound.title")}</h1>
+          <p className="text-lg text-muted-foreground mb-4">{t("notFound.message")}</p>
+          <p className="text-muted-foreground mb-6">{t("notFound.hint")}</p>
         </div>
 
         <Button asChild className="flex items-center gap-2">

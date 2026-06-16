@@ -22,7 +22,7 @@ export const ThemeTriggerButton = memo(forwardRef<HTMLButtonElement, ThemeTrigge
         onClick={onClick}
         {...cyAttr("theme-toggle-button")}
       >
-        <span className="theme-toggle-icon">
+        <span className="transition-transform duration-200 hover:rotate-[15deg]">
           {getThemeToggleIcon(isDark)}
         </span>
         <span className="sr-only">Theme settings</span>
@@ -31,7 +31,6 @@ export const ThemeTriggerButton = memo(forwardRef<HTMLButtonElement, ThemeTrigge
   }
 ));
 
-// Set display name for better debugging
 ThemeTriggerButton.displayName = 'ThemeTriggerButton';
 
 export default ThemeTriggerButton;

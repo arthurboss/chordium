@@ -10,7 +10,7 @@ interface SpeedControlProps {
 
 const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, setScrollSpeed, className }) => {
   return (
-    <div className={"flex items-center " + (className || "") + ""} style={{ cursor: 'pointer' }}>
+    <div className={"flex items-center cursor-pointer " + (className || "")} >
       <Slider
         value={[scrollSpeed]}
         min={1}

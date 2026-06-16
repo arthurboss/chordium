@@ -45,11 +45,11 @@ const RedirectToHome = ({ reason }: RedirectToHomeProps) => {
   }, [navigate, location.pathname, reason]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center space-y-4">
+    <div className="min-h-dvh flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <h2 className="text-lg font-medium text-gray-900">Redirecting to Home...</h2>
-        <p className="text-gray-600 max-w-md">
+        <h2 className="text-lg font-medium text-foreground">Redirecting to Home...</h2>
+        <p className="text-muted-foreground max-w-md">
           The page you requested doesn't exist. Taking you back to the home page.
         </p>
       </div>

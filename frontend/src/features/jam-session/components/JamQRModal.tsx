@@ -146,7 +146,7 @@ export function JamQRModal({ chordSheet }: JamQRModalProps) {
                   readOnly
                   value={jamUrl}
                   onClick={handleInputClick}
-                  className="flex-1 min-w-0 text-xs font-mono px-2 py-1.5 rounded border bg-muted text-muted-foreground cursor-text"
+                  className="flex-1 min-w-0 text-xs font-mono px-2 py-1.5 rounded-sm border bg-muted text-muted-foreground cursor-text"
                   aria-label="Shareable jam link"
                 />
                 <Button

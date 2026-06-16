@@ -237,7 +237,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
       }
 
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="min-h-dvh bg-background flex items-center justify-center p-4">
           <Card className="w-full max-w-2xl">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -331,13 +331,13 @@ ${errorInfo?.componentStack || 'No component stack available'}
                         )}
                       </Button>
                     </div>
-                    <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
+                    <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded-sm border">
                       {this.state.error.stack}
                     </pre>
                     {this.state.errorInfo && (
                       <div>
                         <strong>{t('errors:boundary.componentStack')}</strong>
-                        <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded border">
+                        <pre className="mt-1 overflow-auto text-xs bg-background p-2 rounded-sm border">
                           {this.state.errorInfo.componentStack}
                         </pre>
                       </div>
