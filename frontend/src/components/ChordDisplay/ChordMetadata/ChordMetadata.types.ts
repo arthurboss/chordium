@@ -1,12 +1,19 @@
 import type { ChordSheet } from '@/types/chordSheet';
 
-/**
- * Props for the ChordMetadata component
- * Displays musical metadata like artist and tuning information
- */
+export interface TransposeCapoControls {
+  transpose: number;
+  defaultTranspose: number;
+  handleTransposeChange: (v: number) => void;
+  getTransposeDisableStates: () => { disableIncrement: boolean; disableDecrement: boolean };
+  capo: number;
+  defaultCapo: number;
+  handleCapoChange: (v: number) => void;
+  getCapoDisableStates: () => { disableIncrement: boolean; disableDecrement: boolean };
+  songKey?: string;
+}
+
 export interface ChordMetadataProps {
-  /** Chord sheet object containing all metadata */
   chordSheet: ChordSheet;
-  /** Path of the song (e.g. "ac-dc/back-in-black"), used to derive the artist slug */
   path: string;
+  controls?: TransposeCapoControls;
 }

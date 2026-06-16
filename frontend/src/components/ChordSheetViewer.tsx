@@ -19,19 +19,20 @@ interface ChordSheetViewerProps {
   showControlsBar?: boolean;
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
+  effectiveTranspose?: number;
 }
 
 /**
  * Orchestrates the full chord sheet viewing experience.
  *
- * Owns all playback/display state (transpose, capo, font, auto-scroll, edit mode)
- * via custom hooks and passes derived props down to `ChordSheetContent` and
- * `StickyControlsBar`. Switches to `ChordEdit` when the user enters edit mode.
+ * When `effectiveTranspose` is provided by a parent (e.g. SongViewer), the
+ * internal capo/transpose state is unused. Otherwise falls back to the internal
+ * state for standalone usage (e.g. UploadTab).
  *
  * The forwarded ref points to the root `#chord-sheet-viewer` div, which parent
  * components (e.g. auto-scroll) use to measure scroll position.
  */
-const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode }, ref) => {
+const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode, effectiveTranspose: externalEffectiveTranspose }, ref) => {
 
   const {
     autoScroll,
@@ -41,12 +42,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
   } = useAutoScroll();
 
   const {
-    transpose,
-    setTranspose,
-    defaultTranspose,
-    capo,
-    setCapo,
-    defaultCapo,
     fontSize,
     setFontSize,
     fontStyle,
@@ -55,8 +50,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
     setViewMode,
     hideGuitarTabs,
     setHideGuitarTabs,
-    capoTransposeLinked,
-    setCapoTransposeLinked,
   } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, initialViewMode);
 
   const {
@@ -81,9 +74,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
     toast(result);
   };
 
-  // capo shifts the fret position without changing written chords — to hear the same pitch
-  // the chord sheet must be transposed down by the capo offset relative to the default.
-  const effectiveTranspose = transpose - (capo - defaultCapo);
+  const effectiveTranspose = externalEffectiveTranspose ?? 0;
 
   if (isEditing) {
     return (
@@ -109,13 +100,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
       />
       {showControlsBar && (
         <StickyControlsBar
-          transpose={transpose}
-          setTranspose={setTranspose}
-          defaultTranspose={defaultTranspose}
-          songKey={chordSheet.songKey}
-          capo={capo}
-          setCapo={setCapo}
-          defaultCapo={defaultCapo}
           fontSize={fontSize}
           setFontSize={setFontSize}
           fontStyle={fontStyle}
@@ -128,8 +112,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
           setAutoScroll={toggleAutoScroll}
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
-          capoTransposeLinked={capoTransposeLinked}
-          setCapoTransposeLinked={setCapoTransposeLinked}
           setIsEditing={setIsEditing}
           handleDownload={handleDownload}
         />

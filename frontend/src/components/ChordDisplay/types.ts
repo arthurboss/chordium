@@ -11,13 +11,6 @@ export interface ChordSection {
 }
 
 export interface ChordSheetControlsProps {
-  transpose: number;
-  setTranspose: (v: number) => void;
-  defaultTranspose?: number;
-  songKey?: string;
-  capo: number;
-  setCapo: (v: number) => void;
-  defaultCapo?: number;
   fontSize: number;
   setFontSize: (v: number) => void;
   fontStyle: string;
@@ -30,8 +23,6 @@ export interface ChordSheetControlsProps {
   setAutoScroll: (v: boolean) => void;
   scrollSpeed: number;
   setScrollSpeed: (v: number) => void;
-  capoTransposeLinked?: boolean;
-  setCapoTransposeLinked?: (v: boolean) => void;
   setIsEditing?: (v: boolean) => void;
   handleDownload?: () => void;
 }

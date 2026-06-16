@@ -6,6 +6,9 @@ import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
+import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
+import { useCapoTranspose } from "@/hooks/useCapoTranspose";
+import type { TransposeCapoControls } from "@/components/ChordDisplay/ChordMetadata/ChordMetadata.types";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet & SongMetadata };
@@ -28,10 +31,8 @@ interface SongViewerProps {
 /**
  * Page-level wrapper for the chord sheet viewer screen.
  *
- * Composes the page header (back/action button, title), chord metadata badges,
- * a QR code sharing modal, and the \`ChordSheetViewer\`. Handles the two content
- * sources: directly passed \`chordContent\` (search results / upload preview) or
- * lazily loaded content from local storage (My Chord Sheets).
+ * Owns transpose/capo state and passes the controls down to ChordMetadata
+ * and the effective transpose value to ChordSheetViewer.
  */
 const SongViewer = ({
   song,
@@ -64,6 +65,24 @@ const SongViewer = ({
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
+  const {
+    transpose,
+    setTranspose,
+    defaultTranspose,
+    capo,
+    setCapo,
+    defaultCapo,
+  } = useChordDisplaySettings(chordContentToDisplay, chordSheetToDisplay.songKey, chordSheetToDisplay.guitarCapo, initialViewMode);
+
+  const {
+    handleCapoChange,
+    handleTransposeChange,
+    getCapoDisableStates,
+    getTransposeDisableStates,
+  } = useCapoTranspose({ capo, setCapo, transpose, setTranspose });
+
+  const effectiveTranspose = transpose - (capo - defaultCapo);
+
   const handleAction = () => {
     if (isFromMyChordSheets && !hideDeleteButton) {
       onDelete(songObj.path);
@@ -93,7 +112,21 @@ const SongViewer = ({
             : undefined
         }
       />
-      <ChordMetadata chordSheet={chordSheetToDisplay} path={songObj.path} />
+      <ChordMetadata
+        chordSheet={chordSheetToDisplay}
+        path={songObj.path}
+        controls={{
+          transpose,
+          defaultTranspose,
+          handleTransposeChange,
+          getTransposeDisableStates,
+          capo,
+          defaultCapo,
+          handleCapoChange,
+          getCapoDisableStates,
+          songKey: chordSheetToDisplay.songKey,
+        }}
+      />
 
       <ChordSheetViewer
         ref={chordDisplayRef}
@@ -103,6 +136,7 @@ const SongViewer = ({
         isLoading={finalIsContentLoading}
         onViewModeChange={onViewModeChange}
         initialViewMode={initialViewMode}
+        effectiveTranspose={effectiveTranspose}
       />
     </main>
   );
