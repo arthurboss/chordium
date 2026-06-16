@@ -112,8 +112,10 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
           songCount: null,
         });
         
-        // IMPORTANT: Restore the original search query from session storage
-        // This ensures the input fields show the original search query
+        // Restore the original search query from session storage if present.
+        // If absent (e.g. navigating here from a chord sheet artist link), fall
+        // back to the artist display name so the input field is not left empty.
+        let restoredFromSession = false;
         try {
           const storedQuery = sessionStorage.getItem('chordium_search_query');
           if (storedQuery) {
@@ -128,10 +130,16 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
               setOriginalSearchArtist(artist || '');
               setOriginalSearchSong(song || '');
               setHasSearched(true);
+              restoredFromSession = true;
             }
           }
         } catch (error) {
           console.warn('Failed to restore search query from session storage:', error);
+        }
+
+        if (!restoredFromSession) {
+          setArtistInput(artistName);
+          setPrevArtistInput(artistName);
         }
         
         // Don't set submittedArtist here - preserve the original search query
