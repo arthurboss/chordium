@@ -1,8 +1,10 @@
-import type { StoredSongMetadata } from "@/storage/types";
+import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
+
+export type SortOption = "recent" | "az" | "za" | "most-played";
 
 export interface ChordSheetListProps {
-  chordSheets: StoredSongMetadata[];
-  onChordSheetSelect: (metadata: StoredSongMetadata) => void;
+  chordSheets: ChordSheetListItem[];
+  onChordSheetSelect: (metadata: ChordSheetListItem) => void;
   onDeleteChordSheet: (chordSheetPath: string) => void;
   onUploadClick: () => void;
   tabState?: { scroll: number };
