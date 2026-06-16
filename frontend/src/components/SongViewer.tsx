@@ -1,4 +1,4 @@
-import ChordDisplay from "@/components/ChordDisplay";
+import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
@@ -87,7 +87,7 @@ const SongViewer = ({
       />
       <ChordMetadata chordSheet={chordSheetToDisplay} path={songObj.path} />
 
-      <ChordDisplay
+      <ChordSheetViewer
         ref={chordDisplayRef}
         chordSheet={chordSheetToDisplay}
         content={chordContentToDisplay}

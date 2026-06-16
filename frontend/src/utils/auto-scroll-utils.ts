@@ -15,7 +15,7 @@ export interface AutoScrollRefs {
  * @returns The title/artist DOM element or null
  */
 export function getTitleArtistElement(): Element | null {
-  return document.querySelector('#chord-display .mb-4');
+  return document.querySelector('#chord-sheet-viewer .mb-4');
 }
 
 /**
@@ -120,7 +120,7 @@ export function performAutoScroll(
   setAutoScroll: (value: boolean) => void,
   setScrollSpeed: (value: number) => void
 ): (() => void) | undefined {
-  const mainEl = document.getElementById('chord-display');
+  const mainEl = document.getElementById('chord-sheet-viewer');
   if (mainEl) {
     const mainBottom = mainEl.offsetTop + mainEl.offsetHeight;
     const viewportBottom = window.scrollY + window.innerHeight;
