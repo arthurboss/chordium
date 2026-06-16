@@ -1,4 +1,5 @@
 import { forwardRef, useEffect } from 'react';
+import './ChordDisplay/chord-display.css';
 import type { ChordSheet } from '@/types/chordSheet';
 import { toast } from "@/hooks/use-toast";
 import ChordContent from './ChordDisplay/ChordContent';
