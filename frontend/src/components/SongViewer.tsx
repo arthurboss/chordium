@@ -1,14 +1,14 @@
-import ChordDisplay from "@/components/ChordDisplay";
+import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
-import type { ChordSheet } from "@/types/chordSheet";
+import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 
 interface SongViewerProps {
-  song: { song: Song; chordSheet: ChordSheet };
+  song: { song: Song; chordSheet: ChordSheet & SongMetadata };
   chordContent?: string;
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;
@@ -25,6 +25,14 @@ interface SongViewerProps {
   initialViewMode?: string;
 }
 
+/**
+ * Page-level wrapper for the chord sheet viewer screen.
+ *
+ * Composes the page header (back/action button, title), chord metadata badges,
+ * a QR code sharing modal, and the \`ChordSheetViewer\`. Handles the two content
+ * sources: directly passed \`chordContent\` (search results / upload preview) or
+ * lazily loaded content from local storage (My Chord Sheets).
+ */
 const SongViewer = ({
   song,
   chordContent: directChordContent,
@@ -87,7 +95,7 @@ const SongViewer = ({
       />
       <ChordMetadata chordSheet={chordSheetToDisplay} path={songObj.path} />
 
-      <ChordDisplay
+      <ChordSheetViewer
         ref={chordDisplayRef}
         chordSheet={chordSheetToDisplay}
         content={chordContentToDisplay}
