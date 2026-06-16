@@ -48,9 +48,9 @@ const ChordSheetList = ({
     <div>
       {chordSheets.length > 0 ? (
         <>
-          <div className="flex justify-end mb-3">
+          <div className="flex justify-end mb-4 sm:mb-6">
             <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="w-40 [&>span]:text-left">
+              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

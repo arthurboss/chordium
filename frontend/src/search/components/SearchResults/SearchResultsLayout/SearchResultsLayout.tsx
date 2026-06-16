@@ -67,7 +67,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       <SearchResultsSection title={getSectionTitle()} count={results.length}>
         <div className="flex justify-end mb-2">
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="w-36 [&>span]:text-left">
+            <SelectTrigger className="w-36 bg-card [&>span]:text-left">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
