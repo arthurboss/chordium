@@ -3,12 +3,12 @@ import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import { RefObject, useMemo } from "react";
 import type { Song } from "../types/song";
-import type { ChordSheet } from "@/types/chordSheet";
+import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 
 interface SongViewerProps {
-  song: { song: Song; chordSheet: ChordSheet };
+  song: { song: Song; chordSheet: ChordSheet & SongMetadata };
   chordContent?: string;
   chordDisplayRef: RefObject<HTMLDivElement>;
   onBack: () => void;

@@ -1,3 +1,6 @@
 export interface ChordSheet {
-  songChords: string; // The actual chord sheet content, can be a string of chords or lyrics with chords
+  /** Plain-text chord sheet content (chords + lyrics). Always present. */
+  songChords: string;
+  /** Pre-rendered HTML from the source page. Optional — only present for scraped sheets. */
+  rawHtml?: string;
 }

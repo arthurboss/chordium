@@ -1,6 +1,6 @@
 import { forwardRef, useEffect } from 'react';
 import './ChordDisplay/chord-display.css';
-import type { ChordSheet } from '@/types/chordSheet';
+import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from '@/hooks/use-toast';
 import ChordSheetContent from './ChordDisplay/ChordSheetContent';
 import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
@@ -12,7 +12,7 @@ import { downloadTextFile } from '@/utils/download-utils';
 import { cyAttr } from '@/utils/test-utils';
 
 interface ChordSheetViewerProps {
-  chordSheet: ChordSheet;
+  chordSheet: ChordSheet & SongMetadata;
   content: string;
   onSave?: (content: string) => void;
   isLoading?: boolean;
