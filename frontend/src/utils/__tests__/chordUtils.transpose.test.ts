@@ -30,10 +30,12 @@ describe('chordUtils - Transposition Logic', () => {
       expect(transposeChord('Gadd9', 3)).toBe('A#add9');
     });
 
-    it('should transpose slash chords correctly', () => {
-      expect(transposeChord('C/E', 1)).toBe('C#/E');
-      expect(transposeChord('Am/C', 2)).toBe('Bm/C'); // Slash chord bass note doesn't transpose
-      expect(transposeChord('F#m/A', -1)).toBe('Fm/A'); // Slash chord bass note doesn't transpose
+    it('should transpose slash chords correctly — bass note transposes too', () => {
+      expect(transposeChord('C/E', 1)).toBe('C#/F');
+      expect(transposeChord('Am/C', 2)).toBe('Bm/D');
+      expect(transposeChord('F#m/A', -1)).toBe('Fm/G#');
+      expect(transposeChord('G/B', -1)).toBe('F#/A#');
+      expect(transposeChord('G/B', -2)).toBe('F/A');
     });
 
     it('should handle sharp and flat notes correctly', () => {
@@ -180,11 +182,11 @@ describe('chordUtils - Transposition Logic', () => {
       expect(transposeChord('Bbb', 1)).toBe('Bb'); // Bbb + 1 = Bb (the function normalizes flats to sharps)
     });
 
-    it('should preserve complex chord structures', () => {
+    it('should preserve complex chord structures and transpose bass', () => {
       const complexChord = 'Cmaj7#11/E';
       const transposed = transposeChord(complexChord, 1);
-      
-      expect(transposed).toBe('C#maj7#11/E'); // Slash chord bass note doesn't transpose
+
+      expect(transposed).toBe('C#maj7#11/F');
       expect(transposed.includes('maj7#11')).toBe(true);
     });
   });
@@ -194,7 +196,7 @@ describe('chordUtils - Transposition Logic', () => {
       const originalChord = 'Am7';
       const up = transposeChord(originalChord, 5);
       const back = transposeChord(up, -5);
-      
+
       expect(back).toBe(originalChord);
     });
 
@@ -202,9 +204,58 @@ describe('chordUtils - Transposition Logic', () => {
       const originalChord = 'F#m';
       const upOctave = transposeChord(originalChord, 12);
       const downOctave = transposeChord(originalChord, -12);
-      
+
       expect(upOctave).toBe(originalChord);
       expect(downOctave).toBe(originalChord);
+    });
+
+    it('should round-trip slash chords correctly', () => {
+      expect(transposeChord(transposeChord('G/B', -2), 2)).toBe('G/B');
+      expect(transposeChord(transposeChord('D9/F#', 3), -3)).toBe('D9/F#');
+    });
+  });
+
+  describe('slash chord music theory — interval between root and bass is preserved', () => {
+    const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    function noteIndex(note: string): number {
+      // Normalise flats to sharps before looking up
+      const n = note.endsWith('b') ? NOTES[(NOTES.indexOf(note[0]) + 11) % 12] : note;
+      return NOTES.indexOf(n);
+    }
+
+    function slashInterval(chord: string): number {
+      const [root, bass] = chord.split('/');
+      const rootNote = root.match(/^[A-G][#b]?/)?.[0] ?? '';
+      return ((noteIndex(bass) - noteIndex(rootNote)) + 12) % 12;
+    }
+
+    it('G/B: interval between root and bass is preserved after any transposition', () => {
+      const original = slashInterval('G/B'); // B is 4 semitones above G (major third)
+      expect(slashInterval(transposeChord('G/B', -1))).toBe(original); // F#/A#
+      expect(slashInterval(transposeChord('G/B', -2))).toBe(original); // F/A
+      expect(slashInterval(transposeChord('G/B',  5))).toBe(original); // C/E
+    });
+
+    it('D9/F#: interval preserved — capo use-case from this song', () => {
+      const original = slashInterval('D9/F#');
+      expect(slashInterval(transposeChord('D9/F#', -1))).toBe(original);
+      expect(slashInterval(transposeChord('D9/F#',  2))).toBe(original);
+    });
+
+    it('C/E: classic first-inversion C major, interval preserved', () => {
+      const original = slashInterval('C/E'); // E is 4 semitones above C
+      expect(slashInterval(transposeChord('C/E', 1))).toBe(original); // C#/F
+      expect(slashInterval(transposeChord('C/E', 7))).toBe(original); // G/B
+    });
+
+    it('capo 1 on G/B gives F#/A# (verified against music theory)', () => {
+      // Capo 1 means the sounding pitch is 1 semitone lower than written
+      expect(transposeChord('G/B', -1)).toBe('F#/A#');
+    });
+
+    it('capo 2 on G/B gives F/A (verified against music theory)', () => {
+      expect(transposeChord('G/B', -2)).toBe('F/A');
     });
   });
 });

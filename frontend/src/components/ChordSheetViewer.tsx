@@ -81,6 +81,10 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
     toast(result);
   };
 
+  // capo shifts the fret position without changing written chords — to hear the same pitch
+  // the chord sheet must be transposed down by the capo offset relative to the default.
+  const effectiveTranspose = transpose - (capo - defaultCapo);
+
   if (isEditing) {
     return (
       <ChordEdit
@@ -100,6 +104,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
         fontSize={fontSize}
         fontStyle={fontStyle}
         viewMode={viewMode}
+        transpose={effectiveTranspose}
         isLoading={isLoading}
       />
       {showControlsBar && (

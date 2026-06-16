@@ -6,47 +6,34 @@ import tonalNote from '@tonaljs/note';
 // Define the musical notes for transposing
 export const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+function transposeNote(note: string, halfSteps: number): string {
+  let normalized = note;
+  if (note.endsWith('b')) {
+    normalized = NOTES[(NOTES.indexOf(note[0] as Note) + 11) % 12];
+  }
+  const idx = NOTES.indexOf(normalized as Note);
+  if (idx === -1) return note;
+  return NOTES[(idx + halfSteps + 12) % 12];
+}
+
 /**
- * Transpose a chord by a given number of half steps
+ * Transpose a chord by a given number of half steps.
+ * Both the root note and the bass note of slash chords (e.g. G/B) are transposed.
  */
 export function transposeChord(chord: string, halfSteps: number): string {
-  // If no transposition needed, return the original chord
-  if (halfSteps === 0) {
-    return chord;
+  if (halfSteps === 0) return chord;
+
+  const match = chord.match(/^([A-G][#b]?)(.*?)(\/[A-G][#b]?)?$/);
+  if (!match) return chord;
+
+  const [, root, quality, bassSlash] = match;
+  const transposedRoot = transposeNote(root, halfSteps);
+
+  if (bassSlash) {
+    return transposedRoot + quality + '/' + transposeNote(bassSlash.slice(1), halfSteps);
   }
-  
-  // Regular expression to match the chord root and any additional info
-  const regex = /^([A-G][#b]?)(.*)$/;
-  const match = chord.match(regex);
-  
-  if (!match) {
-    return chord; // Not a valid chord
-  }
-  
-  const [, rootNote, rest] = match;
-  
-  // Normalize sharp/flat notes (convert b to #)
-  let normalizedRoot = rootNote;
-  if (rootNote.endsWith('b')) {
-    const flatIndex = NOTES.indexOf(
-      NOTES[(NOTES.indexOf(rootNote[0] as Note) + 11) % 12]
-    );
-    normalizedRoot = NOTES[flatIndex];
-  }
-  
-  // Find the index of the root note in the notes array
-  const rootIndex = NOTES.indexOf(normalizedRoot as Note);
-  
-  if (rootIndex === -1) {
-    return chord; // Not a valid note
-  }
-  
-  // Calculate the new root note after transposition
-  const newRootIndex = (rootIndex + halfSteps + 12) % 12;
-  const newRoot = NOTES[newRootIndex];
-  
-  // Return the new chord with the original suffix
-  return newRoot + rest;
+
+  return transposedRoot + quality;
 }
 
 /**
