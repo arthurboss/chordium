@@ -164,5 +164,12 @@
     "outro": "Outro",
     "solo": "Solo",
     "interlude": "Interlude"
+  },
+  "sort": {
+    "default": "Relevance",
+    "az": "A → Z",
+    "za": "Z → A",
+    "recent": "Recent",
+    "mostPlayed": "Most played"
   }
 }
