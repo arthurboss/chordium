@@ -37,59 +37,53 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
     }
   };
 
-  return (
-    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs">
-      {/* Row 1: Artist + Tuning */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <MetadataBadge
-          label={t("chordMetadata.artist")}
-          value={chordSheet.artist || t("chordMetadata.unknown")}
-          onClick={chordSheet.artist ? handleArtistClick : undefined}
-          isClickable={!!chordSheet.artist}
-        />
-        <MetadataBadge
-          label={t("chordMetadata.guitarTuning")}
-          value={tuning}
+  const keyCapoControls = controls ? (
+    <>
+      <div className="flex items-center gap-1.5">
+        <span className="font-medium text-muted-foreground">{t("chordMetadata.songKey")}</span>
+        <TransposeMenu
+          transpose={controls.transpose}
+          setTranspose={controls.handleTransposeChange}
+          defaultTranspose={controls.defaultTranspose}
+          songKey={controls.songKey}
+          disableIncrement={controls.getTransposeDisableStates().disableIncrement}
+          disableDecrement={controls.getTransposeDisableStates().disableDecrement}
         />
       </div>
+      <div className="flex items-center gap-1.5">
+        <span className="font-medium text-muted-foreground">{t("chordMetadata.guitarCapo")}</span>
+        <CapoMenu
+          capo={controls.capo}
+          setCapo={controls.handleCapoChange}
+          defaultCapo={controls.defaultCapo}
+          disableIncrement={controls.getCapoDisableStates().disableIncrement}
+          disableDecrement={controls.getCapoDisableStates().disableDecrement}
+        />
+      </div>
+    </>
+  ) : (
+    <>
+      <MetadataBadge label={t("chordMetadata.songKey")} value={chordSheet.songKey || "-"} />
+      <MetadataBadge label={t("chordMetadata.guitarCapo")} value={capoValue} />
+    </>
+  );
 
-      {/* Row 2: Key (transpose control) + Capo (capo control) */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        {controls ? (
-          <div className="flex items-center gap-1.5">
-            <span className="font-medium text-muted-foreground">{t("chordMetadata.songKey")}</span>
-            <TransposeMenu
-              transpose={controls.transpose}
-              setTranspose={controls.handleTransposeChange}
-              defaultTranspose={controls.defaultTranspose}
-              songKey={controls.songKey}
-              disableIncrement={controls.getTransposeDisableStates().disableIncrement}
-              disableDecrement={controls.getTransposeDisableStates().disableDecrement}
-            />
-          </div>
-        ) : (
-          <MetadataBadge
-            label={t("chordMetadata.songKey")}
-            value={chordSheet.songKey || "-"}
-          />
-        )}
-        {controls ? (
-          <div className="flex items-center gap-1.5">
-            <span className="font-medium text-muted-foreground">{t("chordMetadata.guitarCapo")}</span>
-            <CapoMenu
-              capo={controls.capo}
-              setCapo={controls.handleCapoChange}
-              defaultCapo={controls.defaultCapo}
-              disableIncrement={controls.getCapoDisableStates().disableIncrement}
-              disableDecrement={controls.getCapoDisableStates().disableDecrement}
-            />
-          </div>
-        ) : (
-          <MetadataBadge
-            label={t("chordMetadata.guitarCapo")}
-            value={capoValue}
-          />
-        )}
+  return (
+    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs">
+      {/* Row 1: Artist (always alone) */}
+      <MetadataBadge
+        label={t("chordMetadata.artist")}
+        value={chordSheet.artist || t("chordMetadata.unknown")}
+        onClick={chordSheet.artist ? handleArtistClick : undefined}
+        isClickable={!!chordSheet.artist}
+      />
+
+      {/* Mobile: Tuning row 2, Key+Capo row 3. sm+: all on one row */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-4 gap-y-1">
+        <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          {keyCapoControls}
+        </div>
       </div>
     </div>
   );
