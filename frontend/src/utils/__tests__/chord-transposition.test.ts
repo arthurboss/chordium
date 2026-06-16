@@ -61,6 +61,17 @@ describe('chord-transposition', () => {
       expect(transposeChord('C', 100)).toBe('E'); // 100 % 12 = 4
     });
 
+    it('handles effectiveTranspose values outside -12..+12 (e.g. capo+transpose combined)', () => {
+      // transpose=-11, capo=3, defaultCapo=0 => effectiveTranspose=-14
+      expect(transposeChord('C', -14)).toBe('A#');
+      expect(transposeChord('G', -14)).toBe('F');
+      expect(transposeChord('C/E', -14)).toBe('A#/D');
+      expect(transposeChord('C', -13)).toBe('B');
+      // Large positive
+      expect(transposeChord('C', 14)).toBe('D');
+      expect(transposeChord('G', 14)).toBe('A');
+    });
+
     it('returns original for invalid input', () => {
       expect(transposeChord('', 1)).toBe('');
       expect(transposeChord('Invalid', 1)).toBe('Invalid');

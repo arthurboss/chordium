@@ -9,7 +9,7 @@ function transposeNote(note: string, halfSteps: number): string {
   }
   const idx = NOTES.indexOf(normalized as Note);
   if (idx === -1) return note;
-  return NOTES[(idx + halfSteps + 12) % 12];
+  return NOTES[((idx + halfSteps) % 12 + 12) % 12];
 }
 
 /**
