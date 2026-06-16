@@ -22,7 +22,6 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
   disableDecrement: externalDisableDecrement,
 }) => {
   const { t } = useTranslation();
-  const displayTitle = title ?? t("stickyControlsBar.capoFret");
 
   const {
     uiCapoLevel,
@@ -41,9 +40,7 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
   const capoDigits = Array.from({ length: 12 }, (_, i) => i.toString());
 
   return (
-    <>
-      <span className="text-xs text-muted-foreground mb-1">{displayTitle}</span>
-      <IncrementDecrementButton
+    <IncrementDecrementButton
         value={capoDisplay}
         onIncrement={handleIncrement}
         onDecrement={handleDecrement}
@@ -55,8 +52,7 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
         disableDecrement={disableDecrement}
         animationDirection={animationDirection}
         digits={capoDigits}
-      />
-    </>
+    />
   );
 };
 
