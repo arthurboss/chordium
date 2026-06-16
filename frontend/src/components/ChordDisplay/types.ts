@@ -10,15 +10,6 @@ export interface ChordSection {
   isTabSection?: boolean;
 }
 
-export interface ChordContentProps {
-  rawHtml?: string;
-  songChords?: string;
-  fontSize: number;
-  fontStyle: string;
-  isLoading?: boolean;
-  viewMode?: string;
-}
-
 export interface ChordSheetControlsProps {
   transpose: number;
   setTranspose: (v: number) => void;

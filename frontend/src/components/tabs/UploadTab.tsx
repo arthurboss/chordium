@@ -1,7 +1,7 @@
 import { useState, RefObject } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import FileUploader from "@/components/FileUploader";
-import ChordDisplay from "@/components/ChordDisplay";
+import ChordSheetViewer from "@/components/ChordSheetViewer";
 
 import ChordEditToolbar from "@/components/ChordDisplay/ChordEditToolbar";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
@@ -109,7 +109,7 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
               />
             </CardContent>
           </Card>
-          <ChordDisplay
+          <ChordSheetViewer
             ref={chordDisplayRef}
             chordSheet={{
               title: uploadedTitle || "Untitled Song",
