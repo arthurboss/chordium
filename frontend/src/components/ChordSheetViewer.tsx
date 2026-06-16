@@ -21,7 +21,18 @@ interface ChordSheetViewerProps {
   initialViewMode?: string;
 }
 
+/**
+ * Orchestrates the full chord sheet viewing experience.
+ *
+ * Owns all playback/display state (transpose, capo, font, auto-scroll, edit mode)
+ * via custom hooks and passes derived props down to `ChordSheetContent` and
+ * `StickyControlsBar`. Switches to `ChordEdit` when the user enters edit mode.
+ *
+ * The forwarded ref points to the root `#chord-sheet-viewer` div, which parent
+ * components (e.g. auto-scroll) use to measure scroll position.
+ */
 const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode }, ref) => {
+
   const {
     autoScroll,
     scrollSpeed,

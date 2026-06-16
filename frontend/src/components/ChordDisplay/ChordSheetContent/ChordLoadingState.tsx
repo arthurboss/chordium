@@ -1,3 +1,4 @@
+/** Spinner shown inside the chord content card while content is being fetched. */
 export function ChordLoadingState() {
   return (
     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">

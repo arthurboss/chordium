@@ -25,6 +25,14 @@ interface SongViewerProps {
   initialViewMode?: string;
 }
 
+/**
+ * Page-level wrapper for the chord sheet viewer screen.
+ *
+ * Composes the page header (back/action button, title), chord metadata badges,
+ * a QR code sharing modal, and the \`ChordSheetViewer\`. Handles the two content
+ * sources: directly passed \`chordContent\` (search results / upload preview) or
+ * lazily loaded content from local storage (My Chord Sheets).
+ */
 const SongViewer = ({
   song,
   chordContent: directChordContent,

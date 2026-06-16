@@ -14,6 +14,13 @@ interface ChordSheetContentProps {
   isLoading?: boolean;
 }
 
+/**
+ * Card container that renders the chord sheet in one of three states:
+ * loading, empty, or the processed HTML.
+ *
+ * Measures its own width (via `useContainerColumns`) to decide how many
+ * columns wide tab blocks should be before wrapping.
+ */
 const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   rawHtml,
   songChords,
