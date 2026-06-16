@@ -41,7 +41,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
   const shouldUseWheel = displayMode === 'wheel' && digits.length > 0;
   const animationValue = wheelValue || value;
   const currentIndex = shouldUseWheel ? digits.indexOf(animationValue) : -1;
-  const wheelTransform = currentIndex >= 0 ? `translateY(-${currentIndex * 1.5}rem)` : 'translateY(0)';
+  const wheelTransform = currentIndex >= 0 ? `translateY(-${currentIndex * 1.25}rem)` : 'translateY(0)';
   return (
     <div className={`${INCREMENT_DECREMENT_BUTTON_STYLES.container} ${className}`} title={title}>
       {/* Decrement button */}
