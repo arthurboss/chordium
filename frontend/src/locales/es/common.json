@@ -7,6 +7,10 @@
   "header": {
     "homeAriaLabel": "Inicio de Chordium"
   },
+  "devBanner": {
+    "note": "Nota:",
+    "message": "Esta aplicación está en desarrollo. Algunas características pueden no funcionar como se esperaba."
+  },
   "searchBar": {
     "artistPlaceholder": "Buscar artista",
     "songPlaceholder": "Buscar canción",
@@ -51,17 +55,17 @@
   "textStyle": {
     "textPreferences": "Estilo",
     "viewMode": "Modo de vista",
-    "fontStyle": "Estilo de fuente",
+    "fontStyle": "Tipo de fuente",
     "fontSize": "Tamaño de fuente",
-    "fontSpacing": "Espaciado",
+    "fontSpacing": "Espaciado de fuente",
     "serif": "Serif",
-    "sansSerif": "Sans",
+    "sansSerif": "Sin Serif",
     "normal": "Normal",
     "chords": "Acordes",
-    "lyrics": "Letra",
-    "showGuitarTabs": "Mostrar tablaturas",
-    "hideGuitarTabs": "Ocultar tablaturas",
-    "textPreferencesAriaLabel": "Preferencias de texto"
+    "lyrics": "Letras",
+    "showGuitarTabs": "Mostrar Tablaturas de Guitarra",
+    "hideGuitarTabs": "Ocultar Tablaturas de Guitarra",
+    "textPreferencesAriaLabel": "Preferencias de Texto"
   },
   "theme": {
     "light": "Claro",
@@ -75,80 +79,80 @@
     "es": "Español"
   },
   "pageHeader": {
-    "backAriaLabel": "back-button",
-    "saveAriaLabel": "guardar en mi cancionero",
-    "deleteAriaLabel": "delete-button"
+    "backAriaLabel": "botón-atrás",
+    "saveAriaLabel": "guardar en mis acordes",
+    "deleteAriaLabel": "botón-eliminar"
   },
   "navigationButtons": {
     "backAriaLabel": "Volver"
   },
   "saveButton": {
-    "saveAriaLabel": "Guardar en Mi cancionero"
+    "saveAriaLabel": "Guardar en Mis Acordes"
   },
   "chordSheetList": {
-    "empty": "Aún no has guardado ningún acorde.",
-    "uploadAriaLabel": "Importar acordes",
-    "uploadButton": "Importar acordes"
+    "empty": "No has guardado ningún acorde aún.",
+    "uploadAriaLabel": "Importar un acorde",
+    "uploadButton": "Importar un acorde"
   },
   "offlineIndicator": {
-    "ariaLabel": "Mostrar estado sin conexión",
-    "title": "Sin conexión - Haz clic para más detalles",
+    "ariaLabel": "Mostrar estado de conexión",
+    "title": "Estás sin conexión - Haz clic para más detalles",
     "srText": "Sin conexión"
   },
   "jamSession": {
-    "joinSession": "Unirse a la sesión",
-    "shareSession": "Compartir sesión",
+    "joinSession": "Unirse a Jam Session",
+    "shareSession": "Compartir Jam Session",
     "connected": "Conectado",
-    "sessionActive": "Sesión activa",
-    "connectedToSession": "Conectado a la sesión",
-    "sharePeers": "Comparte esta sesión con {{count}} participante",
-    "sharePeers_other": "Comparte esta sesión con {{count}} participantes",
+    "sessionActive": "Sesión Activa",
+    "connectedToSession": "Conectado a la Sesión",
+    "sharePeers": "Compartir esta sesión con {{count}} compañero",
+    "sharePeers_other": "Compartir esta sesión con {{count}} compañeros",
     "connectedToHost": "Conectado a la sesión del anfitrión",
-    "connectedPeers": "Participantes conectados",
-    "noPeers": "Aún no hay participantes conectados",
-    "endSession": "Terminar sesión",
+    "connectedPeers": "Compañeros Conectados",
+    "noPeers": "Sin compañeros conectados aún",
+    "endSession": "Finalizar Sesión",
     "connect": "Conectar",
     "connecting": "Conectando...",
     "back": "Atrás",
-    "scanQrCode": "Escanear código QR",
+    "scanQrCode": "Escanear Código QR",
     "copy": "Copiar",
-    "copyConnectionString": "Copiar cadena de conexión",
+    "copyConnectionString": "Copiar Cadena de Conexión",
     "pasteConnectionString": "Pegar cadena de conexión",
     "orPasteConnectionString": "O pega la cadena de conexión aquí",
     "scanToJoin": "Escanea este código QR para unirte a la sesión",
     "or": "o"
   },
   "smallScreenWarning": {
-    "title": "Pantalla demasiado pequeña",
-    "message": "Por favor, usa un dispositivo con una pantalla más grande para una mejor experiencia."
+    "title": "Pantalla Demasiado Pequeña",
+    "message": "Por favor usa un dispositivo con una pantalla más grande para la mejor experiencia."
   },
   "notFound": {
-    "title": "Página no encontrada",
+    "title": "Página No Encontrada",
     "message": "La página que buscas no existe.",
-    "hint": "Comprueba si hay errores tipográficos en la URL, o vuelve a la página de inicio para comenzar tu búsqueda.",
-    "returnHome": "Volver al inicio"
+    "hint": "Verifica la URL en busca de errores, o vuelve a la página de inicio para comenzar tu búsqueda de música.",
+    "returnHome": "Volver a Inicio"
   },
   "footer": {
-    "source": "Código fuente"
+    "source": "Fuente"
   },
   "stickyControlsBar": {
-    "capoFret": "Cejilla",
-    "link": "Vincular",
-    "transpose": "Transponer",
+    "capoFret": "Traste Capo",
+    "link": "Enlace",
+    "transpose": "Transposición",
     "style": "Estilo",
     "play": "Reproducir",
     "pause": "Pausar",
     "speed": "Velocidad",
-    "capoPosition": "Posición de la cejilla",
-    "resetCapo": "Restablecer cejilla original",
-    "transposeSongKey": "Transponer tonalidad",
-    "resetTranspose": "Restablecer tonalidad original",
-    "linkCapoTranspose": "Vincular cejilla y transposición",
-    "unlinkCapoTranspose": "Desvincular cejilla y transposición",
-    "songControls": "Controles de canción"
+    "capoPosition": "Posición del Capo",
+    "resetCapo": "Restablecer a la posición original del capo",
+    "transposeSongKey": "Transponer Tonalidad",
+    "resetTranspose": "Restablecer a la tonalidad original",
+    "linkCapoTranspose": "Vincular Capo y Transposición",
+    "unlinkCapoTranspose": "Desvincular Capo y Transposición",
+    "songControls": "Controles de Canción"
   },
   "guitarCapoField": {
-    "noCapo": "Sin cejilla",
+    "noCapo": "Sin capo",
     "fretDisplay": "Traste {{ordinal}}"
   },
   "sectionTitles": {

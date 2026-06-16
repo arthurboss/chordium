@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom"; // Import useLocation
+import { useTranslation } from "react-i18next";
 import TabContainer from "@/components/TabContainer";
 import { Song } from "@/types/song";
 import { useTabNavigation } from "@/hooks/use-tab-navigation";
@@ -25,6 +26,7 @@ const getInitialTab = (pathname: string): string => {
 
 const Home = () => {
   const location = useLocation(); // Get location
+  const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState(() => getInitialTab(location.pathname)); // Initialize based on path
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
@@ -43,7 +45,7 @@ const Home = () => {
       {/* Development Banner */}
       {process.env.NODE_ENV === 'production' && (
         <div className="text-center bg-primary/30 border-x-4 border-primary p-3 mb-4 rounded-sm shadow">
-          <strong>Note:</strong> This app is in development. Some features may not work as expected.
+          <strong>{t('devBanner.note')}</strong> {t('devBanner.message')}
         </div>
       )}
       <TabContainer

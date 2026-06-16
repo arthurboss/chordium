@@ -7,6 +7,10 @@
   "header": {
     "homeAriaLabel": "Início do Chordium"
   },
+  "devBanner": {
+    "note": "Nota:",
+    "message": "Este aplicativo está em desenvolvimento. Alguns recursos podem não funcionar como esperado."
+  },
   "searchBar": {
     "artistPlaceholder": "Pesquisar artista",
     "songPlaceholder": "Pesquisar música",
@@ -51,16 +55,16 @@
   "textStyle": {
     "textPreferences": "Estilo",
     "viewMode": "Modo de Exibição",
-    "fontStyle": "Estilo de Fonte",
+    "fontStyle": "Tipo de Fonte",
     "fontSize": "Tamanho da Fonte",
-    "fontSpacing": "Espaçamento",
+    "fontSpacing": "Espaçamento da Fonte",
     "serif": "Serif",
-    "sansSerif": "Sans",
+    "sansSerif": "Sem Serif",
     "normal": "Normal",
     "chords": "Acordes",
-    "lyrics": "Letra",
-    "showGuitarTabs": "Mostrar Tablaturas",
-    "hideGuitarTabs": "Ocultar Tablaturas",
+    "lyrics": "Letras",
+    "showGuitarTabs": "Mostrar Tabs de Guitarra",
+    "hideGuitarTabs": "Ocultar Tabs de Guitarra",
     "textPreferencesAriaLabel": "Preferências de Texto"
   },
   "theme": {
@@ -75,9 +79,9 @@
     "es": "Español"
   },
   "pageHeader": {
-    "backAriaLabel": "back-button",
+    "backAriaLabel": "botão-voltar",
     "saveAriaLabel": "salvar em minhas cifras",
-    "deleteAriaLabel": "delete-button"
+    "deleteAriaLabel": "botão-deletar"
   },
   "navigationButtons": {
     "backAriaLabel": "Voltar"
@@ -92,71 +96,71 @@
   },
   "offlineIndicator": {
     "ariaLabel": "Mostrar status offline",
-    "title": "Você está offline - Clique para detalhes",
+    "title": "Você está offline - Clique para mais detalhes",
     "srText": "Offline"
   },
   "jamSession": {
-    "joinSession": "Entrar na Sessão",
-    "shareSession": "Compartilhar Sessão",
+    "joinSession": "Entrar em Jam Session",
+    "shareSession": "Compartilhar Jam Session",
     "connected": "Conectado",
     "sessionActive": "Sessão Ativa",
     "connectedToSession": "Conectado à Sessão",
-    "sharePeers": "Compartilhe esta sessão com {{count}} participante",
-    "sharePeers_other": "Compartilhe esta sessão com {{count}} participantes",
+    "sharePeers": "Compartilhar esta sessão com {{count}} colega",
+    "sharePeers_other": "Compartilhar esta sessão com {{count}} colegas",
     "connectedToHost": "Conectado à sessão do anfitrião",
-    "connectedPeers": "Participantes Conectados",
-    "noPeers": "Nenhum participante conectado ainda",
-    "endSession": "Encerrar Sessão",
+    "connectedPeers": "Colegas Conectados",
+    "noPeers": "Nenhum colega conectado ainda",
+    "endSession": "Finalizar Sessão",
     "connect": "Conectar",
     "connecting": "Conectando...",
     "back": "Voltar",
-    "scanQrCode": "Escanear QR Code",
+    "scanQrCode": "Escanear Código QR",
     "copy": "Copiar",
     "copyConnectionString": "Copiar String de Conexão",
-    "pasteConnectionString": "Cole a string de conexão",
+    "pasteConnectionString": "Colar string de conexão",
     "orPasteConnectionString": "Ou cole a string de conexão aqui",
-    "scanToJoin": "Escaneie este QR Code para entrar na sessão",
+    "scanToJoin": "Escaneie este código QR para entrar na sessão",
     "or": "ou"
   },
   "smallScreenWarning": {
     "title": "Tela Muito Pequena",
-    "message": "Por favor, use um dispositivo com uma tela maior para a melhor experiência."
+    "message": "Por favor use um dispositivo com uma tela maior para a melhor experiência."
   },
   "notFound": {
     "title": "Página Não Encontrada",
     "message": "A página que você está procurando não existe.",
-    "hint": "Verifique a URL por erros de digitação, ou volte à página inicial para iniciar sua busca musical.",
-    "returnHome": "Voltar para o Início"
+    "hint": "Verifique a URL em busca de erros, ou retorne à página inicial para começar sua busca de música.",
+    "returnHome": "Retornar ao Início"
   },
   "footer": {
-    "source": "Código Fonte"
+    "source": "Fonte"
   },
   "stickyControlsBar": {
-    "capoFret": "Capotraste",
-    "link": "Vincular",
-    "transpose": "Transpor",
+    "capoFret": "Casa do Capo",
+    "link": "Link",
+    "transpose": "Transposição",
     "style": "Estilo",
-    "play": "Tocar",
+    "play": "Reproduzir",
     "pause": "Pausar",
     "speed": "Velocidade",
-    "capoPosition": "Posição do Capotraste",
-    "resetCapo": "Redefinir para capotraste original",
+    "capoPosition": "Posição do Capo",
+    "resetCapo": "Redefinir para a posição original do capo",
     "transposeSongKey": "Transpor Tom da Música",
-    "resetTranspose": "Redefinir para tom original",
-    "linkCapoTranspose": "Vincular Capotraste e Transposição",
-    "unlinkCapoTranspose": "Desvincular Capotraste e Transposição",
+    "resetTranspose": "Redefinir para o tom original",
+    "linkCapoTranspose": "Vincular Capo e Transposição",
+    "unlinkCapoTranspose": "Desvincular Capo e Transposição",
     "songControls": "Controles da Música"
   },
   "guitarCapoField": {
-    "noCapo": "Sem capotraste",
-    "fretDisplay": "{{ordinal}}ª casa"
+    "noCapo": "Sem capo",
+    "fretDisplay": "Casa {{ordinal}}"
   },
   "sectionTitles": {
     "intro": "Intro",
     "verse": "Verso",
     "chorus": "Refrão",
     "preChorus": "Pré-Refrão",
-    "bridge": "Bridge",
+    "bridge": "Ponte",
     "outro": "Outro",
     "solo": "Solo",
     "interlude": "Interlúdio"
