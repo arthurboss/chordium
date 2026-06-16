@@ -38,16 +38,25 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
   };
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 sm:grid sm:[grid-template-columns:repeat(4,_min-content)] sm:gap-x-4 sm:gap-y-1 sm:justify-between min-w-0 text-xs">
-      <MetadataBadge
-        label={t("chordMetadata.artist")}
-        value={chordSheet.artist || t("chordMetadata.unknown")}
-        onClick={chordSheet.artist ? handleArtistClick : undefined}
-        isClickable={!!chordSheet.artist}
-      />
-      <div className="flex gap-3 whitespace-nowrap sm:contents">
+    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs">
+      {/* Row 1: Artist + Tuning */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <MetadataBadge
+          label={t("chordMetadata.artist")}
+          value={chordSheet.artist || t("chordMetadata.unknown")}
+          onClick={chordSheet.artist ? handleArtistClick : undefined}
+          isClickable={!!chordSheet.artist}
+        />
+        <MetadataBadge
+          label={t("chordMetadata.guitarTuning")}
+          value={tuning}
+        />
+      </div>
+
+      {/* Row 2: Key (transpose control) + Capo (capo control) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         {controls ? (
-          <div className="flex items-center gap-1 whitespace-nowrap">
+          <div className="flex items-center gap-1.5">
             <span className="font-medium text-muted-foreground">{t("chordMetadata.songKey")}</span>
             <TransposeMenu
               transpose={controls.transpose}
@@ -65,7 +74,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
           />
         )}
         {controls ? (
-          <div className="flex items-center gap-1 whitespace-nowrap">
+          <div className="flex items-center gap-1.5">
             <span className="font-medium text-muted-foreground">{t("chordMetadata.guitarCapo")}</span>
             <CapoMenu
               capo={controls.capo}
@@ -81,10 +90,6 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
             value={capoValue}
           />
         )}
-        <MetadataBadge
-          label={t("chordMetadata.guitarTuning")}
-          value={tuning}
-        />
       </div>
     </div>
   );
