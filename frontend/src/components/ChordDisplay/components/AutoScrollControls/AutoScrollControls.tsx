@@ -3,40 +3,25 @@ import PlayButton from '../StickyControlsBar/PlayButton';
 import SpeedControl from '../StickyControlsBar/SpeedControl';
 import type { AutoScrollControlsProps } from './AutoScrollControls.types';
 
-/**
- * AutoScrollControls component for managing auto-scroll functionality
- * Provides play/pause button and speed control
- * 
- * @param autoScroll - Current auto-scroll state
- * @param setAutoScroll - Function to update auto-scroll state
- * @param scrollSpeed - Current scroll speed
- * @param setScrollSpeed - Function to update scroll speed
- * @param title - Title text to display above the controls
- */
 const AutoScrollControls: React.FC<AutoScrollControlsProps> = ({
   autoScroll,
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
-  title = "Scroll",
 }) => {
   return (
-    <div className='flex flex-col items-start gap-1'>
-      <div className="text-xs text-muted-foreground">{title}</div>
-      <div className='flex items-center'>
-        <PlayButton
-          autoScroll={autoScroll}
-          setAutoScroll={setAutoScroll}
-          size={16}
-          className={`h-10 w-10 rounded-full transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary ${autoScroll ? 'text-primary' : ''}`}
-        />
-        {/* Speed controls only show when playing, always between PlayButton and Transpose */}
-        {autoScroll && (
-          <div className="w-32 ml-3 transition-all duration-300 animate-in slide-in-from-left-2">
-            <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
-          </div>
-        )}
-      </div>
+    <div className='flex items-center'>
+      <PlayButton
+        autoScroll={autoScroll}
+        setAutoScroll={setAutoScroll}
+        size={16}
+        className={`h-10 w-10 rounded-full transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-0 hover:text-primary ${autoScroll ? 'text-primary' : ''}`}
+      />
+      {autoScroll && (
+        <div className="w-32 ml-3 transition-all duration-300 animate-in slide-in-from-left-2">
+          <SpeedControl autoScroll={autoScroll} scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
+        </div>
+      )}
     </div>
   );
 };

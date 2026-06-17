@@ -39,16 +39,14 @@ const TextStyleMenu: React.FC<TextStyleMenuProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <span className="text-xs text-muted-foreground">{t("textStyle.textPreferences")}</span>
-      <Button
-        variant="outline"
-        className={`${triggerButtonClassName} ${open ? "bg-muted/50 text-primary" : ""}`}
-        onClick={handleToggle}
-      >
-        <Settings size={iconSize} className={`${settingsIconClassName} ${open ? "text-primary" : ""}`} />
-      </Button>
-    </div>
+    <Button
+      variant="outline"
+      className={`${triggerButtonClassName} ${open ? "bg-muted/50 text-primary" : ""}`}
+      onClick={handleToggle}
+      title={t("textStyle.textPreferencesAriaLabel")}
+    >
+      <Settings size={iconSize} className={`${settingsIconClassName} ${open ? "text-primary" : ""}`} />
+    </Button>
   );
 };
 
