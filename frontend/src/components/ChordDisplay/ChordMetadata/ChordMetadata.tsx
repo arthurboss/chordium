@@ -22,7 +22,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
 
   const keyCapoControls = controls ? (
     <>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className="font-medium">{t("chordMetadata.songKey")}</span>
         <TransposeMenu
           transpose={controls.transpose}
@@ -33,7 +33,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
           disableDecrement={controls.getTransposeDisableStates().disableDecrement}
         />
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className="font-medium">{t("chordMetadata.guitarCapo")}</span>
         <CapoMenu
           capo={controls.capo}
@@ -52,8 +52,8 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
   );
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 w-full text-xs">
-      <div className="flex flex-row items-center justify-between">
+    <div className="@container px-4 py-2 w-full text-xs">
+      <div className="flex flex-col @min-[440px]:flex-row @min-[440px]:justify-between @min-[440px]:items-center gap-3">
         <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
         {keyCapoControls}
       </div>

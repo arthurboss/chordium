@@ -22,9 +22,9 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs items-start">
-      <div className="flex flex-row items-center justify-between w-full">
-        <div className="flex items-center gap-3">
+    <div className="px-4 py-2 min-w-0 text-xs">
+      <div className="flex flex-wrap items-center justify-between w-full gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <ToggleOption
             active={viewMode !== "tabs-off" && viewMode !== "lyrics-only"}
             onClick={() => {
@@ -44,8 +44,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
             label={t("textStyle.lyrics")}
           />
         </div>
-        <div className="w-px self-stretch bg-border" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="font-medium">{t("textStyle.fontSize")}</span>
           <SteppedSlider
             value={[fontSize]}
@@ -55,7 +54,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
             onValueChange={(value) => setFontSize(value[0])}
             className="w-24"
           />
-          <span className="w-8 text-center text-primary">{fontSize}px</span>
+          <span className="w-8 text-center">{fontSize}px</span>
         </div>
       </div>
     </div>

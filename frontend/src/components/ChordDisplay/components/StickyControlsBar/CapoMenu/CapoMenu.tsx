@@ -27,7 +27,7 @@ const CapoMenu: React.FC<CapoMenuProps> = ({
         className="w-24"
         title={t("stickyControlsBar.capoPosition")}
       />
-      <span className="w-8 text-primary">{capo === 0 ? "—" : ordinal(capo)}</span>
+      <span className="w-6">{capo === 0 ? "—" : ordinal(capo)}</span>
     </div>
   );
 };
