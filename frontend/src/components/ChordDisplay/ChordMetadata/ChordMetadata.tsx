@@ -52,8 +52,8 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
   );
 
   return (
-    <div className="@container px-4 py-2 w-full text-xs">
-      <div className="flex flex-col @min-[440px]:flex-row @min-[440px]:justify-between @min-[440px]:items-center gap-3">
+    <div className="w-full text-xs">
+      <div className="px-4 py-2 flex flex-row flex-wrap justify-between items-center gap-x-4 gap-y-2">
         <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
         {keyCapoControls}
       </div>
