@@ -45,6 +45,8 @@
   font-size: 1rem;
   border-left: 4px solid hsl(var(--primary));
   padding-left: 0.5rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 #chord-sheet-viewer pre .tablatura {
