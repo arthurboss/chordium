@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react';
 import { processContent } from '@/utils/chord-sheet-utils';
 
 export const useChordDisplaySettings = (initialContent: string, initialSongKey?: string, initialCapo?: number, initialViewMode?: string) => {
-  const [fontSize, setFontSize] = useState(14);
   const [fontStyle, setFontStyle] = useState('');
   const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
-  const [hideGuitarTabs, setHideGuitarTabs] = useState(false);
 
   const defaultTranspose = 0;
   const [transpose, setTranspose] = useState(defaultTranspose);
@@ -24,14 +22,9 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   const processedContent = processContent(initialContent, transpose);
 
   return {
-    fontSize,
-    setFontSize,
     fontStyle,
-    setFontStyle,
     viewMode,
     setViewMode,
-    hideGuitarTabs,
-    setHideGuitarTabs,
     transpose,
     setTranspose,
     defaultTranspose,

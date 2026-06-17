@@ -1,6 +1,3 @@
-/**
- * TextStyleMenu component constants
- */
 export const TEXT_PREFERENCES_VALUES = {
   fontSizes: {
     min: 12,

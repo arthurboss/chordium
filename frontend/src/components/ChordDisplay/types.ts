@@ -11,14 +11,6 @@ export interface ChordSection {
 }
 
 export interface ChordSheetControlsProps {
-  fontSize: number;
-  setFontSize: (v: number) => void;
-  fontStyle: string;
-  setFontStyle: (v: string) => void;
-  viewMode: string;
-  setViewMode: (v: string) => void;
-  hideGuitarTabs: boolean;
-  setHideGuitarTabs: (v: boolean) => void;
   autoScroll: boolean;
   setAutoScroll: (v: boolean) => void;
   scrollSpeed: number;

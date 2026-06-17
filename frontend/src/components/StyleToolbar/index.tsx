@@ -1,37 +1,30 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Slider } from "../../../ui/slider";
-import ToggleOption from "./TextStyleMenu/ToggleOption";
-import { TabsModeIcon, LyricsModeIcon } from "./TextStyleMenu/ViewModeIcons";
-import { TEXT_PREFERENCES_VALUES } from "./TextStyleMenu/TextStyleMenu.constants";
-import { isViewModeActive } from "./TextStyleMenu/TextStyleMenu.utils";
+import { Slider } from "@/components/ui/slider";
+import ToggleOption from "./ToggleOption";
+import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
+import { TEXT_PREFERENCES_VALUES } from "./StyleToolbar.constants";
+import { isViewModeActive } from "./StyleToolbar.utils";
 
-interface TextStylePanelProps {
+interface StyleToolbarProps {
   fontSize: number;
   setFontSize: (value: number) => void;
   viewMode: string;
   setViewMode: (value: string) => void;
-  layout: "desktop" | "mobile";
 }
 
-const TextStylePanel: React.FC<TextStylePanelProps> = ({
+const StyleToolbar: React.FC<StyleToolbarProps> = ({
   fontSize,
   setFontSize,
   viewMode,
   setViewMode,
-  layout,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <div
-      className={`w-full flex items-center gap-4 animate-in slide-in-from-bottom-2 duration-200 ${
-        layout === "desktop" ? "px-0 pb-3 border-b" : "px-1 mb-2"
-      }`}
-    >
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold text-muted-foreground">{t("textStyle.viewMode")}</span>
-        <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs items-center">
+      <div className="flex flex-row flex-wrap items-center gap-x-4 gap-y-1">
+        <div className="flex items-center gap-3">
           <ToggleOption
             active={viewMode !== "tabs-off" && viewMode !== "lyrics-only"}
             onClick={() => {
@@ -51,24 +44,22 @@ const TextStylePanel: React.FC<TextStylePanelProps> = ({
             label={t("textStyle.lyrics")}
           />
         </div>
-      </div>
-      <div className="w-px self-stretch bg-border" />
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-semibold text-muted-foreground">{t("textStyle.fontSize")}</span>
+        <div className="w-px self-stretch bg-border" />
         <div className="flex items-center gap-2">
+          <span className="font-medium text-muted-foreground">{t("textStyle.fontSize")}</span>
           <Slider
             value={[fontSize]}
             min={TEXT_PREFERENCES_VALUES.fontSizes.min}
             max={TEXT_PREFERENCES_VALUES.fontSizes.max}
             step={TEXT_PREFERENCES_VALUES.fontSizes.step}
             onValueChange={(value) => setFontSize(value[0])}
-            className="w-32"
+            className="w-20"
           />
-          <span className="text-xs w-10 text-center text-muted-foreground">{fontSize}px</span>
+          <span className="w-8 text-center text-muted-foreground">{fontSize}px</span>
         </div>
       </div>
     </div>
   );
 };
 
-export default TextStylePanel;
+export default StyleToolbar;

@@ -1,14 +1,15 @@
 import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
-import { RefObject, useMemo } from "react";
+import StyleToolbar from "@/components/StyleToolbar";
+import StyleButton from "@/components/StyleToolbar/StyleButton";
+import { RefObject, useMemo, useState } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
-import type { TransposeCapoControls } from "@/components/ChordDisplay/ChordMetadata/ChordMetadata.types";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet & SongMetadata };
@@ -31,8 +32,8 @@ interface SongViewerProps {
 /**
  * Page-level wrapper for the chord sheet viewer screen.
  *
- * Owns transpose/capo state and passes the controls down to ChordMetadata
- * and the effective transpose value to ChordSheetViewer.
+ * Owns transpose/capo and style state, passes controls to ChordMetadata,
+ * StyleToolbar, and the effective values down to ChordSheetViewer.
  */
 const SongViewer = ({
   song,
@@ -52,6 +53,10 @@ const SongViewer = ({
   initialViewMode,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
+
+  const [fontSize, setFontSize] = useState(14);
+  const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
+  const [showStylePanel, setShowStylePanel] = useState(false);
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : ''
@@ -99,6 +104,11 @@ const SongViewer = ({
     ? isContentLoading
     : isLazyContentLoading;
 
+  const handleViewModeChange = (mode: string) => {
+    setViewMode(mode);
+    onViewModeChange?.(mode);
+  };
+
   const title = chordSheetToDisplay.title;
   const artist = chordSheetToDisplay.artist;
 
@@ -111,25 +121,39 @@ const SongViewer = ({
         title={title}
         artist={artist}
         rightContent={
-          chordContentToDisplay
-            ? <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
-            : undefined
+          <div className="flex items-center gap-2">
+            <StyleButton open={showStylePanel} onToggle={() => setShowStylePanel(p => !p)} />
+            {chordContentToDisplay && (
+              <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
+            )}
+          </div>
         }
       />
-      <ChordMetadata
-        chordSheet={chordSheetToDisplay}
-        controls={{
-          transpose,
-          defaultTranspose,
-          handleTransposeChange,
-          getTransposeDisableStates,
-          capo,
-          defaultCapo,
-          handleCapoChange,
-          getCapoDisableStates,
-          songKey: chordSheetToDisplay.songKey,
-        }}
-      />
+      <div key={showStylePanel ? 'style' : 'meta'} className="animate-panel-in">
+        {showStylePanel ? (
+          <StyleToolbar
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+            viewMode={viewMode}
+            setViewMode={handleViewModeChange}
+          />
+        ) : (
+          <ChordMetadata
+            chordSheet={chordSheetToDisplay}
+            controls={{
+              transpose,
+              defaultTranspose,
+              handleTransposeChange,
+              getTransposeDisableStates,
+              capo,
+              defaultCapo,
+              handleCapoChange,
+              getCapoDisableStates,
+              songKey: chordSheetToDisplay.songKey,
+            }}
+          />
+        )}
+      </div>
 
       <ChordSheetViewer
         ref={chordDisplayRef}
@@ -137,9 +161,9 @@ const SongViewer = ({
         content={chordContentToDisplay}
         onSave={onUpdate}
         isLoading={finalIsContentLoading}
-        onViewModeChange={onViewModeChange}
-        initialViewMode={initialViewMode}
         effectiveTranspose={effectiveTranspose}
+        fontSize={fontSize}
+        viewMode={viewMode}
       />
     </main>
   );
