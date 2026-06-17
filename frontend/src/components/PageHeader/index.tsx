@@ -13,19 +13,28 @@ const PageHeader = memo(({
   title,
   artist,
   titleClassName,
-  rightContent
+  rightContent,
+  metadata,
 }: PageHeaderProps) => {
   return (
-    <Card className="flex flex-row items-center gap-3 py-3 px-4 rounded-lg border bg-card text-card-foreground shadow-xs">
-      <div className="shrink-0">
-        <BackButton onBack={onBack} />
+    <Card className="rounded-lg border bg-card text-card-foreground shadow-xs overflow-hidden">
+      <div className="flex flex-row items-center gap-3 py-3 px-4">
+        <div className="shrink-0">
+          <BackButton onBack={onBack} />
+        </div>
+        <TitleSection title={title} artist={artist} titleClassName={titleClassName} />
+        <div className="flex items-center gap-2 shrink-0 min-w-8 ml-auto sm:ml-0">
+          {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
+          {isSaved === false && onAction && <SaveButton onSave={onAction} />}
+          {rightContent}
+        </div>
       </div>
-      <TitleSection title={title} artist={artist} titleClassName={titleClassName} />
-      <div className="flex items-center gap-2 shrink-0 min-w-8 ml-auto sm:ml-0">
-        {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
-        {isSaved === false && onAction && <SaveButton onSave={onAction} />}
-        {rightContent}
-      </div>
+      {metadata && (
+        <>
+          <div className="border-t mx-4" />
+          {metadata}
+        </>
+      )}
     </Card>
   );
 });

@@ -2,7 +2,7 @@ import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import StyleToolbar from "@/components/StyleToolbar";
-import StyleButton from "@/components/StyleToolbar/StyleButton";
+import { Card } from "@/components/ui/card";
 import { RefObject, useMemo, useState } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
@@ -29,12 +29,6 @@ interface SongViewerProps {
   initialViewMode?: string;
 }
 
-/**
- * Page-level wrapper for the chord sheet viewer screen.
- *
- * Owns transpose/capo and style state, passes controls to ChordMetadata,
- * StyleToolbar, and the effective values down to ChordSheetViewer.
- */
 const SongViewer = ({
   song,
   chordContent: directChordContent,
@@ -56,7 +50,6 @@ const SongViewer = ({
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
-  const [showStylePanel, setShowStylePanel] = useState(false);
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : ''
@@ -113,7 +106,7 @@ const SongViewer = ({
   const artist = chordSheetToDisplay.artist;
 
   return (
-    <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col">
+    <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4">
       <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
@@ -121,23 +114,11 @@ const SongViewer = ({
         title={title}
         artist={artist}
         rightContent={
-          <div className="flex items-center gap-2">
-            <StyleButton open={showStylePanel} onToggle={() => setShowStylePanel(p => !p)} />
-            {chordContentToDisplay && (
-              <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
-            )}
-          </div>
+          chordContentToDisplay && (
+            <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
+          )
         }
-      />
-      <div key={showStylePanel ? 'style' : 'meta'} className="animate-panel-in">
-        {showStylePanel ? (
-          <StyleToolbar
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-            viewMode={viewMode}
-            setViewMode={handleViewModeChange}
-          />
-        ) : (
+        metadata={
           <ChordMetadata
             chordSheet={chordSheetToDisplay}
             controls={{
@@ -152,8 +133,16 @@ const SongViewer = ({
               songKey: chordSheetToDisplay.songKey,
             }}
           />
-        )}
-      </div>
+        }
+      />
+      <Card className="overflow-hidden">
+        <StyleToolbar
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          viewMode={viewMode}
+          setViewMode={handleViewModeChange}
+        />
+      </Card>
 
       <ChordSheetViewer
         ref={chordDisplayRef}

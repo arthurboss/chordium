@@ -15,6 +15,21 @@ const SteppedSlider = React.forwardRef<
   const stepNum = Number(step);
   const stepCount = Math.round((maxNum - minNum) / stepNum) + 1;
 
+  const [currentValue, setCurrentValue] = React.useState<number>(
+    value != null ? Number(value[0]) : minNum
+  );
+
+  React.useEffect(() => {
+    if (value != null) setCurrentValue(Number(value[0]));
+  }, [value]);
+
+  const handleValueChange = (val: number[]) => {
+    setCurrentValue(val[0]);
+    onValueChange?.(val);
+  };
+
+  const thumbPct = ((currentValue - minNum) / (maxNum - minNum)) * 100;
+
   return (
     <SliderPrimitive.Root
       ref={ref}
@@ -26,7 +41,7 @@ const SteppedSlider = React.forwardRef<
       max={max}
       step={step}
       value={value}
-      onValueChange={onValueChange}
+      onValueChange={handleValueChange}
       {...props}
     >
       <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700">
@@ -34,8 +49,10 @@ const SteppedSlider = React.forwardRef<
       </SliderPrimitive.Track>
       {showStepIndicators && stepCount > 1 && (
         <div className="absolute top-1/2 left-0 right-0 pointer-events-none -translate-y-1/2">
-          {Array.from({ length: stepCount }, (_, i) => { if (i === 0 || i === stepCount - 1) return null;
+          {Array.from({ length: stepCount }, (_, i) => {
+            if (i === 0 || i === stepCount - 1) return null;
             const pct = (i / (stepCount - 1)) * 100;
+            if (pct <= thumbPct) return null;
             return (
               <div
                 key={i}
