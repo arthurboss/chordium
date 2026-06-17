@@ -52,7 +52,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
   );
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs">
+    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs sm:items-center">
       {/* Tuning + Key + Capo: single row on sm+, two rows on mobile */}
       <div className="flex flex-row flex-wrap items-center gap-x-4 gap-y-1">
         <div className="flex items-center justify-between xs:justify-start xs:flex-wrap gap-x-4 gap-y-1 w-full xs:w-auto">
