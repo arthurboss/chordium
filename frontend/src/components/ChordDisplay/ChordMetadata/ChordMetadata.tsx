@@ -1,15 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import MetadataBadge from "./MetadataBadge";
 import type { ChordMetadataProps } from "./ChordMetadata.types";
-import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import CapoMenu from "@/components/ChordDisplay/components/StickyControlsBar/CapoMenu";
 import TransposeMenu from "@/components/ChordDisplay/components/StickyControlsBar/TransposeMenu";
 
-const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, controls }) => {
+const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   let tuning = t("chordMetadata.standard");
   if (chordSheet.guitarTuning) {
@@ -22,20 +19,6 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
     chordSheet.guitarCapo !== undefined && chordSheet.guitarCapo !== null
       ? chordSheet.guitarCapo.toString()
       : t("chordMetadata.none");
-
-  const handleArtistClick = () => {
-    if (chordSheet.artist) {
-      const artistSlug = path.split("/")[0];
-      sessionStorage.removeItem("chordium_search_query");
-      try {
-        sessionStorage.setItem(
-          ARTIST_DISPLAY_NAME_KEY,
-          JSON.stringify({ path: artistSlug, displayName: chordSheet.artist })
-        );
-      } catch {}
-      navigate(`/${artistSlug}`);
-    }
-  };
 
   const keyCapoControls = controls ? (
     <>
@@ -70,20 +53,12 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, path, control
 
   return (
     <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs">
-      {/* Row 1: Artist (always alone) */}
-      <MetadataBadge
-        label={t("chordMetadata.artist")}
-        value={chordSheet.artist || t("chordMetadata.unknown")}
-        onClick={chordSheet.artist ? handleArtistClick : undefined}
-        isClickable={!!chordSheet.artist}
-      />
-
-      {/* Mobile: Tuning row 2, Key+Capo row 3. sm+: all on one row */}
+      {/* Tuning + Key + Capo: single row on sm+, two rows on mobile */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-4 gap-y-1">
-        <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <div className="flex items-center justify-between sm:justify-start sm:flex-wrap gap-x-4 gap-y-1 w-full sm:w-auto">
           {keyCapoControls}
         </div>
+        <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
       </div>
     </div>
   );

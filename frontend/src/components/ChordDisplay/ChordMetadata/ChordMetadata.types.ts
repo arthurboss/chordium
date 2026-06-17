@@ -14,6 +14,5 @@ export interface TransposeCapoControls {
 
 export interface ChordMetadataProps {
   chordSheet: ChordSheet;
-  path: string;
   controls?: TransposeCapoControls;
 }

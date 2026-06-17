@@ -99,13 +99,17 @@ const SongViewer = ({
     ? isContentLoading
     : isLazyContentLoading;
 
+  const title = chordSheetToDisplay.title;
+  const artist = chordSheetToDisplay.artist;
+
   return (
     <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col">
       <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
         isSaved={shouldShowActionButton && isFromMyChordSheets}
-        title={chordSheetToDisplay.title}
+        title={title}
+        artist={artist}
         rightContent={
           chordContentToDisplay
             ? <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
@@ -114,7 +118,6 @@ const SongViewer = ({
       />
       <ChordMetadata
         chordSheet={chordSheetToDisplay}
-        path={songObj.path}
         controls={{
           transpose,
           defaultTranspose,
