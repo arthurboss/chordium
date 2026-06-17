@@ -23,7 +23,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
   const keyCapoControls = controls ? (
     <>
       <div className="flex items-center gap-1.5">
-        <span className="font-medium text-muted-foreground">{t("chordMetadata.songKey")}</span>
+        <span className="font-medium">{t("chordMetadata.songKey")}</span>
         <TransposeMenu
           transpose={controls.transpose}
           setTranspose={controls.handleTransposeChange}
@@ -34,7 +34,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
         />
       </div>
       <div className="flex items-center gap-1.5">
-        <span className="font-medium text-muted-foreground">{t("chordMetadata.guitarCapo")}</span>
+        <span className="font-medium">{t("chordMetadata.guitarCapo")}</span>
         <CapoMenu
           capo={controls.capo}
           setCapo={controls.handleCapoChange}
