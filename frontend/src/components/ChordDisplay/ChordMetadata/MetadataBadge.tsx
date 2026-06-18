@@ -5,9 +5,9 @@ const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value, truncate, o
   if (truncate) {
     return (
       <div className="flex overflow-hidden w-full">
-        <span className="font-medium text-muted-foreground whitespace-nowrap shrink-0">{label}</span>
+        <span className="font-medium text-foreground whitespace-nowrap shrink-0">{label}</span>
         <span
-          className={`ml-2 font-medium text-chord-dark dark:text-primary/80 truncate ${isClickable ? 'cursor-pointer hover:underline' : ''}`}
+          className={`ml-2 font-medium text-primary truncate ${isClickable ? 'cursor-pointer hover:underline' : ''}`}
           onClick={onClick}
           role={isClickable ? "button" : undefined}
           tabIndex={isClickable ? 0 : undefined}
@@ -21,9 +21,9 @@ const MetadataBadge: React.FC<MetadataBadgeProps> = ({ label, value, truncate, o
 
   return (
     <div className="whitespace-nowrap">
-      <span className="font-medium text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{label}</span>
       <span
-        className={`ml-2 font-medium text-chord-dark dark:text-primary/80 ${isClickable ? 'cursor-pointer hover:underline' : ''}`}
+        className={`ml-2 font-medium text-primary ${isClickable ? 'cursor-pointer hover:underline' : ''}`}
         onClick={onClick}
         role={isClickable ? "button" : undefined}
         tabIndex={isClickable ? 0 : undefined}

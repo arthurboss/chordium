@@ -24,7 +24,6 @@ const TransposeMenu: React.FC<TransposeMenuProps> = ({
   disableDecrement: externalDisableDecrement,
 }) => {
   const { t } = useTranslation();
-  const displayTitle = title ?? t("stickyControlsBar.transpose");
 
   const {
     uiTransposeLevel,
@@ -42,27 +41,19 @@ const TransposeMenu: React.FC<TransposeMenuProps> = ({
   const keyDisplay = formatKeyDisplay(transpose, uiTransposeLevel, songKey);
 
   return (
-    <>
-      <div className={`text-xs text-muted-foreground mb-1 flex items-center justify-between gap-1 ${isAltered ? "w-24" : "w-16"}`}>
-        <span>{displayTitle}</span>
-        <span className="text-muted-foreground">
-          {keyDisplay.transposeText && ` (${keyDisplay.transposeText})`}
-        </span>
-      </div>
-      <IncrementDecrementButton
-        value={keyDisplay.keyName}
-        onIncrement={handleIncrement}
-        onDecrement={handleDecrement}
-        onReset={handleReset}
-        isAltered={isAltered}
-        title={t("stickyControlsBar.transposeSongKey")}
-        resetTitle={t("stickyControlsBar.resetTranspose")}
-        disableIncrement={disableIncrement}
-        disableDecrement={disableDecrement}
-        animationDirection={animationDirection}
-        digits={ALL_POSSIBLE_KEY_NAMES}
-      />
-    </>
+    <IncrementDecrementButton
+      value={keyDisplay.keyName}
+      onIncrement={handleIncrement}
+      onDecrement={handleDecrement}
+      onReset={handleReset}
+      isAltered={isAltered}
+      title={t("stickyControlsBar.transposeSongKey")}
+      resetTitle={t("stickyControlsBar.resetTranspose")}
+      disableIncrement={disableIncrement}
+      disableDecrement={disableDecrement}
+      animationDirection={animationDirection}
+      digits={ALL_POSSIBLE_KEY_NAMES}
+    />
   );
 };
 

@@ -27,12 +27,11 @@ const StickyBottomContainer: React.FC<StickyBottomContainerProps> = ({
   ];
 
   if (mobileOnly) {
-    base.push("sm:hidden flex border rounded-lg");
-    base.push(expanded ? "flex-col" : "flex-row");
-  }
-
-  if (desktopOnly) {
-    base.push("hidden sm:flex sm:flex-col gap-0 py-2 px-4");
+    base.push(`sm:hidden flex border rounded-lg ${expanded ? "flex-col" : "flex-row"}`);
+  } else if (desktopOnly) {
+    base.push("hidden sm:flex sm:flex-col gap-0 py-2 px-4 w-fit ml-auto");
+  } else {
+    base.push(`flex border rounded-lg w-fit ml-auto ${expanded ? "flex-col" : "flex-row"}`);
   }
 
   return (

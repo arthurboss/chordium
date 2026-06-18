@@ -1,62 +1,43 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import IncrementDecrementButton from "@/components/ui/IncrementDecrementButton";
-import { useCapoMenu } from "./CapoMenu.hooks";
-import { formatCapoDisplay } from "./CapoMenu.utils";
+import { SteppedSlider } from "@/components/ui/stepped-slider";
 import type { CapoMenuProps } from "./CapoMenu.types";
 
-/**
- * CapoMenu component for adjusting capo position
- * Provides increment/decrement buttons and displays current capo position
- *
- * @param capo - Current capo position
- * @param setCapo - Function to update capo position
- * @param defaultCapo - Original capo position (defaults to 0)
- */
+const enSuffix = (n: number): string => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return s[(v - 20) % 10] ?? s[v] ?? s[0];
+};
+
+const CapoLabel: React.FC<{ capo: number; lang: string }> = ({ capo, lang }) => {
+  if (capo === 0) return <span>—</span>;
+  if (lang === "pt-BR") return <span>{capo}<sup>ª</sup></span>;
+  if (lang === "es") return <span>{capo}<sup>º</sup></span>;
+  return <span>{capo}<sup>{enSuffix(capo)}</sup></span>;
+};
+
 const CapoMenu: React.FC<CapoMenuProps> = ({
   capo,
   setCapo,
   defaultCapo = 0,
-  title,
-  disableIncrement: externalDisableIncrement,
-  disableDecrement: externalDisableDecrement,
 }) => {
-  const { t } = useTranslation();
-  const displayTitle = title ?? t("stickyControlsBar.capoFret");
-
-  const {
-    uiCapoLevel,
-    isAltered,
-    handleIncrement,
-    handleDecrement,
-    handleReset,
-    disableIncrement: internalDisableIncrement,
-    disableDecrement: internalDisableDecrement,
-    animationDirection,
-  } = useCapoMenu({ capo, setCapo, defaultCapo });
-
-  const disableIncrement = externalDisableIncrement ?? internalDisableIncrement;
-  const disableDecrement = externalDisableDecrement ?? internalDisableDecrement;
-  const capoDisplay = formatCapoDisplay(capo, uiCapoLevel);
-  const capoDigits = Array.from({ length: 12 }, (_, i) => i.toString());
+  const { t, i18n } = useTranslation();
 
   return (
-    <>
-      <span className="text-xs text-muted-foreground mb-1">{displayTitle}</span>
-      <IncrementDecrementButton
-        value={capoDisplay}
-        onIncrement={handleIncrement}
-        onDecrement={handleDecrement}
-        onReset={handleReset}
-        isAltered={isAltered}
+    <div className="flex items-center gap-2">
+      <SteppedSlider
+        value={[capo]}
+        min={0}
+        max={11}
+        step={1}
+        onValueChange={(value) => setCapo(value[0])}
+        className="w-24"
         title={t("stickyControlsBar.capoPosition")}
-        resetTitle={t("stickyControlsBar.resetCapo")}
-        disableIncrement={disableIncrement}
-        disableDecrement={disableDecrement}
-        animationDirection={animationDirection}
-        digits={capoDigits}
       />
-    </>
+      <span className="w-6 text-sm">
+        <CapoLabel capo={capo} lang={i18n.language} />
+      </span>
+    </div>
   );
 };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../button';
-import { Undo2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { INCREMENT_DECREMENT_BUTTON_STYLES, INCREMENT_DECREMENT_BUTTON_LABELS } from './IncrementDecrementButton.constants';
 import type { IncrementDecrementButtonProps } from './IncrementDecrementButton.types';
 
@@ -41,7 +41,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
   const shouldUseWheel = displayMode === 'wheel' && digits.length > 0;
   const animationValue = wheelValue || value;
   const currentIndex = shouldUseWheel ? digits.indexOf(animationValue) : -1;
-  const wheelTransform = currentIndex >= 0 ? `translateY(-${currentIndex * 1.5}rem)` : 'translateY(0)';
+  const wheelTransform = currentIndex >= 0 ? `translateY(-${currentIndex * 1.25}rem)` : 'translateY(0)';
   return (
     <div className={`${INCREMENT_DECREMENT_BUTTON_STYLES.container} ${className}`} title={title}>
       {/* Decrement button */}
@@ -128,7 +128,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
           disabled={!isAltered}
           title={resetTitle}
         >
-          <Undo2 size={14} />
+          <Trash2 className="h-2 w-2" />
         </Button>
       )}
 

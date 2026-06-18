@@ -11,6 +11,7 @@ interface ChordSheetContentProps {
   fontSize: number;
   fontStyle: string;
   viewMode: string;
+  transpose?: number;
   isLoading?: boolean;
 }
 
@@ -27,12 +28,13 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   fontSize,
   fontStyle,
   viewMode,
+  transpose = 0,
   isLoading,
 }) => {
   const { containerRef, maxCols } = useContainerColumns(rawHtml);
   const fontFamily = FONT_FAMILY[fontStyle];
   const sourceHtml = resolveSourceHtml(rawHtml, songChords);
-  const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols) : undefined;
+  const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols, transpose) : undefined;
 
   return (
     <div

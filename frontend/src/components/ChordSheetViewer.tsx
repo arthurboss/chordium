@@ -19,19 +19,33 @@ interface ChordSheetViewerProps {
   showControlsBar?: boolean;
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
+  effectiveTranspose?: number;
+  fontSize?: number;
+  viewMode?: string;
 }
 
 /**
  * Orchestrates the full chord sheet viewing experience.
  *
- * Owns all playback/display state (transpose, capo, font, auto-scroll, edit mode)
- * via custom hooks and passes derived props down to `ChordSheetContent` and
- * `StickyControlsBar`. Switches to `ChordEdit` when the user enters edit mode.
+ * When `effectiveTranspose` is provided by a parent (e.g. SongViewer), the
+ * internal capo/transpose state is unused. Otherwise falls back to the internal
+ * state for standalone usage (e.g. UploadTab).
  *
  * The forwarded ref points to the root `#chord-sheet-viewer` div, which parent
  * components (e.g. auto-scroll) use to measure scroll position.
  */
-const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode }, ref) => {
+const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
+  chordSheet,
+  content,
+  onSave,
+  isLoading,
+  showControlsBar = true,
+  onViewModeChange,
+  initialViewMode,
+  effectiveTranspose: externalEffectiveTranspose,
+  fontSize: externalFontSize,
+  viewMode: externalViewMode,
+}, ref) => {
 
   const {
     autoScroll,
@@ -41,23 +55,15 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
   } = useAutoScroll();
 
   const {
-    transpose,
-    setTranspose,
-    defaultTranspose,
-    capo,
-    setCapo,
-    defaultCapo,
-    fontSize,
-    setFontSize,
+    fontSize: internalFontSize,
     fontStyle,
-    setFontStyle,
-    viewMode,
+    viewMode: internalViewMode,
     setViewMode,
-    hideGuitarTabs,
-    setHideGuitarTabs,
-    capoTransposeLinked,
-    setCapoTransposeLinked,
   } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, initialViewMode);
+
+  const fontSize = externalFontSize ?? internalFontSize;
+  const viewMode = externalViewMode ?? internalViewMode;
+  const effectiveTranspose = externalEffectiveTranspose ?? 0;
 
   const {
     isEditing,
@@ -100,31 +106,15 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
         fontSize={fontSize}
         fontStyle={fontStyle}
         viewMode={viewMode}
+        transpose={effectiveTranspose}
         isLoading={isLoading}
       />
       {showControlsBar && (
         <StickyControlsBar
-          transpose={transpose}
-          setTranspose={setTranspose}
-          defaultTranspose={defaultTranspose}
-          songKey={chordSheet.songKey}
-          capo={capo}
-          setCapo={setCapo}
-          defaultCapo={defaultCapo}
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          fontStyle={fontStyle}
-          setFontStyle={setFontStyle}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          hideGuitarTabs={hideGuitarTabs}
-          setHideGuitarTabs={setHideGuitarTabs}
           autoScroll={autoScroll}
           setAutoScroll={toggleAutoScroll}
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
-          capoTransposeLinked={capoTransposeLinked}
-          setCapoTransposeLinked={setCapoTransposeLinked}
           setIsEditing={setIsEditing}
           handleDownload={handleDownload}
         />

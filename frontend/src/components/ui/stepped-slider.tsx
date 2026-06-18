@@ -1,73 +1,70 @@
-
 import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { cn } from "@/lib/utils";
 
 interface SteppedSliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
-  steps: number;
   showStepIndicators?: boolean;
-  stepIndicatorColor?: string;
-  trackHeight?: string;
 }
 
 const SteppedSlider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SteppedSliderProps
->(({ className, steps, showStepIndicators = true, stepIndicatorColor = "bg-gray-400", trackHeight = "h-14", min = 0, max = 10, value, onValueChange, ...props }, ref) => {
+>(({ className, showStepIndicators = true, min = 0, max = 10, step = 1, value, onValueChange, ...props }, ref) => {
   const minNum = Number(min);
   const maxNum = Number(max);
-  const step = steps > 1 ? (maxNum - minNum) / (steps - 1) : 1;
+  const stepNum = Number(step);
+  const stepCount = Math.round((maxNum - minNum) / stepNum) + 1;
 
-  // Get current capo position for highlighting
-  const currentCapoPosition = value && value.length > 0 ? value[0] : 0;
+  const [currentValue, setCurrentValue] = React.useState<number>(
+    value != null ? Number(value[0]) : minNum
+  );
 
-  // Snap value to nearest step
+  React.useEffect(() => {
+    if (value != null) setCurrentValue(Number(value[0]));
+  }, [value]);
+
   const handleValueChange = (val: number[]) => {
-    if (steps > 1) {
-      const snapped = val.map(v => {
-        const s = Math.round((v - minNum) / step);
-        const snappedValue = minNum + s * step;
-        return Number(snappedValue.toFixed(6));
-      });
-      onValueChange?.(snapped);
-    } else {
-      onValueChange?.(val);
-    }
+    setCurrentValue(val[0]);
+    onValueChange?.(val);
   };
 
-  return (
-    <div className="relative">
-      <SliderPrimitive.Root
-        ref={ref}
-        className={cn(
-          "relative flex w-full touch-none select-none items-center cursor-pointer z-10",
-          className
-        )}
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onValueChange={handleValueChange}
-        {...props}
-      >
-        <SliderPrimitive.Track className={`${trackHeight} w-full grow overflow-hidden bg-transparent cursor-pointer`}>
-          <SliderPrimitive.Range className="absolute h-full bg-primary/40 z-10" />
-        </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer z-20" />
-      </SliderPrimitive.Root>
+  const thumbPct = ((currentValue - minNum) / (maxNum - minNum)) * 100;
 
-      {/* Step Indicators */}
-      {showStepIndicators && steps > 1 && (
-        <div className="absolute top-1/2 left-0 right-0 flex justify-between pointer-events-none -translate-y-1/2 z-10">
-          {Array.from({ length: steps }, (_, i) => (
-            <div
-              key={i}
-              className={cn("w-1 h-1 rounded-full", stepIndicatorColor)}
-            />
-          ))}
+  return (
+    <SliderPrimitive.Root
+      ref={ref}
+      className={cn(
+        "relative flex w-full touch-none select-none items-center cursor-pointer",
+        className
+      )}
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onValueChange={handleValueChange}
+      {...props}
+    >
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700">
+        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+      </SliderPrimitive.Track>
+      {showStepIndicators && stepCount > 1 && (
+        <div className="absolute top-1/2 left-0 right-0 pointer-events-none -translate-y-1/2">
+          {Array.from({ length: stepCount }, (_, i) => {
+            if (i === 0 || i === stepCount - 1) return null;
+            const pct = (i / (stepCount - 1)) * 100;
+            if (pct <= thumbPct) return null;
+            return (
+              <div
+                key={i}
+                className="absolute w-0.5 h-0.5 rounded-full bg-foreground/50 -translate-x-1/2 top-1/2 -translate-y-1/2"
+                style={{ left: `${pct}%` }}
+              />
+            );
+          })}
         </div>
       )}
-    </div>
+      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-white ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" />
+    </SliderPrimitive.Root>
   );
 });
 

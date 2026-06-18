@@ -2,13 +2,12 @@ import React from 'react';
 import { Slider } from '../../../ui/slider';
 
 interface SpeedControlProps {
-  autoScroll: boolean;
   scrollSpeed: number;
   setScrollSpeed: (v: number) => void;
   className?: string;
 }
 
-const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, setScrollSpeed, className }) => {
+const SpeedControl: React.FC<SpeedControlProps> = ({ scrollSpeed, setScrollSpeed, className }) => {
   return (
     <div className={"flex items-center cursor-pointer " + (className || "")} >
       <Slider
@@ -17,7 +16,7 @@ const SpeedControl: React.FC<SpeedControlProps> = ({ autoScroll, scrollSpeed, se
         max={10}
         step={1}
         onValueChange={(value) => setScrollSpeed(value[0])}
-        className="flex-1 min-w-32 sm:min-w-8"
+        className="flex-1 w-32"
       />
       <span className="text-sm font-medium ml-2">x{scrollSpeed}</span>
     </div>
