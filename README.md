@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://arthurboss.github.io/chordium-static/favicon-180.png" alt="Chordium Logo" height="128">
+  <img src="frontend/public/logo-256.png" alt="Chordium Logo" height="128">
 </p>
 
 <h1 align="center">Chordium</h1>

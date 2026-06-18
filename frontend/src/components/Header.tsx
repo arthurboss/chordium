@@ -4,9 +4,11 @@ import { ShareSession } from "@/features/jam-session";
 import ThemeToggle from "@/components/ThemeToggle";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTheme } from "@/utils/theme-utils";
 
 const Header = () => {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 shadow-xs backdrop-blur-xs dark:bg-card">
@@ -18,13 +20,12 @@ const Header = () => {
           aria-label={t("header.homeAriaLabel")}
         >
           <img
-            src="https://arthurboss.github.io/chordium-static/favicon-192.png"
-            alt="Chordium logo"
-            width={40}
-            height={40}
-            className="mr-2"
+            src={isDark ? "logo-dark.png" : "logo-light.png"}
+            alt="C"
+            width={32}
+            height={32}
           />
-          <h1 className="text-lg font-semibold">Chordium</h1>
+          <h1 className="text-2xl font-semibold">hordium</h1>
         </Link>
 
         <div className="flex items-center gap-2">
