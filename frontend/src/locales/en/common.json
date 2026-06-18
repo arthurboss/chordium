@@ -7,6 +7,10 @@
   "header": {
     "homeAriaLabel": "Chordium home"
   },
+  "devBanner": {
+    "note": "Note:",
+    "message": "This app is in development. Some features may not work as expected."
+  },
   "searchBar": {
     "artistPlaceholder": "Search for an artist",
     "songPlaceholder": "Search for a song",
@@ -160,5 +164,12 @@
     "outro": "Outro",
     "solo": "Solo",
     "interlude": "Interlude"
+  },
+  "sort": {
+    "default": "Relevance",
+    "az": "A → Z",
+    "za": "Z → A",
+    "recent": "Recent",
+    "mostPlayed": "Most played"
   }
 }

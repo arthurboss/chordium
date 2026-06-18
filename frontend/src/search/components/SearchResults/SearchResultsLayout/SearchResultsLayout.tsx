@@ -1,9 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ResultsList from "@/components/ui/ResultsList";
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
-import type { SearchResultsLayoutProps } from "./SearchResultsLayout.types";
+import type { SearchResult, SearchResultsLayoutProps } from "./SearchResultsLayout.types";
 import { ResultCard } from "../../ResultCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type SortOption = "default" | "az" | "za";
+
+function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
+  if (sort === "default") return items;
+  const arr = [...items];
+  const label = (r: SearchResult) => r.type === "song" ? r.title : r.displayName;
+  return arr.sort((a, b) =>
+    sort === "az"
+      ? label(a).localeCompare(label(b))
+      : label(b).localeCompare(label(a))
+  );
+}
 
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results = [],
@@ -14,6 +34,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   activeArtist,
 }) => {
   const { t } = useTranslation();
+  const [sort, setSort] = useState<SortOption>("default");
 
   if (results.length === 0) {
     return (
@@ -39,11 +60,25 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     }
   };
 
+  const sorted = sortResults(results, sort);
+
   return (
     <div className="flex flex-col gap-8 w-full">
       <SearchResultsSection title={getSectionTitle()} count={results.length}>
+        <div className="flex justify-end mb-2">
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger className="w-36 bg-card [&>span]:text-left">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">{t("sort.default")}</SelectItem>
+              <SelectItem value="az">{t("sort.az")}</SelectItem>
+              <SelectItem value="za">{t("sort.za")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <ResultsList
-          items={results}
+          items={sorted}
           renderItem={({ item }) => (
             <ResultCard key={item.path} result={item} onClick={onResultClick} />
           )}
