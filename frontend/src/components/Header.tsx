@@ -18,7 +18,7 @@ const Header = () => {
           aria-label={t("header.homeAriaLabel")}
         >
           <img
-            src="favicon-192.png"
+            src="web-app-manifest-192x192.png"
             alt="Chordium logo"
             width={40}
             height={40}
