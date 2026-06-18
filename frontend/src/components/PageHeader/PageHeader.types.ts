@@ -8,4 +8,5 @@ export interface PageHeaderProps {
   artist?: string;
   titleClassName?: string;
   rightContent?: ReactNode;
+  metadata?: ReactNode;
 }

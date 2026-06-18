@@ -22,8 +22,8 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
 
   const keyCapoControls = controls ? (
     <>
-      <div className="flex items-center gap-1.5">
-        <span className="font-medium text-muted-foreground">{t("chordMetadata.songKey")}</span>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="font-medium">{t("chordMetadata.songKey")}</span>
         <TransposeMenu
           transpose={controls.transpose}
           setTranspose={controls.handleTransposeChange}
@@ -33,8 +33,8 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
           disableDecrement={controls.getTransposeDisableStates().disableDecrement}
         />
       </div>
-      <div className="flex items-center gap-1.5">
-        <span className="font-medium text-muted-foreground">{t("chordMetadata.guitarCapo")}</span>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <span className="font-medium">{t("chordMetadata.guitarCapo")}</span>
         <CapoMenu
           capo={controls.capo}
           setCapo={controls.handleCapoChange}
@@ -52,10 +52,10 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls }) =
   );
 
   return (
-    <div className="flex flex-col gap-1 px-4 py-2 min-w-0 text-xs items-center">
-      <div className="flex flex-row flex-wrap items-center gap-x-4 gap-y-1">
-        {keyCapoControls}
+    <div className="w-full text-xs">
+      <div className="px-4 py-2 flex flex-row flex-wrap justify-between items-center gap-x-4 gap-y-2">
         <MetadataBadge label={t("chordMetadata.guitarTuning")} value={tuning} />
+        {keyCapoControls}
       </div>
     </div>
   );

@@ -1,14 +1,15 @@
 import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
-import { RefObject, useMemo } from "react";
+import StyleToolbar from "@/components/StyleToolbar";
+import { Card } from "@/components/ui/card";
+import { RefObject, useMemo, useState } from "react";
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
-import type { TransposeCapoControls } from "@/components/ChordDisplay/ChordMetadata/ChordMetadata.types";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet & SongMetadata };
@@ -28,12 +29,6 @@ interface SongViewerProps {
   initialViewMode?: string;
 }
 
-/**
- * Page-level wrapper for the chord sheet viewer screen.
- *
- * Owns transpose/capo state and passes the controls down to ChordMetadata
- * and the effective transpose value to ChordSheetViewer.
- */
 const SongViewer = ({
   song,
   chordContent: directChordContent,
@@ -52,6 +47,9 @@ const SongViewer = ({
   initialViewMode,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
+
+  const [fontSize, setFontSize] = useState(14);
+  const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : ''
@@ -99,11 +97,16 @@ const SongViewer = ({
     ? isContentLoading
     : isLazyContentLoading;
 
+  const handleViewModeChange = (mode: string) => {
+    setViewMode(mode);
+    onViewModeChange?.(mode);
+  };
+
   const title = chordSheetToDisplay.title;
   const artist = chordSheetToDisplay.artist;
 
   return (
-    <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col">
+    <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4">
       <PageHeader
         onBack={onBack}
         onAction={shouldShowActionButton && handleAction}
@@ -111,25 +114,35 @@ const SongViewer = ({
         title={title}
         artist={artist}
         rightContent={
-          chordContentToDisplay
-            ? <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
-            : undefined
+          chordContentToDisplay && (
+            <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
+          )
+        }
+        metadata={
+          <ChordMetadata
+            chordSheet={chordSheetToDisplay}
+            controls={{
+              transpose,
+              defaultTranspose,
+              handleTransposeChange,
+              getTransposeDisableStates,
+              capo,
+              defaultCapo,
+              handleCapoChange,
+              getCapoDisableStates,
+              songKey: chordSheetToDisplay.songKey,
+            }}
+          />
         }
       />
-      <ChordMetadata
-        chordSheet={chordSheetToDisplay}
-        controls={{
-          transpose,
-          defaultTranspose,
-          handleTransposeChange,
-          getTransposeDisableStates,
-          capo,
-          defaultCapo,
-          handleCapoChange,
-          getCapoDisableStates,
-          songKey: chordSheetToDisplay.songKey,
-        }}
-      />
+      <Card className="overflow-hidden">
+        <StyleToolbar
+          fontSize={fontSize}
+          setFontSize={setFontSize}
+          viewMode={viewMode}
+          setViewMode={handleViewModeChange}
+        />
+      </Card>
 
       <ChordSheetViewer
         ref={chordDisplayRef}
@@ -137,9 +150,9 @@ const SongViewer = ({
         content={chordContentToDisplay}
         onSave={onUpdate}
         isLoading={finalIsContentLoading}
-        onViewModeChange={onViewModeChange}
-        initialViewMode={initialViewMode}
         effectiveTranspose={effectiveTranspose}
+        fontSize={fontSize}
+        viewMode={viewMode}
       />
     </main>
   );

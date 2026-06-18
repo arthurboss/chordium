@@ -20,6 +20,8 @@ interface ChordSheetViewerProps {
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
   effectiveTranspose?: number;
+  fontSize?: number;
+  viewMode?: string;
 }
 
 /**
@@ -32,7 +34,18 @@ interface ChordSheetViewerProps {
  * The forwarded ref points to the root `#chord-sheet-viewer` div, which parent
  * components (e.g. auto-scroll) use to measure scroll position.
  */
-const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ chordSheet, content, onSave, isLoading, showControlsBar = true, onViewModeChange, initialViewMode, effectiveTranspose: externalEffectiveTranspose }, ref) => {
+const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
+  chordSheet,
+  content,
+  onSave,
+  isLoading,
+  showControlsBar = true,
+  onViewModeChange,
+  initialViewMode,
+  effectiveTranspose: externalEffectiveTranspose,
+  fontSize: externalFontSize,
+  viewMode: externalViewMode,
+}, ref) => {
 
   const {
     autoScroll,
@@ -42,15 +55,15 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
   } = useAutoScroll();
 
   const {
-    fontSize,
-    setFontSize,
+    fontSize: internalFontSize,
     fontStyle,
-    setFontStyle,
-    viewMode,
+    viewMode: internalViewMode,
     setViewMode,
-    hideGuitarTabs,
-    setHideGuitarTabs,
   } = useChordDisplaySettings(content, chordSheet.songKey, chordSheet.guitarCapo, initialViewMode);
+
+  const fontSize = externalFontSize ?? internalFontSize;
+  const viewMode = externalViewMode ?? internalViewMode;
+  const effectiveTranspose = externalEffectiveTranspose ?? 0;
 
   const {
     isEditing,
@@ -73,8 +86,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
     const result = downloadTextFile(content, chordSheet.title || 'chord-sheet');
     toast(result);
   };
-
-  const effectiveTranspose = externalEffectiveTranspose ?? 0;
 
   if (isEditing) {
     return (
@@ -100,14 +111,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({ ch
       />
       {showControlsBar && (
         <StickyControlsBar
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          fontStyle={fontStyle}
-          setFontStyle={setFontStyle}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          hideGuitarTabs={hideGuitarTabs}
-          setHideGuitarTabs={setHideGuitarTabs}
           autoScroll={autoScroll}
           setAutoScroll={toggleAutoScroll}
           scrollSpeed={scrollSpeed}
