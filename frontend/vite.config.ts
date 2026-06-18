@@ -70,38 +70,38 @@ export default defineConfig(({ mode }) => {
           theme_color: '#9b87f5',
           icons: [
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-16.png',
+              src: 'favicon-16.png',
               sizes: '16x16',
               type: 'image/png'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-32.png',
+              src: 'favicon-32.png',
               sizes: '32x32',
               type: 'image/png'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-48.png',
+              src: 'favicon-48.png',
               sizes: '48x48',
               type: 'image/png'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-180.png',
+              src: 'favicon-180.png',
               sizes: '180x180',
               type: 'image/png',
               purpose: 'any maskable'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+              src: 'favicon-192.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/favicon-512.png',
+              src: 'favicon-512.png',
               sizes: '512x512',
               type: 'image/png'
             },
             {
-              src: 'https://arthurboss.github.io/chordium-static/icon-maskable-512.png',
+              src: 'icon-maskable-512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'
@@ -115,7 +115,7 @@ export default defineConfig(({ mode }) => {
               url: '/search',
               icons: [
                 {
-                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  src: 'favicon-192.png',
                   sizes: '192x192',
                   type: 'image/png'
                 }
@@ -128,7 +128,7 @@ export default defineConfig(({ mode }) => {
               url: '/upload',
               icons: [
                 {
-                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  src: 'favicon-192.png',
                   sizes: '192x192',
                   type: 'image/png'
                 }
@@ -141,7 +141,7 @@ export default defineConfig(({ mode }) => {
               url: '/my-chord-sheets',
               icons: [
                 {
-                  src: 'https://arthurboss.github.io/chordium-static/favicon-192.png',
+                  src: 'favicon-192.png',
                   sizes: '192x192',
                   type: 'image/png'
                 }
