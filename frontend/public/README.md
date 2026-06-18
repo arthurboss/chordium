@@ -1,33 +1,13 @@
 # Public Directory
 
-This directory contains static files served by the main Chordium application.
+This directory contains static files served by the Chordium application.
 
-## Current Files
+## Files
 
 - `robots.txt` - SEO crawler instructions
-
-## Static Assets Location
-
-**PWA and favicon assets have been moved to an external repository:**
-
-🔗 **External Repository**: [chordium-static](https://github.com/arthurboss/chordium-static)  
-🌐 **Public URL**: https://arthurboss.github.io/chordium-static/
-
-### Moved Files
-
-The following files are now served from the external repository:
-
-- `favicon.ico` - Browser favicon
-- `favicon-*.png` - Various favicon sizes (16x16, 32x32, 48x48, 180x180, 192x192, 512x512)
-- `icon-maskable-512.png` - PWA maskable icon
-
-### Why External?
-
-These assets are hosted separately to avoid Vercel Authentication conflicts. The external repository serves them publicly via GitHub Pages, ensuring PWA functionality works correctly while keeping the main application secure.
-
-## Adding New Static Files
-
-- **App-specific files** (like `robots.txt`): Add to this directory
-- **PWA/favicon assets**: Add to the [chordium-static](https://github.com/arthurboss/chordium-static) repository
-- **PWA manifest**: Configured in `vite.config.ts` via VitePWA plugin
-
+- `favicon.ico` - Browser favicon (legacy fallback)
+- `favicon-96x96-light.png` / `favicon-96x96-dark.png` - Theme-aware browser favicon
+- `apple-touch-icon.png` - iOS home screen icon (180×180)
+- `web-app-manifest-192x192.png` - PWA manifest icon (192×192, maskable)
+- `web-app-manifest-512x512.png` - PWA manifest icon (512×512, maskable)
+- `logo-light.png` / `logo-dark.png` - App header logo (80×80, theme-aware)
