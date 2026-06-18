@@ -21,11 +21,11 @@ const Header = () => {
         >
           <img
             src={isDark ? "logo-dark.png" : "logo-light.png"}
-            alt="Chordium logo"
+            alt="C"
             width={40}
             height={40}
           />
-          <h1 aria-label="Chordium" className="text-2xl font-semibold">hordium</h1>
+          <h1 className="text-2xl font-semibold">hordium</h1>
         </Link>
 
         <div className="flex items-center gap-2">
