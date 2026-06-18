@@ -22,8 +22,8 @@ const Header = () => {
           <img
             src={isDark ? "logo-dark.png" : "logo-light.png"}
             alt="C"
-            width={40}
-            height={40}
+            width={32}
+            height={32}
           />
           <h1 className="text-2xl font-semibold">hordium</h1>
         </Link>
