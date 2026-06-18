@@ -24,7 +24,7 @@ chordium/
 │   │   └── types/             # Frontend-specific types
 │   ├── public/                # Static assets
 │   └── cypress/               # E2E tests
-├── backend/                    # Node.js + Express backend API
+├── backend/                    # Node.js + Express API server (local dev only)
 │   ├── controllers/           # API route handlers
 │   ├── services/              # Business logic services
 │   ├── utils/                 # Backend utilities
@@ -169,20 +169,22 @@ npm run lint:ts
 
 ## 🚀 Deployment Strategy
 
-### Frontend Deployment
-- **Build:** `npm run build:fe` creates optimized static files
-- **Hosting:** Static file hosting (Vercel, Netlify, etc.)
-- **Environment:** Environment variables injected at build time
+Everything deploys automatically to Vercel from `main`. There is no separate backend deployment.
 
-### Backend Deployment
-- **Build:** `npm run build:be` compiles TypeScript to JavaScript
-- **Runtime:** Node.js environment
-- **Environment:** Environment variables at runtime
+### Production (Vercel)
+- **Frontend:** React SPA built with Vite, served as static files
+- **API:** Serverless functions in `frontend/api/` (artists, search, chord sheets)
+- **Database:** Neon (via Vercel Postgres), connection injected automatically
+- **Environment variables:** Configured in the Vercel dashboard
 
-### Shared Deployment Considerations
-- **Version alignment:** Frontend and backend versions must be compatible
-- **API contracts:** Shared types ensure API compatibility
-- **Environment variables:** Consistent configuration across environments
+### Local Development
+- **Frontend:** Vite dev server (`npm run dev:fe`)
+- **Backend (Express):** `npm run dev:be` — mirrors the Vercel API functions locally, used for chord sheet and scraping work
+- The Express backend in `backend/` is **not deployed**; it exists solely as a local dev convenience
+
+### API Contracts
+- Shared types (`@chordium/types`) ensure the frontend and API functions stay compatible
+- Environment variables are consistent between local and production via `.env` / Vercel dashboard
 
 ## 🔧 Tooling Decisions
 

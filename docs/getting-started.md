@@ -23,7 +23,7 @@ npm install
 This monorepo contains the following workspaces:
 
 - **`frontend/`** - React/Vite application with PWA features
-- **`backend/`** - Node.js/Express API server
+- **`backend/`** - Node.js/Express API server (local development only; production uses Vercel serverless functions in `frontend/api/`)
 - **`packages/types/`** - Shared TypeScript types published to npm
 - **`packages/e2e-tests/`** - End-to-end testing suite
 
@@ -38,9 +38,9 @@ All static assets (favicons, PWA icons, app logo) live in `frontend/public/` and
 
 The frontend will be available at http://localhost:8080.
 
-The backend will be available at http://localhost:3001.
+The backend will be available at http://localhost:3001 (local dev only — production API runs as Vercel serverless functions).
 
-📊 **Production Backend Status**: [Monitor API uptime](https://stats.uptimerobot.com/sIX45GbfwC)
+📊 **API Status**: [Monitor uptime](https://stats.uptimerobot.com/sIX45GbfwC)
 
 ## Monorepo Commands
 

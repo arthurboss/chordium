@@ -24,7 +24,7 @@ The backend runs as Vercel serverless functions in `frontend/api/`.
 
 For deployment configuration, see:
 
-- [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
+- [Deployment Guide](../docs/deployment.md) - Complete deployment guide
 
 ## Tests
 

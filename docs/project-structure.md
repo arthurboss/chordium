@@ -7,7 +7,7 @@ chordium/
 │   ├── public/        # Static assets
 │   ├── dist/          # Build output
 │   └── cypress/       # E2E tests
-├── backend/           # Node.js/Express backend API
+├── backend/           # Node.js/Express API server (local dev only)
 │   ├── controllers/   # API route handlers
 │   ├── services/      # Business logic services
 │   ├── utils/         # Backend utilities
