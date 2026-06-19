@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface AsyncError {
   message: string;
@@ -103,12 +103,7 @@ export const useAsyncError = (options: UseAsyncErrorOptions = {}) => {
     }
 
     if (showToast) {
-      toast({
-        variant: 'destructive',
-        title: 'Something went wrong',
-        description: asyncError.message,
-        duration: 5000
-      });
+      toast.error('Something went wrong', { description: asyncError.message, duration: 5000 });
     }
 
     onError?.(asyncError);

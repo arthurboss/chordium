@@ -11,7 +11,7 @@ import { SearchTab } from "@/search";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
 import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets/operations";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
 import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
@@ -145,10 +145,7 @@ const TabContainer = ({
 
       await storeChordSheet(metadata, content, true, path);
 
-      toast({
-        title: i18n.t("notifications:uploadSaved"),
-        description: i18n.t("notifications:uploadSavedDesc", { title: metadata.title }),
-      });
+      toast.success(i18n.t("notifications:uploadSaved"), { description: i18n.t("notifications:uploadSavedDesc", { title: metadata.title }) });
 
       await setMySongs();
       navigate(`/${artistSlug}/${titleSlug}`, {
@@ -164,11 +161,7 @@ const TabContainer = ({
       if (import.meta.env.DEV) {
         console.error("Failed to save uploaded chord sheet:", error);
       }
-      toast({
-        title: i18n.t("notifications:uploadSaveFailed"),
-        description: i18n.t("notifications:uploadSaveFailedDesc"),
-        variant: "destructive"
-      });
+      toast.error(i18n.t("notifications:uploadSaveFailed"), { description: i18n.t("notifications:uploadSaveFailedDesc") });
     }
   };
 
@@ -185,10 +178,7 @@ const TabContainer = ({
     try {
       await deleteChordSheet(songPath);
 
-      toast({
-        title: i18n.t("notifications:uploadRemoved"),
-        description: i18n.t("notifications:uploadRemovedDesc", { title: songToDelete.title }),
-      });
+      toast.success(i18n.t("notifications:uploadRemoved"), { description: i18n.t("notifications:uploadRemovedDesc", { title: songToDelete.title }) });
 
       await setMySongs();
 
@@ -199,11 +189,7 @@ const TabContainer = ({
       if (import.meta.env.DEV) {
         console.error("Failed to remove chord sheet:", error);
       }
-      toast({
-        title: i18n.t("notifications:uploadRemoveFailed"),
-        description: i18n.t("notifications:uploadRemoveFailedDesc", { title: songToDelete.title }),
-        variant: "destructive"
-      });
+      toast.error(i18n.t("notifications:uploadRemoveFailed"), { description: i18n.t("notifications:uploadRemoveFailedDesc", { title: songToDelete.title }) });
     }
   };
 

@@ -1,7 +1,7 @@
 import { forwardRef, useEffect } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import ChordSheetContent from './ChordDisplay/ChordSheetContent';
 import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
@@ -84,7 +84,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
 
   const handleDownload = () => {
     const result = downloadTextFile(content, chordSheet.title || 'chord-sheet');
-    toast(result);
+    toast.success(result.title, { description: result.description });
   };
 
   if (isEditing) {
