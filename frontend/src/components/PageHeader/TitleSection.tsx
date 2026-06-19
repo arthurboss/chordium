@@ -15,7 +15,7 @@ const TitleSection = ({ title, artist, titleClassName = "", onArtistClick }: Tit
         onArtistClick ? (
           <button
             onClick={onArtistClick}
-            className="text-sm text-muted-foreground truncate block max-w-full hover:underline focus:underline focus:outline-none text-left"
+            className="text-sm text-primary truncate block max-w-full hover:underline focus:underline focus:outline-none text-left"
           >
             {artist}
           </button>
