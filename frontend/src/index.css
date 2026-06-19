@@ -3,76 +3,126 @@
 @source ".";
 
 @layer base {
+  /* ── SURFACE ANCHOR ────────────────────────────────────────────────────────
+     --surface is the single source of truth for the entire palette.
+     Everything else is derived from it via OKLCH relative color syntax.
+
+     Normally it's a hardcoded achromatic OKLCH color (C=0, H=0 — no tint).
+     Achromatic is intentional: all brand hue rotations start from H=0, so
+     calc(0 + 302) = 302° always lands on the correct purple. A tinted surface
+     (e.g. H=240) would offset the result (240+302=542°=182°=teal).
+
+     When .uses-canvas is present (app theme matches OS preference), --surface
+     becomes Canvas — the browser's native background — so the whole palette
+     tracks the actual OS chrome color. Canvas is also near-achromatic on most
+     systems, so the hue rotation math stays consistent. */
+
   :root {
-    color-scheme: light dark;
-    --background: 240 5% 96%;
-    --foreground: 240 10% 3.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 270 84% 75%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 270 84% 75%;
-
+    color-scheme: light;
+    --surface: oklch(0.96 0 0); /* ≈ off-white page background */
     --radius: 0.5rem;
+
+    /* ── SURFACE TOKENS ──────────────────────────────────────────────────────
+       OKLCH lightness (l) is on a 0–1 scale (0 = black, 1 = white).
+
+       Both light and dark mode work the same way:
+         --background = surface           →  the page (matches Canvas)
+         --card       = surface − 0.04    →  recessed panel, darker than page
+
+       This is symmetric — no light-dark() needed for surface tokens.
+       The math naturally does the right thing:
+         light (l=0.96): card = 0.92  (slightly darker than near-white page) ✓
+         dark  (l=0.21): card = 0.17  (slightly darker than dark page)       ✓
+
+       Secondary/muted/accent use l + (0.5 − l) × factor — "pull toward mid-grey".
+       This also self-corrects per mode with no branching:
+         light (l=0.96): pulls down  → darker hover state ✓
+         dark  (l=0.21): pulls up    → lighter hover state ✓ */
+
+    /* Light: page is grey (surface − 0.04), card is elevated at surface level.
+       Dark:  page is surface,               card is recessed (surface − 0.04).
+       light-dark() picks the right arm based on the active color-scheme. */
+    --background: light-dark(
+      oklch(from var(--surface) clamp(0, calc(l - 0.04), 1) c h),
+      var(--surface)
+    );
+    --foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    --card: light-dark(
+      var(--surface),
+      oklch(from var(--surface) clamp(0, calc(l - 0.04), 1) c h)
+    );
+    --card-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    --popover: light-dark(
+      var(--surface),
+      oklch(from var(--surface) clamp(0, calc(l - 0.06), 1) c h)
+    );
+    --popover-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    /* Secondary/muted/accent: subtle containers and hover states.
+       Pull toward mid-grey by 10% — registers as contrast on both light and dark. */
+    --secondary:            oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
+    --secondary-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    --muted:                oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
+    /* Muted foreground: stays in the 0.42–0.68 midtone band — readable but subdued.
+       Formula biases toward the opposite lightness half from surface:
+       light (l≈0.96): 1.04 − 0.96×0.6 = 0.464  (darker midtone) ✓
+       dark  (l≈0.21): 1.04 − 0.21×0.6 = 0.914 → clamped to 0.68 ✓ */
+    --muted-foreground:     oklch(from var(--surface) clamp(0.42, calc(1.04 - l * 0.6), 0.68) 0 0);
+
+    --accent:               oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
+    --accent-foreground:    oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    /* Border/input: stronger pull toward mid-grey (35%) for visible contrast.
+       light (l=0.96): 0.96 − 0.46×0.35 = 0.799  (visible grey border) ✓
+       dark  (l=0.21): 0.21 + 0.29×0.35 = 0.311  (visible light border) ✓ */
+    --border: oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h);
+    --input:  oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h);
+
+    /* ── BRAND TOKENS ────────────────────────────────────────────────────────
+       Primary is rotated 302° from --surface on the OKLCH hue wheel.
+
+       Why 302°? The original primary was hsl(270 84% 75%) ≈ rgb(191, 138, 245).
+       Converting to OKLCH gives oklch(0.724 0.157 302°). OKLCH hues are
+       perceptually remapped — 270° in HSL ≠ 270° in OKLCH.
+
+       Since --surface is achromatic (C=0, H resolves to 0 in calc), the
+       rotation is always: calc(0 + 302) = 302° = this purple.
+       When Canvas has a real tint hue, primary shifts with it by the same
+       offset — the whole palette rotates together. */
+    --primary:            oklch(from var(--surface) 0.724 0.157 calc(h + 302));
+    --primary-foreground: oklch(from var(--primary) clamp(0.02, calc(1 - l), 0.98) 0 0);
+
+    /* Destructive: semantic red, not rotated. light-dark() picks the right
+       lightness so it's legible on both light and dark backgrounds. */
+    --destructive:            light-dark(oklch(0.63 0.26 29), oklch(0.44 0.18 29));
+    --destructive-foreground: oklch(0.98 0 0);
+
+    /* Ring mirrors primary — used for focus outlines */
+    --ring: oklch(from var(--surface) 0.724 0.157 calc(h + 302));
   }
 
   .dark {
-    --background: 240 3.7% 15.9%;
-    --foreground: 0 0% 98%;
+    color-scheme: dark;
+    --surface: oklch(0.21 0 0); /* ≈ dark grey */
+  }
 
-    --card: 240 4.8% 12.4%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 3.7% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 270 84% 75%;
-    --primary-foreground: 240 5.9% 10%;
-
-    --secondary: 240 3.7% 20%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 25%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 20%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 25%;
-    --input: 240 3.7% 25%;
-    --ring: 270 84% 75%;
+  /* When app theme matches OS, upgrade --surface to the real browser Canvas.
+     JS in theme-utils.ts toggles this class on <html>. */
+  :root.uses-canvas,
+  .dark.uses-canvas {
+    --surface: Canvas;
   }
 
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--border);
   }
 
   body {
-    background-color: Canvas;
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
   }
 
   html,
@@ -85,31 +135,31 @@
   }
 
   button:not(:disabled),
-  [role='button']:not(:disabled),
+  [role="button"]:not(:disabled),
   [role="menuitem"] {
     cursor: pointer;
   }
 
   a:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 1px hsl(var(--ring));
+    box-shadow: 0 0 0 1px var(--ring);
     border-radius: var(--radius);
   }
 
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    box-shadow: 0 0 0 1000px hsla(270, 84%, 75%, 0.1) inset;
-    -webkit-text-fill-color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
+    -webkit-box-shadow: 0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    box-shadow: 0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    -webkit-text-fill-color: var(--foreground);
+    border: 1px solid var(--ring);
     transition: background-color 5000s ease-in-out 0s;
-    caret-color: hsl(var(--foreground));
+    caret-color: var(--foreground);
   }
 
   input:-webkit-autofill ~ button[aria-label="Clear input"] {
-    color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--ring));
+    color: var(--foreground);
+    border: 1px solid var(--ring);
   }
 
   pre,
