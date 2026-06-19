@@ -132,30 +132,30 @@
 
 /* Close button uses app theme colors */
 [data-sonner-toast] [data-close-button] {
-  background: hsl(var(--background));
-  border-color: hsl(var(--border));
-  color: hsl(var(--foreground));
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 :where([data-sonner-toast]):hover :where([data-close-button]):hover {
-  background: hsl(var(--muted));
-  border-color: hsl(var(--border));
+  background: hsl(var(--muted)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* Success toast icon uses the app primary color */
 [data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
-  color: hsl(var(--primary));
+  color: hsl(var(--primary)) !important;
 }
 
 /* Error toasts use the app destructive color */
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: hsl(var(--destructive)) !important;
+  border-color: hsl(var(--destructive) / 0.3) !important;
+  color: hsl(var(--destructive-foreground)) !important;
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive-foreground) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: hsl(var(--destructive)) !important;
+  border-color: hsl(var(--destructive-foreground) / 0.3) !important;
+  color: hsl(var(--destructive-foreground)) !important;
 }
