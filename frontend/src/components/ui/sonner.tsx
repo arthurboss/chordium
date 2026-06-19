@@ -13,7 +13,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       position="bottom-center"
       duration={3000}
       closeButton
-      swipeDirections={["down"]}
+      swipeDirections={["down", "left", "right"]}
       {...props}
     />
   )
