@@ -19,7 +19,7 @@
 
   :root {
     color-scheme: light;
-    --surface: oklch(0.96 0 0); /* ≈ off-white page background */
+    --surface: oklch(0.96 0.006 302); /* off-white with a whisper of purple — ties greys to primary */
     --radius: 0.5rem;
 
     /* ── SURFACE TOKENS ──────────────────────────────────────────────────────
@@ -43,43 +43,71 @@
        Dark:  page is surface,               card is recessed (surface − 0.04).
        light-dark() picks the right arm based on the active color-scheme. */
     --background: light-dark(
-      oklch(from var(--surface) clamp(0, calc(l - 0.04), 1) c h),
+      oklch(from var(--surface) clamp(0, calc(l - 0.06), 1) c h),
       var(--surface)
     );
-    --foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+    /* Foreground: tinted with a small fixed chroma in light mode so text feels
+       palette-aware rather than neutral black. Dark mode stays achromatic (0 0)
+       — tinted light text on dark bg looks off.
+       l=0.13 avoids pure black; inversion keeps it close to black on light, white on dark. */
+    --foreground: light-dark(
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 302),
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
+    );
 
     --card: light-dark(
       var(--surface),
-      oklch(from var(--surface) clamp(0, calc(l - 0.04), 1) c h)
+      oklch(from var(--surface) clamp(0, calc(l - 0.06), 1) c h)
     );
-    --card-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+    --card-foreground: light-dark(
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 302),
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
+    );
 
     --popover: light-dark(
       var(--surface),
       oklch(from var(--surface) clamp(0, calc(l - 0.06), 1) c h)
     );
-    --popover-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+    --popover-foreground: light-dark(
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 302),
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
+    );
 
     /* Secondary/muted/accent: subtle containers and hover states.
        Pull toward mid-grey by 10% — registers as contrast on both light and dark. */
     --secondary:            oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    --secondary-foreground: oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+    --secondary-foreground: light-dark(
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 302),
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
+    );
 
-    --muted:                oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    /* Muted foreground: stays in the 0.42–0.68 midtone band — readable but subdued.
+    --muted: oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
+    /* Muted foreground: stays in the 0.46–0.68 midtone band — readable but subdued.
+       Tinted in light mode to stay palette-aware.
        Formula biases toward the opposite lightness half from surface:
-       light (l≈0.96): 1.04 − 0.96×0.6 = 0.464  (darker midtone) ✓
+       light (l≈0.96): 1.04 − 0.96×0.6 = 0.464 → clamped to 0.46 ✓
        dark  (l≈0.21): 1.04 − 0.21×0.6 = 0.914 → clamped to 0.68 ✓ */
-    --muted-foreground:     oklch(from var(--surface) clamp(0.42, calc(1.04 - l * 0.6), 0.68) 0 0);
+    --muted-foreground: light-dark(
+      oklch(from var(--surface) clamp(0.46, calc(1.04 - l * 0.6), 0.68) 0.012 302),
+      oklch(from var(--surface) clamp(0.46, calc(1.04 - l * 0.6), 0.68) 0 0)
+    );
 
     --accent:               oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    --accent-foreground:    oklch(from var(--surface) clamp(0.02, calc(1 - l), 0.98) 0 0);
+    --accent-foreground: light-dark(
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 302),
+      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
+    );
 
-    /* Border/input: stronger pull toward mid-grey (35%) for visible contrast.
-       light (l=0.96): 0.96 − 0.46×0.35 = 0.799  (visible grey border) ✓
-       dark  (l=0.21): 0.21 + 0.29×0.35 = 0.311  (visible light border) ✓ */
-    --border: oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h);
-    --input:  oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h);
+    /* Border/input: tinted in light mode — purple-grey borders tie the layout
+       to the brand without being distracting. Dark mode stays achromatic. */
+    --border: light-dark(
+      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) 0.010 302),
+      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h)
+    );
+    --input: light-dark(
+      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) 0.010 302),
+      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h)
+    );
 
     /* ── BRAND TOKENS ────────────────────────────────────────────────────────
        Primary is rotated 302° from --surface on the OKLCH hue wheel.
