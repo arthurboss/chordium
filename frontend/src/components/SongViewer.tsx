@@ -3,7 +3,9 @@ import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import StyleToolbar from "@/components/StyleToolbar";
 import { Card } from "@/components/ui/card";
-import { RefObject, useMemo, useState } from "react";
+import { RefObject, useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
@@ -47,6 +49,7 @@ const SongViewer = ({
   initialViewMode,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
+  const navigate = useNavigate();
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
@@ -105,6 +108,15 @@ const SongViewer = ({
   const title = chordSheetToDisplay.title;
   const artist = chordSheetToDisplay.artist;
 
+  const handleArtistClick = useCallback(() => {
+    const artistSlug = songObj.path.split("/")[0];
+    sessionStorage.removeItem("chordium_search_query");
+    try {
+      sessionStorage.setItem(ARTIST_DISPLAY_NAME_KEY, JSON.stringify({ path: artistSlug, displayName: artist }));
+    } catch {}
+    navigate(`/${artistSlug}`);
+  }, [artist, navigate, songObj.path]);
+
   return (
     <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4">
       <PageHeader
@@ -113,6 +125,7 @@ const SongViewer = ({
         isSaved={shouldShowActionButton && isFromMyChordSheets}
         title={title}
         artist={artist}
+        onArtistClick={artist ? handleArtistClick : undefined}
         rightContent={
           chordContentToDisplay && (
             <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />

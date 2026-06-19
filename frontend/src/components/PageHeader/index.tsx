@@ -13,6 +13,7 @@ const PageHeader = memo(({
   title,
   artist,
   titleClassName,
+  onArtistClick,
   rightContent,
   metadata,
 }: PageHeaderProps) => {
@@ -22,7 +23,7 @@ const PageHeader = memo(({
         <div className="shrink-0">
           <BackButton onBack={onBack} />
         </div>
-        <TitleSection title={title} artist={artist} titleClassName={titleClassName} />
+        <TitleSection title={title} artist={artist} titleClassName={titleClassName} onArtistClick={onArtistClick} />
         <div className="flex items-center gap-2 shrink-0 min-w-8 ml-auto sm:ml-0">
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
