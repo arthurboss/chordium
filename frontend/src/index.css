@@ -7,17 +7,16 @@
      --surface is the single source of truth for the entire palette.
      Everything else is derived from it via OKLCH relative color syntax.
 
-     In light mode it's a lavender-tinted off-white (hue 275°) so all surface
-     tones (backgrounds, borders) carry a whisper of the brand purple.
-     In dark mode it's achromatic so dark Canvas can override cleanly.
-
-     Brand tokens (--primary, --ring) are hardcoded to 275° — not rotated from
-     --surface — because surface hue varies between light (275°) and dark Canvas
-     (~0°), which would shift primary unpredictably if rotation were used. */
+     When app theme matches OS, --surface is upgraded to Canvas so everything
+     derives from the real system background. JS samples Canvas, computes its
+     OKLCH hue, and writes it to --hue (default 275°). All brand colors rotate
+     with --hue so the whole palette shifts coherently with the OS accent.
+     Fallback: --hue=275 (royal violet) when Canvas is near-neutral. */
 
   :root {
     color-scheme: light;
-    --surface: oklch(0.97 0.010 275); /* lavender-tinted white — ties surface greys to the brand purple */
+    --hue: 275; /* brand hue in OKLCH — updated by JS when Canvas is tinted */
+    --surface: oklch(0.97 0.010 var(--hue)); /* light fallback: lavender-tinted white */
     --radius: 0.5rem;
 
     /* ── SURFACE TOKENS ──────────────────────────────────────────────────────
@@ -121,32 +120,29 @@
        rotation is always: calc(0 + 275) = 275°.
        When Canvas has a real tint hue, primary shifts with it by the same
        offset — the whole palette rotates together. */
-    /* Primary is hardcoded to 275° (royal violet — rich, blue-leaning purple).
-       Not rotated from surface — surface hue varies (275° light fallback, ~0°
-       for dark Canvas), so a rotation offset would shift primary unpredictably.
-       l=0.68, c=0.18: slightly deeper and more saturated than the original for
-       a richer, premium feel. */
-    --primary:            oklch(0.68 0.18 275);
+    /* Primary and ring rotate with --hue so the whole palette shifts together
+       when Canvas has a tint. l=0.68, c=0.18 stays fixed for richness. */
+    --primary:            oklch(0.68 0.18 var(--hue));
     --primary-foreground: oklch(from var(--primary) clamp(0.02, calc(1 - l), 0.98) 0 0);
 
-    /* Destructive: crimson-red at hue 8° — leans slightly violet-ward vs pure
-       orange-red (29°), so it harmonizes with the 275° lavender palette. */
-    --destructive:            light-dark(oklch(0.62 0.24 8), oklch(0.50 0.20 8));
+    /* Destructive: offset −267° from brand hue → lands near red (8° when hue=275).
+       Stays roughly red regardless of how much --hue rotates. */
+    --destructive:            light-dark(oklch(0.62 0.24 calc(var(--hue) - 267)), oklch(0.50 0.20 calc(var(--hue) - 267)));
     --destructive-foreground: oklch(0.98 0 0);
 
-    /* Ring mirrors primary — used for focus outlines */
-    --ring: oklch(0.68 0.18 275);
+    /* Ring mirrors primary */
+    --ring: oklch(0.68 0.18 var(--hue));
   }
 
   .dark {
     color-scheme: dark;
-    --surface: oklch(0.21 0 0); /* ≈ dark grey */
+    --surface: oklch(0.21 0.010 var(--hue)); /* dark fallback: ties dark surface to brand hue */
   }
 
-  /* When app theme matches OS in DARK mode only, upgrade --surface to Canvas.
-     Light Canvas is always near-white with no warmth, which washes out the
-     palette tint — so light mode always uses the hardcoded --surface value. */
-  .dark.uses-canvas {
+  /* When app theme matches OS, upgrade --surface to Canvas so the palette
+     derives from the browser's actual background color.
+     Primary is hardcoded so it won't shift when Canvas has zero chroma. */
+  .uses-canvas {
     --surface: Canvas;
   }
 
