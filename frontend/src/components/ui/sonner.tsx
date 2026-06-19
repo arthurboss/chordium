@@ -12,7 +12,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position="bottom-center"
       duration={3000}
-      richColors
       closeButton
       swipeDirections={["down"]}
       {...props}

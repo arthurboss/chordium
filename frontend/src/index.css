@@ -121,17 +121,24 @@
   }
 }
 
-/* Sonner toast — match Sonner's specificity to override its theme defaults */
+/* Sonner toast — match Sonner specificity to override theme defaults */
 [data-sonner-toaster][data-theme='light'],
 [data-sonner-toaster][data-theme='dark'] {
   --normal-bg: hsl(var(--background));
   --normal-bg-hover: hsl(var(--muted));
   --normal-border: hsl(var(--border));
   --normal-text: hsl(var(--foreground));
-  --success-bg: hsl(var(--primary));
-  --success-border: hsl(var(--primary) / 0.3);
-  --success-text: hsl(var(--primary-foreground));
-  --error-bg: hsl(var(--destructive));
-  --error-border: hsl(var(--destructive) / 0.3);
-  --error-text: hsl(var(--destructive-foreground));
+}
+
+/* Error toasts use the app destructive color */
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] {
+  background: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.3);
+  color: hsl(var(--destructive-foreground));
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
+  background: hsl(var(--destructive));
+  border-color: hsl(var(--destructive-foreground) / 0.3);
+  color: hsl(var(--destructive-foreground));
 }
