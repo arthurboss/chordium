@@ -265,7 +265,7 @@ ${errorInfo?.componentStack || 'No component stack available'}
                 {!isGlobalError && (
                   <Button 
                     onClick={this.handleRetry} 
-                    variant="default"
+                    variant="outline"
                     className="flex items-center gap-2"
                   >
                     <RefreshCw className="h-4 w-4" />

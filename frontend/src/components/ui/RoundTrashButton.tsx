@@ -13,7 +13,7 @@ export interface RoundTrashButtonProps extends React.ButtonHTMLAttributes<HTMLBu
  * @param ...props - All other button props (onClick, className, etc.)
  */
 const RoundTrashButton: React.FC<RoundTrashButtonProps> = ({ label = "Delete", className = "", disabled, onClick, ...props }) => {
- const enabledClass = "hover:border-red-500/20 text-destructive hover:text-destructive dark:text-red-500 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30";
+ const enabledClass = "text-destructive hover:text-destructive hover:border-destructive/20 hover:bg-destructive/8";
  const disabledClass = "text-muted-foreground opacity-50 cursor-not-allowed pointer-events-none";
  return (
   <Button

@@ -36,7 +36,7 @@ export const QueryErrorBoundary = ({ children, onError }: QueryErrorBoundaryProp
           </p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            className="px-4 py-2 border border-input bg-background rounded-md hover:bg-accent hover:text-accent-foreground"
           >
             Refresh Page
           </button>

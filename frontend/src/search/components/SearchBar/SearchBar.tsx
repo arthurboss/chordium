@@ -95,6 +95,7 @@ const SearchBar = ({
             size="icon"
             className="h-10 w-10 rounded-full"
             disabled={!!(loading || artistLoading || isSearchDisabled)}
+            variant="outline"
             aria-label={t("searchBar.search")}
             {...cyAttr("search-submit-button")}
           >

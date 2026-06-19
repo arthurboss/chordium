@@ -20,11 +20,11 @@ const DeleteButton = ({ onDelete }: DeleteButtonProps) => {
         e.stopPropagation();
         onDelete();
       }}
-      className="flex-shrink-0 h-10 w-10 rounded-full hover:border-red-500/20 hover:bg-red-100 dark:hover:bg-opacity-40 dark:hover:bg-destructive/30"
+      className="flex-shrink-0 h-10 w-10 rounded-full hover:border-destructive/20 hover:bg-destructive/8"
       tabIndex={0}
       aria-label={t("pageHeader.deleteAriaLabel")}
     >
-      <Trash2 className="h-4 w-4 text-destructive dark:text-red-500" />
+      <Trash2 className="h-4 w-4 text-destructive" />
     </Button>
   );
 };
