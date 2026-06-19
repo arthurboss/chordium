@@ -4,7 +4,34 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "coverage/**"],
-      "env": ["VITE_API_URL", "NODE_ENV", "VERCEL"]
+      "env": [
+        "VITE_API_URL",
+        "NODE_ENV",
+        "VERCEL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_JWT_SECRET",
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "POSTGRES_URL",
+        "POSTGRES_URL_NO_SSL",
+        "POSTGRES_URL_NON_POOLING",
+        "POSTGRES_PRISMA_URL",
+        "POSTGRES_HOST",
+        "POSTGRES_DATABASE",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "PGHOST",
+        "PGHOST_UNPOOLED",
+        "PGUSER",
+        "PGDATABASE",
+        "PGPASSWORD",
+        "NEON_PROJECT_ID",
+        "NEON_AUTH_BASE_URL",
+        "VITE_NEON_AUTH_URL",
+        "VITE_RENDER_URL"
+      ]
     },
     "test": {
       "dependsOn": ["^build"],
