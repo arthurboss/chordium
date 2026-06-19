@@ -120,3 +120,18 @@
     overflow-wrap: break-word;
   }
 }
+
+/* Sonner toast — match Sonner's specificity to override its theme defaults */
+[data-sonner-toaster][data-theme='light'],
+[data-sonner-toaster][data-theme='dark'] {
+  --normal-bg: hsl(var(--background));
+  --normal-bg-hover: hsl(var(--muted));
+  --normal-border: hsl(var(--border));
+  --normal-text: hsl(var(--foreground));
+  --success-bg: hsl(var(--primary));
+  --success-border: hsl(var(--primary) / 0.3);
+  --success-text: hsl(var(--primary-foreground));
+  --error-bg: hsl(var(--destructive));
+  --error-border: hsl(var(--destructive) / 0.3);
+  --error-text: hsl(var(--destructive-foreground));
+}
