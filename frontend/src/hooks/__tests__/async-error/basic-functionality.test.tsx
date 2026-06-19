@@ -1,20 +1,20 @@
 // Mock the toast hook first
-vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+vi.mock('sonner', () => ({
+  toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn(), info: vi.fn() }),
 }));
 
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAsyncError } from '../../useAsyncError';
 import { setupAsyncErrorMocks, consoleMocks } from './test-utils';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
-const mockToast = vi.mocked(toast);
+const mockToastError = vi.mocked(toast.error);
 
 describe('useAsyncError - Basic Functionality', () => {
   beforeEach(() => {
     setupAsyncErrorMocks();
-    mockToast.mockClear();
+    mockToastError.mockClear();
   });
 
   afterEach(() => {

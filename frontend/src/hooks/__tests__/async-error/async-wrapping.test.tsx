@@ -1,15 +1,15 @@
 // Mock the toast hook first
-vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+vi.mock('sonner', () => ({
+  toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn(), info: vi.fn() }),
 }));
 
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAsyncError } from '../../useAsyncError';
 import { setupAsyncErrorMocks } from './test-utils';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
-const mockToast = vi.mocked(toast);
+const mockToastError = vi.mocked(toast.error);
 
 describe('useAsyncError - Async Function Wrapping', () => {
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('useAsyncError - Async Function Wrapping', () => {
 
     expect(successfulAsyncFn).toHaveBeenCalledWith('arg1', 'arg2');
     expect(result.current.error).toBeNull();
-    expect(mockToast).not.toHaveBeenCalled();
+    expect(mockToastError).not.toHaveBeenCalled();
   });
 
   it('should wrap async functions that throw errors', async () => {
@@ -52,10 +52,8 @@ describe('useAsyncError - Async Function Wrapping', () => {
       message: 'Async error',
       context: 'async-error',
     }));
-    expect(mockToast).toHaveBeenCalledWith({
-      title: 'Something went wrong',
+    expect(mockToastError).toHaveBeenCalledWith('Something went wrong', {
       description: 'Async error',
-      variant: 'destructive',
       duration: 5000,
     });
   });
