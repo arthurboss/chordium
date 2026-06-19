@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    color-scheme: light dark;
     --background: 240 5% 96%;
     --foreground: 240 10% 3.9%;
 
@@ -70,7 +71,7 @@
   }
 
   body {
-    background-color: hsl(var(--background));
+    background-color: Canvas;
     color: hsl(var(--foreground));
   }
 
