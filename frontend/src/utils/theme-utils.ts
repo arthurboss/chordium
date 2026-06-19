@@ -30,6 +30,18 @@ export const updateCanvasMode = (): void => {
   document.documentElement.classList.toggle('uses-canvas', matches);
 };
 
+// Suppress all transitions for one frame so theme switches are instant.
+// Without this, elements with transition-colors (e.g. buttons) briefly
+// animate from the old theme colors to the new ones, causing a visible blink.
+const freezeTransitions = (fn: () => void): void => {
+  const style = document.createElement('style');
+  style.textContent = 'button, [role="button"] { transition: none !important; }';
+  document.head.appendChild(style);
+  fn();
+  // Remove on the next frame — by then the new CSS vars are painted
+  requestAnimationFrame(() => document.head.removeChild(style));
+};
+
 export const applySystemTheme = (): void => {
   if (getSystemPreference() === 'dark') {
     document.documentElement.classList.add('dark');
@@ -39,21 +51,23 @@ export const applySystemTheme = (): void => {
 };
 
 export const applyTheme = (theme: Theme): void => {
-  switch (theme) {
-    case 'light':
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('chordium-theme', 'light');
-      break;
-    case 'dark':
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('chordium-theme', 'dark');
-      break;
-    case 'system':
-      localStorage.removeItem('chordium-theme');
-      applySystemTheme();
-      break;
-  }
-  updateCanvasMode();
+  freezeTransitions(() => {
+    switch (theme) {
+      case 'light':
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('chordium-theme', 'light');
+        break;
+      case 'dark':
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('chordium-theme', 'dark');
+        break;
+      case 'system':
+        localStorage.removeItem('chordium-theme');
+        applySystemTheme();
+        break;
+    }
+    updateCanvasMode();
+  });
 };
 
 export const useTheme = () => {
@@ -84,13 +98,15 @@ export const useTheme = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
       if (isSystemThemeActive()) {
-        if (e.matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        freezeTransitions(() => {
+          if (e.matches) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          updateCanvasMode();
+        });
       }
-      updateCanvasMode();
     };
 
     mediaQuery.addEventListener('change', handleSystemThemeChange);
