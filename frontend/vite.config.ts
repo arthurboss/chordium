@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => {
       //   ext: '.gz',
       // }),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         manifest: {
           name: 'Chordium',
           short_name: 'Chordium',
@@ -132,7 +132,7 @@ export default defineConfig(({ mode }) => {
         workbox: {
           cleanupOutdatedCaches: true,
           clientsClaim: true,
-          skipWaiting: true,
+
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
           // Re-enable navigateFallback but with better caching
           navigateFallback: '/index.html',
@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /manifest\.json$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'chordium-v1-manifest',
+                cacheName: 'chordium-v2-manifest',
                 expiration: {
                   maxEntries: 1,
                   maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
@@ -158,7 +158,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:js|css|html)$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'chordium-v1-app-assets',
+                cacheName: 'chordium-v2-app-assets',
                 expiration: {
                   maxEntries: 100,
                   maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
@@ -172,7 +172,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\/api\//,
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'chordium-v1-api-responses',
+                cacheName: 'chordium-v2-api-responses',
                 networkTimeoutSeconds: 10,
                 expiration: {
                   maxEntries: 50,
@@ -187,7 +187,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'chordium-v1-images',
+                cacheName: 'chordium-v2-images',
                 expiration: {
                   maxEntries: 60,
                   maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
