@@ -29,7 +29,7 @@ export function ShareSession() {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) setScanMode(false); }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-10 w-10" title="Join Jam Session">
+        <Button variant="outline" className="h-10 w-10 rounded-full" title="Join Jam Session">
           <ScanLine className="h-4 w-4" />
         </Button>
       </DialogTrigger>
