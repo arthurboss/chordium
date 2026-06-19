@@ -1,15 +1,12 @@
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useOffline } from "@/hooks/use-offline";
-import { useToast } from "@/hooks/use-toast";
 import i18n from "@/i18n/config";
 
-/**
- * Subtle offline status indicator using toast notifications
- * Shows non-intrusive notifications when network status changes
- */
+const OFFLINE_TOAST_ID = "offline-status";
+
 const OfflineToast = () => {
   const { isOffline, wasOnline } = useOffline();
-  const { toast } = useToast();
   const lastOfflineState = useRef<boolean | null>(null);
   const hasInitialized = useRef<boolean>(false);
 
@@ -24,20 +21,20 @@ const OfflineToast = () => {
       lastOfflineState.current = isOffline;
 
       if (isOffline) {
-        toast({
-          title: i18n.t("notifications:youreOffline"),
+        toast(i18n.t("notifications:youreOffline"), {
+          id: OFFLINE_TOAST_ID,
           description: i18n.t("notifications:youreOfflineDesc"),
-          duration: 0,
+          duration: Infinity,
         });
       } else if (wasOnline) {
-        toast({
-          title: i18n.t("notifications:backOnline"),
+        toast.dismiss(OFFLINE_TOAST_ID);
+        toast.success(i18n.t("notifications:backOnline"), {
           description: i18n.t("notifications:backOnlineDesc"),
           duration: 3000,
         });
       }
     }
-  }, [isOffline, wasOnline, toast]);
+  }, [isOffline, wasOnline]);
 
   return null;
 };

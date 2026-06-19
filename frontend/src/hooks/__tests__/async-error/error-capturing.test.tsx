@@ -4,8 +4,8 @@ import { useAsyncError } from '../../useAsyncError';
 import { setupAsyncErrorMocks } from './test-utils';
 
 // Mock the toast hook
-vi.mock('@/hooks/use-toast', () => ({
-  toast: vi.fn(),
+vi.mock('sonner', () => ({
+  toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn(), info: vi.fn() }),
 }));
 
 describe('useAsyncError - Error Capturing Scenarios', () => {

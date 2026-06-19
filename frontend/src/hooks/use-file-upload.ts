@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { isValidFileType } from '@/utils/file-validation';
 import { showInvalidFileFormatError, showFileReadError } from '@/utils/file-toast';
 import { extractTitleFromFileName } from '@/utils/file-naming';
@@ -50,7 +49,6 @@ export const useFileUpload = ({ onFileContent, externalShowMetadata, onShowMetad
   const [songKey, setSongKey] = useState("");
   const [guitarTuning, setGuitarTuning] = useState("");
   const [guitarCapo, setGuitarCapo] = useState(0);
-  const { toast } = useToast();
 
   // Handle external control of metadata form
   useEffect(() => {
@@ -61,7 +59,7 @@ export const useFileUpload = ({ onFileContent, externalShowMetadata, onShowMetad
 
   const processFile = (file: File) => {
     if (!isValidFileType(file)) {
-      showInvalidFileFormatError(toast);
+      showInvalidFileFormatError();
       return;
     }
 
@@ -94,7 +92,7 @@ export const useFileUpload = ({ onFileContent, externalShowMetadata, onShowMetad
         setShowMetadataForm(true);
         onShowMetadataChange?.(true);
       },
-      () => showFileReadError(toast)
+      () => showFileReadError()
     );
   };
 

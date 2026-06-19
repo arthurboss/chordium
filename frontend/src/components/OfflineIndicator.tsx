@@ -2,7 +2,7 @@ import { WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useOffline } from "@/hooks/use-offline";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import i18n from "@/i18n/config";
 
 interface OfflineIndicatorProps {
@@ -17,24 +17,18 @@ interface OfflineIndicatorProps {
 const OfflineIndicator = ({ className = "", showText = false }: OfflineIndicatorProps) => {
   const { t } = useTranslation();
   const { isOffline } = useOffline();
-  const { toast, toasts } = useToast();
+  const OFFLINE_TOAST_ID = "offline-status";
 
   if (!isOffline) {
     return null;
   }
 
   const handleClick = () => {
-    const offlineToastExists = toasts.some(
-      (t) => t.title === i18n.t("notifications:youreOffline") && t.open
-    );
-
-    if (!offlineToastExists) {
-      toast({
-        title: i18n.t("notifications:youreOffline"),
-        description: i18n.t("notifications:youreOfflineDesc"),
-        duration: 0,
-      });
-    }
+    toast(i18n.t("notifications:youreOffline"), {
+      id: OFFLINE_TOAST_ID,
+      description: i18n.t("notifications:youreOfflineDesc"),
+      duration: Infinity,
+    });
   };
 
   return (
