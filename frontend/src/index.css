@@ -130,6 +130,11 @@
   --normal-text: hsl(var(--foreground));
 }
 
+/* Success toast icon uses the app primary color */
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
+  color: hsl(var(--primary));
+}
+
 /* Error toasts use the app destructive color */
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] {
   background: hsl(var(--destructive));
