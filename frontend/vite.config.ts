@@ -136,7 +136,7 @@ export default defineConfig(({ mode }) => {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
           // Re-enable navigateFallback but with better caching
           navigateFallback: '/index.html',
-          navigateFallbackAllowlist: [/^(?!\/__).*/],
+          navigateFallbackAllowlist: [/^\/(?!.*\.(?:png|jpg|jpeg|svg|webp|gif|ico|js|css|woff2|json|txt|xml|webmanifest)).*/],
           runtimeCaching: [
             {
               // Cache the manifest file with CacheFirst strategy
