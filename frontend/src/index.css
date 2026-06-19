@@ -164,8 +164,9 @@
     max-width: 100%;
   }
 
-  html {
-    transition: color 0.3s ease, background-color 0.3s ease;
+  /* Suppress all transitions during theme switch so everything snaps instantly. */
+  html[data-theme-switching] * {
+    transition: none !important;
   }
 
   button:not(:disabled),
