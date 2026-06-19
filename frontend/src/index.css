@@ -121,4 +121,41 @@
   }
 }
 
-@import "./components/ui/sonner.css";
+/* Sonner toast — match Sonner specificity to override theme defaults */
+[data-sonner-toaster][data-theme='light'],
+[data-sonner-toaster][data-theme='dark'] {
+  --normal-bg: hsl(var(--background));
+  --normal-bg-hover: hsl(var(--muted));
+  --normal-border: hsl(var(--border));
+  --normal-text: hsl(var(--foreground));
+}
+
+/* Close button uses app theme colors */
+[data-sonner-toast] [data-close-button] {
+  background: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+:where([data-sonner-toast]):hover :where([data-close-button]):hover {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--border));
+}
+
+/* Success toast icon uses the app primary color */
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
+  color: hsl(var(--primary));
+}
+
+/* Error toasts use the app destructive color */
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] {
+  background: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.3);
+  color: hsl(var(--destructive-foreground));
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
+  background: hsl(var(--destructive));
+  border-color: hsl(var(--destructive-foreground) / 0.3);
+  color: hsl(var(--destructive-foreground));
+}
