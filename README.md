@@ -14,7 +14,7 @@ Chordium focuses on providing a distraction-free experience for learning and pra
 
 _Experience Chordium's clean interface, smart search, and intuitive chord display in action._
 
-🎵 **[Try it live](https://chordium.vercel.app)** | **Backend:** <img src="https://img.shields.io/uptimerobot/status/m801354672-a38337401e6a3b2dc13e16b9" alt="Uptime Robot status" style="vertical-align: middle;" />
+🎵 **[Try it live](https://chordium.vercel.app)**
 
 ## 🎯 Features
 
@@ -23,10 +23,19 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - **Install-less App (PWA)** - Works offline and installs like a native app
 - **Clean Interface** - Distraction-free chord viewing experience
 - **Smart Search** - Find songs and artists with intelligent caching
-- **Chord Diagrams** - Clear fingering positions for each chord
+- **Transpose & Capo** - Shift chords to any key or capo position on the fly
 - **Auto-scrolling** - Practice at your own pace with speed controls
+- **Dark Mode** - Light, dark, and system theme options
 - **Mobile-friendly** - Learn on-the-go with responsive design
 - **File Upload** - Import your own chord sheets with metadata extraction
+
+## 🎸 Jam Sessions
+
+Share a chord sheet with other players instantly, fully **offline** on a local network..
+
+The host opens a chord sheet and taps **Share** to generate a QR code. Anyone who scans it loads the same chord sheet on their device. 
+
+Join a session by tapping the scan button in the header.
 
 ## 💻 Tech Stack
 
@@ -55,19 +64,19 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 | Topic                                                          | Description                                        |
 | -------------------------------------------------------------- | -------------------------------------------------- |
-| [🚀 Getting Started](./docs/getting-started.md)                | Installation, setup, and development commands      |
-| [🧪 Testing](./docs/testing.md)                                | Testing frameworks, running tests, and guidelines  |
-| [🛡️ Error Handling](./docs/error-handling.md)                  | Error recovery and user-friendly error messages    |
-| [🏗️ Project Structure](./docs/project-structure.md)            | Codebase organization and architecture             |
-| [🚀 Deployment](./docs/deployment.md)                          | Frontend and backend deployment guides             |
-| [🤝 Contributing](./CONTRIBUTING.md)                           | How to contribute to the project                   |
-| [📖 Backend API](./backend/README.md)                          | Backend documentation and API reference            |
-| [🔍 Search Guide](./docs/search-guide.md)                      | Smart search functionality details                 |
-| [🏢 Monorepo](./docs/MONOREPO.md)                              | Monorepo architecture and workspace management     |
-| [🗄️ Cache Architecture](./docs/cache-architecture.md)          | Frontend caching system design and implementation  |
-| [⚡ Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
-| [📱 PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
-| [🧠 Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
+| [Getting Started](./docs/getting-started.md)                | Installation, setup, and development commands      |
+| [Testing](./docs/testing.md)                                | Testing frameworks, running tests, and guidelines  |
+| [Error Handling](./docs/error-handling.md)                  | Error recovery and user-friendly error messages    |
+| [Project Structure](./docs/project-structure.md)            | Codebase organization and architecture             |
+| [Deployment](./docs/deployment.md)                          | Frontend and backend deployment guides             |
+| [Contributing](./CONTRIBUTING.md)                           | How to contribute to the project                   |
+| [Backend API](./backend/README.md)                          | Backend documentation and API reference            |
+| [Search Guide](./docs/search-guide.md)                      | Smart search functionality details                 |
+| [Monorepo](./docs/MONOREPO.md)                              | Monorepo architecture and workspace management     |
+| [Cache Architecture](./docs/cache-architecture.md)          | Frontend caching system design and implementation  |
+| [Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
+| [PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
+| [Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
 
 ## 🚀 Quick Start
 
