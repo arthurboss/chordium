@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { Music2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ShareSession } from "@/features/jam-session";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -32,6 +33,15 @@ const Header = () => {
           <ShareSession />
           <OfflineIndicator />
           <LanguageSwitcher />
+          <NavLink
+            to="/tuner"
+            className={({ isActive }) =>
+              `p-1.5 rounded-md transition-colors hover:bg-accent ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`
+            }
+            aria-label="Guitar Tuner"
+          >
+            <Music2 className="w-5 h-5" />
+          </NavLink>
           <ThemeToggle />
         </div>
       </div>
