@@ -25,7 +25,7 @@ const ResultCard = ({
 
   return (
     <Card
-      className="overflow-hidden cursor-pointer w-full h-12 min-h-0 card-hoverable transition-colors group"
+      className="cursor-pointer w-full h-12 min-h-0 card-hoverable dark:hover:text-white transition-colors group"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(result); }}
       {...cyAttr(`${result.type}-card-compact-${path}`)}

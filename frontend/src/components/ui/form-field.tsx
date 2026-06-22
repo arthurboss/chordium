@@ -40,7 +40,7 @@ const FormField: React.FC<FormFieldProps> = ({
       )}
       <div className="relative">
         {leftIcon && (
-          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0">
+          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full border border-primary/10 bg-primary/5 text-primary/30 shrink-0">
             {leftIcon}
           </div>
         )}

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Slider } from '../../../ui/slider';
+import React from "react";
+import { SteppedSlider } from "@/components/ui/stepped-slider";
 
 interface SpeedControlProps {
   scrollSpeed: number;
@@ -9,8 +9,8 @@ interface SpeedControlProps {
 
 const SpeedControl: React.FC<SpeedControlProps> = ({ scrollSpeed, setScrollSpeed, className }) => {
   return (
-    <div className={"flex items-center cursor-pointer " + (className || "")} >
-      <Slider
+    <div className={"flex items-center cursor-pointer " + (className || "")}>
+      <SteppedSlider
         value={[scrollSpeed]}
         min={1}
         max={10}
@@ -23,4 +23,4 @@ const SpeedControl: React.FC<SpeedControlProps> = ({ scrollSpeed, setScrollSpeed
   );
 };
 
-export default SpeedControl; 
+export default SpeedControl;

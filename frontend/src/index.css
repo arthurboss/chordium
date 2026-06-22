@@ -65,6 +65,33 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
+    /* Centred vignette — light source at viewport centre, all edges darken */
+    background-image: radial-gradient(
+      ellipse 80% 70% at 50% 40%,
+      transparent 20%,
+      oklch(0 0 0 / 0.01) 35%,
+      oklch(0 0 0 / 0.02) 50%,
+      oklch(0 0 0 / 0.04) 62%,
+      oklch(0 0 0 / 0.07) 73%,
+      oklch(0 0 0 / 0.12) 83%,
+      oklch(0 0 0 / 0.20) 92%,
+      oklch(0 0 0 / 0.30) 100%
+    );
+    background-attachment: fixed;
+  }
+  html.dark body {
+    background-image: radial-gradient(
+      ellipse 90% 400% at 50% 50%,
+      transparent 20%,
+      oklch(0 0 0 / 0.02) 15%,
+      oklch(0 0 0 / 0.05) 50%,
+      oklch(0 0 0 / 0.10) 62%,
+      oklch(0 0 0 / 0.18) 72%,
+      oklch(0 0 0 / 0.32) 82%,
+      oklch(0 0 0 / 0.55) 91%,
+      oklch(0 0 0 / 0.72) 100%
+    );
+    background-attachment: fixed;
   }
 
   html,
@@ -156,7 +183,7 @@ footer {
   background-image: radial-gradient(
     var(--vignette-shape),
     transparent 20%,
-    rgba(0, 0, 0, 0.13) 100%
+    rgba(0, 0, 0, 0.07) 100%
   );
   border: 1px solid transparent !important;
   border-image: radial-gradient(
@@ -164,6 +191,7 @@ footer {
     var(--border-glow-hi-light) 0%,
     var(--border) 100%
   ) 1;
+  box-shadow: 0 4px 8px -2px oklch(0 0 0 / 0.10);
 }
 
 /* Gradient border only — no vignette (chord sheet viewer) */
@@ -195,6 +223,7 @@ footer {
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
   outline: 1px solid color-mix(in oklch, var(--primary) 18%, var(--border));
   outline-offset: -1px;
+  background-color: var(--card);
 }
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover,
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):focus-visible {
@@ -207,6 +236,7 @@ button.rounded-full:not(:disabled)[class*="destructive"],
 button.rounded-full:not(:disabled)[class*="border-destructive"] {
   outline: 1px solid color-mix(in oklch, var(--destructive) 15%, transparent);
   outline-offset: -1px;
+  background-color: var(--card);
 }
 button.rounded-full:not(:disabled)[class*="destructive"]:hover,
 button.rounded-full:not(:disabled)[class*="border-destructive"]:hover,
@@ -221,7 +251,7 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
    Applied via .card-hoverable class — add to any clickable card.
 */
 .card-hoverable {
-  transition: box-shadow 0.2s ease, border-image 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, border-image 0.2s ease, transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
 }
 .card-hoverable:hover {
   box-shadow:
@@ -232,7 +262,7 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
 /* Buttons scale up — they're small enough to not overflow anything */
 .card-hoverable.rounded-full:hover,
 .card-hoverable.rounded-md:not([role="combobox"]):hover {
-  transform: scale(1.04);
+  transform: scale(1.02);
 }
 /* Combobox: no transform at all */
 .card-hoverable[role="combobox"]:hover {
@@ -251,6 +281,13 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
   outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border));
   outline-offset: -1px;
 }
+.dark .card-hoverable.rounded-full:hover {
+  color: white;
+}
+.dark button.card-hoverable:hover,
+.dark [role="button"].card-hoverable:hover {
+  color: white;
+}
 
 /* Dark mode: vignette fill + gradient border */
 .dark .shadow-xs,
@@ -264,7 +301,7 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
   background-image:
   /* horizontal vignette fill: brighter centre, darker left/right edges */
     radial-gradient(ellipse 70% 400% at 50% 50%,
-      oklch(0.235 0.010 275) 0%,
+      oklch(0.225 0.010 275) 0%,
       oklch(0.195 0.010 275) 100%
     ),
     /* border: same radial — primary glow at centre, fades to muted at corners */
@@ -275,4 +312,5 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent !important;
+  box-shadow: 0 4px 4px 4px oklch(0 0 0 / 0.1);
 }

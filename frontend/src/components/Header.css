@@ -3,13 +3,14 @@
   color: var(--foreground);
   background: linear-gradient(
     135deg,
-    white 0%,
+    color-mix(in oklch, white 10%, var(--primary)) 0%,
+    color-mix(in oklch, white 60%, var(--primary)) 75%,
+    color-mix(in oklch, white 10%, var(--primary)) 50%,
     color-mix(in oklch, var(--primary) 10%, var(--primary)) 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  opacity: 1;
   transition: opacity 0.2s ease;
 }
 a:hover .logo-text {

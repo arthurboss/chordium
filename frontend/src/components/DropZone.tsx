@@ -46,7 +46,7 @@ const DropZone = ({
         <FileInfo fileName={selectedFile.name} onRemoveFile={onClearFile} />
       ) : (
         <>
-          <div className="rounded-full border border-primary/50 bg-primary/10 text-primary p-3 inline-block mb-3">
+          <div className="rounded-full border border-primary/50 bg-primary/5 text-primary/80 p-3 inline-block mb-3">
             <FileUp className="h-6 w-6" />
           </div>
           <h3 className="font-medium mb-1">{t("dropZone.title")}</h3>
