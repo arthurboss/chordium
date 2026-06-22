@@ -26,7 +26,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
         >
           <Icon
             size={size}
-            className="text-chord opacity-80"
+            className="text-primary opacity-80"
           />
         </div>
       ))}

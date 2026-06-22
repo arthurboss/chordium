@@ -1,0 +1,33 @@
+/* Gradient border using background-clip — preserves border-radius unlike border-image.
+   background-color must be transparent so the background-image layers control the fill. */
+.gradient-input-border {
+  border: 1px solid transparent !important;
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+.dark .gradient-input-border {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    );
+}
+.gradient-input-border:focus-visible {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}

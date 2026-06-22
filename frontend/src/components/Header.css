@@ -1,0 +1,17 @@
+/* Logo text: subtle at rest, gradient primary highlight on hover */
+.logo-text {
+  color: var(--foreground);
+  background: linear-gradient(
+    135deg,
+    white 0%,
+    color-mix(in oklch, var(--primary) 10%, var(--primary)) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+a:hover .logo-text {
+  opacity: 1;
+}

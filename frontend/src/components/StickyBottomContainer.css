@@ -1,0 +1,11 @@
+/* border-image can't coexist with border-radius, so outline is used instead.
+   !important overrides the .dark .shadow-* background-color rule from index.css. */
+#sticky-bottom-container {
+  background-color: color-mix(in oklch, var(--background) 50%, transparent) !important;
+  background-image: none !important;
+  background-origin: unset;
+  background-clip: unset;
+  border: none !important;
+  outline: 1px solid color-mix(in oklch, var(--primary) 30%, var(--border));
+  outline-offset: -2px;
+}

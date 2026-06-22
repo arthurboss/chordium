@@ -39,7 +39,7 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   return (
     <div
       ref={containerRef}
-      className="[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border"
+      className="[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg border gradient-border"
       style={{ '--content-font-size': `${fontSize}px`, fontFamily } as React.CSSProperties}
     >
       {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheetPre html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}

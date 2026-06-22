@@ -1,26 +1,38 @@
-/* Sonner toast — match Sonner specificity to override theme defaults */
+/* Sonner toast — themed to match app palette (OKLCH tokens, not hsl wrappers) */
 [data-sonner-toaster][data-theme='light'],
 [data-sonner-toaster][data-theme='dark'] {
-  --normal-bg: hsl(var(--background));
-  --normal-bg-hover: hsl(var(--muted));
-  --normal-border: hsl(var(--border));
-  --normal-text: hsl(var(--foreground));
+  --normal-bg: var(--card);
+  --normal-bg-hover: var(--secondary);
+  --normal-border: var(--border);
+  --normal-text: var(--card-foreground);
 }
 
-/* Success toast icon uses the app primary color */
+/* Close button */
+[data-sonner-toast] [data-close-button] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+:where([data-sonner-toast]):hover :where([data-close-button]):hover {
+  background: var(--secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Success: primary color icon */
 [data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
-  color: hsl(var(--primary));
+  color: var(--primary) !important;
 }
 
-/* Error toasts use the app destructive color */
+/* Error: destructive colors */
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: var(--destructive) !important;
+  border-color: color-mix(in oklch, var(--destructive) 40%, transparent) !important;
+  color: var(--destructive-foreground) !important;
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive-foreground) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: var(--destructive) !important;
+  border-color: color-mix(in oklch, var(--destructive-foreground) 30%, transparent) !important;
+  color: var(--destructive-foreground) !important;
 }

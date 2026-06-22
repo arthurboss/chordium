@@ -1,0 +1,28 @@
+/* Override .card-hoverable border-image on SelectTrigger — border-image disables
+   border-radius. Use background-clip trick to keep rounded corners on hover. */
+[role="combobox"] {
+  user-select: none;
+}
+[role="combobox"].card-hoverable:hover {
+  border-image: none;
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+/* Subtler inset tint — override the global card-hoverable value */
+.card-hoverable[role="combobox"]:hover {
+  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 2.5%, transparent);
+}
+
+/* Dropdown list — glass background matching sticky bar */
+.select-content-glass {
+  background-color: color-mix(in oklch, var(--popover) 75%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

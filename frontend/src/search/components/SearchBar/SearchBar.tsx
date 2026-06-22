@@ -48,7 +48,7 @@ const SearchBar = ({
               onChange={handleArtistChange}
               disabled={loading || artistLoading || artistDisabled}
               placeholder={t("searchBar.artistPlaceholder")}
-              leftIcon={<User className="h-4 w-4" />}
+              leftIcon={<User className="h-3 w-3" />}
             />
           </div>
           <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">
@@ -61,7 +61,7 @@ const SearchBar = ({
               onChange={handleSongChange}
               disabled={loading || artistLoading}
               placeholder={t("searchBar.songPlaceholder")}
-              leftIcon={<Music className="h-4 w-4" />}
+              leftIcon={<Music className="h-3 w-3" />}
             />
           </div>
         </div>

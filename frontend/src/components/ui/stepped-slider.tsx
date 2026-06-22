@@ -44,8 +44,8 @@ const SteppedSlider = React.forwardRef<
       onValueChange={handleValueChange}
       {...props}
     >
-      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700">
-        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-foreground/10 dark:bg-foreground/10">
+        <SliderPrimitive.Range className="absolute h-full bg-primary/30" />
       </SliderPrimitive.Track>
       {showStepIndicators && stepCount > 1 && (
         <div className="absolute top-1/2 left-0 right-0 pointer-events-none -translate-y-1/2">
@@ -63,7 +63,7 @@ const SteppedSlider = React.forwardRef<
           })}
         </div>
       )}
-      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-white ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" />
+      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-card dark:bg-foreground ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" />
     </SliderPrimitive.Root>
   );
 });

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
+@source not "**/*.css";
 @source ".";
 
 @layer base {
@@ -18,6 +19,13 @@
     --hue: 275; /* brand hue in OKLCH — updated by JS when Canvas is tinted */
     --surface: oklch(0.97 0.010 var(--hue)); /* light fallback: lavender-tinted white */
     --radius: 0.5rem;
+
+    /* ── EFFECT TOKENS ───────────────────────────────────────────────────────
+       Shared values for the gradient border + vignette effects. */
+    --vignette-shape: ellipse 60% 400% at 50% 50%;
+    --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
+    --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
+    --border-glow-hi-light: color-mix(in oklch, var(--primary) 45%, var(--border));
 
     /* ── SURFACE TOKENS ──────────────────────────────────────────────────────
        OKLCH lightness (l) is on a 0–1 scale (0 = black, 1 = white).
@@ -171,19 +179,30 @@
     cursor: pointer;
   }
 
-  a:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 1px var(--ring);
-    border-radius: var(--radius);
+  /* Unified focus ring — sits flush at the border edge. CSS outlines follow
+     border-radius automatically; do NOT set border-radius here or it overrides
+     the element's own rounded corners. */
+  :focus-visible {
+    outline: 1.5px solid color-mix(in oklch, var(--ring) 70%, transparent);
+    outline-offset: 0;
+  }
+  /* Borderless links (logo, footer source) — ring floats just outside */
+  a:not([class*="border"]):focus-visible {
+    outline-offset: 2px;
   }
 
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
-    box-shadow: 0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    /* Inset fill layer + inset border ring — only box-shadow is overrideable during autofill */
+    -webkit-box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--ring) 70%, transparent) inset,
+      0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--ring) 70%, transparent) inset,
+      0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
     -webkit-text-fill-color: var(--foreground);
-    border: 1px solid var(--ring);
+    border: 1px solid transparent;
     transition: background-color 5000s ease-in-out 0s;
     caret-color: var(--foreground);
   }
@@ -203,41 +222,153 @@
   }
 }
 
-/* Sonner toast — match Sonner specificity to override theme defaults */
-[data-sonner-toaster][data-theme='light'],
-[data-sonner-toaster][data-theme='dark'] {
-  --normal-bg: hsl(var(--background));
-  --normal-bg-hover: hsl(var(--muted));
-  --normal-border: hsl(var(--border));
-  --normal-text: hsl(var(--foreground));
+/* ── CARD VIGNETTE + BORDER GLOW ─────────────────────────────────────────────
+   Light source cast at screen centre — horizontal vignette (no Y falloff) and a
+   radial gradient border that glows brightest at centre, fades at corners.
+
+   .shadow-*       → vignette fill + gradient border (cards, panels)
+   .gradient-border → gradient border only, no vignette (chord sheet, dense content)
+   header / footer  → plain subtle shadow, no border effect
+*/
+
+/* Header + footer: subtle depth shadow only */
+header,
+footer {
+  box-shadow: 0 1px 8px oklch(0 0 0 / 0.08);
+}
+.dark header,
+.dark footer {
+  box-shadow: 0 1px 10px oklch(0 0 0 / 0.35);
 }
 
-/* Close button uses app theme colors */
-[data-sonner-toast] [data-close-button] {
-  background: hsl(var(--background)) !important;
-  border-color: hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
+/* Light mode: horizontal vignette + radial gradient border */
+.shadow-xs,
+.shadow-sm,
+.shadow,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  background-image: radial-gradient(
+    var(--vignette-shape),
+    transparent 20%,
+    rgba(0, 0, 0, 0.13) 100%
+  );
+  border: 1px solid transparent !important;
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    var(--border-glow-hi-light) 0%,
+    var(--border) 100%
+  ) 1;
 }
 
-:where([data-sonner-toast]):hover :where([data-close-button]):hover {
-  background: hsl(var(--muted)) !important;
-  border-color: hsl(var(--border)) !important;
+/* Gradient border only — no vignette (chord sheet viewer) */
+.gradient-border {
+  border: 1px solid transparent !important;
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    var(--border-glow-hi-light) 0%,
+    var(--border) 100%
+  ) 1;
+}
+.dark .gradient-border {
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent !important;
+  border-image: none;
 }
 
-/* Success toast icon uses the app primary color */
-[data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
-  color: hsl(var(--primary)) !important;
+
+/* Round buttons only: gradient border via outline, hover brightens.
+   Destructive round buttons keep their own red border — excluded. */
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
+  outline: 1px solid color-mix(in oklch, var(--primary) 18%, var(--border));
+  outline-offset: -1px;
+}
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover,
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):focus-visible {
+  outline: 1.5px solid color-mix(in oklch, var(--ring) 70%, transparent);
+  outline-offset: -1px;
 }
 
-/* Error toasts use the app destructive color */
-[data-sonner-toaster] [data-sonner-toast][data-type='error'] {
-  background: hsl(var(--destructive)) !important;
-  border-color: hsl(var(--destructive) / 0.3) !important;
-  color: hsl(var(--destructive-foreground)) !important;
+/* Destructive round buttons: same border logic using destructive color */
+button.rounded-full:not(:disabled)[class*="destructive"],
+button.rounded-full:not(:disabled)[class*="border-destructive"] {
+  outline: 1px solid color-mix(in oklch, var(--destructive) 15%, transparent);
+  outline-offset: -1px;
+}
+button.rounded-full:not(:disabled)[class*="destructive"]:hover,
+button.rounded-full:not(:disabled)[class*="border-destructive"]:hover,
+button.rounded-full:not(:disabled)[class*="destructive"]:focus-visible,
+button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
+  outline: 1.5px solid color-mix(in oklch, var(--destructive) 80%, transparent);
 }
 
-[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
-  background: hsl(var(--destructive)) !important;
-  border-color: hsl(var(--destructive-foreground) / 0.3) !important;
-  color: hsl(var(--destructive-foreground)) !important;
+/* ── HOVER GLOW ──────────────────────────────────────────────────────────────
+   Shared hover effect for interactive cards and buttons.
+   Inset shadow floods fill; border-image adds radial gradient border on hover.
+   Applied via .card-hoverable class — add to any clickable card.
+*/
+.card-hoverable {
+  transition: box-shadow 0.2s ease, border-image 0.2s ease, transform 0.15s ease;
+}
+.card-hoverable:hover {
+  box-shadow:
+    inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent),
+    0 4px 14px oklch(0 0 0 / 0.10);
+  transform: translateY(-1px);
+}
+/* Buttons scale up — they're small enough to not overflow anything */
+.card-hoverable.rounded-full:hover,
+.card-hoverable.rounded-md:not([role="combobox"]):hover {
+  transform: scale(1.04);
+}
+/* Combobox: no transform at all */
+.card-hoverable[role="combobox"]:hover {
+  transform: none;
+}
+/* Non-round elements: gradient border-image on hover */
+.card-hoverable:not(.rounded-full):hover {
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+    color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+  ) 1;
+}
+/* Round buttons: use outline for gradient border (border-image breaks border-radius) */
+.card-hoverable.rounded-full:hover {
+  outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border));
+  outline-offset: -1px;
+}
+
+/* Dark mode: vignette fill + gradient border */
+.dark .shadow-xs,
+.dark .shadow-sm,
+.dark .shadow,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl {
+  background-color: transparent !important;
+  background-image:
+  /* horizontal vignette fill: brighter centre, darker left/right edges */
+    radial-gradient(ellipse 70% 400% at 50% 50%,
+      oklch(from var(--surface) calc(l + 0.025) c h) 0%,
+      oklch(from var(--surface) calc(l - 0.015) c h) 100%
+    ),
+    /* border: same radial — primary glow at centre, fades to muted at corners */
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent !important;
 }

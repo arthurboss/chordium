@@ -27,7 +27,6 @@ const FormField: React.FC<FormFieldProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Move cursor to end on focus if value exists
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     handleInputFocus(e, value, inputRef);
   };
@@ -41,7 +40,7 @@ const FormField: React.FC<FormFieldProps> = ({
       )}
       <div className="relative">
         {leftIcon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0">
             {leftIcon}
           </div>
         )}
@@ -53,7 +52,7 @@ const FormField: React.FC<FormFieldProps> = ({
           ref={inputRef}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full ${leftIcon ? 'pl-9' : ''} ${value ? 'pr-9' : ''}`}
+          className={`w-full ${leftIcon ? 'pl-10' : ''} ${value ? 'pr-9' : ''}`}
           required={required}
         />
         {value && !disabled && (
