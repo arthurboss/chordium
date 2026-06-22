@@ -9,8 +9,6 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
   const [transpose, setTranspose] = useState(defaultTranspose);
   const defaultCapo = initialCapo || 0;
   const [capo, setCapo] = useState(defaultCapo);
-  const [capoTransposeLinked, setCapoTransposeLinked] = useState(false);
-
   useEffect(() => {
     setTranspose(0);
   }, [initialSongKey]);
@@ -31,8 +29,6 @@ export const useChordDisplaySettings = (initialContent: string, initialSongKey?:
     capo,
     setCapo,
     defaultCapo,
-    capoTransposeLinked,
-    setCapoTransposeLinked,
     processedContent,
   };
 };
