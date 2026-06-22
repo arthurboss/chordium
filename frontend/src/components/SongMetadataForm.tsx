@@ -80,7 +80,8 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           <div className="flex justify-end items-end h-full">
             <Button
               onClick={onContinue}
-              className="w-full h-10 shrink-0"
+              variant="ghost"
+              className="shadow-sm bg-card h-10 shrink-0"
               aria-label={t("songMetadataForm.continueAriaLabel")}
               disabled={!title || !artist}
             >

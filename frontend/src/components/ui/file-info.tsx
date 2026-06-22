@@ -1,5 +1,4 @@
-import { FileUp, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileUp } from 'lucide-react';
 import RoundTrashButton from './RoundTrashButton';
 
 interface FileInfoProps {
@@ -14,15 +13,7 @@ const FileInfo = ({ fileName, onRemoveFile }: FileInfoProps) => {
         <FileUp className="h-5 w-5 text-primary shrink-0" />
         <span className="font-medium truncate">{fileName}</span>
       </div>
-      <Button 
-        variant="ghost" 
-        size="sm"
-        onClick={onRemoveFile}
-        className="h-8 w-8 p-0"
-      >
-        <RoundTrashButton />
-        <span className="sr-only">Remove</span>
-      </Button>
+      <RoundTrashButton onClick={onRemoveFile} />
     </div>
   );
 };
