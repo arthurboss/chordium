@@ -13,6 +13,3 @@
   -webkit-text-fill-color: transparent;
   transition: opacity 0.2s ease;
 }
-a:hover .logo-text {
-  opacity: 1;
-}

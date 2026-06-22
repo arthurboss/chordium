@@ -16,7 +16,7 @@ const CheckIcon = ({ color = "white" }: { color?: string }) => (
 const ToggleOption: React.FC<ToggleOptionProps> = ({ active, onClick, icon, label }) => (
   <button type="button" className="group flex items-center gap-2 cursor-pointer bg-transparent border-0 p-0 text-left transition-colors dark:hover:text-white" onClick={onClick}>
     <div className={`h-5 w-5 rounded-sm border flex items-center justify-center transition-colors ${active ? "border-primary bg-primary/10" : "border-input bg-card/75 group-hover:border-primary/60 group-hover:bg-primary/8"}`}>
-      {active && <CheckIcon color="var(--primary)" />}
+      {active && <CheckIcon color="white" />}
     </div>
     {icon}
     <span className="text-xs text-foreground transition-colors dark:group-hover:text-white">{label}</span>

@@ -22,7 +22,10 @@
       var(--border-glow-lo) 100%
     );
 }
-.gradient-input-border:focus-visible {
+
+/* Focus: shared gradient, only fill color differs between modes */
+.gradient-input-border:focus-visible,
+.dark .gradient-input-border:focus-visible {
   background-image:
     linear-gradient(var(--background), var(--background)),
     radial-gradient(

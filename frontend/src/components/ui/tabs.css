@@ -1,5 +1,5 @@
 /* Active tab indicator: gradient border via background-clip trick */
-[data-cy="tabs-list"] > span[aria-hidden="true"] {
+[data-tabs-list] > span[aria-hidden="true"] {
   background-image:
     linear-gradient(var(--background), var(--background)),
     radial-gradient(var(--vignette-shape),

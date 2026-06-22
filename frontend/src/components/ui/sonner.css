@@ -45,7 +45,7 @@
   background: var(--muted) !important;
   outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border)) !important;
   outline-offset: -1px !important;
-  color: white !important;
+  color: oklch(1 0 0) !important;
 }
 
 /* Success: primary color icon */

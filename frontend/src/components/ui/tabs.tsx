@@ -97,6 +97,7 @@ const TabsList = React.forwardRef<
         "relative inline-flex h-12 items-center justify-center content-center rounded-lg p-1.5 text-muted-foreground border bg-card",
         className
       )}
+      data-tabs-list=""
       {...props}
     >
       <span

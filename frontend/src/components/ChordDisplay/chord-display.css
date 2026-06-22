@@ -3,7 +3,7 @@
 
 .chord {
   display: inline-block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
   color: var(--primary);
   padding: 0.375rem;
   border-radius: 0.125rem;
@@ -11,7 +11,7 @@
 }
 
 .chord-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
   white-space: normal;
   margin-bottom: 0.25rem;
   word-break: break-word;
@@ -50,7 +50,7 @@
 }
 
 #chord-sheet-viewer pre .tablatura {
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   line-height: 1.6;
   display: block;
@@ -68,14 +68,14 @@
 }
 
 #chord-sheet-viewer pre .cnt {
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-mono);
   display: block;
   line-height: 1.4;
   max-width: 100%;
   overflow-x: auto;
-  white-space: pre !important;
-  word-break: normal !important;
-  overflow-wrap: normal !important;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 
 @media (max-width: 640px) {

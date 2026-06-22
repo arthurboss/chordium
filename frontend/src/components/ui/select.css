@@ -5,6 +5,21 @@
 }
 [role="combobox"].card-hoverable:hover {
   border-image: none;
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+/* Light mode fill */
+[role="combobox"].card-hoverable:hover {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}
+/* Dark mode fill */
+.dark [role="combobox"].card-hoverable:hover {
   background-image:
     linear-gradient(var(--card), var(--card)),
     radial-gradient(
@@ -12,8 +27,6 @@
       color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
       color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
     );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
 }
 /* Subtler inset tint — override the global card-hoverable value */
 .card-hoverable[role="combobox"]:hover {
@@ -25,4 +38,15 @@
   background-color: color-mix(in oklch, var(--popover) 75%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+/* Dark mode: white text on hover, matching other card-hoverable buttons */
+.dark [role="combobox"].card-hoverable:hover {
+  color: oklch(1 0 0);
+}
+
+/* Dark mode: white text on focused/hovered dropdown items */
+.dark [role=option]:focus,
+.dark [role=option][data-highlighted] {
+  color: oklch(1 0 0);
 }
