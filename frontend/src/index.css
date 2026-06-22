@@ -4,154 +4,58 @@
 @source ".";
 
 @layer base {
-  /* ── SURFACE ANCHOR ────────────────────────────────────────────────────────
-     --surface is the single source of truth for the entire palette.
-     Everything else is derived from it via OKLCH relative color syntax.
-
-     When app theme matches OS, --surface is upgraded to Canvas so everything
-     derives from the real system background. JS samples Canvas, computes its
-     OKLCH hue, and writes it to --hue (default 275°). All brand colors rotate
-     with --hue so the whole palette shifts coherently with the OS accent.
-     Fallback: --hue=275 (royal violet) when Canvas is near-neutral. */
-
   :root {
     color-scheme: light;
-    --hue: 275; /* brand hue in OKLCH — updated by JS when Canvas is tinted */
-    --surface: oklch(0.97 0.010 var(--hue)); /* light fallback: lavender-tinted white */
     --radius: 0.5rem;
 
-    /* ── EFFECT TOKENS ───────────────────────────────────────────────────────
-       Shared values for the gradient border + vignette effects. */
-    --vignette-shape: ellipse 60% 400% at 50% 50%;
+    /* Light palette — static OKLCH values (hue 275 = royal violet) */
+    --background:             oklch(0.910 0.010 275);
+    --foreground:             oklch(0.130 0.018 275);
+    --card:                   oklch(0.970 0.010 275);
+    --card-foreground:        oklch(0.130 0.018 275);
+    --popover:                oklch(0.970 0.010 275);
+    --popover-foreground:     oklch(0.130 0.018 275);
+    --primary:                oklch(0.68 0.18 275);
+    --primary-foreground:     oklch(0.32 0 0);
+    --secondary:              oklch(0.923 0.010 275);
+    --secondary-foreground:   oklch(0.130 0.018 275);
+    --muted:                  oklch(0.923 0.010 275);
+    --muted-foreground:       oklch(0.460 0.012 275);
+    --accent:                 oklch(0.923 0.010 275);
+    --accent-foreground:      oklch(0.130 0.018 275);
+    --destructive:            oklch(0.62 0.24 8);
+    --destructive-foreground: oklch(0.98 0 0);
+    --border:                 oklch(0.806 0.010 275);
+    --input:                  oklch(0.806 0.010 275);
+    --ring:                   oklch(0.68 0.18 275);
+
+    /* Effect tokens — used only on a handful of card/border selectors */
+    --vignette-shape:       ellipse 60% 400% at 50% 50%;
     --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
     --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
     --border-glow-hi-light: color-mix(in oklch, var(--primary) 45%, var(--border));
-
-    /* ── SURFACE TOKENS ──────────────────────────────────────────────────────
-       OKLCH lightness (l) is on a 0–1 scale (0 = black, 1 = white).
-
-       Both light and dark mode work the same way:
-         --background = surface           →  the page (matches Canvas)
-         --card       = surface − 0.04    →  recessed panel, darker than page
-
-       This is symmetric — no light-dark() needed for surface tokens.
-       The math naturally does the right thing:
-         light (l=0.96): card = 0.92  (slightly darker than near-white page) ✓
-         dark  (l=0.21): card = 0.17  (slightly darker than dark page)       ✓
-
-       Secondary/muted/accent use l + (0.5 − l) × factor — "pull toward mid-grey".
-       This also self-corrects per mode with no branching:
-         light (l=0.96): pulls down  → darker hover state ✓
-         dark  (l=0.21): pulls up    → lighter hover state ✓ */
-
-    /* Light: page is grey (surface − 0.04), card is elevated at surface level.
-       Dark:  page is surface,               card is recessed (surface − 0.04).
-       light-dark() picks the right arm based on the active color-scheme. */
-    --background: light-dark(
-      oklch(from var(--surface) clamp(0, calc(l - 0.06), 1) c h),
-      var(--surface)
-    );
-    /* Foreground: tinted with a small fixed chroma in light mode so text feels
-       palette-aware rather than neutral black. Dark mode stays achromatic (0 0)
-       — tinted light text on dark bg looks off.
-       l=0.13 avoids pure black; inversion keeps it close to black on light, white on dark. */
-    --foreground: light-dark(
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 275),
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
-    );
-
-    --card: light-dark(
-      var(--surface),
-      oklch(from var(--surface) clamp(0, calc(l - 0.03), 1) c h)
-    );
-    --card-foreground: light-dark(
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 275),
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
-    );
-
-    --popover: light-dark(
-      var(--surface),
-      oklch(from var(--surface) clamp(0, calc(l - 0.03), 1) c h)
-    );
-    --popover-foreground: light-dark(
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 275),
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
-    );
-
-    /* Secondary/muted/accent: subtle containers and hover states.
-       Pull toward mid-grey by 10% — registers as contrast on both light and dark. */
-    --secondary:            oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    --secondary-foreground: light-dark(
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 275),
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
-    );
-
-    --muted: oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    /* Muted foreground: stays in the 0.46–0.68 midtone band — readable but subdued.
-       Tinted in light mode to stay palette-aware.
-       Formula biases toward the opposite lightness half from surface:
-       light (l≈0.96): 1.04 − 0.96×0.6 = 0.464 → clamped to 0.46 ✓
-       dark  (l≈0.21): 1.04 − 0.21×0.6 = 0.914 → clamped to 0.68 ✓ */
-    --muted-foreground: light-dark(
-      oklch(from var(--surface) clamp(0.46, calc(1.04 - l * 0.6), 0.68) 0.012 275),
-      oklch(from var(--surface) clamp(0.46, calc(1.04 - l * 0.6), 0.68) 0 0)
-    );
-
-    --accent:               oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.10), 1) c h);
-    --accent-foreground: light-dark(
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0.018 275),
-      oklch(from var(--surface) clamp(0.13, calc(1 - l), 0.98) 0 0)
-    );
-
-    /* Border/input: tinted in light mode — purple-grey borders tie the layout
-       to the brand without being distracting. Dark mode stays achromatic. */
-    --border: light-dark(
-      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) 0.010 275),
-      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h)
-    );
-    --input: light-dark(
-      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) 0.010 275),
-      oklch(from var(--surface) clamp(0, calc(l + (0.5 - l) * 0.35), 1) c h)
-    );
-
-    /* ── BRAND TOKENS ────────────────────────────────────────────────────────
-       Primary is rotated 275° from --surface on the OKLCH hue wheel.
-
-       275° in OKLCH is the rich royal/violet purple — the "premium" purple
-       in color theory, blue-leaning without crossing into indigo. This is
-       distinct from the original 302° (which reads as pink-purple/magenta).
-
-       l=0.68 (slightly deeper than 0.724) and c=0.18 (slightly more saturated)
-       give it the richness associated with luxury/premium palettes.
-
-       Since --surface is achromatic (C=0, H resolves to 0 in calc), the
-       rotation is always: calc(0 + 275) = 275°.
-       When Canvas has a real tint hue, primary shifts with it by the same
-       offset — the whole palette rotates together. */
-    /* Primary and ring rotate with --hue so the whole palette shifts together
-       when Canvas has a tint. l=0.68, c=0.18 stays fixed for richness. */
-    --primary:            oklch(0.68 0.18 var(--hue));
-    --primary-foreground: oklch(from var(--primary) clamp(0.02, calc(1 - l), 0.98) 0 0);
-
-    /* Destructive: offset −267° from brand hue → lands near red (8° when hue=275).
-       Stays roughly red regardless of how much --hue rotates. */
-    --destructive:            light-dark(oklch(0.62 0.24 calc(var(--hue) - 267)), oklch(0.50 0.20 calc(var(--hue) - 267)));
-    --destructive-foreground: oklch(0.98 0 0);
-
-    /* Ring mirrors primary */
-    --ring: oklch(0.68 0.18 var(--hue));
   }
 
   .dark {
     color-scheme: dark;
-    --surface: oklch(0.21 0.010 var(--hue)); /* dark fallback: ties dark surface to brand hue */
-  }
 
-  /* When app theme matches OS, upgrade --surface to Canvas so the palette
-     derives from the browser's actual background color.
-     Primary is hardcoded so it won't shift when Canvas has zero chroma. */
-  .uses-canvas {
-    --surface: Canvas;
+    /* Dark palette — static OKLCH values */
+    --background:             oklch(0.210 0.010 275);
+    --foreground:             oklch(0.79 0 0);
+    --card:                   oklch(0.180 0.010 275);
+    --card-foreground:        oklch(0.79 0 0);
+    --popover:                oklch(0.180 0.010 275);
+    --popover-foreground:     oklch(0.79 0 0);
+    --secondary:              oklch(0.239 0.010 275);
+    --secondary-foreground:   oklch(0.79 0 0);
+    --muted:                  oklch(0.239 0.010 275);
+    --muted-foreground:       oklch(0.68 0 0);
+    --accent:                 oklch(0.239 0.010 275);
+    --accent-foreground:      oklch(0.79 0 0);
+    --destructive:            oklch(0.50 0.20 8);
+    --border:                 oklch(0.312 0.010 275);
+    --input:                  oklch(0.312 0.010 275);
+    /* --primary, --primary-foreground, --destructive-foreground, --ring: inherited from :root */
   }
 
   * {
@@ -360,8 +264,8 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
   background-image:
   /* horizontal vignette fill: brighter centre, darker left/right edges */
     radial-gradient(ellipse 70% 400% at 50% 50%,
-      oklch(from var(--surface) calc(l + 0.025) c h) 0%,
-      oklch(from var(--surface) calc(l - 0.015) c h) 100%
+      oklch(0.235 0.010 275) 0%,
+      oklch(0.195 0.010 275) 100%
     ),
     /* border: same radial — primary glow at centre, fades to muted at corners */
     radial-gradient(var(--vignette-shape),
