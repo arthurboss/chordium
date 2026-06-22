@@ -3,20 +3,49 @@
 [data-sonner-toaster][data-theme='dark'] {
   --normal-bg: var(--card);
   --normal-bg-hover: var(--secondary);
-  --normal-border: var(--border);
+  --normal-border: transparent;
   --normal-text: var(--card-foreground);
 }
 
-/* Close button */
-[data-sonner-toast] [data-close-button] {
-  background: var(--card) !important;
-  border-color: var(--border) !important;
-  color: var(--card-foreground) !important;
+/* Gradient border matching card components */
+[data-sonner-toast] {
+  border: 1px solid transparent !important;
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    var(--border-glow-hi-light) 0%,
+    var(--border) 100%
+  ) 1 !important;
 }
 
-:where([data-sonner-toast]):hover :where([data-close-button]):hover {
-  background: var(--secondary) !important;
-  border-color: var(--border) !important;
+.dark [data-sonner-toast] {
+  background-color: var(--card) !important;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    ) !important;
+  background-origin: padding-box, border-box !important;
+  background-clip: padding-box, border-box !important;
+  border: 1px solid transparent !important;
+  border-image: none !important;
+}
+
+/* Close button — matches ClearInputButton style + round button border treatment */
+[data-sonner-toast] [data-close-button] {
+  background: var(--muted) !important;
+  border: 1px solid transparent !important;
+  outline: 1px solid color-mix(in oklch, var(--primary) 18%, var(--border)) !important;
+  outline-offset: -1px !important;
+  color: var(--muted-foreground) !important;
+  border-radius: 9999px !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--muted) !important;
+  outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border)) !important;
+  outline-offset: -1px !important;
+  color: white !important;
 }
 
 /* Success: primary color icon */
@@ -27,6 +56,7 @@
 /* Error: destructive colors */
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] {
   background: var(--destructive) !important;
+  border-image: none !important;
   border-color: color-mix(in oklch, var(--destructive) 40%, transparent) !important;
   color: var(--destructive-foreground) !important;
 }

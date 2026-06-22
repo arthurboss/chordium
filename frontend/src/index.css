@@ -1,3 +1,4 @@
+@import "./components/ui/sonner.css";
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 @source not "**/*.css";
