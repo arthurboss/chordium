@@ -6,7 +6,7 @@
 [role="combobox"].card-hoverable:hover {
   border-image: none;
   background-image:
-    linear-gradient(var(--background), var(--background)),
+    linear-gradient(var(--card), var(--card)),
     radial-gradient(
       var(--vignette-shape),
       color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
