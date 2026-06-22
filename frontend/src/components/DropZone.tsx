@@ -35,7 +35,7 @@ const DropZone = ({
 
   return (
     <div
-      className={`border-2 border-dashed rounded-lg py-5 px-6 text-center ${
+      className={`border border-dashed rounded-lg py-5 px-6 text-center ${
         isDragOver ? "border-primary bg-primary/5" : "border-border"
       } transition-colors`}
       onDragOver={handleDragOver}
@@ -54,7 +54,7 @@ const DropZone = ({
           <Button
             variant="ghost"
             onClick={handleBrowseClick}
-            className="mx-auto shadow-sm bg-card"
+            className="mx-auto bg-card"
           >
             {t("dropZone.browse")}
           </Button>

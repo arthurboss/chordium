@@ -98,7 +98,7 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
         onShowMetadataChange={setShowMetadata}
       />
       {uploadedContent && !showMetadata && (
-        <div className="mt-6 animate-fade-in">
+        <div className="animate-fade-in">
           <Card className="mb-4">
             <CardContent className="p-3 sm:p-4">
               <ChordEditToolbar

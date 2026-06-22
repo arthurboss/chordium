@@ -79,9 +79,10 @@ const ChordSheetList = ({
           <p className="text-muted-foreground mb-3">{t("chordSheetList.empty")}</p>
           <Button
             onClick={onUploadClick}
-            variant="outline"
+            variant="ghost"
             tabIndex={0}
             aria-label={t("chordSheetList.uploadAriaLabel")}
+            className="mx-auto bg-card"
           >
             {t("chordSheetList.uploadButton")}
           </Button>
