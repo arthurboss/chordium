@@ -24,8 +24,32 @@
   transform: none;
 }
 
+/* Cards with rounded-lg: gradient border via background-clip (like round buttons) */
+.card-hoverable.rounded-lg {
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-image: none;
+}
+
+.card-hoverable.rounded-lg:hover {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}
+
 /* Non-round: gradient border-image on hover */
-.card-hoverable:not(.rounded-full):hover {
+.card-hoverable:not(.rounded-full):not(.rounded-lg):hover {
   border-image: radial-gradient(
     var(--vignette-shape),
     color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
