@@ -48,9 +48,10 @@ const ChordSheetList = ({
     <div>
       {chordSheets.length > 0 ? (
         <>
-          <div className="flex justify-end mb-2 sm:mb-4">
+          <div className="flex items-center justify-end gap-3 mb-2 sm:mb-4">
+            <label className="text-sm text-muted-foreground">{t("sort.label")}</label>
             <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
+              <SelectTrigger className="w-40 bg-card [&>span]:text-left" aria-label={t("sort.label")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
