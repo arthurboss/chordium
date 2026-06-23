@@ -49,7 +49,7 @@
 }
 
 /* Non-round: gradient border-image on hover */
-.card-hoverable:not(.rounded-full):not(.rounded-lg):hover {
+.card-hoverable:not(.rounded-full):not(.rounded-lg):not([role="combobox"]):hover {
   border-image: radial-gradient(
     var(--vignette-shape),
     color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,

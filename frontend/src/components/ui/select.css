@@ -1,26 +1,18 @@
-/* SelectTrigger combobox: prevent border-image from disabling border-radius */
+/* SelectTrigger combobox: gradient border via background-clip */
 [role="combobox"] {
   user-select: none;
-}
-[role="combobox"].card-hoverable:hover {
-  border-image: none;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
+  border: 1px solid transparent;
 }
 
-/* Light mode fill */
 [role="combobox"].card-hoverable:hover {
-  background-image:
-    linear-gradient(var(--background), var(--background)),
-    radial-gradient(
-      var(--vignette-shape),
-      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
-      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
-    );
-}
-
-/* Dark mode fill */
-.dark [role="combobox"].card-hoverable:hover {
   background-image:
     linear-gradient(var(--card), var(--card)),
     radial-gradient(
@@ -28,11 +20,6 @@
       color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
       color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
     );
-}
-
-/* Subtler inset tint — override the global card-hoverable value */
-[role="combobox"].card-hoverable:hover {
-  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 2.5%, transparent);
 }
 
 /* Dropdown list — glass background matching sticky bar */
