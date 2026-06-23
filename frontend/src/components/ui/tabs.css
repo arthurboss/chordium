@@ -12,12 +12,3 @@
   background-color: transparent;
 }
 
-/* Active tab trigger: same hover glow as card-hoverable */
-[role="tab"][data-state="active"]:hover {
-  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
-  border-image: radial-gradient(
-    var(--vignette-shape),
-    color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
-    color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
-  ) 1;
-}
