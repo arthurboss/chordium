@@ -80,9 +80,7 @@ const TabsList = React.forwardRef<
       updateIndicator();
     });
     resizeObserver.observe(listElement);
-    Array.from(listElement.querySelectorAll<HTMLElement>('[role="tab"]')).forEach(trigger => {
-        resizeObserver.observe(trigger);
-    });
+
 
     return () => {
       mutationObserver.disconnect();
