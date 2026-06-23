@@ -37,13 +37,13 @@ const ResultCard = ({
       >
         <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25"><Icon className="h-4 w-4" /></div>
         <div className="min-w-0 flex-1">
-          <h3
+          <h2
             className="w-full block font-semibold truncate text-sm"
             {...cyAttr(`${result.type}-title-${path}`)}
             title={title}
           >
             {title}
-          </h3>
+          </h2>
           {subtitle && (
             <p
               className="text-muted-foreground text-xs truncate w-full block"

@@ -17,13 +17,13 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
       >
         <div className="flex gap-2 w-full items-center">
           <div className="min-w-0 flex-1">
-            <h3
+            <h2
               className="w-full block font-semibold truncate text-base mb-1"
               title={chordSheet.title}
               {...cyAttr(`chordsheet-title-${chordSheet.path}`)}
             >
               {chordSheet.title}
-            </h3>
+            </h2>
             <p
               className="text-muted-foreground text-sm truncate w-full block"
               title={chordSheet.artist}

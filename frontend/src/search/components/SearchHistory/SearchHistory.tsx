@@ -77,9 +77,9 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
                   <Search className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="w-full block font-semibold truncate text-sm" title={label}>
+                  <h2 className="w-full block font-semibold truncate text-sm" title={label}>
                     {label}
-                  </h3>
+                  </h2>
                 </div>
               </CardContent>
             </Card>
