@@ -54,6 +54,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           onChange={(v) => onArtistChange(sanitize(v))}
           placeholder={t("songMetadataForm.artistPlaceholder")}
           required
+          autoCorrect="off"
         />
         <FormField
           id="song-key-input"

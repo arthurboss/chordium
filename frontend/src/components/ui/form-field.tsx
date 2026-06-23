@@ -13,6 +13,7 @@ interface FormFieldProps {
   required?: boolean;
   leftIcon?: ReactNode;
   disabled?: boolean;
+  autoCorrect?: "on" | "off";
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -24,6 +25,7 @@ const FormField: React.FC<FormFieldProps> = ({
   required = false,
   leftIcon,
   disabled = false,
+  autoCorrect,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +57,7 @@ const FormField: React.FC<FormFieldProps> = ({
           placeholder={placeholder}
           className={`w-full ${leftIcon ? 'pl-9' : ''} ${value ? 'pr-9' : ''}`}
           required={required}
+          {...(autoCorrect && { autoCorrect })}
         />
         {value && !disabled && (
           <ClearInputButton
