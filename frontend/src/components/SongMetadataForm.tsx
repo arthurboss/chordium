@@ -55,6 +55,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           placeholder={t("songMetadataForm.artistPlaceholder")}
           required
           autoCorrect="off"
+          spellCheck={false}
         />
         <FormField
           id="song-key-input"
