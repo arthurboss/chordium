@@ -34,7 +34,7 @@ const SteppedSlider = React.forwardRef<
     <SliderPrimitive.Root
       ref={ref}
       className={cn(
-        "relative flex w-full touch-none select-none items-center cursor-pointer",
+        "slider-track-glow relative flex w-full touch-none select-none items-center cursor-pointer",
         className
       )}
       min={min}

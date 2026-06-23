@@ -128,7 +128,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
           disabled={!isAltered}
           title={resetTitle}
         >
-          <Trash2 className="h-2 w-2" />
+          <Trash2 className="h-2 w-2 trash-icon-reset" />
         </Button>
       )}
 

@@ -39,7 +39,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button className="group text-xs text-muted-foreground flex items-center gap-1 transition-colors hover:bg-transparent dark:hover:text-white focus:outline-none">
-              <Trash2 className="h-3 w-3 text-destructive/50 group-hover:text-destructive transition-colors" />
+              <Trash2 className="h-3 w-3 trash-icon-reset group-hover:trash-icon-reset transition-colors" />
               Clear
             </button>
           </AlertDialogTrigger>

@@ -320,3 +320,105 @@ button.border-none.gradient-border {
   background-image: none !important;
   background-color: transparent !important;
 }
+
+/* Round buttons (except destructive): glow border */
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-image: none;
+  outline: none;
+}
+
+/* Round buttons hover: light mode */
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+/* Destructive round buttons: same border logic using destructive color */
+button.rounded-full:not(:disabled)[class*="destructive"],
+button.rounded-full:not(:disabled)[class*="border-destructive"] {
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      oklch(0.3 0.15 25 / 1) 0%,
+      oklch(0.1 0.15 25 / 1) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-image: none;
+  outline: none;
+}
+
+/* Destructive round buttons hover: light mode */
+button.rounded-full:not(:disabled)[class*="destructive"]:hover,
+button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      oklch(0.3 0.15 25 / 0.6) 0%,
+      oklch(0.1 0.15 25 / 0.6) 100%
+    );
+  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--destructive) 8%, transparent);
+}
+
+/* Destructive round buttons: disabled state */
+button.rounded-full:disabled[class*="destructive"],
+button.rounded-full:disabled[class*="border-destructive"] {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      oklch(0.3 0.15 25 / 0.75) 0%,
+      oklch(0.1 0.15 25 / 0.75) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-image: none;
+  opacity: 0.5;
+}
+
+/* Stepped slider: track glows when hovering over slider */
+.slider-track-glow:hover .relative.h-2.w-full {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+/* Increment/decrement buttons: no hover effects */
+button.border-none.card-hoverable:hover {
+  box-shadow: none !important;
+  transform: none !important;
+  border-image: none !important;
+  background-image: none !important;
+}
+
+/* Increment/decrement reset button trash icon: match destructive trash icon color */
+.trash-icon-reset {
+  color: oklch(0.45 0.15 25) !important;
+}
+
+.dark .trash-icon-reset {
+  color: oklch(0.45 0.15 25) !important;
+}
