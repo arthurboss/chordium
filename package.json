@@ -61,5 +61,8 @@
   },
   "overrides": {
     "puppeteer": "^24.16.1"
+  },
+  "dependencies": {
+    "@radix-ui/react-tabs": "^1.1.15"
   }
 }
