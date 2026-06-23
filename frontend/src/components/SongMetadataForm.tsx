@@ -56,6 +56,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
           required
           autoCorrect="off"
           spellCheck={false}
+          autoComplete="off"
         />
         <FormField
           id="song-key-input"

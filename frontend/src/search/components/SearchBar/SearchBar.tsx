@@ -51,6 +51,7 @@ const SearchBar = ({
               leftIcon={<User className="h-4 w-4" />}
               autoCorrect="off"
               spellCheck={false}
+              autoComplete="off"
             />
           </div>
           <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">

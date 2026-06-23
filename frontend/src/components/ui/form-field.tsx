@@ -15,6 +15,7 @@ interface FormFieldProps {
   disabled?: boolean;
   autoCorrect?: "on" | "off";
   spellCheck?: boolean;
+  autoComplete?: "on" | "off";
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -28,6 +29,7 @@ const FormField: React.FC<FormFieldProps> = ({
   disabled = false,
   autoCorrect,
   spellCheck,
+  autoComplete,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -61,6 +63,7 @@ const FormField: React.FC<FormFieldProps> = ({
           required={required}
           {...(autoCorrect && { autoCorrect })}
           {...(spellCheck !== undefined && { spellCheck })}
+          {...(autoComplete && { autoComplete })}
         />
         {value && !disabled && (
           <ClearInputButton
