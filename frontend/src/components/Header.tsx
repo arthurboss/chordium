@@ -23,11 +23,12 @@ const Header = () => {
           <img
             src={isDark ? "logo-dark.png" : "logo-light.png"}
             alt="C"
+            aria-hidden="true"
             width={32}
             height={32}
             className="transition-all duration-200 hover:drop-shadow-[0_0_1px_var(--primary)]"
           />
-          <h1 className="text-2xl font-semibold logo-text">hordium</h1>
+          <h1 className="text-2xl font-semibold logo-text" aria-hidden="true">hordium</h1>
         </Link>
 
         <div className="flex items-center gap-2">
