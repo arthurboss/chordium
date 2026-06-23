@@ -1,5 +1,4 @@
-/* Override .card-hoverable border-image on SelectTrigger — border-image disables
-   border-radius. Use background-clip trick to keep rounded corners on hover. */
+/* SelectTrigger combobox: prevent border-image from disabling border-radius */
 [role="combobox"] {
   user-select: none;
 }
@@ -8,6 +7,7 @@
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
 }
+
 /* Light mode fill */
 [role="combobox"].card-hoverable:hover {
   background-image:
@@ -18,6 +18,7 @@
       color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
     );
 }
+
 /* Dark mode fill */
 .dark [role="combobox"].card-hoverable:hover {
   background-image:
@@ -28,8 +29,9 @@
       color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
     );
 }
+
 /* Subtler inset tint — override the global card-hoverable value */
-.card-hoverable[role="combobox"]:hover {
+[role="combobox"].card-hoverable:hover {
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 2.5%, transparent);
 }
 
@@ -40,13 +42,12 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Dark mode: white text on hover, matching other card-hoverable buttons */
+/* Dark mode: white text on hover and focus */
 .dark [role="combobox"].card-hoverable:hover {
   color: oklch(1 0 0);
 }
 
-/* Dark mode: white text on focused/hovered dropdown items */
-.dark [role=option]:focus,
-.dark [role=option][data-highlighted] {
+.dark [role="option"]:focus,
+.dark [role="option"][data-highlighted] {
   color: oklch(1 0 0);
 }

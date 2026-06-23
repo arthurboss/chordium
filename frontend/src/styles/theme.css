@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+@source not "**/*.css";
+@source "..";
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --radius: 0.5rem;
+
+    /* Light palette — static OKLCH values (hue 275 = royal violet) */
+    --background:             oklch(0.910 0.010 275);
+    --foreground:             oklch(0.130 0.018 275);
+    --card:                   oklch(0.970 0.010 275);
+    --card-foreground:        oklch(0.130 0.018 275);
+    --popover:                oklch(0.970 0.010 275);
+    --popover-foreground:     oklch(0.130 0.018 275);
+    --primary:                oklch(0.68 0.18 275);
+    --primary-foreground:     oklch(0.32 0 0);
+    --secondary:              oklch(0.923 0.010 275);
+    --secondary-foreground:   oklch(0.130 0.018 275);
+    --muted:                  oklch(0.923 0.010 275);
+    --muted-foreground:       oklch(0.460 0.012 275);
+    --accent:                 oklch(0.923 0.010 275);
+    --accent-foreground:      oklch(0.130 0.018 275);
+    --destructive:            oklch(0.62 0.24 8);
+    --destructive-foreground: oklch(0.98 0 0);
+    --border:                 oklch(0.806 0.010 275);
+    --input:                  oklch(0.806 0.010 275);
+    --ring:                   oklch(0.68 0.18 275);
+
+    /* Effect tokens */
+    --vignette-shape:       ellipse 60% 400% at 50% 50%;
+    --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
+    --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
+    --border-glow-hi-light: color-mix(in oklch, var(--primary) 45%, var(--border));
+    --font-mono:            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --background:             oklch(0.210 0.010 275);
+    --foreground:             oklch(0.79 0 0);
+    --card:                   oklch(0.180 0.010 275);
+    --card-foreground:        oklch(0.79 0 0);
+    --popover:                oklch(0.180 0.010 275);
+    --popover-foreground:     oklch(0.79 0 0);
+    --secondary:              oklch(0.239 0.010 275);
+    --secondary-foreground:   oklch(0.79 0 0);
+    --muted:                  oklch(0.239 0.010 275);
+    --muted-foreground:       oklch(0.75 0 0);
+    --accent:                 oklch(0.239 0.010 275);
+    --accent-foreground:      oklch(0.79 0 0);
+    --destructive:            oklch(0.50 0.20 8);
+    --border:                 oklch(0.312 0.010 275);
+    --input:                  oklch(0.312 0.010 275);
+    /* --primary, --primary-foreground, --destructive-foreground, --ring: inherited from :root */
+  }
+}

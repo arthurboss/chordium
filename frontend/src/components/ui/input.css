@@ -1,8 +1,8 @@
 /* Gradient border using background-clip — preserves border-radius unlike border-image.
    background-color must be transparent so the background-image layers control the fill. */
-.gradient-input-border {
-  border: 1px solid transparent !important;
-  background-color: transparent !important;
+input.gradient-input-border {
+  border: 1px solid transparent;
+  background-color: transparent;
   background-image:
     linear-gradient(var(--background), var(--background)),
     radial-gradient(
@@ -13,7 +13,7 @@
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
 }
-.dark .gradient-input-border {
+.dark input.gradient-input-border {
   background-image:
     linear-gradient(var(--card), var(--card)),
     radial-gradient(
@@ -24,8 +24,7 @@
 }
 
 /* Focus: shared gradient, only fill color differs between modes */
-.gradient-input-border:focus-visible,
-.dark .gradient-input-border:focus-visible {
+input.gradient-input-border:focus-visible {
   background-image:
     linear-gradient(var(--background), var(--background)),
     radial-gradient(
@@ -34,7 +33,7 @@
       color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
     );
 }
-.dark .gradient-input-border:focus-visible {
+.dark input.gradient-input-border:focus-visible {
   background-image:
     linear-gradient(var(--card), var(--card)),
     radial-gradient(

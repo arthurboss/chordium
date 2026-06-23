@@ -1,0 +1,102 @@
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html,
+  body {
+    max-width: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    background-image: radial-gradient(
+      ellipse 80% 70% at 50% 40%,
+      transparent 20%,
+      oklch(0 0 0 / 0.01) 35%,
+      oklch(0 0 0 / 0.02) 50%,
+      oklch(0 0 0 / 0.04) 62%,
+      oklch(0 0 0 / 0.07) 73%,
+      oklch(0 0 0 / 0.12) 83%,
+      oklch(0 0 0 / 0.20) 92%,
+      oklch(0 0 0 / 0.30) 100%
+    );
+  }
+
+  html.dark body {
+    background-image: radial-gradient(
+      ellipse 90% 400% at 50% 50%,
+      transparent 20%,
+      oklch(0 0 0 / 0.02) 15%,
+      oklch(0 0 0 / 0.05) 50%,
+      oklch(0 0 0 / 0.10) 62%,
+      oklch(0 0 0 / 0.18) 72%,
+      oklch(0 0 0 / 0.32) 82%,
+      oklch(0 0 0 / 0.55) 91%,
+      oklch(0 0 0 / 0.72) 100%
+    );
+  }
+
+  /* Suppress all transitions during theme switch so everything snaps instantly */
+  html[data-theme-switching] * {
+    transition: none !important;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  [role="menuitem"] {
+    cursor: pointer;
+  }
+
+  /* Focus ring — sits flush at the border edge */
+  :focus-visible {
+    outline: 1.5px solid color-mix(in oklch, var(--ring) 70%, transparent);
+    outline-offset: 0;
+  }
+
+  /* Borderless links — ring floats just outside */
+  a:not([class*="border"]):focus-visible {
+    outline-offset: 2px;
+  }
+
+  /* Autofill — only box-shadow is overrideable by the browser */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--ring) 70%, transparent) inset,
+      0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--ring) 70%, transparent) inset,
+      0 0 0 1000px color-mix(in oklch, var(--primary) 10%, transparent) inset;
+    -webkit-text-fill-color: var(--foreground);
+    border: 1px solid transparent;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: var(--foreground);
+  }
+
+  input:-webkit-autofill ~ button[aria-label="Clear input"] {
+    color: var(--foreground);
+    border: 1px solid var(--ring);
+  }
+
+  /* Chord sheet viewer — pre/code wrapping scoped here to avoid overriding chord-display.css */
+  pre,
+  code,
+  #chord-sheet-viewer .chord-line,
+  #chord-sheet-viewer .lyrics-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Trash icon reset button color */
+  .trash-icon-reset {
+    color: oklch(0.45 0.15 25);
+  }
+
+  .dark .trash-icon-reset {
+    color: oklch(0.45 0.15 25);
+  }
+}

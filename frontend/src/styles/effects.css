@@ -1,0 +1,46 @@
+/* ── CARD HOVER GLOW ─────────────────────────────────────────────────────────
+   Applied via .card-hoverable className — add to any clickable card or button.
+*/
+
+.card-hoverable {
+  transition: box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.card-hoverable:hover {
+  box-shadow:
+    inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent),
+    0 4px 14px oklch(0 0 0 / 0.10);
+  transform: translateY(-1px);
+}
+
+/* Scale up for small interactive elements */
+.card-hoverable.rounded-full:hover,
+.card-hoverable.rounded-md:not([role="combobox"]):hover {
+  transform: scale(1.02);
+}
+
+/* Combobox: no transform */
+.card-hoverable[role="combobox"]:hover {
+  transform: none;
+}
+
+/* Non-round: gradient border-image on hover */
+.card-hoverable:not(.rounded-full):hover {
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+    color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+  ) 1;
+}
+
+/* Round: outline instead of border-image (border-image breaks border-radius) */
+.card-hoverable.rounded-full:hover {
+  outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border));
+  outline-offset: -1px;
+}
+
+.dark .card-hoverable.rounded-full:hover,
+.dark button.card-hoverable:hover,
+.dark [role="button"].card-hoverable:hover {
+  color: oklch(1 0 0);
+}

@@ -49,35 +49,6 @@
   word-break: break-word;
 }
 
-#chord-sheet-viewer pre .tablatura {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.6;
-  display: block;
-  white-space: pre;
-  word-break: normal;
-  overflow-wrap: normal;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-#chord-sheet-viewer pre .tab-info {
-  font-size: var(--content-font-size, 14px);
-  font-family: inherit;
-  white-space: pre-wrap;
-}
-
-#chord-sheet-viewer pre .cnt {
-  font-family: var(--font-mono);
-  display: block;
-  line-height: 1.4;
-  max-width: 100%;
-  overflow-x: auto;
-  white-space: pre;
-  word-break: normal;
-  overflow-wrap: normal;
-}
-
 @media (max-width: 640px) {
   .chord-line {
     font-size: 0.875rem;
@@ -103,20 +74,5 @@
     font-size: 1rem;
     margin-top: 0.75rem;
     margin-bottom: 0.25rem;
-  }
-
-  #chord-sheet-viewer pre {
-    white-space: pre-wrap;
-    word-break: normal;
-    font-size: inherit;
-    overflow-x: auto;
-  }
-
-  #chord-sheet-viewer pre .tablatura {
-    white-space: pre;
-    word-break: normal;
-    overflow-wrap: normal;
-    max-width: 100%;
-    overflow-x: auto;
   }
 }

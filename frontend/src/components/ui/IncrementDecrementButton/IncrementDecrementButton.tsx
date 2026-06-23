@@ -3,6 +3,8 @@ import { Button } from '../button';
 import { Trash2 } from 'lucide-react';
 import { INCREMENT_DECREMENT_BUTTON_STYLES, INCREMENT_DECREMENT_BUTTON_LABELS } from './IncrementDecrementButton.constants';
 import type { IncrementDecrementButtonProps } from './IncrementDecrementButton.types';
+import './IncrementDecrementButton.css';
+
 
 /**
  * Generic IncrementDecrementButton component
