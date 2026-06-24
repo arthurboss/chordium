@@ -25,8 +25,21 @@
 }
 
 /* Cards with rounded-lg: gradient border via background-clip (like round buttons) */
-.dark .card-hoverable.rounded-lg {
+.card-hoverable.rounded-lg {
   background-color: transparent;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-image: none;
+}
+
+.dark .card-hoverable.rounded-lg {
   background-image:
     radial-gradient(ellipse 70% 400% at 50% 50%,
       oklch(0.26 0.010 275) 0%,
@@ -36,9 +49,5 @@
       var(--border-glow-hi-light) 0%,
       var(--border) 100%
     );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
-  border-image: none;
 }
 
