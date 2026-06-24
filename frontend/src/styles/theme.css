@@ -8,32 +8,41 @@
     color-scheme: light;
     --radius: 0.5rem;
 
-    /* Light palette — static OKLCH values (hue 275 = royal violet) */
-    --background:             oklch(0.910 0.010 275);
-    --foreground:             oklch(0.130 0.018 275);
-    --card:                   oklch(0.970 0.010 275);
-    --card-foreground:        oklch(0.130 0.018 275);
-    --popover:                oklch(0.970 0.010 275);
-    --popover-foreground:     oklch(0.130 0.018 275);
-    --primary:                oklch(0.68 0.18 275);
+    /* Light palette — pure whites with cyan accents */
+    --background:             oklch(0.985 0 0);
+    --foreground:             oklch(0.120 0 0);
+    --card:                   oklch(0.995 0 0);
+    --card-foreground:        oklch(0.120 0 0);
+    --popover:                oklch(0.995 0 0);
+    --popover-foreground:     oklch(0.120 0 0);
+    --primary:                oklch(0.65 0.20 200);
     --primary-foreground:     oklch(0.32 0 0);
-    --secondary:              oklch(0.923 0.010 275);
-    --secondary-foreground:   oklch(0.130 0.018 275);
-    --muted:                  oklch(0.923 0.010 275);
-    --muted-foreground:       oklch(0.460 0.012 275);
-    --accent:                 oklch(0.923 0.010 275);
-    --accent-foreground:      oklch(0.130 0.018 275);
+    --secondary:              oklch(0.920 0.08 200);
+    --secondary-foreground:   oklch(0.120 0 0);
+    --muted:                  oklch(0.920 0.08 200);
+    --muted-foreground:       oklch(0.450 0 0);
+    --accent:                 oklch(0.920 0.08 200);
+    --accent-foreground:      oklch(0.120 0 0);
     --destructive:            oklch(0.62 0.24 8);
     --destructive-foreground: oklch(0.98 0 0);
-    --border:                 oklch(0.806 0.010 275);
-    --input:                  oklch(0.806 0.010 275);
-    --ring:                   oklch(0.68 0.18 275);
+    --border:                 oklch(0.900 0 0);
+    --input:                  oklch(0.900 0 0);
+    --ring:                   oklch(0.65 0.20 200);
 
     /* Effect tokens */
     --vignette-shape:       ellipse 60% 400% at 50% 50%;
     --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
     --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
     --border-glow-hi-light: color-mix(in oklch, var(--primary) 48%, var(--border));
+
+    /* Gradient borders for cards/buttons/inputs (light mode: cyan) - radial part only */
+    --gradient-border-radial-normal: radial-gradient(var(--vignette-shape), var(--primary) 0%, var(--border) 100%);
+    --gradient-border-radial-hover: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
+    --gradient-border-radial-focus: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
+
+    /* Outline color for sticky-bottom-container (light mode: cyan) */
+    --outline-border-color: oklch(0.72 0.08 200 / 0.3);
+
     --font-mono:            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   }
 
@@ -46,6 +55,7 @@
     --card-foreground:        oklch(0.79 0 0);
     --popover:                oklch(0.180 0.010 275);
     --popover-foreground:     oklch(0.79 0 0);
+    --primary:                oklch(0.68 0.18 275);
     --secondary:              oklch(0.239 0.010 275);
     --secondary-foreground:   oklch(0.79 0 0);
     --muted:                  oklch(0.239 0.010 275);
@@ -55,6 +65,15 @@
     --destructive:            oklch(0.50 0.20 8);
     --border:                 oklch(0.312 0.010 275);
     --input:                  oklch(0.312 0.010 275);
-    /* --primary, --primary-foreground, --destructive-foreground, --ring: inherited from :root */
+    --ring:                   oklch(0.68 0.18 275);
+
+    /* Gradient borders for cards/buttons/inputs (dark mode: purple) - radial part only */
+    --gradient-border-radial-normal: radial-gradient(var(--vignette-shape), var(--border-glow-hi) 0%, var(--border-glow-lo) 100%);
+    --gradient-border-radial-hover: radial-gradient(var(--vignette-shape), var(--border-glow-hi-light) 0%, var(--border) 100%);
+    --gradient-border-radial-focus: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
+
+    /* Outline color for sticky-bottom-container (dark mode: purple) */
+    --outline-border-color: oklch(0.65 0.08 275 / 0.3);
+    /* --primary-foreground, --destructive-foreground: inherited from :root */
   }
 }

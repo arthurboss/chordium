@@ -5,6 +5,6 @@
   background-origin: unset;
   background-clip: unset;
   border: none;
-  outline: 1px solid color-mix(in oklch, var(--primary) 30%, var(--border));
+  outline: 1px solid var(--outline-border-color);
   outline-offset: -2px;
 }

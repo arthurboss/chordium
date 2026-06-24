@@ -24,30 +24,35 @@
   transform: none;
 }
 
-/* Cards with rounded-lg: gradient border via background-clip (like round buttons) */
-.card-hoverable.rounded-lg {
+/* Light mode: Cards with rounded-lg gradient border (cyan) */
+:not(.dark) .card-hoverable.rounded-lg {
   background-color: transparent;
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      var(--border-glow-hi-light) 0%,
-      var(--border) 100%
-    );
+  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
   border-image: none;
 }
 
+:not(.dark) .card-hoverable.rounded-lg:hover {
+  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-hover);
+}
+
+/* Dark mode: Cards with rounded-lg gradient border (purple) */
 .dark .card-hoverable.rounded-lg {
   background-image:
     radial-gradient(ellipse 70% 400% at 50% 50%,
       oklch(0.26 0.010 275) 0%,
       oklch(0.195 0.010 275) 100%
     ),
-    radial-gradient(var(--vignette-shape),
-      var(--border-glow-hi-light) 0%,
-      var(--border) 100%
-    );
+    var(--gradient-border-radial-normal);
 }
 
+.dark .card-hoverable.rounded-lg:hover {
+  background-image:
+    radial-gradient(ellipse 70% 400% at 50% 50%,
+      oklch(0.26 0.010 275) 0%,
+      oklch(0.195 0.010 275) 100%
+    ),
+    var(--gradient-border-radial-hover);
+}
