@@ -2,6 +2,7 @@
 @import "./styles/reset.css";
 @import "./styles/shadows.css";
 @import "./styles/effects.css";
+@import "./styles/icon-gradient-border.css";
 @import "./components/ui/sonner.css";
 @import "./components/button-round.css";
 @import "./components/button-destructive.css";
