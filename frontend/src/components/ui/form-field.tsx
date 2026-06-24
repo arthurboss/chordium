@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { handleInputFocus } from "@/utils/handleInputFocus";
 import ClearInputButton from "@/components/ui/ClearInputButton";
+import "./form-field.css";
 
 interface FormFieldProps {
   id: string;
@@ -40,7 +41,9 @@ const FormField: React.FC<FormFieldProps> = ({
       )}
       <div className="relative">
         {leftIcon && (
-          <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full border border-primary/10 bg-primary/5 text-primary/30 shrink-0">
+          <div 
+            className={`icon-gradient-border absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full shrink-0 transition-opacity ${value ? 'icon-filled' : 'icon-empty'}`}
+          >
             {leftIcon}
           </div>
         )}

@@ -1,4 +1,5 @@
-import { User, Music, ArrowLeft, Search } from "lucide-react";
+import { Music, ArrowLeft, Search } from "lucide-react";
+import { UserIconCustom } from "./UserIconCustom";
 import { useTranslation } from "react-i18next";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ const SearchBar = ({
               onChange={handleArtistChange}
               disabled={loading || artistLoading || artistDisabled}
               placeholder={t("searchBar.artistPlaceholder")}
-              leftIcon={<User className="h-3 w-3" />}
+              leftIcon={<UserIconCustom className="h-3 w-3" />}
             />
           </div>
           <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">

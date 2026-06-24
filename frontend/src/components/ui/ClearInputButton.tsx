@@ -1,5 +1,5 @@
 import React from "react";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface ClearInputButtonProps {
   onClick: () => void;
@@ -9,11 +9,11 @@ const ClearInputButton: React.FC<ClearInputButtonProps> = ({ onClick }) => (
   <button
     type="button"
     aria-label="Clear input"
-    className="absolute right-2 top-1/2 -translate-y-1/2 text-destructive hover:text-[oklch(0.62_0.24_10)] focus:outline-hidden bg-card rounded-full border-destructive shadow-xs focus:ring-1 focus:ring-ring transition-colors"
+    className="absolute right-3 top-1/2 -translate-y-1/2 p-0 bg-transparent border-0 focus:outline-none transition-colors hover:text-[oklch(0.62_0.24_10)]"
     onClick={onClick}
     tabIndex={0}
   >
-    <X className="h-4 w-4" />
+    <Trash2 className="h-4 w-4 text-destructive transition-colors" />
   </button>
 );
 
