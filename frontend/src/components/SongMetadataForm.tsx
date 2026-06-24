@@ -81,7 +81,7 @@ const SongMetadataForm: React.FC<SongMetadataFormProps> = ({
             <Button
               onClick={onContinue}
               variant="ghost"
-              className="bg-card h-10 shrink-0"
+              className="bg-card h-10 shrink-0 dark:hover:text-white hover:bg-primary/5"
               aria-label={t("songMetadataForm.continueAriaLabel")}
               disabled={!title || !artist}
             >

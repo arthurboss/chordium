@@ -12,7 +12,7 @@ interface LoadingStateProps {
  */
 const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
   <div className="p-8 text-center">
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2 opacity-70">
       {[
         { Icon: Guitar, size: 32 },
         { Icon: Music3, size: 24 },

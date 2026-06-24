@@ -2,7 +2,7 @@ import React, { ReactNode, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { handleInputFocus } from "@/utils/handleInputFocus";
-import ClearInputButton from "@/components/ui/ClearInputButton";
+import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import "./form-field.css";
 
 interface FormFieldProps {
@@ -32,6 +32,8 @@ const FormField: React.FC<FormFieldProps> = ({
     handleInputFocus(e, value, inputRef);
   };
 
+  const showClearButton = value && !disabled;
+
   return (
     <div className="space-y-2">
       {label && (
@@ -48,24 +50,26 @@ const FormField: React.FC<FormFieldProps> = ({
           ref={inputRef}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full ${leftIcon ? 'pl-10' : ''} ${value ? 'pr-9' : ''}`}
+          className={`w-full ${leftIcon ? 'pl-10' : ''} ${showClearButton ? 'pr-9' : ''}`}
           required={required}
         />
         {leftIcon && (
-          <div 
+          <div
             className={`icon-gradient-border absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full shrink-0 ${value ? 'icon-filled' : 'icon-empty'}`}
           >
             {leftIcon}
           </div>
         )}
-        {value && !disabled && (
-          <ClearInputButton
+        <div className={`clear-input-button-container absolute right-2.5 top-1/2 -translate-y-1/2 ${showClearButton ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <RoundTrashButton
+            size="small"
+            label="Clear input"
             onClick={() => {
               onChange("");
               setTimeout(() => inputRef.current?.focus(), 0);
             }}
           />
-        )}
+        </div>
       </div>
     </div>
   );

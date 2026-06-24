@@ -35,7 +35,7 @@ const ResultCard = ({
         onClick={() => onClick(result)}
         {...cyAttr(`${result.type}-card-compact-content-${path}`)}
       >
-        <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25"><Icon className="h-4 w-4" /></div>
+        <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25 icon-gradient-border"><Icon className="h-4 w-4" /></div>
         <div className="min-w-0 flex-1">
           <h2
             className="w-full block font-semibold truncate text-sm"

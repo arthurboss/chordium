@@ -54,7 +54,7 @@ const DropZone = ({
           <Button
             variant="ghost"
             onClick={handleBrowseClick}
-            className="mx-auto bg-card"
+            className="mx-auto bg-card hover:bg-primary/5 dark:hover:text-white"
           >
             {t("dropZone.browse")}
           </Button>

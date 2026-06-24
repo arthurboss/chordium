@@ -73,7 +73,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(artist, song, searchType, displayName); }}
             >
               <CardContent className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25 icon-gradient-border">
                   <Search className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">

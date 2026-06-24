@@ -52,3 +52,13 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   transition: background-color var(--transition-ui), box-shadow var(--transition-ui);
 }
+
+/* Clear button container animation */
+.clear-input-button-container {
+  transition: opacity 200ms ease;
+}
+
+.clear-input-button-container:not(:has(button)) {
+  opacity: 0;
+  pointer-events: none;
+}

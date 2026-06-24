@@ -60,6 +60,12 @@ button.rounded-full:disabled[class*="border-destructive"] {
     );
 }
 
+/* Icon color transition — smooth color change on hover/unhover */
+button.rounded-full:not(:disabled)[class*="destructive"] [class*="lucide"],
+button.rounded-full:not(:disabled)[class*="border-destructive"] [class*="lucide"] {
+  transition: color 0.2s ease;
+}
+
 /* Icon color on hover: use #ff4141 (oklch(0.62 0.24 10)) */
 button.rounded-full:not(:disabled)[class*="destructive"]:hover [class*="lucide"],
 button.rounded-full:not(:disabled)[class*="border-destructive"]:hover [class*="lucide"] {
