@@ -10,20 +10,24 @@ button.border-none.gradient-border {
 button.border-none:not(:disabled) {
   color: var(--primary);
   transition: color 0.2s ease;
+  user-select: none;
 }
 button.border-none:not(:disabled):hover {
   color: var(--foreground);
 }
 
-/* Reset button icon styling - same as RoundTrashButton */
-.trash-icon-reset {
+/* Reset button icon styling */
+button.border-none:not(:disabled) .text-destructive {
   color: var(--destructive);
   transition: color 0.2s ease;
 }
 
-/* Reset button hover - same as RoundTrashButton hover */
-button.border-none:not(:disabled):has(.trash-icon-reset):hover .trash-icon-reset {
+button.border-none:not(:disabled):hover .text-destructive {
   color: oklch(0.62 0.24 10);
+}
+
+button.border-none:disabled .text-destructive {
+  color: var(--muted-foreground);
 }
 
 /* Disabled buttons */

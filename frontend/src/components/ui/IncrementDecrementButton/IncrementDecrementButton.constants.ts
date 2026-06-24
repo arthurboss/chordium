@@ -1,5 +1,5 @@
 export const INCREMENT_DECREMENT_BUTTON_STYLES = {
-  container: "flex items-center justify-between h-6 w-[100px] sm:w-[110px] bg-card/75 rounded-md px-1",
+  container: "flex items-center justify-between h-6 w-[100px] bg-card/75 rounded-md px-1 gradient-border",
   decrementButton: "h-5 w-3 p-0 flex-shrink-0 border-none",
   incrementButton: "h-5 w-3 p-0 flex-shrink-0 border-none",
   resetButton: "h-5 w-5 p-0 flex-shrink-0 border-none",

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../button';
-import { Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { INCREMENT_DECREMENT_BUTTON_STYLES, INCREMENT_DECREMENT_BUTTON_LABELS } from './IncrementDecrementButton.constants';
 import type { IncrementDecrementButtonProps } from './IncrementDecrementButton.types';
 import './IncrementDecrementButton.css';
@@ -28,6 +28,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
   const animationValue = wheelValue || value;
   const currentIndex = shouldUseWheel ? digits.indexOf(animationValue) : -1;
   const wheelTransform = currentIndex >= 0 ? `translateY(-${currentIndex * 1.25}rem)` : 'translateY(0)';
+  
   return (
     <div className={`${INCREMENT_DECREMENT_BUTTON_STYLES.container} ${className}`} title={title}>
       {/* Decrement button */}
@@ -102,17 +103,17 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
         </div>
       </div>
 
-      {/* Reset button - always visible but disabled when not altered */}
+      {/* Reset button - icon only, no border */}
       {onReset && (
         <Button
           variant="ghost"
           size="sm"
-          className={!isAltered ? INCREMENT_DECREMENT_BUTTON_STYLES.disabledResetButton : INCREMENT_DECREMENT_BUTTON_STYLES.resetButton}
+          className={`h-5 w-5 p-0 flex-shrink-0 border-none ${!isAltered ? 'opacity-50' : ''}`}
           onClick={!isAltered ? undefined : onReset}
           disabled={!isAltered}
           title={resetTitle}
         >
-          <Trash2 className="h-2 w-2 trash-icon-reset" />
+          <X className="h-2 w-2 text-destructive" />
         </Button>
       )}
 
