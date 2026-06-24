@@ -15,14 +15,14 @@ button.border-none:not(:disabled):hover {
   color: var(--foreground);
 }
 
-/* Reset button specific styling */
-button.border-none:not(:disabled).trash-icon-reset-btn {
+/* Reset button icon styling - same as RoundTrashButton */
+.trash-icon-reset {
   color: var(--destructive);
-  opacity: 0.5;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: color 0.2s ease;
 }
-button.border-none:not(:disabled).trash-icon-reset-btn:hover {
-  opacity: 1;
+
+/* Reset button hover - same as RoundTrashButton hover */
+button.border-none:not(:disabled):has(.trash-icon-reset):hover .trash-icon-reset {
   color: oklch(0.62 0.24 10);
 }
 

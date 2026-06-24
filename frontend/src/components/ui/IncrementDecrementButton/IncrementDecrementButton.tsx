@@ -6,21 +6,6 @@ import type { IncrementDecrementButtonProps } from './IncrementDecrementButton.t
 import './IncrementDecrementButton.css';
 
 
-/**
- * Generic IncrementDecrementButton component
- * Provides increment/decrement buttons with optional reset functionality
- * 
- * @param value - Current value to display
- * @param onIncrement - Function to call when increment button is clicked
- * @param onDecrement - Function to call when decrement button is clicked
- * @param onReset - Optional function to call when reset button is clicked
- * @param showReset - Whether to show the reset button
- * @param title - Optional title for the component
- * @param incrementLabel - Label for increment button (defaults to '+')
- * @param decrementLabel - Label for decrement button (defaults to '−')
- * @param resetTitle - Title for reset button tooltip
- * @param className - Additional CSS classes
- */
 const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
   value,
   onIncrement,
@@ -39,7 +24,6 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
   wheelValue,
   displayMode = 'wheel'
 }) => {
-  // Calculate wheel animation only if in wheel mode and digits are provided
   const shouldUseWheel = displayMode === 'wheel' && digits.length > 0;
   const animationValue = wheelValue || value;
   const currentIndex = shouldUseWheel ? digits.indexOf(animationValue) : -1;
@@ -85,7 +69,7 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
                     ? INCREMENT_DECREMENT_BUTTON_STYLES.slideTextUp 
                     : INCREMENT_DECREMENT_BUTTON_STYLES.slideTextDown
                 }`}
-                key={value} // Force re-render and animation restart when value changes
+                key={value}
               >
                 {value}
               </div>
@@ -93,7 +77,6 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
           ) : (
             <div className={INCREMENT_DECREMENT_BUTTON_STYLES.staticDisplay}>
               {(() => {
-                // Parse complex values like "Cm (+½)" into main text and sub text
                 const match = value.match(/^(.+?)\s*\((.+?)\)$/);
                 if (match) {
                   const [, mainText, subText] = match;
@@ -108,7 +91,6 @@ const IncrementDecrementButton: React.FC<IncrementDecrementButtonProps> = ({
                     </>
                   );
                 }
-                // Fallback for simple values
                 return (
                   <span className={INCREMENT_DECREMENT_BUTTON_STYLES.staticMainText}>
                     {value}
