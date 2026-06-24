@@ -47,7 +47,7 @@ button.rounded-full:disabled[class*="border-destructive"] {
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
   border-image: none;
-  opacity: 0.5;
+  opacity: 0.9;
 }
 
 .dark button.rounded-full:not(:disabled)[class*="destructive"]:hover,
