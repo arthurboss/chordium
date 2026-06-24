@@ -33,7 +33,7 @@
     --vignette-shape:       ellipse 60% 400% at 50% 50%;
     --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
     --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
-    --border-glow-hi-light: color-mix(in oklch, var(--primary) 45%, var(--border));
+    --border-glow-hi-light: color-mix(in oklch, var(--primary) 48%, var(--border));
     --font-mono:            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   }
 
