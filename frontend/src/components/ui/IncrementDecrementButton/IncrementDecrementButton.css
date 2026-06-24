@@ -23,7 +23,7 @@ button.border-none:not(:disabled).trash-icon-reset-btn {
 }
 button.border-none:not(:disabled).trash-icon-reset-btn:hover {
   opacity: 1;
-  color: var(--destructive);
+  color: oklch(0.62 0.24 10);
 }
 
 /* Disabled buttons */

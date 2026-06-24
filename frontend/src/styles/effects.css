@@ -39,32 +39,3 @@
   border-image: none;
 }
 
-.card-hoverable.rounded-lg:hover {
-  background-image:
-    linear-gradient(var(--background), var(--background)),
-    radial-gradient(var(--vignette-shape),
-      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
-      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
-    );
-}
-
-/* Non-round: gradient border-image on hover */
-.card-hoverable:not(.rounded-full):not(.rounded-lg):not([role="combobox"]):hover {
-  border-image: radial-gradient(
-    var(--vignette-shape),
-    color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
-    color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
-  ) 1;
-}
-
-/* Round: outline instead of border-image (border-image breaks border-radius) */
-.card-hoverable.rounded-full:hover {
-  outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border));
-  outline-offset: -1px;
-}
-
-.dark .card-hoverable.rounded-full:hover,
-.dark button.card-hoverable:hover,
-.dark [role="button"].card-hoverable:hover {
-  color: oklch(1 0 0);
-}

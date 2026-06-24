@@ -13,15 +13,14 @@ interface PlayButtonProps {
 const PlayButton: React.FC<PlayButtonProps> = ({ autoScroll, setAutoScroll, size = 22, className = '', style }) => (
   <Button 
     variant="outline"
-    size="icon" 
-    className={`group flex items-center dark:hover:text-white ${className}`}
+    className={`flex justify-center items-center h-10 w-10 rounded-full ${className}`}
     onClick={() => setAutoScroll(!autoScroll)}
     title={autoScroll ? "Stop Auto-Scroll" : "Start Auto-Scroll"}
     style={style}
   >
-    {autoScroll ? (<Pause size={size} className="text-foreground dark:group-hover:text-white" />) : (
+    {autoScroll ? (<Pause size={size} className="text-foreground" />) : (
     <div className='flex items-center gap-2'>
-      <Play size={size} className="text-foreground dark:group-hover:text-white" />
+      <Play size={size} className="text-foreground" />
     </div>)
     }
   </Button>

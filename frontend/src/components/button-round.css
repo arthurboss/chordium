@@ -28,6 +28,10 @@ button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="bord
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
 }
 
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover [class*="lucide"] {
+  color: color-mix(in oklch, var(--primary) 70%, var(--border));
+}
+
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):focus-visible {
   outline: 1.5px solid color-mix(in oklch, var(--ring) 70%, transparent);
   outline-offset: -1px;

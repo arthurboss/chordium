@@ -23,8 +23,8 @@ button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
   background-image:
     linear-gradient(var(--card), var(--card)),
     radial-gradient(var(--vignette-shape),
-      oklch(0.3 0.15 25 / 0.6) 0%,
-      oklch(0.1 0.15 25 / 0.6) 100%
+      oklch(0.5 0.15 25 / 1) 0%,
+      oklch(0.3 0.15 25 / 1) 100%
     );
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--destructive) 8%, transparent);
 }
@@ -48,4 +48,25 @@ button.rounded-full:disabled[class*="border-destructive"] {
   border: 1px solid transparent;
   border-image: none;
   opacity: 0.5;
+}
+
+.dark button.rounded-full:not(:disabled)[class*="destructive"]:hover,
+.dark button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      oklch(0.5 0.15 25 / 1) 0%,
+      oklch(0.3 0.15 25 / 1) 100%
+    );
+}
+
+/* Icon color on hover: use #ff4141 (oklch(0.62 0.24 10)) */
+button.rounded-full:not(:disabled)[class*="destructive"]:hover [class*="lucide"],
+button.rounded-full:not(:disabled)[class*="border-destructive"]:hover [class*="lucide"] {
+  color: oklch(0.62 0.24 10);
+}
+
+button.rounded-full:disabled[class*="destructive"] [class*="lucide"],
+button.rounded-full:disabled[class*="border-destructive"] [class*="lucide"] {
+  color: oklch(0.62 0.24 10 / 0.4);
 }
