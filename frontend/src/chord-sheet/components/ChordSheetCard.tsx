@@ -9,7 +9,7 @@ import { cyAttr } from "@/utils/test-utils";
  */
 const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
   return (
-    <Card className="w-full overflow-hidden cursor-pointer hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary transition-colors duration-300" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
+    <Card className="w-full cursor-pointer card-hoverable dark:hover:text-white transition-colors duration-300" {...cyAttr(`chordsheet-card-${chordSheet.path}`)}>
       <CardContent
         className="flex-1 flex flex-col justify-between p-4"
         onClick={() => onView(chordSheet)}
@@ -17,13 +17,13 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
       >
         <div className="flex gap-2 w-full items-center">
           <div className="min-w-0 flex-1">
-            <h3
+            <h2
               className="w-full block font-semibold truncate text-base mb-1"
               title={chordSheet.title}
               {...cyAttr(`chordsheet-title-${chordSheet.path}`)}
             >
               {chordSheet.title}
-            </h3>
+            </h2>
             <p
               className="text-muted-foreground text-sm truncate w-full block"
               title={chordSheet.artist}

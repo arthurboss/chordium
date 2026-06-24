@@ -34,7 +34,7 @@ const SteppedSlider = React.forwardRef<
     <SliderPrimitive.Root
       ref={ref}
       className={cn(
-        "relative flex w-full touch-none select-none items-center cursor-pointer",
+        "slider-track-glow relative flex w-full touch-none select-none items-center cursor-pointer",
         className
       )}
       min={min}
@@ -44,8 +44,8 @@ const SteppedSlider = React.forwardRef<
       onValueChange={handleValueChange}
       {...props}
     >
-      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-gray-300 dark:bg-gray-700">
-        <SliderPrimitive.Range className="absolute h-full bg-primary" />
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-foreground/10 dark:bg-card dark:border dark:border-primary/30 hover:border-primary">
+        <SliderPrimitive.Range className="absolute h-full bg-primary/50" />
       </SliderPrimitive.Track>
       {showStepIndicators && stepCount > 1 && (
         <div className="absolute top-1/2 left-0 right-0 pointer-events-none -translate-y-1/2">
@@ -56,14 +56,14 @@ const SteppedSlider = React.forwardRef<
             return (
               <div
                 key={i}
-                className="absolute w-0.5 h-0.5 rounded-full bg-foreground/50 -translate-x-1/2 top-1/2 -translate-y-1/2"
+                className="absolute w-0.5 h-0.5 rounded-full bg-primary/20 -translate-x-1/2 top-1/2 -translate-y-1/2"
                 style={{ left: `${pct}%` }}
               />
             );
           })}
         </div>
       )}
-      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-white ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" />
+      <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-card dark:bg-foreground hover:bg-primary dark:hover:bg-white ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" />
     </SliderPrimitive.Root>
   );
 });

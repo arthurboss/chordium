@@ -3,15 +3,15 @@
 
 .chord {
   display: inline-block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  color: hsl(var(--primary));
+  font-family: var(--font-mono);
+  color: var(--primary);
   padding: 0.375rem;
   border-radius: 0.125rem;
   font-weight: 600;
 }
 
 .chord-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  font-family: var(--font-mono);
   white-space: normal;
   margin-bottom: 0.25rem;
   word-break: break-word;
@@ -29,13 +29,13 @@
   font-size: 1.125rem;
   margin-bottom: 0.5rem;
   margin-top: 1rem;
-  border-left: 4px solid hsl(var(--primary));
+  border-left: 4px solid var(--primary);
   padding-left: 0.5rem;
 }
 
 #chord-sheet-viewer pre b,
 #chord-sheet-viewer pre .tablatura b {
-  color: hsl(var(--primary));
+  color: var(--primary);
   font-weight: 500;
 }
 
@@ -43,39 +43,10 @@
   display: block;
   font-weight: 700;
   font-size: 1rem;
-  border-left: 4px solid hsl(var(--primary));
+  border-left: 4px solid var(--primary);
   padding-left: 0.5rem;
   white-space: normal;
   word-break: break-word;
-}
-
-#chord-sheet-viewer pre .tablatura {
-  font-family: "Roboto Mono", monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  display: block;
-  white-space: pre;
-  word-break: normal;
-  overflow-wrap: normal;
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-#chord-sheet-viewer pre .tab-info {
-  font-size: var(--content-font-size, 14px);
-  font-family: inherit;
-  white-space: pre-wrap;
-}
-
-#chord-sheet-viewer pre .cnt {
-  font-family: "Roboto Mono", monospace;
-  display: block;
-  line-height: 1.4;
-  max-width: 100%;
-  overflow-x: auto;
-  white-space: pre !important;
-  word-break: normal !important;
-  overflow-wrap: normal !important;
 }
 
 @media (max-width: 640px) {
@@ -103,20 +74,5 @@
     font-size: 1rem;
     margin-top: 0.75rem;
     margin-bottom: 0.25rem;
-  }
-
-  #chord-sheet-viewer pre {
-    white-space: pre-wrap;
-    word-break: normal;
-    font-size: inherit;
-    overflow-x: auto;
-  }
-
-  #chord-sheet-viewer pre .tablatura {
-    white-space: pre;
-    word-break: normal;
-    overflow-wrap: normal;
-    max-width: 100%;
-    overflow-x: auto;
   }
 }

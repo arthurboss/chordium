@@ -1,0 +1,40 @@
+/* SelectTrigger combobox: gradient border via background-clip */
+[role="combobox"] {
+  user-select: none;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+}
+
+[role="combobox"].card-hoverable:hover {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}
+
+/* Dropdown list — glass background matching sticky bar */
+.select-content-glass {
+  background-color: color-mix(in oklch, var(--popover) 75%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Dark mode: white text on hover and focus */
+.dark [role="combobox"].card-hoverable:hover {
+  color: oklch(1 0 0);
+}
+
+.dark [role="option"]:focus,
+.dark [role="option"][data-highlighted] {
+  color: oklch(1 0 0);
+}

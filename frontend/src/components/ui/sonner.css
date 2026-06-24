@@ -1,26 +1,68 @@
-/* Sonner toast — match Sonner specificity to override theme defaults */
+/* Sonner toast — themed to match app palette (OKLCH tokens, not hsl wrappers) */
 [data-sonner-toaster][data-theme='light'],
 [data-sonner-toaster][data-theme='dark'] {
-  --normal-bg: hsl(var(--background));
-  --normal-bg-hover: hsl(var(--muted));
-  --normal-border: hsl(var(--border));
-  --normal-text: hsl(var(--foreground));
+  --normal-bg: var(--card);
+  --normal-bg-hover: var(--secondary);
+  --normal-border: transparent;
+  --normal-text: var(--card-foreground);
 }
 
-/* Success toast icon uses the app primary color */
+/* Gradient border matching card components */
+[data-sonner-toast] {
+  border: 1px solid transparent !important;
+  border-image: radial-gradient(
+    var(--vignette-shape),
+    var(--border-glow-hi-light) 0%,
+    var(--border) 100%
+  ) 1 !important;
+}
+
+.dark [data-sonner-toast] {
+  background-color: var(--card) !important;
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    ) !important;
+  background-origin: padding-box, border-box !important;
+  background-clip: padding-box, border-box !important;
+  border: 1px solid transparent !important;
+  border-image: none !important;
+}
+
+/* Close button — matches ClearInputButton style + round button border treatment */
+[data-sonner-toast] [data-close-button] {
+  background: var(--muted) !important;
+  border: 1px solid transparent !important;
+  outline: 1px solid color-mix(in oklch, var(--primary) 18%, var(--border)) !important;
+  outline-offset: -1px !important;
+  color: var(--muted-foreground) !important;
+  border-radius: 9999px !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--muted) !important;
+  outline: 1.5px solid color-mix(in oklch, var(--primary) 65%, var(--border)) !important;
+  outline-offset: -1px !important;
+  color: oklch(1 0 0) !important;
+}
+
+/* Success: primary color icon */
 [data-sonner-toaster] [data-sonner-toast][data-type='success'] [data-icon] {
-  color: hsl(var(--primary));
+  color: var(--primary) !important;
 }
 
-/* Error toasts use the app destructive color */
+/* Error: destructive colors */
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: var(--destructive) !important;
+  border-image: none !important;
+  border-color: color-mix(in oklch, var(--destructive) 40%, transparent) !important;
+  color: var(--destructive-foreground) !important;
 }
 
 [data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
-  background: hsl(var(--destructive));
-  border-color: hsl(var(--destructive-foreground) / 0.3);
-  color: hsl(var(--destructive-foreground));
+  background: var(--destructive) !important;
+  border-color: color-mix(in oklch, var(--destructive-foreground) 30%, transparent) !important;
+  color: var(--destructive-foreground) !important;
 }

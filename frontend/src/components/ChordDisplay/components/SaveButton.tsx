@@ -15,7 +15,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({ onSave }) => {
 
   return (
     <Button
-      variant="default"
+      variant="outline"
       size="icon"
       onClick={onSave}
       aria-label={t("saveButton.saveAriaLabel")}

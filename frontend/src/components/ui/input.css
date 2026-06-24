@@ -1,0 +1,44 @@
+/* Gradient border using background-clip — preserves border-radius unlike border-image.
+   background-color must be transparent so the background-image layers control the fill. */
+input.gradient-input-border {
+  border: 1px solid transparent;
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      var(--border-glow-hi-light) 0%,
+      var(--border) 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+}
+.dark input.gradient-input-border {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(
+      var(--vignette-shape),
+      var(--border-glow-hi) 0%,
+      var(--border-glow-lo) 100%
+    );
+}
+
+/* Focus: shared gradient, only fill color differs between modes */
+input.gradient-input-border:focus-visible {
+  background-image:
+    linear-gradient(var(--background), var(--background)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}
+.dark input.gradient-input-border:focus-visible {
+  background-image:
+    linear-gradient(var(--card), var(--card)),
+    radial-gradient(
+      var(--vignette-shape),
+      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
+      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
+    );
+}

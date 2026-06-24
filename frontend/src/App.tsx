@@ -5,6 +5,7 @@ import { lazy, Suspense, useEffect, ComponentType } from 'react';
 import RootLayout from "@/components/layouts/RootLayout";
 import { GlobalErrorBoundary, RouteErrorBoundary, AsyncErrorBoundary } from "@/components/ErrorBoundaryWrappers";
 import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling";
+import LoadingState from "@/components/LoadingState";
 // import OfflineTestPanel from "@/components/OfflineTestPanel";
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
@@ -40,9 +41,8 @@ const queryClient = createQueryClientWithErrorHandling();
 
 // Enhanced loading component for Suspense
 const Loading = () => (
-  <div className="flex justify-center items-center h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-    <span className="ml-2">Loading...</span>
+  <div className="flex justify-center items-center flex-1">
+    <LoadingState />
   </div>
 );
 

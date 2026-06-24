@@ -170,6 +170,7 @@
     "az": "A → Z",
     "za": "Z → A",
     "recent": "Recent",
-    "mostPlayed": "Most played"
+    "mostPlayed": "Most played",
+    "label": "Sort by"
   }
 }

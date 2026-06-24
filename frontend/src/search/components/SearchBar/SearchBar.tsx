@@ -1,4 +1,5 @@
-import { User, Music, ArrowLeft, Search } from "lucide-react";
+import { Music, ArrowLeft, Search } from "lucide-react";
+import { UserIconCustom } from "./UserIconCustom";
 import { useTranslation } from "react-i18next";
 import FormField from "@/components/ui/form-field";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ const SearchBar = ({
               onChange={handleArtistChange}
               disabled={loading || artistLoading || artistDisabled}
               placeholder={t("searchBar.artistPlaceholder")}
-              leftIcon={<User className="h-4 w-4" />}
+              leftIcon={<UserIconCustom className="h-3 w-3" />}
             />
           </div>
           <div className="hidden sm:flex flex-col text-sm items-center justify-center text-muted-foreground px-2">
@@ -61,7 +62,7 @@ const SearchBar = ({
               onChange={handleSongChange}
               disabled={loading || artistLoading}
               placeholder={t("searchBar.songPlaceholder")}
-              leftIcon={<Music className="h-4 w-4" />}
+              leftIcon={<Music className="h-3 w-3" />}
             />
           </div>
         </div>
@@ -95,6 +96,7 @@ const SearchBar = ({
             size="icon"
             className="h-10 w-10 rounded-full"
             disabled={!!(loading || artistLoading || isSearchDisabled)}
+            variant="outline"
             aria-label={t("searchBar.search")}
             {...cyAttr("search-submit-button")}
           >

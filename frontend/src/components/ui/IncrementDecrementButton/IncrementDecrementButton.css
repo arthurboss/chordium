@@ -1,0 +1,41 @@
+/* Borderless buttons — override gradient-border for compact controls */
+button.border-none,
+button.border-none.gradient-border {
+  border: none;
+  background-image: none;
+  background-color: transparent;
+}
+
+/* Enabled buttons: color and hover effects */
+button.border-none:not(:disabled) {
+  color: var(--primary);
+  transition: color 0.2s ease;
+}
+button.border-none:not(:disabled):hover {
+  color: var(--foreground);
+}
+
+/* Reset button specific styling */
+button.border-none:not(:disabled).trash-icon-reset-btn {
+  color: var(--destructive);
+  opacity: 0.5;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+button.border-none:not(:disabled).trash-icon-reset-btn:hover {
+  opacity: 1;
+  color: oklch(0.62 0.24 10);
+}
+
+/* Disabled buttons */
+button.border-none:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+
+/* Increment/decrement buttons: no hover effects or transforms from card-hoverable */
+button.border-none:not(:disabled).card-hoverable:hover {
+  box-shadow: none;
+  transform: none;
+  border-image: none;
+  background-image: none;
+}

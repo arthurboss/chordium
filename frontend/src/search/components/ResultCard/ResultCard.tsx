@@ -24,21 +24,26 @@ const ResultCard = ({
   }
 
   return (
-    <Card className="overflow-hidden cursor-pointer w-full h-12 min-h-0 hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary transition-colors" {...cyAttr(`${result.type}-card-compact-${path}`)}>
+    <Card
+      className="cursor-pointer w-full h-12 min-h-0 card-hoverable dark:hover:text-white transition-colors group"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(result); }}
+      {...cyAttr(`${result.type}-card-compact-${path}`)}
+    >
       <CardContent
         className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
         onClick={() => onClick(result)}
         {...cyAttr(`${result.type}-card-compact-content-${path}`)}
       >
-        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary shrink-0"><Icon className="h-4 w-4 text-white" /></div>
+        <div className="flex items-center justify-center h-8 w-8 rounded-full border border-primary/50 bg-primary/15 text-primary shrink-0 transition-colors group-hover:bg-primary/25"><Icon className="h-4 w-4" /></div>
         <div className="min-w-0 flex-1">
-          <h3
+          <h2
             className="w-full block font-semibold truncate text-sm"
             {...cyAttr(`${result.type}-title-${path}`)}
             title={title}
           >
             {title}
-          </h3>
+          </h2>
           {subtitle && (
             <p
               className="text-muted-foreground text-xs truncate w-full block"
