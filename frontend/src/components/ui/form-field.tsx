@@ -1,8 +1,9 @@
 import React, { ReactNode, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { handleInputFocus } from "@/utils/handleInputFocus";
-import RoundTrashButton from "@/components/ui/RoundTrashButton";
+import { X } from "lucide-react";
 import "./form-field.css";
 
 interface FormFieldProps {
@@ -61,14 +62,19 @@ const FormField: React.FC<FormFieldProps> = ({
           </div>
         )}
         <div className={`clear-input-button-container absolute right-2.5 top-1/2 -translate-y-1/2 ${showClearButton ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-          <RoundTrashButton
-            size="small"
-            label="Clear input"
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-6 w-6 rounded-full p-0 text-destructive"
             onClick={() => {
               onChange("");
               setTimeout(() => inputRef.current?.focus(), 0);
             }}
-          />
+            aria-label="Clear input"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
