@@ -1,3 +1,7 @@
+:root {
+  --transition-ui: 300ms ease;
+}
+
 .icon-gradient-border {
   background-color: transparent;
   background-image:
@@ -11,11 +15,13 @@
   border: 1px solid transparent;
   border-image: none;
   color: inherit;
+  transition: opacity var(--transition-ui);
 }
 
 .icon-gradient-border svg {
   color: inherit;
   stroke: currentColor;
+  transition: color var(--transition-ui);
 }
 
 .icon-gradient-border.icon-empty {
@@ -24,4 +30,25 @@
 
 .icon-gradient-border.icon-filled {
   opacity: 1;
+}
+
+/* Autofill state */
+input:-webkit-autofill ~ .icon-gradient-border.icon-empty {
+  opacity: 1;
+}
+
+/* Clear button transition */
+.clear-input-button {
+  transition: opacity var(--transition-ui);
+}
+
+/* Input border and background transitions */
+input {
+  transition: border-color var(--transition-ui), background-color var(--transition-ui), box-shadow var(--transition-ui);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  transition: background-color var(--transition-ui), box-shadow var(--transition-ui);
 }

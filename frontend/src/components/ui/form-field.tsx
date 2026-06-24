@@ -40,13 +40,6 @@ const FormField: React.FC<FormFieldProps> = ({
         </Label>
       )}
       <div className="relative">
-        {leftIcon && (
-          <div 
-            className={`icon-gradient-border absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full shrink-0 transition-opacity ${value ? 'icon-filled' : 'icon-empty'}`}
-          >
-            {leftIcon}
-          </div>
-        )}
         <Input
           id={id}
           value={value}
@@ -58,6 +51,13 @@ const FormField: React.FC<FormFieldProps> = ({
           className={`w-full ${leftIcon ? 'pl-10' : ''} ${value ? 'pr-9' : ''}`}
           required={required}
         />
+        {leftIcon && (
+          <div 
+            className={`icon-gradient-border absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center h-6 w-6 rounded-full shrink-0 ${value ? 'icon-filled' : 'icon-empty'}`}
+          >
+            {leftIcon}
+          </div>
+        )}
         {value && !disabled && (
           <ClearInputButton
             onClick={() => {
