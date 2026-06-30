@@ -1,4 +1,3 @@
-/* ID specificity beats .dark .shadow-* without needing !important */
 #sticky-bottom-container {
   background-color: color-mix(in oklch, var(--background) 50%, transparent);
   background-image: none;
@@ -6,5 +5,4 @@
   background-clip: unset;
   border: none;
   outline: 1px solid var(--outline-border-color);
-  outline-offset: -2px;
 }

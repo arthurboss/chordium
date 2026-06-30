@@ -3,31 +3,22 @@
 */
 
 .card-hoverable {
-  transition: box-shadow 0.2s ease, transform 0.15s ease, color 0.2s ease, background-color 0.2s ease;
+  transition: box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .card-hoverable:hover {
   box-shadow:
-    inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent),
-    0 4px 14px oklch(0 0 0 / 0.10);
-  transform: translateY(-1px);
+    inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
 }
 
-/* Scale up for small interactive elements */
-.card-hoverable.rounded-full:hover,
-.card-hoverable.rounded-md:not([role="combobox"]):hover {
-  transform: scale(1.02);
-}
-
-/* Combobox: no transform */
-.card-hoverable[role="combobox"]:hover {
-  transform: none;
-}
-
-/* Light mode: Cards with rounded-lg gradient border (cyan) */
+/* Light mode: Cards with rounded-lg gradient border (light purple) */
 :not(.dark) .card-hoverable.rounded-lg {
-  background-color: transparent;
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
+  background-image:
+    radial-gradient(ellipse 70% 400% at 50% 50%,
+      oklch(1 0 0) 0%,
+      oklch(0.97 0.002 275) 100%
+    ),
+    var(--gradient-border-radial-normal);
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
@@ -35,7 +26,12 @@
 }
 
 :not(.dark) .card-hoverable.rounded-lg:hover {
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-hover);
+  background-image:
+    radial-gradient(ellipse 70% 400% at 50% 50%,
+      oklch(1 0 0) 0%,
+      oklch(0.98 0.001 275) 100%
+    ),
+    var(--gradient-border-radial-hover);
 }
 
 /* Dark mode: Cards with rounded-lg gradient border (purple) */

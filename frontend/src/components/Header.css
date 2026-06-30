@@ -1,15 +1,50 @@
-/* Logo text: subtle at rest, gradient primary highlight on hover */
+/* Logo text: darker gradient at rest, even darker on hover */
 .logo-text {
-  color: var(--foreground);
   background: linear-gradient(
     135deg,
-    color-mix(in oklch, white 10%, var(--primary)) 0%,
-    color-mix(in oklch, white 60%, var(--primary)) 75%,
-    color-mix(in oklch, white 10%, var(--primary)) 50%,
-    color-mix(in oklch, var(--primary) 10%, var(--primary)) 100%
+    oklch(0.68 0.18 275) 0%,
+    oklch(0.60 0.18 275) 75%,
+    oklch(0.68 0.18 275) 50%,
+    oklch(0.52 0.18 275) 100%
   );
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   transition: opacity 0.2s ease;
+}
+
+:not(.dark) .logo-text:hover {
+  background: linear-gradient(
+    135deg,
+    oklch(0.75 0.18 275) 0%,
+    oklch(0.68 0.18 275) 75%,
+    oklch(0.75 0.18 275) 50%,
+    oklch(0.60 0.18 275) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.dark .logo-text {
+  background: linear-gradient(
+    135deg,
+    oklch(0.68 0.18 275) 0%,
+    oklch(0.60 0.18 275) 75%,
+    oklch(0.68 0.18 275) 50%,
+    oklch(0.52 0.18 275) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.dark .logo-text:hover {
+  background: linear-gradient(
+    135deg,
+    oklch(0.75 0.18 275) 0%,
+    oklch(0.68 0.18 275) 75%,
+    oklch(0.75 0.18 275) 50%,
+    oklch(0.60 0.18 275) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
 }

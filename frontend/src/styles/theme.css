@@ -8,42 +8,50 @@
     color-scheme: light;
     --radius: 0.5rem;
 
-    /* Light palette — pure whites with cyan accents */
+    /* Light palette — whites with cool gray matching footer source text */
     --background:             oklch(0.985 0 0);
-    --foreground:             oklch(0.120 0 0);
+    --foreground:             oklch(0.25 0.005 240);
+    --foreground-hover:       oklch(0.10 0.005 240);
     --card:                   oklch(0.995 0 0);
-    --card-foreground:        oklch(0.120 0 0);
+    --card-foreground:        oklch(0.25 0.005 240);
     --popover:                oklch(0.995 0 0);
-    --popover-foreground:     oklch(0.120 0 0);
-    --primary:                oklch(0.65 0.20 200);
-    --primary-foreground:     oklch(0.32 0 0);
-    --secondary:              oklch(0.920 0.08 200);
-    --secondary-foreground:   oklch(0.120 0 0);
-    --muted:                  oklch(0.920 0.08 200);
-    --muted-foreground:       oklch(0.450 0 0);
-    --accent:                 oklch(0.920 0.08 200);
-    --accent-foreground:      oklch(0.120 0 0);
+    --popover-foreground:     oklch(0.25 0.005 240);
+    --primary:                oklch(0.68 0.18 275);
+    --primary-foreground:     oklch(0.98 0 0);
+    --secondary:              oklch(0.900 0.01 275);
+    --secondary-foreground:   oklch(0.25 0.005 240);
+    --muted:                  oklch(0.900 0.01 275);
+    --muted-foreground:       oklch(0.50 0.005 275);
+    --accent:                 oklch(0.900 0.01 275);
+    --accent-foreground:      oklch(0.25 0.005 240);
     --destructive:            oklch(0.62 0.24 8);
     --destructive-foreground: oklch(0.98 0 0);
-    --border:                 oklch(0.900 0 0);
-    --input:                  oklch(0.900 0 0);
-    --ring:                   oklch(0.65 0.20 200);
+    --border:                 oklch(0.850 0.01 275);
+    --input:                  oklch(0.850 0.01 275);
+    --ring:                   oklch(0.68 0.18 275);
 
     /* Effect tokens */
     --vignette-shape:       ellipse 60% 400% at 50% 50%;
-    --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
-    --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
-    --border-glow-hi-light: color-mix(in oklch, var(--primary) 48%, var(--border));
+    --border-glow-hi:       var(--primary);
+    --border-glow-lo:       var(--primary);
+    --border-glow-hi-light: var(--primary);
 
-    /* Gradient borders for cards/buttons/inputs (light mode: cyan) - radial part only */
+    /* Gradient borders for cards/buttons/inputs (light mode: purple) - radial part only */
     --gradient-border-radial-normal: radial-gradient(var(--vignette-shape), var(--primary) 0%, var(--border) 100%);
-    --gradient-border-radial-hover: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
-    --gradient-border-radial-focus: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
+    --gradient-border-radial-hover: radial-gradient(var(--vignette-shape), var(--primary) 0%, var(--border) 100%);
+    --gradient-border-radial-focus: radial-gradient(var(--vignette-shape), var(--primary) 0%, var(--border) 100%);
 
-    /* Outline color for sticky-bottom-container (light mode: cyan) */
-    --outline-border-color: oklch(0.72 0.08 200 / 0.3);
+    /* Outline color for sticky-bottom-container (light mode: purple) */
+    --outline-border-color: oklch(0.68 0.18 275 / 0.3);
 
     --font-mono:            ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  a:hover,
+  button:hover,
+  [role="button"]:hover,
+  [role="menuitem"]:hover {
+    color: hsl(var(--foreground-hover));
   }
 
   .dark {
@@ -71,6 +79,10 @@
     --gradient-border-radial-normal: radial-gradient(var(--vignette-shape), var(--border-glow-hi) 0%, var(--border-glow-lo) 100%);
     --gradient-border-radial-hover: radial-gradient(var(--vignette-shape), var(--border-glow-hi-light) 0%, var(--border) 100%);
     --gradient-border-radial-focus: radial-gradient(var(--vignette-shape), color-mix(in oklch, var(--primary) 70%, var(--border)) 0%, color-mix(in oklch, var(--primary) 20%, var(--border)) 100%);
+
+    --border-glow-hi:       color-mix(in oklch, var(--primary) 40%, var(--border));
+    --border-glow-lo:       color-mix(in oklch, var(--primary) 12%, var(--border));
+    --border-glow-hi-light: color-mix(in oklch, var(--primary) 48%, var(--border));
 
     /* Outline color for sticky-bottom-container (dark mode: purple) */
     --outline-border-color: oklch(0.65 0.08 275 / 0.3);

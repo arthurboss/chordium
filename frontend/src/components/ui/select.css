@@ -1,14 +1,14 @@
 /* SelectTrigger combobox: gradient border (uses --gradient-border-* variables) */
 [role="combobox"] {
   user-select: none;
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
+  background-image: linear-gradient(oklch(0.97 0.002 275), oklch(0.97 0.002 275)), var(--gradient-border-radial-normal);
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
 }
 
 [role="combobox"].card-hoverable:hover {
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-hover);
+  background-image: linear-gradient(oklch(0.97 0.002 275), oklch(0.97 0.002 275)), var(--gradient-border-radial-hover);
 }
 
 .dark [role="combobox"] {

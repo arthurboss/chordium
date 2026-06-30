@@ -15,7 +15,7 @@ footer {
   box-shadow: 0 1px 10px oklch(0 0 0 / 0.35);
 }
 
-/* Light mode: vignette fill + gradient border (cyan) */
+/* Light mode: vignette fill + gradient border (desaturated purple) */
 .shadow-xs,
 .shadow-sm,
 .shadow,
@@ -24,11 +24,11 @@ footer {
 .shadow-xl,
 .shadow-2xl {
   background-color: transparent;
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
+  background-image: linear-gradient(var(--card), var(--card)), radial-gradient(var(--vignette-shape), oklch(0.80 0.02 275) 0%, oklch(0.90 0.01 275) 100%);
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
-  box-shadow: 0 4px 8px -2px oklch(0 0 0 / 0.10);
+  box-shadow: 0 1px 3px 0px oklch(0 0 0 / 0.10);
 }
 
 /* Dark mode: vignette fill + gradient border */
@@ -49,13 +49,13 @@ footer {
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
-  box-shadow: 0 4px 4px 4px oklch(0 0 0 / 0.1);
+  box-shadow: 0 1px 3px 0px oklch(0 0 0 / 0.10);
 }
 
-/* Gradient border only — no vignette (light mode: cyan) */
+/* Gradient border only — no vignette (light mode: desaturated purple) */
 .gradient-border {
   background-color: transparent;
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
+  background-image: linear-gradient(var(--card), var(--card)), radial-gradient(var(--vignette-shape), oklch(0.80 0.02 275) 0%, oklch(0.90 0.01 275) 100%);
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;

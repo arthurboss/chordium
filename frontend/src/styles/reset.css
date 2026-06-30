@@ -11,17 +11,6 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    background-image: radial-gradient(
-      ellipse 80% 70% at 50% 40%,
-      transparent 20%,
-      oklch(0 0 0 / 0.01) 35%,
-      oklch(0 0 0 / 0.02) 50%,
-      oklch(0 0 0 / 0.04) 62%,
-      oklch(0 0 0 / 0.07) 73%,
-      oklch(0 0 0 / 0.12) 83%,
-      oklch(0 0 0 / 0.20) 92%,
-      oklch(0 0 0 / 0.30) 100%
-    );
   }
 
   html.dark body {

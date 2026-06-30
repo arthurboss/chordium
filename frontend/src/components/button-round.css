@@ -4,6 +4,10 @@
    Uses --gradient-border-* variables for light/dark modes.
 */
 
+button.rounded-full {
+  flex-shrink: 0;
+}
+
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
   background-color: transparent;
   background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-normal);

@@ -26,6 +26,7 @@ export default {
 				ring: 'var(--ring)',
 				background: 'var(--background)',
 				foreground: 'var(--foreground)',
+				'foreground-hover': 'var(--foreground-hover)',
 				primary: {
 					DEFAULT: 'var(--primary)',
 					foreground: 'var(--primary-foreground)'
