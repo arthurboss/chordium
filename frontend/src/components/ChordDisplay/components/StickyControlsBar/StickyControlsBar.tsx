@@ -6,7 +6,7 @@ import { useAtBottom } from "@/hooks/useAtBottom";
 import SpeedControl from "./SpeedControl";
 import PlayButton from "./PlayButton";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowUp, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 
 function useAtTop(offset = 10): boolean {
   return useSyncExternalStore(
@@ -24,6 +24,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
+  setIsEditing,
 }) => {
   const isAtBottom = useAtBottom({ offset: 60 });
   const isAtTop = useAtTop();
@@ -55,6 +56,17 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
         >
           <SpeedControl scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
         </div>
+        {setIsEditing && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-full"
+            onClick={() => setIsEditing(true)}
+            title="Edit chord sheet"
+          >
+            <Pencil size={20} />
+          </Button>
+        )}
         <Button
           variant="outline"
           size="icon"
