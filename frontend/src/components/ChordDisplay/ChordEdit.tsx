@@ -1,9 +1,9 @@
-import React from 'react';
-import { ChordEditProps } from './types';
-import { Textarea } from '../ui/textarea';
-import ChordEditToolbar from './ChordEditToolbar';
-import StickyBottomContainer from '../StickyBottomContainer';
-import { useAtBottom } from '@/hooks/useAtBottom';
+import React from "react";
+import { ChordEditProps } from "./types";
+import { Textarea } from "../ui/textarea";
+import ChordEditToolbar from "./ChordEditToolbar";
+import StickyBottomContainer from "../StickyBottomContainer";
+import { useAtBottom } from "@/hooks/useAtBottom";
 
 const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, handleSaveEdits, setIsEditing }) => {
   const isAtBottom = useAtBottom();
