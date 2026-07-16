@@ -9,9 +9,12 @@ import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArt
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
-import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
+import { useChordEditor } from "@/hooks/use-chord-editor";
+import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet & SongMetadata };
@@ -52,16 +55,16 @@ const SongViewer = ({
   const navigate = useNavigate();
 
   const [fontSize, setFontSize] = useState(14);
-  const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
+  const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
-    path: isFromMyChordSheets ? songObj.path : ''
+    path: isFromMyChordSheets ? songObj.path : "",
   });
 
   const chordContentToDisplay = useMemo(() => {
     if (directChordContent) return directChordContent;
-    if (isFromMyChordSheets) return lazyContent || '';
-    return chordSheet.songChords || '';
+    if (isFromMyChordSheets) return lazyContent || "";
+    return chordSheet.songChords || "";
   }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
@@ -73,7 +76,12 @@ const SongViewer = ({
     capo,
     setCapo,
     defaultCapo,
-  } = useChordDisplaySettings(chordContentToDisplay, chordSheetToDisplay.songKey, chordSheetToDisplay.guitarCapo, initialViewMode);
+  } = useChordDisplaySettings(
+    chordContentToDisplay,
+    chordSheetToDisplay.songKey,
+    chordSheetToDisplay.guitarCapo,
+    initialViewMode
+  );
 
   const {
     handleCapoChange,
@@ -84,8 +92,19 @@ const SongViewer = ({
 
   const effectiveTranspose = transpose - (capo - defaultCapo);
 
+  const {
+    isEditing,
+    setIsEditing,
+    editContent,
+    setEditContent,
+    updateEditContent,
+    handleSaveEdits: saveEdits,
+  } = useChordEditor(chordContentToDisplay, onUpdate);
+
   const handleAction = () => {
-    if (isFromMyChordSheets && !hideDeleteButton) {
+    if (isEditing) {
+      saveEdits();
+    } else if (isFromMyChordSheets && !hideDeleteButton) {
       onDelete(songObj.path);
     } else if (!hideSaveButton && !isFromMyChordSheets && onSave) {
       onSave();
@@ -93,8 +112,14 @@ const SongViewer = ({
   };
 
   const shouldShowActionButton =
+    isEditing ||
     (isFromMyChordSheets && !hideDeleteButton) ||
     (!hideSaveButton && !isFromMyChordSheets && !!onSave);
+
+  // isSaved controls which icon the action button shows:
+  // true = trash (delete), false = save disk icon
+  // When editing, show the save icon (false)
+  const isSaved = isEditing ? false : isFromMyChordSheets && !hideDeleteButton;
 
   const finalIsContentLoading = useProgressiveLoading
     ? isContentLoading
@@ -112,24 +137,43 @@ const SongViewer = ({
     const artistSlug = songObj.path.split("/")[0];
     sessionStorage.removeItem("chordium_search_query");
     try {
-      sessionStorage.setItem(ARTIST_DISPLAY_NAME_KEY, JSON.stringify({ path: artistSlug, displayName: artist }));
+      sessionStorage.setItem(
+        ARTIST_DISPLAY_NAME_KEY,
+        JSON.stringify({ path: artistSlug, displayName: artist })
+      );
     } catch {}
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
 
   return (
-    <main id="page-chord-viewer" className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4">
+    <main
+      id="page-chord-viewer"
+      className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4"
+    >
       <PageHeader
         onBack={onBack}
-        onAction={shouldShowActionButton && handleAction}
-        isSaved={shouldShowActionButton && isFromMyChordSheets}
+        onAction={shouldShowActionButton ? handleAction : undefined}
+        isSaved={isSaved}
         title={title}
         artist={artist}
         onArtistClick={artist ? handleArtistClick : undefined}
         rightContent={
-          chordContentToDisplay && (
-            <JamQRModal chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }} />
-          )
+          <>
+            {!isEditing && chordContentToDisplay && (
+              <JamQRModal
+                chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }}
+              />
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={() => setIsEditing((e) => !e)}
+              title={isEditing ? "Cancel editing" : "Edit chord sheet"}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </>
         }
         metadata={
           <ChordMetadata
@@ -166,6 +210,11 @@ const SongViewer = ({
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}
         viewMode={viewMode}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        editContent={editContent}
+        setEditContent={setEditContent}
+        handleSaveEdits={saveEdits}
       />
     </main>
   );

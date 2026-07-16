@@ -15,7 +15,6 @@ export interface ChordSheetControlsProps {
   setAutoScroll: (v: boolean) => void;
   scrollSpeed: number;
   setScrollSpeed: (v: number) => void;
-  setIsEditing?: (v: boolean) => void;
   handleDownload?: () => void;
 }
 
