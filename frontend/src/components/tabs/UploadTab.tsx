@@ -121,6 +121,11 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
             }}
             content={uploadedContent}
             showControlsBar={false}
+            isEditing={true}
+            setIsEditing={() => {}}
+            editContent={uploadedContent}
+            setEditContent={setUploadedContent}
+            handleSaveEdits={handleSave}
           />
         </div>
       )}
