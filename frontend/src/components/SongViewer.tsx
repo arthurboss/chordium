@@ -15,6 +15,16 @@ import { useChordEditor } from "@/hooks/use-chord-editor";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
+import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
+
+export interface UpdatedSongData {
+  songChords: string;
+  title: string;
+  artist: string;
+  songKey: string;
+  guitarTuning: ChordSheet["guitarTuning"];
+  guitarCapo: number;
+}
 
 interface SongViewerProps {
   song: { song: Song; chordSheet: ChordSheet & SongMetadata };
@@ -23,7 +33,7 @@ interface SongViewerProps {
   onBack: () => void;
   onDelete: (songPath: string) => void;
   onSave?: () => void;
-  onUpdate: (content: string) => void;
+  onUpdate: (data: UpdatedSongData) => void;
   hideDeleteButton?: boolean;
   hideSaveButton?: boolean;
   isFromMyChordSheets?: boolean;
@@ -92,6 +102,27 @@ const SongViewer = ({
 
   const effectiveTranspose = transpose - (capo - defaultCapo);
 
+  // Editable metadata buffer (title/artist/key/tuning/capo).
+  const [editTitle, setEditTitle] = useState(chordSheetToDisplay.title ?? "");
+  const [editArtist, setEditArtist] = useState(chordSheetToDisplay.artist ?? "");
+  const [editSongKey, setEditSongKey] = useState(chordSheetToDisplay.songKey ?? "");
+  const [editTuning, setEditTuning] = useState(guitarTuningToString(chordSheetToDisplay.guitarTuning));
+  const [editCapo, setEditCapo] = useState(chordSheetToDisplay.guitarCapo ?? 0);
+
+  const handleSaveWithMeta = useCallback(
+    (content: string) => {
+      onUpdate({
+        songChords: content,
+        title: editTitle || "Untitled Song",
+        artist: editArtist || "Unknown Artist",
+        songKey: editSongKey,
+        guitarTuning: mapStringToGuitarTuning(editTuning),
+        guitarCapo: editCapo,
+      });
+    },
+    [onUpdate, editTitle, editArtist, editSongKey, editTuning, editCapo]
+  );
+
   const {
     isEditing,
     setIsEditing,
@@ -99,13 +130,19 @@ const SongViewer = ({
     setEditContent,
     updateEditContent,
     handleSaveEdits: saveEdits,
-  } = useChordEditor(chordContentToDisplay, onUpdate);
+  } = useChordEditor(chordContentToDisplay, handleSaveWithMeta);
 
-  // Keep the editor buffer in sync with displayed content while not editing,
-  // so re-opening the editor shows the latest (possibly just-saved) text.
+  // Keep the editor buffers in sync with displayed content/metadata while not
+  // editing, so re-opening the editor shows the latest (possibly just-saved) values.
   useEffect(() => {
-    if (!isEditing) updateEditContent(chordContentToDisplay);
-  }, [chordContentToDisplay, isEditing, updateEditContent]);
+    if (isEditing) return;
+    updateEditContent(chordContentToDisplay);
+    setEditTitle(chordSheetToDisplay.title ?? "");
+    setEditArtist(chordSheetToDisplay.artist ?? "");
+    setEditSongKey(chordSheetToDisplay.songKey ?? "");
+    setEditTuning(guitarTuningToString(chordSheetToDisplay.guitarTuning));
+    setEditCapo(chordSheetToDisplay.guitarCapo ?? 0);
+  }, [chordContentToDisplay, chordSheetToDisplay, isEditing, updateEditContent]);
 
   const handleAction = () => {
     if (isEditing) {
@@ -136,8 +173,8 @@ const SongViewer = ({
     onViewModeChange?.(mode);
   };
 
-  const title = chordSheetToDisplay.title;
-  const artist = chordSheetToDisplay.artist;
+  const title = isEditing ? editTitle : chordSheetToDisplay.title;
+  const artist = isEditing ? editArtist : chordSheetToDisplay.artist;
 
   const handleArtistClick = useCallback(() => {
     const artistSlug = songObj.path.split("/")[0];
@@ -162,7 +199,10 @@ const SongViewer = ({
         isSaved={isSaved}
         title={title}
         artist={artist}
-        onArtistClick={artist ? handleArtistClick : undefined}
+        onArtistClick={!isEditing && artist ? handleArtistClick : undefined}
+        isEditing={isEditing}
+        onTitleChange={setEditTitle}
+        onArtistChange={setEditArtist}
         rightContent={
           <>
             {!isEditing && chordContentToDisplay && (
@@ -184,7 +224,7 @@ const SongViewer = ({
         metadata={
           <ChordMetadata
             chordSheet={chordSheetToDisplay}
-            controls={{
+            controls={isEditing ? undefined : {
               transpose,
               defaultTranspose,
               handleTransposeChange,
@@ -195,6 +235,14 @@ const SongViewer = ({
               getCapoDisableStates,
               songKey: chordSheetToDisplay.songKey,
             }}
+            edit={isEditing ? {
+              songKey: editSongKey,
+              guitarTuning: editTuning,
+              guitarCapo: editCapo,
+              onSongKeyChange: setEditSongKey,
+              onGuitarTuningChange: setEditTuning,
+              onGuitarCapoChange: setEditCapo,
+            } : undefined}
           />
         }
       />
@@ -211,7 +259,6 @@ const SongViewer = ({
         ref={chordDisplayRef}
         chordSheet={chordSheetToDisplay}
         content={chordContentToDisplay}
-        onSave={onUpdate}
         isLoading={finalIsContentLoading}
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}

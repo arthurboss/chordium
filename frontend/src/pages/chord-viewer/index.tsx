@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation, useSearchParams } from 'react-router-dom';
-import SongViewer from '@/components/SongViewer';
+import SongViewer, { type UpdatedSongData } from '@/components/SongViewer';
 import { useChordSheetWithFallback } from '@/hooks/useChordSheetWithFallback';
 import type { RouteParams } from './chord-viewer.types';
 
@@ -29,11 +29,11 @@ const ChordViewer = () => {
   const [searchParams] = useSearchParams();
   const [jamPayload, setJamPayload] = useState<JamPayload | null>(null);
 
-  // Holds edited chord content so the view reflects saves without a page refresh.
-  const [editedContent, setEditedContent] = useState<string | null>(null);
+  // Holds edited song data so the view reflects saves without a page refresh.
+  const [editedData, setEditedData] = useState<UpdatedSongData | null>(null);
 
   useEffect(() => {
-    setEditedContent(null);
+    setEditedData(null);
   }, [path]);
 
   useEffect(() => {
@@ -108,17 +108,21 @@ const ChordViewer = () => {
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
   );
 
-  const handleUpdate = useCallback(async (updatedContent: string) => {
-    if (!chordSheetData) return;
-    const { title, artist, songKey, guitarTuning, guitarCapo } = chordSheetData.chordSheet;
+  const handleUpdate = useCallback(async (data: UpdatedSongData) => {
     await storeChordSheet(
-      { title, artist, songKey, guitarTuning, guitarCapo },
-      { songChords: updatedContent },
+      {
+        title: data.title,
+        artist: data.artist,
+        songKey: data.songKey,
+        guitarTuning: data.guitarTuning,
+        guitarCapo: data.guitarCapo,
+      },
+      { songChords: data.songChords },
       isSaved,
       path
     );
-    setEditedContent(updatedContent);
-  }, [chordSheetData, isSaved, path]);
+    setEditedData(data);
+  }, [isSaved, path]);
 
   if (jamPayload && !chordSheetResult.metadata) {
     const jamChordSheet = {
@@ -168,20 +172,29 @@ const ChordViewer = () => {
     );
   }
 
-  const displayContent = editedContent ?? (chordSheetResult.content?.songChords ?? '');
+  const displayContent = editedData?.songChords ?? (chordSheetResult.content?.songChords ?? '');
 
-  // When an edit has been made, the edited plain text becomes the source of
-  // truth; drop the stale scraped rawHtml so the new content renders.
-  const displayChordSheet = editedContent != null
-    ? { ...chordSheetData!.chordSheet, songChords: editedContent, rawHtml: undefined }
+  // Once edited, the edited plain text/metadata become the source of truth;
+  // drop the stale scraped rawHtml so the new content renders.
+  const displayChordSheet = editedData != null
+    ? {
+        ...chordSheetData!.chordSheet,
+        title: editedData.title,
+        artist: editedData.artist,
+        songKey: editedData.songKey,
+        guitarTuning: editedData.guitarTuning,
+        guitarCapo: editedData.guitarCapo,
+        songChords: editedData.songChords,
+        rawHtml: undefined,
+      }
     : chordSheetData!.chordSheet;
 
   return (
     <SongViewer
       song={{
         song: {
-          title: chordSheetData!.chordSheet.title,
-          artist: chordSheetData!.chordSheet.artist,
+          title: displayChordSheet.title,
+          artist: displayChordSheet.artist,
           path: chordSheetData!.path
         },
         chordSheet: displayChordSheet

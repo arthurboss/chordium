@@ -10,4 +10,8 @@ export interface PageHeaderProps {
   rightContent?: ReactNode;
   onArtistClick?: () => void;
   metadata?: ReactNode;
+  // Inline editing of title/artist
+  isEditing?: boolean;
+  onTitleChange?: (title: string) => void;
+  onArtistChange?: (artist: string) => void;
 }

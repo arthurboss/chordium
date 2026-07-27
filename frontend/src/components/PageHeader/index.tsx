@@ -16,6 +16,9 @@ const PageHeader = memo(({
   onArtistClick,
   rightContent,
   metadata,
+  isEditing = false,
+  onTitleChange,
+  onArtistChange,
 }: PageHeaderProps) => {
   return (
     <Card className="rounded-lg border bg-card text-card-foreground shadow-xs overflow-hidden">
@@ -23,7 +26,15 @@ const PageHeader = memo(({
         <div className="shrink-0">
           <BackButton onBack={onBack} />
         </div>
-        <TitleSection title={title} artist={artist} titleClassName={titleClassName} onArtistClick={onArtistClick} />
+        <TitleSection
+          title={title}
+          artist={artist}
+          titleClassName={titleClassName}
+          onArtistClick={onArtistClick}
+          isEditing={isEditing}
+          onTitleChange={onTitleChange}
+          onArtistChange={onArtistChange}
+        />
         <div className="flex items-center gap-2 shrink-0 min-w-8 ml-auto sm:ml-0">
           {isSaved === true && onAction && <DeleteButton onDelete={onAction} />}
           {isSaved === false && onAction && <SaveButton onSave={onAction} />}
