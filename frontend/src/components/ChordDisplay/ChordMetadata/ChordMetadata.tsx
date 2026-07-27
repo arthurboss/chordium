@@ -5,6 +5,7 @@ import type { ChordMetadataProps } from "./ChordMetadata.types";
 import CapoMenu from "@/components/ChordDisplay/components/StickyControlsBar/CapoMenu";
 import TransposeMenu from "@/components/ChordDisplay/components/StickyControlsBar/TransposeMenu";
 import { Input } from "@/components/ui/input";
+import TuningPicker from "./TuningPicker";
 
 const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edit }) => {
   const { t } = useTranslation();
@@ -27,12 +28,9 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
         <div className="px-4 py-2 flex flex-row flex-wrap items-center gap-x-4 gap-y-2">
           <label className="flex items-center gap-1.5 shrink-0">
             <span className="font-medium">{t("chordMetadata.guitarTuning")}</span>
-            <Input
+            <TuningPicker
               value={edit.guitarTuning}
-              onChange={(e) => edit.onGuitarTuningChange(e.target.value)}
-              placeholder="E-A-D-G-B-E"
-              aria-label={t("chordMetadata.guitarTuning")}
-              className="h-7 w-32 text-xs"
+              onChange={edit.onGuitarTuningChange}
             />
           </label>
           <label className="flex items-center gap-1.5 shrink-0">
