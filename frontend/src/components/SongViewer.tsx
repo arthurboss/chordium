@@ -3,7 +3,7 @@ import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import StyleToolbar from "@/components/StyleToolbar";
 import { Card } from "@/components/ui/card";
-import { RefObject, useCallback, useMemo, useState } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import type { Song } from "../types/song";
@@ -100,6 +100,12 @@ const SongViewer = ({
     updateEditContent,
     handleSaveEdits: saveEdits,
   } = useChordEditor(chordContentToDisplay, onUpdate);
+
+  // Keep the editor buffer in sync with displayed content while not editing,
+  // so re-opening the editor shows the latest (possibly just-saved) text.
+  useEffect(() => {
+    if (!isEditing) updateEditContent(chordContentToDisplay);
+  }, [chordContentToDisplay, isEditing, updateEditContent]);
 
   const handleAction = () => {
     if (isEditing) {

@@ -11,6 +11,7 @@ import { extractNavigationData } from './utils/navigation-data';
 
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
+import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
 
 import { ChordViewerLoading } from './components/chord-viewer-loading';
 import { ChordViewerError } from './components/chord-viewer-error';
@@ -27,6 +28,13 @@ const ChordViewer = () => {
 
   const [searchParams] = useSearchParams();
   const [jamPayload, setJamPayload] = useState<JamPayload | null>(null);
+
+  // Holds edited chord content so the view reflects saves without a page refresh.
+  const [editedContent, setEditedContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    setEditedContent(null);
+  }, [path]);
 
   useEffect(() => {
     const d = searchParams.get('d');
@@ -100,6 +108,18 @@ const ChordViewer = () => {
     chordSheetData?.chordSheet.title ?? 'Chord Sheet'
   );
 
+  const handleUpdate = useCallback(async (updatedContent: string) => {
+    if (!chordSheetData) return;
+    const { title, artist, songKey, guitarTuning, guitarCapo } = chordSheetData.chordSheet;
+    await storeChordSheet(
+      { title, artist, songKey, guitarTuning, guitarCapo },
+      { songChords: updatedContent },
+      isSaved,
+      path
+    );
+    setEditedContent(updatedContent);
+  }, [chordSheetData, isSaved, path]);
+
   if (jamPayload && !chordSheetResult.metadata) {
     const jamChordSheet = {
       title: jamPayload.title,
@@ -148,7 +168,13 @@ const ChordViewer = () => {
     );
   }
 
-  const displayContent = chordSheetResult.content?.songChords ?? '';
+  const displayContent = editedContent ?? (chordSheetResult.content?.songChords ?? '');
+
+  // When an edit has been made, the edited plain text becomes the source of
+  // truth; drop the stale scraped rawHtml so the new content renders.
+  const displayChordSheet = editedContent != null
+    ? { ...chordSheetData!.chordSheet, songChords: editedContent, rawHtml: undefined }
+    : chordSheetData!.chordSheet;
 
   return (
     <SongViewer
@@ -158,14 +184,14 @@ const ChordViewer = () => {
           artist: chordSheetData!.chordSheet.artist,
           path: chordSheetData!.path
         },
-        chordSheet: chordSheetData!.chordSheet
+        chordSheet: displayChordSheet
       }}
       chordContent={displayContent}
       chordDisplayRef={chordDisplayRef}
       onBack={handleBack}
       onDelete={handleDelete}
       onSave={handleSave}
-      onUpdate={() => {}}
+      onUpdate={handleUpdate}
       hideDeleteButton={!isSaved}
       hideSaveButton={isSaved}
       isFromMyChordSheets={isSaved}
