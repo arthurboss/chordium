@@ -1,7 +1,7 @@
 {
   "title": "More Than Words",
   "artist": "Extreme",
-  "songKey": "G",
-  "guitarTuning": ["E", "A", "D", "G", "B", "E"],
+  "songKey": "F#",
+  "guitarTuning": ["Eb", "Ab", "Db", "Gb", "Bb", "Eb"],
   "guitarCapo": 0
 }

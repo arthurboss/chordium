@@ -7,21 +7,15 @@ interface ChordEditToolbarProps {
   onReturn: () => void;
 }
 
-/**
- * Toolbar component for the ChordEdit component
- * Contains title, navigation buttons, and save functionality
- */
 const ChordEditToolbar: React.FC<ChordEditToolbarProps> = ({
   onSave,
   onReturn
 }) => {
   return (
-      <div className="flex items-center justify-between">
-        <NavigationButtons 
-          onReturn={onReturn}
-        />
-        <SaveButton onSave={onSave} />
-      </div>
+    <div className="flex items-center justify-between gap-4 w-full">
+      <NavigationButtons onReturn={onReturn} />
+      <SaveButton onSave={onSave} />
+    </div>
   );
 };
 

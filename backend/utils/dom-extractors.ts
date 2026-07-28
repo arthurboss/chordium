@@ -261,14 +261,20 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     }
   }
 
-  const guitarTuning: ["E", "A", "D", "G", "B", "E"] = [
-    "E",
-    "A",
-    "D",
-    "G",
-    "B",
-    "E",
-  ]; // Standard tuning default
+  // Extract tuning from span#cifra_afi a element (CifraClub specific).
+  // The element is only present when the tuning is non-standard; when it is
+  // absent we fall back to standard tuning.
+  let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
+  const tuningElement = document.querySelector("span#cifra_afi a");
+  if (tuningElement) {
+    const notes = (tuningElement.textContent || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (notes.length === 6) {
+      guitarTuning = notes as unknown as GuitarTuning;
+    }
+  }
 
   return {
     songChords,
@@ -403,14 +409,20 @@ export function extractSongMetadata(): SongMetadata {
     }
   }
 
-  const guitarTuning: GuitarTuning = [
-    "E",
-    "A",
-    "D",
-    "G",
-    "B",
-    "E",
-  ]; // Standard tuning default
+  // Extract tuning from span#cifra_afi a element (CifraClub specific).
+  // The element is only present when the tuning is non-standard; when it is
+  // absent we fall back to standard tuning.
+  let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
+  const tuningElement = document.querySelector("span#cifra_afi a");
+  if (tuningElement) {
+    const notes = (tuningElement.textContent || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (notes.length === 6) {
+      guitarTuning = notes as unknown as GuitarTuning;
+    }
+  }
 
   return {
     songKey,

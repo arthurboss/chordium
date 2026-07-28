@@ -14,7 +14,7 @@ import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets
 import { toast } from "sonner";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
-import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
+import { mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
 import i18n from "@/i18n/config";
 
 interface TabContainerProps {
@@ -100,20 +100,6 @@ const TabContainer = ({
       });
     }
   };
-
-  function mapStringToGuitarTuning(tuning: string) {
-    const normalized = tuning.trim().toLowerCase();
-    for (const key in GUITAR_TUNINGS) {
-      if (
-        key.toLowerCase() === normalized ||
-        GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS].join("-").toLowerCase() ===
-          normalized.replace(/\s+/g, "-")
-      ) {
-        return GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS];
-      }
-    }
-    return GUITAR_TUNINGS.STANDARD;
-  }
 
   const handleSaveUploadedChordSheet = async (meta: {
     content: string;

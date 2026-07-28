@@ -22,18 +22,14 @@ interface ChordSheetViewerProps {
   effectiveTranspose?: number;
   fontSize?: number;
   viewMode?: string;
+  // When provided by a parent, editing state is controlled externally
+  isEditing?: boolean;
+  setIsEditing?: (v: boolean) => void;
+  editContent?: string;
+  setEditContent?: (v: string) => void;
+  handleSaveEdits?: () => void;
 }
 
-/**
- * Orchestrates the full chord sheet viewing experience.
- *
- * When `effectiveTranspose` is provided by a parent (e.g. SongViewer), the
- * internal capo/transpose state is unused. Otherwise falls back to the internal
- * state for standalone usage (e.g. UploadTab).
- *
- * The forwarded ref points to the root `#chord-sheet-viewer` div, which parent
- * components (e.g. auto-scroll) use to measure scroll position.
- */
 const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   chordSheet,
   content,
@@ -45,6 +41,11 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   effectiveTranspose: externalEffectiveTranspose,
   fontSize: externalFontSize,
   viewMode: externalViewMode,
+  isEditing: externalIsEditing,
+  setIsEditing: externalSetIsEditing,
+  editContent: externalEditContent,
+  setEditContent: externalSetEditContent,
+  handleSaveEdits: externalHandleSaveEdits,
 }, ref) => {
 
   const {
@@ -65,22 +66,21 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   const viewMode = externalViewMode ?? internalViewMode;
   const effectiveTranspose = externalEffectiveTranspose ?? 0;
 
-  const {
-    isEditing,
-    setIsEditing,
-    editContent,
-    setEditContent,
-    updateEditContent,
-    handleSaveEdits: saveEdits
-  } = useChordEditor(content, onSave);
+  const internal = useChordEditor(content, onSave);
 
   useEffect(() => {
-    updateEditContent(content);
-  }, [content, updateEditContent]);
+    internal.updateEditContent(content);
+  }, [content, internal.updateEditContent]);
 
   useEffect(() => {
     onViewModeChange?.(viewMode);
   }, [viewMode, onViewModeChange]);
+
+  const isEditing = externalIsEditing ?? internal.isEditing;
+  const setIsEditing = externalSetIsEditing ?? internal.setIsEditing;
+  const editContent = externalEditContent ?? internal.editContent;
+  const setEditContent = externalSetEditContent ?? internal.setEditContent;
+  const handleSaveEdits = externalHandleSaveEdits ?? internal.handleSaveEdits;
 
   const handleDownload = () => {
     const result = downloadTextFile(content, chordSheet.title || 'chord-sheet');
@@ -92,7 +92,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
       <ChordEdit
         editContent={editContent}
         setEditContent={setEditContent}
-        handleSaveEdits={saveEdits}
+        handleSaveEdits={handleSaveEdits}
         setIsEditing={setIsEditing}
       />
     );
@@ -115,7 +115,6 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           setAutoScroll={toggleAutoScroll}
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
-          setIsEditing={setIsEditing}
           handleDownload={handleDownload}
         />
       )}

@@ -12,7 +12,17 @@ export interface TransposeCapoControls {
   songKey?: string;
 }
 
+export interface MetadataEditControls {
+  songKey: string;
+  guitarTuning: string;
+  guitarCapo: number;
+  onSongKeyChange: (v: string) => void;
+  onGuitarTuningChange: (v: string) => void;
+  onGuitarCapoChange: (v: number) => void;
+}
+
 export interface ChordMetadataProps {
   chordSheet: ChordSheet;
   controls?: TransposeCapoControls;
+  edit?: MetadataEditControls;
 }
