@@ -4,7 +4,7 @@ import FileUploader from "@/components/FileUploader";
 import ChordSheetViewer from "@/components/ChordSheetViewer";
 
 import ChordEditToolbar from "@/components/ChordDisplay/ChordEditToolbar";
-import { GUITAR_TUNINGS } from "@/constants/guitar-tunings";
+import { mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
 import { extractSongMetadata } from "@/utils/metadata-extraction";
 import { ChordSheet } from "@chordium/types";
 
@@ -75,20 +75,6 @@ const UploadTab = ({ chordDisplayRef, onSaveUploadedSong }: UploadTabProps) => {
       setShowMetadata(false);
     }
   };
-
-  // Map string tuning to GuitarTuning array for preview
-  function mapStringToGuitarTuning(tuning: string) {
-    const normalized = tuning.trim().toLowerCase();
-    for (const key in GUITAR_TUNINGS) {
-      if (
-        key.toLowerCase() === normalized ||
-        GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS].join('-').toLowerCase() === normalized.replace(/\s+/g, '-')
-      ) {
-        return GUITAR_TUNINGS[key as keyof typeof GUITAR_TUNINGS];
-      }
-    }
-    return GUITAR_TUNINGS.STANDARD;
-  }
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
