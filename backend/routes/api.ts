@@ -16,21 +16,33 @@ router.get('/cifraclub-chord-sheet', (req, res) => getChordSheetHandler(req, res
 
 export default router;
 
-// Local dev shim: combines metadata + chord sheet into a single response (mirrors the Vercel cifraclub-song function)
+// Local dev shim: combines metadata + chord sheet into a single response (mirrors the Vercel cifraclub-song function).
+// Prefers the simplified arrangement via the cascade; returns which variant was used and whether it has tabs.
 router.get('/cifraclub-song', async (req, res) => {
   try {
     const { url: pathParam } = req.query as { url?: string };
     if (!pathParam) { res.status(400).json({ error: 'Missing url parameter' }); return; }
-    const basePath = pathParam.trim();
-    const songUrl = `https://www.cifraclub.com.br/${basePath}/`;
+    const songUrl = `https://www.cifraclub.com.br/${pathParam.trim()}`;
 
-    const [metadata, chordSheet] = await Promise.all([
-      cifraClubService.getSongMetadata(songUrl),
-      cifraClubService.getChordSheet(songUrl),
-    ]);
-    res.json({ ...metadata, ...chordSheet });
+    const { data, variant, hasTabs } = await cifraClubService.getPreferredChordSheet(songUrl);
+    res.json({ ...data, variant, hasTabs });
   } catch (error) {
     const status = (error as any).code === 'NOT_FOUND' ? 404 : 500;
     res.status(status).json({ error: status === 404 ? 'Song not found' : 'Failed to fetch song', details: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+// Fetches the full arrangement (with tabs) for the simplified⇄full toggle.
+router.get('/cifraclub-song-full', async (req, res) => {
+  try {
+    const { url: pathParam } = req.query as { url?: string };
+    if (!pathParam) { res.status(400).json({ error: 'Missing url parameter' }); return; }
+    const songUrl = `https://www.cifraclub.com.br/${pathParam.trim()}`;
+
+    const { data, variant, hasTabs } = await cifraClubService.getFullChordSheet(songUrl);
+    res.json({ ...data, variant, hasTabs });
+  } catch (error) {
+    const status = (error as any).code === 'NOT_FOUND' ? 404 : 500;
+    res.status(status).json({ error: status === 404 ? 'Song not found' : 'Failed to fetch full song', details: error instanceof Error ? error.message : String(error) });
   }
 });
