@@ -89,6 +89,12 @@ const SongViewer = ({
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
+  // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
+  const hasTabs = useMemo(() => {
+    if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
+    return (chordContentToDisplay || "").includes("[TAB]");
+  }, [chordSheetToDisplay.rawHtml, chordContentToDisplay]);
+
   const {
     transpose,
     setTranspose,
@@ -266,6 +272,7 @@ const SongViewer = ({
           setFontSize={setFontSize}
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
+          hasTabs={hasTabs}
         />
       </Card>
 

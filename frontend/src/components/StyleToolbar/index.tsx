@@ -11,6 +11,8 @@ interface StyleToolbarProps {
   setFontSize: (value: number) => void;
   viewMode: string;
   setViewMode: (value: string) => void;
+  /** Whether the displayed content has tab blocks; hides the Tabs toggle when false. */
+  hasTabs?: boolean;
 }
 
 const StyleToolbar: React.FC<StyleToolbarProps> = ({
@@ -18,6 +20,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   setFontSize,
   viewMode,
   setViewMode,
+  hasTabs = true,
 }) => {
   const { t } = useTranslation();
 
@@ -25,15 +28,17 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
     <div className="px-4 py-2 min-w-0 text-xs">
       <div className="flex flex-wrap items-center justify-between w-full gap-3">
         <div className="flex items-center gap-3 shrink-0">
-          <ToggleOption
-            active={viewMode !== "tabs-off" && viewMode !== "lyrics-only"}
-            onClick={() => {
-              if (viewMode === "lyrics-only") setViewMode("tabs-on");
-              else setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off");
-            }}
-            icon={<TabsModeIcon className="opacity-70" />}
-            label="Tabs"
-          />
+          {hasTabs && (
+            <ToggleOption
+              active={viewMode !== "tabs-off" && viewMode !== "lyrics-only"}
+              onClick={() => {
+                if (viewMode === "lyrics-only") setViewMode("tabs-on");
+                else setViewMode(viewMode === "tabs-off" ? "tabs-on" : "tabs-off");
+              }}
+              icon={<TabsModeIcon className="opacity-70" />}
+              label="Tabs"
+            />
+          )}
           <ToggleOption
             active={isViewModeActive(viewMode, "lyrics-only")}
             onClick={() => {
