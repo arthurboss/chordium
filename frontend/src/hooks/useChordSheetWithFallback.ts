@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SongMetadata, ChordSheet } from '@chordium/types';
 import type { StoredSongMetadata, StoredChordSheet } from '@/storage/types';
-import { fetchSongFromAPI } from '@/services/api/fetch-song';
-import { storeChordSheet } from '@/storage/stores/chord-sheets/operations';
+import { fetchSongFromAPI, fetchFullSongFromAPI, type ArrangementVariant } from '@/services/api/fetch-song';
+import { storeChordSheet, storeFullChordSheet, getFullChordSheetContent } from '@/storage/stores/chord-sheets/operations';
 
 export interface ChordSheetWithFallbackState {
   metadata: StoredSongMetadata | null;
@@ -12,6 +12,12 @@ export interface ChordSheetWithFallbackState {
   error: string | null;
   isFromAPI: boolean;
   isContentLoading: boolean;
+  /** Which arrangement the primary content came from. */
+  variant: ArrangementVariant | null;
+  /** Full arrangement (with tabs), once fetched/loaded. Null until available. */
+  fullContent: StoredChordSheet | null;
+  /** True when a distinct full arrangement (with tabs) is available to toggle to. */
+  hasFullArrangement: boolean;
 }
 
 export interface ChordSheetWithFallbackActions {
@@ -28,22 +34,26 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
 
   const [isFromAPI, setIsFromAPI] = useState(false);
   const [apiData, setApiData] = useState<(ChordSheet & SongMetadata) | null>(null);
+  const [variant, setVariant] = useState<ArrangementVariant | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
 
+  const [fullContent, setFullContent] = useState<StoredChordSheet | null>(null);
 
-  // Check IndexedDB first
+  // Check IndexedDB first (both the primary content and any stored full arrangement)
   useEffect(() => {
     const checkLocalData = async () => {
       if (!path) { setIsCheckingLocal(false); return; }
       try {
         const { getChordSheetMetadata, getChordSheetContent } = await import('@/storage/stores/chord-sheets/operations');
-        const [metadata, content] = await Promise.all([
+        const [metadata, content, full] = await Promise.all([
           getChordSheetMetadata(path),
           getChordSheetContent(path),
+          getFullChordSheetContent(path),
         ]);
         setLocalMetadata(metadata);
         setLocalContent(content);
+        setFullContent(full);
         setLocalError(null);
       } catch (err) {
         setLocalError(err instanceof Error ? err.message : 'Failed to check local data');
@@ -54,7 +64,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     checkLocalData();
   }, [path]);
 
-  // Single combined API call — one browser launch
+  // Single combined API call — one browser launch (prefers simplified arrangement)
   const loadFromAPI = useCallback(async () => {
     if (!path || isFromAPI) return;
     setIsFromAPI(true);
@@ -62,6 +72,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     try {
       const data = await fetchSongFromAPI(path);
       setApiData(data);
+      setVariant(data?.variant ?? null);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load song');
@@ -73,7 +84,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // loadContent is a no-op now — kept for API compatibility
   const loadContent = useCallback(async () => {}, []);
 
-  // Store to IndexedDB when API data arrives
+  // Store primary content to IndexedDB when API data arrives
   useEffect(() => {
     if (apiData && isFromAPI) {
       const { songChords, rawHtml, ...metadata } = apiData;
@@ -81,10 +92,42 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     }
   }, [apiData, isFromAPI, path]);
 
+  // Background-fetch the full arrangement (with tabs) once we have primary
+  // content that itself has no tabs — i.e. it looks like a simplified
+  // arrangement — and no full arrangement is stored yet. This covers both the
+  // fresh-scrape case (variant === 'simplified') and re-opening a cached song.
+  const primarySongChords = localContent?.songChords ?? apiData?.songChords ?? null;
+  const primaryHasTabs = !!primarySongChords && (primarySongChords.includes('[TAB]') || (localContent?.rawHtml?.includes('tablatura') ?? false));
+  useEffect(() => {
+    if (!path) return;
+    if (fullContent) return;              // already have it
+    if (!primarySongChords) return;       // nothing loaded yet
+    if (primaryHasTabs) return;           // primary already has tabs; no separate full needed
+    // If we fetched fresh and it wasn't the simplified variant, the primary IS
+    // the full arrangement — don't fetch again.
+    if (isFromAPI && variant && variant !== 'simplified') return;
+
+    let cancelled = false;
+    (async () => {
+      const full = await fetchFullSongFromAPI(path);
+      if (cancelled || !full?.songChords) return;
+      const stored: StoredChordSheet = {
+        path,
+        songChords: full.songChords,
+        ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}),
+      };
+      setFullContent(stored);
+      storeFullChordSheet({ songChords: full.songChords, ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}) }, path).catch(() => {});
+    })();
+    return () => { cancelled = true; };
+  }, [path, fullContent, primarySongChords, primaryHasTabs, isFromAPI, variant]);
+
   const reset = useCallback(() => {
     setLocalMetadata(null);
     setLocalContent(null);
+    setFullContent(null);
     setApiData(null);
+    setVariant(null);
     setError(null);
     setIsFromAPI(false);
     setIsLoadingContent(false);
@@ -126,6 +169,10 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     ...(finalContent.rawHtml ? { rawHtml: finalContent.rawHtml } : {}),
   } : null;
 
+  // A distinct full arrangement is available to toggle to when we have full
+  // content that actually contains tab blocks.
+  const hasFullArrangement = !!fullContent && (fullContent.rawHtml?.includes('tablatura') || fullContent.songChords.includes('[TAB]')) === true;
+
   return {
     metadata: finalMetadata,
     content: finalContent,
@@ -134,6 +181,9 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     error: localError || error,
     isFromAPI,
     isContentLoading: isLoadingContent,
+    variant,
+    fullContent,
+    hasFullArrangement,
     loadFromAPI,
     loadContent,
     reset,

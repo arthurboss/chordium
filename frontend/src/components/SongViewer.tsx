@@ -13,7 +13,7 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
-import { Pencil } from "lucide-react";
+import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
@@ -43,6 +43,12 @@ interface SongViewerProps {
   isContentLoading?: boolean;
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
+  /** A distinct full arrangement (with tabs) is available to toggle to. */
+  hasFullArrangement?: boolean;
+  /** Whether the full arrangement is currently displayed. */
+  showFull?: boolean;
+  /** Toggle between simplified and full arrangements. */
+  onToggleArrangement?: (showFull: boolean) => void;
 }
 
 const SongViewer = ({
@@ -61,6 +67,9 @@ const SongViewer = ({
   isContentLoading,
   onViewModeChange,
   initialViewMode,
+  hasFullArrangement = false,
+  showFull = false,
+  onToggleArrangement,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   const navigate = useNavigate();
@@ -259,6 +268,31 @@ const SongViewer = ({
           setViewMode={handleViewModeChange}
         />
       </Card>
+
+      {hasFullArrangement && !isEditing && (
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-full border p-0.5 text-sm">
+            <button
+              type="button"
+              onClick={() => onToggleArrangement?.(false)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${!showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              title="Simplified arrangement (easier chords, no tabs)"
+            >
+              <Music className="h-3.5 w-3.5" />
+              Simplified
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleArrangement?.(true)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              title="Full arrangement (with tabs)"
+            >
+              <Guitar className="h-3.5 w-3.5" />
+              Full
+            </button>
+          </div>
+        </div>
+      )}
 
       <ChordSheetViewer
         ref={chordDisplayRef}
