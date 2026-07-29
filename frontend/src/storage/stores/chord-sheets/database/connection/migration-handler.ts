@@ -56,6 +56,14 @@ export function handleIndexedDBMigrations(db: IDBDatabase, oldVersion: number, n
         }
         break;
       }
+      case 5: {
+        // Migration to v5: add a separate store for full arrangements (with tabs),
+        // used by the simplified/full toggle. Keyed by path, content only.
+        if (!db.objectStoreNames.contains(STORES.FULL_CHORD_SHEETS)) {
+          db.createObjectStore(STORES.FULL_CHORD_SHEETS, { keyPath: 'path' });
+        }
+        break;
+      }
       // Add future migrations here
       default:
         break;
