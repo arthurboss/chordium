@@ -53,7 +53,15 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
       return `${openTag}${inner}</${tag}>`;
     }
 
-    const rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+    let rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+    // Some tab blocks close the tablatura span before the last string, leaving
+    // the 6th string (e.g. "E|----|") as a bare line after </span></span>.
+    // Absorb those trailing tab-string lines back inside the cnt span so the
+    // whole tab block renders together.
+    rawHtmlRaw = rawHtmlRaw.replace(
+      /(<\/span>)(<\/span>)((?:\n[ \t]*[EADGBe]\|[-\d][^\n]*)+)/g,
+      (_m, closeCnt, closeTab, orphanLines) => orphanLines + closeCnt + closeTab
+    );
     const lines = rawHtmlRaw.split("\n");
     const result: string[] = [];
     let dedentAmount = 0;
