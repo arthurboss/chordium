@@ -1,6 +1,13 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
-import { extractChordSheet, extractSongMetadata, extractLyricsContent, extractFullChordSheet } from "./dom-extractors.js";
+import { extractChordSheet, extractSongMetadata, extractLyricsContent } from "./dom-extractors.js";
+import {
+  fetchPreferredChordSheet as sharedFetchPreferred,
+  fetchFullChordSheet as sharedFetchFull,
+  type CascadeResult,
+  type PageLike,
+} from "@chordium/scraping";
+export type { CascadeResult } from "@chordium/scraping";
 import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
@@ -356,102 +363,18 @@ async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
 
 
 /**
- * Result of a cascade fetch: the full song data plus which variant was used.
- */
-export interface CascadeResult {
-  data: ChordSheet & SongMetadata;
-  variant: "simplified" | "full" | "regular";
-  hasTabs: boolean;
-}
-
-/**
- * Loads a single URL and extracts content + metadata in one page evaluation.
- * Returns null when the page redirects away from the expected path (i.e. the
- * variant does not exist for this song) or yields no chord content.
- */
-async function tryLoadVariant(
-  page: Page,
-  url: string,
-  timeout: number
-): Promise<(ChordSheet & SongMetadata) | null> {
-  try {
-    page.setDefaultNavigationTimeout(timeout);
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout });
-    await delay(1000);
-
-    // Detect redirect away from the requested path (variant not available).
-    const expectedPath = new URL(url).pathname.replace(/\/+$/, "").toLowerCase();
-    const finalPath = new URL(page.url()).pathname.replace(/\/+$/, "").toLowerCase();
-    if (!finalPath.startsWith(expectedPath)) {
-      logger.info(`↪️  ${url} redirected to ${page.url()} — variant unavailable`);
-      return null;
-    }
-
-    const data = await page.evaluate(extractFullChordSheet);
-    if (!data?.songChords?.trim()) {
-      logger.warn(`⚠️  ${url} yielded no chord content`);
-      return null;
-    }
-    return data;
-  } catch (error) {
-    logger.warn(`Variant load failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
-    return null;
-  }
-}
-
-/**
- * Fetches a song preferring CifraClub's simplified arrangement, cascading
- * through progressively more reliable routes:
- *   1. {base}/simplificada/imprimir.html — simplified print (easy chords, light, has tuning)
- *   2. {base}/imprimir.html              — full print (light, has tuning)
- *   3. {base}/                           — regular route (heaviest, most reliable)
- *
- * Each route is a single attempt with its own timeout; the cascade itself is
- * the retry mechanism. Falls through when a route redirects away (variant
- * missing) or returns empty chords.
+ * Cascade fetchers — delegate to the shared @chordium/scraping logic, injecting
+ * the backend's Puppeteer page. Keeping the cascade in the shared package keeps
+ * the Express backend and the Vercel serverless functions in sync.
  */
 export async function fetchPreferredChordSheet(baseUrl: string): Promise<CascadeResult> {
-  const base = baseUrl.replace(/\/+$/, "");
-  const routes: Array<{ url: string; variant: CascadeResult["variant"]; timeout: number }> = [
-    { url: `${base}/simplificada/imprimir.html`, variant: "simplified", timeout: 8000 },
-    { url: `${base}/imprimir.html`, variant: "full", timeout: 10000 },
-    { url: `${base}/`, variant: "regular", timeout: 20000 },
-  ];
-
-  return puppeteerService.withPage(async (page: Page) => {
-    for (const route of routes) {
-      logger.info(`🌐 Cascade: trying ${route.variant} → ${route.url}`);
-      const data = await tryLoadVariant(page, route.url, route.timeout);
-      if (data) {
-        const hasTabs = data.songChords.includes("[TAB]");
-        logger.info(`✅ Cascade hit: ${route.variant} (hasTabs=${hasTabs})`);
-        return { data, variant: route.variant, hasTabs };
-      }
-    }
-    throw Object.assign(new Error(`No chord sheet found for ${base}`), { code: "NOT_FOUND" });
-  });
+  return puppeteerService.withPage((page: Page) =>
+    sharedFetchPreferred(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
+  );
 }
 
-/**
- * Fetches the FULL arrangement of a song (with tabs), used for the
- * simplified⇄full toggle. Cascades: full print → regular route.
- */
 export async function fetchFullChordSheet(baseUrl: string): Promise<CascadeResult> {
-  const base = baseUrl.replace(/\/+$/, "");
-  const routes: Array<{ url: string; variant: CascadeResult["variant"]; timeout: number }> = [
-    { url: `${base}/imprimir.html`, variant: "full", timeout: 10000 },
-    { url: `${base}/`, variant: "regular", timeout: 20000 },
-  ];
-
-  return puppeteerService.withPage(async (page: Page) => {
-    for (const route of routes) {
-      logger.info(`🌐 Full-fetch: trying ${route.variant} → ${route.url}`);
-      const data = await tryLoadVariant(page, route.url, route.timeout);
-      if (data) {
-        const hasTabs = data.songChords.includes("[TAB]");
-        return { data, variant: route.variant, hasTabs };
-      }
-    }
-    throw Object.assign(new Error(`No full chord sheet found for ${base}`), { code: "NOT_FOUND" });
-  });
+  return puppeteerService.withPage((page: Page) =>
+    sharedFetchFull(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
+  );
 }

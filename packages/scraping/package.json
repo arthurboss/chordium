@@ -1,0 +1,30 @@
+{
+  "name": "@chordium/scraping",
+  "version": "1.0.0",
+  "description": "Shared CifraClub scraping and DOM extraction logic for Chordium",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@chordium/types": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "tsup": "^7.0.0"
+  }
+}
