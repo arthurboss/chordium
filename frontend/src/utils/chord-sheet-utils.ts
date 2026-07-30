@@ -14,7 +14,10 @@ export interface ChordSection {
 }
 
 // Enhanced chord regex pattern for better recognition
-export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|4|2)?(?:\/[A-G][#b]?)?)\b/g;
+// Trailing (?![A-Za-z0-9#]) instead of \b so sharp chords ending in '#'
+// (e.g. F#, C#, D/F#) are fully matched — a \b after '#' fails before a space,
+// which previously dropped the '#' and broke chord-line detection.
+export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|4|2)?(?:\/[A-G][#b]?)?)(?![A-Za-z0-9#])/g;
 
 function isChordLine(line: string): boolean {
   CHORD_REGEX.lastIndex = 0;
