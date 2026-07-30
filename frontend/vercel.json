@@ -2,8 +2,15 @@
   "outputDirectory": "./dist",
   "framework": "vite",
   "functions": {
-    "api/cifraclub-song.ts": { "maxDuration": 60 },
-    "api/artist-songs.ts": { "maxDuration": 60 }
+    "api/cifraclub-song.ts": {
+      "maxDuration": 60
+    },
+    "api/artist-songs.ts": {
+      "maxDuration": 60
+    },
+    "api/cifraclub-song-full.ts": {
+      "maxDuration": 60
+    }
   },
   "rewrites": [
     {

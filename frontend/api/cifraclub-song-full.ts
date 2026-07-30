@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
-import { fetchPreferredChordSheet, type PageLike } from "@chordium/scraping";
+import { fetchFullChordSheet, type PageLike } from "@chordium/scraping";
 
 export const config = {
   maxDuration: 60,
@@ -36,14 +36,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     );
 
-    const { data, variant, hasTabs } = await fetchPreferredChordSheet(page as unknown as PageLike, baseUrl);
+    const { data, variant, hasTabs } = await fetchFullChordSheet(page as unknown as PageLike, baseUrl);
     return res.json({ ...data, variant, hasTabs });
   } catch (e) {
     const code = (e as { code?: string }).code;
     if (code === "NOT_FOUND") {
-      return res.status(404).json({ error: "Song not found" });
+      return res.status(404).json({ error: "Full chord sheet not found" });
     }
-    return res.status(502).json({ error: "Failed to fetch song", details: (e as Error).message });
+    return res.status(502).json({ error: "Failed to fetch full song", details: (e as Error).message });
   } finally {
     if (browser) await browser.close().catch(() => {});
   }

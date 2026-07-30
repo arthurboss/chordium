@@ -86,7 +86,8 @@
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",
-    "zod": "^3.24.3"
+    "zod": "^3.24.3",
+    "@chordium/scraping": "*"
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "^0.25.4",
