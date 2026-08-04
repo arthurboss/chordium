@@ -9,11 +9,13 @@ import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordS
 import { createChordSheetData } from './utils/chord-sheet-data';
 import { extractNavigationData } from './utils/navigation-data';
 import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
+import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
 import { storeFullChordSheet } from '@/storage/stores/chord-sheets/operations';
+import { fetchFullSongFromAPI } from '@/services/api/fetch-song';
 
 import { ChordViewerLoading } from './components/chord-viewer-loading';
 import { ChordViewerError } from './components/chord-viewer-error';
@@ -111,6 +113,15 @@ const ChordViewer = () => {
   const handleSave = async () => {
     await baseHandleSave();
     setIsSaved(true);
+
+    // Persist the full arrangement (with tabs) as saved too, so toggling to
+    // it later doesn't require re-fetching.
+    persistFullArrangementOnSave(
+      path,
+      chordSheetResult.hasFullArrangement,
+      chordSheetResult.fullContent,
+      { storeFullChordSheet, fetchFullSongFromAPI }
+    );
   };
   const { handleDelete } = useChordSheetDelete(
     path,
