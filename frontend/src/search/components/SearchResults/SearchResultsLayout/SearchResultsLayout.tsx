@@ -46,7 +46,10 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
   const getSectionTitle = (): string => {
     if (activeArtist && results.length > 0 && results[0].type === "song") {
-      return activeArtist.displayName;
+      // Prefer the artist name carried on the song result (e.g. "AC/DC") over
+      // activeArtist.displayName, which can be slug-derived (e.g. "Ac Dc") when
+      // the page was restored from a route rather than a picked search result.
+      return results[0].artist || activeArtist.displayName;
     }
     switch (searchType) {
       case "artist":

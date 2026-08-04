@@ -93,7 +93,10 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
       const artistPath = getCurrentArtistPath();
       
       if (artistPath) {
-        // Prefer stored displayName (set when navigating from artist selection) over fromSlug
+        // Prefer stored displayName (set when navigating from artist selection) over
+        // fromSlug. Kept (not removed) so it survives repeated back-navigation to
+        // this artist; it's keyed by path and overwritten when a different artist
+        // is selected, so it can't go stale for the wrong artist.
         let artistName = fromSlug(artistPath);
         try {
           const stored = sessionStorage.getItem(ARTIST_DISPLAY_NAME_KEY);
@@ -101,7 +104,6 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
             const { path: storedPath, displayName } = JSON.parse(stored);
             if (storedPath === artistPath && displayName) {
               artistName = displayName;
-              sessionStorage.removeItem(ARTIST_DISPLAY_NAME_KEY);
             }
           }
         } catch {}

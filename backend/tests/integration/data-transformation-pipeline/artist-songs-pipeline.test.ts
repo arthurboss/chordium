@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from '@jest/globals';
 import { extractArtistSongs } from '../../../utils/dom-extractors.js';
 import { transformToSongResults } from '../../../utils/result-transformers.js';
-import { mockDocument, cleanupDOM, type MockLink } from './shared-test-utils.js';
+import { cleanupDOM } from './shared-test-utils.js';
 import type { BasicSearchResult } from '../../../../shared/types/index.js';
 
 /**
@@ -9,29 +9,38 @@ import type { BasicSearchResult } from '../../../../shared/types/index.js';
  * Validates extraction and transformation of artist-specific song lists
  */
 
+function mockArtistSongsDOM(links: { href: string; primaryLabel: string }[], artistName: string): void {
+  const testGlobal = global as unknown as {
+    document: { querySelectorAll: (s: string) => unknown[]; querySelector: (s: string) => unknown; title: string };
+    window: { location: { origin: string; pathname: string } };
+  };
+  testGlobal.document = {
+    querySelectorAll: (selector: string) =>
+      selector === 'ol li a[href]'
+        ? links.map((l) => ({
+            getAttribute: (name: string) => (name === 'href' ? l.href : null),
+            querySelector: (s: string) => (s === "p[class*='primaryLabel']" ? { textContent: l.primaryLabel } : null),
+          }))
+        : [],
+    querySelector: (selector: string) => (selector === 'h2.t3 a' ? { textContent: artistName } : null),
+    title: '',
+  };
+  testGlobal.window = { location: { origin: 'https://www.cifraclub.com.br', pathname: '/oasis/' } };
+}
+
 describe('Artist Songs Pipeline', () => {
   afterEach(() => {
     cleanupDOM();
   });
 
   it('should extract artist songs with url field and maintain consistency', () => {
-    const mockLinks: MockLink[] = [
-      {
-        textContent: 'Wonderwall',
-        href: 'https://www.cifraclub.com.br/oasis/wonderwall/'
-      },
-      {
-        textContent: 'Don\'t Look Back in Anger',
-        href: 'https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/'
-      }
-    ];
-
-    mockDocument((selector) => {
-      if (selector === 'a.art_music-link') {
-        return mockLinks;
-      }
-      return [];
-    }, 'Oasis - Cifra Club');
+    mockArtistSongsDOM(
+      [
+        { href: '/oasis/wonderwall/', primaryLabel: 'Wonderwall' },
+        { href: '/oasis/dont-look-back-in-anger/', primaryLabel: "Don't Look Back in Anger" },
+      ],
+      'Oasis'
+    );
 
     // Step 1: DOM extraction for artist songs
     const rawResults = extractArtistSongs();

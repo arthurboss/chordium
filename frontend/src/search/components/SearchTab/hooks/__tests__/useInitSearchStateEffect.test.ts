@@ -96,6 +96,74 @@ describe("useInitSearchStateEffect", () => {
     consoleSpy.mockRestore();
   });
 
+  it('should prefer the stored artist displayName over the slug-derived name', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "AC/DC",
+      path: "ac-dc",
+      songCount: null,
+    });
+  });
+
+  it('should not remove the stored displayName, so it survives repeated back-navigation', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockSessionStorage.removeItem).not.toHaveBeenCalledWith("chordium_artist_display_name");
+  });
+
+  it('should ignore a stored displayName for a different artist path', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/oasis" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "oasis"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "oasis",
+      path: "oasis",
+      songCount: null,
+    });
+  });
+
   it('should handle URL parameter initialization for search route', () => {
     const mockOptionsWithSearchParams = {
       ...mockOptions,

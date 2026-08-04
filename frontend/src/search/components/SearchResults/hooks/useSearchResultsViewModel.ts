@@ -56,7 +56,10 @@ export function useSearchResultsViewModel({
 
     if (searchType === 'artist') {
       if (activeArtist && artistSongs) {
-        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: activeArtist?.displayName ?? s.artist })));
+        // Prefer the artist name scraped with each song (e.g. "AC/DC") over
+        // activeArtist.displayName, which can be slug-derived (e.g. "Ac Dc")
+        // when the page was restored from a route rather than a picked result.
+        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: s.artist || activeArtist?.displayName })));
         return {
           results,
           onResultClick: (item: SearchResult) => {
