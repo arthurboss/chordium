@@ -3,6 +3,7 @@ import { usePropertyFilter } from '@/hooks/usePropertyFilter';
 import { mapArtistsToSearchResults, mapSongsToSearchResults } from '@/search/utils/mappers/search-mappers';
 import { filterSongsByArtistAndTitle } from '@/search/utils/filtering/filterSongsByArtistAndTitle';
 import { normalizeForSearch } from '@/search/utils/normalization/normalizeForSearch';
+import { isSlugDerivedName } from '@/utils/url-slug-utils';
 import type { Artist, Song, SearchType } from '@chordium/types';
 import type { SearchResult } from '../SearchResultsLayout/SearchResultsLayout.types';
 
@@ -56,7 +57,16 @@ export function useSearchResultsViewModel({
 
     if (searchType === 'artist') {
       if (activeArtist && artistSongs) {
-        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: activeArtist?.displayName ?? s.artist })));
+        // Prefer activeArtist.displayName unless it's an untouched slug guess
+        // (e.g. "Ac Dc" for path "ac-dc") - in that case a scraped song's real
+        // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
+        // displayName (from the search API, cache, or sessionStorage) always
+        // wins, since it can't be recovered from a per-song scrape.
+        const trustedArtistName =
+          activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)
+            ? activeArtist.displayName
+            : undefined;
+        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: trustedArtistName || s.artist || activeArtist?.displayName })));
         return {
           results,
           onResultClick: (item: SearchResult) => {

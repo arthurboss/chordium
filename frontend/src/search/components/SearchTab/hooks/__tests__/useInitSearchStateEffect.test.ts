@@ -1,6 +1,14 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useInitSearchStateEffect } from "../useInitSearchStateEffect";
+
+vi.mock("@/search/utils/artist/artist-display-name-cache", () => ({
+  getStoredArtistDisplayName: vi.fn().mockResolvedValue(null),
+}));
+
+import { getStoredArtistDisplayName } from "@/search/utils/artist/artist-display-name-cache";
+
+const mockGetStoredArtistDisplayName = vi.mocked(getStoredArtistDisplayName);
 
 // Mock sessionStorage
 const mockSessionStorage = {
@@ -38,6 +46,7 @@ describe("useInitSearchStateEffect", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSessionStorage.getItem.mockReturnValue(null);
+    mockGetStoredArtistDisplayName.mockResolvedValue(null);
   });
 
   it('should initialize with default values when no session storage data exists', () => {
@@ -94,6 +103,127 @@ describe("useInitSearchStateEffect", () => {
     });
     
     consoleSpy.mockRestore();
+  });
+
+  it('should prefer the stored artist displayName over the slug-derived name', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "AC/DC",
+      path: "ac-dc",
+      songCount: null,
+    });
+  });
+
+  it('should not remove the stored displayName, so it survives repeated back-navigation', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockSessionStorage.removeItem).not.toHaveBeenCalledWith("chordium_artist_display_name");
+  });
+
+  it('should ignore a stored displayName for a different artist path', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/oasis" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "oasis"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "oasis",
+      path: "oasis",
+      songCount: null,
+    });
+  });
+
+  it('should upgrade to the cached displayName once the async lookup resolves', async () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/florianopolis-house-of-prayer" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "florianopolis-house-of-prayer"),
+    };
+
+    mockGetStoredArtistDisplayName.mockResolvedValue("Florianópolis House Of Prayer (fhop music)");
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    // Synchronous slug-derived guess is set first, so there's no blank flash.
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "florianopolis house of prayer",
+      path: "florianopolis-house-of-prayer",
+      songCount: null,
+    });
+
+    await waitFor(() => {
+      expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+        displayName: "Florianópolis House Of Prayer (fhop music)",
+        path: "florianopolis-house-of-prayer",
+        songCount: null,
+      });
+    });
+  });
+
+  it('should not re-set activeArtist when the cached lookup matches what is already shown', async () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+    };
+
+    mockSessionStorage.getItem.mockImplementation((key: string) => {
+      if (key === "chordium_artist_display_name") {
+        return JSON.stringify({ path: "ac-dc", displayName: "AC/DC" });
+      }
+      return null;
+    });
+    mockGetStoredArtistDisplayName.mockResolvedValue("AC/DC");
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    await waitFor(() => {
+      expect(mockGetStoredArtistDisplayName).toHaveBeenCalledWith("ac-dc");
+    });
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledTimes(1);
   });
 
   it('should handle URL parameter initialization for search route', () => {

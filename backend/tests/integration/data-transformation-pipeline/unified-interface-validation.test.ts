@@ -4,6 +4,25 @@ import { transformToSongResults } from '../../../utils/result-transformers.js';
 import { mockDocument, cleanupDOM, type MockLink, expectedSongInterface } from './shared-test-utils.js';
 import type { BasicSearchResult } from '../../../../shared/types/index.js';
 
+function mockArtistSongsDOM(links: { href: string; primaryLabel: string }[], artistName: string): void {
+  const testGlobal = global as unknown as {
+    document: { querySelectorAll: (s: string) => unknown[]; querySelector: (s: string) => unknown; title: string };
+    window: { location: { origin: string; pathname: string } };
+  };
+  testGlobal.document = {
+    querySelectorAll: (selector: string) =>
+      selector === 'ol li a[href]'
+        ? links.map((l) => ({
+            getAttribute: (name: string) => (name === 'href' ? l.href : null),
+            querySelector: (s: string) => (s === "p[class*='primaryLabel']" ? { textContent: l.primaryLabel } : null),
+          }))
+        : [],
+    querySelector: (selector: string) => (selector === 'h2.t3 a' ? { textContent: artistName } : null),
+    title: '',
+  };
+  testGlobal.window = { location: { origin: 'https://www.cifraclub.com.br', pathname: '/test-artist/' } };
+}
+
 /**
  * Tests for unified Song interface validation across different data sources
  * Ensures consistency between search results and artist song results
@@ -24,14 +43,6 @@ describe('Unified Song Interface Validation', () => {
       }
     ];
 
-    // Mock artist songs
-    const artistSongsMockLinks: MockLink[] = [
-      {
-        textContent: 'Test Song',
-        href: 'https://www.cifraclub.com.br/test-artist/test-song/'
-      }
-    ];
-
     // Test search results
     mockDocument((selector) => {
       if (selector === '.gsc-result a') {
@@ -44,12 +55,7 @@ describe('Unified Song Interface Validation', () => {
     const searchFinalResults = transformToSongResults(searchRawResults as unknown as BasicSearchResult[]);
 
     // Test artist songs
-    mockDocument((selector) => {
-      if (selector === 'a.art_music-link') {
-        return artistSongsMockLinks;
-      }
-      return [];
-    }, 'Test Artist - Cifra Club');
+    mockArtistSongsDOM([{ href: '/test-artist/test-song/', primaryLabel: 'Test Song' }], 'Test Artist');
 
     const artistSongsRawResults = extractArtistSongs();
     const artistSongsFinalResults = transformToSongResults(artistSongsRawResults as unknown as BasicSearchResult[]);

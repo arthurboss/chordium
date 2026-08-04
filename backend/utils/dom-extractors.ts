@@ -99,13 +99,23 @@ export function extractSearchResults(): DOMSearchResult[] {
  * Extracts artist songs from CifraClub artist page DOM
  */
 export function extractArtistSongs(): Song[] {
-  // Extract artist name from page title (format: "Artist Name - Cifra Club")
+  // Extract artist name from the artist link element (h2.t3 a), which is always
+  // present on the artist page and already used elsewhere for this purpose (see
+  // extractChordSheetMeta below and cifraclub-song.ts). More reliable than the
+  // page title, whose format varies between song pages ("Artist - Cifra Club")
+  // and the /musicas.html listing page ("Artist | Todas as músicas").
   let artistName = "Unknown Artist";
-  const pageTitle = document.title;
-  if (pageTitle) {
-    const titleMatch = pageTitle.match(/^(.+?)\s*-\s*Cifra Club$/);
-    if (titleMatch) {
-      artistName = titleMatch[1].trim();
+  const artistElement = document.querySelector("h2.t3 a");
+  if (artistElement) {
+    artistName = artistElement.textContent?.trim() || "Unknown Artist";
+  }
+  if (artistName === "Unknown Artist") {
+    const pageTitle = document.title;
+    if (pageTitle) {
+      const titleMatch = pageTitle.match(/^(.+?)\s*(?:\||-)\s*(?:Todas as m|Cifra Club)/i);
+      if (titleMatch) {
+        artistName = titleMatch[1].trim();
+      }
     }
   }
   if (artistName === "Unknown Artist") {

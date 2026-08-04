@@ -23,8 +23,12 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
   const cachedEntry = await searchCacheService.get(searchKey);
   if (
     cachedEntry &&
-    cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG
+    cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG &&
+    cachedEntry.results.length > 0
   ) {
+    // A displayName-only entry (written by storeArtistDisplayName before any
+    // songs were fetched) has empty results - fall through to fetch songs
+    // rather than treating it as "this artist has zero songs".
     return cachedEntry.results as Song[];
   }
 
@@ -41,11 +45,19 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     const data: Song[] = await resp.json();
     // Only cache non-empty results
     if (data.length > 0) {
+      // Re-read the cache instead of reusing the entry fetched before the
+      // network call above: storeArtistDisplayName (fired when the artist was
+      // clicked) can write in the meantime, and using the stale read here
+      // would overwrite that displayName with undefined.
+      const latestEntry = await searchCacheService.get(searchKey);
       await searchCacheService.storeResults({
         searchKey,
         results: data,
         search: {
-          query: { artist: artistPath, song: "" },
+          // Preserve a displayName already cached by storeArtistDisplayName
+          // (e.g. from clicking this artist in search results) so fetching
+          // the song list doesn't clobber it.
+          query: { artist: artistPath, song: "", displayName: latestEntry?.search.query.displayName },
           searchType: SEARCH_TYPES.ARTIST_SONG,
           dataSource: "neon",
         },

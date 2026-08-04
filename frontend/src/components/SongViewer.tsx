@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
+import { storeArtistDisplayName } from "@/search/utils/artist/artist-display-name-cache";
 import type { Song } from "../types/song";
 import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
@@ -185,6 +186,10 @@ const SongViewer = ({
         JSON.stringify({ path: artistSlug, displayName: artist })
       );
     } catch {}
+    // Persist the displayName the song page is already showing, so /:artist
+    // can reuse it later instead of re-deriving a name from DOM scraping or a
+    // slug guess.
+    void storeArtistDisplayName(artistSlug, artist);
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
 
