@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import ResultsList from "@/components/ui/ResultsList";
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
 import type { SearchResult, SearchResultsLayoutProps } from "./SearchResultsLayout.types";
+import { isSlugDerivedName } from "@/utils/url-slug-utils";
 import { ResultCard } from "../../ResultCard";
 import {
   Select,
@@ -46,9 +47,14 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
   const getSectionTitle = (): string => {
     if (activeArtist && results.length > 0 && results[0].type === "song") {
-      // Prefer the artist name carried on the song result (e.g. "AC/DC") over
-      // activeArtist.displayName, which can be slug-derived (e.g. "Ac Dc") when
-      // the page was restored from a route rather than a picked search result.
+      // Prefer activeArtist.displayName unless it's an untouched slug guess
+      // (e.g. "Ac Dc" for path "ac-dc") - in that case the scraped song's real
+      // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
+      // displayName (from the search API, cache, or sessionStorage) always
+      // wins, since it can't be recovered from a per-song scrape.
+      if (activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)) {
+        return activeArtist.displayName;
+      }
       return results[0].artist || activeArtist.displayName;
     }
     switch (searchType) {

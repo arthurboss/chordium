@@ -39,3 +39,13 @@ export function fromSlug(slug: string): string {
 export function slugsMatch(slug1: string, slug2: string): boolean {
   return toSlug(fromSlug(slug1)) === toSlug(fromSlug(slug2));
 }
+
+/**
+ * Checks whether a displayName is just the untouched slug-derived guess for a
+ * path (e.g. "Ac Dc" for "ac-dc"), rather than a name confirmed by the search
+ * API or a scrape. Used to decide whether a more specific source (a cached
+ * or scraped name) should override it.
+ */
+export function isSlugDerivedName(displayName: string, path: string): boolean {
+  return displayName === fromSlug(path);
+}

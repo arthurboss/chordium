@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { fromSlug } from "@/utils/url-slug-utils";
 import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
+import { getStoredArtistDisplayName } from "@/search/utils/artist/artist-display-name-cache";
 import type { Artist } from "@chordium/types";
 
 interface InitSearchStateOptions {
@@ -112,6 +113,22 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
           displayName: artistName,
           path: artistPath,
           songCount: null,
+        });
+
+        // The displayName exactly as returned by the search API (e.g.
+        // "Florianópolis House Of Prayer (fhop music)") is the most trustworthy
+        // source available, since it doesn't depend on the source page's DOM
+        // markup or a slug guess. It's looked up async (IndexedDB), so it can
+        // upgrade the name set above once it resolves, e.g. on a fresh tab
+        // where sessionStorage is empty but this artist was searched before.
+        getStoredArtistDisplayName(artistPath).then((cachedDisplayName) => {
+          if (cachedDisplayName && cachedDisplayName !== artistName) {
+            setActiveArtist({
+              displayName: cachedDisplayName,
+              path: artistPath,
+              songCount: null,
+            });
+          }
         });
         
         // Restore the original search query from session storage if present.
