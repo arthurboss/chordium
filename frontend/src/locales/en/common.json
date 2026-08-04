@@ -171,5 +171,13 @@
     "za": "Z → A",
     "recent": "Recent",
     "mostPlayed": "Most played"
+  },
+  "arrangementToggle": {
+    "simplified": "Simplified",
+    "simplifiedTitle": "Simplified arrangement (easier chords, no tabs)",
+    "full": "Full",
+    "fullTitle": "Full arrangement (with tabs)",
+    "editingIndicator": "Editing: {{arrangement}}",
+    "editingIndicatorTitle": "The arrangement you are currently editing"
   }
 }

@@ -8,6 +8,7 @@ import { resolveChordSheetPath } from './utils/path-resolver';
 import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordSheetQR';
 import { createChordSheetData } from './utils/chord-sheet-data';
 import { extractNavigationData } from './utils/navigation-data';
+import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
 
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
@@ -127,11 +128,14 @@ const ChordViewer = () => {
     if (showFull) {
       // Editing the full arrangement: content goes to the full store; metadata
       // is shared, so persist it to the primary store's metadata too (keeping
-      // the primary content untouched).
+      // the primary content untouched). Read the simplified content the same
+      // way displayContent does below - editedData first - since
+      // chordSheetResult.content is only populated once on mount and would
+      // otherwise clobber a simplified edit just saved earlier this session.
       await storeFullChordSheet({ songChords: data.songChords }, path);
       await storeChordSheet(
         metadata,
-        { songChords: chordSheetResult.content?.songChords ?? '' },
+        { songChords: resolveSimplifiedContentForFullEdit(editedData?.songChords, chordSheetResult.content?.songChords) },
         isSaved,
         path
       );
@@ -141,7 +145,7 @@ const ChordViewer = () => {
       await storeChordSheet(metadata, { songChords: data.songChords }, isSaved, path);
       setEditedData(data);
     }
-  }, [isSaved, path, showFull, chordSheetResult.content]);
+  }, [isSaved, path, showFull, editedData, chordSheetResult.content]);
 
   if (jamPayload && !chordSheetResult.metadata) {
     const jamChordSheet = {
