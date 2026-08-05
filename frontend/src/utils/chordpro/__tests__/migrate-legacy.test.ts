@@ -31,7 +31,7 @@ describe('migrateLegacyToChordPro', () => {
 
     const result = migrateLegacyToChordPro(FIXTURE);
 
-    expect(result).toBe('{comment: Intro}\n\n[Em7]Today is gonna b[G]e the day\n\n[Em7] [G] [D]');
+    expect(result).toBe('{comment: Intro}\n\n[Em7]Today is gonna [G]be the day\n\n[Em7] [G] [D]');
   });
 
   it('clamps a chord column beyond the lyric line length to the end of the line', () => {
@@ -74,5 +74,15 @@ describe('migrateLegacyToChordPro', () => {
     const result = migrateLegacyToChordPro(FIXTURE);
 
     expect(result).toBe('{comment: Intro}\n\n[Em] [G] [D] [A]\n[Em] [G] [D] [A]');
+  });
+
+  it('snaps a chord column that falls mid-word to the start of that word instead of splitting it', () => {
+    // Source column for "C9" (col 6) falls inside "love" (starts at col 4),
+    // not at a word boundary -- the bracket must move to the start of "love".
+    const FIXTURE = ['G           C9', '  Saying "I love you"'].join('\n');
+
+    const result = migrateLegacyToChordPro(FIXTURE);
+
+    expect(result).toBe('  [G]Saying "I [C9]love you"');
   });
 });

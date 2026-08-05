@@ -43,6 +43,6 @@ describe('resolveSourceHtml', () => {
     const result = resolveSourceHtml(undefined, legacy);
 
     expect(result).toContain('<span class="section-title">Intro</span>');
-    expect(result).toContain('<b>Em7</b>Today is gonna b<b>G</b>e the day');
+    expect(result).toContain('<b>Em7</b>Today is gonna <b>G</b>be the day');
   });
 });

@@ -80,15 +80,43 @@ function extractChordTokensWithColumns(line: string): ChordToken[] {
   return tokens;
 }
 
-// Inserts `[chord]` brackets into `lyricLine` at the same character columns
-// the chord tokens occupied on their own line. If the lyric line is shorter
-// than a chord's column, the bracket is appended at the end instead.
+interface WordSpan {
+  start: number;
+  end: number;
+}
+
+function findWords(line: string): WordSpan[] {
+  const words: WordSpan[] = [];
+  const re = /\S+/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(line)) !== null) {
+    words.push({ start: match.index, end: match.index + match[0].length });
+  }
+  return words;
+}
+
+// A chord's source column rarely lines up exactly with a word start once
+// re-flowed as inline brackets -- inserting at the raw column routinely
+// splits a word in half (e.g. "l[C9]ove"). Snap to the nearest word
+// boundary instead: if the column falls inside a word, insert before that
+// word; if it falls in whitespace between words, insert before the next
+// word; past the last word, append at the end of the line.
+function snapColumnToWordStart(col: number, words: WordSpan[]): number {
+  for (const word of words) {
+    if (col < word.end) return word.start;
+  }
+  return words.length > 0 ? words[words.length - 1].end : 0;
+}
+
+// Inserts `[chord]` brackets into `lyricLine`, snapping each chord's source
+// column to the start of the nearest word so brackets never land mid-word.
 function insertChordsAtColumns(lyricLine: string, tokens: ChordToken[]): string {
   const sorted = [...tokens].sort((a, b) => a.col - b.col);
+  const words = findWords(lyricLine);
   let result = '';
   let lastPos = 0;
   for (const { col, chord } of sorted) {
-    const insertPos = Math.max(Math.min(col, lyricLine.length), lastPos);
+    const insertPos = Math.max(snapColumnToWordStart(col, words), lastPos);
     result += lyricLine.slice(lastPos, insertPos);
     result += `[${chord}]`;
     lastPos = insertPos;
