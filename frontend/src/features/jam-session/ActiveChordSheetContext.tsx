@@ -3,14 +3,26 @@ import type { ChordSheet, SongMetadata } from '@chordium/types';
 
 export type ShareableChordSheet = ChordSheet & SongMetadata;
 
-export interface ActiveChordSheetContextValue {
-  /** The chord sheet currently on screen, or null when none is shareable. */
-  chordSheet: ShareableChordSheet | null;
+export interface ActiveShareable {
+  /** The arrangement currently on screen. */
+  chordSheet: ShareableChordSheet;
   /**
-   * Publishes the chord sheet the viewer is showing. Pass null to withdraw it,
-   * which the viewer does while editing so unsaved text is never shared.
+   * The simplified arrangement, when it differs from the displayed one. A QR
+   * code cannot hold a long song, so this is the smaller fallback payload.
    */
-  setChordSheet: (chordSheet: ShareableChordSheet | null) => void;
+  simplifiedChordSheet?: ShareableChordSheet;
+  /** Route of the song, for the link-only fallback. */
+  songPath: string;
+}
+
+export interface ActiveChordSheetContextValue {
+  /** What is currently shareable, or null when nothing is. */
+  active: ActiveShareable | null;
+  /**
+   * Publishes what the viewer is showing. Pass null to withdraw it, which the
+   * viewer does while editing so unsaved text is never shared.
+   */
+  setActive: (active: ActiveShareable | null) => void;
 }
 
 export const ActiveChordSheetContext = createContext<ActiveChordSheetContextValue | undefined>(
@@ -25,8 +37,8 @@ export const ActiveChordSheetContext = createContext<ActiveChordSheetContextValu
  * shared ancestor instead of drilling it through every layer in between.
  */
 export function ActiveChordSheetProvider({ children }: { children: ReactNode }) {
-  const [chordSheet, setChordSheet] = useState<ShareableChordSheet | null>(null);
-  const value = useMemo(() => ({ chordSheet, setChordSheet }), [chordSheet]);
+  const [active, setActive] = useState<ActiveShareable | null>(null);
+  const value = useMemo(() => ({ active, setActive }), [active]);
   return (
     <ActiveChordSheetContext.Provider value={value}>{children}</ActiveChordSheetContext.Provider>
   );

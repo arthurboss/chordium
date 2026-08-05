@@ -137,6 +137,16 @@ function resolveJamOrigin(): string {
   return window.location.origin;
 }
 
+/**
+ * The song's normal URL, with no embedded payload.
+ *
+ * Used when a song is too large for any QR code: the scan still opens the right
+ * song, it just needs a connection to fetch it instead of working offline.
+ */
+export function buildPlainSongUrl(songPath: string): string {
+  return new URL(songPath.startsWith('/') ? songPath : '/' + songPath, resolveJamOrigin()).toString();
+}
+
 export function buildJamUrl(encoded: string, artist: string, title: string): string {
   const base = resolveJamOrigin();
   const artistSlug = normalizeNamePart(artist);

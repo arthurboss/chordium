@@ -264,6 +264,19 @@ const ChordViewer = () => {
       hasFullArrangement={chordSheetResult.hasFullArrangement}
       showFull={showFull}
       onToggleArrangement={setShowFull}
+      // Only meaningful while the full arrangement is displayed: it is the
+      // smaller payload the share dialog falls back to when the full one is
+      // too large for a QR code.
+      simplifiedChordSheet={
+        showFull && chordSheetResult.content
+          ? {
+              songChords: editedData?.songChords ?? chordSheetResult.content.songChords,
+              ...(chordSheetResult.content.rawHtml
+                ? { rawHtml: chordSheetResult.content.rawHtml }
+                : {}),
+            }
+          : undefined
+      }
     />
   );
 };

@@ -50,6 +50,11 @@ interface SongViewerProps {
   showFull?: boolean;
   /** Toggle between simplified and full arrangements. */
   onToggleArrangement?: (showFull: boolean) => void;
+  /**
+   * The simplified arrangement, when the full one is displayed. Shared instead
+   * of the full version when the latter is too large for a QR code.
+   */
+  simplifiedChordSheet?: { songChords: string; rawHtml?: string };
 }
 
 const SongViewer = ({
@@ -71,6 +76,7 @@ const SongViewer = ({
   hasFullArrangement = false,
   showFull = false,
   onToggleArrangement,
+  simplifiedChordSheet,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   const navigate = useNavigate();
@@ -91,7 +97,7 @@ const SongViewer = ({
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
-  const { setChordSheet: setActiveChordSheet } = useActiveChordSheet();
+  const { setActive: setActiveShareable } = useActiveChordSheet();
 
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
@@ -169,13 +175,28 @@ const SongViewer = ({
   // and on unmount, so the button stops offering a song after navigating away.
   useEffect(() => {
     if (isEditing || !chordContentToDisplay) {
-      setActiveChordSheet(null);
+      setActiveShareable(null);
       return;
     }
-    setActiveChordSheet({ ...chordSheetToDisplay, songChords: chordContentToDisplay });
-  }, [isEditing, chordSheetToDisplay, chordContentToDisplay, setActiveChordSheet]);
+    setActiveShareable({
+      chordSheet: { ...chordSheetToDisplay, songChords: chordContentToDisplay },
+      // Offered as the smaller payload when the full arrangement will not fit
+      // in a QR code. Absent when the simplified one is already on screen.
+      simplifiedChordSheet: simplifiedChordSheet
+        ? { ...chordSheetToDisplay, ...simplifiedChordSheet }
+        : undefined,
+      songPath: songObj.path,
+    });
+  }, [
+    isEditing,
+    chordSheetToDisplay,
+    chordContentToDisplay,
+    simplifiedChordSheet,
+    songObj.path,
+    setActiveShareable,
+  ]);
 
-  useEffect(() => () => setActiveChordSheet(null), [setActiveChordSheet]);
+  useEffect(() => () => setActiveShareable(null), [setActiveShareable]);
 
   const handleAction = () => {
     if (isEditing) {

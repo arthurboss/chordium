@@ -20,7 +20,7 @@ export function ShareSession() {
   const isMobile = useIsMobile();
   // The song being viewed, if any. Absent on other routes and withdrawn while
   // editing, in which case the dialog offers joining only.
-  const { chordSheet } = useActiveChordSheet();
+  const { active } = useActiveChordSheet();
 
   const handleDetected = useCallback((url: URL) => {
     navigator.vibrate?.(80);
@@ -39,14 +39,14 @@ export function ShareSession() {
 
   // With no song open the button can only join a session, so it shows a QR
   // icon and matching wording rather than promising a share it cannot do.
-  const canShare = !!chordSheet;
+  const canShare = !!active;
   const triggerLabel = t(canShare ? 'jamSession.jamSession' : 'jamSession.joinSession');
   const TriggerIcon = canShare ? Share : QrCode;
 
   const title = scanMode ? t('jamSession.scanQrCode') : triggerLabel;
   const description = scanMode
     ? t('jamSession.pointAtQrCode')
-    : t(chordSheet ? 'jamSession.shareOrJoinDescription' : 'jamSession.joinDescription');
+    : t(canShare ? 'jamSession.shareOrJoinDescription' : 'jamSession.joinDescription');
 
   const trigger = (
     <Button
@@ -71,9 +71,13 @@ export function ShareSession() {
     </>
   ) : (
     <>
-      {chordSheet && (
+      {active && (
         <>
-          <JamShareQR chordSheet={chordSheet} />
+          <JamShareQR
+            chordSheet={active.chordSheet}
+            simplifiedChordSheet={active.simplifiedChordSheet}
+            songPath={active.songPath}
+          />
           <div className="relative flex items-center w-full">
             <div className="flex-grow border-t" />
             <span className="px-4 text-sm text-muted-foreground">{t('jamSession.or')}</span>

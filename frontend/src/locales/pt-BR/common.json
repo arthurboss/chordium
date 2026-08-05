@@ -134,7 +134,9 @@
     "jamLinkPlaceholder": "Link de jam do Chordium ou conteúdo",
     "go": "Ir",
     "shareOrJoinDescription": "Compartilhe esta música com um dispositivo próximo ou entre em uma sessão de outro dispositivo.",
-    "joinDescription": "Entre em uma sessão de jam de outro dispositivo."
+    "joinDescription": "Entre em uma sessão de jam de outro dispositivo.",
+    "scanToLoadSimplified": "Escaneie para carregar {{title}} em outro dispositivo. A versão completa com tablaturas é grande demais para um código, então a simplificada é compartilhada. Funciona offline.",
+    "scanToOpenOnline": "Escaneie para abrir {{title}} em outro dispositivo. Esta música é grande demais para um código, então o link a abre online em vez de offline."
   },
   "smallScreenWarning": {
     "title": "Tela Muito Pequena",

@@ -10,5 +10,5 @@ import {
  * rendered in isolation by a test).
  */
 export function useActiveChordSheet(): ActiveChordSheetContextValue {
-  return useContext(ActiveChordSheetContext) ?? { chordSheet: null, setChordSheet: () => {} };
+  return useContext(ActiveChordSheetContext) ?? { active: null, setActive: () => {} };
 }

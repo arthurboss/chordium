@@ -134,7 +134,9 @@
     "jamLinkPlaceholder": "Chordium jam link or payload",
     "go": "Go",
     "shareOrJoinDescription": "Share this song with a nearby device, or join a session from another device.",
-    "joinDescription": "Join a jam session from another device."
+    "joinDescription": "Join a jam session from another device.",
+    "scanToLoadSimplified": "Scan to load {{title}} on another device. The full version with tabs is too large for a code, so the simplified one is shared. Works offline.",
+    "scanToOpenOnline": "Scan to open {{title}} on another device. This song is too large for a code, so the link opens it online instead of loading it offline."
   },
   "smallScreenWarning": {
     "title": "Screen Too Small",

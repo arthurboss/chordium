@@ -134,7 +134,9 @@
     "jamLinkPlaceholder": "Enlace de jam de Chordium o contenido",
     "go": "Ir",
     "shareOrJoinDescription": "Comparte esta canción con un dispositivo cercano o únete a una sesión desde otro dispositivo.",
-    "joinDescription": "Únete a una sesión de jam desde otro dispositivo."
+    "joinDescription": "Únete a una sesión de jam desde otro dispositivo.",
+    "scanToLoadSimplified": "Escanea para cargar {{title}} en otro dispositivo. La versión completa con tablaturas es demasiado grande para un código, así que se comparte la simplificada. Funciona sin conexión.",
+    "scanToOpenOnline": "Escanea para abrir {{title}} en otro dispositivo. Esta canción es demasiado grande para un código, así que el enlace la abre en línea en lugar de sin conexión."
   },
   "smallScreenWarning": {
     "title": "Pantalla Demasiado Pequeña",
