@@ -86,8 +86,7 @@ export const loadSampleContent = async (path: string): Promise<ChordSheet> => {
 
 /**
  * Load the full arrangement (with tabs) for a sample path, if one exists.
- * Returns undefined for samples that have no distinct full arrangement
- * (e.g. Hotel California, whose only source is the tab-only regular page).
+ * Returns undefined for samples that have no distinct full arrangement.
  *
  * @param path - The chord sheet path to load full content for
  */
@@ -96,6 +95,8 @@ export const loadSampleFullContent = async (path: string): Promise<ChordSheet | 
     switch (path) {
       case 'oasis/wonderwall':
         return (await import('../../data/samples/chord-sheets/full-content/oasis-wonderwall.json')).default as ChordSheet;
+      case 'the-eagles/hotel-california':
+        return (await import('../../data/samples/chord-sheets/full-content/eagles-hotel_california.json')).default as ChordSheet;
       case 'extreme/more-than-words':
         return (await import('../../data/samples/chord-sheets/full-content/extreme-more_than_words.json')).default as ChordSheet;
       default:

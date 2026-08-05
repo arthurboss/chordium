@@ -19,11 +19,11 @@ export interface PageLike {
   url(): string;
   evaluate<T>(fn: () => T): Promise<T>;
   setDefaultNavigationTimeout?(timeout: number): void;
-  /** Used to wait for the chord content element to be fully parsed. */
-  waitForFunction?(
-    fn: () => boolean,
-    opts?: { timeout?: number; polling?: string | number }
-  ): Promise<unknown>;
+  /**
+   * Disabled before navigating: the source's print pages ship a script that
+   * paginates the sheet and deletes overflow content from the DOM.
+   */
+  setJavaScriptEnabled?(enabled: boolean): Promise<void>;
 }
 
 interface RouteSpec {
@@ -32,60 +32,31 @@ interface RouteSpec {
   timeout: number;
 }
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 /**
- * Runs in the browser: true once the chord <pre> element has been fully
- * parsed, i.e. the parser has moved past its closing tag.
+ * The source's print pages are fully server-rendered, but they also load a
+ * script that paginates the sheet to the selected paper size and DELETES the
+ * overflow from the DOM. Extracting after it runs yields a silently truncated
+ * song, so JavaScript is disabled for the whole cascade.
  *
- * A <pre> that is still being streamed is the last element in the document, so
- * `nextElementSibling` (on it or any ancestor up to <body>) is null until the
- * closing tag is seen. This is what distinguishes a partially received
- * response from a complete one.
- */
-function isChordContentComplete(): boolean {
-  const pre = document.querySelector("pre");
-  if (!pre) return false;
-  for (let node: Element | null = pre; node && node !== document.body; node = node.parentElement) {
-    if (node.nextElementSibling) return true;
-  }
-  return document.readyState === "complete";
-}
-
-/**
- * Waits until the chord content is fully parsed.
+ * Measured on /oficina-g3/incondicional/simplificada/imprimir.html:
+ *   JS enabled  -> pre.textContent = 1006 chars (truncated mid-song)
+ *   JS disabled -> pre.textContent = 1266 chars (complete)
  *
- * Guards against extracting from a partially received response: in constrained
- * network environments (notably serverless), `domcontentloaded` can fire after
- * only the first TCP segment of a gzip-encoded response has been processed,
- * leaving the <pre> truncated mid-song. The extractor would then happily read
- * that partial DOM and return it as if complete.
+ * This was previously environment-dependent: the extraction raced that script,
+ * so slower networks happened to win and fast ones (serverless) lost.
  */
-async function waitForCompleteChordContent(
-  page: PageLike,
-  timeout: number,
-  logger?: (msg: string) => void
-): Promise<boolean> {
-  if (!page.waitForFunction) {
-    await delay(1000);
-    return true;
+async function disablePageScripts(page: PageLike, logger?: (msg: string) => void): Promise<void> {
+  if (!page.setJavaScriptEnabled) {
+    logger?.("page cannot disable JavaScript — content may be truncated by the source's print script");
+    return;
   }
-  try {
-    await page.waitForFunction(isChordContentComplete, { timeout, polling: 100 });
-    return true;
-  } catch {
-    logger?.("chord content still incomplete after waiting");
-    return false;
-  }
+  await page.setJavaScriptEnabled(false);
 }
 
 /**
  * Loads a single URL and extracts content + metadata in one page evaluation.
  * Returns null when the page redirected away from the requested path (variant
- * not available), the response was only partially received, or the page
- * yielded no chord content.
+ * not available) or yielded no chord content.
  */
 async function tryLoadVariant(
   page: PageLike,
@@ -95,19 +66,16 @@ async function tryLoadVariant(
 ): Promise<(ChordSheet & SongMetadata) | null> {
   try {
     page.setDefaultNavigationTimeout?.(timeout);
-    // `load` rather than `domcontentloaded`: the latter can resolve before the
-    // whole response body has been received, yielding a truncated <pre>.
-    await page.goto(url, { waitUntil: "load", timeout });
+    await disablePageScripts(page, logger);
+    // With scripts disabled the markup is complete at `domcontentloaded`, and
+    // there is deliberately no settle delay: waiting would only give the
+    // source's pagination script a chance to run and trim the sheet.
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout });
 
     const expectedPath = new URL(url).pathname.replace(/\/+$/, "").toLowerCase();
     const finalPath = new URL(page.url()).pathname.replace(/\/+$/, "").toLowerCase();
     if (!finalPath.startsWith(expectedPath)) {
       logger?.(`redirected from ${url} to ${page.url()} — variant unavailable`);
-      return null;
-    }
-
-    if (!(await waitForCompleteChordContent(page, timeout, logger))) {
-      logger?.(`${url} response only partially received — discarding`);
       return null;
     }
 
