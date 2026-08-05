@@ -128,7 +128,10 @@ export function ShareSession() {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 w-[calc(100vw_-_2rem)] sm:max-w-[380px]">
+      <DialogContent
+        animation="fade"
+        className="flex max-h-[90dvh] flex-col gap-0 w-[calc(100vw_-_2rem)] sm:max-w-[380px]"
+      >
         <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="sr-only">{description}</DialogDescription>
