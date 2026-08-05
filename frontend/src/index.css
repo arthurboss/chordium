@@ -90,6 +90,16 @@
     scrollbar-gutter: stable;
   }
 
+  /*
+   * Radix locks scrolling by hiding overflow and adding a right margin to
+   * replace the scrollbar it removes. With the gutter reserved above, the
+   * scrollbar's space was never given up, so that margin double-compensates
+   * and visibly shrinks and shifts the page behind an open dialog.
+   */
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
+  }
+
   button:not(:disabled),
   [role='button']:not(:disabled),
   [role="menuitem"] {
