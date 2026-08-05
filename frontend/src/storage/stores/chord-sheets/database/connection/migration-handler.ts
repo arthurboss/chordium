@@ -16,8 +16,15 @@ import { STORES } from '../../../../core/config/stores';
  * @param db - The IDBDatabase instance
  * @param oldVersion - The previous version of the database
  * @param newVersion - The new version being migrated to
+ * @param transaction - The versionchange transaction, required by migrations
+ *                      that rewrite existing records rather than only schema
  */
-export function handleIndexedDBMigrations(db: IDBDatabase, oldVersion: number, newVersion: number): void {
+export function handleIndexedDBMigrations(
+  db: IDBDatabase,
+  oldVersion: number,
+  newVersion: number,
+  transaction?: IDBTransaction | null
+): void {
   for (let v = oldVersion + 1; v <= newVersion; v++) {
     switch (v) {
       case 1:
@@ -56,9 +63,63 @@ export function handleIndexedDBMigrations(db: IDBDatabase, oldVersion: number, n
         }
         break;
       }
+      case 5: {
+        // Migration to v5: add a separate store for full arrangements (with tabs),
+        // used by the simplified/full toggle. Keyed by path, content only.
+        if (!db.objectStoreNames.contains(STORES.FULL_CHORD_SHEETS)) {
+          db.createObjectStore(STORES.FULL_CHORD_SHEETS, { keyPath: 'path' });
+        }
+        break;
+      }
+      case 6: {
+        // Migration to v6: drop cached content scraped before the truncation
+        // fix, which was silently cut short and would otherwise never refresh
+        // (cached content is served without re-fetching).
+        //
+        // Only unsaved entries are cleared. Songs the user saved are left
+        // untouched: their content store also holds user edits, and there is
+        // no separate edited flag to tell an edit from a plain cache entry.
+        dropUnsavedCachedContent(db, transaction);
+        break;
+      }
       // Add future migrations here
       default:
         break;
     }
   }
+}
+
+/**
+ * Deletes cached (unsaved) chord sheet content so it is re-fetched on next open.
+ *
+ * Walks songsMetadata rather than the content stores because `storage.saved`
+ * lives on the metadata record. Metadata itself is kept so the entry keeps its
+ * access history; clearing the content is enough to trigger a re-fetch, since
+ * the viewer falls back to the API whenever content is missing and unsaved.
+ */
+function dropUnsavedCachedContent(db: IDBDatabase, transaction?: IDBTransaction | null): void {
+  if (!transaction) return;
+  if (!db.objectStoreNames.contains(STORES.SONGS_METADATA)) return;
+
+  const metadataStore = transaction.objectStore(STORES.SONGS_METADATA);
+  const contentStore = db.objectStoreNames.contains(STORES.CHORD_SHEETS)
+    ? transaction.objectStore(STORES.CHORD_SHEETS)
+    : null;
+  const fullStore = db.objectStoreNames.contains(STORES.FULL_CHORD_SHEETS)
+    ? transaction.objectStore(STORES.FULL_CHORD_SHEETS)
+    : null;
+  if (!contentStore && !fullStore) return;
+
+  metadataStore.openCursor().onsuccess = (event) => {
+    const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result;
+    if (!cursor) return;
+
+    const record = cursor.value as { path?: string; storage?: { saved?: boolean } };
+    if (record?.path && !record.storage?.saved) {
+      contentStore?.delete(record.path);
+      fullStore?.delete(record.path);
+      cursor.update({ ...record, storage: { ...record.storage, contentAvailable: false } });
+    }
+    cursor.continue();
+  };
 }

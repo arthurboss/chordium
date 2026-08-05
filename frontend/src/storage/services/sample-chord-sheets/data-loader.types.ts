@@ -11,4 +11,6 @@ export interface SampleChordSheetRecord {
   path: string;
   metadata: SongMetadata;
   content: ChordSheet;
+  /** Full arrangement (with tabs), when the source has a distinct one. */
+  fullContent?: ChordSheet;
 }

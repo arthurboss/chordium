@@ -2,7 +2,12 @@ import { CHORD_REGEX } from '@/utils/chord-sheet-utils';
 import i18next from 'i18next';
 
 const TAB_LINE_REGEX = /^[EBGDAe][\|][-\d]/;
-const SECTION_REGEX = /^\[([^\]]+)\]$/;
+
+// Characters tolerated around chords on an otherwise chord-only line: repeat
+// markers like "(2x)" or "x2", brackets/parens grouping alternate chords
+// (e.g. "( Am  C  Am )"), and basic punctuation. Letters are deliberately
+// excluded, so real lyric words never slip through as "decoration".
+const CHORD_LINE_DECORATION_REGEX = /^[\s()[\]{}xX0-9.,:-]*$/;
 
 const SECTION_TITLE_KEYWORDS: Record<string, string> = {
   'intro': 'sectionTitles.intro',
@@ -31,7 +36,7 @@ function isChordLine(line: string): boolean {
   if (!CHORD_REGEX.test(line)) return false;
   CHORD_REGEX.lastIndex = 0;
   const stripped = line.replace(CHORD_REGEX, '');
-  return stripped.trim() === '';
+  return CHORD_LINE_DECORATION_REGEX.test(stripped);
 }
 
 function isTabLine(line: string): boolean {
@@ -52,11 +57,19 @@ export function songChordsToRawHtml(songChords: string): string {
     const line = lines[i];
     const trimmed = line.trim();
 
-    // Section title: [Title]
-    const sectionMatch = trimmed.match(/^\[([^\]]+)\]$/);
+    // Section title: [Title], optionally followed by chords on the same line
+    // (e.g. "[Intro] C  Am  C  Am") - split the title onto its own line so it
+    // still renders as a heading, and let the remainder fall through to the
+    // chord-line check below.
+    const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
     if (sectionMatch) {
       const translatedTitle = translateSectionTitle(sectionMatch[1]);
       result.push('<span class="section-title">' + translatedTitle + '</span>');
+      const rest = sectionMatch[2];
+      if (rest) {
+        lines[i] = rest;
+        continue;
+      }
       i++;
       continue;
     }

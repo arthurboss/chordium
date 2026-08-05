@@ -17,4 +17,7 @@ export const STORES = {
   
   /** Search cache storage - contains cached search results */
   SEARCH_CACHE: "searchCache",
+
+  /** Full-arrangement chord sheets (with tabs) for the simplified/full toggle */
+  FULL_CHORD_SHEETS: "fullChordSheets",
 } as const;

@@ -18,10 +18,11 @@ export default async function initializeDatabase(): Promise<IDBDatabase> {
         );
       request.onsuccess = () => resolve(request.result);
       request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
+        const target = event.target as IDBOpenDBRequest;
+        const db = target.result;
         const oldVersion = event.oldVersion || 0;
         const newVersion = event.newVersion || DB_VERSION;
-        handleIndexedDBMigrations(db, oldVersion, newVersion);
+        handleIndexedDBMigrations(db, oldVersion, newVersion, target.transaction);
       };
     });
   } catch (error) {

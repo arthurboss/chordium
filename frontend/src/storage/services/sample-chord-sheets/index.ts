@@ -11,7 +11,7 @@ export type { SampleChordSheetRecord } from './data-loader.types';
 // Utilities (for testing and advanced usage)
 export { isDevelopmentMode } from './environment';
 export { shouldLoadSamples } from './duplicate-prevention';
-export { loadSampleData } from './data-loader';
+export { loadSampleData, loadSampleFullContent } from './data-loader';
 export { storeSampleChordSheets } from './storage';
 export { 
   logSkippingLoad, 

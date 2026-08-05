@@ -9,6 +9,7 @@
     "frontend",
     "backend",
     "packages/types",
+    "packages/scraping",
     "packages/e2e-tests"
   ],
   "scripts": {

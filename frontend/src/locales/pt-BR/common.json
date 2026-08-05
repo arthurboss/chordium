@@ -171,5 +171,13 @@
     "za": "Z → A",
     "recent": "Recentes",
     "mostPlayed": "Mais tocados"
+  },
+  "arrangementToggle": {
+    "simplified": "Simplificada",
+    "simplifiedTitle": "Versão simplificada (acordes mais fáceis, sem tablatura)",
+    "full": "Completa",
+    "fullTitle": "Versão completa (com tablatura)",
+    "editingIndicator": "Editando: {{arrangement}}",
+    "editingIndicatorTitle": "A versão que você está editando atualmente"
   }
 }

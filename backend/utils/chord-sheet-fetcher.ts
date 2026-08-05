@@ -1,6 +1,13 @@
 import puppeteerService from "../services/puppeteer.service.js";
 import logger from "./logger.js";
 import { extractChordSheet, extractSongMetadata, extractLyricsContent } from "./dom-extractors.js";
+import {
+  fetchPreferredChordSheet as sharedFetchPreferred,
+  fetchFullChordSheet as sharedFetchFull,
+  type CascadeResult,
+  type PageLike,
+} from "@chordium/scraping";
+export type { CascadeResult } from "@chordium/scraping";
 import type { ChordSheet, SongMetadata } from "../../shared/types/index.js";
 import type { Page } from "puppeteer";
 
@@ -354,3 +361,20 @@ async function fetchContentOnly(songUrl: string): Promise<ChordSheet> {
 }
 
 
+
+/**
+ * Cascade fetchers — delegate to the shared @chordium/scraping logic, injecting
+ * the backend's Puppeteer page. Keeping the cascade in the shared package keeps
+ * the Express backend and the Vercel serverless functions in sync.
+ */
+export async function fetchPreferredChordSheet(baseUrl: string): Promise<CascadeResult> {
+  return puppeteerService.withPage((page: Page) =>
+    sharedFetchPreferred(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
+  );
+}
+
+export async function fetchFullChordSheet(baseUrl: string): Promise<CascadeResult> {
+  return puppeteerService.withPage((page: Page) =>
+    sharedFetchFull(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
+  );
+}

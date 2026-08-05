@@ -5,6 +5,7 @@ import StyleToolbar from "@/components/StyleToolbar";
 import { Card } from "@/components/ui/card";
 import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import { storeArtistDisplayName } from "@/search/utils/artist/artist-display-name-cache";
 import type { Song } from "../types/song";
@@ -13,7 +14,7 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
-import { Pencil } from "lucide-react";
+import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
@@ -43,6 +44,12 @@ interface SongViewerProps {
   isContentLoading?: boolean;
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
+  /** A distinct full arrangement (with tabs) is available to toggle to. */
+  hasFullArrangement?: boolean;
+  /** Whether the full arrangement is currently displayed. */
+  showFull?: boolean;
+  /** Toggle between simplified and full arrangements. */
+  onToggleArrangement?: (showFull: boolean) => void;
 }
 
 const SongViewer = ({
@@ -61,9 +68,13 @@ const SongViewer = ({
   isContentLoading,
   onViewModeChange,
   initialViewMode,
+  hasFullArrangement = false,
+  showFull = false,
+  onToggleArrangement,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
@@ -79,6 +90,12 @@ const SongViewer = ({
   }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
+
+  // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
+  const hasTabs = useMemo(() => {
+    if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
+    return (chordContentToDisplay || "").includes("[TAB]");
+  }, [chordSheetToDisplay.rawHtml, chordContentToDisplay]);
 
   const {
     transpose,
@@ -257,8 +274,43 @@ const SongViewer = ({
           setFontSize={setFontSize}
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
+          hasTabs={hasTabs}
         />
       </Card>
+
+      {hasFullArrangement && isEditing && (
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
+            {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
+            {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
+          </div>
+        </div>
+      )}
+
+      {hasFullArrangement && !isEditing && (
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-full border p-0.5 text-sm">
+            <button
+              type="button"
+              onClick={() => onToggleArrangement?.(false)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${!showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              title={t("arrangementToggle.simplifiedTitle")}
+            >
+              <Music className="h-3.5 w-3.5" />
+              {t("arrangementToggle.simplified")}
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleArrangement?.(true)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              title={t("arrangementToggle.fullTitle")}
+            >
+              <Guitar className="h-3.5 w-3.5" />
+              {t("arrangementToggle.full")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <ChordSheetViewer
         ref={chordDisplayRef}

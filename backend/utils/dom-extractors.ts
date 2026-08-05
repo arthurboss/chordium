@@ -199,6 +199,12 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const artistElement = document.querySelector("h2.t3 a");
   if (artistElement) {
     artist = artistElement.textContent?.trim() || "";
+  } else {
+    // Print pages (imprimir.html) render the artist in a bare h2 with no anchor.
+    const artistHeading = document.querySelector("h2");
+    if (artistHeading) {
+      artist = artistHeading.textContent?.trim() || "";
+    }
   }
 
   // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
@@ -254,9 +260,15 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   // Extract key, tuning, and capo information
   // Extract song key from span#cifra_tom a element (CifraClub specific)
   let songKey = "";
-  const keyElement = document.querySelector("span#cifra_tom a");
-  if (keyElement) {
-    songKey = keyElement.textContent?.trim() || "";
+  const keyAnchor = document.querySelector("span#cifra_tom a");
+  if (keyAnchor) {
+    songKey = keyAnchor.textContent?.trim() || "";
+  } else {
+    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
+    const keySpan = document.querySelector("span#cifra_tom");
+    if (keySpan) {
+      songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    }
   }
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
@@ -301,10 +313,14 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
  */
 export function extractSongKey(): string {
   // Extract song key from span#cifra_tom a element (CifraClub specific)
-  const keyElement = document.querySelector("span#cifra_tom a");
-  if (keyElement) {
-    const key = keyElement.textContent?.trim() || "";
-    return key;
+  const keyAnchor = document.querySelector("span#cifra_tom a");
+  if (keyAnchor) {
+    return keyAnchor.textContent?.trim() || "";
+  }
+  // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
+  const keySpan = document.querySelector("span#cifra_tom");
+  if (keySpan) {
+    return (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
   }
 
   return "";
@@ -347,6 +363,12 @@ export function extractSongMetadata(): SongMetadata {
   const artistElement = document.querySelector("h2.t3 a");
   if (artistElement) {
     artist = artistElement.textContent?.trim() || "";
+  } else {
+    // Print pages (imprimir.html) render the artist in a bare h2 with no anchor.
+    const artistHeading = document.querySelector("h2");
+    if (artistHeading) {
+      artist = artistHeading.textContent?.trim() || "";
+    }
   }
 
   // Try to get title and artist from page title (format: "Song Title - Artist Name - Cifra Club")
@@ -402,9 +424,15 @@ export function extractSongMetadata(): SongMetadata {
   // Extract key, tuning, and capo information
   // Extract song key from span#cifra_tom a element (CifraClub specific)
   let songKey = "";
-  const keyElement = document.querySelector("span#cifra_tom a");
-  if (keyElement) {
-    songKey = keyElement.textContent?.trim() || "";
+  const keyAnchor = document.querySelector("span#cifra_tom a");
+  if (keyAnchor) {
+    songKey = keyAnchor.textContent?.trim() || "";
+  } else {
+    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
+    const keySpan = document.querySelector("span#cifra_tom");
+    if (keySpan) {
+      songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    }
   }
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)

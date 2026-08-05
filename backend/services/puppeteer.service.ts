@@ -214,10 +214,24 @@ class PuppeteerService {
         return result;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorCode = (error as { code?: string }).code;
+
+        // A definitive 'this song has no chord sheet' is not a transient
+        // failure: retrying cannot change the outcome, and re-wrapping it would
+        // hide the code the route handlers use to answer 404 instead of 502.
+        if (errorCode === 'NOT_FOUND') {
+          throw error;
+        }
+
         logger.warn(`withPage operation failed (attempt ${attempt}/${maxRetries}): ${errorMessage}`);
-        
+
         if (attempt === maxRetries) {
-          throw new Error(`withPage operation failed after ${maxRetries} attempts: ${errorMessage}`);
+          // Preserve the original code so callers can still map it to the right
+          // status instead of a blanket 502.
+          throw Object.assign(
+            new Error(`withPage operation failed after ${maxRetries} attempts: ${errorMessage}`),
+            errorCode ? { code: errorCode } : {}
+          );
         }
 
         // Check if it's a browser connection issue that requires restart

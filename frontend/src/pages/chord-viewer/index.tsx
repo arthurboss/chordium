@@ -8,10 +8,14 @@ import { resolveChordSheetPath } from './utils/path-resolver';
 import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordSheetQR';
 import { createChordSheetData } from './utils/chord-sheet-data';
 import { extractNavigationData } from './utils/navigation-data';
+import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
+import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
+import { storeFullChordSheet } from '@/storage/stores/chord-sheets/operations';
+import { fetchFullSongFromAPI } from '@/services/api/fetch-song';
 
 import { ChordViewerLoading } from './components/chord-viewer-loading';
 import { ChordViewerError } from './components/chord-viewer-error';
@@ -31,9 +35,16 @@ const ChordViewer = () => {
 
   // Holds edited song data so the view reflects saves without a page refresh.
   const [editedData, setEditedData] = useState<UpdatedSongData | null>(null);
+  // Whether the full arrangement (with tabs) is currently displayed.
+  const [showFull, setShowFull] = useState(false);
+  // Holds an edit made to the full arrangement (separate from editedData, which
+  // is the simplified override).
+  const [fullEdited, setFullEdited] = useState<string | null>(null);
 
   useEffect(() => {
     setEditedData(null);
+    setShowFull(false);
+    setFullEdited(null);
   }, [path]);
 
   useEffect(() => {
@@ -102,6 +113,15 @@ const ChordViewer = () => {
   const handleSave = async () => {
     await baseHandleSave();
     setIsSaved(true);
+
+    // Persist the full arrangement (with tabs) as saved too, so toggling to
+    // it later doesn't require re-fetching.
+    persistFullArrangementOnSave(
+      path,
+      chordSheetResult.hasFullArrangement,
+      chordSheetResult.fullContent,
+      { storeFullChordSheet, fetchFullSongFromAPI }
+    );
   };
   const { handleDelete } = useChordSheetDelete(
     path,
@@ -109,20 +129,34 @@ const ChordViewer = () => {
   );
 
   const handleUpdate = useCallback(async (data: UpdatedSongData) => {
-    await storeChordSheet(
-      {
-        title: data.title,
-        artist: data.artist,
-        songKey: data.songKey,
-        guitarTuning: data.guitarTuning,
-        guitarCapo: data.guitarCapo,
-      },
-      { songChords: data.songChords },
-      isSaved,
-      path
-    );
-    setEditedData(data);
-  }, [isSaved, path]);
+    const metadata = {
+      title: data.title,
+      artist: data.artist,
+      songKey: data.songKey,
+      guitarTuning: data.guitarTuning,
+      guitarCapo: data.guitarCapo,
+    };
+    if (showFull) {
+      // Editing the full arrangement: content goes to the full store; metadata
+      // is shared, so persist it to the primary store's metadata too (keeping
+      // the primary content untouched). Read the simplified content the same
+      // way displayContent does below - editedData first - since
+      // chordSheetResult.content is only populated once on mount and would
+      // otherwise clobber a simplified edit just saved earlier this session.
+      await storeFullChordSheet({ songChords: data.songChords }, path);
+      await storeChordSheet(
+        metadata,
+        { songChords: resolveSimplifiedContentForFullEdit(editedData?.songChords, chordSheetResult.content?.songChords) },
+        isSaved,
+        path
+      );
+      setFullEdited(data.songChords);
+    } else {
+      // Editing the simplified (default) arrangement.
+      await storeChordSheet(metadata, { songChords: data.songChords }, isSaved, path);
+      setEditedData(data);
+    }
+  }, [isSaved, path, showFull, editedData, chordSheetResult.content]);
 
   if (jamPayload && !chordSheetResult.metadata) {
     const jamChordSheet = {
@@ -172,22 +206,36 @@ const ChordViewer = () => {
     );
   }
 
-  const displayContent = editedData?.songChords ?? (chordSheetResult.content?.songChords ?? '');
+  const fullSheet = chordSheetResult.fullContent;
 
-  // Once edited, the edited plain text/metadata become the source of truth;
-  // drop the stale scraped rawHtml so the new content renders.
-  const displayChordSheet = editedData != null
-    ? {
-        ...chordSheetData!.chordSheet,
-        title: editedData.title,
-        artist: editedData.artist,
-        songKey: editedData.songKey,
-        guitarTuning: editedData.guitarTuning,
-        guitarCapo: editedData.guitarCapo,
-        songChords: editedData.songChords,
-        rawHtml: undefined,
-      }
-    : chordSheetData!.chordSheet;
+  // Choose which arrangement to display. Full arrangement uses its own content
+  // and rawHtml; simplified uses the primary content (with edit override).
+  let displayContent: string;
+  let displayChordSheet: typeof chordSheetData.chordSheet;
+  if (showFull && fullSheet) {
+    displayContent = fullEdited ?? fullSheet.songChords;
+    displayChordSheet = {
+      ...chordSheetData!.chordSheet,
+      songChords: fullEdited ?? fullSheet.songChords,
+      // When the full arrangement was edited in plain text, drop the scraped
+      // rawHtml so the edited text renders; otherwise keep it for tab rendering.
+      rawHtml: fullEdited != null ? undefined : fullSheet.rawHtml,
+    };
+  } else {
+    displayContent = editedData?.songChords ?? (chordSheetResult.content?.songChords ?? '');
+    displayChordSheet = editedData != null
+      ? {
+          ...chordSheetData!.chordSheet,
+          title: editedData.title,
+          artist: editedData.artist,
+          songKey: editedData.songKey,
+          guitarTuning: editedData.guitarTuning,
+          guitarCapo: editedData.guitarCapo,
+          songChords: editedData.songChords,
+          rawHtml: undefined,
+        }
+      : chordSheetData!.chordSheet;
+  }
 
   return (
     <SongViewer
@@ -213,6 +261,9 @@ const ChordViewer = () => {
       isContentLoading={chordSheetResult.isContentLoading}
       onViewModeChange={handleViewModeChange}
       initialViewMode={activeViewMode}
+      hasFullArrangement={chordSheetResult.hasFullArrangement}
+      showFull={showFull}
+      onToggleArrangement={setShowFull}
     />
   );
 };
