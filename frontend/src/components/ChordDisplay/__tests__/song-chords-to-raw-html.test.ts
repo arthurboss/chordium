@@ -67,4 +67,42 @@ describe("songChordsToRawHtml", () => {
     expect(result).toContain("<b>C</b>            <b>G</b>");
     expect(result).toContain("Pai eu quero te amar");
   });
+
+  it("wraps chords grouped in parentheses, e.g. a repeated turnaround", () => {
+    const result = songChordsToRawHtml("( Am  C  Am )");
+
+    expect(result).toBe("( <b>Am</b>  <b>C</b>  <b>Am</b> )");
+  });
+
+  it("wraps chords next to a repeat marker like 2x", () => {
+    const result = songChordsToRawHtml("2x  C  Am");
+
+    expect(result).toBe("2x  <b>C</b>  <b>Am</b>");
+  });
+
+  it("wraps chords followed by a parenthesized repeat marker", () => {
+    const result = songChordsToRawHtml("C  Am  (2x)");
+
+    expect(result).toBe("<b>C</b>  <b>Am</b>  (2x)");
+  });
+
+  it("does not treat a pure repeat instruction with no chords as a chord line", () => {
+    const result = songChordsToRawHtml("(repete 2x)");
+
+    expect(result).toBe("(repete 2x)");
+  });
+
+  it("does not treat lyric lines containing chord-letter words as chord lines", () => {
+    const result = songChordsToRawHtml("E o Senhor é bom");
+
+    expect(result).toBe("E o Senhor é bom");
+  });
+
+  it("handles multiple parenthesized chord groups across lines, matching the reported song", () => {
+    const input = "Aleluia, alelu____ia\n\n( Am  C  Am )\n\nSegunda Parte";
+    const result = songChordsToRawHtml(input);
+
+    expect(result).toContain("( <b>Am</b>  <b>C</b>  <b>Am</b> )");
+    expect(result).toContain("Aleluia, alelu____ia");
+  });
 });

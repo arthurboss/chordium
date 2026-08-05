@@ -3,6 +3,12 @@ import i18next from 'i18next';
 
 const TAB_LINE_REGEX = /^[EBGDAe][\|][-\d]/;
 
+// Characters tolerated around chords on an otherwise chord-only line: repeat
+// markers like "(2x)" or "x2", brackets/parens grouping alternate chords
+// (e.g. "( Am  C  Am )"), and basic punctuation. Letters are deliberately
+// excluded, so real lyric words never slip through as "decoration".
+const CHORD_LINE_DECORATION_REGEX = /^[\s()[\]{}xX0-9.,:-]*$/;
+
 const SECTION_TITLE_KEYWORDS: Record<string, string> = {
   'intro': 'sectionTitles.intro',
   'verse': 'sectionTitles.verse',
@@ -30,7 +36,7 @@ function isChordLine(line: string): boolean {
   if (!CHORD_REGEX.test(line)) return false;
   CHORD_REGEX.lastIndex = 0;
   const stripped = line.replace(CHORD_REGEX, '');
-  return stripped.trim() === '';
+  return CHORD_LINE_DECORATION_REGEX.test(stripped);
 }
 
 function isTabLine(line: string): boolean {
