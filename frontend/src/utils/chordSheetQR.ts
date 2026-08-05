@@ -120,8 +120,25 @@ export async function decodeChordSheet(
   }
 }
 
+/**
+ * Resolves the origin a shared jam link should point at.
+ *
+ * Production uses `VITE_APP_URL` so a code stays valid regardless of which host
+ * generated it: the same build is served on several hostnames, and the
+ * per-deployment one is superseded by the next deploy, which would leave
+ * already-shared codes pointing at a host that no longer serves the app.
+ *
+ * Previews and local dev deliberately ignore it and use the current origin, so
+ * a code scanned while reviewing a branch opens that branch, not production.
+ */
+function resolveJamOrigin(): string {
+  const canonical = import.meta.env.VITE_APP_URL;
+  if (canonical && process.env.VERCEL_ENV === "production") return canonical;
+  return window.location.origin;
+}
+
 export function buildJamUrl(encoded: string, artist: string, title: string): string {
-  const base = import.meta.env.VITE_APP_URL ?? window.location.origin;
+  const base = resolveJamOrigin();
   const artistSlug = normalizeNamePart(artist);
   const titleSlug = normalizeNamePart(title);
   const url = new URL(`/${artistSlug}/${titleSlug}`, base);
