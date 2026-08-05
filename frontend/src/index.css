@@ -81,6 +81,13 @@
 
   html {
     transition: color 0.3s ease, background-color 0.3s ease;
+    /*
+     * Reserve the scrollbar gutter at all times. Without this, short pages have
+     * no scrollbar and tall ones do, so the viewport narrows by the scrollbar
+     * width and every centred element jumps sideways when navigating between
+     * them.
+     */
+    scrollbar-gutter: stable;
   }
 
   button:not(:disabled),
