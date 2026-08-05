@@ -2,7 +2,6 @@ import { CHORD_REGEX } from '@/utils/chord-sheet-utils';
 import i18next from 'i18next';
 
 const TAB_LINE_REGEX = /^[EBGDAe][\|][-\d]/;
-const SECTION_REGEX = /^\[([^\]]+)\]$/;
 
 const SECTION_TITLE_KEYWORDS: Record<string, string> = {
   'intro': 'sectionTitles.intro',
@@ -52,11 +51,19 @@ export function songChordsToRawHtml(songChords: string): string {
     const line = lines[i];
     const trimmed = line.trim();
 
-    // Section title: [Title]
-    const sectionMatch = trimmed.match(/^\[([^\]]+)\]$/);
+    // Section title: [Title], optionally followed by chords on the same line
+    // (e.g. "[Intro] C  Am  C  Am") - split the title onto its own line so it
+    // still renders as a heading, and let the remainder fall through to the
+    // chord-line check below.
+    const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
     if (sectionMatch) {
       const translatedTitle = translateSectionTitle(sectionMatch[1]);
       result.push('<span class="section-title">' + translatedTitle + '</span>');
+      const rest = sectionMatch[2];
+      if (rest) {
+        lines[i] = rest;
+        continue;
+      }
       i++;
       continue;
     }
