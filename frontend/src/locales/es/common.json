@@ -120,7 +120,23 @@
     "pasteConnectionString": "Pegar cadena de conexión",
     "orPasteConnectionString": "O pega la cadena de conexión aquí",
     "scanToJoin": "Escanea este código QR para unirte a la sesión",
-    "or": "o"
+    "or": "o",
+    "jamSession": "Sesión de jam",
+    "pointAtQrCode": "Apunta a un código QR de Chordium",
+    "orPasteLink": "o pega el enlace",
+    "generatingQr": "Generando código QR…",
+    "scanToLoad": "Escanea para cargar {{title}} en otro dispositivo. Funciona sin conexión.",
+    "shareableLink": "Enlace de jam para compartir",
+    "linkCopied": "Enlace copiado",
+    "pressToCopy": "Pulsa Cmd+C / Ctrl+C para copiar",
+    "qrFailed": "No se pudo generar el código QR",
+    "invalidCode": "Código no válido: pega un enlace de jam de Chordium o el contenido sin procesar",
+    "jamLinkPlaceholder": "Enlace de jam de Chordium o contenido",
+    "go": "Ir",
+    "shareOrJoinDescription": "Comparte esta canción con un dispositivo cercano o únete a una sesión desde otro dispositivo.",
+    "joinDescription": "Únete a una sesión de jam desde otro dispositivo.",
+    "scanToLoadSimplified": "Escanea para cargar {{title}} en otro dispositivo. La versión completa con tablaturas es demasiado grande para un código, así que se comparte la simplificada. Funciona sin conexión.",
+    "scanToOpenOnline": "Escanea para abrir {{title}} en otro dispositivo. Esta canción es demasiado grande para un código, así que el enlace la abre en línea en lugar de sin conexión."
   },
   "smallScreenWarning": {
     "title": "Pantalla Demasiado Pequeña",
@@ -179,5 +195,9 @@
     "fullTitle": "Versión completa (con tablatura)",
     "editingIndicator": "Editando: {{arrangement}}",
     "editingIndicatorTitle": "La versión que estás editando actualmente"
+  },
+  "chordSheet": {
+    "editChordSheet": "Editar cifrado",
+    "cancelEditing": "Cancelar edición"
   }
 }

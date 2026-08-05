@@ -81,6 +81,23 @@
 
   html {
     transition: color 0.3s ease, background-color 0.3s ease;
+    /*
+     * Reserve the scrollbar gutter at all times. Without this, short pages have
+     * no scrollbar and tall ones do, so the viewport narrows by the scrollbar
+     * width and every centred element jumps sideways when navigating between
+     * them.
+     */
+    scrollbar-gutter: stable;
+  }
+
+  /*
+   * Radix locks scrolling by hiding overflow and adding a right margin to
+   * replace the scrollbar it removes. With the gutter reserved above, the
+   * scrollbar's space was never given up, so that margin double-compensates
+   * and visibly shrinks and shifts the page behind an open dialog.
+   */
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
   }
 
   button:not(:disabled),

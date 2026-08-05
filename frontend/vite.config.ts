@@ -283,6 +283,9 @@ export default defineConfig(({ mode }) => {
       // Ensure environment variables are available at build time
       'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
       'process.env.VERCEL': JSON.stringify(process.env.VERCEL),
+      // Distinguishes the production deployment from branch previews, so shared
+      // jam links only get rewritten to the canonical host in production.
+      'process.env.VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV),
     },
     test: {
       globals: true,

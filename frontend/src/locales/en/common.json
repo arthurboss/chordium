@@ -120,7 +120,23 @@
     "pasteConnectionString": "Paste connection string",
     "orPasteConnectionString": "Or paste connection string here",
     "scanToJoin": "Scan this QR code to join the session",
-    "or": "or"
+    "or": "or",
+    "jamSession": "Jam Session",
+    "pointAtQrCode": "Point at a Chordium QR code",
+    "orPasteLink": "or paste link",
+    "generatingQr": "Generating QR code…",
+    "scanToLoad": "Scan to load {{title}} on another device. Works offline — no internet needed.",
+    "shareableLink": "Shareable jam link",
+    "linkCopied": "Link copied",
+    "pressToCopy": "Press Cmd+C / Ctrl+C to copy",
+    "qrFailed": "Failed to generate QR code",
+    "invalidCode": "Invalid code — paste a Chordium jam link or the raw payload",
+    "jamLinkPlaceholder": "Chordium jam link or payload",
+    "go": "Go",
+    "shareOrJoinDescription": "Share this song with a nearby device, or join a session from another device.",
+    "joinDescription": "Join a jam session from another device.",
+    "scanToLoadSimplified": "Scan to load {{title}} on another device. The full version with tabs is too large for a code, so the simplified one is shared. Works offline.",
+    "scanToOpenOnline": "Scan to open {{title}} on another device. This song is too large for a code, so the link opens it online instead of loading it offline."
   },
   "smallScreenWarning": {
     "title": "Screen Too Small",
@@ -179,5 +195,9 @@
     "fullTitle": "Full arrangement (with tabs)",
     "editingIndicator": "Editing: {{arrangement}}",
     "editingIndicatorTitle": "The arrangement you are currently editing"
+  },
+  "chordSheet": {
+    "editChordSheet": "Edit chord sheet",
+    "cancelEditing": "Cancel editing"
   }
 }

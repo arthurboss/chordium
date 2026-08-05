@@ -16,7 +16,7 @@ import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
+import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
 
 export interface UpdatedSongData {
@@ -50,6 +50,11 @@ interface SongViewerProps {
   showFull?: boolean;
   /** Toggle between simplified and full arrangements. */
   onToggleArrangement?: (showFull: boolean) => void;
+  /**
+   * The simplified arrangement, when the full one is displayed. Shared instead
+   * of the full version when the latter is too large for a QR code.
+   */
+  simplifiedChordSheet?: { songChords: string; rawHtml?: string };
 }
 
 const SongViewer = ({
@@ -71,6 +76,7 @@ const SongViewer = ({
   hasFullArrangement = false,
   showFull = false,
   onToggleArrangement,
+  simplifiedChordSheet,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   const navigate = useNavigate();
@@ -90,6 +96,8 @@ const SongViewer = ({
   }, [directChordContent, isFromMyChordSheets, lazyContent, chordSheet.songChords]);
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
+
+  const { setActive: setActiveShareable } = useActiveChordSheet();
 
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
@@ -162,6 +170,34 @@ const SongViewer = ({
     setEditCapo(chordSheetToDisplay.guitarCapo ?? 0);
   }, [chordContentToDisplay, chordSheetToDisplay, isEditing, updateEditContent]);
 
+  // Publish what is on screen so the header's jam button can share it. It is
+  // withdrawn while editing, so unsaved text is never encoded into a QR code,
+  // and on unmount, so the button stops offering a song after navigating away.
+  useEffect(() => {
+    if (isEditing || !chordContentToDisplay) {
+      setActiveShareable(null);
+      return;
+    }
+    setActiveShareable({
+      chordSheet: { ...chordSheetToDisplay, songChords: chordContentToDisplay },
+      // Offered as the smaller payload when the full arrangement will not fit
+      // in a QR code. Absent when the simplified one is already on screen.
+      simplifiedChordSheet: simplifiedChordSheet
+        ? { ...chordSheetToDisplay, ...simplifiedChordSheet }
+        : undefined,
+      songPath: songObj.path,
+    });
+  }, [
+    isEditing,
+    chordSheetToDisplay,
+    chordContentToDisplay,
+    simplifiedChordSheet,
+    songObj.path,
+    setActiveShareable,
+  ]);
+
+  useEffect(() => () => setActiveShareable(null), [setActiveShareable]);
+
   const handleAction = () => {
     if (isEditing) {
       saveEdits();
@@ -226,22 +262,15 @@ const SongViewer = ({
         onTitleChange={setEditTitle}
         onArtistChange={setEditArtist}
         rightContent={
-          <>
-            {!isEditing && chordContentToDisplay && (
-              <JamQRModal
-                chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }}
-              />
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-shrink-0 h-10 w-10 rounded-full"
-              onClick={() => setIsEditing((e) => !e)}
-              title={isEditing ? "Cancel editing" : "Edit chord sheet"}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-shrink-0 h-10 w-10 rounded-full"
+            onClick={() => setIsEditing((e) => !e)}
+            title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
         }
         metadata={
           <ChordMetadata

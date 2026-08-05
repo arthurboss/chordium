@@ -8,6 +8,8 @@
         "VITE_API_URL",
         "NODE_ENV",
         "VERCEL",
+        "VERCEL_ENV",
+        "VITE_APP_URL",
         "SUPABASE_ANON_KEY",
         "SUPABASE_URL",
         "SUPABASE_SERVICE_ROLE_KEY",
