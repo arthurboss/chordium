@@ -29,7 +29,7 @@ describe('extractChordSheet', () => {
 
     const result: ChordSheet = extractChordSheet();
 
-    expect(result.songChords).toBe('   [Em7]  [G]\nToday is gonna be the day');
+    expect(result.songChords).toBe('[Em7]Today is [G]gonna be the day');
   });
 
   it('trims whitespace inside the chord bracket', () => {
@@ -134,7 +134,7 @@ describe('extractChordSheet', () => {
     const result: ChordSheet = extractChordSheet();
 
     expect(result.songChords).toBe(
-      '{comment: Intro}\n[Em7]  [G]  [Dsus4]  [A7sus4]\n\n{comment: Verse 1}\n[Em7]             [G]\nToday is gonna be the day'
+      '{comment: Intro}\n[Em7]  [G]  [Dsus4]  [A7sus4]\n\n{comment: Verse 1}\n[Em7]Today is gonna [G]be the day'
     );
   });
 
@@ -146,5 +146,44 @@ describe('extractChordSheet', () => {
     expect(result).toEqual({
       songChords: '',
     });
+  });
+
+  it('merges a chord-only line into the following lyric line instead of leaving them on separate lines', () => {
+    // Real CifraClub markup wraps each chord in its own <b> on a line by
+    // itself, positioned above the lyric line it belongs to -- not real
+    // ChordPro until the two are merged into one inline-bracket line.
+    const mockPreElement = mockElement('pre', {
+      children: [
+        mockElement('b', { textContent: "G#m" }),
+        mockTextNode('          '),
+        mockElement('b', { textContent: 'F#' }),
+        mockTextNode('              '),
+        mockElement('b', { textContent: 'E' }),
+        mockTextNode('\nI am so high, I can hear heaven'),
+      ],
+    });
+
+    mockDocument((selector: string) => (selector === 'pre' ? [mockPreElement] : []));
+
+    const result: ChordSheet = extractChordSheet();
+
+    expect(result.songChords).toBe('[G#m]I am so high, [F#]I can hear [E]heaven');
+  });
+
+  it('does not merge a chord-only line into a following section directive or another chord-only line', () => {
+    const mockPreElement = mockElement('pre', {
+      children: [
+        mockTextNode('[Intro]\n'),
+        mockElement('b', { textContent: 'Em7' }),
+        mockTextNode('\n'),
+        mockElement('b', { textContent: 'G' }),
+      ],
+    });
+
+    mockDocument((selector: string) => (selector === 'pre' ? [mockPreElement] : []));
+
+    const result: ChordSheet = extractChordSheet();
+
+    expect(result.songChords).toBe('{comment: Intro}\n[Em7]\n[G]');
   });
 });
