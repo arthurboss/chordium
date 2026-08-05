@@ -171,18 +171,72 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
   let songChords = "";
   if (preElement) {
-    preElement.childNodes.forEach(function(node) {
+    // Recursively walk each top-level child, converting the source's <b>-wrapped
+    // chords and span.tablatura tab blocks into ChordPro's inline-bracket and
+    // {start_of_tab}/{end_of_tab} directive syntax. Plain text (lyrics, and bare
+    // "[Section]" text nodes) passes through untouched at this stage -- bare
+    // section-header brackets are disambiguated from chord brackets in a second
+    // pass below, once full line boundaries are known.
+    function nodeToChordPro(node: Node): string {
       if (node.nodeType === Node.TEXT_NODE) {
-        songChords += node.textContent || "";
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (el.classList.contains("tablatura")) {
-          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-        } else {
-          songChords += el.textContent || "";
-        }
+        return node.textContent || "";
       }
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        return "{start_of_tab}\n" + (el.textContent || "") + "\n{end_of_tab}\n";
+      }
+      if (el.tagName.toLowerCase() === "b") {
+        // Prefix with a sentinel control character so the line-level pass below
+        // can tell a chord-origin bracket (from a <b> tag) apart from a bare
+        // "[Section]" text node even when the bracket is the only content on
+        // its line (e.g. an instrumental line with a single chord). Stripped
+        // out again once that disambiguation is done.
+        return "\u0000[" + (el.textContent || "").trim() + "]";
+      }
+      // Any other wrapping element: recurse so a <b> nested one level deeper
+      // (or any other markup CifraClub adds) still resolves to a chord bracket.
+      return Array.from(el.childNodes).map(nodeToChordPro).join("");
+    }
+
+    let assembled = "";
+    preElement.childNodes.forEach(function(node) {
+      assembled += nodeToChordPro(node);
     });
+
+    // Second pass: a line that is *only* "[Section Name]" (bare bracket, no
+    // adjoining chords/lyrics) is a section header in the source markup, not a
+    // chord -- convert it to a ChordPro comment directive. Lines inside a tab
+    // block are left untouched since tab content is whitespace-significant.
+    let insideTab = false;
+    songChords = assembled
+      .split("\n")
+      .map(function(line) {
+        const trimmed = line.trim();
+        if (trimmed === "{start_of_tab}") {
+          insideTab = true;
+          return line;
+        }
+        if (trimmed === "{end_of_tab}") {
+          insideTab = false;
+          return line;
+        }
+        if (!insideTab) {
+          // A section label can be followed by trailing content (typically
+          // chords) on the same source line, e.g. "[Intro] Em7  G  D4". Split
+          // the label onto its own {comment: ...} line so the trailing part
+          // is still parsed as a normal chord/lyrics line downstream.
+          const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
+          if (sectionMatch) {
+            const rest = sectionMatch[2];
+            return rest ? "{comment: " + sectionMatch[1] + "}\n" + rest : "{comment: " + sectionMatch[1] + "}";
+          }
+        }
+        return line;
+      })
+      .join("\n")
+      .split("\u0000")
+      .join("");
   }
 
   // Extract title and artist from page
@@ -473,27 +527,81 @@ export function extractSongMetadata(): SongMetadata {
 
 /**
  * Extracts chord sheet from CifraClub song page DOM (content only)
- * Extracts chord sheet content from the pre element.
- * Tab blocks (span.tablatura) are wrapped with [TAB]/[/TAB] markers
- * so the parser can identify them without heuristics.
+ * Extracts chord sheet content from the pre element, in ChordPro format:
+ * chords wrapped in <b> tags become inline [Chord] brackets, tab blocks
+ * (span.tablatura) become {start_of_tab}/{end_of_tab} blocks, and bare
+ * "[Section]" text nodes become {comment: Section} directives.
  */
 export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
   if (!preElement) return { songChords: "" };
 
-  let songChords = "";
-  preElement.childNodes.forEach(function(node) {
+  // Recursively walk each top-level child, converting the source's <b>-wrapped
+  // chords and span.tablatura tab blocks into ChordPro's inline-bracket and
+  // {start_of_tab}/{end_of_tab} directive syntax. Plain text (lyrics, and bare
+  // "[Section]" text nodes) passes through untouched at this stage -- bare
+  // section-header brackets are disambiguated from chord brackets in a second
+  // pass below, once full line boundaries are known.
+  function nodeToChordPro(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) {
-      songChords += node.textContent || "";
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as Element;
-      if (el.classList.contains("tablatura")) {
-        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-      } else {
-        songChords += el.textContent || "";
-      }
+      return node.textContent || "";
     }
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as Element;
+    if (el.classList.contains("tablatura")) {
+      return "{start_of_tab}\n" + (el.textContent || "") + "\n{end_of_tab}\n";
+    }
+    if (el.tagName.toLowerCase() === "b") {
+      // Prefix with a sentinel control character so the line-level pass below
+      // can tell a chord-origin bracket (from a <b> tag) apart from a bare
+      // "[Section]" text node even when the bracket is the only content on
+      // its line (e.g. an instrumental line with a single chord). Stripped
+      // out again once that disambiguation is done.
+      return "\u0000[" + (el.textContent || "").trim() + "]";
+    }
+    // Any other wrapping element: recurse so a <b> nested one level deeper
+    // (or any other markup CifraClub adds) still resolves to a chord bracket.
+    return Array.from(el.childNodes).map(nodeToChordPro).join("");
+  }
+
+  let assembled = "";
+  preElement.childNodes.forEach(function(node) {
+    assembled += nodeToChordPro(node);
   });
+
+  // Second pass: a line that is *only* "[Section Name]" (bare bracket, no
+  // adjoining chords/lyrics) is a section header in the source markup, not a
+  // chord -- convert it to a ChordPro comment directive. Lines inside a tab
+  // block are left untouched since tab content is whitespace-significant.
+  let insideTab = false;
+  const songChords = assembled
+    .split("\n")
+    .map(function(line) {
+      const trimmed = line.trim();
+      if (trimmed === "{start_of_tab}") {
+        insideTab = true;
+        return line;
+      }
+      if (trimmed === "{end_of_tab}") {
+        insideTab = false;
+        return line;
+      }
+      if (!insideTab) {
+        // A section label can be followed by trailing content (typically
+        // chords) on the same source line, e.g. "[Intro] Em7  G  D4". Split
+        // the label onto its own {comment: ...} line so the trailing part
+        // is still parsed as a normal chord/lyrics line downstream.
+        const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
+        if (sectionMatch) {
+          const rest = sectionMatch[2];
+          return rest ? "{comment: " + sectionMatch[1] + "}\n" + rest : "{comment: " + sectionMatch[1] + "}";
+        }
+      }
+      return line;
+    })
+    .join("\n")
+    .split("\u0000")
+    .join("");
 
 
   function sanitizeNode(node: Node): string {

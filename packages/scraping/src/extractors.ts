@@ -21,19 +21,66 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   let rawHtml: string | undefined;
 
   if (preElement) {
-    // Plain-text content (tab blocks wrapped in [TAB] markers).
-    preElement.childNodes.forEach(function (node) {
+    // Plain-text content in ChordPro format: chords wrapped in source <b>
+    // tags become inline [Chord] brackets, span.tablatura tab blocks become
+    // {start_of_tab}/{end_of_tab} directives, and bare "[Section]" text nodes
+    // (optionally followed by trailing chords on the same source line, e.g.
+    // "[Intro] Em7  G") become {comment: Section} directives.
+    function nodeToChordPro(node: Node): string {
       if (node.nodeType === Node.TEXT_NODE) {
-        songChords += node.textContent || "";
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (el.classList.contains("tablatura")) {
-          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-        } else {
-          songChords += el.textContent || "";
-        }
+        return node.textContent || "";
       }
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        return "{start_of_tab}\n" + (el.textContent || "") + "\n{end_of_tab}\n";
+      }
+      if (el.tagName.toLowerCase() === "b") {
+        // Sentinel-prefixed so the line-level pass below can tell a
+        // chord-origin bracket apart from a bare "[Section]" text node even
+        // when the bracket is the only content on its line (e.g. an
+        // instrumental line with a single chord).
+        return "\u0000[" + (el.textContent || "").trim() + "]";
+      }
+      return Array.from(el.childNodes).map(nodeToChordPro).join("");
+    }
+
+    let assembled = "";
+    preElement.childNodes.forEach(function (node) {
+      assembled += nodeToChordPro(node);
     });
+
+    // A line that is *only* "[Section Name]" (bare bracket, optionally
+    // followed by trailing content such as chords on the same line) is a
+    // section header in the source markup, not a chord -- convert the label
+    // to a ChordPro comment directive, splitting any trailing content onto
+    // its own line. Lines inside a tab block are left untouched since tab
+    // content is whitespace-significant.
+    let insideTab = false;
+    songChords = assembled
+      .split("\n")
+      .map(function (line) {
+        const trimmed = line.trim();
+        if (trimmed === "{start_of_tab}") {
+          insideTab = true;
+          return line;
+        }
+        if (trimmed === "{end_of_tab}") {
+          insideTab = false;
+          return line;
+        }
+        if (!insideTab) {
+          const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
+          if (sectionMatch) {
+            const rest = sectionMatch[2];
+            return rest ? "{comment: " + sectionMatch[1] + "}\n" + rest : "{comment: " + sectionMatch[1] + "}";
+          }
+        }
+        return line;
+      })
+      .join("\n")
+      .split("\u0000")
+      .join("");
 
     // rawHtml: keep only text, <b> (chords) and <span> (styling), stripping all
     // attributes except class on span. Preserves the source's chord markup.

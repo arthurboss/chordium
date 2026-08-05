@@ -102,7 +102,7 @@ const SongViewer = ({
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
-    return (chordContentToDisplay || "").includes("[TAB]");
+    return (chordContentToDisplay || "").includes("{start_of_tab}");
   }, [chordSheetToDisplay.rawHtml, chordContentToDisplay]);
 
   const {

@@ -1,5 +1,6 @@
 import { processTabBlocks } from '../tab-splitting';
-import { songChordsToRawHtml } from '../song-chords-to-raw-html';
+import { chordProToRawHtml } from '../chordpro-to-raw-html';
+import { isLegacyPositionalFormat, migrateLegacyToChordPro } from '@/utils/chordpro/migrate-legacy';
 import {
   normalizeZeroWidthSpaces,
   fixInlineSectionTitles,
@@ -39,8 +40,15 @@ export function processHtml(html: string, viewMode: string, maxCols: number, tra
 
 /**
  * Resolves the HTML source for a chord sheet.
- * Prefers `rawHtml` (scraped); falls back to converting plain-text `songChords`.
+ * Prefers `rawHtml` (scraped). Falls back to `songChords`: legacy
+ * positional-format text is migrated to ChordPro on the fly before
+ * rendering; ChordPro-format text renders directly.
  */
 export function resolveSourceHtml(rawHtml?: string, songChords?: string): string | undefined {
-  return rawHtml ?? (songChords ? songChordsToRawHtml(songChords) : undefined);
+  if (rawHtml) return rawHtml;
+  if (!songChords) return undefined;
+  const chordProText = isLegacyPositionalFormat(songChords)
+    ? migrateLegacyToChordPro(songChords)
+    : songChords;
+  return chordProToRawHtml(chordProText);
 }

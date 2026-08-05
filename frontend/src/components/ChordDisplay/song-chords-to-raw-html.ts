@@ -20,7 +20,7 @@ const SECTION_TITLE_KEYWORDS: Record<string, string> = {
   'interlude': 'sectionTitles.interlude',
 };
 
-function translateSectionTitle(title: string): string {
+export function translateSectionTitle(title: string): string {
   const lowerTitle = title.toLowerCase().trim();
   for (const [keyword, i18nKey] of Object.entries(SECTION_TITLE_KEYWORDS)) {
     if (lowerTitle.includes(keyword)) {
