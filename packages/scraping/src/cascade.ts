@@ -19,6 +19,11 @@ export interface PageLike {
   url(): string;
   evaluate<T>(fn: () => T): Promise<T>;
   setDefaultNavigationTimeout?(timeout: number): void;
+  /** Used to wait for the chord content element to be fully parsed. */
+  waitForFunction?(
+    fn: () => boolean,
+    opts?: { timeout?: number; polling?: string | number }
+  ): Promise<unknown>;
 }
 
 interface RouteSpec {
@@ -32,9 +37,55 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
+ * Runs in the browser: true once the chord <pre> element has been fully
+ * parsed, i.e. the parser has moved past its closing tag.
+ *
+ * A <pre> that is still being streamed is the last element in the document, so
+ * `nextElementSibling` (on it or any ancestor up to <body>) is null until the
+ * closing tag is seen. This is what distinguishes a partially received
+ * response from a complete one.
+ */
+function isChordContentComplete(): boolean {
+  const pre = document.querySelector("pre");
+  if (!pre) return false;
+  for (let node: Element | null = pre; node && node !== document.body; node = node.parentElement) {
+    if (node.nextElementSibling) return true;
+  }
+  return document.readyState === "complete";
+}
+
+/**
+ * Waits until the chord content is fully parsed.
+ *
+ * Guards against extracting from a partially received response: in constrained
+ * network environments (notably serverless), `domcontentloaded` can fire after
+ * only the first TCP segment of a gzip-encoded response has been processed,
+ * leaving the <pre> truncated mid-song. The extractor would then happily read
+ * that partial DOM and return it as if complete.
+ */
+async function waitForCompleteChordContent(
+  page: PageLike,
+  timeout: number,
+  logger?: (msg: string) => void
+): Promise<boolean> {
+  if (!page.waitForFunction) {
+    await delay(1000);
+    return true;
+  }
+  try {
+    await page.waitForFunction(isChordContentComplete, { timeout, polling: 100 });
+    return true;
+  } catch {
+    logger?.("chord content still incomplete after waiting");
+    return false;
+  }
+}
+
+/**
  * Loads a single URL and extracts content + metadata in one page evaluation.
  * Returns null when the page redirected away from the requested path (variant
- * not available) or yielded no chord content.
+ * not available), the response was only partially received, or the page
+ * yielded no chord content.
  */
 async function tryLoadVariant(
   page: PageLike,
@@ -44,13 +95,19 @@ async function tryLoadVariant(
 ): Promise<(ChordSheet & SongMetadata) | null> {
   try {
     page.setDefaultNavigationTimeout?.(timeout);
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout });
-    await delay(1000);
+    // `load` rather than `domcontentloaded`: the latter can resolve before the
+    // whole response body has been received, yielding a truncated <pre>.
+    await page.goto(url, { waitUntil: "load", timeout });
 
     const expectedPath = new URL(url).pathname.replace(/\/+$/, "").toLowerCase();
     const finalPath = new URL(page.url()).pathname.replace(/\/+$/, "").toLowerCase();
     if (!finalPath.startsWith(expectedPath)) {
       logger?.(`redirected from ${url} to ${page.url()} — variant unavailable`);
+      return null;
+    }
+
+    if (!(await waitForCompleteChordContent(page, timeout, logger))) {
+      logger?.(`${url} response only partially received — discarding`);
       return null;
     }
 
