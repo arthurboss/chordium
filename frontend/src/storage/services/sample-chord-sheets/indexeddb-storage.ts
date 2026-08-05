@@ -1,6 +1,6 @@
 /**
  * IndexedDB storage implementation for sample chord sheets service
- * 
+ *
  * Provides a clean interface for the sample chord sheets service to work with IndexedDB
  * storage. Implements the IChordSheetStorage interface using the chord sheets
  * store. This is the pure IndexedDB implementation without any localStorage
@@ -11,10 +11,11 @@ import type { ChordSheet, Song, SongMetadata } from '@chordium/types';
 import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/get-all-saved';
 import type { IChordSheetStorage } from './types';
 import { ChordSheetStore } from '../../stores/chord-sheets/store';
+import storeFullChordSheet from '../../stores/chord-sheets/operations/store-full-chord-sheet';
 
 /**
  * IndexedDB implementation of chord sheet storage
- * 
+ *
  * Wraps the ChordSheetStore to provide the interface expected by the sample
  * chord sheets service. Handles the parameter ordering and provides a clean API
  * for the sample chord sheets loading logic.
@@ -28,7 +29,7 @@ export class IndexedDBStorage implements IChordSheetStorage {
 
   /**
    * Get all saved chord sheets
-   * 
+   *
    * @returns Promise resolving to array of saved chord sheet list items
    */
   async getAllSaved(): Promise<ChordSheetListItem[]> {
@@ -37,7 +38,7 @@ export class IndexedDBStorage implements IChordSheetStorage {
 
   /**
    * Store a chord sheet in IndexedDB
-   * 
+   *
    * @param metadata - Song metadata to store
    * @param content - Chord sheet content to store
    * @param saved - Whether this is a user-saved chord sheet
@@ -51,6 +52,13 @@ export class IndexedDBStorage implements IChordSheetStorage {
     path: Song["path"]
   ): Promise<void> {
     return this.chordSheetStore.store(metadata, content, saved, path);
+  }
+
+  /**
+   * Store the full arrangement (with tabs) in the separate full-arrangement store.
+   */
+  async storeFullContent(content: ChordSheet, path: Song["path"]): Promise<void> {
+    return storeFullChordSheet(content, path);
   }
 }
 

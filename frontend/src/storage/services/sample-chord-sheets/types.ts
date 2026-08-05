@@ -11,4 +11,6 @@ import type { ChordSheetListItem } from '../../stores/chord-sheets/operations/ge
 export interface IChordSheetStorage {
   getAllSaved(): Promise<ChordSheetListItem[]>;
   store(metadata: SongMetadata, content: ChordSheet, saved: boolean, path: Song["path"]): Promise<void>;
+  /** Stores the full arrangement (with tabs), when the sample has one. */
+  storeFullContent?(content: ChordSheet, path: Song["path"]): Promise<void>;
 }

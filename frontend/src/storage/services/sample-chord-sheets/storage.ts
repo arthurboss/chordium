@@ -14,5 +14,8 @@ export const storeSampleChordSheets = async (
 ): Promise<void> => {
   for (const sample of samples) {
     await storage.store(sample.metadata, sample.content, true, sample.path); // Sample chord sheets are saved
+    if (sample.fullContent) {
+      await storage.storeFullContent?.(sample.fullContent, sample.path);
+    }
   }
 };
