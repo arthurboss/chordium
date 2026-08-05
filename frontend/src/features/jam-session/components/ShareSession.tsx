@@ -2,7 +2,7 @@ import { useState, useCallback, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { ScanLine } from 'lucide-react';
+import { QrCode, Share } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -37,7 +37,13 @@ export function ShareSession() {
   const close = () => { setIsOpen(false); setScanMode(false); };
   const onOpenChange = (open: boolean) => { setIsOpen(open); if (!open) setScanMode(false); };
 
-  const title = scanMode ? t('jamSession.scanQrCode') : t('jamSession.jamSession');
+  // With no song open the button can only join a session, so it shows a QR
+  // icon and matching wording rather than promising a share it cannot do.
+  const canShare = !!chordSheet;
+  const triggerLabel = t(canShare ? 'jamSession.jamSession' : 'jamSession.joinSession');
+  const TriggerIcon = canShare ? Share : QrCode;
+
+  const title = scanMode ? t('jamSession.scanQrCode') : triggerLabel;
   const description = scanMode
     ? t('jamSession.pointAtQrCode')
     : t(chordSheet ? 'jamSession.shareOrJoinDescription' : 'jamSession.joinDescription');
@@ -46,10 +52,10 @@ export function ShareSession() {
     <Button
       variant="outline"
       className="h-10 w-10 rounded-full"
-      title={t('jamSession.jamSession')}
-      aria-label={t('jamSession.jamSession')}
+      title={triggerLabel}
+      aria-label={triggerLabel}
     >
-      <ScanLine className="h-4 w-4" />
+      <TriggerIcon className="h-4 w-4" />
     </Button>
   );
 
