@@ -16,7 +16,7 @@ import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JamQRModal } from "@/features/jam-session/components/JamQRModal";
+import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
 
 export interface UpdatedSongData {
@@ -91,6 +91,8 @@ const SongViewer = ({
 
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
+  const { setChordSheet: setActiveChordSheet } = useActiveChordSheet();
+
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
@@ -162,6 +164,19 @@ const SongViewer = ({
     setEditCapo(chordSheetToDisplay.guitarCapo ?? 0);
   }, [chordContentToDisplay, chordSheetToDisplay, isEditing, updateEditContent]);
 
+  // Publish what is on screen so the header's jam button can share it. It is
+  // withdrawn while editing, so unsaved text is never encoded into a QR code,
+  // and on unmount, so the button stops offering a song after navigating away.
+  useEffect(() => {
+    if (isEditing || !chordContentToDisplay) {
+      setActiveChordSheet(null);
+      return;
+    }
+    setActiveChordSheet({ ...chordSheetToDisplay, songChords: chordContentToDisplay });
+  }, [isEditing, chordSheetToDisplay, chordContentToDisplay, setActiveChordSheet]);
+
+  useEffect(() => () => setActiveChordSheet(null), [setActiveChordSheet]);
+
   const handleAction = () => {
     if (isEditing) {
       saveEdits();
@@ -226,22 +241,15 @@ const SongViewer = ({
         onTitleChange={setEditTitle}
         onArtistChange={setEditArtist}
         rightContent={
-          <>
-            {!isEditing && chordContentToDisplay && (
-              <JamQRModal
-                chordSheet={{ ...chordSheetToDisplay, songChords: chordContentToDisplay }}
-              />
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-shrink-0 h-10 w-10 rounded-full"
-              onClick={() => setIsEditing((e) => !e)}
-              title={isEditing ? "Cancel editing" : "Edit chord sheet"}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          </>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-shrink-0 h-10 w-10 rounded-full"
+            onClick={() => setIsEditing((e) => !e)}
+            title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
         }
         metadata={
           <ChordMetadata

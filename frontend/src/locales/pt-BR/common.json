@@ -120,7 +120,19 @@
     "pasteConnectionString": "Colar string de conexão",
     "orPasteConnectionString": "Ou cole a string de conexão aqui",
     "scanToJoin": "Escaneie este código QR para entrar na sessão",
-    "or": "ou"
+    "or": "ou",
+    "jamSession": "Sessão de jam",
+    "pointAtQrCode": "Aponte para um código QR do Chordium",
+    "orPasteLink": "ou cole o link",
+    "generatingQr": "Gerando código QR…",
+    "scanToLoad": "Escaneie para carregar {{title}} em outro dispositivo. Funciona offline.",
+    "shareableLink": "Link de jam para compartilhar",
+    "linkCopied": "Link copiado",
+    "pressToCopy": "Pressione Cmd+C / Ctrl+C para copiar",
+    "qrFailed": "Não foi possível gerar o código QR",
+    "invalidCode": "Código inválido: cole um link de jam do Chordium ou o conteúdo bruto",
+    "jamLinkPlaceholder": "Link de jam do Chordium ou conteúdo",
+    "go": "Ir"
   },
   "smallScreenWarning": {
     "title": "Tela Muito Pequena",
@@ -179,5 +191,9 @@
     "fullTitle": "Versão completa (com tablatura)",
     "editingIndicator": "Editando: {{arrangement}}",
     "editingIndicatorTitle": "A versão que você está editando atualmente"
+  },
+  "chordSheet": {
+    "editChordSheet": "Editar cifra",
+    "cancelEditing": "Cancelar edição"
   }
 }
