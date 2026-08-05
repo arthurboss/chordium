@@ -132,7 +132,9 @@
     "qrFailed": "Failed to generate QR code",
     "invalidCode": "Invalid code — paste a Chordium jam link or the raw payload",
     "jamLinkPlaceholder": "Chordium jam link or payload",
-    "go": "Go"
+    "go": "Go",
+    "shareOrJoinDescription": "Share this song with a nearby device, or join a session from another device.",
+    "joinDescription": "Join a jam session from another device."
   },
   "smallScreenWarning": {
     "title": "Screen Too Small",

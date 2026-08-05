@@ -132,7 +132,9 @@
     "qrFailed": "No se pudo generar el código QR",
     "invalidCode": "Código no válido: pega un enlace de jam de Chordium o el contenido sin procesar",
     "jamLinkPlaceholder": "Enlace de jam de Chordium o contenido",
-    "go": "Ir"
+    "go": "Ir",
+    "shareOrJoinDescription": "Comparte esta canción con un dispositivo cercano o únete a una sesión desde otro dispositivo.",
+    "joinDescription": "Únete a una sesión de jam desde otro dispositivo."
   },
   "smallScreenWarning": {
     "title": "Pantalla Demasiado Pequeña",

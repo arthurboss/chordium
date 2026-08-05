@@ -132,7 +132,9 @@
     "qrFailed": "Não foi possível gerar o código QR",
     "invalidCode": "Código inválido: cole um link de jam do Chordium ou o conteúdo bruto",
     "jamLinkPlaceholder": "Link de jam do Chordium ou conteúdo",
-    "go": "Ir"
+    "go": "Ir",
+    "shareOrJoinDescription": "Compartilhe esta música com um dispositivo próximo ou entre em uma sessão de outro dispositivo.",
+    "joinDescription": "Entre em uma sessão de jam de outro dispositivo."
   },
   "smallScreenWarning": {
     "title": "Tela Muito Pequena",
