@@ -230,6 +230,23 @@ const SongViewer = ({
   const title = isEditing ? editTitle : chordSheetToDisplay.title;
   const artist = isEditing ? editArtist : chordSheetToDisplay.artist;
 
+  const arrangementIndicator = hasFullArrangement ? (
+    <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
+      {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
+      {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
+    </div>
+  ) : undefined;
+
+  // While editing, the header's back button cancels the edit (discarding
+  // unsaved changes) instead of navigating away.
+  const handleBack = () => {
+    if (isEditing) {
+      setIsEditing(false);
+      return;
+    }
+    onBack();
+  };
+
   const handleArtistClick = useCallback(() => {
     const artistSlug = songObj.path.split("/")[0];
     sessionStorage.removeItem("chordium_search_query");
@@ -252,7 +269,7 @@ const SongViewer = ({
       className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4"
     >
       <PageHeader
-        onBack={onBack}
+        onBack={handleBack}
         onAction={shouldShowActionButton ? handleAction : undefined}
         isSaved={isSaved}
         title={title}
@@ -309,15 +326,6 @@ const SongViewer = ({
         </Card>
       )}
 
-      {hasFullArrangement && isEditing && (
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
-            {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
-            {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
-          </div>
-        </div>
-      )}
-
       {hasFullArrangement && !isEditing && (
         <div className="flex justify-center">
           <div className="inline-flex rounded-full border p-0.5 text-sm">
@@ -356,6 +364,7 @@ const SongViewer = ({
         editContent={editContent}
         setEditContent={setEditContent}
         handleSaveEdits={saveEdits}
+        arrangementIndicator={arrangementIndicator}
       />
     </main>
   );

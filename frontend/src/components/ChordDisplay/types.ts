@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export interface ChordLine {
   type: 'chord' | 'lyrics' | 'tab' | 'empty';
   content: string;
@@ -26,4 +28,6 @@ export interface ChordEditProps {
   /** Font size (px) and family, matching the read-only display's current settings. */
   fontSize?: number;
   fontFamily?: string;
+  /** Rendered next to the full-screen toggle, e.g. a full/simplified arrangement indicator. */
+  arrangementIndicator?: ReactNode;
 }

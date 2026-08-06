@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { Maximize2, Minimize2 } from "lucide-react";
 import ChordProPreview from "./ChordProPreview";
 
-const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, fontSize, fontFamily }) => {
+const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, fontSize, fontFamily, arrangementIndicator }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const previewStyle: React.CSSProperties = {
     fontSize: fontSize ? `${fontSize}px` : undefined,
@@ -20,16 +20,18 @@ const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, font
           : "relative flex w-full flex-col gap-2"
       }
     >
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="self-end"
-        onClick={() => setIsFullScreen((v) => !v)}
-        title={isFullScreen ? "Exit full screen" : "Enter full screen"}
-      >
-        {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-      </Button>
+      <div className="flex items-center justify-between gap-2">
+        <div>{arrangementIndicator}</div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setIsFullScreen((v) => !v)}
+          title={isFullScreen ? "Exit full screen" : "Enter full screen"}
+        >
+          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </Button>
+      </div>
       <div className="flex flex-1 flex-col gap-4 overflow-hidden md:flex-row">
         <Textarea
           value={editContent}
