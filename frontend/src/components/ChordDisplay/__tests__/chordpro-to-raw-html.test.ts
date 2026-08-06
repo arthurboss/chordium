@@ -21,16 +21,24 @@ vi.mock('i18next', () => ({
 import { chordProToRawHtml } from '../chordpro-to-raw-html';
 
 describe('chordProToRawHtml', () => {
-  it('renders a single chord+lyric line', () => {
+  it('renders a single chord+lyric line with the chord on its own line above the lyric', () => {
     const result = chordProToRawHtml('[G]Saying I love you');
 
-    expect(result).toBe('<b>G</b>Saying I love you');
+    expect(result).toBe('<b>G</b>\nSaying I love you');
   });
 
-  it('renders multiple chords per line', () => {
+  it('renders multiple chords per line, each above the syllable it annotates', () => {
     const result = chordProToRawHtml("Saying I [C]love you [G]but you don't");
 
-    expect(result).toBe('Saying I <b>C</b>love you <b>G</b>but you don&#39;t');
+    expect(result).toBe(
+      '         <b>C</b>        <b>G</b>\nSaying I love you but you don&#39;t'
+    );
+  });
+
+  it('renders a lyric line with no chords as plain text, unchanged', () => {
+    const result = chordProToRawHtml('Just some plain lyrics');
+
+    expect(result).toBe('Just some plain lyrics');
   });
 
   it('renders a comment as a translated section-title span', () => {
@@ -51,13 +59,13 @@ describe('chordProToRawHtml', () => {
   it('preserves empty lines', () => {
     const result = chordProToRawHtml('[G]Hello\n\n[C]World');
 
-    expect(result).toBe('<b>G</b>Hello\n\n<b>C</b>World');
+    expect(result).toBe('<b>G</b>\nHello\n\n<b>C</b>\nWorld');
   });
 
   it('skips unknown directives', () => {
     const result = chordProToRawHtml('{key: G}\n[G]Hello');
 
-    expect(result).toBe('<b>G</b>Hello');
+    expect(result).toBe('<b>G</b>\nHello');
   });
 
   it('HTML-escapes lyric and chord text to prevent markup injection', () => {
@@ -65,7 +73,7 @@ describe('chordProToRawHtml', () => {
 
     expect(result).not.toContain('<script>');
     expect(result).toBe(
-      '<b>G&lt;script&gt;</b>Say &quot;hi&quot; &lt;b&gt;now&lt;/b&gt; &amp; smile'
+      '<b>G&lt;script&gt;</b>\nSay &quot;hi&quot; &lt;b&gt;now&lt;/b&gt; &amp; smile'
     );
   });
 });

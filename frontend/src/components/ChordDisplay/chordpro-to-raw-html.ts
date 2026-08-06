@@ -16,20 +16,72 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
+interface PlacedChord {
+  /** Character column in the plain lyric text where this chord sits. */
+  col: number;
+  chord: string;
+}
+
+/**
+ * Splits a parsed lyrics line into its plain lyric text (chords removed)
+ * and the column each chord occupies in that plain text -- the inverse of
+ * `migrate-legacy.ts`'s column-insertion, needed to rebuild the classic
+ * "chord line above lyric line" look from inline ChordPro segments.
+ */
+function toPlainLyricAndChordColumns(
+  line: Extract<ChordProLine, { type: 'lyrics' }>
+): { lyric: string; chords: PlacedChord[] } {
+  let lyric = '';
+  const chords: PlacedChord[] = [];
+  for (const segment of line.segments) {
+    if (segment.chord !== undefined) {
+      chords.push({ col: lyric.length, chord: segment.chord });
+    }
+    lyric += segment.lyric;
+  }
+  return { lyric, chords };
+}
+
+/**
+ * Renders a chord-position line: each chord name placed at its column,
+ * separated by at least one space so adjacent chords never run together.
+ */
+function renderChordLine(chords: PlacedChord[]): string {
+  let result = '';
+  for (const { col, chord } of chords) {
+    const padTo = Math.max(col, result.length + (result.length > 0 ? 1 : 0));
+    result += ' '.repeat(Math.max(0, padTo - result.length));
+    result += chord;
+  }
+  return result;
+}
+
+/**
+ * Renders a `ChordProLine` of type 'lyrics' as one or two HTML lines: a
+ * chord-position line (chords wrapped in `<b>`, placed above the syllable
+ * they annotate) followed by the plain lyric line -- the classic aligned
+ * look every other part of the render pipeline (`trimPureChordLineIndent`,
+ * `removeChordsForLyricsOnly`, tab-splitting) already expects. A line with
+ * no chords at all renders as just the lyric text, unchanged.
+ */
 function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): string {
-  return line.segments
-    .map((segment) => {
-      const chordHtml = segment.chord !== undefined ? `<b>${escapeHtml(segment.chord)}</b>` : '';
-      return chordHtml + escapeHtml(segment.lyric);
-    })
-    .join('');
+  const { lyric, chords } = toPlainLyricAndChordColumns(line);
+  const escapedLyric = escapeHtml(lyric);
+  if (chords.length === 0) return escapedLyric;
+
+  const chordLineText = renderChordLine(chords);
+  const chordLineHtml = escapeHtml(chordLineText).replace(
+    /\S+/g,
+    (chord) => `<b>${chord}</b>`
+  );
+  return chordLineHtml + '\n' + escapedLyric;
 }
 
 /**
  * Converts a parsed ChordProDocument into the same HTML shape the legacy
  * `songChordsToRawHtml` converter produces, so downstream `processHtml` /
  * `chord-html/*` / `tab-splitting.ts` transforms keep working unchanged:
- * - chords wrapped in `<b>...</b>`
+ * - chords wrapped in `<b>...</b>`, on their own line above the lyric line
  * - section titles as `<span class="section-title">...</span>`
  * - tab blocks as `<span class="tablatura"><span class="cnt">...</span></span>`
  *

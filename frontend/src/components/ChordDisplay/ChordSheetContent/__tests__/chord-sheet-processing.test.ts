@@ -34,7 +34,7 @@ describe('resolveSourceHtml', () => {
   it('converts ChordPro-format songChords directly via the new converter', () => {
     const result = resolveSourceHtml(undefined, '[G]Saying I [C]love you');
 
-    expect(result).toBe('<b>G</b>Saying I <b>C</b>love you');
+    expect(result).toBe('<b>G</b>        <b>C</b>\nSaying I love you');
   });
 
   it('migrates legacy positional-format songChords to ChordPro before rendering', () => {
@@ -43,6 +43,6 @@ describe('resolveSourceHtml', () => {
     const result = resolveSourceHtml(undefined, legacy);
 
     expect(result).toContain('<span class="section-title">Intro</span>');
-    expect(result).toContain('<b>Em7</b>Today is gonna <b>G</b>be the day');
+    expect(result).toContain('<b>Em7</b>            <b>G</b>\nToday is gonna be the day');
   });
 });
