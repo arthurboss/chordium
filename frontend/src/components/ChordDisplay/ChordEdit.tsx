@@ -32,7 +32,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, font
           {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
       </div>
-      <div className={isFullScreen ? "flex flex-1 flex-col gap-4 overflow-hidden md:flex-row" : "flex flex-1 flex-col gap-4 md:flex-row"}>
+      <div className={isFullScreen ? "flex min-h-0 flex-1 flex-col gap-4 md:flex-row" : "flex flex-1 flex-col gap-4 md:flex-row"}>
         <Textarea
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
