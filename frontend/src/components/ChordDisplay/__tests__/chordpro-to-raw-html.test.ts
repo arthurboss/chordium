@@ -90,4 +90,18 @@ describe('chordProToRawHtml', () => {
       '<span class="section-title">Intro</span>\n<b>G</b> <b>C9</b> <b>Am7</b>'
     );
   });
+
+  it('drops a blank line directly under a section title, since some source markup carries one and some does not', () => {
+    const result = chordProToRawHtml('{comment: Primeira Parte}\n\n[G]Saying I love you');
+
+    expect(result).toBe(
+      '<span class="section-title">Primeira Parte</span>\n<b>G</b>\nSaying I love you'
+    );
+  });
+
+  it('still preserves a blank line between two lyric lines (not adjacent to a section title)', () => {
+    const result = chordProToRawHtml('[G]Hello\n\n[C]World');
+
+    expect(result).toBe('<b>G</b>\nHello\n\n<b>C</b>\nWorld');
+  });
 });

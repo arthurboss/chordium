@@ -57,4 +57,12 @@ describe('ChordProPreview', () => {
     expect(container.querySelectorAll('.chord-line')).toHaveLength(1);
     expect(container.querySelector('.lyrics-line')).toBeNull();
   });
+
+  it('drops a blank line directly under a section header', () => {
+    const { container } = render(<ChordProPreview text={'{comment: Intro}\n\n[G]Saying I love you'} />);
+
+    const children = [...container.querySelector('.chordpro-preview')!.children];
+    expect(children[0].className).toBe('section-header');
+    expect(children[1].className).toBe('chord-line');
+  });
 });

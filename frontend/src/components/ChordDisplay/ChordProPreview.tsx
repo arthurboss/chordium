@@ -68,6 +68,7 @@ type PreviewItem =
 function groupTabBlocks(lines: ChordProLine[]): PreviewItem[] {
   const items: PreviewItem[] = [];
   let tabBuffer: string[] | null = null;
+  let justSawSectionTitle = false;
 
   const flush = () => {
     if (tabBuffer !== null) {
@@ -80,9 +81,15 @@ function groupTabBlocks(lines: ChordProLine[]): PreviewItem[] {
     if (line.type === 'tab') {
       if (tabBuffer === null) tabBuffer = [];
       tabBuffer.push(line.content);
+      justSawSectionTitle = false;
       continue;
     }
     flush();
+    // A blank line directly under a section title is a scraper artifact
+    // (some source markup has one, some doesn't) rather than intentional
+    // spacing -- skip it, matching chordpro-to-raw-html.ts's read-view fix.
+    if (line.type === 'empty' && justSawSectionTitle) continue;
+    justSawSectionTitle = line.type === 'comment';
     items.push({ kind: 'line', line });
   }
   flush();

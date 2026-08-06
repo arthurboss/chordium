@@ -57,6 +57,7 @@ function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): stri
 function renderDocument(doc: ChordProDocument): string {
   const result: string[] = [];
   let tabBuffer: string[] | null = null;
+  let justRenderedSectionTitle = false;
 
   const flushTabBuffer = () => {
     if (tabBuffer !== null) {
@@ -69,6 +70,7 @@ function renderDocument(doc: ChordProDocument): string {
     if (line.type === 'tab') {
       if (tabBuffer === null) tabBuffer = [];
       tabBuffer.push(escapeHtml(line.content));
+      justRenderedSectionTitle = false;
       continue;
     }
 
@@ -77,11 +79,18 @@ function renderDocument(doc: ChordProDocument): string {
     switch (line.type) {
       case 'lyrics':
         result.push(renderLyricsLine(line));
+        justRenderedSectionTitle = false;
         break;
       case 'comment':
         result.push('<span class="section-title">' + escapeHtml(translateSectionTitle(line.text)) + '</span>');
+        justRenderedSectionTitle = true;
         break;
       case 'empty':
+        // A blank line directly under a section title is a scraper artifact
+        // (some source markup has one, some doesn't) rather than intentional
+        // spacing -- skip it so section titles render with consistent
+        // spacing regardless of which convention the source used.
+        if (justRenderedSectionTitle) continue;
         result.push('');
         break;
       case 'directive':
