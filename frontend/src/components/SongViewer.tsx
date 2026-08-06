@@ -297,15 +297,17 @@ const SongViewer = ({
           />
         }
       />
-      <Card className="overflow-hidden">
-        <StyleToolbar
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          viewMode={viewMode}
-          setViewMode={handleViewModeChange}
-          hasTabs={hasTabs}
-        />
-      </Card>
+      {!isEditing && (
+        <Card className="overflow-hidden">
+          <StyleToolbar
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+            viewMode={viewMode}
+            setViewMode={handleViewModeChange}
+            hasTabs={hasTabs}
+          />
+        </Card>
+      )}
 
       {hasFullArrangement && isEditing && (
         <div className="flex justify-center">

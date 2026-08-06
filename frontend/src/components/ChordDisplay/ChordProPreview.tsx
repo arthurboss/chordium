@@ -1,27 +1,53 @@
 import React, { useMemo } from 'react';
 import { parseChordPro } from '@/utils/chordpro/parse';
+import { toPlainLyricAndChordColumns, renderChordLineText } from '@/utils/chordpro/layout';
 import type { ChordProLine } from '@/utils/chordpro/types';
+
+// A tab-string line (e.g. "E|-3--3----2h3p2------3---|") vs. a chord-name
+// annotation line ("   C9      D         Em7") that may sit above it inside
+// the same tab block. Only string lines get their fret-number digits
+// highlighted -- annotation-line digits are part of a chord name, not a fret.
+const TAB_STRING_LINE_RE = /^[EBGDAe]\|/;
 
 interface ChordProPreviewProps {
   text: string;
 }
 
 /**
- * Renders one `{type: 'lyrics'}` line as safe React elements: each chord in
- * a `<span className="chord">` (matching the `.chord` styling used elsewhere
- * for rendered chord tags) and each lyric run as a plain text node (React
- * escapes text nodes automatically).
+ * Renders one `{type: 'lyrics'}` line as safe React elements, matching the
+ * read-only display's classic look: a chord-position row (each chord in a
+ * `<span className="chord">`, placed above the syllable it annotates via
+ * the same column math as `chordpro-to-raw-html.ts`) followed by the plain
+ * lyric row. A line with no chords renders as just the lyric row.
  */
 function LyricsLine({ line }: { line: Extract<ChordProLine, { type: 'lyrics' }> }) {
+  const { lyric, chords } = toPlainLyricAndChordColumns(line);
+
+  if (chords.length === 0) {
+    return <div className="lyrics-line">{lyric}</div>;
+  }
+
+  const chordLineText = renderChordLineText(chords);
+  // Split the chord-position text into alternating runs of whitespace and
+  // chord tokens so each token becomes its own <span className="chord">
+  // while inter-chord spacing renders as plain text (preserving alignment).
+  const tokens = chordLineText.split(/(\S+)/g).filter((t) => t !== '');
+
   return (
-    <div className="chord-line">
-      {line.segments.map((segment, index) => (
-        <React.Fragment key={index}>
-          {segment.chord !== undefined && <span className="chord">{segment.chord}</span>}
-          {segment.lyric}
-        </React.Fragment>
-      ))}
-    </div>
+    <>
+      <div className="chord-line">
+        {tokens.map((token, index) =>
+          token.trim() === '' ? (
+            <React.Fragment key={index}>{token}</React.Fragment>
+          ) : (
+            <span key={index} className="chord">
+              {token}
+            </span>
+          )
+        )}
+      </div>
+      <div className="lyrics-line">{lyric}</div>
+    </>
   );
 }
 
@@ -64,8 +90,9 @@ function groupTabBlocks(lines: ChordProLine[]): PreviewItem[] {
 /**
  * Live preview of ChordPro-formatted text, rendered as safe React elements
  * (no `dangerouslySetInnerHTML`) since this is actively-typed user input.
- * Companion to `chordpro-to-raw-html.ts`, which produces the equivalent
- * trusted HTML string for the read-only render pipeline.
+ * Mirrors the exact layout `chordpro-to-raw-html.ts` produces for the
+ * read-only render pipeline, so what you see while editing matches what
+ * renders after saving.
  */
 export default function ChordProPreview({ text }: ChordProPreviewProps) {
   const doc = useMemo(() => parseChordPro(text), [text]);
@@ -77,7 +104,28 @@ export default function ChordProPreview({ text }: ChordProPreviewProps) {
         if (item.kind === 'tab-block') {
           return (
             <pre key={index} className="tablatura whitespace-pre font-mono text-sm">
-              {item.content}
+              {item.content.split('\n').map((tabLine, lineIndex, lines) => {
+                const isStringLine = TAB_STRING_LINE_RE.test(tabLine);
+                const separator = lineIndex < lines.length - 1 ? '\n' : '';
+                if (!isStringLine) {
+                  return <React.Fragment key={lineIndex}>{tabLine}{separator}</React.Fragment>;
+                }
+                const tokens = tabLine.split(/(\d+)/g).filter((t) => t !== '');
+                return (
+                  <React.Fragment key={lineIndex}>
+                    {tokens.map((token, tokenIndex) =>
+                      /^\d+$/.test(token) ? (
+                        <span key={tokenIndex} className="chord">
+                          {token}
+                        </span>
+                      ) : (
+                        <React.Fragment key={tokenIndex}>{token}</React.Fragment>
+                      )
+                    )}
+                    {separator}
+                  </React.Fragment>
+                );
+              })}
             </pre>
           );
         }

@@ -47,12 +47,21 @@ describe('chordProToRawHtml', () => {
     expect(result).toBe('<span class="section-title">Intro</span>');
   });
 
-  it('wraps a tab block in tablatura/cnt spans', () => {
+  it('wraps a tab block in tablatura/cnt spans, highlighting fret digits on string lines', () => {
     const tab = ['{start_of_tab}', 'E|-0-1-2-|', 'B|-0-1-2-|', '{end_of_tab}'].join('\n');
     const result = chordProToRawHtml(tab);
 
     expect(result).toBe(
-      '<span class="tablatura"><span class="cnt">E|-0-1-2-|\nB|-0-1-2-|</span></span>'
+      '<span class="tablatura"><span class="cnt">E|-<b>0</b>-<b>1</b>-<b>2</b>-|\nB|-<b>0</b>-<b>1</b>-<b>2</b>-|</span></span>'
+    );
+  });
+
+  it('does not highlight digits on a chord-name annotation line above a tab-string line', () => {
+    const tab = ['{start_of_tab}', '   C9      D', 'E|-0-1-2-|', '{end_of_tab}'].join('\n');
+    const result = chordProToRawHtml(tab);
+
+    expect(result).toBe(
+      '<span class="tablatura"><span class="cnt">   C9      D\nE|-<b>0</b>-<b>1</b>-<b>2</b>-|</span></span>'
     );
   });
 

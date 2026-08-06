@@ -1,5 +1,6 @@
 import type { ChordProDocument, ChordProLine } from '@/utils/chordpro/types';
 import { parseChordPro } from '@/utils/chordpro/parse';
+import { toPlainLyricAndChordColumns, renderChordLineText } from '@/utils/chordpro/layout';
 import { translateSectionTitle } from './song-chords-to-raw-html';
 
 /**
@@ -16,46 +17,6 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-interface PlacedChord {
-  /** Character column in the plain lyric text where this chord sits. */
-  col: number;
-  chord: string;
-}
-
-/**
- * Splits a parsed lyrics line into its plain lyric text (chords removed)
- * and the column each chord occupies in that plain text -- the inverse of
- * `migrate-legacy.ts`'s column-insertion, needed to rebuild the classic
- * "chord line above lyric line" look from inline ChordPro segments.
- */
-function toPlainLyricAndChordColumns(
-  line: Extract<ChordProLine, { type: 'lyrics' }>
-): { lyric: string; chords: PlacedChord[] } {
-  let lyric = '';
-  const chords: PlacedChord[] = [];
-  for (const segment of line.segments) {
-    if (segment.chord !== undefined) {
-      chords.push({ col: lyric.length, chord: segment.chord });
-    }
-    lyric += segment.lyric;
-  }
-  return { lyric, chords };
-}
-
-/**
- * Renders a chord-position line: each chord name placed at its column,
- * separated by at least one space so adjacent chords never run together.
- */
-function renderChordLine(chords: PlacedChord[]): string {
-  let result = '';
-  for (const { col, chord } of chords) {
-    const padTo = Math.max(col, result.length + (result.length > 0 ? 1 : 0));
-    result += ' '.repeat(Math.max(0, padTo - result.length));
-    result += chord;
-  }
-  return result;
-}
-
 /**
  * Renders a `ChordProLine` of type 'lyrics' as one or two HTML lines: a
  * chord-position line (chords wrapped in `<b>`, placed above the syllable
@@ -69,7 +30,7 @@ function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): stri
   const escapedLyric = escapeHtml(lyric);
   if (chords.length === 0) return escapedLyric;
 
-  const chordLineText = renderChordLine(chords);
+  const chordLineText = renderChordLineText(chords);
   const chordLineHtml = escapeHtml(chordLineText).replace(
     /\S+/g,
     (chord) => `<b>${chord}</b>`
@@ -89,6 +50,18 @@ function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): stri
  * (chord names and lyrics) since ChordPro `songChords` can contain
  * user-edited free text.
  */
+// A tab-string line (e.g. "E|-3--3----2h3p2------3---|") vs. a chord-name
+// annotation line ("   C9      D         Em7") that may sit above it inside
+// the same tab block. Only string lines get their fret-number digits
+// highlighted -- annotation-line digits are part of a chord name, not a fret.
+const TAB_STRING_LINE_RE = /^[EBGDAe]\|/;
+
+/** Wraps each run of digits in a tab-string line's fret numbers in `<b>`. */
+function highlightTabDigits(escapedLine: string): string {
+  if (!TAB_STRING_LINE_RE.test(escapedLine)) return escapedLine;
+  return escapedLine.replace(/\d+/g, (digits) => `<b>${digits}</b>`);
+}
+
 function renderDocument(doc: ChordProDocument): string {
   const result: string[] = [];
   let tabBuffer: string[] | null = null;
@@ -103,7 +76,7 @@ function renderDocument(doc: ChordProDocument): string {
   for (const line of doc.lines) {
     if (line.type === 'tab') {
       if (tabBuffer === null) tabBuffer = [];
-      tabBuffer.push(escapeHtml(line.content));
+      tabBuffer.push(highlightTabDigits(escapeHtml(line.content)));
       continue;
     }
 
