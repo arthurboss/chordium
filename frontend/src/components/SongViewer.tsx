@@ -279,15 +279,17 @@ const SongViewer = ({
         onTitleChange={setEditTitle}
         onArtistChange={setEditArtist}
         rightContent={
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-shrink-0 h-10 w-10 rounded-full"
-            onClick={() => setIsEditing((e) => !e)}
-            title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          !isEditing && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={() => setIsEditing((e) => !e)}
+              title={t("chordSheet.editChordSheet")}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )
         }
         metadata={
           <ChordMetadata

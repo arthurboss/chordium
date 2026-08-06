@@ -197,7 +197,6 @@
     "editingIndicatorTitle": "The arrangement you are currently editing"
   },
   "chordSheet": {
-    "editChordSheet": "Edit chord sheet",
-    "cancelEditing": "Cancel editing"
+    "editChordSheet": "Edit chord sheet"
   }
 }
