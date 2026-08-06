@@ -339,7 +339,10 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     }
   }
 
-  // Song key: regular pages use an anchor; print pages render bare "tom: Bm".
+  // Song key: regular pages use an anchor; print pages render bare "tom: Bm";
+  // current non-print pages render a button instead, sometimes with a
+  // "(com forma de X)" suffix explaining the fingering shape used -- not
+  // part of the key itself, so it's stripped below regardless of source.
   let songKey = "";
   const keyAnchor = document.querySelector("span#cifra_tom a");
   if (keyAnchor) {
@@ -348,8 +351,14 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     const keySpan = document.querySelector("span#cifra_tom");
     if (keySpan) {
       songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        songKey = (keyButton.textContent || "").trim();
+      }
     }
   }
+  songKey = songKey.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
   let guitarCapo = 0;
   const capoElement = document.querySelector('span[data-cy="song-capo"] a');

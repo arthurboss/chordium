@@ -454,8 +454,18 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     const keySpan = document.querySelector("span#cifra_tom");
     if (keySpan) {
       songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        songKey = (keyButton.textContent || "").trim();
+      }
     }
   }
+  songKey = songKey.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
   let guitarCapo = 0;
@@ -500,16 +510,27 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
 export function extractSongKey(): string {
   // Extract song key from span#cifra_tom a element (CifraClub specific)
   const keyAnchor = document.querySelector("span#cifra_tom a");
+  let key = "";
   if (keyAnchor) {
-    return keyAnchor.textContent?.trim() || "";
-  }
-  // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-  const keySpan = document.querySelector("span#cifra_tom");
-  if (keySpan) {
-    return (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    key = keyAnchor.textContent?.trim() || "";
+  } else {
+    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
+    const keySpan = document.querySelector("span#cifra_tom");
+    if (keySpan) {
+      key = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        key = (keyButton.textContent || "").trim();
+      }
+    }
   }
 
-  return "";
+  return key.replace(/\s*\([^)]*\)\s*$/, "").trim();
 }
 
 /**
@@ -618,8 +639,18 @@ export function extractSongMetadata(): SongMetadata {
     const keySpan = document.querySelector("span#cifra_tom");
     if (keySpan) {
       songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        songKey = (keyButton.textContent || "").trim();
+      }
     }
   }
+  songKey = songKey.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
   let guitarCapo = 0;
