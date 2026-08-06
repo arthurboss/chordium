@@ -111,13 +111,20 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     (async () => {
       const full = await fetchFullSongFromAPI(path);
       if (cancelled || !full?.songChords) return;
+      // The full arrangement can report a different key/tuning/capo than the
+      // simplified one (e.g. a tab arrangement using an alternate fingering
+      // shape) -- carry its own values alongside its content rather than
+      // relying on the simplified arrangement's metadata.
       const stored: StoredChordSheet = {
         path,
         songChords: full.songChords,
         ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}),
+        songKey: full.songKey,
+        guitarTuning: full.guitarTuning,
+        guitarCapo: full.guitarCapo,
       };
       setFullContent(stored);
-      storeFullChordSheet({ songChords: full.songChords, ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}) }, path).catch(() => {});
+      storeFullChordSheet(full, path).catch(() => {});
     })();
     return () => { cancelled = true; };
   }, [path, fullContent, primarySongChords, primaryHasTabs, isFromAPI, variant]);
