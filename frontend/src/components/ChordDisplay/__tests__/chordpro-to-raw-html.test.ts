@@ -76,4 +76,18 @@ describe('chordProToRawHtml', () => {
       '<b>G&lt;script&gt;</b>\nSay &quot;hi&quot; &lt;b&gt;now&lt;/b&gt; &amp; smile'
     );
   });
+
+  it('renders a chord-only line (no real lyric text) as just the chord row, with no blank line beneath it', () => {
+    const result = chordProToRawHtml('[G]  [C9]  [Am7]');
+
+    expect(result).toBe('<b>G</b> <b>C9</b> <b>Am7</b>');
+  });
+
+  it('renders a chord-only line right after a section title with no blank line between them', () => {
+    const result = chordProToRawHtml('{comment: Intro}\n[G]  [C9]  [Am7]');
+
+    expect(result).toBe(
+      '<span class="section-title">Intro</span>\n<b>G</b> <b>C9</b> <b>Am7</b>'
+    );
+  });
 });

@@ -50,4 +50,11 @@ describe('ChordProPreview', () => {
     const chordSpan = container.querySelector('span.chord');
     expect(chordSpan?.textContent).toBe('G<x>');
   });
+
+  it('renders a chord-only line (no real lyric text) as just the chord row, with no blank .lyrics-line beneath it', () => {
+    const { container } = render(<ChordProPreview text="[G]  [C9]  [Am7]" />);
+
+    expect(container.querySelectorAll('.chord-line')).toHaveLength(1);
+    expect(container.querySelector('.lyrics-line')).toBeNull();
+  });
 });

@@ -35,6 +35,10 @@ function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): stri
     /\S+/g,
     (chord) => `<b>${chord}</b>`
   );
+  // A chord-only line (e.g. "[G]  [G/B]  [C9]") has no real lyric text --
+  // just the whitespace that separated the chord brackets. Emitting that as
+  // a second line renders a blank row with nothing on it.
+  if (lyric.trim() === '') return chordLineHtml;
   return chordLineHtml + '\n' + escapedLyric;
 }
 

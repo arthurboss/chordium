@@ -27,19 +27,28 @@ function LyricsLine({ line }: { line: Extract<ChordProLine, { type: 'lyrics' }> 
   // while inter-chord spacing renders as plain text (preserving alignment).
   const tokens = chordLineText.split(/(\S+)/g).filter((t) => t !== '');
 
+  const chordRow = (
+    <div className="chord-line">
+      {tokens.map((token, index) =>
+        token.trim() === '' ? (
+          <React.Fragment key={index}>{token}</React.Fragment>
+        ) : (
+          <span key={index} className="chord">
+            {token}
+          </span>
+        )
+      )}
+    </div>
+  );
+
+  // A chord-only line (e.g. "[G]  [G/B]  [C9]") has no real lyric text --
+  // just the whitespace that separated the chord brackets. Rendering that
+  // as a second row shows a blank line with nothing on it.
+  if (lyric.trim() === '') return chordRow;
+
   return (
     <>
-      <div className="chord-line">
-        {tokens.map((token, index) =>
-          token.trim() === '' ? (
-            <React.Fragment key={index}>{token}</React.Fragment>
-          ) : (
-            <span key={index} className="chord">
-              {token}
-            </span>
-          )
-        )}
-      </div>
+      {chordRow}
       <div className="lyrics-line">{lyric}</div>
     </>
   );
