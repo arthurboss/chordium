@@ -3,12 +3,6 @@ import { parseChordPro } from '@/utils/chordpro/parse';
 import { toPlainLyricAndChordColumns, renderChordLineText } from '@/utils/chordpro/layout';
 import type { ChordProLine } from '@/utils/chordpro/types';
 
-// A tab-string line (e.g. "E|-3--3----2h3p2------3---|") vs. a chord-name
-// annotation line ("   C9      D         Em7") that may sit above it inside
-// the same tab block. Only string lines get their fret-number digits
-// highlighted -- annotation-line digits are part of a chord name, not a fret.
-const TAB_STRING_LINE_RE = /^[EBGDAe]\|/;
-
 interface ChordProPreviewProps {
   text: string;
 }
@@ -103,29 +97,8 @@ export default function ChordProPreview({ text }: ChordProPreviewProps) {
       {items.map((item, index) => {
         if (item.kind === 'tab-block') {
           return (
-            <pre key={index} className="tablatura whitespace-pre font-mono text-sm">
-              {item.content.split('\n').map((tabLine, lineIndex, lines) => {
-                const isStringLine = TAB_STRING_LINE_RE.test(tabLine);
-                const separator = lineIndex < lines.length - 1 ? '\n' : '';
-                if (!isStringLine) {
-                  return <React.Fragment key={lineIndex}>{tabLine}{separator}</React.Fragment>;
-                }
-                const tokens = tabLine.split(/(\d+)/g).filter((t) => t !== '');
-                return (
-                  <React.Fragment key={lineIndex}>
-                    {tokens.map((token, tokenIndex) =>
-                      /^\d+$/.test(token) ? (
-                        <span key={tokenIndex} className="chord">
-                          {token}
-                        </span>
-                      ) : (
-                        <React.Fragment key={tokenIndex}>{token}</React.Fragment>
-                      )
-                    )}
-                    {separator}
-                  </React.Fragment>
-                );
-              })}
+            <pre key={index} className="tablatura">
+              {item.content}
             </pre>
           );
         }

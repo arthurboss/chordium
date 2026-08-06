@@ -5,8 +5,12 @@ import { Button } from "../ui/button";
 import { Maximize2, Minimize2 } from "lucide-react";
 import ChordProPreview from "./ChordProPreview";
 
-const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent }) => {
+const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent, fontSize, fontFamily }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const previewStyle: React.CSSProperties = {
+    fontSize: fontSize ? `${fontSize}px` : undefined,
+    fontFamily: fontFamily ?? "inherit",
+  };
 
   return (
     <div
@@ -26,7 +30,7 @@ const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent }) =>
       >
         {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
       </Button>
-      <div className={isFullScreen ? "flex flex-1 gap-4 overflow-hidden md:flex-row" : "flex flex-1 flex-col gap-4 md:flex-row"}>
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden md:flex-row">
         <Textarea
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
@@ -40,9 +44,10 @@ const ChordEdit: React.FC<ChordEditProps> = ({ editContent, setEditContent }) =>
         <div
           className={
             isFullScreen
-              ? "flex-1 overflow-y-auto rounded-md border border-input bg-card px-3 py-2 text-sm md:w-1/2"
-              : "min-h-[500px] w-full overflow-y-auto rounded-md border border-input bg-card px-3 py-2 text-sm md:w-1/2"
+              ? "flex-1 overflow-y-auto rounded-lg border shadow-xs bg-card px-4 py-6 sm:px-6 md:w-1/2"
+              : "min-h-[500px] w-full overflow-y-auto rounded-lg border shadow-xs bg-card px-4 py-6 sm:px-6 md:w-1/2"
           }
+          style={previewStyle}
         >
           <ChordProPreview text={editContent} />
         </div>

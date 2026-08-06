@@ -3,6 +3,7 @@ import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
 import ChordSheetContent from './ChordDisplay/ChordSheetContent';
+import { FONT_FAMILY } from './ChordDisplay/ChordSheetContent/chord-sheet-processing';
 import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
@@ -94,6 +95,8 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
         setEditContent={setEditContent}
         handleSaveEdits={handleSaveEdits}
         setIsEditing={setIsEditing}
+        fontSize={fontSize}
+        fontFamily={FONT_FAMILY[fontStyle]}
       />
     );
   }

@@ -23,4 +23,7 @@ export interface ChordEditProps {
   setEditContent: (v: string) => void;
   handleSaveEdits: () => void;
   setIsEditing: (v: boolean) => void;
+  /** Font size (px) and family, matching the read-only display's current settings. */
+  fontSize?: number;
+  fontFamily?: string;
 }

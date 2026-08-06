@@ -50,18 +50,6 @@ function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): stri
  * (chord names and lyrics) since ChordPro `songChords` can contain
  * user-edited free text.
  */
-// A tab-string line (e.g. "E|-3--3----2h3p2------3---|") vs. a chord-name
-// annotation line ("   C9      D         Em7") that may sit above it inside
-// the same tab block. Only string lines get their fret-number digits
-// highlighted -- annotation-line digits are part of a chord name, not a fret.
-const TAB_STRING_LINE_RE = /^[EBGDAe]\|/;
-
-/** Wraps each run of digits in a tab-string line's fret numbers in `<b>`. */
-function highlightTabDigits(escapedLine: string): string {
-  if (!TAB_STRING_LINE_RE.test(escapedLine)) return escapedLine;
-  return escapedLine.replace(/\d+/g, (digits) => `<b>${digits}</b>`);
-}
-
 function renderDocument(doc: ChordProDocument): string {
   const result: string[] = [];
   let tabBuffer: string[] | null = null;
@@ -76,7 +64,7 @@ function renderDocument(doc: ChordProDocument): string {
   for (const line of doc.lines) {
     if (line.type === 'tab') {
       if (tabBuffer === null) tabBuffer = [];
-      tabBuffer.push(highlightTabDigits(escapeHtml(line.content)));
+      tabBuffer.push(escapeHtml(line.content));
       continue;
     }
 

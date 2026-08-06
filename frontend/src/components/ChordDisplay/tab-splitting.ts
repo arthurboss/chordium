@@ -49,8 +49,18 @@ function sliceHtmlByPlainIndex(html: string, start: number, end: number): string
   for (let i = 0; i < opens - closes; i++) {
     slice += '</b>';
   }
-  const leadingCloses = (slice.match(/^(<\/b>)/g) || []).length;
-  for (let i = 0; i < leadingCloses; i++) {
+
+  // A chunk boundary can land in the middle of an already-open <b>...</b>
+  // run (e.g. splitting "9797975" into "979797" / "5" mid-digit-run) --
+  // checking only whether the slice's own leading characters are a literal
+  // "</b>" misses this, since the slice here starts with plain text, not a
+  // tag. Instead check whether more <b> than </b> tags precede resultStart
+  // in the FULL html: if so, this slice starts inside an unclosed span and
+  // needs its own opening <b>.
+  const before = html.substring(0, resultStart);
+  const opensBefore = (before.match(/<b>/g) || []).length;
+  const closesBefore = (before.match(/<\/b>/g) || []).length;
+  if (opensBefore > closesBefore) {
     slice = '<b>' + slice;
   }
 

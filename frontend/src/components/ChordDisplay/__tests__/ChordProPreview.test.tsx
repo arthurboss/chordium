@@ -43,17 +43,6 @@ describe('ChordProPreview', () => {
     expect(pre?.textContent).toBe('E|-0-1-2-|\nB|-0-1-2-|');
   });
 
-  it('highlights fret-number digits on tab-string lines like chords, but not on chord-name annotation lines', () => {
-    const tab = ['{start_of_tab}', '   C9      D', 'E|-0-1-2-|', '{end_of_tab}'].join('\n');
-    const { container } = render(<ChordProPreview text={tab} />);
-
-    const pre = container.querySelector('pre.tablatura');
-    expect(pre?.textContent).toBe('   C9      D\nE|-0-1-2-|');
-
-    const digitSpans = pre?.querySelectorAll('span.chord');
-    expect(Array.from(digitSpans ?? []).map((s) => s.textContent)).toEqual(['0', '1', '2']);
-  });
-
   it('does not execute or leak markup for chord/lyric text containing HTML-like characters', () => {
     const { container } = render(<ChordProPreview text='[G<x>]Say "hi" <b>now</b>' />);
 
