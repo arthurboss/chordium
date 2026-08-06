@@ -184,7 +184,32 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
       if (node.nodeType !== Node.ELEMENT_NODE) return "";
       const el = node as Element;
       if (el.classList.contains("tablatura")) {
-        return "{start_of_tab}\n" + (el.textContent || "") + "\n{end_of_tab}\n";
+        // A bare "[Label]" line (e.g. "[Tab - Solo]") sometimes precedes the
+        // actual string lines inside the source's tablature text -- hoist
+        // it out as a ChordPro comment directive ahead of the tab block
+        // instead of leaving it as inert text inside {start_of_tab}, since
+        // ChordPro directives aren't recognized inside a tab environment.
+        const tabText = el.textContent || "";
+        const tabLines = tabText.split("\n");
+        const labelLines: string[] = [];
+        let i = 0;
+        while (i < tabLines.length) {
+          const trimmed = tabLines[i].trim();
+          const labelMatch = trimmed.match(/^\[([^\]]+)\]$/);
+          if (labelMatch) {
+            labelLines.push("{comment: " + labelMatch[1] + "}");
+            i++;
+            continue;
+          }
+          if (trimmed === "" && labelLines.length > 0 && i < tabLines.length - 1) {
+            i++;
+            continue;
+          }
+          break;
+        }
+        const labelPrefix = labelLines.length > 0 ? labelLines.join("\n") + "\n" : "";
+        const remainingTabText = tabLines.slice(i).join("\n");
+        return labelPrefix + "{start_of_tab}\n" + remainingTabText + "\n{end_of_tab}\n";
       }
       if (el.tagName.toLowerCase() === "b") {
         // Prefix with a sentinel control character so the line-level pass below
@@ -656,7 +681,32 @@ export function extractChordSheet(): ChordSheet {
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const el = node as Element;
     if (el.classList.contains("tablatura")) {
-      return "{start_of_tab}\n" + (el.textContent || "") + "\n{end_of_tab}\n";
+      // A bare "[Label]" line (e.g. "[Tab - Solo]") sometimes precedes the
+      // actual string lines inside the source's tablature text -- hoist
+      // it out as a ChordPro comment directive ahead of the tab block
+      // instead of leaving it as inert text inside {start_of_tab}, since
+      // ChordPro directives aren't recognized inside a tab environment.
+      const tabText = el.textContent || "";
+      const tabLines = tabText.split("\n");
+      const labelLines: string[] = [];
+      let i = 0;
+      while (i < tabLines.length) {
+        const trimmed = tabLines[i].trim();
+        const labelMatch = trimmed.match(/^\[([^\]]+)\]$/);
+        if (labelMatch) {
+          labelLines.push("{comment: " + labelMatch[1] + "}");
+          i++;
+          continue;
+        }
+        if (trimmed === "" && labelLines.length > 0 && i < tabLines.length - 1) {
+          i++;
+          continue;
+        }
+        break;
+      }
+      const labelPrefix = labelLines.length > 0 ? labelLines.join("\n") + "\n" : "";
+      const remainingTabText = tabLines.slice(i).join("\n");
+      return labelPrefix + "{start_of_tab}\n" + remainingTabText + "\n{end_of_tab}\n";
     }
     if (el.tagName.toLowerCase() === "b") {
       // Prefix with a sentinel control character so the line-level pass below

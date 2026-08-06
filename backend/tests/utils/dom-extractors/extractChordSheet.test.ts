@@ -92,7 +92,29 @@ describe('extractChordSheet', () => {
     expect(result.songChords).toBe(`{start_of_tab}\n${tabContent}\n{end_of_tab}\n`);
   });
 
-  it('leaves bracketed lines inside a tab block untouched (whitespace-significant)', () => {
+  it('hoists a bare "[Label]" line preceding tab-string lines into a {comment: ...} directive ahead of the tab block', () => {
+    const tabContent = '[Tab - Intro]\n\nE|----3--x--3--3--x--3-----x----|';
+    const mockPreElement = mockElement('pre', {
+      children: [
+        mockElement('span', { className: 'tablatura', textContent: tabContent }),
+      ],
+    });
+
+    mockDocument((selector: string) => (selector === 'pre' ? [mockPreElement] : []));
+
+    const result: ChordSheet = extractChordSheet();
+
+    // The label becomes a real section-comment directive (ChordPro doesn't
+    // recognize directives inside a tab environment), and the blank line
+    // that separated it from the string lines is dropped along with it.
+    expect(result.songChords).toBe(
+      '{comment: Tab - Intro}\n{start_of_tab}\nE|----3--x--3--3--x--3-----x----|\n{end_of_tab}\n'
+    );
+  });
+
+  it('leaves a bare "[Label]" line inside a tab block untouched when it is not followed by a blank line', () => {
+    // No blank line between the label and the string line -- still hoisted,
+    // since the label is unambiguous regardless of spacing.
     const tabContent = '[Tab - Intro]\nE|----3--x--3--3--x--3-----x----|';
     const mockPreElement = mockElement('pre', {
       children: [
@@ -104,10 +126,9 @@ describe('extractChordSheet', () => {
 
     const result: ChordSheet = extractChordSheet();
 
-    // The tab content itself is emitted verbatim between the directives —
-    // "[Tab - Intro]" is not converted to a {comment: ...} directive because
-    // it's inside a tab block.
-    expect(result.songChords).toBe(`{start_of_tab}\n${tabContent}\n{end_of_tab}\n`);
+    expect(result.songChords).toBe(
+      '{comment: Tab - Intro}\n{start_of_tab}\nE|----3--x--3--3--x--3-----x----|\n{end_of_tab}\n'
+    );
   });
 
   it('extracts a full multi-line chord sheet into ChordPro format', () => {
