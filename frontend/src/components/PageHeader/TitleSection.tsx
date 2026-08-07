@@ -19,26 +19,27 @@ const TitleSection = ({
   onTitleChange,
   onArtistChange,
 }: TitleSectionProps) => {
-  // Title/artist share the same font-size + line-height (text-lg/leading-7 and
-  // text-sm/leading-5) in both modes, and the edit inputs strip Input's
-  // default border/padding/fixed-height -- so the row's total height falls
-  // out of the shared typography instead of a separately hardcoded number.
+  // Same total height in both modes without hardcoding the header's height:
+  // the edit inputs use a tighter line-height (leading-6/leading-5 vs the
+  // read view's leading-7/leading-5) to make room for a visible gap between
+  // the two visible-bordered fields, while the read view's h1/artist text
+  // keep their normal line-height -- both add up to the same total.
   if (isEditing) {
     return (
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col gap-1">
         <Input
           value={title ?? ""}
           onChange={(e) => onTitleChange?.(e.target.value)}
           placeholder="Title"
           aria-label="Song title"
-          className="h-auto border-0 bg-transparent p-0 text-lg md:text-lg font-semibold leading-7 focus-visible:ring-offset-0"
+          className="h-auto border-0 rounded-md bg-background px-2 py-0 text-lg md:text-lg font-semibold leading-6 ring-1 ring-inset ring-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
         />
         <Input
           value={artist ?? ""}
           onChange={(e) => onArtistChange?.(e.target.value)}
           placeholder="Artist"
           aria-label="Artist"
-          className="h-auto border-0 bg-transparent p-0 text-sm leading-5 focus-visible:ring-offset-0"
+          className="h-auto border-0 rounded-md bg-background px-2 py-0 text-sm leading-5 ring-1 ring-inset ring-input focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
         />
       </div>
     );
