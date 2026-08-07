@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { processContent } from '@/utils/chord-sheet-utils';
 
 export const useChordDisplaySettings = (initialContent: string, initialSongKey?: string, initialCapo?: number, initialViewMode?: string) => {
-  const [fontStyle, setFontStyle] = useState('');
+  const [fontStyle, setFontStyle] = useState('monospace');
   const [viewMode, setViewMode] = useState(initialViewMode || 'tabs-on');
 
   const defaultTranspose = 0;
