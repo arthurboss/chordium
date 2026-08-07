@@ -14,7 +14,7 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
-import { Pencil, Music, Guitar } from "lucide-react";
+import { Pencil, Music, Guitar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
@@ -279,7 +279,17 @@ const SongViewer = ({
         onTitleChange={setEditTitle}
         onArtistChange={setEditArtist}
         rightContent={
-          !isEditing && (
+          isEditing ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={handleBack}
+              title={t("chordSheet.cancelEditing")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : (
             <Button
               variant="outline"
               size="sm"

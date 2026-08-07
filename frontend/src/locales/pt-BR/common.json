@@ -197,6 +197,7 @@
     "editingIndicatorTitle": "A versão que você está editando atualmente"
   },
   "chordSheet": {
-    "editChordSheet": "Editar cifra"
+    "editChordSheet": "Editar cifra",
+    "cancelEditing": "Cancelar edição"
   }
 }
