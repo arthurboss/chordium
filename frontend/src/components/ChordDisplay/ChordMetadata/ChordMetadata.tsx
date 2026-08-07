@@ -25,7 +25,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
   if (edit) {
     return (
       <div className="w-full text-xs">
-        <div className="px-4 py-2 flex flex-row flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="px-4 py-2 flex flex-row flex-wrap justify-between items-center gap-x-4 gap-y-2">
           <label className="flex items-center gap-1.5 shrink-0">
             <span className="font-medium">{t("chordMetadata.guitarTuning")}</span>
             <TuningPicker
