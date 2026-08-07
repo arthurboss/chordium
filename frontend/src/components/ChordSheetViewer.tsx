@@ -1,8 +1,9 @@
-import { forwardRef, useEffect } from 'react';
+import { forwardRef, useEffect, type ReactNode } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
 import ChordSheetContent from './ChordDisplay/ChordSheetContent';
+import { FONT_FAMILY } from './ChordDisplay/ChordSheetContent/chord-sheet-processing';
 import StickyControlsBar from './ChordDisplay/components/StickyControlsBar';
 import ChordEdit from './ChordDisplay/ChordEdit';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
@@ -28,6 +29,8 @@ interface ChordSheetViewerProps {
   editContent?: string;
   setEditContent?: (v: string) => void;
   handleSaveEdits?: () => void;
+  /** Rendered next to the full-screen toggle while editing, e.g. a full/simplified arrangement indicator. */
+  arrangementIndicator?: ReactNode;
 }
 
 const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
@@ -46,6 +49,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   editContent: externalEditContent,
   setEditContent: externalSetEditContent,
   handleSaveEdits: externalHandleSaveEdits,
+  arrangementIndicator,
 }, ref) => {
 
   const {
@@ -94,6 +98,9 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
         setEditContent={setEditContent}
         handleSaveEdits={handleSaveEdits}
         setIsEditing={setIsEditing}
+        fontSize={fontSize}
+        fontFamily={FONT_FAMILY[fontStyle]}
+        arrangementIndicator={arrangementIndicator}
       />
     );
   }

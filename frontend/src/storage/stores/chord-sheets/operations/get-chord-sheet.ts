@@ -9,6 +9,7 @@ import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../database/connection";
 import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
 import { STORES } from "../../../core/config/stores";
+import { upgradeLegacySongChords } from "../utils/legacy-upgrade/upgrade-legacy-song-chords";
 
 /**
  * Gets stored chord sheet metadata by its unique path identifier
@@ -57,7 +58,7 @@ export async function getChordSheetContent(
   // Try split stores: content
   const content = await executeReadTransaction<StoredChordSheet | undefined>(STORES.CHORD_SHEETS, (store) => store.get(path));
   if (content) {
-    return content;
+    return upgradeLegacySongChords(STORES.CHORD_SHEETS, content);
   }
 
   // Try with resolved path for sample chord sheets
@@ -65,7 +66,7 @@ export async function getChordSheetContent(
   if (resolvedPath !== path) {
     const resolvedContent = await executeReadTransaction<StoredChordSheet | undefined>(STORES.CHORD_SHEETS, (store) => store.get(resolvedPath));
     if (resolvedContent) {
-      return resolvedContent;
+      return upgradeLegacySongChords(STORES.CHORD_SHEETS, resolvedContent);
     }
   }
 

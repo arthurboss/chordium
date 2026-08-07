@@ -171,18 +171,204 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
   let songChords = "";
   if (preElement) {
-    preElement.childNodes.forEach(function(node) {
+    // Recursively walk each top-level child, converting the source's <b>-wrapped
+    // chords and span.tablatura tab blocks into ChordPro's inline-bracket and
+    // {start_of_tab}/{end_of_tab} directive syntax. Plain text (lyrics, and bare
+    // "[Section]" text nodes) passes through untouched at this stage -- bare
+    // section-header brackets are disambiguated from chord brackets in a second
+    // pass below, once full line boundaries are known.
+    function nodeToChordPro(node: Node): string {
       if (node.nodeType === Node.TEXT_NODE) {
-        songChords += node.textContent || "";
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        if (el.classList.contains("tablatura")) {
-          songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-        } else {
-          songChords += el.textContent || "";
+        return node.textContent || "";
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const el = node as Element;
+      if (el.classList.contains("tablatura")) {
+        // A bare "[Label]" line (e.g. "[Tab - Solo]") sometimes precedes the
+        // actual string lines inside the source's tablature text -- hoist
+        // it out as a ChordPro comment directive ahead of the tab block
+        // instead of leaving it as inert text inside {start_of_tab}, since
+        // ChordPro directives aren't recognized inside a tab environment.
+        const tabText = el.textContent || "";
+        const tabLines = tabText.split("\n");
+        const labelLines: string[] = [];
+        let i = 0;
+        while (i < tabLines.length) {
+          const trimmed = tabLines[i].trim();
+          const labelMatch = trimmed.match(/^\[([^\]]+)\]$/);
+          if (labelMatch) {
+            labelLines.push("{comment: " + labelMatch[1] + "}");
+            i++;
+            continue;
+          }
+          if (trimmed === "" && labelLines.length > 0 && i < tabLines.length - 1) {
+            i++;
+            continue;
+          }
+          break;
+        }
+        const labelPrefix = labelLines.length > 0 ? labelLines.join("\n") + "\n" : "";
+        const remainingTabText = tabLines.slice(i).join("\n");
+        return labelPrefix + "{start_of_tab}\n" + remainingTabText + "\n{end_of_tab}\n";
+      }
+      if (el.tagName.toLowerCase() === "b") {
+        // Prefix with a sentinel control character so the line-level pass below
+        // can tell a chord-origin bracket (from a <b> tag) apart from a bare
+        // "[Section]" text node even when the bracket is the only content on
+        // its line (e.g. an instrumental line with a single chord). Stripped
+        // out again once that disambiguation is done.
+        return "\u0000[" + (el.textContent || "").trim() + "]";
+      }
+      // Any other wrapping element: recurse so a <b> nested one level deeper
+      // (or any other markup CifraClub adds) still resolves to a chord bracket.
+      return Array.from(el.childNodes).map(nodeToChordPro).join("");
+    }
+
+    let assembled = "";
+    preElement.childNodes.forEach(function(node) {
+      assembled += nodeToChordPro(node);
+    });
+
+    // Second pass: a line that is *only* "[Section Name]" (bare bracket, no
+    // adjoining chords/lyrics) is a section header in the source markup, not a
+    // chord -- convert it to a ChordPro comment directive. Lines inside a tab
+    // block are left untouched since tab content is whitespace-significant.
+    let insideTab = false;
+    songChords = assembled
+      .split("\n")
+      .map(function(line) {
+        const trimmed = line.trim();
+        if (trimmed === "{start_of_tab}") {
+          insideTab = true;
+          return line;
+        }
+        if (trimmed === "{end_of_tab}") {
+          insideTab = false;
+          return line;
+        }
+        if (!insideTab) {
+          // A section label can be followed by trailing content (typically
+          // chords) on the same source line, e.g. "[Intro] Em7  G  D4". Split
+          // the label onto its own {comment: ...} line so the trailing part
+          // is still parsed as a normal chord/lyrics line downstream.
+          const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
+          if (sectionMatch) {
+            const rest = sectionMatch[2];
+            return rest ? "{comment: " + sectionMatch[1] + "}\n" + rest : "{comment: " + sectionMatch[1] + "}";
+          }
+        }
+        return line;
+      })
+      .join("\n")
+      .split("\u0000")
+      .join("");
+
+    // Third pass: a chord-only line (after the wrap pass, stripping every
+    // [chord] bracket leaves only whitespace) is still on its own line here,
+    // mirroring the source's positional layout -- not real ChordPro. Merge
+    // it into the following lyric line, snapping each chord's source column
+    // to the start of the nearest word so brackets never land mid-word.
+    const CHORD_BRACKET_RE = /\[([^\]]+)\]/g;
+
+    function isChordOnlyLine(line: string): boolean {
+      if (line.trim() === "") return false;
+      CHORD_BRACKET_RE.lastIndex = 0;
+      if (!CHORD_BRACKET_RE.test(line)) return false;
+      CHORD_BRACKET_RE.lastIndex = 0;
+      const stripped = line.replace(CHORD_BRACKET_RE, "");
+      return stripped.trim() === "";
+    }
+
+    function extractChordTokensWithColumns(line: string): { col: number; chord: string }[] {
+      // `line` already has its chords wrapped as "[Chord]" by the earlier
+      // wrap pass, which shifts each subsequent chord's bracket position
+      // rightward relative to the ORIGINAL source layout (every "[" "]"
+      // pair adds 2 characters that weren't in the source's plain-text
+      // spacing). The lyric line below was never bracket-wrapped, so its
+      // column scale still matches the original layout -- recover that
+      // same scale here by stripping brackets back out before tokenizing,
+      // which restores the exact original whitespace run lengths.
+      const debracketed = line.replace(/[[\]]/g, "");
+      const tokens: { col: number; chord: string }[] = [];
+      const re = /\S+/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(debracketed)) !== null) {
+        tokens.push({ col: m.index, chord: m[0] });
+      }
+      return tokens;
+    }
+
+    function findWords(line: string): { start: number; end: number }[] {
+      const words: { start: number; end: number }[] = [];
+      const re = /\S+/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(line)) !== null) {
+        words.push({ start: m.index, end: m.index + m[0].length });
+      }
+      return words;
+    }
+
+    function snapColumnToWordStart(col: number, words: { start: number; end: number }[]): number {
+      for (const word of words) {
+        if (col < word.end) return word.start;
+      }
+      return words.length > 0 ? words[words.length - 1].end : 0;
+    }
+
+    function insertChordsAtColumns(lyricLine: string, tokens: { col: number; chord: string }[]): string {
+      const sorted = tokens.slice().sort((a, b) => a.col - b.col);
+      const words = findWords(lyricLine);
+      let result = "";
+      let lastPos = 0;
+      for (const t of sorted) {
+        const insertPos = Math.max(snapColumnToWordStart(t.col, words), lastPos);
+        result += lyricLine.slice(lastPos, insertPos);
+        result += "[" + t.chord + "]";
+        lastPos = insertPos;
+      }
+      result += lyricLine.slice(lastPos);
+      return result;
+    }
+
+    const DIRECTIVE_RE = /^\{[a-zA-Z_]+(?::[^}]*)?\}$/;
+    const reflowedLines: string[] = [];
+    const linesForReflow = songChords.split("\n");
+    let insideTabReflow = false;
+    let idx = 0;
+    while (idx < linesForReflow.length) {
+      const line = linesForReflow[idx];
+      const trimmed = line.trim();
+      if (trimmed === "{start_of_tab}") {
+        insideTabReflow = true;
+        reflowedLines.push(line);
+        idx++;
+        continue;
+      }
+      if (trimmed === "{end_of_tab}") {
+        insideTabReflow = false;
+        reflowedLines.push(line);
+        idx++;
+        continue;
+      }
+      if (!insideTabReflow && isChordOnlyLine(line)) {
+        const next = linesForReflow[idx + 1];
+        const nextTrimmed = next !== undefined ? next.trim() : undefined;
+        const nextIsLyricLine =
+          next !== undefined &&
+          nextTrimmed !== "" &&
+          !DIRECTIVE_RE.test(nextTrimmed as string) &&
+          !isChordOnlyLine(next);
+        if (nextIsLyricLine) {
+          const tokens = extractChordTokensWithColumns(line);
+          reflowedLines.push(insertChordsAtColumns(next as string, tokens));
+          idx += 2;
+          continue;
         }
       }
-    });
+      reflowedLines.push(line);
+      idx++;
+    }
+    songChords = reflowedLines.join("\n");
   }
 
   // Extract title and artist from page
@@ -268,8 +454,18 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     const keySpan = document.querySelector("span#cifra_tom");
     if (keySpan) {
       songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        songKey = (keyButton.textContent || "").trim();
+      }
     }
   }
+  songKey = songKey.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
   let guitarCapo = 0;
@@ -314,16 +510,27 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
 export function extractSongKey(): string {
   // Extract song key from span#cifra_tom a element (CifraClub specific)
   const keyAnchor = document.querySelector("span#cifra_tom a");
+  let key = "";
   if (keyAnchor) {
-    return keyAnchor.textContent?.trim() || "";
-  }
-  // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-  const keySpan = document.querySelector("span#cifra_tom");
-  if (keySpan) {
-    return (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    key = keyAnchor.textContent?.trim() || "";
+  } else {
+    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
+    const keySpan = document.querySelector("span#cifra_tom");
+    if (keySpan) {
+      key = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        key = (keyButton.textContent || "").trim();
+      }
+    }
   }
 
-  return "";
+  return key.replace(/\s*\([^)]*\)\s*$/, "").trim();
 }
 
 /**
@@ -432,8 +639,18 @@ export function extractSongMetadata(): SongMetadata {
     const keySpan = document.querySelector("span#cifra_tom");
     if (keySpan) {
       songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+    } else {
+      // Current (non-print) pages render the key as a button instead, e.g.
+      // <button data-anchor="--chord-tone">F# (com forma de G)</button> --
+      // the parenthetical explains which chord's fingering shape is used,
+      // not part of the key itself, so it's stripped below.
+      const keyButton = document.querySelector('[data-anchor="--chord-tone"]');
+      if (keyButton) {
+        songKey = (keyButton.textContent || "").trim();
+      }
     }
   }
+  songKey = songKey.replace(/\s*\([^)]*\)\s*$/, "").trim();
 
   // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
   let guitarCapo = 0;
@@ -473,27 +690,213 @@ export function extractSongMetadata(): SongMetadata {
 
 /**
  * Extracts chord sheet from CifraClub song page DOM (content only)
- * Extracts chord sheet content from the pre element.
- * Tab blocks (span.tablatura) are wrapped with [TAB]/[/TAB] markers
- * so the parser can identify them without heuristics.
+ * Extracts chord sheet content from the pre element, in ChordPro format:
+ * chords wrapped in <b> tags become inline [Chord] brackets, tab blocks
+ * (span.tablatura) become {start_of_tab}/{end_of_tab} blocks, and bare
+ * "[Section]" text nodes become {comment: Section} directives.
  */
 export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
   if (!preElement) return { songChords: "" };
 
-  let songChords = "";
-  preElement.childNodes.forEach(function(node) {
+  // Recursively walk each top-level child, converting the source's <b>-wrapped
+  // chords and span.tablatura tab blocks into ChordPro's inline-bracket and
+  // {start_of_tab}/{end_of_tab} directive syntax. Plain text (lyrics, and bare
+  // "[Section]" text nodes) passes through untouched at this stage -- bare
+  // section-header brackets are disambiguated from chord brackets in a second
+  // pass below, once full line boundaries are known.
+  function nodeToChordPro(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) {
-      songChords += node.textContent || "";
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as Element;
-      if (el.classList.contains("tablatura")) {
-        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-      } else {
-        songChords += el.textContent || "";
+      return node.textContent || "";
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as Element;
+    if (el.classList.contains("tablatura")) {
+      // A bare "[Label]" line (e.g. "[Tab - Solo]") sometimes precedes the
+      // actual string lines inside the source's tablature text -- hoist
+      // it out as a ChordPro comment directive ahead of the tab block
+      // instead of leaving it as inert text inside {start_of_tab}, since
+      // ChordPro directives aren't recognized inside a tab environment.
+      const tabText = el.textContent || "";
+      const tabLines = tabText.split("\n");
+      const labelLines: string[] = [];
+      let i = 0;
+      while (i < tabLines.length) {
+        const trimmed = tabLines[i].trim();
+        const labelMatch = trimmed.match(/^\[([^\]]+)\]$/);
+        if (labelMatch) {
+          labelLines.push("{comment: " + labelMatch[1] + "}");
+          i++;
+          continue;
+        }
+        if (trimmed === "" && labelLines.length > 0 && i < tabLines.length - 1) {
+          i++;
+          continue;
+        }
+        break;
+      }
+      const labelPrefix = labelLines.length > 0 ? labelLines.join("\n") + "\n" : "";
+      const remainingTabText = tabLines.slice(i).join("\n");
+      return labelPrefix + "{start_of_tab}\n" + remainingTabText + "\n{end_of_tab}\n";
+    }
+    if (el.tagName.toLowerCase() === "b") {
+      // Prefix with a sentinel control character so the line-level pass below
+      // can tell a chord-origin bracket (from a <b> tag) apart from a bare
+      // "[Section]" text node even when the bracket is the only content on
+      // its line (e.g. an instrumental line with a single chord). Stripped
+      // out again once that disambiguation is done.
+      return "\u0000[" + (el.textContent || "").trim() + "]";
+    }
+    // Any other wrapping element: recurse so a <b> nested one level deeper
+    // (or any other markup CifraClub adds) still resolves to a chord bracket.
+    return Array.from(el.childNodes).map(nodeToChordPro).join("");
+  }
+
+  let assembled = "";
+  preElement.childNodes.forEach(function(node) {
+    assembled += nodeToChordPro(node);
+  });
+
+  // Second pass: a line that is *only* "[Section Name]" (bare bracket, no
+  // adjoining chords/lyrics) is a section header in the source markup, not a
+  // chord -- convert it to a ChordPro comment directive. Lines inside a tab
+  // block are left untouched since tab content is whitespace-significant.
+  let insideTab = false;
+  let songChords = assembled
+    .split("\n")
+    .map(function(line) {
+      const trimmed = line.trim();
+      if (trimmed === "{start_of_tab}") {
+        insideTab = true;
+        return line;
+      }
+      if (trimmed === "{end_of_tab}") {
+        insideTab = false;
+        return line;
+      }
+      if (!insideTab) {
+        // A section label can be followed by trailing content (typically
+        // chords) on the same source line, e.g. "[Intro] Em7  G  D4". Split
+        // the label onto its own {comment: ...} line so the trailing part
+        // is still parsed as a normal chord/lyrics line downstream.
+        const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
+        if (sectionMatch) {
+          const rest = sectionMatch[2];
+          return rest ? "{comment: " + sectionMatch[1] + "}\n" + rest : "{comment: " + sectionMatch[1] + "}";
+        }
+      }
+      return line;
+    })
+    .join("\n")
+    .split("\u0000")
+    .join("");
+
+  // Third pass: a chord-only line (after the wrap pass, stripping every
+  // [chord] bracket leaves only whitespace) is still on its own line here,
+  // mirroring the source's positional layout -- not real ChordPro. Merge
+  // it into the following lyric line, snapping each chord's source column
+  // to the start of the nearest word so brackets never land mid-word.
+  const CHORD_BRACKET_RE = /\[([^\]]+)\]/g;
+
+  function isChordOnlyLine(line: string): boolean {
+    if (line.trim() === "") return false;
+    CHORD_BRACKET_RE.lastIndex = 0;
+    if (!CHORD_BRACKET_RE.test(line)) return false;
+    CHORD_BRACKET_RE.lastIndex = 0;
+    const stripped = line.replace(CHORD_BRACKET_RE, "");
+    return stripped.trim() === "";
+  }
+
+  function extractChordTokensWithColumns(line: string): { col: number; chord: string }[] {
+    // `line` already has its chords wrapped as "[Chord]" by the earlier
+    // wrap pass, which shifts each subsequent chord's bracket position
+    // rightward relative to the ORIGINAL source layout (every "[" "]"
+    // pair adds 2 characters that weren't in the source's plain-text
+    // spacing). The lyric line below was never bracket-wrapped, so its
+    // column scale still matches the original layout -- recover that
+    // same scale here by stripping brackets back out before tokenizing,
+    // which restores the exact original whitespace run lengths.
+    const debracketed = line.replace(/[[\]]/g, "");
+    const tokens: { col: number; chord: string }[] = [];
+    const re = /\S+/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(debracketed)) !== null) {
+      tokens.push({ col: m.index, chord: m[0] });
+    }
+    return tokens;
+  }
+
+  function findWords(line: string): { start: number; end: number }[] {
+    const words: { start: number; end: number }[] = [];
+    const re = /\S+/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(line)) !== null) {
+      words.push({ start: m.index, end: m.index + m[0].length });
+    }
+    return words;
+  }
+
+  function snapColumnToWordStart(col: number, words: { start: number; end: number }[]): number {
+    for (const word of words) {
+      if (col < word.end) return word.start;
+    }
+    return words.length > 0 ? words[words.length - 1].end : 0;
+  }
+
+  function insertChordsAtColumns(lyricLine: string, tokens: { col: number; chord: string }[]): string {
+    const sorted = tokens.slice().sort((a, b) => a.col - b.col);
+    const words = findWords(lyricLine);
+    let result = "";
+    let lastPos = 0;
+    for (const t of sorted) {
+      const insertPos = Math.max(snapColumnToWordStart(t.col, words), lastPos);
+      result += lyricLine.slice(lastPos, insertPos);
+      result += "[" + t.chord + "]";
+      lastPos = insertPos;
+    }
+    result += lyricLine.slice(lastPos);
+    return result;
+  }
+
+  const DIRECTIVE_RE = /^\{[a-zA-Z_]+(?::[^}]*)?\}$/;
+  const reflowedLines: string[] = [];
+  const linesForReflow = songChords.split("\n");
+  let insideTabReflow = false;
+  let idx = 0;
+  while (idx < linesForReflow.length) {
+    const line = linesForReflow[idx];
+    const trimmed = line.trim();
+    if (trimmed === "{start_of_tab}") {
+      insideTabReflow = true;
+      reflowedLines.push(line);
+      idx++;
+      continue;
+    }
+    if (trimmed === "{end_of_tab}") {
+      insideTabReflow = false;
+      reflowedLines.push(line);
+      idx++;
+      continue;
+    }
+    if (!insideTabReflow && isChordOnlyLine(line)) {
+      const next = linesForReflow[idx + 1];
+      const nextTrimmed = next !== undefined ? next.trim() : undefined;
+      const nextIsLyricLine =
+        next !== undefined &&
+        nextTrimmed !== "" &&
+        !DIRECTIVE_RE.test(nextTrimmed as string) &&
+        !isChordOnlyLine(next);
+      if (nextIsLyricLine) {
+        const tokens = extractChordTokensWithColumns(line);
+        reflowedLines.push(insertChordsAtColumns(next as string, tokens));
+        idx += 2;
+        continue;
       }
     }
-  });
+    reflowedLines.push(line);
+    idx++;
+  }
+  songChords = reflowedLines.join("\n");
 
 
   function sanitizeNode(node: Node): string {

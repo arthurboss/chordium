@@ -1,0 +1,68 @@
+import { render } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import ChordProPreview from '../ChordProPreview';
+
+describe('ChordProPreview', () => {
+  it('renders chords on a chord-position row above the plain lyric row, matching the saved display', () => {
+    const { container } = render(<ChordProPreview text="[G]Saying I [C]love you" />);
+
+    const chordSpans = container.querySelectorAll('span.chord');
+    expect(chordSpans).toHaveLength(2);
+    expect(chordSpans[0].textContent).toBe('G');
+    expect(chordSpans[1].textContent).toBe('C');
+
+    const chordLine = container.querySelector('.chord-line');
+    expect(chordLine?.textContent).toBe('G        C');
+
+    const lyricsLine = container.querySelector('.lyrics-line');
+    expect(lyricsLine?.textContent).toBe('Saying I love you');
+  });
+
+  it('renders a lyric line with no chords as a single plain lyrics row', () => {
+    const { container } = render(<ChordProPreview text="Just some plain lyrics" />);
+
+    expect(container.querySelector('.chord-line')).toBeNull();
+    const lyricsLine = container.querySelector('.lyrics-line');
+    expect(lyricsLine?.textContent).toBe('Just some plain lyrics');
+  });
+
+  it('renders a comment as a section header', () => {
+    const { container } = render(<ChordProPreview text="{comment: Intro}" />);
+
+    const header = container.querySelector('.section-header');
+    expect(header).not.toBeNull();
+    expect(header?.textContent).toBe('Intro');
+  });
+
+  it('renders tab blocks with whitespace preserved', () => {
+    const tab = ['{start_of_tab}', 'E|-0-1-2-|', 'B|-0-1-2-|', '{end_of_tab}'].join('\n');
+    const { container } = render(<ChordProPreview text={tab} />);
+
+    const pre = container.querySelector('pre.tablatura');
+    expect(pre).not.toBeNull();
+    expect(pre?.textContent).toBe('E|-0-1-2-|\nB|-0-1-2-|');
+  });
+
+  it('does not execute or leak markup for chord/lyric text containing HTML-like characters', () => {
+    const { container } = render(<ChordProPreview text='[G<x>]Say "hi" <b>now</b>' />);
+
+    expect(container.querySelector('b')).toBeNull();
+    const chordSpan = container.querySelector('span.chord');
+    expect(chordSpan?.textContent).toBe('G<x>');
+  });
+
+  it('renders a chord-only line (no real lyric text) as just the chord row, with no blank .lyrics-line beneath it', () => {
+    const { container } = render(<ChordProPreview text="[G]  [C9]  [Am7]" />);
+
+    expect(container.querySelectorAll('.chord-line')).toHaveLength(1);
+    expect(container.querySelector('.lyrics-line')).toBeNull();
+  });
+
+  it('drops a blank line directly under a section header', () => {
+    const { container } = render(<ChordProPreview text={'{comment: Intro}\n\n[G]Saying I love you'} />);
+
+    const children = [...container.querySelector('.chordpro-preview')!.children];
+    expect(children[0].className).toBe('section-header');
+    expect(children[1].className).toBe('chord-line');
+  });
+});

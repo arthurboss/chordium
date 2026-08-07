@@ -59,7 +59,7 @@ const TuningPicker: React.FC<TuningPickerProps> = ({ value, onChange }) => {
         >
           <SelectPrimitive.Trigger
             aria-label={`String ${6 - i}`}
-            className="inline-flex items-center justify-center w-8 h-7 rounded-md border border-input bg-background font-medium text-primary hover:bg-primary/10 focus:outline-hidden focus:ring-1 focus:ring-ring data-[state=open]:ring-1 data-[state=open]:ring-ring transition-colors"
+            className="inline-flex items-center justify-center w-8 h-6 rounded-md border border-input bg-background font-medium text-primary hover:bg-primary/10 focus:outline-hidden focus:ring-1 focus:ring-ring data-[state=open]:ring-1 data-[state=open]:ring-ring transition-colors"
           >
             <SelectPrimitive.Value />
           </SelectPrimitive.Trigger>

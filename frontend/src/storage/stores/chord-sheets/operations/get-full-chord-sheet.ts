@@ -4,6 +4,7 @@ import { executeReadTransaction } from "../../../core/transactions";
 import { getDatabase } from "../database/connection";
 import { resolveSampleChordSheetPath } from "../../../services/sample-chord-sheets/path-resolver";
 import { STORES } from "../../../core/config/stores";
+import { upgradeLegacySongChords } from "../utils/legacy-upgrade/upgrade-legacy-song-chords";
 
 /**
  * Gets the stored full arrangement (with tabs) by path, if one has been fetched.
@@ -20,7 +21,7 @@ export async function getFullChordSheetContent(
     STORES.FULL_CHORD_SHEETS,
     (store) => store.get(path)
   );
-  if (content) return content;
+  if (content) return upgradeLegacySongChords(STORES.FULL_CHORD_SHEETS, content);
 
   const resolvedPath = resolveSampleChordSheetPath(path);
   if (resolvedPath !== path) {
@@ -28,7 +29,7 @@ export async function getFullChordSheetContent(
       STORES.FULL_CHORD_SHEETS,
       (store) => store.get(resolvedPath)
     );
-    if (resolved) return resolved;
+    if (resolved) return upgradeLegacySongChords(STORES.FULL_CHORD_SHEETS, resolved);
   }
 
   return null;

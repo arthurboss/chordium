@@ -25,7 +25,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
   if (edit) {
     return (
       <div className="w-full text-xs">
-        <div className="px-4 py-2 flex flex-row flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="px-4 py-2 flex flex-row flex-wrap justify-between items-center gap-x-4 gap-y-2">
           <label className="flex items-center gap-1.5 shrink-0">
             <span className="font-medium">{t("chordMetadata.guitarTuning")}</span>
             <TuningPicker
@@ -40,7 +40,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
               onChange={(e) => edit.onSongKeyChange(e.target.value)}
               placeholder="-"
               aria-label={t("chordMetadata.songKey")}
-              className="h-7 w-16 text-xs"
+              className="h-6 w-16 text-xs"
             />
           </label>
           <label className="flex items-center gap-1.5 shrink-0">
@@ -52,7 +52,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
               value={edit.guitarCapo}
               onChange={(e) => edit.onGuitarCapoChange(Number(e.target.value))}
               aria-label={t("chordMetadata.guitarCapo")}
-              className="h-7 w-16 text-xs"
+              className="h-6 w-16 text-xs"
             />
           </label>
         </div>

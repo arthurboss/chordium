@@ -1,42 +1,60 @@
 /* Plain CSS — not a CSS module. Class names are injected as raw strings
    by song-chords-to-raw-html.ts and the scraper, so they must not be mangled. */
 
+/* .chord / .chord-line / .lyrics-line / .section-header style the live
+   ChordProPreview shown while editing -- tuned to match the read-only
+   display's spacing and typography (#chord-sheet-viewer pre b /
+   .section-title below) as closely as a live-DOM React preview can. Font
+   family/size are intentionally NOT set here: they inherit from the
+   .chordpro-preview container's inline style (set from the same
+   fontSize/fontStyle the read-only display uses), the same way
+   #chord-sheet-viewer pre inherits its font from its own container. */
 .chord {
-  display: inline-block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   color: hsl(var(--primary));
-  padding: 0.375rem;
-  border-radius: 0.125rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .chord-line {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  white-space: normal;
-  margin-bottom: 0.25rem;
-  word-break: break-word;
-  line-height: 1;
+  white-space: pre;
+  word-break: normal;
+  line-height: 1.5;
 }
 
 .lyrics-line {
-  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
   word-break: break-word;
-  line-height: 1.1;
+  line-height: 1.5;
 }
 
 .section-header {
+  display: block;
   font-weight: 700;
-  font-size: 1.125rem;
-  margin-bottom: 0.5rem;
-  margin-top: 1rem;
+  font-size: 1rem;
   border-left: 4px solid hsl(var(--primary));
   padding-left: 0.5rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 #chord-sheet-viewer pre b,
 #chord-sheet-viewer pre .tablatura b {
   color: hsl(var(--primary));
   font-weight: 500;
+}
+
+/* Tab blocks in the live preview -- matches #chord-sheet-viewer pre .tablatura
+   below exactly, since tab notation is always monospace regardless of the
+   chosen body font/size. */
+.chordpro-preview .tablatura {
+  font-family: "Roboto Mono", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  display: block;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 #chord-sheet-viewer pre .section-title {
@@ -80,29 +98,22 @@
 
 @media (max-width: 640px) {
   .chord-line {
-    font-size: 0.875rem;
-    margin-bottom: 0.125rem;
     word-break: break-all;
-    line-height: 1;
+    line-height: 1.5;
     overflow-wrap: break-word;
     max-width: 100%;
   }
 
   .chord {
-    font-size: 0.75rem;
-    padding: 0.125rem 0.25rem;
     word-break: keep-all;
   }
 
   .lyrics-line {
-    margin-bottom: 0.5rem;
     max-width: 100%;
   }
 
   .section-header {
     font-size: 1rem;
-    margin-top: 0.75rem;
-    margin-bottom: 0.25rem;
   }
 
   #chord-sheet-viewer pre {

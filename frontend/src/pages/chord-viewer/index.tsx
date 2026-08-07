@@ -9,6 +9,7 @@ import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordS
 import { createChordSheetData } from './utils/chord-sheet-data';
 import { extractNavigationData } from './utils/navigation-data';
 import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
+import { resolveFullArrangementMetadata } from './utils/resolve-full-arrangement-metadata';
 import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 
 import { useNavigation } from '@/hooks/navigation';
@@ -220,6 +221,7 @@ const ChordViewer = () => {
       // When the full arrangement was edited in plain text, drop the scraped
       // rawHtml so the edited text renders; otherwise keep it for tab rendering.
       rawHtml: fullEdited != null ? undefined : fullSheet.rawHtml,
+      ...resolveFullArrangementMetadata(fullSheet, chordSheetData!.chordSheet),
     };
   } else {
     displayContent = editedData?.songChords ?? (chordSheetResult.content?.songChords ?? '');

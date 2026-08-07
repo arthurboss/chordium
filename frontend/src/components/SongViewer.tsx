@@ -14,7 +14,7 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
-import { Pencil, Music, Guitar } from "lucide-react";
+import { Pencil, Music, Guitar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
 import { guitarTuningToString, mapStringToGuitarTuning } from "@/utils/guitar-tuning-utils";
@@ -102,7 +102,7 @@ const SongViewer = ({
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
-    return (chordContentToDisplay || "").includes("[TAB]");
+    return (chordContentToDisplay || "").includes("{start_of_tab}");
   }, [chordSheetToDisplay.rawHtml, chordContentToDisplay]);
 
   const {
@@ -230,6 +230,23 @@ const SongViewer = ({
   const title = isEditing ? editTitle : chordSheetToDisplay.title;
   const artist = isEditing ? editArtist : chordSheetToDisplay.artist;
 
+  const arrangementIndicator = hasFullArrangement ? (
+    <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
+      {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
+      {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
+    </div>
+  ) : undefined;
+
+  // While editing, the header's back button cancels the edit (discarding
+  // unsaved changes) instead of navigating away.
+  const handleBack = () => {
+    if (isEditing) {
+      setIsEditing(false);
+      return;
+    }
+    onBack();
+  };
+
   const handleArtistClick = useCallback(() => {
     const artistSlug = songObj.path.split("/")[0];
     sessionStorage.removeItem("chordium_search_query");
@@ -252,7 +269,7 @@ const SongViewer = ({
       className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4"
     >
       <PageHeader
-        onBack={onBack}
+        onBack={handleBack}
         onAction={shouldShowActionButton ? handleAction : undefined}
         isSaved={isSaved}
         title={title}
@@ -262,15 +279,27 @@ const SongViewer = ({
         onTitleChange={setEditTitle}
         onArtistChange={setEditArtist}
         rightContent={
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-shrink-0 h-10 w-10 rounded-full"
-            onClick={() => setIsEditing((e) => !e)}
-            title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
+          isEditing ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={handleBack}
+              title={t("chordSheet.cancelEditing")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={() => setIsEditing((e) => !e)}
+              title={t("chordSheet.editChordSheet")}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )
         }
         metadata={
           <ChordMetadata
@@ -297,23 +326,16 @@ const SongViewer = ({
           />
         }
       />
-      <Card className="overflow-hidden">
-        <StyleToolbar
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          viewMode={viewMode}
-          setViewMode={handleViewModeChange}
-          hasTabs={hasTabs}
-        />
-      </Card>
-
-      {hasFullArrangement && isEditing && (
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
-            {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
-            {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
-          </div>
-        </div>
+      {!isEditing && (
+        <Card className="overflow-hidden">
+          <StyleToolbar
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+            viewMode={viewMode}
+            setViewMode={handleViewModeChange}
+            hasTabs={hasTabs}
+          />
+        </Card>
       )}
 
       {hasFullArrangement && !isEditing && (
@@ -354,6 +376,7 @@ const SongViewer = ({
         editContent={editContent}
         setEditContent={setEditContent}
         handleSaveEdits={saveEdits}
+        arrangementIndicator={arrangementIndicator}
       />
     </main>
   );

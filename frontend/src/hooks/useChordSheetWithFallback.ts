@@ -97,7 +97,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // arrangement — and no full arrangement is stored yet. This covers both the
   // fresh-scrape case (variant === 'simplified') and re-opening a cached song.
   const primarySongChords = localContent?.songChords ?? apiData?.songChords ?? null;
-  const primaryHasTabs = !!primarySongChords && (primarySongChords.includes('[TAB]') || (localContent?.rawHtml?.includes('tablatura') ?? false));
+  const primaryHasTabs = !!primarySongChords && (primarySongChords.includes('{start_of_tab}') || primarySongChords.includes('[TAB]') || (localContent?.rawHtml?.includes('tablatura') ?? false));
   useEffect(() => {
     if (!path) return;
     if (fullContent) return;              // already have it
@@ -111,13 +111,20 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     (async () => {
       const full = await fetchFullSongFromAPI(path);
       if (cancelled || !full?.songChords) return;
+      // The full arrangement can report a different key/tuning/capo than the
+      // simplified one (e.g. a tab arrangement using an alternate fingering
+      // shape) -- carry its own values alongside its content rather than
+      // relying on the simplified arrangement's metadata.
       const stored: StoredChordSheet = {
         path,
         songChords: full.songChords,
         ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}),
+        songKey: full.songKey,
+        guitarTuning: full.guitarTuning,
+        guitarCapo: full.guitarCapo,
       };
       setFullContent(stored);
-      storeFullChordSheet({ songChords: full.songChords, ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}) }, path).catch(() => {});
+      storeFullChordSheet(full, path).catch(() => {});
     })();
     return () => { cancelled = true; };
   }, [path, fullContent, primarySongChords, primaryHasTabs, isFromAPI, variant]);
@@ -171,7 +178,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
 
   // A distinct full arrangement is available to toggle to when we have full
   // content that actually contains tab blocks.
-  const hasFullArrangement = !!fullContent && (fullContent.rawHtml?.includes('tablatura') || fullContent.songChords.includes('[TAB]')) === true;
+  const hasFullArrangement = !!fullContent && (fullContent.rawHtml?.includes('tablatura') || fullContent.songChords.includes('{start_of_tab}') || fullContent.songChords.includes('[TAB]')) === true;
 
   return {
     metadata: finalMetadata,
