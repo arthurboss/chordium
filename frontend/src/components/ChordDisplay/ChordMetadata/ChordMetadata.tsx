@@ -40,7 +40,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
               onChange={(e) => edit.onSongKeyChange(e.target.value)}
               placeholder="-"
               aria-label={t("chordMetadata.songKey")}
-              className="h-7 w-16 text-xs"
+              className="h-6 w-16 text-xs"
             />
           </label>
           <label className="flex items-center gap-1.5 shrink-0">
@@ -52,7 +52,7 @@ const ChordMetadata: React.FC<ChordMetadataProps> = ({ chordSheet, controls, edi
               value={edit.guitarCapo}
               onChange={(e) => edit.onGuitarCapoChange(Number(e.target.value))}
               aria-label={t("chordMetadata.guitarCapo")}
-              className="h-7 w-16 text-xs"
+              className="h-6 w-16 text-xs"
             />
           </label>
         </div>
