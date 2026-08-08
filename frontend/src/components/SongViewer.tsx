@@ -14,6 +14,8 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
+import { useLyricsVersion } from "@/hooks/useLyricsVersion";
+import ArrangementLyricsToggle from "@/components/ArrangementLyricsToggle";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
@@ -98,6 +100,11 @@ const SongViewer = ({
   const chordSheetToDisplay = useMemo(() => chordSheet, [chordSheet]);
 
   const { setActive: setActiveShareable } = useActiveChordSheet();
+
+  const { lyrics, isLoading: isLyricsLoading } = useLyricsVersion({
+    path: songObj.path,
+    enabled: viewMode === 'lyrics-only'
+  });
 
   // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
   const hasTabs = useMemo(() => {
@@ -316,29 +323,14 @@ const SongViewer = ({
         </div>
       )}
 
-      {hasFullArrangement && !isEditing && (
-        <div className="flex justify-center">
-          <div className="inline-flex rounded-full border p-0.5 text-sm">
-            <button
-              type="button"
-              onClick={() => onToggleArrangement?.(false)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${!showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              title={t("arrangementToggle.simplifiedTitle")}
-            >
-              <Music className="h-3.5 w-3.5" />
-              {t("arrangementToggle.simplified")}
-            </button>
-            <button
-              type="button"
-              onClick={() => onToggleArrangement?.(true)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              title={t("arrangementToggle.fullTitle")}
-            >
-              <Guitar className="h-3.5 w-3.5" />
-              {t("arrangementToggle.full")}
-            </button>
-          </div>
-        </div>
+      {!isEditing && (
+        <ArrangementLyricsToggle
+          hasFullArrangement={hasFullArrangement}
+          showFull={showFull}
+          onToggleArrangement={onToggleArrangement || (() => {})}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
       )}
 
       <ChordSheetViewer

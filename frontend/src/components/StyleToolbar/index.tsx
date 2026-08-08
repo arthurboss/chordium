@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { SteppedSlider } from "@/components/ui/stepped-slider";
 import ToggleOption from "./ToggleOption";
-import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
+import { TabsModeIcon } from "./ViewModeIcons";
 import { TEXT_PREFERENCES_VALUES } from "./StyleToolbar.constants";
 import { isViewModeActive } from "./StyleToolbar.utils";
 
@@ -28,15 +28,6 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
     <div className="px-4 py-2 min-w-0 text-xs">
       <div className="flex flex-wrap items-center justify-between w-full gap-3">
         <div className="flex items-center gap-3 shrink-0">
-          <ToggleOption
-            active={isViewModeActive(viewMode, "lyrics-only")}
-            onClick={() => {
-              if (viewMode === "lyrics-only") setViewMode("tabs-on");
-              else setViewMode("lyrics-only");
-            }}
-            icon={<LyricsModeIcon className="opacity-70" />}
-            label={t("textStyle.lyrics")}
-          />
           <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
               hasTabs ? "max-w-[8rem] opacity-100" : "max-w-0 opacity-0 pointer-events-none"

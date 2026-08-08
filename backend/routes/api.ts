@@ -46,3 +46,17 @@ router.get('/cifraclub-song-full', async (req, res) => {
     res.status(status).json({ error: status === 404 ? 'Song not found' : 'Failed to fetch full song', details: error instanceof Error ? error.message : String(error) });
   }
 });
+
+// Fetches lyrics (original + translated) for a song.
+router.get('/cifraclub-lyrics', async (req, res) => {
+  try {
+    const { url: pathParam } = req.query as { url?: string };
+    if (!pathParam) { res.status(400).json({ error: 'Missing url parameter' }); return; }
+    const songUrl = `https://www.cifraclub.com.br/${pathParam.trim()}`;
+
+    const lyrics = await cifraClubService.getLyrics(songUrl);
+    res.json(lyrics);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch lyrics', details: error instanceof Error ? error.message : String(error) });
+  }
+});
