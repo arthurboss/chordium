@@ -202,7 +202,6 @@
   },
   "lyrics": {
     "lyrics": "Lyrics",
-    "showOriginal": "Show Original",
-    "showTranslation": "Show Translation"
+    "translation": "Translation"
   }
 }

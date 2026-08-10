@@ -319,7 +319,11 @@ const SongViewer = ({
           setFontSize={setFontSize}
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
-          hasTabs={hasTabs && version !== 'lyrics'}
+          hasTabs={hasTabs}
+          isLyricsMode={version === 'lyrics'}
+          hasTranslation={hasTranslation}
+          showTranslation={showTranslation}
+          onToggleTranslation={() => setShowTranslation(!showTranslation)}
         />
       </Card>
 
@@ -329,17 +333,6 @@ const SongViewer = ({
           onVersionChange={handleVersionChange}
           hasFullArrangement={hasFullArrangement}
         />
-      )}
-
-      {!isEditing && version === 'lyrics' && hasTranslation && (
-        <div className="flex justify-center">
-          <button
-            onClick={() => setShowTranslation(!showTranslation)}
-            className="text-xs px-3 py-1 rounded-full border hover:bg-accent transition-colors"
-          >
-            {showTranslation ? t("lyrics.showOriginal") || "Show Original" : t("lyrics.showTranslation") || "Show Translation"}
-          </button>
-        </div>
       )}
 
       {isEditing && (

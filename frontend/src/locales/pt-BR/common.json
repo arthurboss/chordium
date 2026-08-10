@@ -202,7 +202,6 @@
   },
   "lyrics": {
     "lyrics": "Letras",
-    "showOriginal": "Mostrar Original",
-    "showTranslation": "Mostrar Tradução"
+    "translation": "Tradução"
   }
 }
