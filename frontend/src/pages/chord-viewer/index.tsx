@@ -106,16 +106,23 @@ const ChordViewer = () => {
     fetchLyricsInBackground();
   }, [path]);
   
-  // Mirror lyrics mode in the URL as a "/letra" suffix. replaceState is used so
-  // the swap doesn't remount the route; window.location is read instead of the
-  // router's location because replaceState leaves the latter stale.
+  // Mirror the displayed version in the URL, matching the source's own paths:
+  // "/letra" for lyrics and "/simplificada" for the simplified arrangement.
+  // The simplified suffix is only meaningful when a distinct full arrangement
+  // exists, since otherwise the primary content already IS the full version.
+  // replaceState avoids remounting the route, and window.location is read
+  // instead of the router's location because replaceState leaves it stale.
+  const showSimplified = !showLyrics && !showFull && chordSheetResult.hasFullArrangement;
   useEffect(() => {
     const current = window.location.pathname;
-    const endsWithLetra = current.endsWith('/letra');
-    if (showLyrics === endsWithLetra) return;
-    const next = showLyrics ? `${current}/letra` : current.replace(/\/letra$/, '');
+    const base = current.replace(/\/(letra|simplificada)$/, '');
+    let suffix = '';
+    if (showLyrics) suffix = '/letra';
+    else if (showSimplified) suffix = '/simplificada';
+    const next = base + suffix;
+    if (next === current) return;
     window.history.replaceState(null, '', next + window.location.search);
-  }, [showLyrics]);
+  }, [showLyrics, showSimplified]);
   const hasJamParam = searchParams.has('d');
   useEffect(() => {
     if (!hasJamParam && (!chordSheetResult.chordSheet || !chordSheetResult.chordSheet.rawHtml) && !chordSheetResult.metadata?.storage?.saved && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
