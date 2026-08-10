@@ -11,6 +11,7 @@ import { extractNavigationData } from './utils/navigation-data';
 import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
 import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 
+import { getLyrics, storeLyrics } from '@/storage/services/lyrics-storage';
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
@@ -40,6 +41,7 @@ const ChordViewer = () => {
   // Holds an edit made to the full arrangement (separate from editedData, which
   // is the simplified override).
   const [fullEdited, setFullEdited] = useState<string | null>(null);
+  const [showLyrics, setShowLyrics] = useState(() => location.pathname.endsWith('/letra'));
 
   useEffect(() => {
     setEditedData(null);
@@ -87,6 +89,33 @@ const ChordViewer = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Background fetch lyrics
+  useEffect(() => {
+    if (!path) return;
+    const fetchLyricsInBackground = async () => {
+      try {
+        const cached = await getLyrics(path);
+        if (cached) return;
+        const response = await fetch(`/api/cifraclub-lyrics?url=${encodeURIComponent(path)}`);
+        if (response.ok) {
+          const data = await response.json();
+          await storeLyrics(path, data);
+        }
+      } catch (error) { }
+    };
+    fetchLyricsInBackground();
+  }, [path]);
+  
+  // Mirror lyrics mode in the URL as a "/letra" suffix. replaceState is used so
+  // the swap doesn't remount the route; window.location is read instead of the
+  // router's location because replaceState leaves the latter stale.
+  useEffect(() => {
+    const current = window.location.pathname;
+    const endsWithLetra = current.endsWith('/letra');
+    if (showLyrics === endsWithLetra) return;
+    const next = showLyrics ? `${current}/letra` : current.replace(/\/letra$/, '');
+    window.history.replaceState(null, '', next + window.location.search);
+  }, [showLyrics]);
   const hasJamParam = searchParams.has('d');
   useEffect(() => {
     if (!hasJamParam && (!chordSheetResult.chordSheet || !chordSheetResult.chordSheet.rawHtml) && !chordSheetResult.metadata?.storage?.saved && !chordSheetResult.isFromAPI && !chordSheetResult.isLoading && path) {
@@ -264,6 +293,8 @@ const ChordViewer = () => {
       hasFullArrangement={chordSheetResult.hasFullArrangement}
       showFull={showFull}
       onToggleArrangement={setShowFull}
+      showLyrics={showLyrics}
+      onLyricsToggle={setShowLyrics}
       // Only meaningful while the full arrangement is displayed: it is the
       // smaller payload the share dialog falls back to when the full one is
       // too large for a QR code.

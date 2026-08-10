@@ -17,5 +17,6 @@ export const storeSampleChordSheets = async (
     if (sample.fullContent) {
       await storage.storeFullContent?.(sample.fullContent, sample.path);
     }
+    // Lyrics are fetched lazily in the background when needed, not stored upfront
   }
 };

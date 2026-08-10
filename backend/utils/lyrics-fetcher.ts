@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import type { Browser } from 'puppeteer';
 
 interface LyricsFetchResult {
   original?: string;
@@ -6,86 +6,108 @@ interface LyricsFetchResult {
 }
 
 /**
- * Fetches lyrics from CifraClub with cascade:
- * 1. Print page (letra/imprimir.html) - lighter, cleaner markup
- * 2. Regular page with ?translation=off - original lyrics only
- * 3. Regular page - may include translation
+ * Pulls lyric text out of a CifraClub page. Print pages expose a <pre>;
+ * the regular route renders paragraphs inside <article> under hashed class
+ * names, so the paragraphs are joined rather than matched by selector.
  */
+function extractLyricsInPage(): string | null {
+  const pre = document.querySelector('pre');
+  if (pre) {
+    const text = (pre as HTMLElement).innerText?.trim();
+    if (text) return text;
+  }
+
+  const article = document.querySelector('article');
+  if (article) {
+    const paragraphs = Array.from(article.querySelectorAll('p'))
+      .map((p) => (p as HTMLElement).innerText?.trim())
+      .filter((t): t is string => !!t && t.length > 20);
+    if (paragraphs.length) return paragraphs.join('\n\n');
+  }
+
+  return null;
+}
+
+/**
+ * The regular /letra/ route interleaves each translated line with its original
+ * line. Splitting on that alternation recovers both versions; an odd or
+ * unbalanced block means no translation exists, so it is left untouched.
+ */
+function splitInterleavedTranslation(text: string): { original: string; translated: string } | null {
+  const blocks = text.split(/\n{2,}/);
+  const originalBlocks: string[] = [];
+  const translatedBlocks: string[] = [];
+
+  for (const block of blocks) {
+    const lines = block.split('\n').filter((l) => l.trim());
+    if (lines.length < 2 || lines.length % 2 !== 0) return null;
+    const translated: string[] = [];
+    const original: string[] = [];
+    for (let i = 0; i < lines.length; i += 2) {
+      translated.push(lines[i]);
+      original.push(lines[i + 1]);
+    }
+    translatedBlocks.push(translated.join('\n'));
+    originalBlocks.push(original.join('\n'));
+  }
+
+  if (!originalBlocks.length) return null;
+  return { original: originalBlocks.join('\n\n'), translated: translatedBlocks.join('\n\n') };
+}
+
 async function fetchLyricsFromCifraClub(
   basePath: string,
-  browser: puppeteer.Browser
+  browser: Browser
 ): Promise<LyricsFetchResult> {
   const result: LyricsFetchResult = {};
+  const base = basePath.endsWith('/') ? basePath : `${basePath}/`;
 
   const routes = [
-    { url: `https://www.cifraclub.com.br${basePath}letra/imprimir.html`, type: 'original', timeout: 8000 },
-    { url: `https://www.cifraclub.com.br${basePath}letra/?translation=off`, type: 'original', timeout: 10000 },
-    { url: `https://www.cifraclub.com.br${basePath}letra/`, type: 'both', timeout: 15000 },
+    { url: `https://www.cifraclub.com.br${base}letra/imprimir.html`, timeout: 8000 },
+    { url: `https://www.cifraclub.com.br${base}letra/?translation=off`, timeout: 10000 },
   ];
 
   for (const route of routes) {
+    let page;
     try {
-      const page = await browser.newPage();
+      page = await browser.newPage();
       page.setDefaultTimeout(route.timeout);
       page.setDefaultNavigationTimeout(route.timeout);
-
       await page.goto(route.url, { waitUntil: 'domcontentloaded' });
-      
-      // Extract lyrics - look for common CifraClub selectors
-      const lyrics = await page.evaluate(() => {
-        const lyricElement = 
-          document.querySelector('.lyric') ||
-          document.querySelector('[data-component="Lyrics"]') ||
-          document.querySelector('.cnb-lyric') ||
-          document.querySelector('pre');
-
-        if (!lyricElement) return null;
-        
-        return lyricElement.innerText?.trim() || null;
-      });
-
-      await page.close();
-
+      const lyrics = await page.evaluate(extractLyricsInPage);
       if (lyrics) {
-        if (route.type === 'original') {
-          result.original = lyrics;
-        } else if (route.type === 'both' && !result.original) {
-          result.original = lyrics;
-        }
-        // If we have the original, stop cascading
-        if (result.original) break;
+        result.original = lyrics;
+        break;
       }
-    } catch (error) {
-      // Continue to next route on error
-      continue;
+    } catch {
+      // Try the next route in the cascade.
+    } finally {
+      await page?.close().catch(() => {});
     }
   }
 
-  // If we got lyrics and the last successful route included translation parameter off, try translated version
-  if (result.original && !result.translated) {
-    try {
-      const page = await browser.newPage();
-      page.setDefaultTimeout(10000);
-
-      await page.goto(`https://www.cifraclub.com.br${basePath}letra/`, { waitUntil: 'domcontentloaded' });
-      
-      const translated = await page.evaluate(() => {
-        // CifraClub may have a separate translated lyrics section or toggle
-        const translatedElement = 
-          document.querySelector('[data-translated="true"]') ||
-          document.querySelector('.translated-lyric');
-
-        return translatedElement?.innerText?.trim() || null;
-      });
-
-      if (translated) {
-        result.translated = translated;
+  // The regular route carries the translation (interleaved with the original),
+  // and doubles as the last-resort source when both routes above came up empty.
+  let page;
+  try {
+    page = await browser.newPage();
+    page.setDefaultTimeout(15000);
+    page.setDefaultNavigationTimeout(15000);
+    await page.goto(`https://www.cifraclub.com.br${base}letra/`, { waitUntil: 'domcontentloaded' });
+    const combined = await page.evaluate(extractLyricsInPage);
+    if (combined) {
+      const split = splitInterleavedTranslation(combined);
+      if (split) {
+        result.translated = split.translated;
+        if (!result.original) result.original = split.original;
+      } else if (!result.original) {
+        result.original = combined;
       }
-
-      await page.close();
-    } catch (error) {
-      // Translated fetch is optional, don't fail on it
     }
+  } catch {
+    // Translation is optional.
+  } finally {
+    await page?.close().catch(() => {});
   }
 
   return result;

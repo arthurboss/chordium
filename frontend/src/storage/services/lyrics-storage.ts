@@ -13,29 +13,45 @@ export interface StoredLyrics {
 const LYRICS_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export async function storeLyrics(songPath: string, lyrics: ChordSheet['lyrics']): Promise<void> {
-  const db = await getDatabase();
-  const tx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
-  const store = tx.objectStore(STORES.SONG_LYRICS);
+  try {
+    const db = await getDatabase();
+    
+    // Check if store exists (gracefully handle old DB versions)
+    if (!db.objectStoreNames.contains(STORES.SONG_LYRICS)) {
+      return; // Store not available yet; skip silently
+    }
+    
+    const tx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
+    const store = tx.objectStore(STORES.SONG_LYRICS);
 
-  const now = Date.now();
-  const entry: StoredLyrics = {
-    path: songPath,
-    original: lyrics?.original,
-    translated: lyrics?.translated,
-    timestamp: now,
-    expiresAt: now + LYRICS_TTL,
-  };
+    const now = Date.now();
+    const entry: StoredLyrics = {
+      path: songPath,
+      original: lyrics?.original,
+      translated: lyrics?.translated,
+      timestamp: now,
+      expiresAt: now + LYRICS_TTL,
+    };
 
-  store.put(entry);
-  await new Promise((resolve, reject) => {
-    tx.oncomplete = () => resolve(undefined);
-    tx.onerror = () => reject(tx.error);
-  });
+    store.put(entry);
+    await new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve(undefined);
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (error) {
+    console.error('Failed to store lyrics:', error);
+  }
 }
 
 export async function getLyrics(songPath: string): Promise<ChordSheet['lyrics'] | null> {
   try {
     const db = await getDatabase();
+    
+    // Check if store exists (gracefully handle old DB versions)
+    if (!db.objectStoreNames.contains(STORES.SONG_LYRICS)) {
+      return null; // Store not available yet; return null silently
+    }
+    
     const tx = db.transaction(STORES.SONG_LYRICS, 'readonly');
     const store = tx.objectStore(STORES.SONG_LYRICS);
     const entry = store.get(songPath) as IDBRequest<StoredLyrics | undefined>;
@@ -64,7 +80,7 @@ export async function getLyrics(songPath: string): Promise<ChordSheet['lyrics'] 
       entry.onerror = () => reject(entry.error);
     });
   } catch (error) {
-    console.error('Failed to get lyrics from storage:', error);
+    console.warn('Failed to get lyrics from storage:', error);
     return null;
   }
 }
@@ -72,6 +88,12 @@ export async function getLyrics(songPath: string): Promise<ChordSheet['lyrics'] 
 export async function deleteLyrics(songPath: string): Promise<void> {
   try {
     const db = await getDatabase();
+    
+    // Check if store exists (gracefully handle old DB versions)
+    if (!db.objectStoreNames.contains(STORES.SONG_LYRICS)) {
+      return; // Store not available yet; skip silently
+    }
+    
     const tx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
     tx.objectStore(STORES.SONG_LYRICS).delete(songPath);
 

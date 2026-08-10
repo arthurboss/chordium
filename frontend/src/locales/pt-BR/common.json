@@ -199,5 +199,10 @@
   "chordSheet": {
     "editChordSheet": "Editar cifra",
     "cancelEditing": "Cancelar edição"
+  },
+  "lyrics": {
+    "lyrics": "Letras",
+    "showOriginal": "Mostrar Original",
+    "showTranslation": "Mostrar Tradução"
   }
 }

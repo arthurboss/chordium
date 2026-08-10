@@ -1,55 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getLyrics, storeLyrics, deleteLyrics } from '@/storage/services/lyrics-storage';
+import { getLyrics, deleteLyrics } from '@/storage/services/lyrics-storage';
 import type { ChordSheet } from '@/../shared/types/index.js';
 
 interface UseLyricsVersionOptions {
   path: string;
-  enabled: boolean;
 }
 
-export function useLyricsVersion({ path, enabled }: UseLyricsVersionOptions) {
+export function useLyricsVersion({ path }: UseLyricsVersionOptions) {
   const [lyrics, setLyrics] = useState<ChordSheet['lyrics'] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showTranslation, setShowTranslation] = useState(false);
 
-  // Load lyrics from storage or fetch from API
-  const loadLyrics = useCallback(async () => {
-    if (!enabled || !path) return;
+  const displayLyrics = showTranslation && lyrics?.translated ? lyrics.translated : lyrics?.original;
 
-    setIsLoading(true);
-    setError(null);
+  // Lyrics are fetched and cached in the background by the page, so a single
+  // read on mount usually lands before they arrive. Poll until they show up,
+  // then stop.
+  useEffect(() => {
+    if (!path) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
 
-    try {
-      // Try cache first
+    const poll = async (attempt: number) => {
+      if (cancelled) return;
       const cached = await getLyrics(path);
-      if (cached) {
+      if (cancelled) return;
+      if (cached?.original) {
         setLyrics(cached);
         return;
       }
+      if (attempt >= 20) return;
+      timer = setTimeout(() => poll(attempt + 1), 1000);
+    };
 
-      // Fetch from API
-      const response = await fetch(`/api/cifraclub-lyrics?url=${encodeURIComponent(path)}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch lyrics');
-      }
+    setLyrics(null);
+    setShowTranslation(false);
+    poll(0);
 
-      const data = (await response.json()) as ChordSheet['lyrics'];
-      setLyrics(data);
-      await storeLyrics(path, data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setLyrics(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [path, enabled]);
-
-  // Fetch lyrics when enabled or path changes
-  useEffect(() => {
-    if (enabled && path) {
-      loadLyrics();
-    }
-  }, [enabled, path, loadLyrics]);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [path]);
 
   const clearLyrics = useCallback(async () => {
     setLyrics(null);
@@ -58,9 +46,10 @@ export function useLyricsVersion({ path, enabled }: UseLyricsVersionOptions) {
 
   return {
     lyrics,
-    isLoading,
-    error,
-    reload: loadLyrics,
+    displayLyrics,
+    showTranslation,
+    setShowTranslation,
+    hasTranslation: !!lyrics?.translated,
     clear: clearLyrics,
   };
 }

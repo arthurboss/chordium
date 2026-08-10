@@ -11,12 +11,6 @@ import type { SampleChordSheetRecord } from './data-loader.types';
 
 /**
  * Load sample chord sheet metadata only (fast, non-blocking)
- *
- * Dynamically imports sample chord sheet metadata and creates records with
- * the correct path format for IndexedDB storage.
- *
- * @returns Promise resolving to array of objects with path and metadata
- * @throws {Error} When sample metadata cannot be loaded
  */
 export const loadSampleMetadata = async (): Promise<Array<{ path: string; metadata: SongMetadata }>> => {
   try {
@@ -50,12 +44,6 @@ export const loadSampleMetadata = async (): Promise<Array<{ path: string; metada
 
 /**
  * Load sample chord sheet content for a specific path (heavy, on-demand)
- *
- * Dynamically imports sample chord sheet content and combines it with metadata.
- *
- * @param path - The chord sheet path to load content for
- * @returns Promise resolving to complete ChordSheet object
- * @throws {Error} When sample content cannot be loaded
  */
 export const loadSampleContent = async (path: string): Promise<ChordSheet> => {
   try {
@@ -87,37 +75,32 @@ export const loadSampleContent = async (path: string): Promise<ChordSheet> => {
 /**
  * Load the full arrangement (with tabs) for a sample path, if one exists.
  * Returns undefined for samples that have no distinct full arrangement.
- *
- * @param path - The chord sheet path to load full content for
  */
 export const loadSampleFullContent = async (path: string): Promise<ChordSheet | undefined> => {
   try {
+    let fullContentModule;
+
     switch (path) {
       case 'oasis/wonderwall':
-        return (await import('../../data/samples/chord-sheets/full-content/oasis-wonderwall.json')).default as ChordSheet;
+        fullContentModule = await import('../../data/samples/chord-sheets/full-content/oasis-wonderwall.json');
+        return fullContentModule.default as ChordSheet;
       case 'the-eagles/hotel-california':
-        return (await import('../../data/samples/chord-sheets/full-content/eagles-hotel_california.json')).default as ChordSheet;
-      case 'extreme/more-than-words':
-        return (await import('../../data/samples/chord-sheets/full-content/extreme-more_than_words.json')).default as ChordSheet;
+        fullContentModule = await import('../../data/samples/chord-sheets/full-content/eagles-hotel_california.json');
+        return fullContentModule.default as ChordSheet;
       default:
         return undefined;
     }
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error(`Failed to load sample full chord sheet content for ${path}:`, error);
+      console.debug(`No full content found for sample path ${path} (this is OK)`);
     }
     return undefined;
   }
 };
 
 /**
- * Load complete sample chord sheet data (metadata + content)
- *
- * This is a convenience function that loads both metadata and content.
- * For progressive loading, use loadSampleMetadata() first, then loadSampleContent() on demand.
- *
- * @returns Promise resolving to array of complete SampleChordSheetRecord objects
- * @throws {Error} When sample data cannot be loaded
+ * Load complete sample chord sheet data (metadata, content, and full arrangements)
+ * Lyrics are NOT loaded here; they're fetched lazily in the background when needed
  */
 export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
   try {
