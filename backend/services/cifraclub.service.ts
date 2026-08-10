@@ -1,9 +1,7 @@
 import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
-import { fetchWithProgressiveExtraction, fetchPreferredChordSheet, fetchFullChordSheet, type CascadeResult } from "../utils/chord-sheet-fetcher.js";
-import { fetchLyricsFromCifraClub } from "../utils/lyrics-fetcher.js";
-import puppeteerService from "./puppeteer.service.js";
+import { fetchWithProgressiveExtraction, fetchPreferredChordSheet, fetchFullChordSheet, fetchSongLyrics, type CascadeResult } from "../utils/chord-sheet-fetcher.js";
 import type { Artist, Song, ChordSheet, SongMetadata, SearchType } from "../../shared/types/index.js";
 
 class CifraClubService {
@@ -43,15 +41,7 @@ class CifraClubService {
   }
 
   async getLyrics(songUrl: string): Promise<ChordSheet['lyrics']> {
-    try {
-      const url = new URL(songUrl);
-      const basePath = url.pathname;
-      const browser = await puppeteerService.init();
-      return await fetchLyricsFromCifraClub(basePath, browser);
-    } catch (error) {
-      console.error('Failed to fetch lyrics:', error);
-      return {};
-    }
+    return fetchSongLyrics(songUrl);
   }
 }
 

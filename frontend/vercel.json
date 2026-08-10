@@ -10,6 +10,9 @@
     },
     "api/cifraclub-song-full.ts": {
       "maxDuration": 60
+    },
+    "api/cifraclub-lyrics.ts": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
