@@ -97,10 +97,12 @@ const ChordViewer = () => {
         const cached = await getLyrics(path);
         if (cached) return;
         const response = await fetch(`/api/cifraclub-lyrics?url=${encodeURIComponent(path)}`);
-        if (response.ok) {
-          const data = await response.json();
-          await storeLyrics(path, data);
-        }
+        if (!response.ok) return;
+        const data = await response.json();
+        // A song with no lyrics page yields nothing usable; caching that would
+        // replace the chord-sheet fallback with an empty view for 30 days.
+        if (!data?.original?.trim()) return;
+        await storeLyrics(path, data);
       } catch (error) { }
     };
     fetchLyricsInBackground();

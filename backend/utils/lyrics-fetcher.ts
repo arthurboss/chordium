@@ -55,6 +55,15 @@ function splitInterleavedTranslation(text: string): { original: string; translat
   return { original: originalBlocks.join('\n\n'), translated: translatedBlocks.join('\n\n') };
 }
 
+/**
+ * A song without a lyrics page redirects to the artist or chord sheet page,
+ * whose markup still yields paragraphs (the song listing), so the redirect has
+ * to be detected by URL or those links get stored as lyrics.
+ */
+function isLyricsPage(url: string): boolean {
+  return url.includes('/letra');
+}
+
 async function fetchLyricsFromCifraClub(
   basePath: string,
   browser: Browser
@@ -74,6 +83,7 @@ async function fetchLyricsFromCifraClub(
       page.setDefaultTimeout(route.timeout);
       page.setDefaultNavigationTimeout(route.timeout);
       await page.goto(route.url, { waitUntil: 'domcontentloaded' });
+      if (!isLyricsPage(page.url())) continue;
       const lyrics = await page.evaluate(extractLyricsInPage);
       if (lyrics) {
         result.original = lyrics;
@@ -94,7 +104,7 @@ async function fetchLyricsFromCifraClub(
     page.setDefaultTimeout(15000);
     page.setDefaultNavigationTimeout(15000);
     await page.goto(`https://www.cifraclub.com.br${base}letra/`, { waitUntil: 'domcontentloaded' });
-    const combined = await page.evaluate(extractLyricsInPage);
+    const combined = isLyricsPage(page.url()) ? await page.evaluate(extractLyricsInPage) : null;
     if (combined) {
       const split = splitInterleavedTranslation(combined);
       if (split) {
