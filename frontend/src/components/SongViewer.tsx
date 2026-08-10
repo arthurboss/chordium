@@ -223,6 +223,11 @@ const SongViewer = ({
     ? isContentLoading
     : isLazyContentLoading;
 
+  const handleViewModeChange = (mode: string) => {
+    setViewMode(mode);
+    onViewModeChange?.(mode);
+  };
+
   const handleVersionChange = (newVersion: 'simplified' | 'full' | 'lyrics') => {
     setVersion(newVersion);
     onLyricsToggle?.(newVersion === 'lyrics');
@@ -313,7 +318,7 @@ const SongViewer = ({
           fontSize={fontSize}
           setFontSize={setFontSize}
           viewMode={viewMode}
-          setViewMode={() => {}}
+          setViewMode={handleViewModeChange}
           hasTabs={hasTabs && version !== 'lyrics'}
         />
       </Card>

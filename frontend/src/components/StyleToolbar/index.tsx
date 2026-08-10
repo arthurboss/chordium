@@ -27,6 +27,18 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   return (
     <div className="px-4 py-2 min-w-0 text-xs">
       <div className="flex flex-wrap items-center justify-between w-full gap-3">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="font-medium">{t("textStyle.fontSize")}</span>
+          <SteppedSlider
+            value={[fontSize]}
+            min={TEXT_PREFERENCES_VALUES.fontSizes.min}
+            max={TEXT_PREFERENCES_VALUES.fontSizes.max}
+            step={TEXT_PREFERENCES_VALUES.fontSizes.step}
+            onValueChange={(value) => setFontSize(value[0])}
+            className="w-24"
+          />
+          <span className="w-8 text-center">{fontSize}px</span>
+        </div>
         <div className="flex items-center gap-3 shrink-0">
           <div
             className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -44,18 +56,6 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
               label="Tabs"
             />
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="font-medium">{t("textStyle.fontSize")}</span>
-          <SteppedSlider
-            value={[fontSize]}
-            min={TEXT_PREFERENCES_VALUES.fontSizes.min}
-            max={TEXT_PREFERENCES_VALUES.fontSizes.max}
-            step={TEXT_PREFERENCES_VALUES.fontSizes.step}
-            onValueChange={(value) => setFontSize(value[0])}
-            className="w-24"
-          />
-          <span className="w-8 text-center">{fontSize}px</span>
         </div>
       </div>
     </div>
