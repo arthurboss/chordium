@@ -9,18 +9,21 @@ export interface LyricsResult {
  * Pulls lyric text out of a source page. Print pages expose a <pre>; the
  * regular route renders paragraphs inside <article> under hashed class names,
  * so the paragraphs are joined rather than matched by selector.
+ *
+ * innerText is required over textContent: the lines are separated by <br>, and
+ * textContent runs them together, which leaves the translation unsplittable.
  */
 function extractLyrics(): string | null {
   const pre = document.querySelector("pre");
   if (pre) {
-    const text = (pre as HTMLElement).textContent?.trim();
+    const text = (pre as HTMLElement).innerText?.trim();
     if (text) return text;
   }
 
   const article = document.querySelector("article");
   if (article) {
     const paragraphs = Array.from(article.querySelectorAll("p"))
-      .map((p) => (p as HTMLElement).textContent?.trim())
+      .map((p) => (p as HTMLElement).innerText?.trim())
       .filter((t): t is string => !!t && t.length > 20);
     if (paragraphs.length) return paragraphs.join("\n\n");
   }
