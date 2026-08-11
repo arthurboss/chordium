@@ -38,6 +38,14 @@ function readEntry(store: IDBObjectStore, songPath: string): Promise<StoredLyric
   });
 }
 
+function readAll(store: IDBObjectStore): Promise<StoredLyrics[]> {
+  const request = store.getAll() as IDBRequest<StoredLyrics[]>;
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 function awaitTx(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
@@ -110,6 +118,58 @@ export async function getTranslatedLanguages(songPath: string): Promise<Translat
   } catch (error) {
     console.warn('Failed to read translation languages from storage:', error);
     return [];
+  }
+}
+
+/** Which of the app's languages have translations stored for any song. */
+export async function getStoredTranslationLanguages(): Promise<TranslatableLanguage[]> {
+  try {
+    return await withStore(
+      'readonly',
+      async (store) => {
+        const entries = await readAll(store);
+        const languages = new Set<TranslatableLanguage>();
+        for (const entry of entries) {
+          for (const language of Object.keys(entry.translations) as TranslatableLanguage[]) {
+            languages.add(language);
+          }
+        }
+        return [...languages];
+      },
+      []
+    );
+  } catch (error) {
+    console.warn('Failed to read stored translation languages:', error);
+    return [];
+  }
+}
+
+/**
+ * Drops one language's translations across every song, for readers reclaiming
+ * space. The songs keep their other languages.
+ */
+export async function removeTranslationsForLanguage(
+  language: TranslatableLanguage
+): Promise<void> {
+  try {
+    await withStore(
+      'readwrite',
+      async (store, tx) => {
+        for (const entry of await readAll(store)) {
+          if (!(language in entry.translations)) continue;
+          const { [language]: _removed, ...kept } = entry.translations;
+          if (Object.keys(kept).length === 0) {
+            store.delete(entry.path);
+          } else {
+            store.put({ ...entry, translations: kept } satisfies StoredLyrics);
+          }
+        }
+        await awaitTx(tx);
+      },
+      undefined
+    );
+  } catch (error) {
+    console.error('Failed to remove translations:', error);
   }
 }
 
