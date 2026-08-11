@@ -8,9 +8,19 @@ export interface StoredLyrics {
   translated?: string;
   timestamp: number;
   expiresAt: number;
+  /** Extractor version that produced this entry; see LYRICS_EXTRACTOR_VERSION. */
+  version?: number;
 }
 
 const LYRICS_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+/**
+ * Bump when a fix changes what the extractor produces, so entries cached by the
+ * previous version are refetched instead of being served for the rest of their
+ * TTL. Version 2 reads the lines with their breaks intact, without which no
+ * translation was ever detected.
+ */
+export const LYRICS_EXTRACTOR_VERSION = 2;
 
 export async function storeLyrics(songPath: string, lyrics: ChordSheet['lyrics']): Promise<void> {
   try {
@@ -31,6 +41,7 @@ export async function storeLyrics(songPath: string, lyrics: ChordSheet['lyrics']
       translated: lyrics?.translated,
       timestamp: now,
       expiresAt: now + LYRICS_TTL,
+      version: LYRICS_EXTRACTOR_VERSION,
     };
 
     store.put(entry);
@@ -64,8 +75,9 @@ export async function getLyrics(songPath: string): Promise<ChordSheet['lyrics'] 
           return;
         }
 
-        if (result.expiresAt < Date.now()) {
-          // Entry expired, delete it and return null
+        if (result.expiresAt < Date.now() || (result.version ?? 1) < LYRICS_EXTRACTOR_VERSION) {
+          // Expired, or written by an older extractor: drop it and report the
+          // entry as absent so the caller refetches once.
           const deleteTx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
           deleteTx.objectStore(STORES.SONG_LYRICS).delete(songPath);
           resolve(null);
