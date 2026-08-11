@@ -1,7 +1,7 @@
 import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
-import { fetchWithProgressiveExtraction, fetchPreferredChordSheet, fetchFullChordSheet, fetchSongLyrics, type CascadeResult } from "../utils/chord-sheet-fetcher.js";
+import { fetchWithProgressiveExtraction, fetchPreferredChordSheet, fetchFullChordSheet, type CascadeResult } from "../utils/chord-sheet-fetcher.js";
 import type { Artist, Song, ChordSheet, SongMetadata, SearchType } from "../../shared/types/index.js";
 
 class CifraClubService {
@@ -38,10 +38,6 @@ class CifraClubService {
 
   async getFullChordSheet(songUrl: string): Promise<CascadeResult> {
     return fetchFullChordSheet(songUrl);
-  }
-
-  async getLyrics(songUrl: string): Promise<ChordSheet['lyrics']> {
-    return fetchSongLyrics(songUrl);
   }
 }
 

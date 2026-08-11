@@ -11,7 +11,6 @@ import { extractNavigationData } from './utils/navigation-data';
 import { resolveSimplifiedContentForFullEdit } from './utils/resolve-simplified-content';
 import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 
-import { getLyrics, storeLyrics } from '@/storage/services/lyrics-storage';
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
@@ -89,26 +88,6 @@ const ChordViewer = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Background fetch lyrics
-  useEffect(() => {
-    if (!path) return;
-    const fetchLyricsInBackground = async () => {
-      try {
-        // getLyrics reports entries from an older extractor as absent, so this
-        // refetches them once and then leaves them alone.
-        const cached = await getLyrics(path);
-        if (cached) return;
-        const response = await fetch(`/api/cifraclub-lyrics?url=${encodeURIComponent(path)}`);
-        if (!response.ok) return;
-        const data = await response.json();
-        // A song with no lyrics page yields nothing usable; caching that would
-        // replace the chord-sheet fallback with an empty view for 30 days.
-        if (!data?.original?.trim()) return;
-        await storeLyrics(path, data);
-      } catch (error) { }
-    };
-    fetchLyricsInBackground();
-  }, [path]);
   
   // Mirror the displayed version in the URL, matching the source's own paths:
   // "/letra" for lyrics and "/simplificada" for the simplified arrangement.
