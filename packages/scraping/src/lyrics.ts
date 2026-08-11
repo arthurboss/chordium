@@ -32,10 +32,12 @@ interface ExtractedLyrics {
  * separates one section of a song from the next, and the groups are rejoined
  * with a blank line so that structure survives.
  *
- * Print pages carry no translation and expose the lyrics in a <pre>.
+ * Without that container there is nothing to read, so extraction stops rather
+ * than searching the page at large and mistaking interface text for lyrics.
  */
 function extractLyrics(): ExtractedLyrics | null {
   const container = document.querySelector("[data-chord-container]");
+  if (!container) return null;
 
   const join = (sections: string[][]) =>
     sections
@@ -43,9 +45,7 @@ function extractLyrics(): ExtractedLyrics | null {
       .filter((section) => section)
       .join("\n\n");
 
-  const taggedLines = container
-    ? Array.from(container.querySelectorAll("span[data-original]"))
-    : [];
+  const taggedLines = Array.from(container.querySelectorAll("span[data-original]"));
   if (taggedLines.length) {
     const originalSections: string[][] = [];
     const translatedSections: string[][] = [];
@@ -88,19 +88,14 @@ function extractLyrics(): ExtractedLyrics | null {
   }
 
   // Untranslated songs: the lines sit in the container as plain paragraphs.
-  if (container) {
-    const paragraphs = Array.from(container.querySelectorAll("p"))
-      .map((paragraph) => (paragraph as HTMLElement).innerText ?? paragraph.textContent ?? "")
-      .map((text) => text.split("\n").map((line) => line.trim()).filter((line) => line))
-      .filter((lines) => lines.length);
-    const fromParagraphs = join(paragraphs);
-    if (fromParagraphs) return { original: fromParagraphs };
-  }
+  const paragraphs = Array.from(container.querySelectorAll("p"))
+    .map((paragraph) => (paragraph as HTMLElement).innerText ?? paragraph.textContent ?? "")
+    .map((text) => text.split("\n").map((line) => line.trim()).filter((line) => line))
+    .filter((lines) => lines.length);
+  const fromParagraphs = join(paragraphs);
+  if (fromParagraphs) return { original: fromParagraphs };
 
-  // Print pages have no container and hold the whole song in a single <pre>.
-  const pre = document.querySelector("pre");
-  const text = (pre as HTMLElement | null)?.innerText?.trim();
-  return text ? { original: text } : null;
+  return null;
 }
 
 /**
@@ -117,8 +112,8 @@ async function tryLoadLyrics(
 ): Promise<ExtractedLyrics | null> {
   try {
     page.setDefaultNavigationTimeout?.(timeout);
-    // Print pages ship a pagination script that deletes overflow content from
-    // the DOM, which silently truncates the lyrics.
+    // The source ships a script that trims content out of the DOM, which
+    // silently truncates the lyrics.
     await page.setJavaScriptEnabled?.(false);
     await page.goto(url, { waitUntil: "domcontentloaded", timeout });
 
@@ -140,10 +135,9 @@ async function tryLoadLyrics(
 }
 
 /**
- * Fetches a song's lyrics, cascading: print page, then the no-translation
- * route. The regular route is always visited last because it is the only one
- * carrying the translation, and it doubles as the fallback for the original
- * when the earlier routes yield nothing.
+ * Fetches a song's lyrics from the route that carries them. Only this route
+ * wraps the song in the container the extraction relies on, and it is also the
+ * only one offering a translation, so there is nothing to cascade to.
  */
 export async function fetchLyrics(
   page: PageLike,
@@ -151,23 +145,11 @@ export async function fetchLyrics(
   logger?: (msg: string) => void
 ): Promise<LyricsResult> {
   const base = baseUrl.replace(/\/+$/, "");
+  const found = await tryLoadLyrics(page, `${base}/letra/`, 15000, logger);
+  if (!found) return {};
 
-  // The regular route is tried first because it is the only one carrying the
-  // translation; the print page is a lighter fallback for the original alone.
-  const routes = [
-    { url: `${base}/letra/`, timeout: 15000 },
-    { url: `${base}/letra/imprimir.html`, timeout: 8000 },
-  ];
-
-  const result: LyricsResult = {};
-  for (const route of routes) {
-    const found = await tryLoadLyrics(page, route.url, route.timeout, logger);
-    if (found) {
-      result.original = found.original;
-      if (found.translated) result.translated = found.translated;
-      break;
-    }
-  }
-
-  return result;
+  return {
+    original: found.original,
+    ...(found.translated ? { translated: found.translated } : {}),
+  };
 }
