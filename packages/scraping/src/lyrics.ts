@@ -22,31 +22,58 @@ interface ExtractedLyrics {
  * are laid out across more than one container, and it removes the need to guess
  * at an alternating pattern.
  *
+ * Lines are grouped by the paragraph holding them, which is what separates one
+ * section of a song from the next, and the groups are rejoined with a blank
+ * line so that structure survives.
+ *
  * Print pages carry no translation and expose the lyrics in a <pre>, which is
  * the fallback when no tagged lines are present.
  */
 function extractLyrics(): ExtractedLyrics | null {
-  const pairs = Array.from(document.querySelectorAll("span[data-original]"));
-  if (pairs.length) {
-    const originals: string[] = [];
-    const translations: string[] = [];
+  const taggedLines = Array.from(document.querySelectorAll("span[data-original]"));
+  if (taggedLines.length) {
+    const originalSections: string[][] = [];
+    const translatedSections: string[][] = [];
+    let originalCount = 0;
+    let translatedCount = 0;
+    let currentParagraph: Element | null = null;
 
-    for (const originalSpan of pairs) {
+    for (const originalSpan of taggedLines) {
       const line = originalSpan.textContent?.trim();
       if (!line) continue;
-      originals.push(line);
+
+      const paragraph = originalSpan.closest("p");
+      if (paragraph !== currentParagraph) {
+        currentParagraph = paragraph;
+        originalSections.push([]);
+        translatedSections.push([]);
+      }
+
+      originalSections[originalSections.length - 1].push(line);
+      originalCount++;
+
       // The sibling carries the same line translated; absent on untranslated pages.
       const translatedSpan = originalSpan.parentElement?.querySelector("span[data-translation]");
       const translated = translatedSpan?.textContent?.trim();
-      if (translated) translations.push(translated);
+      if (translated) {
+        translatedSections[translatedSections.length - 1].push(translated);
+        translatedCount++;
+      }
     }
 
-    if (originals.length) {
+    const join = (sections: string[][]) =>
+      sections
+        .map((lines) => lines.join("\n"))
+        .filter((section) => section)
+        .join("\n\n");
+
+    const original = join(originalSections);
+    if (original) {
       return {
-        original: originals.join("\n"),
+        original,
         // Only offer a translation when every line has one, so a partially
         // translated page cannot silently drop verses.
-        translated: translations.length === originals.length ? translations.join("\n") : undefined,
+        translated: translatedCount === originalCount ? join(translatedSections) : undefined,
       };
     }
   }
