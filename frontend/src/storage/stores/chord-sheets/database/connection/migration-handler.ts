@@ -84,8 +84,14 @@ export function handleIndexedDBMigrations(
       }
       case 7: {
         // Migration to v7: add a store for song lyrics (original + translated),
-        // used by the lyrics view. Keyed by path, with a TTL index.
+        // used by the lyrics view. Keyed by path.
         createSchema(db, 7);
+        break;
+      }
+      case 8: {
+        // Migration to v8: lyrics no longer expire on their own, so the index
+        // and the field it pointed at are both removed.
+        dropLyricsExpiry(transaction);
         break;
       }
       // Add future migrations here
@@ -126,6 +132,30 @@ function dropUnsavedCachedContent(db: IDBDatabase, transaction?: IDBTransaction 
       fullStore?.delete(record.path);
       cursor.update({ ...record, storage: { ...record.storage, contentAvailable: false } });
     }
+    cursor.continue();
+  };
+}
+
+/**
+ * Removes every trace of the lyrics store's own expiry, left over from when
+ * lyrics expired independently of the song they belong to: the index, and the
+ * field it pointed at on records written before this version.
+ */
+function dropLyricsExpiry(transaction?: IDBTransaction | null): void {
+  if (!transaction) return;
+  if (!transaction.db.objectStoreNames.contains(STORES.SONG_LYRICS)) return;
+
+  const lyricsStore = transaction.objectStore(STORES.SONG_LYRICS);
+  if (lyricsStore.indexNames.contains('expiresAt')) {
+    lyricsStore.deleteIndex('expiresAt');
+  }
+
+  lyricsStore.openCursor().onsuccess = (event) => {
+    const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result;
+    if (!cursor) return;
+
+    const { expiresAt, ...record } = cursor.value as Record<string, unknown>;
+    if (expiresAt !== undefined) cursor.update(record);
     cursor.continue();
   };
 }
