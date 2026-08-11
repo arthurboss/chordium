@@ -16,21 +16,36 @@ interface ExtractedLyrics {
 /**
  * Pulls lyrics out of a source page.
  *
- * The regular route tags every line with data-original and data-translation,
- * so both versions are read straight from those attributes. Doing it by
- * attribute rather than by reading the rendered text matters because the lines
- * are laid out across more than one container, and it removes the need to guess
- * at an alternating pattern.
+ * On the regular route everything lives inside a single container the source
+ * marks with data-chord-container, so the search is scoped to it rather than to
+ * the whole document. That matters because the page also carries unrelated
+ * paragraphs, such as the app store notice, which would otherwise be picked up
+ * as the lyrics. Scoping also means the number of wrappers the lines happen to
+ * be nested in does not matter.
  *
- * Lines are grouped by the paragraph holding them, which is what separates one
- * section of a song from the next, and the groups are rejoined with a blank
- * line so that structure survives.
+ * Within it, each line of a translated song is tagged with data-original and
+ * data-translation, so both versions are read straight from those tags instead
+ * of guessing at an alternating pattern. Songs without a translation carry
+ * their lines as plain paragraphs, which is the second case below.
  *
- * Print pages carry no translation and expose the lyrics in a <pre>, which is
- * the fallback when no tagged lines are present.
+ * Either way the lines are grouped by the paragraph holding them, which is what
+ * separates one section of a song from the next, and the groups are rejoined
+ * with a blank line so that structure survives.
+ *
+ * Print pages carry no translation and expose the lyrics in a <pre>.
  */
 function extractLyrics(): ExtractedLyrics | null {
-  const taggedLines = Array.from(document.querySelectorAll("span[data-original]"));
+  const container = document.querySelector("[data-chord-container]");
+
+  const join = (sections: string[][]) =>
+    sections
+      .map((lines) => lines.join("\n"))
+      .filter((section) => section)
+      .join("\n\n");
+
+  const taggedLines = container
+    ? Array.from(container.querySelectorAll("span[data-original]"))
+    : [];
   if (taggedLines.length) {
     const originalSections: string[][] = [];
     const translatedSections: string[][] = [];
@@ -61,12 +76,6 @@ function extractLyrics(): ExtractedLyrics | null {
       }
     }
 
-    const join = (sections: string[][]) =>
-      sections
-        .map((lines) => lines.join("\n"))
-        .filter((section) => section)
-        .join("\n\n");
-
     const original = join(originalSections);
     if (original) {
       return {
@@ -78,6 +87,17 @@ function extractLyrics(): ExtractedLyrics | null {
     }
   }
 
+  // Untranslated songs: the lines sit in the container as plain paragraphs.
+  if (container) {
+    const paragraphs = Array.from(container.querySelectorAll("p"))
+      .map((paragraph) => (paragraph as HTMLElement).innerText ?? paragraph.textContent ?? "")
+      .map((text) => text.split("\n").map((line) => line.trim()).filter((line) => line))
+      .filter((lines) => lines.length);
+    const fromParagraphs = join(paragraphs);
+    if (fromParagraphs) return { original: fromParagraphs };
+  }
+
+  // Print pages have no container and hold the whole song in a single <pre>.
   const pre = document.querySelector("pre");
   const text = (pre as HTMLElement | null)?.innerText?.trim();
   return text ? { original: text } : null;
