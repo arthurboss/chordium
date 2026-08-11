@@ -77,7 +77,15 @@
     "en": "English",
     "ptBR": "Português (BR)",
     "es": "Español",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "appLanguage": "Idioma de la app",
+    "packHint": "Cada idioma se descarga una vez y queda en tu dispositivo, así las letras se traducen sin conexión.",
+    "packDownloadFor": "Descargar {{language}} para la traducción de letras",
+    "packDownloading": "Descargando",
+    "packReady": "Listo para traducir letras",
+    "packUnavailable": "No disponible",
+    "packSource": "Original",
+    "packPrompt": "Descarga {{language}} para traducir las letras a ese idioma."
   },
   "pageHeader": {
     "backAriaLabel": "botón-atrás",

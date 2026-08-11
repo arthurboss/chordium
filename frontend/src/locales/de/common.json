@@ -77,7 +77,15 @@
     "en": "English",
     "ptBR": "Português (BR)",
     "es": "Español",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "appLanguage": "App-Sprache",
+    "packHint": "Jede Sprache wird einmal geladen und bleibt auf deinem Gerät, damit Liedtexte offline übersetzt werden.",
+    "packDownloadFor": "{{language}} für die Liedtext-Übersetzung herunterladen",
+    "packDownloading": "Wird geladen",
+    "packReady": "Bereit für Liedtext-Übersetzung",
+    "packUnavailable": "Nicht verfügbar",
+    "packSource": "Original",
+    "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen."
   },
   "pageHeader": {
     "backAriaLabel": "zurück-schaltfläche",

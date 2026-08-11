@@ -7,10 +7,10 @@ import {
   requiresDownloadConsent,
   translateLyrics,
 } from '@/services/translation/get-translator';
-import { isTranslatableLanguage, type TranslatableLanguage } from '@/services/translation/types';
-
-/** Lyrics come from the source site in Brazilian Portuguese. */
-const SOURCE_LANGUAGE: TranslatableLanguage = 'pt-BR';
+import {
+  isTranslatableLanguage,
+  LYRICS_SOURCE_LANGUAGE as SOURCE_LANGUAGE,
+} from '@/services/translation/types';
 
 interface UseLyricsVersionOptions {
   /** Identifies the song in storage, so a translation is fetched once per song. */

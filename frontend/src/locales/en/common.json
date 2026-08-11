@@ -77,7 +77,15 @@
     "en": "English",
     "ptBR": "Português (BR)",
     "es": "Español",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "appLanguage": "App language",
+    "packHint": "Each language downloads once and stays on your device, so lyrics translate offline.",
+    "packDownloadFor": "Download {{language}} for lyrics translation",
+    "packDownloading": "Downloading",
+    "packReady": "Ready to translate lyrics",
+    "packUnavailable": "Unavailable",
+    "packSource": "Original",
+    "packPrompt": "Download {{language}} to translate lyrics into it."
   },
   "pageHeader": {
     "backAriaLabel": "back-button",
