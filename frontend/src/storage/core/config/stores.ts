@@ -20,4 +20,7 @@ export const STORES = {
 
   /** Full-arrangement chord sheets (with tabs) for the simplified/full toggle */
   FULL_CHORD_SHEETS: "fullChordSheets",
+
+  /** Song lyrics storage (original + translated versions) */
+  SONG_LYRICS: "songLyrics",
 } as const;

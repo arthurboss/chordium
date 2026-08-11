@@ -82,6 +82,12 @@ export function handleIndexedDBMigrations(
         dropUnsavedCachedContent(db, transaction);
         break;
       }
+      case 7: {
+        // Migration to v7: add a store for song lyrics (original + translated),
+        // used by the lyrics view. Keyed by path, with a TTL index.
+        createSchema(db, 7);
+        break;
+      }
       // Add future migrations here
       default:
         break;

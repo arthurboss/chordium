@@ -2,6 +2,7 @@ import ChordSheetViewer from "@/components/ChordSheetViewer";
 import PageHeader from "@/components/PageHeader";
 import ChordMetadata from "@/components/ChordDisplay/ChordMetadata";
 import StyleToolbar from "@/components/StyleToolbar";
+import VersionToggle from "@/components/VersionToggle";
 import { Card } from "@/components/ui/card";
 import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
+import { useLyricsVersion } from "@/hooks/useLyricsVersion";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
@@ -44,17 +46,12 @@ interface SongViewerProps {
   isContentLoading?: boolean;
   onViewModeChange?: (viewMode: string) => void;
   initialViewMode?: string;
-  /** A distinct full arrangement (with tabs) is available to toggle to. */
   hasFullArrangement?: boolean;
-  /** Whether the full arrangement is currently displayed. */
   showFull?: boolean;
-  /** Toggle between simplified and full arrangements. */
   onToggleArrangement?: (showFull: boolean) => void;
-  /**
-   * The simplified arrangement, when the full one is displayed. Shared instead
-   * of the full version when the latter is too large for a QR code.
-   */
   simplifiedChordSheet?: { songChords: string; rawHtml?: string };
+  showLyrics?: boolean;
+  onLyricsToggle?: (show: boolean) => void;
 }
 
 const SongViewer = ({
@@ -77,6 +74,8 @@ const SongViewer = ({
   showFull = false,
   onToggleArrangement,
   simplifiedChordSheet,
+  showLyrics = false,
+  onLyricsToggle,
 }: SongViewerProps) => {
   const { song: songObj, chordSheet } = song;
   const navigate = useNavigate();
@@ -84,6 +83,7 @@ const SongViewer = ({
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
+  const [version, setVersion] = useState<'simplified' | 'full' | 'lyrics'>(showLyrics ? 'lyrics' : 'simplified');
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : "",
@@ -99,7 +99,19 @@ const SongViewer = ({
 
   const { setActive: setActiveShareable } = useActiveChordSheet();
 
-  // Whether the displayed arrangement contains tab blocks — drives the Tabs toggle.
+  const { displayLyrics, showTranslation, setShowTranslation, hasTranslation } = useLyricsVersion({
+    path: songObj.path,
+  });
+
+  // ChordSheetViewer renders from chordSheet.rawHtml/songChords, so fetched
+  // lyrics have to replace those (rawHtml dropped) to be displayed at all.
+  // When no lyrics were fetched, fall through to the chord sheet and let
+  // lyrics-only view mode strip the chords.
+  const lyricsChordSheet = useMemo(() => {
+    if (version !== 'lyrics' || !displayLyrics) return null;
+    return { ...chordSheetToDisplay, songChords: displayLyrics, rawHtml: undefined };
+  }, [version, displayLyrics, chordSheetToDisplay]);
+
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
     return (chordContentToDisplay || "").includes("[TAB]");
@@ -128,7 +140,6 @@ const SongViewer = ({
 
   const effectiveTranspose = transpose - (capo - defaultCapo);
 
-  // Editable metadata buffer (title/artist/key/tuning/capo).
   const [editTitle, setEditTitle] = useState(chordSheetToDisplay.title ?? "");
   const [editArtist, setEditArtist] = useState(chordSheetToDisplay.artist ?? "");
   const [editSongKey, setEditSongKey] = useState(chordSheetToDisplay.songKey ?? "");
@@ -158,8 +169,6 @@ const SongViewer = ({
     handleSaveEdits: saveEdits,
   } = useChordEditor(chordContentToDisplay, handleSaveWithMeta);
 
-  // Keep the editor buffers in sync with displayed content/metadata while not
-  // editing, so re-opening the editor shows the latest (possibly just-saved) values.
   useEffect(() => {
     if (isEditing) return;
     updateEditContent(chordContentToDisplay);
@@ -170,9 +179,6 @@ const SongViewer = ({
     setEditCapo(chordSheetToDisplay.guitarCapo ?? 0);
   }, [chordContentToDisplay, chordSheetToDisplay, isEditing, updateEditContent]);
 
-  // Publish what is on screen so the header's jam button can share it. It is
-  // withdrawn while editing, so unsaved text is never encoded into a QR code,
-  // and on unmount, so the button stops offering a song after navigating away.
   useEffect(() => {
     if (isEditing || !chordContentToDisplay) {
       setActiveShareable(null);
@@ -180,8 +186,6 @@ const SongViewer = ({
     }
     setActiveShareable({
       chordSheet: { ...chordSheetToDisplay, songChords: chordContentToDisplay },
-      // Offered as the smaller payload when the full arrangement will not fit
-      // in a QR code. Absent when the simplified one is already on screen.
       simplifiedChordSheet: simplifiedChordSheet
         ? { ...chordSheetToDisplay, ...simplifiedChordSheet }
         : undefined,
@@ -213,9 +217,6 @@ const SongViewer = ({
     (isFromMyChordSheets && !hideDeleteButton) ||
     (!hideSaveButton && !isFromMyChordSheets && !!onSave);
 
-  // isSaved controls which icon the action button shows:
-  // true = trash (delete), false = save disk icon
-  // When editing, show the save icon (false)
   const isSaved = isEditing ? false : isFromMyChordSheets && !hideDeleteButton;
 
   const finalIsContentLoading = useProgressiveLoading
@@ -225,6 +226,24 @@ const SongViewer = ({
   const handleViewModeChange = (mode: string) => {
     setViewMode(mode);
     onViewModeChange?.(mode);
+  };
+
+  const handleVersionChange = (newVersion: 'simplified' | 'full' | 'lyrics') => {
+    setVersion(newVersion);
+    onLyricsToggle?.(newVersion === 'lyrics');
+    
+    if (newVersion === 'lyrics') {
+      setViewMode('lyrics-only');
+      onViewModeChange?.('lyrics-only');
+    } else if (newVersion === 'full') {
+      setViewMode('tabs-on');
+      onViewModeChange?.('tabs-on');
+      onToggleArrangement?.(true);
+    } else {
+      setViewMode('tabs-on');
+      onViewModeChange?.('tabs-on');
+      onToggleArrangement?.(false);
+    }
   };
 
   const title = isEditing ? editTitle : chordSheetToDisplay.title;
@@ -239,9 +258,6 @@ const SongViewer = ({
         JSON.stringify({ path: artistSlug, displayName: artist })
       );
     } catch {}
-    // Persist the displayName the song page is already showing, so /:artist
-    // can reuse it later instead of re-deriving a name from DOM scraping or a
-    // slug guess.
     void storeArtistDisplayName(artistSlug, artist);
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
@@ -304,51 +320,40 @@ const SongViewer = ({
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
           hasTabs={hasTabs}
+          isLyricsMode={version === 'lyrics'}
+          hasTranslation={hasTranslation}
+          showTranslation={showTranslation}
+          onToggleTranslation={() => setShowTranslation(!showTranslation)}
         />
       </Card>
 
-      {hasFullArrangement && isEditing && (
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground" title={t("arrangementToggle.editingIndicatorTitle")}>
-            {showFull ? <Guitar className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
-            {t("arrangementToggle.editingIndicator", { arrangement: t(showFull ? "arrangementToggle.full" : "arrangementToggle.simplified") })}
-          </div>
-        </div>
+      {!isEditing && (
+        <VersionToggle
+          version={version}
+          onVersionChange={handleVersionChange}
+          hasFullArrangement={hasFullArrangement}
+        />
       )}
 
-      {hasFullArrangement && !isEditing && (
+      {isEditing && (
         <div className="flex justify-center">
-          <div className="inline-flex rounded-full border p-0.5 text-sm">
-            <button
-              type="button"
-              onClick={() => onToggleArrangement?.(false)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${!showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              title={t("arrangementToggle.simplifiedTitle")}
-            >
-              <Music className="h-3.5 w-3.5" />
-              {t("arrangementToggle.simplified")}
-            </button>
-            <button
-              type="button"
-              onClick={() => onToggleArrangement?.(true)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${showFull ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              title={t("arrangementToggle.fullTitle")}
-            >
-              <Guitar className="h-3.5 w-3.5" />
-              {t("arrangementToggle.full")}
-            </button>
+          <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground">
+            <Music className="h-3.5 w-3.5" />
+            {t("arrangementToggle.editingIndicator", { 
+              arrangement: t(version === 'full' ? "arrangementToggle.full" : version === 'lyrics' ? "lyrics.lyrics" : "arrangementToggle.simplified")
+            })}
           </div>
         </div>
       )}
 
       <ChordSheetViewer
         ref={chordDisplayRef}
-        chordSheet={chordSheetToDisplay}
-        content={chordContentToDisplay}
+        chordSheet={lyricsChordSheet ?? chordSheetToDisplay}
+        content={lyricsChordSheet ? lyricsChordSheet.songChords : chordContentToDisplay}
         isLoading={finalIsContentLoading}
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}
-        viewMode={viewMode}
+        viewMode={version === 'lyrics' ? 'lyrics-only' : viewMode}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         editContent={editContent}

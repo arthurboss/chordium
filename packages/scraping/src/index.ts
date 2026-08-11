@@ -6,3 +6,4 @@ export {
   type ArrangementVariant,
   type PageLike,
 } from "./cascade";
+export { fetchLyrics, type LyricsResult } from "./lyrics";

@@ -92,17 +92,16 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     }
   }, [apiData, isFromAPI, path]);
 
-  // Background-fetch the full arrangement (with tabs) once we have primary
-  // content that itself has no tabs — i.e. it looks like a simplified
-  // arrangement — and no full arrangement is stored yet. This covers both the
-  // fresh-scrape case (variant === 'simplified') and re-opening a cached song.
+  // Background-fetch the full arrangement once we have primary content and no
+  // full arrangement is stored yet. This covers both the fresh-scrape case
+  // (variant === 'simplified') and re-opening a cached song.
   const primarySongChords = localContent?.songChords ?? apiData?.songChords ?? null;
   const primaryHasTabs = !!primarySongChords && (primarySongChords.includes('[TAB]') || (localContent?.rawHtml?.includes('tablatura') ?? false));
   useEffect(() => {
     if (!path) return;
     if (fullContent) return;              // already have it
     if (!primarySongChords) return;       // nothing loaded yet
-    if (primaryHasTabs) return;           // primary already has tabs; no separate full needed
+    if (primaryHasTabs) return;           // primary already has tabs; it IS the full one
     // If we fetched fresh and it wasn't the simplified variant, the primary IS
     // the full arrangement — don't fetch again.
     if (isFromAPI && variant && variant !== 'simplified') return;
@@ -169,9 +168,13 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     ...(finalContent.rawHtml ? { rawHtml: finalContent.rawHtml } : {}),
   } : null;
 
-  // A distinct full arrangement is available to toggle to when we have full
-  // content that actually contains tab blocks.
-  const hasFullArrangement = !!fullContent && (fullContent.rawHtml?.includes('tablatura') || fullContent.songChords.includes('[TAB]')) === true;
+  // A distinct full arrangement is available to toggle to once the fetched full
+  // content differs from the primary. Tabs are not required: some full versions
+  // differ only by richer chord voicings (e.g. slash chords).
+  const hasFullArrangement =
+    !!fullContent &&
+    !!finalContent &&
+    fullContent.songChords.trim() !== finalContent.songChords.trim();
 
   return {
     metadata: finalMetadata,

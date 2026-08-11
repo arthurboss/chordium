@@ -199,5 +199,9 @@
   "chordSheet": {
     "editChordSheet": "Edit chord sheet",
     "cancelEditing": "Cancel editing"
+  },
+  "lyrics": {
+    "lyrics": "Lyrics",
+    "translation": "Translation"
   }
 }

@@ -132,6 +132,36 @@ const router = createBrowserRouter([
         )
       },
       {
+        // Lyrics view of a chord sheet: /artist/song/letra
+        path: ":artist/:song/letra",
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <OfflineRouteHandler>
+                  <ChordViewer />
+                </OfflineRouteHandler>
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
+      },
+      {
+        // Simplified arrangement of a chord sheet: /artist/song/simplificada
+        path: ":artist/:song/simplificada",
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <OfflineRouteHandler>
+                  <ChordViewer />
+                </OfflineRouteHandler>
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
+      },
+      {
         // Catch-all route for 404 - temporarily simplified
         path: "*",
         element: (

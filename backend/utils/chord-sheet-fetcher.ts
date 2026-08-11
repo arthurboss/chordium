@@ -4,7 +4,9 @@ import { extractChordSheet, extractSongMetadata, extractLyricsContent } from "./
 import {
   fetchPreferredChordSheet as sharedFetchPreferred,
   fetchFullChordSheet as sharedFetchFull,
+  fetchLyrics as sharedFetchLyrics,
   type CascadeResult,
+  type LyricsResult,
   type PageLike,
 } from "@chordium/scraping";
 export type { CascadeResult } from "@chordium/scraping";
@@ -376,5 +378,11 @@ export async function fetchPreferredChordSheet(baseUrl: string): Promise<Cascade
 export async function fetchFullChordSheet(baseUrl: string): Promise<CascadeResult> {
   return puppeteerService.withPage((page: Page) =>
     sharedFetchFull(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
+  );
+}
+
+export async function fetchSongLyrics(baseUrl: string): Promise<LyricsResult> {
+  return puppeteerService.withPage((page: Page) =>
+    sharedFetchLyrics(page as unknown as PageLike, baseUrl, (m) => logger.info(m))
   );
 }
