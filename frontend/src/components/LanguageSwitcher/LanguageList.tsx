@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Download, Loader2, Trash2 } from "lucide-react";
+import { Download, Loader2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { BRFlag, DEFlag, ESFlag, USFlag } from "@/components/icons/flags";
@@ -26,7 +26,6 @@ interface LanguageListProps {
   selected?: string;
   statuses: Partial<Record<TranslatableLanguage, PackStatus>>;
   progress: Partial<Record<TranslatableLanguage, number>>;
-  storedLanguages: TranslatableLanguage[];
   /** The language whose download is being pointed out, if any. */
   promptedFor: TranslatableLanguage | null;
   onSelect: (language: TranslatableLanguage) => void;
@@ -38,7 +37,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
   selected,
   statuses,
   progress,
-  storedLanguages,
   promptedFor,
   onSelect,
   onDownload,
@@ -54,7 +52,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
         const isSelected = selected === language;
         const percent = Math.round((progress[language] ?? 0) * 100);
         const name = t(NAME_KEYS[language]);
-        const hasStored = storedLanguages.includes(language);
 
         return (
           <li key={language}>
@@ -113,7 +110,7 @@ const LanguageList: React.FC<LanguageListProps> = ({
                   </span>
                 )}
 
-                {status === "installed" && hasStored && (
+                {status === "installed" && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -126,13 +123,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                )}
-
-                {status === "installed" && !hasStored && (
-                  <span className="shrink-0 pr-2 text-muted-foreground" title={t("language.packReady")}>
-                    <Check className="h-4 w-4" />
-                    <span className="sr-only">{t("language.packReady")}</span>
-                  </span>
                 )}
 
                 {status === "unavailable" && (

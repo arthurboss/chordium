@@ -82,13 +82,12 @@
     "packHint": "Baixe um idioma para que as letras das músicas sejam traduzidas para ele no seu dispositivo.",
     "packDownloadFor": "Baixar {{language}} para tradução de letras",
     "packDownloading": "Baixando",
-    "packReady": "Pronto para traduzir letras",
     "packUnavailable": "Indisponível",
     "packPrompt": "Baixe {{language}} para traduzir as letras para esse idioma.",
-    "removeStoredFor": "Remover traduções em {{language}} salvas",
-    "removeTitle": "Remover as traduções em {{language}}?",
-    "removeBody": "As traduções em {{language}} salvas neste dispositivo serão excluídas, e as músicas serão traduzidas novamente na próxima vez que você abri-las. O navegador mantém o idioma em si; isso só pode ser removido nas configurações do próprio navegador.",
-    "removeConfirm": "Remover",
+    "removeStoredFor": "Desativar {{language}} para tradução de letras",
+    "removeTitle": "Desativar {{language}}?",
+    "removeBody": "As letras deixarão de ser traduzidas para {{language}}, e as traduções salvas neste dispositivo serão excluídas. Você pode reativar quando quiser. O navegador mantém o idioma em si; só as configurações dele podem removê-lo.",
+    "removeConfirm": "Desativar",
     "removeCancel": "Cancelar"
   },
   "pageHeader": {

@@ -8,6 +8,10 @@ import {
   translateLyrics,
 } from '@/services/translation/get-translator';
 import { detectLyricsLanguage } from '@/services/translation/detect-language';
+import {
+  getEnabledLanguages,
+  setLanguageEnabled,
+} from '@/services/translation/enabled-languages';
 import { isTranslatableLanguage } from '@/services/translation/types';
 
 interface UseLyricsVersionOptions {
@@ -93,6 +97,13 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
       }
       if (isStale()) return;
 
+      // A language turned off in the language list is not translated into until
+      // the reader asks for it again, which the toggle offers.
+      if (!consented && !getEnabledLanguages().includes(target)) {
+        if (!isStale()) setStatus('needs-consent');
+        return;
+      }
+
       // Downloading a model is the reader's call, so stop and ask unless they
       // already agreed in this session.
       if (!consented && (await requiresDownloadConsent(source, target))) {
@@ -144,6 +155,9 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     acceptDownload: useCallback(() => {
       if (!source || !target) return;
       setStatus('translating');
+      // Agreeing here also turns the language on in the language list, so the two
+      // never disagree about what is available.
+      setLanguageEnabled(target, true);
       const runId = runIdRef.current;
       void prepareTranslator(source, target, (ratio) => {
         if (runIdRef.current === runId) setDownloadProgress(ratio);

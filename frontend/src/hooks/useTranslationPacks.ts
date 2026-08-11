@@ -2,6 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { getChromePairState, warmChromePair } from '@/services/translation/chrome-translator';
 import { isLocalModelSupported } from '@/services/translation/local-model-translator';
 import {
+  getEnabledLanguages,
+  setLanguageEnabled,
+} from '@/services/translation/enabled-languages';
+import {
   getStoredTranslationLanguages,
   removeTranslationsForLanguage,
 } from '@/storage/services/lyrics-storage';
@@ -9,8 +13,8 @@ import { TRANSLATABLE_LANGUAGES, type TranslatableLanguage } from '@/services/tr
 
 /**
  * How a language stands for translating lyrics into it:
- * - "installed": ready to translate, offline included.
- * - "downloadable": needs a one-off download the reader has to start.
+ * - "installed": on, and ready to translate offline included.
+ * - "downloadable": off, or on but still missing what it needs.
  * - "downloading": that download is running.
  * - "unavailable": this browser cannot translate into it at all.
  */
@@ -27,33 +31,36 @@ function representativeSourceFor(language: TranslatableLanguage): TranslatableLa
   return language === 'en' ? 'pt-BR' : 'en';
 }
 
-async function readStatus(language: TranslatableLanguage): Promise<PackStatus> {
+async function readStatus(
+  language: TranslatableLanguage,
+  isOn: boolean
+): Promise<PackStatus> {
   const state = await getChromePairState(representativeSourceFor(language), language);
-  if (state === 'ready') return 'installed';
-  if (state === 'needs-gesture') return 'downloadable';
-  return isLocalModelSupported() ? 'downloadable' : 'unavailable';
+  if (state === 'no') return isLocalModelSupported() ? 'downloadable' : 'unavailable';
+  // A language that is off is offered again rather than reported as ready, even
+  // though the browser still holds what it fetched.
+  if (!isOn) return 'downloadable';
+  return state === 'ready' ? 'installed' : 'downloadable';
 }
 
 /**
- * Tracks, per app language, whether lyrics can be translated into it yet and
- * lets the reader fetch what is missing or clear what is stored. Languages are
- * downloaded one at a time rather than as one bundle, so each is offered alone.
+ * Tracks, per app language, whether lyrics can be translated into it and lets the
+ * reader turn one on or off. Languages are handled one at a time rather than as
+ * one bundle, so each is offered alone.
  */
 export function useTranslationPacks() {
   const [statuses, setStatuses] = useState<Partial<Record<TranslatableLanguage, PackStatus>>>({});
   const [progress, setProgress] = useState<Partial<Record<TranslatableLanguage, number>>>({});
-  const [storedLanguages, setStoredLanguages] = useState<TranslatableLanguage[]>([]);
 
   const refresh = useCallback(async () => {
-    const [entries, stored] = await Promise.all([
-      Promise.all(
-        TRANSLATABLE_LANGUAGES.map(
-          async (language) => [language, await readStatus(language)] as const
-        )
-      ),
-      getStoredTranslationLanguages(),
-    ]);
-    setStoredLanguages(stored);
+    // Translations already on the device count as on, so the languages the app
+    // shipped with are not offered as though they were missing.
+    const enabled = new Set([...getEnabledLanguages(), ...(await getStoredTranslationLanguages())]);
+    const entries = await Promise.all(
+      TRANSLATABLE_LANGUAGES.map(
+        async (language) => [language, await readStatus(language, enabled.has(language))] as const
+      )
+    );
     setStatuses((current) => {
       const next = { ...current };
       for (const [language, status] of entries) {
@@ -76,6 +83,7 @@ export function useTranslationPacks() {
   const download = useCallback((language: TranslatableLanguage) => {
     setProgress((current) => ({ ...current, [language]: 0 }));
     setStatuses((current) => ({ ...current, [language]: 'downloading' }));
+    setLanguageEnabled(language, true);
 
     const warming = warmChromePair(representativeSourceFor(language), language, (ratio) =>
       setProgress((current) => ({ ...current, [language]: ratio }))
@@ -85,18 +93,20 @@ export function useTranslationPacks() {
       return;
     }
     void warming.then(async () => {
-      const settled = await readStatus(language);
+      const settled = await readStatus(language, true);
       setStatuses((current) => ({ ...current, [language]: settled }));
     });
   }, []);
 
+  /** Turns a language off and drops what it had stored. */
   const removeStored = useCallback(
     async (language: TranslatableLanguage) => {
+      setLanguageEnabled(language, false);
       await removeTranslationsForLanguage(language);
       await refresh();
     },
     [refresh]
   );
 
-  return { statuses, progress, storedLanguages, download, removeStored, refresh };
+  return { statuses, progress, download, removeStored, refresh };
 }

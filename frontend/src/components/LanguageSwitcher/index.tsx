@@ -30,8 +30,7 @@ const PROMPT_FLAG = "chordium-language-pack-prompted";
 const LanguageSwitcher: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
-  const { statuses, progress, storedLanguages, download, removeStored, refresh } =
-    useTranslationPacks();
+  const { statuses, progress, download, removeStored, refresh } = useTranslationPacks();
   const [open, setOpen] = useState(false);
   const [promptedFor, setPromptedFor] = useState<TranslatableLanguage | null>(null);
   const [pendingRemoval, setPendingRemoval] = useState<TranslatableLanguage | null>(null);
@@ -70,7 +69,6 @@ const LanguageSwitcher: React.FC = () => {
       selected={current}
       statuses={statuses}
       progress={progress}
-      storedLanguages={storedLanguages}
       promptedFor={promptedFor}
       onSelect={selectLanguage}
       onDownload={download}

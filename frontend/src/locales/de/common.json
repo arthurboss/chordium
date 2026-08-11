@@ -82,13 +82,12 @@
     "packHint": "Lade eine Sprache herunter, damit Liedtexte auf deinem Gerät in sie übersetzt werden.",
     "packDownloadFor": "{{language}} für die Liedtext-Übersetzung herunterladen",
     "packDownloading": "Wird geladen",
-    "packReady": "Bereit für Liedtext-Übersetzung",
     "packUnavailable": "Nicht verfügbar",
     "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen.",
-    "removeStoredFor": "Gespeicherte Übersetzungen auf {{language}} entfernen",
-    "removeTitle": "Übersetzungen auf {{language}} entfernen?",
-    "removeBody": "Die auf diesem Gerät gespeicherten Übersetzungen auf {{language}} werden gelöscht, und Lieder werden beim nächsten Öffnen erneut übersetzt. Die Sprache selbst behält der Browser; sie lässt sich nur in dessen eigenen Einstellungen entfernen.",
-    "removeConfirm": "Entfernen",
+    "removeStoredFor": "{{language}} für die Liedtext-Übersetzung ausschalten",
+    "removeTitle": "{{language}} ausschalten?",
+    "removeBody": "Liedtexte werden nicht mehr auf {{language}} übersetzt, und die auf diesem Gerät gespeicherten Übersetzungen werden gelöscht. Du kannst es jederzeit wieder einschalten. Die Sprache selbst behält der Browser; nur dessen eigene Einstellungen können sie entfernen.",
+    "removeConfirm": "Ausschalten",
     "removeCancel": "Abbrechen"
   },
   "pageHeader": {

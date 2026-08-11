@@ -82,13 +82,12 @@
     "packHint": "Download a language to have song lyrics translated into it on your device.",
     "packDownloadFor": "Download {{language}} for lyrics translation",
     "packDownloading": "Downloading",
-    "packReady": "Ready to translate lyrics",
     "packUnavailable": "Unavailable",
     "packPrompt": "Download {{language}} to translate lyrics into it.",
-    "removeStoredFor": "Remove stored {{language}} translations",
-    "removeTitle": "Remove {{language}} translations?",
-    "removeBody": "The {{language}} translations saved on this device will be deleted, and songs will be translated again next time you open them. The browser keeps the language itself; that can only be removed in the browser's own settings.",
-    "removeConfirm": "Remove",
+    "removeStoredFor": "Turn off {{language}} for lyrics translation",
+    "removeTitle": "Turn off {{language}}?",
+    "removeBody": "Lyrics will stop being translated into {{language}}, and the translations saved on this device will be deleted. You can turn it back on whenever you like. The browser keeps the language itself; only its own settings can remove that.",
+    "removeConfirm": "Turn off",
     "removeCancel": "Cancel"
   },
   "pageHeader": {
