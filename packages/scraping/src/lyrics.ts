@@ -6,58 +6,96 @@ export interface LyricsResult {
 }
 
 /**
- * Pulls lyric text out of a source page. Print pages expose a <pre>; the
- * regular route renders paragraphs inside <article> under hashed class names,
- * so the paragraphs are joined rather than matched by selector.
+ * Lyric text plus its translation when the page carries one.
  */
-function extractLyrics(): string | null {
-  const pre = document.querySelector("pre");
-  if (pre) {
-    const text = (pre as HTMLElement).textContent?.trim();
-    if (text) return text;
-  }
-
-  const article = document.querySelector("article");
-  if (article) {
-    const paragraphs = Array.from(article.querySelectorAll("p"))
-      .map((p) => (p as HTMLElement).textContent?.trim())
-      .filter((t): t is string => !!t && t.length > 20);
-    if (paragraphs.length) return paragraphs.join("\n\n");
-  }
-
-  return null;
+interface ExtractedLyrics {
+  original: string;
+  translated?: string;
 }
 
 /**
- * The regular route interleaves each translated line with its original line.
- * Splitting on that alternation recovers both versions; an odd or unbalanced
- * block means there is no translation, so it is left untouched.
+ * Pulls lyrics out of a source page.
+ *
+ * On the regular route everything lives inside a single container the source
+ * marks with data-chord-container, so the search is scoped to it rather than to
+ * the whole document. That matters because the page also carries unrelated
+ * paragraphs, such as the app store notice, which would otherwise be picked up
+ * as the lyrics. Scoping also means the number of wrappers the lines happen to
+ * be nested in does not matter.
+ *
+ * Within it, each line of a translated song is tagged with data-original and
+ * data-translation, so both versions are read straight from those tags instead
+ * of guessing at an alternating pattern. Songs without a translation carry
+ * their lines as plain paragraphs, which is the second case below.
+ *
+ * Either way the lines are grouped by the paragraph holding them, which is what
+ * separates one section of a song from the next, and the groups are rejoined
+ * with a blank line so that structure survives.
+ *
+ * Without that container there is nothing to read, so extraction stops rather
+ * than searching the page at large and mistaking interface text for lyrics.
  */
-function splitInterleavedTranslation(
-  text: string
-): { original: string; translated: string } | null {
-  const blocks = text.split(/\n{2,}/);
-  const originalBlocks: string[] = [];
-  const translatedBlocks: string[] = [];
+function extractLyrics(): ExtractedLyrics | null {
+  const container = document.querySelector("[data-chord-container]");
+  if (!container) return null;
 
-  for (const block of blocks) {
-    const lines = block.split("\n").filter((l) => l.trim());
-    if (lines.length < 2 || lines.length % 2 !== 0) return null;
-    const translated: string[] = [];
-    const original: string[] = [];
-    for (let i = 0; i < lines.length; i += 2) {
-      translated.push(lines[i]);
-      original.push(lines[i + 1]);
+  const join = (sections: string[][]) =>
+    sections
+      .map((lines) => lines.join("\n"))
+      .filter((section) => section)
+      .join("\n\n");
+
+  const taggedLines = Array.from(container.querySelectorAll("span[data-original]"));
+  if (taggedLines.length) {
+    const originalSections: string[][] = [];
+    const translatedSections: string[][] = [];
+    let originalCount = 0;
+    let translatedCount = 0;
+    let currentParagraph: Element | null = null;
+
+    for (const originalSpan of taggedLines) {
+      const line = originalSpan.textContent?.trim();
+      if (!line) continue;
+
+      const paragraph = originalSpan.closest("p");
+      if (paragraph !== currentParagraph) {
+        currentParagraph = paragraph;
+        originalSections.push([]);
+        translatedSections.push([]);
+      }
+
+      originalSections[originalSections.length - 1].push(line);
+      originalCount++;
+
+      // The sibling carries the same line translated; absent on untranslated pages.
+      const translatedSpan = originalSpan.parentElement?.querySelector("span[data-translation]");
+      const translated = translatedSpan?.textContent?.trim();
+      if (translated) {
+        translatedSections[translatedSections.length - 1].push(translated);
+        translatedCount++;
+      }
     }
-    translatedBlocks.push(translated.join("\n"));
-    originalBlocks.push(original.join("\n"));
+
+    const original = join(originalSections);
+    if (original) {
+      return {
+        original,
+        // Only offer a translation when every line has one, so a partially
+        // translated page cannot silently drop verses.
+        translated: translatedCount === originalCount ? join(translatedSections) : undefined,
+      };
+    }
   }
 
-  if (!originalBlocks.length) return null;
-  return {
-    original: originalBlocks.join("\n\n"),
-    translated: translatedBlocks.join("\n\n"),
-  };
+  // Untranslated songs: the lines sit in the container as plain paragraphs.
+  const paragraphs = Array.from(container.querySelectorAll("p"))
+    .map((paragraph) => (paragraph as HTMLElement).innerText ?? paragraph.textContent ?? "")
+    .map((text) => text.split("\n").map((line) => line.trim()).filter((line) => line))
+    .filter((lines) => lines.length);
+  const fromParagraphs = join(paragraphs);
+  if (fromParagraphs) return { original: fromParagraphs };
+
+  return null;
 }
 
 /**
@@ -71,11 +109,11 @@ async function tryLoadLyrics(
   url: string,
   timeout: number,
   logger?: (msg: string) => void
-): Promise<string | null> {
+): Promise<ExtractedLyrics | null> {
   try {
     page.setDefaultNavigationTimeout?.(timeout);
-    // Print pages ship a pagination script that deletes overflow content from
-    // the DOM, which silently truncates the lyrics.
+    // The source ships a script that trims content out of the DOM, which
+    // silently truncates the lyrics.
     await page.setJavaScriptEnabled?.(false);
     await page.goto(url, { waitUntil: "domcontentloaded", timeout });
 
@@ -84,12 +122,12 @@ async function tryLoadLyrics(
       return null;
     }
 
-    const text = await page.evaluate(extractLyrics);
-    if (!text?.trim()) {
+    const result = await page.evaluate(extractLyrics);
+    if (!result?.original?.trim()) {
       logger?.(`${url} yielded no lyrics`);
       return null;
     }
-    return text;
+    return result;
   } catch (error) {
     logger?.(`lyrics load failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
     return null;
@@ -97,10 +135,9 @@ async function tryLoadLyrics(
 }
 
 /**
- * Fetches a song's lyrics, cascading: print page, then the no-translation
- * route. The regular route is always visited last because it is the only one
- * carrying the translation, and it doubles as the fallback for the original
- * when the earlier routes yield nothing.
+ * Fetches a song's lyrics from the route that carries them. Only this route
+ * wraps the song in the container the extraction relies on, and it is also the
+ * only one offering a translation, so there is nothing to cascade to.
  */
 export async function fetchLyrics(
   page: PageLike,
@@ -108,31 +145,11 @@ export async function fetchLyrics(
   logger?: (msg: string) => void
 ): Promise<LyricsResult> {
   const base = baseUrl.replace(/\/+$/, "");
-  const result: LyricsResult = {};
+  const found = await tryLoadLyrics(page, `${base}/letra/`, 15000, logger);
+  if (!found) return {};
 
-  const routes = [
-    { url: `${base}/letra/imprimir.html`, timeout: 8000 },
-    { url: `${base}/letra/?translation=off`, timeout: 10000 },
-  ];
-
-  for (const route of routes) {
-    const text = await tryLoadLyrics(page, route.url, route.timeout, logger);
-    if (text) {
-      result.original = text;
-      break;
-    }
-  }
-
-  const combined = await tryLoadLyrics(page, `${base}/letra/`, 15000, logger);
-  if (combined) {
-    const split = splitInterleavedTranslation(combined);
-    if (split) {
-      result.translated = split.translated;
-      if (!result.original) result.original = split.original;
-    } else if (!result.original) {
-      result.original = combined;
-    }
-  }
-
-  return result;
+  return {
+    original: found.original,
+    ...(found.translated ? { translated: found.translated } : {}),
+  };
 }

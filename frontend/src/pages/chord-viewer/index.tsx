@@ -94,6 +94,8 @@ const ChordViewer = () => {
     if (!path) return;
     const fetchLyricsInBackground = async () => {
       try {
+        // getLyrics reports entries from an older extractor as absent, so this
+        // refetches them once and then leaves them alone.
         const cached = await getLyrics(path);
         if (cached) return;
         const response = await fetch(`/api/cifraclub-lyrics?url=${encodeURIComponent(path)}`);
