@@ -7,10 +7,10 @@ import {
   requiresDownloadConsent,
   translateLyrics,
 } from '@/services/translation/get-translator';
-import { isTranslatableLanguage } from '@/services/translation/types';
+import { isTranslatableLanguage, type TranslatableLanguage } from '@/services/translation/types';
 
 /** Lyrics come from the source site in Brazilian Portuguese. */
-const SOURCE_LANGUAGE = 'pt-BR';
+const SOURCE_LANGUAGE: TranslatableLanguage = 'pt-BR';
 
 interface UseLyricsVersionOptions {
   /** Identifies the song in storage, so a translation is fetched once per song. */
@@ -50,8 +50,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   // result belongs to the previous song or language.
   const runIdRef = useRef(0);
 
-  const isTranslatable =
-    isTranslatableLanguage(language) && language !== SOURCE_LANGUAGE && !!lyrics.trim();
+  // Only the app's own languages can be translated into, and the source needs no
+  // translating; anything else leaves the toggle out of the way.
+  const target = isTranslatableLanguage(language) && language !== SOURCE_LANGUAGE ? language : null;
+  const isTranslatable = target !== null && !!lyrics.trim();
 
   useEffect(() => {
     const ref = runIdRef;
@@ -62,14 +64,14 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     setShowTranslation(false);
     setDownloadProgress(0);
 
-    if (!isTranslatable) {
+    if (!isTranslatable || !target) {
       setStatus('unnecessary');
       return;
     }
     setStatus('idle');
 
     (async () => {
-      const cached = path ? await getTranslation(path, language) : null;
+      const cached = path ? await getTranslation(path, target) : null;
       if (isStale()) return;
       if (cached) {
         setTranslated(cached);
@@ -79,7 +81,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
 
       // Nothing can translate here, so the toggle stays out of the way rather
       // than offering something that would never finish.
-      if (!(await canTranslate(SOURCE_LANGUAGE, language))) {
+      if (!(await canTranslate(SOURCE_LANGUAGE, target))) {
         if (!isStale()) setStatus('unnecessary');
         return;
       }
@@ -87,7 +89,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
 
       // Downloading a model is the reader's call, so stop and ask unless they
       // already agreed in this session.
-      if (!consented && (await requiresDownloadConsent(SOURCE_LANGUAGE, language))) {
+      if (!consented && (await requiresDownloadConsent(SOURCE_LANGUAGE, target))) {
         if (!isStale()) setStatus('needs-consent');
         return;
       }
@@ -97,7 +99,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
       try {
         const result = await translateLyrics(lyrics, {
           from: SOURCE_LANGUAGE,
-          to: language,
+          to: target,
           onProgress: (ratio) => {
             if (!isStale()) setDownloadProgress(ratio);
           },
@@ -105,7 +107,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
         if (isStale()) return;
         setTranslated(result);
         setStatus('ready');
-        if (path) await storeTranslation(path, language, result);
+        if (path) await storeTranslation(path, target, result);
       } catch (error) {
         console.error('Failed to translate lyrics:', error);
         if (!isStale()) setStatus('failed');
@@ -113,7 +115,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     })();
 
     return () => { ref.current++; };
-  }, [path, language, lyrics, isTranslatable, consented]);
+  }, [path, target, lyrics, isTranslatable, consented]);
 
   const clearLyrics = useCallback(async () => {
     setTranslated(null);
@@ -134,12 +136,13 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
      * is still being handled.
      */
     acceptDownload: useCallback(() => {
+      if (!target) return;
       setStatus('translating');
       const runId = runIdRef.current;
-      void prepareTranslator(SOURCE_LANGUAGE, language, (ratio) => {
+      void prepareTranslator(SOURCE_LANGUAGE, target, (ratio) => {
         if (runIdRef.current === runId) setDownloadProgress(ratio);
       }).finally(() => setConsented(true));
-    }, [language]),
+    }, [target]),
     clear: clearLyrics,
   };
 }

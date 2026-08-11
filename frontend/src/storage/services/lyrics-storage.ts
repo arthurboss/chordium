@@ -1,10 +1,13 @@
 import { STORES } from '@/storage/core/config/stores';
 import { getDatabase } from '@/storage/stores/chord-sheets/database/connection';
+import type { TranslatableLanguage } from '@/services/translation/types';
+
+/** Translated lyrics for one song, keyed by the app language each was produced for. */
+export type LyricsTranslations = Partial<Record<TranslatableLanguage, string>>;
 
 export interface StoredLyrics {
   path: string;
-  /** Translated lyrics, keyed by the app language they were produced for. */
-  translations?: Record<string, string>;
+  translations: LyricsTranslations;
   timestamp: number;
 }
 
@@ -43,13 +46,12 @@ function awaitTx(tx: IDBTransaction): Promise<void> {
 }
 
 /**
- * Adds one language's translation, leaving translations already stored for other
- * languages in place so switching the app language back does not re-translate.
+ * Merges translations into a song's entry, leaving languages already stored in
+ * place so switching the app language back does not re-translate.
  */
-export async function storeTranslation(
+export async function storeTranslations(
   songPath: string,
-  language: string,
-  translated: string
+  translations: LyricsTranslations
 ): Promise<void> {
   try {
     await withStore(
@@ -58,7 +60,7 @@ export async function storeTranslation(
         const existing = await readEntry(store, songPath);
         store.put({
           path: songPath,
-          translations: { ...existing?.translations, [language]: translated },
+          translations: { ...existing?.translations, ...translations },
           timestamp: Date.now(),
         } satisfies StoredLyrics);
         await awaitTx(tx);
@@ -66,20 +68,48 @@ export async function storeTranslation(
       undefined
     );
   } catch (error) {
-    console.error('Failed to store translation:', error);
+    console.error('Failed to store translations:', error);
   }
 }
 
-export async function getTranslation(songPath: string, language: string): Promise<string | null> {
+export function storeTranslation(
+  songPath: string,
+  language: TranslatableLanguage,
+  translated: string
+): Promise<void> {
+  return storeTranslations(songPath, { [language]: translated });
+}
+
+export async function getTranslation(
+  songPath: string,
+  language: TranslatableLanguage
+): Promise<string | null> {
   try {
     return await withStore(
       'readonly',
-      async (store) => (await readEntry(store, songPath))?.translations?.[language] ?? null,
+      async (store) => (await readEntry(store, songPath))?.translations[language] ?? null,
       null
     );
   } catch (error) {
     console.warn('Failed to read translation from storage:', error);
     return null;
+  }
+}
+
+/** Which languages already have a translation stored for this song. */
+export async function getTranslatedLanguages(songPath: string): Promise<TranslatableLanguage[]> {
+  try {
+    return await withStore(
+      'readonly',
+      async (store) => {
+        const entry = await readEntry(store, songPath);
+        return Object.keys(entry?.translations ?? {}) as TranslatableLanguage[];
+      },
+      []
+    );
+  } catch (error) {
+    console.warn('Failed to read translation languages from storage:', error);
+    return [];
   }
 }
 
