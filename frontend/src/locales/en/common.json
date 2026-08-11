@@ -203,6 +203,10 @@
   },
   "lyrics": {
     "lyrics": "Lyrics",
-    "translation": "Translation"
+    "translation": "Translation",
+    "enableTranslation": "Translate lyrics",
+    "translating": "Translating…",
+    "downloadingModel": "Preparing translation… {{percent}}%",
+    "translationFailed": "Translation unavailable"
   }
 }

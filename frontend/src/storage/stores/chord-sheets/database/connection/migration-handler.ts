@@ -94,6 +94,13 @@ export function handleIndexedDBMigrations(
         dropLyricsExpiry(transaction);
         break;
       }
+      case 9: {
+        // Migration to v9: lyrics are now derived from the chord sheet and
+        // translated on the device, so entries holding text scraped from the
+        // source are dropped rather than converted.
+        clearScrapedLyrics(transaction);
+        break;
+      }
       // Add future migrations here
       default:
         break;
@@ -134,6 +141,18 @@ function dropUnsavedCachedContent(db: IDBDatabase, transaction?: IDBTransaction 
     }
     cursor.continue();
   };
+}
+
+/**
+ * Empties the lyrics store of records written while lyrics were scraped from the
+ * source site. Their shape (`original`/`translated`) no longer applies now that
+ * the words come from the chord sheet and translations are keyed by language, and
+ * the replacement is derived on demand, so there is nothing to preserve.
+ */
+function clearScrapedLyrics(transaction?: IDBTransaction | null): void {
+  if (!transaction) return;
+  if (!transaction.db.objectStoreNames.contains(STORES.SONG_LYRICS)) return;
+  transaction.objectStore(STORES.SONG_LYRICS).clear();
 }
 
 /**
