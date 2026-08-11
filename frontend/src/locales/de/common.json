@@ -79,13 +79,17 @@
     "es": "Español",
     "de": "Deutsch",
     "appLanguage": "App-Sprache",
-    "packHint": "Jede Sprache wird einmal geladen und bleibt auf deinem Gerät, damit Liedtexte offline übersetzt werden.",
+    "packHint": "Lade eine Sprache herunter, damit Liedtexte auf deinem Gerät in sie übersetzt werden.",
     "packDownloadFor": "{{language}} für die Liedtext-Übersetzung herunterladen",
     "packDownloading": "Wird geladen",
     "packReady": "Bereit für Liedtext-Übersetzung",
     "packUnavailable": "Nicht verfügbar",
-    "packSource": "Original",
-    "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen."
+    "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen.",
+    "removeStoredFor": "Gespeicherte Übersetzungen auf {{language}} entfernen",
+    "removeTitle": "Übersetzungen auf {{language}} entfernen?",
+    "removeBody": "Die auf diesem Gerät gespeicherten Übersetzungen auf {{language}} werden gelöscht, und Lieder werden beim nächsten Öffnen erneut übersetzt. Die Sprache selbst behält der Browser; sie lässt sich nur in dessen eigenen Einstellungen entfernen.",
+    "removeConfirm": "Entfernen",
+    "removeCancel": "Abbrechen"
   },
   "pageHeader": {
     "backAriaLabel": "zurück-schaltfläche",

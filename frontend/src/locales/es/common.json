@@ -79,13 +79,17 @@
     "es": "Español",
     "de": "Deutsch",
     "appLanguage": "Idioma de la app",
-    "packHint": "Cada idioma se descarga una vez y queda en tu dispositivo, así las letras se traducen sin conexión.",
+    "packHint": "Descarga un idioma para que las letras de las canciones se traduzcan a él en tu dispositivo.",
     "packDownloadFor": "Descargar {{language}} para la traducción de letras",
     "packDownloading": "Descargando",
     "packReady": "Listo para traducir letras",
     "packUnavailable": "No disponible",
-    "packSource": "Original",
-    "packPrompt": "Descarga {{language}} para traducir las letras a ese idioma."
+    "packPrompt": "Descarga {{language}} para traducir las letras a ese idioma.",
+    "removeStoredFor": "Eliminar las traducciones en {{language}} guardadas",
+    "removeTitle": "¿Eliminar las traducciones en {{language}}?",
+    "removeBody": "Se eliminarán las traducciones en {{language}} guardadas en este dispositivo, y las canciones se traducirán de nuevo la próxima vez que las abras. El navegador conserva el idioma en sí; eso solo se puede quitar en la configuración del propio navegador.",
+    "removeConfirm": "Eliminar",
+    "removeCancel": "Cancelar"
   },
   "pageHeader": {
     "backAriaLabel": "botón-atrás",

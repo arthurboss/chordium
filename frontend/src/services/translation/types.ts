@@ -7,9 +7,6 @@ export function isTranslatableLanguage(lang: string): lang is TranslatableLangua
   return (TRANSLATABLE_LANGUAGES as readonly string[]).includes(lang);
 }
 
-/** Lyrics come from the source site in Brazilian Portuguese. */
-export const LYRICS_SOURCE_LANGUAGE: TranslatableLanguage = 'pt-BR';
-
 export interface Translator {
   /** Identifies which backend produced a translation, for logging and tests. */
   readonly id: 'chrome' | 'local-model';
