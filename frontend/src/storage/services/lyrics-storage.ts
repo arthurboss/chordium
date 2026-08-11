@@ -7,18 +7,20 @@ export interface StoredLyrics {
   original?: string;
   translated?: string;
   timestamp: number;
-  expiresAt: number;
   /** Extractor version that produced this entry; see LYRICS_EXTRACTOR_VERSION. */
   version?: number;
 }
 
-const LYRICS_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
-
 /**
- * Bump when a fix changes what the extractor produces, so entries cached by the
- * previous version are refetched instead of being served for the rest of their
- * TTL. Version 2 reads the lines with their breaks intact, without which no
- * translation was ever detected.
+ * Lyrics carry no expiry of their own: like the full arrangement, they are
+ * content belonging to a song, and how long that song is kept is recorded once
+ * on its metadata. Saving a song therefore keeps its lyrics until it is
+ * deleted, and an unsaved song loses them when its metadata lapses.
+ *
+ * Bump when a fix changes what the extractor produces, so entries written by
+ * the previous version are refetched rather than served indefinitely. Version 2
+ * reads the lines with their breaks intact, without which no translation was
+ * ever detected.
  */
 export const LYRICS_EXTRACTOR_VERSION = 2;
 
@@ -34,13 +36,11 @@ export async function storeLyrics(songPath: string, lyrics: ChordSheet['lyrics']
     const tx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
     const store = tx.objectStore(STORES.SONG_LYRICS);
 
-    const now = Date.now();
     const entry: StoredLyrics = {
       path: songPath,
       original: lyrics?.original,
       translated: lyrics?.translated,
-      timestamp: now,
-      expiresAt: now + LYRICS_TTL,
+      timestamp: Date.now(),
       version: LYRICS_EXTRACTOR_VERSION,
     };
 
@@ -75,9 +75,9 @@ export async function getLyrics(songPath: string): Promise<ChordSheet['lyrics'] 
           return;
         }
 
-        if (result.expiresAt < Date.now() || (result.version ?? 1) < LYRICS_EXTRACTOR_VERSION) {
-          // Expired, or written by an older extractor: drop it and report the
-          // entry as absent so the caller refetches once.
+        if ((result.version ?? 1) < LYRICS_EXTRACTOR_VERSION) {
+          // Written by an older extractor: drop it and report the entry as
+          // absent so the caller refetches once.
           const deleteTx = db.transaction(STORES.SONG_LYRICS, 'readwrite');
           deleteTx.objectStore(STORES.SONG_LYRICS).delete(songPath);
           resolve(null);
