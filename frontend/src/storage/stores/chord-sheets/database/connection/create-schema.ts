@@ -56,8 +56,7 @@ export default function createSchema(db: IDBDatabase, version: number): void {
   // v7: Add lyrics storage for original + translated versions
   if (version === 7) {
     if (!db.objectStoreNames.contains(STORES.SONG_LYRICS)) {
-      const lyricsStore = db.createObjectStore(STORES.SONG_LYRICS, { keyPath: 'path' });
-      lyricsStore.createIndex('expiresAt', 'expiresAt', { unique: false });
+      db.createObjectStore(STORES.SONG_LYRICS, { keyPath: 'path' });
     }
   }
 }
