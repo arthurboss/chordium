@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeAll, beforeEach } from 'vitest';
 import StyleToolbar from '../index';
 import type { TranslationStatus } from '@/hooks/useLyricsVersion';
 
@@ -54,6 +54,10 @@ describe('the translation toggle while a translation is not ready', () => {
     toastInfo.mockReset();
     toastError.mockReset();
   });
+
+  // The suite does not clean the DOM between tests on its own, and a leftover
+  // toolbar would be found instead of the one under test.
+  afterEach(cleanup);
 
   it('shows how far the download has got', () => {
     renderToolbar({ translationStatus: 'translating', translationProgress: 0.42 });
