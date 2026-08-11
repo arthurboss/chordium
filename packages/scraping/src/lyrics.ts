@@ -6,61 +6,54 @@ export interface LyricsResult {
 }
 
 /**
- * Pulls lyric text out of a source page. Print pages expose a <pre>; the
- * regular route renders paragraphs inside <article> under hashed class names,
- * so the paragraphs are joined rather than matched by selector.
- *
- * innerText is required over textContent: the lines are separated by <br>, and
- * textContent runs them together, which leaves the translation unsplittable.
+ * Lyric text plus its translation when the page carries one.
  */
-function extractLyrics(): string | null {
-  const pre = document.querySelector("pre");
-  if (pre) {
-    const text = (pre as HTMLElement).innerText?.trim();
-    if (text) return text;
-  }
-
-  const article = document.querySelector("article");
-  if (article) {
-    const paragraphs = Array.from(article.querySelectorAll("p"))
-      .map((p) => (p as HTMLElement).innerText?.trim())
-      .filter((t): t is string => !!t && t.length > 20);
-    if (paragraphs.length) return paragraphs.join("\n\n");
-  }
-
-  return null;
+interface ExtractedLyrics {
+  original: string;
+  translated?: string;
 }
 
 /**
- * The regular route interleaves each translated line with its original line.
- * Splitting on that alternation recovers both versions; an odd or unbalanced
- * block means there is no translation, so it is left untouched.
+ * Pulls lyrics out of a source page.
+ *
+ * The regular route tags every line with data-original and data-translation,
+ * so both versions are read straight from those attributes. Doing it by
+ * attribute rather than by reading the rendered text matters because the lines
+ * are laid out across more than one container, and it removes the need to guess
+ * at an alternating pattern.
+ *
+ * Print pages carry no translation and expose the lyrics in a <pre>, which is
+ * the fallback when no tagged lines are present.
  */
-function splitInterleavedTranslation(
-  text: string
-): { original: string; translated: string } | null {
-  const blocks = text.split(/\n{2,}/);
-  const originalBlocks: string[] = [];
-  const translatedBlocks: string[] = [];
+function extractLyrics(): ExtractedLyrics | null {
+  const pairs = Array.from(document.querySelectorAll("span[data-original]"));
+  if (pairs.length) {
+    const originals: string[] = [];
+    const translations: string[] = [];
 
-  for (const block of blocks) {
-    const lines = block.split("\n").filter((l) => l.trim());
-    if (lines.length < 2 || lines.length % 2 !== 0) return null;
-    const translated: string[] = [];
-    const original: string[] = [];
-    for (let i = 0; i < lines.length; i += 2) {
-      translated.push(lines[i]);
-      original.push(lines[i + 1]);
+    for (const originalSpan of pairs) {
+      const line = originalSpan.textContent?.trim();
+      if (!line) continue;
+      originals.push(line);
+      // The sibling carries the same line translated; absent on untranslated pages.
+      const translatedSpan = originalSpan.parentElement?.querySelector("span[data-translation]");
+      const translated = translatedSpan?.textContent?.trim();
+      if (translated) translations.push(translated);
     }
-    translatedBlocks.push(translated.join("\n"));
-    originalBlocks.push(original.join("\n"));
+
+    if (originals.length) {
+      return {
+        original: originals.join("\n"),
+        // Only offer a translation when every line has one, so a partially
+        // translated page cannot silently drop verses.
+        translated: translations.length === originals.length ? translations.join("\n") : undefined,
+      };
+    }
   }
 
-  if (!originalBlocks.length) return null;
-  return {
-    original: originalBlocks.join("\n\n"),
-    translated: translatedBlocks.join("\n\n"),
-  };
+  const pre = document.querySelector("pre");
+  const text = (pre as HTMLElement | null)?.innerText?.trim();
+  return text ? { original: text } : null;
 }
 
 /**
@@ -74,7 +67,7 @@ async function tryLoadLyrics(
   url: string,
   timeout: number,
   logger?: (msg: string) => void
-): Promise<string | null> {
+): Promise<ExtractedLyrics | null> {
   try {
     page.setDefaultNavigationTimeout?.(timeout);
     // Print pages ship a pagination script that deletes overflow content from
@@ -87,12 +80,12 @@ async function tryLoadLyrics(
       return null;
     }
 
-    const text = await page.evaluate(extractLyrics);
-    if (!text?.trim()) {
+    const result = await page.evaluate(extractLyrics);
+    if (!result?.original?.trim()) {
       logger?.(`${url} yielded no lyrics`);
       return null;
     }
-    return text;
+    return result;
   } catch (error) {
     logger?.(`lyrics load failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
     return null;
@@ -111,29 +104,21 @@ export async function fetchLyrics(
   logger?: (msg: string) => void
 ): Promise<LyricsResult> {
   const base = baseUrl.replace(/\/+$/, "");
-  const result: LyricsResult = {};
 
+  // The regular route is tried first because it is the only one carrying the
+  // translation; the print page is a lighter fallback for the original alone.
   const routes = [
+    { url: `${base}/letra/`, timeout: 15000 },
     { url: `${base}/letra/imprimir.html`, timeout: 8000 },
-    { url: `${base}/letra/?translation=off`, timeout: 10000 },
   ];
 
+  const result: LyricsResult = {};
   for (const route of routes) {
-    const text = await tryLoadLyrics(page, route.url, route.timeout, logger);
-    if (text) {
-      result.original = text;
+    const found = await tryLoadLyrics(page, route.url, route.timeout, logger);
+    if (found) {
+      result.original = found.original;
+      if (found.translated) result.translated = found.translated;
       break;
-    }
-  }
-
-  const combined = await tryLoadLyrics(page, `${base}/letra/`, 15000, logger);
-  if (combined) {
-    const split = splitInterleavedTranslation(combined);
-    if (split) {
-      result.translated = split.translated;
-      if (!result.original) result.original = split.original;
-    } else if (!result.original) {
-      result.original = combined;
     }
   }
 
