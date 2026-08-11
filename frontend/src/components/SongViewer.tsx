@@ -115,6 +115,7 @@ const SongViewer = ({
     status: translationStatus,
     downloadProgress,
     acceptDownload,
+    retry: retryTranslation,
   } = useLyricsVersion({
     path: songObj.path,
     lyrics: sourceLyrics,
@@ -344,6 +345,7 @@ const SongViewer = ({
           translationStatus={translationStatus}
           translationProgress={downloadProgress}
           onAcceptTranslationDownload={acceptDownload}
+          onRetryTranslation={retryTranslation}
         />
       </Card>
 

@@ -215,6 +215,9 @@
     "enableTranslation": "Traduzir a letra",
     "translating": "Traduzindo…",
     "downloadingModel": "Preparando a tradução… {{percent}}%",
-    "translationFailed": "Tradução indisponível"
+    "translationFailed": "Tradução indisponível",
+    "translationUnavailable": "Tradução indisponível neste navegador",
+    "translationPreparing": "Preparando a tradução — ela aparecerá aqui quando estiver pronta.",
+    "translationRetry": "Tentando a tradução novamente…"
   }
 }

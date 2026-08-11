@@ -215,6 +215,9 @@
     "enableTranslation": "Translate lyrics",
     "translating": "Translating…",
     "downloadingModel": "Preparing translation… {{percent}}%",
-    "translationFailed": "Translation unavailable"
+    "translationFailed": "Translation unavailable",
+    "translationUnavailable": "Translation unavailable in this browser",
+    "translationPreparing": "Preparing the translation — it will show up here when it's ready.",
+    "translationRetry": "Trying the translation again…"
   }
 }

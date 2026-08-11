@@ -20,8 +20,12 @@ interface UseLyricsVersionOptions {
 }
 
 export type TranslationStatus =
+  /** Working out what this song and language need. */
   | 'idle'
+  /** Nothing to translate: the lyrics are already in the app's language. */
   | 'unnecessary'
+  /** Translating is possible but no backend on this device can do it. */
+  | 'unavailable'
   | 'needs-consent'
   | 'translating'
   | 'ready'
@@ -45,6 +49,8 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [consented, setConsented] = useState(false);
+  // Bumped to run the whole thing again after a failure.
+  const [attempt, setAttempt] = useState(0);
 
   // Re-running the effect must abandon any translation still in flight, whose
   // result belongs to the previous song or language.
@@ -79,10 +85,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
         return;
       }
 
-      // Nothing can translate here, so the toggle stays out of the way rather
-      // than offering something that would never finish.
+      // Nothing here can translate, which the toggle says outright rather than
+      // offering something that would never finish.
       if (!(await canTranslate(SOURCE_LANGUAGE, target))) {
-        if (!isStale()) setStatus('unnecessary');
+        if (!isStale()) setStatus('unavailable');
         return;
       }
       if (isStale()) return;
@@ -115,7 +121,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     })();
 
     return () => { ref.current++; };
-  }, [path, target, lyrics, isTranslatable, consented]);
+  }, [path, target, lyrics, isTranslatable, consented, attempt]);
 
   const clearLyrics = useCallback(async () => {
     setTranslated(null);
@@ -143,6 +149,8 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
         if (runIdRef.current === runId) setDownloadProgress(ratio);
       }).finally(() => setConsented(true));
     }, [target]),
+    /** Runs the translation again after it failed. */
+    retry: useCallback(() => setAttempt((n) => n + 1), []),
     clear: clearLyrics,
   };
 }
