@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTranslation, storeTranslation, deleteLyrics } from '@/storage/services/lyrics-storage';
 import {
@@ -7,10 +7,8 @@ import {
   requiresDownloadConsent,
   translateLyrics,
 } from '@/services/translation/get-translator';
-import {
-  isTranslatableLanguage,
-  LYRICS_SOURCE_LANGUAGE as SOURCE_LANGUAGE,
-} from '@/services/translation/types';
+import { detectLyricsLanguage } from '@/services/translation/detect-language';
+import { isTranslatableLanguage } from '@/services/translation/types';
 
 interface UseLyricsVersionOptions {
   /** Identifies the song in storage, so a translation is fetched once per song. */
@@ -34,11 +32,12 @@ export type TranslationStatus =
 /**
  * Keeps a translation of the lyrics in the app's language ready to show.
  *
- * Translating starts as soon as the lyrics are known rather than waiting for the
- * toggle, so the words are already there when the reader asks for them. Browsers
- * without a built-in translator need a model downloaded first, which is only
- * done once the reader agrees, and each language is cached separately so
- * switching languages back and forth does not repeat the work.
+ * The words are read in whatever language they are sung in rather than the
+ * source site's, so a song is only offered for translation when it is actually
+ * in a different language from the app. Browsers without a built-in translator
+ * need a model downloaded first, which is only done once the reader agrees, and
+ * each language is cached separately so switching back and forth does not
+ * repeat the work.
  */
 export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   const { i18n } = useTranslation();
@@ -56,10 +55,11 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   // result belongs to the previous song or language.
   const runIdRef = useRef(0);
 
-  // Only the app's own languages can be translated into, and the source needs no
-  // translating; anything else leaves the toggle out of the way.
-  const target = isTranslatableLanguage(language) && language !== SOURCE_LANGUAGE ? language : null;
-  const isTranslatable = target !== null && !!lyrics.trim();
+  const source = useMemo(() => detectLyricsLanguage(lyrics), [lyrics]);
+  const target = isTranslatableLanguage(language) ? language : null;
+  // Unreadable lyrics are left alone rather than translated from a guess, and a
+  // song already in the app's language needs nothing doing.
+  const isTranslatable = !!source && !!target && source !== target && !!lyrics.trim();
 
   useEffect(() => {
     const ref = runIdRef;
@@ -70,7 +70,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     setShowTranslation(false);
     setDownloadProgress(0);
 
-    if (!isTranslatable || !target) {
+    if (!isTranslatable || !target || !source) {
       setStatus('unnecessary');
       return;
     }
@@ -87,7 +87,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
 
       // Nothing here can translate, which the toggle says outright rather than
       // offering something that would never finish.
-      if (!(await canTranslate(SOURCE_LANGUAGE, target))) {
+      if (!(await canTranslate(source, target))) {
         if (!isStale()) setStatus('unavailable');
         return;
       }
@@ -95,7 +95,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
 
       // Downloading a model is the reader's call, so stop and ask unless they
       // already agreed in this session.
-      if (!consented && (await requiresDownloadConsent(SOURCE_LANGUAGE, target))) {
+      if (!consented && (await requiresDownloadConsent(source, target))) {
         if (!isStale()) setStatus('needs-consent');
         return;
       }
@@ -104,7 +104,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
       setStatus('translating');
       try {
         const result = await translateLyrics(lyrics, {
-          from: SOURCE_LANGUAGE,
+          from: source,
           to: target,
           onProgress: (ratio) => {
             if (!isStale()) setDownloadProgress(ratio);
@@ -121,7 +121,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     })();
 
     return () => { ref.current++; };
-  }, [path, target, lyrics, isTranslatable, consented, attempt]);
+  }, [path, source, target, lyrics, isTranslatable, consented, attempt]);
 
   const clearLyrics = useCallback(async () => {
     setTranslated(null);
@@ -142,13 +142,13 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
      * is still being handled.
      */
     acceptDownload: useCallback(() => {
-      if (!target) return;
+      if (!source || !target) return;
       setStatus('translating');
       const runId = runIdRef.current;
-      void prepareTranslator(SOURCE_LANGUAGE, target, (ratio) => {
+      void prepareTranslator(source, target, (ratio) => {
         if (runIdRef.current === runId) setDownloadProgress(ratio);
       }).finally(() => setConsented(true));
-    }, [target]),
+    }, [source, target]),
     /** Runs the translation again after it failed. */
     retry: useCallback(() => setAttempt((n) => n + 1), []),
     clear: clearLyrics,
