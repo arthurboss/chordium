@@ -10,9 +10,17 @@ interface ChromeTranslatorInstance {
   destroy?(): void;
 }
 
+interface ChromeTranslatorMonitor {
+  addEventListener(type: 'downloadprogress', listener: (event: { loaded: number }) => void): void;
+}
+
 interface ChromeTranslatorApi {
   availability(options: { sourceLanguage: string; targetLanguage: string }): Promise<string>;
-  create(options: { sourceLanguage: string; targetLanguage: string }): Promise<ChromeTranslatorInstance>;
+  create(options: {
+    sourceLanguage: string;
+    targetLanguage: string;
+    monitor?: (monitor: ChromeTranslatorMonitor) => void;
+  }): Promise<ChromeTranslatorInstance>;
 }
 
 function getApi(): ChromeTranslatorApi | null {
@@ -49,11 +57,28 @@ export async function getChromePairState(from: string, to: string): Promise<Chro
  * Starts fetching a language pack. Must be called straight from a click: the
  * browser refuses to download one outside a user gesture, and awaiting anything
  * first spends it.
+ *
+ * The download itself runs through Chrome's own component updater rather than
+ * the page's network stack, so it is invisible to fetch/XHR listeners and
+ * DevTools' Network panel; onProgress via the API's own monitor is the only way
+ * to observe it.
  */
-export function warmChromePair(from: string, to: string): Promise<unknown> | null {
+export function warmChromePair(
+  from: string,
+  to: string,
+  onProgress?: (ratio: number) => void
+): Promise<unknown> | null {
   const api = getApi();
   if (!api) return null;
-  return api.create({ sourceLanguage: from, targetLanguage: to }).catch(() => null);
+  return api
+    .create({
+      sourceLanguage: from,
+      targetLanguage: to,
+      monitor(monitor) {
+        monitor.addEventListener('downloadprogress', (event) => onProgress?.(event.loaded));
+      },
+    })
+    .catch(() => null);
 }
 
 export function createChromeTranslator(): Translator {

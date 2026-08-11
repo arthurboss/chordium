@@ -135,7 +135,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
      */
     acceptDownload: useCallback(() => {
       setStatus('translating');
-      void prepareTranslator(SOURCE_LANGUAGE, language).finally(() => setConsented(true));
+      const runId = runIdRef.current;
+      void prepareTranslator(SOURCE_LANGUAGE, language, (ratio) => {
+        if (runIdRef.current === runId) setDownloadProgress(ratio);
+      }).finally(() => setConsented(true));
     }, [language]),
     clear: clearLyrics,
   };

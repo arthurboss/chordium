@@ -42,8 +42,12 @@ export async function canTranslate(from: string, to: string): Promise<boolean> {
  * translation so the browser accepts it. Returns once the pack is in hand, or
  * immediately when the fallback model will be used instead.
  */
-export async function prepareTranslator(from: string, to: string): Promise<void> {
-  const warming = warmChromePair(from, to);
+export async function prepareTranslator(
+  from: string,
+  to: string,
+  onProgress?: (ratio: number) => void
+): Promise<void> {
+  const warming = warmChromePair(from, to, onProgress);
   if (warming) await warming;
 }
 
