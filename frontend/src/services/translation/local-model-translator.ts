@@ -7,8 +7,12 @@ import { TranslatorUnavailableError, translateLineByLine, type Translator } from
  */
 export const LOCAL_MODEL_ID = 'Xenova/nllb-200-distilled-600M';
 
-/** Approximate download size, shown to the user before the model is fetched. */
-export const LOCAL_MODEL_SIZE_MB = 600;
+/**
+ * Approximate download size, shown to the user before the model is fetched.
+ * Measured from the weights actually requested below; the repository's other
+ * quantisations are all larger.
+ */
+export const LOCAL_MODEL_SIZE_MB = 850;
 
 /** NLLB identifies languages by its own script-qualified codes. */
 const NLLB_CODES: Record<string, string> = {
@@ -101,6 +105,10 @@ async function getPipeline(onProgress?: (ratio: number) => void): Promise<Transl
     pipelinePromise = (async () => {
       const { pipeline } = await import('@huggingface/transformers');
       return (await pipeline('translation', LOCAL_MODEL_ID, {
+        // Pinned rather than left to the library's choice: this is the only
+        // quantisation of this model that the runtime can build a session from,
+        // and it is also the smallest the repository offers.
+        dtype: 'q8',
         progress_callback: aggregateProgress(onProgress),
       })) as unknown as TranslationPipeline;
     })().catch((error) => {
