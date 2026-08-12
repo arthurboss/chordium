@@ -142,7 +142,18 @@ const LanguageSwitcher: React.FC = () => {
     </Button>
   );
 
-  const hint = <p className="px-4 pb-3 text-xs text-muted-foreground">{t("language.packHint")}</p>;
+  // Only the browser's own translator has something to fetch per language. Where
+  // one model covers them all, that is said once in the section below instead.
+  const perLanguageHint =
+    backend === "chrome" ? (
+      <p className="px-4 pb-3 text-xs text-muted-foreground">{t("language.packHint")}</p>
+    ) : (
+      <div className="pb-1" />
+    );
+  const spokenHint =
+    backend === "chrome"
+      ? t("language.packHint")
+      : t("language.modelHint", { size: modelSizeMb });
 
   return (
     <>
@@ -157,9 +168,9 @@ const LanguageSwitcher: React.FC = () => {
           >
             <SheetHeader className="shrink-0 px-4 text-left">
               <SheetTitle>{t("language.appLanguage")}</SheetTitle>
-              <SheetDescription className="sr-only">{t("language.packHint")}</SheetDescription>
+              <SheetDescription className="sr-only">{spokenHint}</SheetDescription>
             </SheetHeader>
-            {hint}
+            {perLanguageHint}
             <div className="min-h-0 overflow-y-auto overscroll-contain">
               {list}
               {modelSection}
@@ -171,7 +182,7 @@ const LanguageSwitcher: React.FC = () => {
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent align="end" className="w-80 overflow-hidden p-0">
             <p className="px-4 pt-4 text-sm font-medium">{t("language.appLanguage")}</p>
-            {hint}
+            {perLanguageHint}
             {list}
             {modelSection}
           </PopoverContent>
