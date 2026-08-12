@@ -87,8 +87,10 @@
     "cancel": "Cancelar",
     "modelHeading": "Traducción de canciones sin conexión",
     "modelHint": "Descarga una vez ({{size}} MB) para traducir las letras a cualquier idioma en tu dispositivo.",
-    "modelDownload": "Descargar el modelo",
-    "modelDelete": "Eliminar el modelo",
+    "modelDownload": "Descargar paquete de idiomas",
+    "modelCancel": "Cancelar la descarga ({{percent}}%)",
+    "modelHintDownloaded": "Elimínalo para liberar {{size}} MB. Las letras dejarán de traducirse hasta que lo descargues otra vez, pero las traducciones ya guardadas se conservan.",
+    "modelDelete": "Eliminar paquete de idiomas",
     "modelDeleteTitle": "¿Eliminar el modelo de traducción?",
     "modelDeleteBody": "El modelo de {{size}} MB se elimina de este dispositivo, y las letras dejan de traducirse hasta que se descargue de nuevo. Las traducciones ya guardadas se conservan.",
     "modelDeleteConfirm": "Eliminar"

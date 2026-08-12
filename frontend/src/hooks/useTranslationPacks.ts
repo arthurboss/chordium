@@ -5,6 +5,7 @@ import {
   warmChromePair,
 } from '@/services/translation/chrome-translator';
 import {
+  cancelLocalModelDownload,
   deleteLocalModel,
   downloadLocalModel,
   isLocalModelDownloaded,
@@ -131,13 +132,27 @@ export function useTranslationPacks() {
     setModelProgress(0);
     setModelStatus('downloading');
     void downloadLocalModel((ratio) => setModelProgress(ratio))
-      .then(() => setModelStatus('present'))
+      .then((outcome) => {
+        setModelStatus(outcome === 'completed' ? 'present' : 'absent');
+        if (outcome === 'cancelled') setModelProgress(0);
+      })
       .catch((error) => {
         console.error('Failed to download the translation model:', error);
         setModelStatus('absent');
+        setModelProgress(0);
       })
       .finally(() => void refresh());
   }, [refresh]);
+
+  /**
+   * The library cannot be made to drop its requests, so the reader is taken back
+   * to the offer at once and the part-downloaded model is cleared behind them.
+   */
+  const cancelModelDownload = useCallback(() => {
+    cancelLocalModelDownload();
+    setModelStatus('absent');
+    setModelProgress(0);
+  }, []);
 
   const removeModel = useCallback(async () => {
     await deleteLocalModel();
@@ -153,6 +168,7 @@ export function useTranslationPacks() {
     modelProgress,
     modelSizeMb: LOCAL_MODEL_SIZE_MB,
     downloadModel,
+    cancelModelDownload,
     removeModel,
     refresh,
   };

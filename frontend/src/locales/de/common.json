@@ -87,8 +87,10 @@
     "cancel": "Abbrechen",
     "modelHeading": "Offline-Übersetzung für Lieder",
     "modelHint": "Lade einmal ({{size}} MB) herunter, um Liedtexte auf deinem Gerät in jede Sprache zu übersetzen.",
-    "modelDownload": "Modell herunterladen",
-    "modelDelete": "Modell löschen",
+    "modelDownload": "Sprachpaket herunterladen",
+    "modelCancel": "Download abbrechen ({{percent}}%)",
+    "modelHintDownloaded": "Löschen gibt {{size}} MB frei. Liedtexte werden dann nicht mehr übersetzt, bis du es erneut lädst; bereits gespeicherte Übersetzungen bleiben erhalten.",
+    "modelDelete": "Sprachpaket löschen",
     "modelDeleteTitle": "Übersetzungsmodell löschen?",
     "modelDeleteBody": "Das Modell mit {{size}} MB wird von diesem Gerät entfernt, und Liedtexte werden nicht mehr übersetzt, bis es erneut geladen wird. Bereits gespeicherte Übersetzungen bleiben erhalten.",
     "modelDeleteConfirm": "Löschen"

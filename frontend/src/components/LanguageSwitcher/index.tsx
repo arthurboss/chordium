@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Download, Globe, Loader2, Trash2 } from "lucide-react";
+import { Download, Globe, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,7 +14,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Progress } from "@/components/ui/progress";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslationPacks } from "@/hooks/useTranslationPacks";
 import type { TranslatableLanguage } from "@/services/translation/types";
@@ -40,6 +39,7 @@ const LanguageSwitcher: React.FC = () => {
     modelProgress,
     modelSizeMb,
     downloadModel,
+    cancelModelDownload,
     removeModel,
     refresh,
   } = useTranslationPacks();
@@ -91,31 +91,42 @@ const LanguageSwitcher: React.FC = () => {
   // Browsers without a translator of their own use one model for every language,
   // so it is offered once here instead of language by language. It is also the
   // one download the app itself stores, and so the only one it can remove.
+  const modelPercent = Math.round(modelProgress * 100);
   const modelSection = backend === "local-model" && (
     <div className="border-t px-4 py-3">
       <p className="text-sm font-medium">{t("language.modelHeading")}</p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {t("language.modelHint", { size: modelSizeMb })}
+        {modelStatus === "present"
+          ? t("language.modelHintDownloaded", { size: modelSizeMb })
+          : t("language.modelHint", { size: modelSizeMb })}
       </p>
 
-      {modelStatus === "downloading" ? (
-        <div className="mt-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            {Math.round(modelProgress * 100)}%
-          </div>
-          <Progress value={Math.round(modelProgress * 100)} className="mt-1 h-1" />
-        </div>
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-2 w-full"
-          onClick={() =>
-            modelStatus === "present" ? setConfirmingModelRemoval(true) : downloadModel()
-          }
-        >
-          {modelStatus === "present" ? (
+      {/* One button carries the whole state: it starts the download, then fills
+          with its progress and offers to stop, then offers to remove it. */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="relative mt-2 w-full overflow-hidden"
+        onClick={() => {
+          if (modelStatus === "downloading") cancelModelDownload();
+          else if (modelStatus === "present") setConfirmingModelRemoval(true);
+          else downloadModel();
+        }}
+      >
+        {modelStatus === "downloading" && (
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-0 bg-primary/25 transition-[width] duration-200"
+            style={{ width: `${modelPercent}%` }}
+          />
+        )}
+        <span className="relative z-10 flex items-center">
+          {modelStatus === "downloading" ? (
+            <>
+              <X className="mr-2 h-4 w-4" />
+              {t("language.modelCancel", { percent: modelPercent })}
+            </>
+          ) : modelStatus === "present" ? (
             <>
               <Trash2 className="mr-2 h-4 w-4" />
               {t("language.modelDelete")}
@@ -126,8 +137,8 @@ const LanguageSwitcher: React.FC = () => {
               {t("language.modelDownload")}
             </>
           )}
-        </Button>
-      )}
+        </span>
+      </Button>
     </div>
   );
 

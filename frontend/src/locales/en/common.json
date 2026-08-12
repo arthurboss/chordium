@@ -87,8 +87,10 @@
     "cancel": "Cancel",
     "modelHeading": "Offline translation for songs",
     "modelHint": "Download once ({{size}} MB) to translate song lyrics into any language on your device.",
-    "modelDownload": "Download the model",
-    "modelDelete": "Delete the model",
+    "modelDownload": "Download language pack",
+    "modelCancel": "Cancel download ({{percent}}%)",
+    "modelHintDownloaded": "Delete to free up {{size}} MB. Song lyrics will stop being translated until you download it again, but translations you have already saved are kept.",
+    "modelDelete": "Delete language pack",
     "modelDeleteTitle": "Delete the translation model?",
     "modelDeleteBody": "The {{size}} MB model is removed from this device, and lyrics stop being translated until it is downloaded again. Translations already saved are kept.",
     "modelDeleteConfirm": "Delete"

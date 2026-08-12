@@ -32,6 +32,66 @@ type TranslationPipeline = (
 
 let pipelinePromise: Promise<TranslationPipeline> | null = null;
 
+/** What the library reports as it fetches each of the model's files. */
+interface FileProgressEvent {
+  status?: string;
+  file?: string;
+  loaded?: number;
+  total?: number;
+}
+
+/**
+ * Turns the library's per-file reports into one figure for the whole download.
+ *
+ * Each file reports its own percentage, so passing those straight through makes
+ * the reading lurch about as the files interleave. Bytes are summed across every
+ * file instead, and the figure is never allowed to fall.
+ */
+function aggregateProgress(onProgress?: (ratio: number) => void) {
+  const files = new Map<string, { loaded: number; total: number }>();
+  let highest = 0;
+
+  return (event: FileProgressEvent) => {
+    if (!onProgress || !event.file) return;
+
+    if (event.status === 'done') {
+      const known = files.get(event.file);
+      if (known) files.set(event.file, { loaded: known.total, total: known.total });
+    } else if (typeof event.total === 'number') {
+      files.set(event.file, { loaded: event.loaded ?? 0, total: event.total });
+    }
+
+    let loaded = 0;
+    let announced = 0;
+    for (const file of files.values()) {
+      loaded += file.loaded;
+      announced += file.total;
+    }
+
+    // Files are announced as the download goes along, so early on the announced
+    // total is a small fraction of the real one and the first few tiny files
+    // would read as the whole thing being finished. The model's known size holds
+    // the denominator down until the real figure overtakes it.
+    const total = Math.max(announced, LOCAL_MODEL_SIZE_MB * 1024 * 1024);
+
+    // Held just short of the end, because finishing is announced by the download
+    // resolving rather than by the bytes adding up.
+    const ratio = Math.min(loaded / total, 0.99);
+    if (ratio > highest) {
+      highest = ratio;
+      onProgress(highest);
+    }
+  };
+}
+
+/**
+ * Counts downloads so a cancellation can be told apart from a later attempt. The
+ * library gives no way to abort its own requests, so cancelling stops the app
+ * acting on the result and clears whatever reached the cache once it stops.
+ */
+let downloadGeneration = 0;
+let cancelledGeneration = -1;
+
 /**
  * The model weights are large, so the library and the model are only fetched
  * once a translation is actually requested, and then reused.
@@ -41,11 +101,7 @@ async function getPipeline(onProgress?: (ratio: number) => void): Promise<Transl
     pipelinePromise = (async () => {
       const { pipeline } = await import('@huggingface/transformers');
       return (await pipeline('translation', LOCAL_MODEL_ID, {
-        progress_callback: (event: { status?: string; progress?: number }) => {
-          if (event.status === 'progress' && typeof event.progress === 'number') {
-            onProgress?.(event.progress / 100);
-          }
-        },
+        progress_callback: aggregateProgress(onProgress),
       })) as unknown as TranslationPipeline;
     })().catch((error) => {
       // Allow a later attempt to retry instead of replaying this failure.
@@ -56,14 +112,56 @@ async function getPipeline(onProgress?: (ratio: number) => void): Promise<Transl
   return pipelinePromise;
 }
 
+export type DownloadOutcome = 'completed' | 'cancelled';
+
+/**
+ * Fetches the model up front, so it is there before any lyrics need it. Stopping
+ * partway leaves nothing behind: whatever arrived is cleared once the library
+ * stops writing, so the next attempt starts fresh rather than from half a model.
+ */
+export async function downloadLocalModel(
+  onProgress?: (ratio: number) => void
+): Promise<DownloadOutcome> {
+  const generation = ++downloadGeneration;
+  const isCancelled = () => cancelledGeneration >= generation;
+  try {
+    await getPipeline((ratio) => {
+      if (!isCancelled()) onProgress?.(ratio);
+    });
+    if (!isCancelled()) return 'completed';
+  } catch (error) {
+    if (!isCancelled()) throw error;
+  }
+  // Only tidy up when nothing newer has taken over, or this would delete the
+  // model a later attempt is busy fetching.
+  if (downloadGeneration === generation) await deleteLocalModel();
+  return 'cancelled';
+}
+
+/**
+ * Calls off a download in progress. The caller can move on straight away; the
+ * cache is cleared in the background once the library stops.
+ */
+export function cancelLocalModelDownload(): void {
+  cancelledGeneration = downloadGeneration;
+  // A later attempt must build its own pipeline rather than join this one.
+  pipelinePromise = null;
+  // What has already arrived goes now; the download itself clears anything the
+  // library writes after this, once it stops.
+  void deleteLocalModel();
+}
+
+function isModelFile(url: string): boolean {
+  return url.includes(LOCAL_MODEL_ID);
+}
+
+function isModelWeights(url: string): boolean {
+  return isModelFile(url) && url.includes('.onnx');
+}
+
 /** Whether the model has already been fetched, so no consent is needed again. */
 export function isLocalModelLoaded(): boolean {
   return pipelinePromise !== null;
-}
-
-/** Fetches the model up front, so it is there before any lyrics need it. */
-export async function downloadLocalModel(onProgress?: (ratio: number) => void): Promise<void> {
-  await getPipeline(onProgress);
 }
 
 /**
@@ -76,7 +174,10 @@ export async function isLocalModelDownloaded(): Promise<boolean> {
   try {
     for (const name of await caches.keys()) {
       const cached = await (await caches.open(name)).keys();
-      if (cached.some((request) => request.url.includes(LOCAL_MODEL_ID))) return true;
+      // The weights are what make the model usable. Its config and tokenizer
+      // files are fetched first and are tiny, so counting those would report a
+      // part-downloaded model as ready.
+      if (cached.some((request) => isModelWeights(request.url))) return true;
     }
     return false;
   } catch {
@@ -95,7 +196,7 @@ export async function deleteLocalModel(): Promise<void> {
     for (const name of await caches.keys()) {
       const cache = await caches.open(name);
       for (const request of await cache.keys()) {
-        if (request.url.includes(LOCAL_MODEL_ID)) await cache.delete(request);
+        if (isModelFile(request.url)) await cache.delete(request);
       }
     }
   } catch (error) {
