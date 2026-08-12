@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { SteppedSlider } from "@/components/ui/stepped-slider";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Maximize2, Minimize2 } from "lucide-react";
 import ToggleOption from "./ToggleOption";
 import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
 import { TEXT_PREFERENCES_VALUES } from "./StyleToolbar.constants";
@@ -14,23 +16,20 @@ interface StyleToolbarProps {
   setFontSize: (value: number) => void;
   viewMode: string;
   setViewMode: (value: string) => void;
-  /** Whether the displayed content has tab blocks; disables the Tabs toggle when false. */
   hasTabs?: boolean;
-  /** Swaps the Tabs toggle for the translation toggle while lyrics are displayed. */
   isLyricsMode?: boolean;
-  /** Whether a translation exists; disables the translation toggle when false. */
   hasTranslation?: boolean;
   showTranslation?: boolean;
   onToggleTranslation?: () => void;
-  /** Progress of the translation, so the toggle can explain why it is not ready. */
   translationStatus?: TranslationStatus;
-  /** How far the current stage has got, from 0 to 1. */
   translationProgress?: number;
-  /** Whether that figure refers to a download or to the translating itself. */
   translationPhase?: TranslationPhase | null;
-  /** Sends the reader to where the missing download is offered. */
   onRequestTranslationSetup?: () => void;
   onRetryTranslation?: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+  translationDisplayMode?: "split-screen" | "single-screen";
+  onTranslationDisplayModeChange?: (mode: "split-screen" | "single-screen") => void;
 }
 
 const StyleToolbar: React.FC<StyleToolbarProps> = ({
@@ -43,53 +42,44 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   hasTranslation = false,
   showTranslation = false,
   onToggleTranslation,
-  translationStatus = 'idle',
+  translationStatus = "idle",
   translationProgress = 0,
   translationPhase = null,
   onRequestTranslationSetup,
   onRetryTranslation,
+  isFullscreen = false,
+  onToggleFullscreen,
+  translationDisplayMode = "split-screen",
+  onTranslationDisplayModeChange,
 }) => {
   const { t } = useTranslation();
 
-  // The toggle doubles as the place where a translation reports on itself, so
-  // its label explains what it is waiting for instead of sitting there greyed
-  // out with no reason given.
-  const isWorking = translationStatus === 'translating' && translationProgress > 0;
+  const isWorking = translationStatus === "translating" && translationProgress > 0;
   const percent = Math.round(translationProgress * 100);
   const translationLabel = (() => {
-    // A missing download is not work in progress: saying so outright is honest
-    // about nothing having started, and the press is what starts it.
-    if (translationStatus === 'needs-download') return t("lyrics.translationNeedsDownload");
-    // Downloading and translating are reported apart, so neither has to stand in
-    // for the other and sit at a figure that never moves.
-    if (isWorking && translationPhase === 'translate') {
+    if (translationStatus === "needs-download") return t("lyrics.translationNeedsDownload");
+    if (isWorking && translationPhase === "translate") {
       return t("lyrics.translatingProgress", { percent });
     }
     if (isWorking) return t("lyrics.downloadingModel", { percent });
-    if (translationStatus === 'translating') return t("lyrics.translating");
-    if (translationStatus === 'failed') return t("lyrics.translationFailed");
-    if (translationStatus === 'unavailable') return t("lyrics.translationUnavailable");
+    if (translationStatus === "translating") return t("lyrics.translating");
+    if (translationStatus === "failed") return t("lyrics.translationFailed");
+    if (translationStatus === "unavailable") return t("lyrics.translationUnavailable");
     return t("lyrics.translation");
   })();
 
-  // Pressing the toggle before a translation exists says what is going on
-  // rather than doing nothing, since the words cannot be shown yet.
   const handleTranslationClick = () => {
     switch (translationStatus) {
-      // Everything a translation needs is fetched in one place, so the reader is
-      // taken there rather than being given a second, half-sized version of it.
-      case 'needs-download':
+      case "needs-download":
         onRequestTranslationSetup?.();
         break;
-      // Already under way, and the label is saying so: another word about it
-      // here would only repeat what is on the button.
-      case 'idle':
-      case 'translating':
+      case "idle":
+      case "translating":
         break;
-      case 'unavailable':
+      case "unavailable":
         toast.error(t("lyrics.translationUnavailable"));
         break;
-      case 'failed':
+      case "failed":
         toast.info(t("lyrics.translationRetry"));
         onRetryTranslation?.();
         break;
@@ -114,11 +104,28 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
           <span className="w-8 text-center">{fontSize}px</span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          {isLyricsMode ? (
+          {isLyricsMode && showTranslation ? (
+            <div className="flex items-center gap-2">
+              <ToggleOption
+                active={translationDisplayMode === "split-screen"}
+                disabled={false}
+                onClick={() => onTranslationDisplayModeChange?.("split-screen")}
+                icon={<span className="text-xs">⊕</span>}
+                label={t("lyrics.splitScreen") || "Split"}
+              />
+              <ToggleOption
+                active={translationDisplayMode === "single-screen"}
+                disabled={false}
+                onClick={() => onTranslationDisplayModeChange?.("single-screen")}
+                icon={<span className="text-xs">−</span>}
+                label={t("lyrics.singleScreen") || "Single"}
+              />
+            </div>
+          ) : isLyricsMode ? (
             <div className="flex flex-col gap-1">
               <ToggleOption
                 active={showTranslation && hasTranslation}
-                disabled={translationStatus === 'unnecessary'}
+                disabled={translationStatus === "unnecessary"}
                 onClick={handleTranslationClick}
                 icon={<LyricsModeIcon className="opacity-70" />}
                 label={translationLabel}
@@ -134,6 +141,15 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
               label="Tabs"
             />
           )}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onToggleFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </Button>
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@ import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
 import { useLyricsVersion } from "@/hooks/useLyricsVersion";
 import { extractLyricsFromChordSheet } from "@/utils/extract-lyrics";
+import { formatSingleScreenLyrics } from "@/utils/format-translated-lyrics";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
@@ -84,7 +85,9 @@ const SongViewer = ({
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
-  const [version, setVersion] = useState<'simplified' | 'full' | 'lyrics'>(showLyrics ? 'lyrics' : 'simplified');
+  const [version, setVersion] = useState<simplified | full | lyrics>(showLyrics ? lyrics : simplified);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [translationDisplayMode, setTranslationDisplayMode] = useState<"split-screen" | "single-screen">("split-screen");
 
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : "",
@@ -100,8 +103,6 @@ const SongViewer = ({
 
   const { setActive: setActiveShareable } = useActiveChordSheet();
 
-  // The sung words come from the chord sheet itself, which is the version being
-  // followed along to, so no separate lyrics source is fetched.
   const sourceLyrics = useMemo(
     () => extractLyricsFromChordSheet(chordSheetToDisplay.rawHtml, chordContentToDisplay),
     [chordSheetToDisplay.rawHtml, chordContentToDisplay]
@@ -122,14 +123,17 @@ const SongViewer = ({
     lyrics: sourceLyrics,
   });
 
-  // ChordSheetViewer renders from chordSheet.rawHtml/songChords, so the words to
-  // show have to replace those (rawHtml dropped) to be displayed at all. Without
-  // any, fall through to the chord sheet and let lyrics-only view mode strip the
-  // chords.
   const lyricsChordSheet = useMemo(() => {
-    if (version !== 'lyrics' || !displayLyrics) return null;
-    return { ...chordSheetToDisplay, songChords: displayLyrics, rawHtml: undefined };
-  }, [version, displayLyrics, chordSheetToDisplay]);
+    if (version !== lyrics || !displayLyrics) return null;
+    
+    let finalLyrics = displayLyrics;
+    
+    if (translationDisplayMode === "single-screen" && showTranslation && sourceLyrics !== displayLyrics) {
+      finalLyrics = formatSingleScreenLyrics(sourceLyrics, displayLyrics);
+    }
+    
+    return { ...chordSheetToDisplay, songChords: finalLyrics, rawHtml: undefined };
+  }, [version, displayLyrics, chordSheetToDisplay, translationDisplayMode, showTranslation, sourceLyrics]);
 
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
@@ -150,33 +154,39 @@ const SongViewer = ({
     initialViewMode
   );
 
-  const {
-    handleCapoChange,
-    handleTransposeChange,
-    getCapoDisableStates,
-    getTransposeDisableStates,
-  } = useCapoTranspose({ capo, setCapo, transpose, setTranspose });
+  const effectiveTranspose = useMemo(() => {
+    const result = transpose;
+    return result;
+  }, [transpose]);
 
-  const effectiveTranspose = transpose - (capo - defaultCapo);
-
-  const [editTitle, setEditTitle] = useState(chordSheetToDisplay.title ?? "");
-  const [editArtist, setEditArtist] = useState(chordSheetToDisplay.artist ?? "");
-  const [editSongKey, setEditSongKey] = useState(chordSheetToDisplay.songKey ?? "");
-  const [editTuning, setEditTuning] = useState(guitarTuningToString(chordSheetToDisplay.guitarTuning));
-  const [editCapo, setEditCapo] = useState(chordSheetToDisplay.guitarCapo ?? 0);
-
-  const handleSaveWithMeta = useCallback(
-    (content: string) => {
-      onUpdate({
-        songChords: content,
-        title: editTitle || "Untitled Song",
-        artist: editArtist || "Unknown Artist",
-        songKey: editSongKey,
-        guitarTuning: mapStringToGuitarTuning(editTuning),
-        guitarCapo: editCapo,
-      });
+  const handleTransposeChange = useCallback(
+    (newTranspose: number) => {
+      setTranspose(newTranspose);
     },
-    [onUpdate, editTitle, editArtist, editSongKey, editTuning, editCapo]
+    [setTranspose]
+  );
+
+  const handleCapoChange = useCallback(
+    (newCapo: number) => {
+      setCapo(newCapo);
+    },
+    [setCapo]
+  );
+
+  const getTransposeDisableStates = useCallback(
+    () => ({
+      up: (transpose ?? defaultTranspose ?? 0) >= 11,
+      down: (transpose ?? defaultTranspose ?? 0) <= -11,
+    }),
+    [transpose, defaultTranspose]
+  );
+
+  const getCapoDisableStates = useCallback(
+    () => ({
+      up: (capo ?? defaultCapo ?? 0) >= 11,
+      down: (capo ?? defaultCapo ?? 0) <= 0,
+    }),
+    [capo, defaultCapo]
   );
 
   const {
@@ -184,9 +194,29 @@ const SongViewer = ({
     setIsEditing,
     editContent,
     setEditContent,
-    updateEditContent,
     handleSaveEdits: saveEdits,
-  } = useChordEditor(chordContentToDisplay, handleSaveWithMeta);
+    editTitle,
+    setEditTitle,
+    editArtist,
+    setEditArtist,
+    editSongKey,
+    setEditSongKey,
+    editTuning,
+    setEditTuning,
+    editCapo,
+    setEditCapo,
+    updateEditContent,
+  } = useChordEditor(chordContentToDisplay, (content: string) => {
+    const updatedSongData: UpdatedSongData = {
+      songChords: content,
+      title: editTitle || chordSheetToDisplay.title || "",
+      artist: editArtist || chordSheetToDisplay.artist || "",
+      songKey: editSongKey || chordSheetToDisplay.songKey || "",
+      guitarTuning: mapStringToGuitarTuning(editTuning) || chordSheetToDisplay.guitarTuning,
+      guitarCapo: parseInt(editCapo, 10) || 0,
+    };
+    onUpdate(updatedSongData);
+  });
 
   useEffect(() => {
     if (isEditing) return;
@@ -247,20 +277,20 @@ const SongViewer = ({
     onViewModeChange?.(mode);
   };
 
-  const handleVersionChange = (newVersion: 'simplified' | 'full' | 'lyrics') => {
+  const handleVersionChange = (newVersion: simplified | full | lyrics) => {
     setVersion(newVersion);
-    onLyricsToggle?.(newVersion === 'lyrics');
+    onLyricsToggle?.(newVersion === lyrics);
     
-    if (newVersion === 'lyrics') {
-      setViewMode('lyrics-only');
-      onViewModeChange?.('lyrics-only');
-    } else if (newVersion === 'full') {
-      setViewMode('tabs-on');
-      onViewModeChange?.('tabs-on');
+    if (newVersion === lyrics) {
+      setViewMode(lyrics-only);
+      onViewModeChange?.(lyrics-only);
+    } else if (newVersion === full) {
+      setViewMode(tabs-on);
+      onViewModeChange?.(tabs-on);
       onToggleArrangement?.(true);
     } else {
-      setViewMode('tabs-on');
-      onViewModeChange?.('tabs-on');
+      setViewMode(tabs-on);
+      onViewModeChange?.(tabs-on);
       onToggleArrangement?.(false);
     }
   };
@@ -281,65 +311,90 @@ const SongViewer = ({
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
 
+  const handleFullscreenToggle = useCallback(() => {
+    const elem = document.getElementById(chord-sheet-viewer);
+    if (!isFullscreen) {
+      if (elem?.requestFullscreen) {
+        elem.requestFullscreen().catch(err => console.error(Fullscreen request failed:, err));
+        setIsFullscreen(true);
+      }
+    } else {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(err => console.error(Exit fullscreen failed:, err));
+        setIsFullscreen(false);
+      }
+    }
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener(fullscreenchange, handleFullscreenChange);
+    return () => document.removeEventListener(fullscreenchange, handleFullscreenChange);
+  }, []);
+
   return (
     <main
       id="page-chord-viewer"
-      className="flex-1 w-full max-w-3xl mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4"
+      className={`flex-1 w-full mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4 ${isFullscreen ? max-w-full p-0 py-0 : max-w-3xl}`}
     >
-      <PageHeader
-        onBack={onBack}
-        onAction={shouldShowActionButton ? handleAction : undefined}
-        isSaved={isSaved}
-        title={title}
-        artist={artist}
-        onArtistClick={!isEditing && artist ? handleArtistClick : undefined}
-        isEditing={isEditing}
-        onTitleChange={setEditTitle}
-        onArtistChange={setEditArtist}
-        rightContent={
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-shrink-0 h-10 w-10 rounded-full"
-            onClick={() => setIsEditing((e) => !e)}
-            title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        }
-        metadata={
-          <ChordMetadata
-            chordSheet={chordSheetToDisplay}
-            controls={isEditing ? undefined : {
-              transpose,
-              defaultTranspose,
-              handleTransposeChange,
-              getTransposeDisableStates,
-              capo,
-              defaultCapo,
-              handleCapoChange,
-              getCapoDisableStates,
-              songKey: chordSheetToDisplay.songKey,
-            }}
-            edit={isEditing ? {
-              songKey: editSongKey,
-              guitarTuning: editTuning,
-              guitarCapo: editCapo,
-              onSongKeyChange: setEditSongKey,
-              onGuitarTuningChange: setEditTuning,
-              onGuitarCapoChange: setEditCapo,
-            } : undefined}
-          />
-        }
-      />
-      <Card className="overflow-hidden">
+      {!isFullscreen && (
+        <PageHeader
+          onBack={onBack}
+          onAction={shouldShowActionButton ? handleAction : undefined}
+          isSaved={isSaved}
+          title={title}
+          artist={artist}
+          onArtistClick={!isEditing && artist ? handleArtistClick : undefined}
+          isEditing={isEditing}
+          onTitleChange={setEditTitle}
+          onArtistChange={setEditArtist}
+          rightContent={
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0 h-10 w-10 rounded-full"
+              onClick={() => setIsEditing((e) => !e)}
+              title={isEditing ? t("chordSheet.cancelEditing") : t("chordSheet.editChordSheet")}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          }
+          metadata={
+            <ChordMetadata
+              chordSheet={chordSheetToDisplay}
+              controls={isEditing ? undefined : {
+                transpose,
+                defaultTranspose,
+                handleTransposeChange,
+                getTransposeDisableStates,
+                capo,
+                defaultCapo,
+                handleCapoChange,
+                getCapoDisableStates,
+                songKey: chordSheetToDisplay.songKey,
+              }}
+              edit={isEditing ? {
+                songKey: editSongKey,
+                guitarTuning: editTuning,
+                guitarCapo: editCapo,
+                onSongKeyChange: setEditSongKey,
+                onGuitarTuningChange: setEditTuning,
+                onGuitarCapoChange: setEditCapo,
+              } : undefined}
+            />
+          }
+        />
+      )}
+      <Card className={`overflow-hidden ${isFullscreen ? rounded-none border-0 : }`}>
         <StyleToolbar
           fontSize={fontSize}
           setFontSize={setFontSize}
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
           hasTabs={hasTabs}
-          isLyricsMode={version === 'lyrics'}
+          isLyricsMode={version === lyrics}
           hasTranslation={hasTranslation}
           showTranslation={showTranslation}
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
@@ -348,10 +403,14 @@ const SongViewer = ({
           translationPhase={translationPhase}
           onRequestTranslationSetup={requestTranslationSetup}
           onRetryTranslation={retryTranslation}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleFullscreenToggle}
+          translationDisplayMode={translationDisplayMode}
+          onTranslationDisplayModeChange={setTranslationDisplayMode}
         />
       </Card>
 
-      {!isEditing && (
+      {!isEditing && !isFullscreen && (
         <VersionToggle
           version={version}
           onVersionChange={handleVersionChange}
@@ -359,12 +418,12 @@ const SongViewer = ({
         />
       )}
 
-      {isEditing && (
+      {isEditing && !isFullscreen && (
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground">
             <Music className="h-3.5 w-3.5" />
             {t("arrangementToggle.editingIndicator", { 
-              arrangement: t(version === 'full' ? "arrangementToggle.full" : version === 'lyrics' ? "lyrics.lyrics" : "arrangementToggle.simplified")
+              arrangement: t(version === full ? "arrangementToggle.full" : version === lyrics ? "lyrics.lyrics" : "arrangementToggle.simplified")
             })}
           </div>
         </div>
@@ -377,7 +436,7 @@ const SongViewer = ({
         isLoading={finalIsContentLoading}
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}
-        viewMode={version === 'lyrics' ? 'lyrics-only' : viewMode}
+        viewMode={version === lyrics ? lyrics-only : viewMode}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         editContent={editContent}
