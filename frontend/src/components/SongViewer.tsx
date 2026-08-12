@@ -86,6 +86,7 @@ const SongViewer = ({
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
   const [version, setVersion] = useState<'simplified' | 'full' | 'lyrics'>(showLyrics ? 'lyrics' : 'simplified');
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : "",
   });
