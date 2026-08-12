@@ -58,11 +58,13 @@ const LanguageSwitcher: React.FC = () => {
     else setPromptedFor(null);
   };
 
+  // Picking a language is the whole point of the panel, so it closes once one is
+  // chosen. Downloading is not: that leaves it open, since the reader is likely
+  // to watch it or start another.
   const selectLanguage = (language: TranslatableLanguage) => {
     void i18n.changeLanguage(language);
-    // Offer the download straight away when lyrics cannot yet follow the
-    // language just chosen, rather than leaving it to be discovered in a song.
-    setPromptedFor(statuses[language] === "downloadable" ? language : null);
+    setPromptedFor(null);
+    setOpen(false);
   };
 
   const list = (
