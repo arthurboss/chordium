@@ -137,6 +137,10 @@ export default defineConfig(({ mode }) => {
           // Re-enable navigateFallback but with better caching
           navigateFallback: '/index.html',
           navigateFallbackAllowlist: [/^\/(?!.*\.(?:png|jpg|jpeg|svg|webp|gif|ico|js|css|woff2|json|txt|xml|webmanifest)).*/],
+          // Only things the app does not ship itself are cached at runtime. Its own
+          // code and shell are precached above, with a revision per build and
+          // outdated ones pruned, so caching them here as well would serve an
+          // index.html from the previous build that no reload could shift.
           runtimeCaching: [
             {
               // Cache the manifest file with CacheFirst strategy
@@ -147,21 +151,6 @@ export default defineConfig(({ mode }) => {
                 expiration: {
                   maxEntries: 1,
                   maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-            {
-              // Cache the main app files with CacheFirst strategy
-              urlPattern: /\.(?:js|css|html)$/,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'chordium-v2-app-assets',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
                 },
                 cacheableResponse: {
                   statuses: [0, 200],
