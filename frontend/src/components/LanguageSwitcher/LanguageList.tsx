@@ -1,5 +1,5 @@
 import React from "react";
-import { Download, Loader2, Trash2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { BRFlag, DEFlag, ESFlag, USFlag } from "@/components/icons/flags";
@@ -30,10 +30,11 @@ interface LanguageListProps {
   promptedFor: TranslatableLanguage | null;
   onSelect: (language: TranslatableLanguage) => void;
   onDownload: (language: TranslatableLanguage) => void;
-  /** Set when this backend's downloads are the app's own to remove. */
-  onRemove?: (language: TranslatableLanguage) => void;
-  /** Size of the download, shown before it is started. */
-  sizeMbFor?: (language: TranslatableLanguage) => number;
+  /**
+   * Whether a language can be fetched on its own. The fallback covers every
+   * language with one model, so there is nothing to fetch per language.
+   */
+  perLanguageDownloads?: boolean;
 }
 
 const LanguageList: React.FC<LanguageListProps> = ({
@@ -43,8 +44,7 @@ const LanguageList: React.FC<LanguageListProps> = ({
   promptedFor,
   onSelect,
   onDownload,
-  onRemove,
-  sizeMbFor,
+  perLanguageDownloads = true,
 }) => {
   const { t } = useTranslation();
 
@@ -56,7 +56,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
         const isSelected = selected === language;
         const percent = Math.round((progress[language] ?? 0) * 100);
         const name = t(NAME_KEYS[language]);
-        const sizeMb = sizeMbFor?.(language) ?? 0;
 
         return (
           <li key={language}>
@@ -90,7 +89,7 @@ const LanguageList: React.FC<LanguageListProps> = ({
                 <Flag className="!h-6 !w-6 shrink-0" />
                 <span className={cn("flex-1 text-sm", isSelected && "font-medium")}>{name}</span>
 
-                {status === "downloadable" && (
+                {status === "downloadable" && perLanguageDownloads && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -99,7 +98,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
                       promptedFor === language && "ring-1 ring-primary"
                     )}
                     aria-label={t("language.packDownloadFor", { language: name })}
-                    title={sizeMb ? t("language.packSize", { size: sizeMb }) : undefined}
                     onClick={(event) => {
                       event.stopPropagation();
                       onDownload(language);
@@ -116,22 +114,6 @@ const LanguageList: React.FC<LanguageListProps> = ({
                   </span>
                 )}
 
-                {/* Nothing to remove for a language that needed no download. */}
-                {status === "installed" && onRemove && sizeMb > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                    aria-label={t("language.removeFor", { language: name })}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onRemove(language);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-
                 {status === "unavailable" && (
                   <span className="shrink-0 pr-2 text-xs text-muted-foreground">
                     {t("language.packUnavailable")}
@@ -140,11 +122,9 @@ const LanguageList: React.FC<LanguageListProps> = ({
               </span>
             </div>
 
-            {promptedFor === language && status === "downloadable" && (
+            {promptedFor === language && status === "downloadable" && perLanguageDownloads && (
               <p className="px-4 pb-2 text-xs text-muted-foreground">
-                {sizeMb
-                  ? t("language.packPromptSized", { language: name, size: sizeMb })
-                  : t("language.packPrompt", { language: name })}
+                {t("language.packPrompt", { language: name })}
               </p>
             )}
           </li>

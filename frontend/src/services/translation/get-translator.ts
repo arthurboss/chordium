@@ -1,12 +1,12 @@
 import { createChromeTranslator, getChromePairState, warmChromePair } from './chrome-translator';
 import {
   createLocalModelTranslator,
-  isLanguageDownloaded,
+  isLocalModelDownloaded,
   isLocalModelSupported,
   type LocalProgress,
   type TranslationPhase,
 } from './local-model-translator';
-import { isTranslatableLanguage, type Translator } from './types';
+import type { Translator } from './types';
 
 export type TranslatorKind = 'chrome' | 'local-model';
 
@@ -17,7 +17,7 @@ export type { TranslationPhase };
 /**
  * Which backend would handle a given language pair. Chrome's API is preferred
  * wherever it can serve the pair, since it needs no download; everything else
- * falls back to the bundled models. Chrome can also fail at translate() time, in
+ * falls back to the bundled model. Chrome can also fail at translate() time, in
  * which case translateLyrics retries with the fallback.
  */
 export async function resolveTranslatorKind(from: string, to: string): Promise<TranslatorKind> {
@@ -28,19 +28,14 @@ export async function resolveTranslatorKind(from: string, to: string): Promise<T
  * Whether translating this pair has to wait for the reader to ask for it.
  *
  * Both backends can need it: the browser refuses to fetch a language pack
- * outside a click, and the fallback's models are a large download worth agreeing
+ * outside a click, and the fallback's model is a large download worth agreeing
  * to. Either way the work is deferred until the toggle is pressed.
  */
 export async function requiresDownloadConsent(from: string, to: string): Promise<boolean> {
   const chromeState = await getChromePairState(from, to);
   if (chromeState === 'ready') return false;
   if (chromeState === 'needs-gesture') return true;
-  if (!isLocalModelSupported()) return false;
-  // Only ask when something is actually missing: both sides of the pair have to
-  // be on the device before a translation can run without a download.
-  const pair = [from, to].filter(isTranslatableLanguage);
-  const ready = await Promise.all(pair.map(isLanguageDownloaded));
-  return ready.some((isReady) => !isReady);
+  return isLocalModelSupported() && !(await isLocalModelDownloaded());
 }
 
 /** Whether either backend can translate this pair at all. */
@@ -51,8 +46,8 @@ export async function canTranslate(from: string, to: string): Promise<boolean> {
 /**
  * Begins any download the pair needs, called from the click that asked for the
  * translation so the browser accepts it. Returns once the pack is in hand, or
- * immediately when the fallback will be used instead, which reports its own
- * progress as it goes.
+ * immediately when the fallback model will be used instead, which reports its
+ * own progress as it goes.
  */
 export async function prepareTranslator(
   from: string,
@@ -78,7 +73,7 @@ export interface TranslateLyricsOptions {
 
 /**
  * Translates lyrics with the best available backend, falling back to the local
- * models when Chrome's API is chosen but then fails.
+ * model when Chrome's API is chosen but then fails.
  */
 export async function translateLyrics(
   text: string,

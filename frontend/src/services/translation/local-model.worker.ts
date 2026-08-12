@@ -1,18 +1,21 @@
 /// <reference lib="webworker" />
-import type { TranslationStep } from './local-model-config';
+import { LOCAL_MODEL_ID, LOCAL_MODEL_SIZE_MB } from './local-model-config';
 
 /**
  * Runs the fallback translator away from the main thread.
  *
- * The models run through WebAssembly, which holds on to the thread it is given
+ * The model runs through WebAssembly, which holds on to the thread it is given
  * for as long as it is working. On the main thread that freezes the page for the
  * whole of a song, so all of it happens here instead and only messages cross
  * back.
  */
 
-type TranslationPipeline = (text: string) => Promise<Array<{ translation_text: string }>>;
+type TranslationPipeline = (
+  text: string,
+  options: { src_lang: string; tgt_lang: string }
+) => Promise<Array<{ translation_text: string }>>;
 
-const pipelines = new Map<string, Promise<TranslationPipeline>>();
+let pipelinePromise: Promise<TranslationPipeline> | null = null;
 
 interface FileProgressEvent {
   status?: string;
@@ -22,10 +25,10 @@ interface FileProgressEvent {
 }
 
 /**
- * Sums bytes across every file of every model being fetched, so one download
- * reads as one figure rather than each file reporting its own.
+ * Sums bytes across every file of the model, so one download reads as one figure
+ * rather than each file reporting its own and the reading lurching about.
  */
-function createDownloadReporter(report: (ratio: number) => void, expectedBytes: number) {
+function createDownloadReporter(report: (ratio: number) => void) {
   const files = new Map<string, { loaded: number; total: number }>();
   let highest = 0;
 
@@ -44,9 +47,10 @@ function createDownloadReporter(report: (ratio: number) => void, expectedBytes: 
       loaded += file.loaded;
       announced += file.total;
     }
-    // Files are announced as the download goes, so the expected size keeps the
-    // first few small ones from reading as the whole thing.
-    const total = Math.max(announced, expectedBytes);
+    // Files are announced as the download goes, so the known size keeps the first
+    // few small ones from reading as the whole thing being finished.
+    const total = Math.max(announced, LOCAL_MODEL_SIZE_MB * 1024 * 1024);
+    // Held short of the end: finishing is announced by the job resolving.
     const ratio = Math.min(loaded / total, 0.99);
     if (ratio > highest) {
       highest = ratio;
@@ -55,27 +59,24 @@ function createDownloadReporter(report: (ratio: number) => void, expectedBytes: 
   };
 }
 
-async function loadPipeline(
-  model: string,
+async function getPipeline(
   onProgress?: (event: FileProgressEvent) => void
 ): Promise<TranslationPipeline> {
-  let pending = pipelines.get(model);
-  if (!pending) {
-    pending = (async () => {
+  if (!pipelinePromise) {
+    pipelinePromise = (async () => {
       const { pipeline } = await import('@huggingface/transformers');
-      return (await pipeline('translation', model, {
-        // The runtime cannot build a session from the other quantisations these
-        // models publish.
+      return (await pipeline('translation', LOCAL_MODEL_ID, {
+        // The runtime cannot build a session from the other quantisations this
+        // model publishes.
         dtype: 'q8',
         progress_callback: onProgress,
       })) as unknown as TranslationPipeline;
     })().catch((error) => {
-      pipelines.delete(model);
+      pipelinePromise = null;
       throw error;
     });
-    pipelines.set(model, pending);
   }
-  return pending;
+  return pipelinePromise;
 }
 
 function post(message: unknown) {
@@ -85,64 +86,52 @@ function post(message: unknown) {
 interface DownloadRequest {
   type: 'download';
   id: number;
-  models: string[];
-  expectedBytes: number;
 }
 
 interface TranslateRequest {
   type: 'translate';
   id: number;
   lines: string[];
-  steps: TranslationStep[];
-  expectedBytes: number;
+  from: string;
+  to: string;
 }
 
 interface ForgetRequest {
   type: 'forget';
   id: number;
-  models: string[];
 }
 
 type Request = DownloadRequest | TranslateRequest | ForgetRequest;
 
 self.onmessage = async (event: MessageEvent<Request>) => {
   const request = event.data;
-  try {
-    if (request.type === 'download') {
-      const report = createDownloadReporter(
-        (ratio) => post({ type: 'progress', id: request.id, phase: 'download', ratio }),
-        request.expectedBytes
-      );
-      for (const model of request.models) await loadPipeline(model, report);
-      post({ type: 'done', id: request.id });
-      return;
-    }
+  const report = createDownloadReporter((ratio) =>
+    post({ type: 'progress', id: request.id, phase: 'download', ratio })
+  );
 
+  try {
     if (request.type === 'forget') {
       // Dropped so the next use rebuilds from whatever is on the device now.
-      for (const model of request.models) pipelines.delete(model);
+      pipelinePromise = null;
       post({ type: 'done', id: request.id });
       return;
     }
 
-    const report = createDownloadReporter(
-      (ratio) => post({ type: 'progress', id: request.id, phase: 'download', ratio }),
-      request.expectedBytes
-    );
-    const loaded: TranslationPipeline[] = [];
-    for (const step of request.steps) loaded.push(await loadPipeline(step.model, report));
+    if (request.type === 'download') {
+      await getPipeline(report);
+      post({ type: 'done', id: request.id });
+      return;
+    }
 
-    // Every line goes through each step in turn, and progress is counted in
-    // lines so the reader sees the translating itself move, not just the
-    // download that came before it.
+    const translate = await getPipeline(report);
+
+    // Every line goes through on its own, and progress is counted in lines so
+    // the reader sees the translating itself move, not just the download that
+    // came before it.
     const translated: string[] = [];
     for (const [index, line] of request.lines.entries()) {
-      let text = line;
-      for (const pipe of loaded) {
-        const [result] = await pipe(text);
-        text = result?.translation_text ?? text;
-      }
-      translated.push(text);
+      const [result] = await translate(line, { src_lang: request.from, tgt_lang: request.to });
+      translated.push(result?.translation_text ?? line);
       post({
         type: 'progress',
         id: request.id,

@@ -16,7 +16,7 @@ const localDownloaded = vi.hoisted(() => vi.fn(async () => false));
 
 vi.mock('../local-model-translator', () => ({
   createLocalModelTranslator: () => ({ id: 'local-model', translate: localTranslate }),
-  isLanguageDownloaded: localDownloaded,
+  isLocalModelDownloaded: localDownloaded,
   isLocalModelSupported: localSupported,
 }));
 
