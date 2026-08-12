@@ -20,9 +20,10 @@ vi.mock('react-i18next', () => ({
 function renderToolbar(overrides: {
   translationStatus: TranslationStatus;
   translationProgress?: number;
+  translationPhase?: 'download' | 'translate' | null;
   hasTranslation?: boolean;
   onToggleTranslation?: () => void;
-  onAcceptTranslationDownload?: () => void;
+  onRequestTranslationSetup?: () => void;
   onRetryTranslation?: () => void;
 }) {
   return render(
@@ -66,6 +67,16 @@ describe('the translation toggle while a translation is not ready', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
+  it('tells translating apart from the download it followed', () => {
+    renderToolbar({
+      translationStatus: 'translating',
+      translationProgress: 0.3,
+      translationPhase: 'translate',
+    });
+
+    expect(screen.getByText('lyrics.translatingProgress:30')).toBeInTheDocument();
+  });
+
   it('leaves out the bar until the download reports something', () => {
     renderToolbar({ translationStatus: 'translating', translationProgress: 0 });
 
@@ -73,13 +84,13 @@ describe('the translation toggle while a translation is not ready', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
-  it('says the translation is on its way when pressed too early', async () => {
+  it('adds nothing to what the label already says when pressed too early', async () => {
     const onToggleTranslation = vi.fn();
     renderToolbar({ translationStatus: 'translating', onToggleTranslation });
 
     await userEvent.click(screen.getByRole('button', { name: /lyrics\./ }));
 
-    expect(toastInfo).toHaveBeenCalledWith('lyrics.translationPreparing');
+    expect(toastInfo).not.toHaveBeenCalled();
     expect(onToggleTranslation).not.toHaveBeenCalled();
   });
 
@@ -100,13 +111,27 @@ describe('the translation toggle while a translation is not ready', () => {
     expect(onRetryTranslation).toHaveBeenCalledOnce();
   });
 
-  it('starts the download when the reader agrees to it', async () => {
-    const onAcceptTranslationDownload = vi.fn();
-    renderToolbar({ translationStatus: 'needs-consent', onAcceptTranslationDownload });
+  it('asks for the download rather than pretending to translate', () => {
+    renderToolbar({ translationStatus: 'needs-download' });
+
+    expect(screen.getByText('lyrics.translationNeedsDownload')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
+  it('sends the reader to the language manager to get it', async () => {
+    const onRequestTranslationSetup = vi.fn();
+    const onToggleTranslation = vi.fn();
+    renderToolbar({
+      translationStatus: 'needs-download',
+      onRequestTranslationSetup,
+      onToggleTranslation,
+    });
 
     await userEvent.click(screen.getByRole('button', { name: /lyrics\./ }));
 
-    expect(onAcceptTranslationDownload).toHaveBeenCalledOnce();
+    expect(onRequestTranslationSetup).toHaveBeenCalledOnce();
+    expect(onToggleTranslation).not.toHaveBeenCalled();
+    expect(toastInfo).not.toHaveBeenCalled();
   });
 
   it('stays out of the way when there is nothing to translate', () => {

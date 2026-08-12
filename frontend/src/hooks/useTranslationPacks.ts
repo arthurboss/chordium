@@ -4,6 +4,7 @@ import {
   isChromeTranslatorSupported,
   warmChromePair,
 } from '@/services/translation/chrome-translator';
+import { announceTranslationPacksChanged } from '@/services/translation/language-manager';
 import {
   cancelLocalModelDownload,
   deleteLocalModel,
@@ -107,12 +108,17 @@ export function useTranslationPacks() {
   /**
    * Must be called straight from a click: the browser refuses to fetch a
    * language pack outside a user gesture, and awaiting anything first spends it.
+   *
+   * A song waiting on a translation passes the language it is in, since the
+   * browser holds each direction separately and the stand-in route above would
+   * leave that song no better off.
    */
-  const download = useCallback((language: TranslatableLanguage) => {
+  const download = useCallback((language: TranslatableLanguage, source?: string) => {
+    const from = source ?? representativeSourceFor(language);
     setProgress((current) => ({ ...current, [language]: 0 }));
     setStatuses((current) => ({ ...current, [language]: 'downloading' }));
 
-    const warming = warmChromePair(representativeSourceFor(language), language, (ratio) =>
+    const warming = warmChromePair(from, language, (ratio) =>
       setProgress((current) => ({ ...current, [language]: ratio }))
     );
     if (!warming) {
@@ -120,11 +126,12 @@ export function useTranslationPacks() {
       return;
     }
     void warming.then(async () => {
-      const state = await getChromePairState(representativeSourceFor(language), language);
+      const state = await getChromePairState(from, language);
       setStatuses((current) => ({
         ...current,
         [language]: state === 'ready' ? 'installed' : 'downloadable',
       }));
+      if (state === 'ready') announceTranslationPacksChanged();
     });
   }, []);
 
@@ -135,6 +142,7 @@ export function useTranslationPacks() {
       .then((outcome) => {
         setModelStatus(outcome === 'completed' ? 'present' : 'absent');
         if (outcome === 'cancelled') setModelProgress(0);
+        else announceTranslationPacksChanged();
       })
       .catch((error) => {
         console.error('Failed to download the translation model:', error);
@@ -157,6 +165,7 @@ export function useTranslationPacks() {
   const removeModel = useCallback(async () => {
     await deleteLocalModel();
     await refresh();
+    announceTranslationPacksChanged();
   }, [refresh]);
 
   return {

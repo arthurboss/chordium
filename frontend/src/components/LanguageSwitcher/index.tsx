@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Download, Globe, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { useTranslationPacks } from "@/hooks/useTranslationPacks";
+import { onLanguageManagerRequested } from "@/services/translation/language-manager";
 import type { TranslatableLanguage } from "@/services/translation/types";
 import LanguageList, { FLAGS } from "./LanguageList";
-
-/** Asked at most once per visit, so a declined offer is not pushed again. */
-const PROMPT_FLAG = "chordium-language-pack-prompted";
 
 /**
  * Picks the language the app is shown in, and manages whatever the device needs
@@ -45,28 +44,35 @@ const LanguageSwitcher: React.FC = () => {
   } = useTranslationPacks();
   const [open, setOpen] = useState(false);
   const [promptedFor, setPromptedFor] = useState<TranslatableLanguage | null>(null);
+  // The language a waiting song is sung in, kept so its own pair is the one
+  // fetched rather than the stand-in route used when nobody asked.
+  const [pendingSource, setPendingSource] = useState<string | null>(null);
   const [confirmingModelRemoval, setConfirmingModelRemoval] = useState(false);
-  const hasOfferedRef = useRef(false);
 
   const current = i18n.resolvedLanguage;
   const CurrentFlag = FLAGS[current as TranslatableLanguage];
 
-  // Someone reading in a language whose lyrics cannot be translated yet would
-  // otherwise only find out inside a song, so the offer is made up front.
-  useEffect(() => {
-    if (hasOfferedRef.current || sessionStorage.getItem(PROMPT_FLAG)) return;
-    const language = current as TranslatableLanguage;
-    if (statuses[language] !== "downloadable") return;
-    hasOfferedRef.current = true;
-    sessionStorage.setItem(PROMPT_FLAG, "1");
-    setPromptedFor(language);
-    setOpen(true);
-  }, [current, statuses]);
+  // The panel opens when it is asked for, and not otherwise: a song waiting on a
+  // download sends the reader here, which is the point at which the download
+  // means anything to them.
+  useEffect(
+    () =>
+      onLanguageManagerRequested(({ source }) => {
+        setPendingSource(source ?? null);
+        setPromptedFor((i18n.resolvedLanguage as TranslatableLanguage) ?? null);
+        setOpen(true);
+        void refresh();
+      }),
+    [i18n, refresh]
+  );
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (next) void refresh();
-    else setPromptedFor(null);
+    else {
+      setPromptedFor(null);
+      setPendingSource(null);
+    }
   };
 
   // Picking a language is the whole point of the panel, so it closes once one is
@@ -78,6 +84,12 @@ const LanguageSwitcher: React.FC = () => {
     setOpen(false);
   };
 
+  // Only the language a song is actually waiting on is fetched by its own route;
+  // any other row is a plain choice with no particular song behind it.
+  const handleDownload = (language: TranslatableLanguage) => {
+    download(language, language === promptedFor ? pendingSource ?? undefined : undefined);
+  };
+
   const list = (
     <LanguageList
       selected={current}
@@ -85,7 +97,7 @@ const LanguageSwitcher: React.FC = () => {
       progress={progress}
       promptedFor={promptedFor}
       onSelect={selectLanguage}
-      onDownload={download}
+      onDownload={handleDownload}
       perLanguageDownloads={backend === "chrome"}
     />
   );
@@ -108,7 +120,11 @@ const LanguageSwitcher: React.FC = () => {
       <Button
         variant="outline"
         size="sm"
-        className="relative mt-2 w-full overflow-hidden"
+        className={cn(
+          "relative mt-2 w-full overflow-hidden",
+          // Pointed out when the reader was sent here by something waiting on it.
+          promptedFor && modelStatus === "absent" && "ring-1 ring-primary"
+        )}
         onClick={() => {
           if (modelStatus === "downloading") cancelModelDownload();
           else if (modelStatus === "present") setConfirmingModelRemoval(true);

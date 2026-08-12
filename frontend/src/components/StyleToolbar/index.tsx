@@ -28,7 +28,8 @@ interface StyleToolbarProps {
   translationProgress?: number;
   /** Whether that figure refers to a download or to the translating itself. */
   translationPhase?: TranslationPhase | null;
-  onAcceptTranslationDownload?: () => void;
+  /** Sends the reader to where the missing download is offered. */
+  onRequestTranslationSetup?: () => void;
   onRetryTranslation?: () => void;
 }
 
@@ -45,7 +46,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   translationStatus = 'idle',
   translationProgress = 0,
   translationPhase = null,
-  onAcceptTranslationDownload,
+  onRequestTranslationSetup,
   onRetryTranslation,
 }) => {
   const { t } = useTranslation();
@@ -56,7 +57,9 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   const isWorking = translationStatus === 'translating' && translationProgress > 0;
   const percent = Math.round(translationProgress * 100);
   const translationLabel = (() => {
-    if (translationStatus === 'needs-consent') return t("lyrics.enableTranslation");
+    // A missing download is not work in progress: saying so outright is honest
+    // about nothing having started, and the press is what starts it.
+    if (translationStatus === 'needs-download') return t("lyrics.translationNeedsDownload");
     // Downloading and translating are reported apart, so neither has to stand in
     // for the other and sit at a figure that never moves.
     if (isWorking && translationPhase === 'translate') {
@@ -73,12 +76,15 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   // rather than doing nothing, since the words cannot be shown yet.
   const handleTranslationClick = () => {
     switch (translationStatus) {
-      case 'needs-consent':
-        onAcceptTranslationDownload?.();
+      // Everything a translation needs is fetched in one place, so the reader is
+      // taken there rather than being given a second, half-sized version of it.
+      case 'needs-download':
+        onRequestTranslationSetup?.();
         break;
+      // Already under way, and the label is saying so: another word about it
+      // here would only repeat what is on the button.
       case 'idle':
       case 'translating':
-        toast.info(t("lyrics.translationPreparing"));
         break;
       case 'unavailable':
         toast.error(t("lyrics.translationUnavailable"));

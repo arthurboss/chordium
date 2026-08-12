@@ -220,12 +220,12 @@
   "lyrics": {
     "lyrics": "Liedtext",
     "translation": "Übersetzung",
-    "enableTranslation": "Liedtext übersetzen",
     "translating": "Übersetze…",
+    "translatingProgress": "Übersetze… {{percent}}%",
     "downloadingModel": "Übersetzung wird vorbereitet… {{percent}}%",
     "translationFailed": "Übersetzung nicht verfügbar",
     "translationUnavailable": "Übersetzung in diesem Browser nicht verfügbar",
-    "translationPreparing": "Übersetzung wird vorbereitet — sie erscheint hier, sobald sie fertig ist.",
-    "translationRetry": "Übersetzung wird erneut versucht…"
+    "translationRetry": "Übersetzung wird erneut versucht…",
+    "translationNeedsDownload": "Zum Übersetzen herunterladen"
   }
 }

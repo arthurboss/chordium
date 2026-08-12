@@ -220,12 +220,12 @@
   "lyrics": {
     "lyrics": "Letras",
     "translation": "Traducción",
-    "enableTranslation": "Traducir la letra",
     "translating": "Traduciendo…",
+    "translatingProgress": "Traduciendo… {{percent}}%",
     "downloadingModel": "Preparando la traducción… {{percent}}%",
     "translationFailed": "Traducción no disponible",
     "translationUnavailable": "Traducción no disponible en este navegador",
-    "translationPreparing": "Preparando la traducción: aparecerá aquí cuando esté lista.",
-    "translationRetry": "Reintentando la traducción…"
+    "translationRetry": "Reintentando la traducción…",
+    "translationNeedsDownload": "Descargar para traducir"
   }
 }

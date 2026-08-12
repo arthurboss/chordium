@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { getTranslation, storeTranslation, deleteLyrics } from '@/storage/services/lyrics-storage';
 import {
   canTranslate,
-  prepareTranslator,
   requiresDownloadConsent,
   translateLyrics,
 } from '@/services/translation/get-translator';
 import { detectLyricsLanguage } from '@/services/translation/detect-language';
+import {
+  onTranslationPacksChanged,
+  openLanguageManager,
+} from '@/services/translation/language-manager';
 import type { TranslationPhase } from '@/services/translation/get-translator';
 import { isTranslatableLanguage } from '@/services/translation/types';
 
@@ -25,7 +28,8 @@ export type TranslationStatus =
   | 'unnecessary'
   /** Translating is possible but no backend on this device can do it. */
   | 'unavailable'
-  | 'needs-consent'
+  /** The device has not got what this pair needs yet, which is a download away. */
+  | 'needs-download'
   | 'translating'
   | 'ready'
   | 'failed';
@@ -35,10 +39,9 @@ export type TranslationStatus =
  *
  * The words are read in whatever language they are sung in rather than the
  * source site's, so a song is only offered for translation when it is actually
- * in a different language from the app. Browsers without a built-in translator
- * need a model downloaded first, which is only done once the reader agrees, and
- * each language is cached separately so switching back and forth does not
- * repeat the work.
+ * in a different language from the app. Anything the device is missing is
+ * fetched from the language manager rather than here, and each language is
+ * cached separately so switching back and forth does not repeat the work.
  */
 export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   const { i18n } = useTranslation();
@@ -51,8 +54,8 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   // and a single figure covering both would sit still through one of them.
   const [phase, setPhase] = useState<TranslationPhase | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
-  const [consented, setConsented] = useState(false);
-  // Bumped to run the whole thing again after a failure.
+  // Bumped to run the whole thing again: after a failure, or once a download has
+  // given the device something it did not have before.
   const [attempt, setAttempt] = useState(0);
 
   // Re-running the effect must abandon any translation still in flight, whose
@@ -64,6 +67,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   // Unreadable lyrics are left alone rather than translated from a guess, and a
   // song already in the app's language needs nothing doing.
   const isTranslatable = !!source && !!target && source !== target && !!lyrics.trim();
+
+  // Whatever the reader fetched in the language manager may be exactly what this
+  // song was missing, so it picks up from there on its own.
+  useEffect(() => onTranslationPacksChanged(() => setAttempt((n) => n + 1)), []);
 
   useEffect(() => {
     const ref = runIdRef;
@@ -98,10 +105,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
       }
       if (isStale()) return;
 
-      // Downloading a model is the reader's call, so stop and ask unless they
-      // already agreed in this session.
-      if (!consented && (await requiresDownloadConsent(source, target))) {
-        if (!isStale()) setStatus('needs-consent');
+      // Downloading is the reader's call and is made in the language manager, so
+      // stop here and let the toggle send them there.
+      if (await requiresDownloadConsent(source, target)) {
+        if (!isStale()) setStatus('needs-download');
         return;
       }
       if (isStale()) return;
@@ -128,7 +135,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     })();
 
     return () => { ref.current++; };
-  }, [path, source, target, lyrics, isTranslatable, consented, attempt]);
+  }, [path, source, target, lyrics, isTranslatable, attempt]);
 
   const clearLyrics = useCallback(async () => {
     setTranslated(null);
@@ -146,19 +153,12 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     /** Whether the figure above refers to a download or to translating. */
     translationPhase: phase,
     /**
-     * Called from the reader's click. The download starts here rather than in the
-     * effect that follows, because the browser only permits it while the click
-     * is still being handled.
+     * Opens the language manager, where the missing download lives. The song
+     * carries its own language along so the pair it needs is the one fetched.
      */
-    acceptDownload: useCallback(() => {
-      if (!source || !target) return;
-      setStatus('translating');
-      setPhase('download');
-      const runId = runIdRef.current;
-      void prepareTranslator(source, target, (ratio) => {
-        if (runIdRef.current === runId) setDownloadProgress(ratio);
-      }).finally(() => setConsented(true));
-    }, [source, target]),
+    requestSetup: useCallback(() => {
+      openLanguageManager({ source: source ?? undefined });
+    }, [source]),
     /** Runs the translation again after it failed. */
     retry: useCallback(() => setAttempt((n) => n + 1), []),
     clear: clearLyrics,
