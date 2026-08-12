@@ -76,7 +76,24 @@
     "switcher": "Language",
     "en": "English",
     "ptBR": "Português (BR)",
-    "es": "Español"
+    "es": "Español",
+    "de": "Deutsch",
+    "appLanguage": "App language",
+    "packHint": "Download a language to have song lyrics translated into it on your device.",
+    "packDownloadFor": "Download {{language}} for lyrics translation",
+    "packDownloading": "Downloading",
+    "packUnavailable": "Unavailable",
+    "packPrompt": "Download {{language}} to translate lyrics into it.",
+    "cancel": "Cancel",
+    "modelHeading": "Offline translation for songs",
+    "modelHint": "Download once ({{size}} MB) to translate song lyrics into any language on your device.",
+    "modelDownload": "Download language pack",
+    "modelCancel": "Cancel download ({{percent}}%)",
+    "modelHintDownloaded": "Delete to free up {{size}} MB. Song lyrics will stop being translated until you download it again, but translations you have already saved are kept.",
+    "modelDelete": "Delete language pack",
+    "modelDeleteTitle": "Delete the translation model?",
+    "modelDeleteBody": "The {{size}} MB model is removed from this device, and lyrics stop being translated until it is downloaded again. Translations already saved are kept.",
+    "modelDeleteConfirm": "Delete"
   },
   "pageHeader": {
     "backAriaLabel": "back-button",
@@ -202,6 +219,13 @@
   },
   "lyrics": {
     "lyrics": "Lyrics",
-    "translation": "Translation"
+    "translation": "Translation",
+    "translating": "Translating…",
+    "translatingProgress": "Translating… {{percent}}%",
+    "downloadingModel": "Preparing translation… {{percent}}%",
+    "translationFailed": "Translation unavailable",
+    "translationUnavailable": "Translation unavailable in this browser",
+    "translationRetry": "Trying the translation again…",
+    "translationNeedsDownload": "Download to translate"
   }
 }

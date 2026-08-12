@@ -1,0 +1,231 @@
+{
+  "tabs": {
+    "myChordSheets": "Liederbuch",
+    "search": "Suche",
+    "upload": "Hochladen"
+  },
+  "header": {
+    "homeAriaLabel": "Chordium Startseite"
+  },
+  "devBanner": {
+    "note": "Hinweis:",
+    "message": "Diese App befindet sich in Entwicklung. Einige Funktionen arbeiten möglicherweise nicht wie erwartet."
+  },
+  "searchBar": {
+    "artistPlaceholder": "Nach Künstler suchen",
+    "songPlaceholder": "Nach Lied suchen",
+    "back": "Zurück",
+    "search": "Suchen",
+    "clearAriaLabel": "Suche löschen",
+    "andOr": "und | oder"
+  },
+  "searchResults": {
+    "noResults": "Keine Ergebnisse gefunden.",
+    "artists": "Künstler",
+    "songs": "Lieder",
+    "results": "Ergebnisse"
+  },
+  "dropZone": {
+    "title": "Akkordblatt hochladen",
+    "subtitle": "Textdatei hierher ziehen oder klicken zum Auswählen",
+    "browse": "Dateien durchsuchen"
+  },
+  "songMetadataForm": {
+    "songTitle": "Liedtitel",
+    "songTitlePlaceholder": "Liedtitel eingeben",
+    "artist": "Künstler",
+    "artistPlaceholder": "Künstlernamen eingeben",
+    "songKey": "Tonart",
+    "songKeyPlaceholder": "z. B. cis-Moll",
+    "guitarTuning": "Gitarrenstimmung",
+    "guitarTuningPlaceholder": "z. B. Standardstimmung",
+    "guitarCapo": "Kapodaster",
+    "continue": "Weiter",
+    "continueAriaLabel": "Weiter zum Bearbeiten"
+  },
+  "chordMetadata": {
+    "artist": "Künstler:",
+    "songKey": "Tonart:",
+    "guitarTuning": "Stimmung:",
+    "guitarCapo": "Kapodaster:",
+    "unknown": "Unbekannt",
+    "none": "Keiner",
+    "standard": "Standard"
+  },
+  "textStyle": {
+    "textPreferences": "Stil",
+    "viewMode": "Ansicht",
+    "fontStyle": "Schriftart",
+    "fontSize": "Schriftgröße",
+    "fontSpacing": "Zeichenabstand",
+    "serif": "Serif",
+    "sansSerif": "Sans",
+    "normal": "Normal",
+    "chords": "Akkorde",
+    "lyrics": "Liedtext",
+    "showGuitarTabs": "Gitarrentabs anzeigen",
+    "hideGuitarTabs": "Gitarrentabs verbergen",
+    "textPreferencesAriaLabel": "Texteinstellungen"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "language": {
+    "switcher": "Sprache",
+    "en": "English",
+    "ptBR": "Português (BR)",
+    "es": "Español",
+    "de": "Deutsch",
+    "appLanguage": "App-Sprache",
+    "packHint": "Lade eine Sprache herunter, damit Liedtexte auf deinem Gerät in sie übersetzt werden.",
+    "packDownloadFor": "{{language}} für die Liedtext-Übersetzung herunterladen",
+    "packDownloading": "Wird geladen",
+    "packUnavailable": "Nicht verfügbar",
+    "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen.",
+    "cancel": "Abbrechen",
+    "modelHeading": "Offline-Übersetzung für Lieder",
+    "modelHint": "Lade einmal ({{size}} MB) herunter, um Liedtexte auf deinem Gerät in jede Sprache zu übersetzen.",
+    "modelDownload": "Sprachpaket herunterladen",
+    "modelCancel": "Download abbrechen ({{percent}}%)",
+    "modelHintDownloaded": "Löschen gibt {{size}} MB frei. Liedtexte werden dann nicht mehr übersetzt, bis du es erneut lädst; bereits gespeicherte Übersetzungen bleiben erhalten.",
+    "modelDelete": "Sprachpaket löschen",
+    "modelDeleteTitle": "Übersetzungsmodell löschen?",
+    "modelDeleteBody": "Das Modell mit {{size}} MB wird von diesem Gerät entfernt, und Liedtexte werden nicht mehr übersetzt, bis es erneut geladen wird. Bereits gespeicherte Übersetzungen bleiben erhalten.",
+    "modelDeleteConfirm": "Löschen"
+  },
+  "pageHeader": {
+    "backAriaLabel": "zurück-schaltfläche",
+    "saveAriaLabel": "in meinen Akkordblättern speichern",
+    "deleteAriaLabel": "löschen-schaltfläche"
+  },
+  "navigationButtons": {
+    "backAriaLabel": "Zurück"
+  },
+  "saveButton": {
+    "saveAriaLabel": "In meinen Akkordblättern speichern"
+  },
+  "chordSheetList": {
+    "empty": "Du hast noch keine Akkordblätter gespeichert.",
+    "uploadAriaLabel": "Akkordblatt hochladen",
+    "uploadButton": "Akkordblatt hochladen"
+  },
+  "offlineIndicator": {
+    "ariaLabel": "Offline-Status anzeigen",
+    "title": "Du bist offline - für Details klicken",
+    "srText": "Offline"
+  },
+  "jamSession": {
+    "joinSession": "Jam-Session beitreten",
+    "shareSession": "Jam-Session teilen",
+    "connected": "Verbunden",
+    "sessionActive": "Session aktiv",
+    "connectedToSession": "Mit Session verbunden",
+    "sharePeers": "Diese Session mit {{count}} Teilnehmer teilen",
+    "sharePeers_other": "Diese Session mit {{count}} Teilnehmern teilen",
+    "connectedToHost": "Mit der Session des Hosts verbunden",
+    "connectedPeers": "Verbundene Teilnehmer",
+    "noPeers": "Noch keine Teilnehmer verbunden",
+    "endSession": "Session beenden",
+    "connect": "Verbinden",
+    "connecting": "Verbinde...",
+    "back": "Zurück",
+    "scanQrCode": "QR-Code scannen",
+    "copy": "Kopieren",
+    "copyConnectionString": "Verbindungscode kopieren",
+    "pasteConnectionString": "Verbindungscode einfügen",
+    "orPasteConnectionString": "Oder Verbindungscode hier einfügen",
+    "scanToJoin": "Diesen QR-Code scannen, um der Session beizutreten",
+    "or": "oder",
+    "jamSession": "Jam-Session",
+    "pointAtQrCode": "Auf einen Chordium QR-Code richten",
+    "orPasteLink": "oder Link einfügen",
+    "generatingQr": "QR-Code wird erstellt…",
+    "scanToLoad": "Scannen, um {{title}} auf einem anderen Gerät zu laden. Funktioniert offline — kein Internet nötig.",
+    "shareableLink": "Teilbarer Jam-Link",
+    "linkCopied": "Link kopiert",
+    "pressToCopy": "Cmd+C / Strg+C drücken, um zu kopieren",
+    "qrFailed": "QR-Code konnte nicht erstellt werden",
+    "invalidCode": "Ungültiger Code — füge einen Chordium Jam-Link oder die Rohdaten ein",
+    "jamLinkPlaceholder": "Chordium Jam-Link oder Rohdaten",
+    "go": "Los",
+    "shareOrJoinDescription": "Teile dieses Lied mit einem Gerät in der Nähe oder tritt einer Session von einem anderen Gerät bei.",
+    "joinDescription": "Einer Jam-Session von einem anderen Gerät beitreten.",
+    "scanToLoadSimplified": "Scannen, um {{title}} auf einem anderen Gerät zu laden. Die vollständige Version mit Tabs ist zu groß für einen Code, daher wird die vereinfachte geteilt. Funktioniert offline.",
+    "scanToOpenOnline": "Scannen, um {{title}} auf einem anderen Gerät zu öffnen. Dieses Lied ist zu groß für einen Code, daher öffnet der Link es online statt offline zu laden."
+  },
+  "smallScreenWarning": {
+    "title": "Bildschirm zu klein",
+    "message": "Bitte nutze ein Gerät mit größerem Bildschirm für die beste Erfahrung."
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "message": "Die gesuchte Seite existiert nicht.",
+    "hint": "Prüfe die URL auf Tippfehler oder gehe zurück zur Startseite, um deine Musiksuche zu beginnen.",
+    "returnHome": "Zurück zur Startseite"
+  },
+  "footer": {
+    "source": "Quelle"
+  },
+  "stickyControlsBar": {
+    "capoFret": "Kapodaster-Bund",
+    "link": "Verknüpfen",
+    "transpose": "Transponieren",
+    "style": "Stil",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "speed": "Geschwindigkeit",
+    "capoPosition": "Kapodaster-Position",
+    "resetCapo": "Auf ursprüngliche Kapodaster-Position zurücksetzen",
+    "transposeSongKey": "Tonart transponieren",
+    "resetTranspose": "Auf ursprüngliche Tonart zurücksetzen",
+    "linkCapoTranspose": "Kapodaster & Transponieren verknüpfen",
+    "unlinkCapoTranspose": "Kapodaster & Transponieren trennen",
+    "songControls": "Liedsteuerung"
+  },
+  "guitarCapoField": {
+    "noCapo": "Kein Kapodaster",
+    "fretDisplay": "{{ordinal}} Bund"
+  },
+  "sectionTitles": {
+    "intro": "Intro",
+    "verse": "Strophe",
+    "chorus": "Refrain",
+    "preChorus": "Pre-Refrain",
+    "bridge": "Bridge",
+    "outro": "Outro",
+    "solo": "Solo",
+    "interlude": "Zwischenspiel"
+  },
+  "sort": {
+    "default": "Relevanz",
+    "az": "A → Z",
+    "za": "Z → A",
+    "recent": "Neueste",
+    "mostPlayed": "Meist gespielt"
+  },
+  "arrangementToggle": {
+    "simplified": "Vereinfacht",
+    "simplifiedTitle": "Vereinfachtes Arrangement (einfachere Akkorde, keine Tabs)",
+    "full": "Vollständig",
+    "fullTitle": "Vollständiges Arrangement (mit Tabs)",
+    "editingIndicator": "Bearbeiten: {{arrangement}}",
+    "editingIndicatorTitle": "Das Arrangement, das du gerade bearbeitest"
+  },
+  "chordSheet": {
+    "editChordSheet": "Akkordblatt bearbeiten",
+    "cancelEditing": "Bearbeitung abbrechen"
+  },
+  "lyrics": {
+    "lyrics": "Liedtext",
+    "translation": "Übersetzung",
+    "translating": "Übersetze…",
+    "translatingProgress": "Übersetze… {{percent}}%",
+    "downloadingModel": "Übersetzung wird vorbereitet… {{percent}}%",
+    "translationFailed": "Übersetzung nicht verfügbar",
+    "translationUnavailable": "Übersetzung in diesem Browser nicht verfügbar",
+    "translationRetry": "Übersetzung wird erneut versucht…",
+    "translationNeedsDownload": "Zum Übersetzen herunterladen"
+  }
+}

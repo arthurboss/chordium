@@ -1,0 +1,28 @@
+{
+  "loading": "Wird geladen...",
+  "boundary": {
+    "applicationError": "Anwendungsfehler",
+    "pageError": "Seitenfehler",
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
+    "applicationErrorDesc": "In der Anwendung ist ein unerwarteter Fehler aufgetreten. Sie muss neu geladen werden.",
+    "pageErrorDesc": "Auf dieser Seite ist ein Fehler aufgetreten. Du kannst sie neu laden oder zur Startseite zurückkehren.",
+    "componentErrorDesc": "In dieser Komponente ist ein Fehler aufgetreten. Du kannst es erneut versuchen oder die Seite neu laden.",
+    "errorId": "Fehler-ID:",
+    "error": "Fehler:",
+    "unknownError": "Unbekannter Fehler aufgetreten",
+    "tryAgain": "Erneut versuchen",
+    "reloadPage": "Seite neu laden",
+    "goHome": "Zur Startseite",
+    "reportIssue": "Dieses Problem auf GitHub melden",
+    "devDetails": "Entwicklerdetails (zum Aufklappen klicken)",
+    "errorStack": "Fehler-Stack:",
+    "componentStack": "Komponenten-Stack:",
+    "copyAll": "Alles kopieren",
+    "copied": "Kopiert!"
+  },
+  "chordViewer": {
+    "errorTitle": "Fehler",
+    "chordSheetNotFound": "Akkordblatt nicht gefunden",
+    "failedToLoad": "Akkordblatt konnte nicht geladen werden"
+  }
+}

@@ -8,6 +8,7 @@
 
 import type { ChordSheet, SongMetadata } from '@chordium/types';
 import type { SampleChordSheetRecord } from './data-loader.types';
+import type { LyricsTranslations } from '@/storage/services/lyrics-storage';
 
 /**
  * Load sample chord sheet metadata only (fast, non-blocking)
@@ -99,8 +100,39 @@ export const loadSampleFullContent = async (path: string): Promise<ChordSheet | 
 };
 
 /**
- * Load complete sample chord sheet data (metadata, content, and full arrangements)
- * Lyrics are NOT loaded here; they're fetched lazily in the background when needed
+ * Load the lyric translations shipped with a sample, so the samples read in the
+ * app's language without waiting on a download or a translator.
+ */
+export const loadSampleTranslations = async (
+  path: string
+): Promise<LyricsTranslations | undefined> => {
+  try {
+    switch (path) {
+      case 'oasis/wonderwall':
+        return (await import('../../data/samples/chord-sheets/translations/oasis-wonderwall.json'))
+          .default;
+      case 'the-eagles/hotel-california':
+        return (
+          await import('../../data/samples/chord-sheets/translations/eagles-hotel_california.json')
+        ).default;
+      case 'extreme/more-than-words':
+        return (
+          await import('../../data/samples/chord-sheets/translations/extreme-more_than_words.json')
+        ).default;
+      default:
+        return undefined;
+    }
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.debug(`No sample translations found for ${path} (this is OK)`);
+    }
+    return undefined;
+  }
+};
+
+/**
+ * Load complete sample chord sheet data (metadata, content, full arrangements and
+ * the translations shipped with each sample)
  */
 export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
   try {
@@ -108,15 +140,17 @@ export const loadSampleData = async (): Promise<SampleChordSheetRecord[]> => {
 
     const completeRecords = await Promise.all(
       metadataRecords.map(async (record) => {
-        const [content, fullContent] = await Promise.all([
+        const [content, fullContent, translations] = await Promise.all([
           loadSampleContent(record.path),
           loadSampleFullContent(record.path),
+          loadSampleTranslations(record.path),
         ]);
         return {
           path: record.path,
           metadata: record.metadata,
           content,
           ...(fullContent ? { fullContent } : {}),
+          ...(translations ? { translations } : {}),
         };
       })
     );

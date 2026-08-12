@@ -16,6 +16,7 @@ import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
 import { useChordEditor } from "@/hooks/use-chord-editor";
 import { useLyricsVersion } from "@/hooks/useLyricsVersion";
+import { extractLyricsFromChordSheet } from "@/utils/extract-lyrics";
 import { Pencil, Music, Guitar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveChordSheet } from "@/features/jam-session/useActiveChordSheet";
@@ -99,14 +100,32 @@ const SongViewer = ({
 
   const { setActive: setActiveShareable } = useActiveChordSheet();
 
-  const { displayLyrics, showTranslation, setShowTranslation, hasTranslation } = useLyricsVersion({
+  // The sung words come from the chord sheet itself, which is the version being
+  // followed along to, so no separate lyrics source is fetched.
+  const sourceLyrics = useMemo(
+    () => extractLyricsFromChordSheet(chordSheetToDisplay.rawHtml, chordContentToDisplay),
+    [chordSheetToDisplay.rawHtml, chordContentToDisplay]
+  );
+
+  const {
+    displayLyrics,
+    showTranslation,
+    setShowTranslation,
+    hasTranslation,
+    status: translationStatus,
+    downloadProgress,
+    translationPhase,
+    requestSetup: requestTranslationSetup,
+    retry: retryTranslation,
+  } = useLyricsVersion({
     path: songObj.path,
+    lyrics: sourceLyrics,
   });
 
-  // ChordSheetViewer renders from chordSheet.rawHtml/songChords, so fetched
-  // lyrics have to replace those (rawHtml dropped) to be displayed at all.
-  // When no lyrics were fetched, fall through to the chord sheet and let
-  // lyrics-only view mode strip the chords.
+  // ChordSheetViewer renders from chordSheet.rawHtml/songChords, so the words to
+  // show have to replace those (rawHtml dropped) to be displayed at all. Without
+  // any, fall through to the chord sheet and let lyrics-only view mode strip the
+  // chords.
   const lyricsChordSheet = useMemo(() => {
     if (version !== 'lyrics' || !displayLyrics) return null;
     return { ...chordSheetToDisplay, songChords: displayLyrics, rawHtml: undefined };
@@ -324,6 +343,11 @@ const SongViewer = ({
           hasTranslation={hasTranslation}
           showTranslation={showTranslation}
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
+          translationStatus={translationStatus}
+          translationProgress={downloadProgress}
+          translationPhase={translationPhase}
+          onRequestTranslationSetup={requestTranslationSetup}
+          onRetryTranslation={retryTranslation}
         />
       </Card>
 

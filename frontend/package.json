@@ -21,8 +21,10 @@
     "translate": "node scripts/check-translations.mjs"
   },
   "dependencies": {
+    "@chordium/scraping": "*",
     "@chordium/types": "^1.0.0",
     "@hookform/resolvers": "5.0.1",
+    "@huggingface/transformers": "^3.7.5",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
     "@radix-ui/react-aspect-ratio": "^1.1.4",
@@ -86,8 +88,7 @@
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^13.0.0",
-    "zod": "^3.24.3",
-    "@chordium/scraping": "*"
+    "zod": "^3.24.3"
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "^0.25.4",

@@ -76,7 +76,24 @@
     "switcher": "Idioma",
     "en": "English",
     "ptBR": "Português (BR)",
-    "es": "Español"
+    "es": "Español",
+    "de": "Deutsch",
+    "appLanguage": "Idioma do app",
+    "packHint": "Baixe um idioma para que as letras das músicas sejam traduzidas para ele no seu dispositivo.",
+    "packDownloadFor": "Baixar {{language}} para tradução de letras",
+    "packDownloading": "Baixando",
+    "packUnavailable": "Indisponível",
+    "packPrompt": "Baixe {{language}} para traduzir as letras para esse idioma.",
+    "cancel": "Cancelar",
+    "modelHeading": "Tradução offline de músicas",
+    "modelHint": "Baixe uma vez ({{size}} MB) para traduzir as letras para qualquer idioma no seu dispositivo.",
+    "modelDownload": "Baixar pacote de idiomas",
+    "modelCancel": "Cancelar download ({{percent}}%)",
+    "modelHintDownloaded": "Exclua para liberar {{size}} MB. As letras deixarão de ser traduzidas até você baixar de novo, mas as traduções já salvas são mantidas.",
+    "modelDelete": "Excluir pacote de idiomas",
+    "modelDeleteTitle": "Excluir o modelo de tradução?",
+    "modelDeleteBody": "O modelo de {{size}} MB é removido deste dispositivo, e as letras deixam de ser traduzidas até que ele seja baixado novamente. As traduções já salvas são mantidas.",
+    "modelDeleteConfirm": "Excluir"
   },
   "pageHeader": {
     "backAriaLabel": "botão-voltar",
@@ -202,6 +219,13 @@
   },
   "lyrics": {
     "lyrics": "Letras",
-    "translation": "Tradução"
+    "translation": "Tradução",
+    "translating": "Traduzindo…",
+    "translatingProgress": "Traduzindo… {{percent}}%",
+    "downloadingModel": "Preparando a tradução… {{percent}}%",
+    "translationFailed": "Tradução indisponível",
+    "translationUnavailable": "Tradução indisponível neste navegador",
+    "translationRetry": "Tentando a tradução novamente…",
+    "translationNeedsDownload": "Baixar para traduzir"
   }
 }

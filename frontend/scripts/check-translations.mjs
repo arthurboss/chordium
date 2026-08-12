@@ -145,6 +145,8 @@ const DYNAMIC_KEYS = new Set([
   "common:theme.system",
   "common:language.en",
   "common:language.ptBR",
+  "common:language.es",
+  "common:language.de",
   "common:jamSession.sharePeers_other",
 ]);
 

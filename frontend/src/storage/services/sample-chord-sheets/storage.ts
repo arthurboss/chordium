@@ -4,6 +4,7 @@
 
 import type { SampleChordSheetRecord } from './data-loader.types';
 import type { IChordSheetStorage } from './types';
+import { storeTranslations } from '@/storage/services/lyrics-storage';
 
 /**
  * Store sample chord sheets with saved: true metadata
@@ -17,6 +18,8 @@ export const storeSampleChordSheets = async (
     if (sample.fullContent) {
       await storage.storeFullContent?.(sample.fullContent, sample.path);
     }
-    // Lyrics are fetched lazily in the background when needed, not stored upfront
+    if (sample.translations) {
+      await storeTranslations(sample.path, sample.translations);
+    }
   }
 };
