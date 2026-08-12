@@ -1,227 +1,175 @@
-import { TranslatorUnavailableError, translateLineByLine, type Translator } from './types';
+import {
+  isTranslatableLanguage,
+  TranslatorUnavailableError,
+  type Translator,
+  type TranslatableLanguage,
+} from './types';
+import {
+  downloadSizeMbFor,
+  modelsForLanguage,
+  routeBetween,
+  type TranslationStep,
+} from './local-model-config';
 
 /**
- * Fallback translator for browsers without the Translator API. Runs an NLLB
- * model in the page via WebAssembly, which means a one-off model download the
- * user has to agree to; see requiresDownloadConsent.
+ * Fallback translator for browsers without the Translator API. The work happens
+ * in a worker; this side only sends it lines and reports back what it says.
  */
-export const LOCAL_MODEL_ID = 'Xenova/nllb-200-distilled-600M';
 
-/**
- * Approximate download size, shown to the user before the model is fetched.
- * Measured from the weights actually requested below; the repository's other
- * quantisations are all larger.
- */
-export const LOCAL_MODEL_SIZE_MB = 850;
+/** Which stage a translation is at, so the two can be told apart in the UI. */
+export type TranslationPhase = 'download' | 'translate';
 
-/** NLLB identifies languages by its own script-qualified codes. */
-const NLLB_CODES: Record<string, string> = {
-  en: 'eng_Latn',
-  es: 'spa_Latn',
-  'pt-BR': 'por_Latn',
-  pt: 'por_Latn',
-  de: 'deu_Latn',
-};
-
-function toNllbCode(lang: string): string {
-  const code = NLLB_CODES[lang] ?? NLLB_CODES[lang.split('-')[0]];
-  if (!code) throw new TranslatorUnavailableError(`Unsupported language: ${lang}`);
-  return code;
+export interface LocalProgress {
+  phase: TranslationPhase;
+  ratio: number;
 }
 
-type TranslationPipeline = (
-  text: string,
-  options: { src_lang: string; tgt_lang: string }
-) => Promise<Array<{ translation_text: string }>>;
+type WorkerMessage =
+  | { type: 'progress'; id: number; phase: TranslationPhase; ratio: number }
+  | { type: 'result'; id: number; lines: string[] }
+  | { type: 'done'; id: number }
+  | { type: 'error'; id: number; message: string };
 
-let pipelinePromise: Promise<TranslationPipeline> | null = null;
-
-/** What the library reports as it fetches each of the model's files. */
-interface FileProgressEvent {
-  status?: string;
-  file?: string;
-  loaded?: number;
-  total?: number;
+interface PendingJob {
+  resolve: (lines: string[]) => void;
+  reject: (error: Error) => void;
+  onProgress?: (progress: LocalProgress) => void;
 }
 
-/**
- * Turns the library's per-file reports into one figure for the whole download.
- *
- * Each file reports its own percentage, so passing those straight through makes
- * the reading lurch about as the files interleave. Bytes are summed across every
- * file instead, and the figure is never allowed to fall.
- */
-function aggregateProgress(onProgress?: (ratio: number) => void) {
-  const files = new Map<string, { loaded: number; total: number }>();
-  let highest = 0;
+let worker: Worker | null = null;
+const jobs = new Map<number, PendingJob>();
+let nextJobId = 0;
 
-  return (event: FileProgressEvent) => {
-    if (!onProgress || !event.file) return;
-
-    if (event.status === 'done') {
-      const known = files.get(event.file);
-      if (known) files.set(event.file, { loaded: known.total, total: known.total });
-    } else if (typeof event.total === 'number') {
-      files.set(event.file, { loaded: event.loaded ?? 0, total: event.total });
-    }
-
-    let loaded = 0;
-    let announced = 0;
-    for (const file of files.values()) {
-      loaded += file.loaded;
-      announced += file.total;
-    }
-
-    // Files are announced as the download goes along, so early on the announced
-    // total is a small fraction of the real one and the first few tiny files
-    // would read as the whole thing being finished. The model's known size holds
-    // the denominator down until the real figure overtakes it.
-    const total = Math.max(announced, LOCAL_MODEL_SIZE_MB * 1024 * 1024);
-
-    // Held just short of the end, because finishing is announced by the download
-    // resolving rather than by the bytes adding up.
-    const ratio = Math.min(loaded / total, 0.99);
-    if (ratio > highest) {
-      highest = ratio;
-      onProgress(highest);
-    }
-  };
-}
-
-/**
- * Counts downloads so a cancellation can be told apart from a later attempt. The
- * library gives no way to abort its own requests, so cancelling stops the app
- * acting on the result and clears whatever reached the cache once it stops.
- */
-let downloadGeneration = 0;
-let cancelledGeneration = -1;
-
-/**
- * The model weights are large, so the library and the model are only fetched
- * once a translation is actually requested, and then reused.
- */
-async function getPipeline(onProgress?: (ratio: number) => void): Promise<TranslationPipeline> {
-  if (!pipelinePromise) {
-    pipelinePromise = (async () => {
-      const { pipeline } = await import('@huggingface/transformers');
-      return (await pipeline('translation', LOCAL_MODEL_ID, {
-        // Pinned rather than left to the library's choice: this is the only
-        // quantisation of this model that the runtime can build a session from,
-        // and it is also the smallest the repository offers.
-        dtype: 'q8',
-        progress_callback: aggregateProgress(onProgress),
-      })) as unknown as TranslationPipeline;
-    })().catch((error) => {
-      // Allow a later attempt to retry instead of replaying this failure.
-      pipelinePromise = null;
-      throw error;
-    });
+function getWorker(): Worker {
+  if (!worker) {
+    worker = new Worker(new URL('./local-model.worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+      const message = event.data;
+      const job = jobs.get(message.id);
+      if (!job) return;
+      if (message.type === 'progress') {
+        job.onProgress?.({ phase: message.phase, ratio: message.ratio });
+        return;
+      }
+      jobs.delete(message.id);
+      if (message.type === 'error') job.reject(new Error(message.message));
+      else if (message.type === 'result') job.resolve(message.lines);
+      else job.resolve([]);
+    };
   }
-  return pipelinePromise;
+  return worker;
 }
 
-export type DownloadOutcome = 'completed' | 'cancelled';
+function ask(
+  request: Record<string, unknown>,
+  onProgress?: (progress: LocalProgress) => void
+): Promise<string[]> {
+  const id = ++nextJobId;
+  const target = getWorker();
+  return new Promise<string[]>((resolve, reject) => {
+    jobs.set(id, { resolve, reject, onProgress });
+    target.postMessage({ ...request, id });
+  });
+}
 
-/**
- * Fetches the model up front, so it is there before any lyrics need it. Stopping
- * partway leaves nothing behind: whatever arrived is cleared once the library
- * stops writing, so the next attempt starts fresh rather than from half a model.
- */
-export async function downloadLocalModel(
+function expectedBytesFor(languages: TranslatableLanguage[]): number {
+  const megabytes = languages.reduce((total, language) => total + downloadSizeMbFor(language), 0);
+  return megabytes * 1024 * 1024;
+}
+
+/** Fetches everything a language needs, so it is ready before any lyrics use it. */
+export async function downloadLanguageModels(
+  language: TranslatableLanguage,
   onProgress?: (ratio: number) => void
-): Promise<DownloadOutcome> {
-  const generation = ++downloadGeneration;
-  const isCancelled = () => cancelledGeneration >= generation;
-  try {
-    await getPipeline((ratio) => {
-      if (!isCancelled()) onProgress?.(ratio);
-    });
-    if (!isCancelled()) return 'completed';
-  } catch (error) {
-    if (!isCancelled()) throw error;
-  }
-  // Only tidy up when nothing newer has taken over, or this would delete the
-  // model a later attempt is busy fetching.
-  if (downloadGeneration === generation) await deleteLocalModel();
-  return 'cancelled';
+): Promise<void> {
+  const models = modelsForLanguage(language);
+  if (models.length === 0) return;
+  await ask({ type: 'download', models, expectedBytes: expectedBytesFor([language]) }, (progress) =>
+    onProgress?.(progress.ratio)
+  );
 }
 
 /**
- * Calls off a download in progress. The caller can move on straight away; the
- * cache is cleared in the background once the library stops.
+ * The models are cached through the Cache API, which only exists in a secure
+ * context. Over plain http on anything but localhost it is absent and loading a
+ * model would stall with no error, so the caller is told up front instead.
  */
-export function cancelLocalModelDownload(): void {
-  cancelledGeneration = downloadGeneration;
-  // A later attempt must build its own pipeline rather than join this one.
-  pipelinePromise = null;
-  // What has already arrived goes now; the download itself clears anything the
-  // library writes after this, once it stops.
-  void deleteLocalModel();
+export function isLocalModelSupported(): boolean {
+  return typeof caches !== 'undefined' && typeof Worker !== 'undefined';
 }
 
-function isModelFile(url: string): boolean {
-  return url.includes(LOCAL_MODEL_ID);
-}
-
-function isModelWeights(url: string): boolean {
-  return isModelFile(url) && url.includes('.onnx');
-}
-
-/** Whether the model has already been fetched, so no consent is needed again. */
-export function isLocalModelLoaded(): boolean {
-  return pipelinePromise !== null;
-}
-
-/**
- * Whether the weights are on the device from an earlier visit. The library
- * stores them in the Cache API under the model's own name, so their presence is
- * read from there rather than from this session's state.
- */
-export async function isLocalModelDownloaded(): Promise<boolean> {
-  if (!isLocalModelSupported()) return false;
+async function cachedModelUrls(): Promise<string[]> {
+  if (!isLocalModelSupported()) return [];
   try {
+    const urls: string[] = [];
     for (const name of await caches.keys()) {
-      const cached = await (await caches.open(name)).keys();
-      // The weights are what make the model usable. Its config and tokenizer
-      // files are fetched first and are tiny, so counting those would report a
-      // part-downloaded model as ready.
-      if (cached.some((request) => isModelWeights(request.url))) return true;
+      for (const request of await (await caches.open(name)).keys()) urls.push(request.url);
     }
-    return false;
+    return urls;
   } catch {
-    return false;
+    return [];
   }
 }
 
 /**
- * Removes the weights from the device. Unlike the browser's own language packs,
- * this model is ours to delete, and it is large enough to be worth reclaiming.
+ * Whether a language's models are on the device. Weights are what make a model
+ * usable; its config and tokenizer files are fetched first and are tiny, so
+ * counting those would report a part-downloaded language as ready.
  */
-export async function deleteLocalModel(): Promise<void> {
-  pipelinePromise = null;
-  if (!isLocalModelSupported()) return;
+export async function isLanguageDownloaded(language: TranslatableLanguage): Promise<boolean> {
+  const models = modelsForLanguage(language);
+  if (models.length === 0) return true;
+  const urls = await cachedModelUrls();
+  return models.every((model) => urls.some((url) => url.includes(model) && url.includes('.onnx')));
+}
+
+/** Removes a language's models from the device, reclaiming the space. */
+export async function deleteLanguageModels(language: TranslatableLanguage): Promise<void> {
+  const models = modelsForLanguage(language);
+  if (models.length === 0 || !isLocalModelSupported()) return;
   try {
     for (const name of await caches.keys()) {
       const cache = await caches.open(name);
       for (const request of await cache.keys()) {
-        if (isModelFile(request.url)) await cache.delete(request);
+        if (models.some((model) => request.url.includes(model))) await cache.delete(request);
       }
     }
+    // The worker holds a loaded copy, which has to go too or it would keep
+    // serving a language the reader has removed.
+    await ask({ type: 'forget', models });
   } catch (error) {
-    console.error('Failed to delete the translation model:', error);
+    console.error('Failed to delete the language models:', error);
   }
 }
 
-/**
- * The model is cached through the Cache API, which only exists in a secure
- * context. Over plain http on anything but localhost it is absent and loading
- * the model would stall with no error, so the caller is told up front instead.
- */
-export function isLocalModelSupported(): boolean {
-  return typeof caches !== 'undefined';
+function toTranslatable(language: string): TranslatableLanguage {
+  if (!isTranslatableLanguage(language)) {
+    throw new TranslatorUnavailableError(`Unsupported language: ${language}`);
+  }
+  return language;
 }
 
-export function createLocalModelTranslator(onProgress?: (ratio: number) => void): Translator {
+/**
+ * Splits lyrics into the lines to be translated, noting where the blank lines
+ * between stanzas were so they can be put back afterwards.
+ */
+function toLines(text: string): { lines: string[]; layout: Array<number | null> } {
+  const lines: string[] = [];
+  const layout: Array<number | null> = [];
+  for (const raw of text.split('\n')) {
+    if (!raw.trim()) {
+      layout.push(null);
+      continue;
+    }
+    layout.push(lines.length);
+    lines.push(raw);
+  }
+  return { lines, layout };
+}
+
+export function createLocalModelTranslator(
+  onProgress?: (progress: LocalProgress) => void
+): Translator {
   return {
     id: 'local-model',
     async translate(text, from, to) {
@@ -230,16 +178,20 @@ export function createLocalModelTranslator(onProgress?: (ratio: number) => void)
           'Translation needs a secure context (https or localhost)'
         );
       }
-      const translator = await getPipeline(onProgress);
-      const src_lang = toNllbCode(from);
-      const tgt_lang = toNllbCode(to);
+      const source = toTranslatable(from);
+      const target = toTranslatable(to);
+      const steps: TranslationStep[] = routeBetween(source, target);
+      if (steps.length === 0) return text;
 
-      // The model truncates long inputs, and lyrics are far longer than its
-      // window, so each line is translated on its own.
-      return translateLineByLine(text, async (line) => {
-        const [result] = await translator(line, { src_lang, tgt_lang });
-        return result?.translation_text ?? line;
-      });
+      const { lines, layout } = toLines(text);
+      if (lines.length === 0) return text;
+
+      const translated = await ask(
+        { type: 'translate', lines, steps, expectedBytes: expectedBytesFor([source, target]) },
+        onProgress
+      );
+
+      return layout.map((index) => (index === null ? '' : translated[index] ?? '')).join('\n');
     },
   };
 }

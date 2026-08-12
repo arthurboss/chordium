@@ -5,13 +5,12 @@ import {
   warmChromePair,
 } from '@/services/translation/chrome-translator';
 import {
-  cancelLocalModelDownload,
-  deleteLocalModel,
-  downloadLocalModel,
-  isLocalModelDownloaded,
+  deleteLanguageModels,
+  downloadLanguageModels,
+  isLanguageDownloaded,
   isLocalModelSupported,
-  LOCAL_MODEL_SIZE_MB,
 } from '@/services/translation/local-model-translator';
+import { downloadSizeMbFor } from '@/services/translation/local-model-config';
 import { TRANSLATABLE_LANGUAGES, type TranslatableLanguage } from '@/services/translation/types';
 
 /**
@@ -25,8 +24,6 @@ export type PackStatus = 'installed' | 'downloadable' | 'downloading' | 'unavail
 
 /** Where translations come from on this browser. */
 export type TranslationBackend = 'chrome' | 'local-model' | 'none';
-
-export type ModelStatus = 'absent' | 'downloading' | 'present';
 
 function detectBackend(): TranslationBackend {
   if (isChromeTranslatorSupported()) return 'chrome';
@@ -46,34 +43,18 @@ function representativeSourceFor(language: TranslatableLanguage): TranslatableLa
 
 /**
  * Tracks what each of the app's languages needs before lyrics can be translated
- * into it, and lets the reader fetch it.
+ * into it, and lets the reader fetch it or clear it again.
  *
- * The two backends are managed differently because they are shaped differently.
- * The browser's own translator keeps a separate pack per language, which it will
- * not let a page delete, so those are only ever added. The fallback is a single
- * large model covering every language, which is ours to delete and worth
- * offering to remove.
+ * Both backends are per language, but they differ in what can be done with them:
+ * the browser's own packs cannot be deleted by a page, while the fallback's
+ * models are the app's own and are large enough to be worth reclaiming.
  */
 export function useTranslationPacks() {
   const [backend] = useState<TranslationBackend>(detectBackend);
   const [statuses, setStatuses] = useState<Partial<Record<TranslatableLanguage, PackStatus>>>({});
   const [progress, setProgress] = useState<Partial<Record<TranslatableLanguage, number>>>({});
-  const [modelStatus, setModelStatus] = useState<ModelStatus>('absent');
-  const [modelProgress, setModelProgress] = useState(0);
 
   const refresh = useCallback(async () => {
-    if (backend === 'local-model') {
-      // One model serves every language, so they all stand or fall together.
-      const present = await isLocalModelDownloaded();
-      setModelStatus((current) => (current === 'downloading' ? current : present ? 'present' : 'absent'));
-      setStatuses(
-        Object.fromEntries(
-          TRANSLATABLE_LANGUAGES.map((language) => [language, present ? 'installed' : 'downloadable'])
-        )
-      );
-      return;
-    }
-
     if (backend === 'none') {
       setStatuses(
         Object.fromEntries(TRANSLATABLE_LANGUAGES.map((language) => [language, 'unavailable']))
@@ -83,9 +64,18 @@ export function useTranslationPacks() {
 
     const entries = await Promise.all(
       TRANSLATABLE_LANGUAGES.map(async (language) => {
-        const state = await getChromePairState(representativeSourceFor(language), language);
-        const status: PackStatus =
-          state === 'ready' ? 'installed' : state === 'needs-gesture' ? 'downloadable' : 'unavailable';
+        let status: PackStatus;
+        if (backend === 'local-model') {
+          status = (await isLanguageDownloaded(language)) ? 'installed' : 'downloadable';
+        } else {
+          const state = await getChromePairState(representativeSourceFor(language), language);
+          status =
+            state === 'ready'
+              ? 'installed'
+              : state === 'needs-gesture'
+                ? 'downloadable'
+                : 'unavailable';
+        }
         return [language, status] as const;
       })
     );
@@ -105,71 +95,63 @@ export function useTranslationPacks() {
   }, [refresh]);
 
   /**
-   * Must be called straight from a click: the browser refuses to fetch a
-   * language pack outside a user gesture, and awaiting anything first spends it.
+   * For the browser's own translator this must be called straight from a click:
+   * it refuses to fetch a language pack outside a user gesture, and awaiting
+   * anything first spends it.
    */
-  const download = useCallback((language: TranslatableLanguage) => {
-    setProgress((current) => ({ ...current, [language]: 0 }));
-    setStatuses((current) => ({ ...current, [language]: 'downloading' }));
+  const download = useCallback(
+    (language: TranslatableLanguage) => {
+      setProgress((current) => ({ ...current, [language]: 0 }));
+      setStatuses((current) => ({ ...current, [language]: 'downloading' }));
 
-    const warming = warmChromePair(representativeSourceFor(language), language, (ratio) =>
-      setProgress((current) => ({ ...current, [language]: ratio }))
-    );
-    if (!warming) {
-      setStatuses((current) => ({ ...current, [language]: 'unavailable' }));
-      return;
-    }
-    void warming.then(async () => {
-      const state = await getChromePairState(representativeSourceFor(language), language);
-      setStatuses((current) => ({
-        ...current,
-        [language]: state === 'ready' ? 'installed' : 'downloadable',
-      }));
-    });
-  }, []);
+      if (backend === 'local-model') {
+        void downloadLanguageModels(language, (ratio) =>
+          setProgress((current) => ({ ...current, [language]: ratio }))
+        )
+          .then(() => setStatuses((current) => ({ ...current, [language]: 'installed' })))
+          .catch((error) => {
+            console.error('Failed to download the language models:', error);
+            setStatuses((current) => ({ ...current, [language]: 'downloadable' }));
+            setProgress((current) => ({ ...current, [language]: 0 }));
+          });
+        return;
+      }
 
-  const downloadModel = useCallback(() => {
-    setModelProgress(0);
-    setModelStatus('downloading');
-    void downloadLocalModel((ratio) => setModelProgress(ratio))
-      .then((outcome) => {
-        setModelStatus(outcome === 'completed' ? 'present' : 'absent');
-        if (outcome === 'cancelled') setModelProgress(0);
-      })
-      .catch((error) => {
-        console.error('Failed to download the translation model:', error);
-        setModelStatus('absent');
-        setModelProgress(0);
-      })
-      .finally(() => void refresh());
-  }, [refresh]);
+      const warming = warmChromePair(representativeSourceFor(language), language, (ratio) =>
+        setProgress((current) => ({ ...current, [language]: ratio }))
+      );
+      if (!warming) {
+        setStatuses((current) => ({ ...current, [language]: 'unavailable' }));
+        return;
+      }
+      void warming.then(async () => {
+        const state = await getChromePairState(representativeSourceFor(language), language);
+        setStatuses((current) => ({
+          ...current,
+          [language]: state === 'ready' ? 'installed' : 'downloadable',
+        }));
+      });
+    },
+    [backend]
+  );
 
-  /**
-   * The library cannot be made to drop its requests, so the reader is taken back
-   * to the offer at once and the part-downloaded model is cleared behind them.
-   */
-  const cancelModelDownload = useCallback(() => {
-    cancelLocalModelDownload();
-    setModelStatus('absent');
-    setModelProgress(0);
-  }, []);
-
-  const removeModel = useCallback(async () => {
-    await deleteLocalModel();
-    await refresh();
-  }, [refresh]);
+  const remove = useCallback(
+    async (language: TranslatableLanguage) => {
+      await deleteLanguageModels(language);
+      await refresh();
+    },
+    [refresh]
+  );
 
   return {
     backend,
     statuses,
     progress,
     download,
-    modelStatus,
-    modelProgress,
-    modelSizeMb: LOCAL_MODEL_SIZE_MB,
-    downloadModel,
-    cancelModelDownload,
-    removeModel,
+    /** Only the fallback's models are the app's to remove. */
+    canRemove: backend === 'local-model',
+    remove,
+    sizeMbFor: downloadSizeMbFor,
     refresh,
   };
 }

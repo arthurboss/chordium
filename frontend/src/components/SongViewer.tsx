@@ -114,6 +114,7 @@ const SongViewer = ({
     hasTranslation,
     status: translationStatus,
     downloadProgress,
+    translationPhase,
     acceptDownload,
     retry: retryTranslation,
   } = useLyricsVersion({
@@ -344,6 +345,7 @@ const SongViewer = ({
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
           translationStatus={translationStatus}
           translationProgress={downloadProgress}
+          translationPhase={translationPhase}
           onAcceptTranslationDownload={acceptDownload}
           onRetryTranslation={retryTranslation}
         />

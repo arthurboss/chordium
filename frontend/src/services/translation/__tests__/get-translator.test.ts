@@ -11,9 +11,12 @@ const localTranslate = vi.hoisted(() => vi.fn());
 
 const localSupported = vi.hoisted(() => vi.fn(() => true));
 
+/** Nothing is on the device unless a test says so. */
+const localDownloaded = vi.hoisted(() => vi.fn(async () => false));
+
 vi.mock('../local-model-translator', () => ({
   createLocalModelTranslator: () => ({ id: 'local-model', translate: localTranslate }),
-  isLocalModelLoaded: () => false,
+  isLanguageDownloaded: localDownloaded,
   isLocalModelSupported: localSupported,
 }));
 
@@ -42,6 +45,7 @@ describe('choosing a translator', () => {
     localTranslate.mockReset();
     localTranslate.mockResolvedValue('lokale übersetzung');
     localSupported.mockReturnValue(true);
+    localDownloaded.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -86,6 +90,7 @@ describe('translateLyrics', () => {
     localTranslate.mockReset();
     localTranslate.mockResolvedValue('lokale übersetzung');
     localSupported.mockReturnValue(true);
+    localDownloaded.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -135,6 +140,7 @@ describe('when nothing can translate', () => {
   afterEach(() => {
     installTranslatorApi(undefined);
     localSupported.mockReturnValue(true);
+    localDownloaded.mockResolvedValue(false);
   });
 
   it('reports the pair as untranslatable without the local model', async () => {

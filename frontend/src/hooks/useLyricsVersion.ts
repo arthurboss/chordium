@@ -8,6 +8,7 @@ import {
   translateLyrics,
 } from '@/services/translation/get-translator';
 import { detectLyricsLanguage } from '@/services/translation/detect-language';
+import type { TranslationPhase } from '@/services/translation/get-translator';
 import { isTranslatableLanguage } from '@/services/translation/types';
 
 interface UseLyricsVersionOptions {
@@ -46,6 +47,9 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   const [translated, setTranslated] = useState<string | null>(null);
   const [status, setStatus] = useState<TranslationStatus>('idle');
   const [downloadProgress, setDownloadProgress] = useState(0);
+  // Fetching a model and translating with it are both slow but quite different,
+  // and a single figure covering both would sit still through one of them.
+  const [phase, setPhase] = useState<TranslationPhase | null>(null);
   const [showTranslation, setShowTranslation] = useState(false);
   const [consented, setConsented] = useState(false);
   // Bumped to run the whole thing again after a failure.
@@ -69,6 +73,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     setTranslated(null);
     setShowTranslation(false);
     setDownloadProgress(0);
+    setPhase(null);
 
     if (!isTranslatable || !target || !source) {
       setStatus('unnecessary');
@@ -106,8 +111,10 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
         const result = await translateLyrics(lyrics, {
           from: source,
           to: target,
-          onProgress: (ratio) => {
-            if (!isStale()) setDownloadProgress(ratio);
+          onProgress: ({ phase: stage, ratio }) => {
+            if (isStale()) return;
+            setPhase(stage);
+            setDownloadProgress(ratio);
           },
         });
         if (isStale()) return;
@@ -136,6 +143,8 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     hasTranslation: !!translated,
     status,
     downloadProgress,
+    /** Whether the figure above refers to a download or to translating. */
+    translationPhase: phase,
     /**
      * Called from the reader's click. The download starts here rather than in the
      * effect that follows, because the browser only permits it while the click
@@ -144,6 +153,7 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
     acceptDownload: useCallback(() => {
       if (!source || !target) return;
       setStatus('translating');
+      setPhase('download');
       const runId = runIdRef.current;
       void prepareTranslator(source, target, (ratio) => {
         if (runIdRef.current === runId) setDownloadProgress(ratio);

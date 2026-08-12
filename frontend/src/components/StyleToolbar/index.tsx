@@ -7,6 +7,7 @@ import ToggleOption from "./ToggleOption";
 import { TabsModeIcon, LyricsModeIcon } from "./ViewModeIcons";
 import { TEXT_PREFERENCES_VALUES } from "./StyleToolbar.constants";
 import type { TranslationStatus } from "@/hooks/useLyricsVersion";
+import type { TranslationPhase } from "@/services/translation/get-translator";
 
 interface StyleToolbarProps {
   fontSize: number;
@@ -23,8 +24,10 @@ interface StyleToolbarProps {
   onToggleTranslation?: () => void;
   /** Progress of the translation, so the toggle can explain why it is not ready. */
   translationStatus?: TranslationStatus;
-  /** Share of the translation model downloaded so far, from 0 to 1. */
+  /** How far the current stage has got, from 0 to 1. */
   translationProgress?: number;
+  /** Whether that figure refers to a download or to the translating itself. */
+  translationPhase?: TranslationPhase | null;
   onAcceptTranslationDownload?: () => void;
   onRetryTranslation?: () => void;
 }
@@ -41,6 +44,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   onToggleTranslation,
   translationStatus = 'idle',
   translationProgress = 0,
+  translationPhase = null,
   onAcceptTranslationDownload,
   onRetryTranslation,
 }) => {
@@ -49,11 +53,16 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
   // The toggle doubles as the place where a translation reports on itself, so
   // its label explains what it is waiting for instead of sitting there greyed
   // out with no reason given.
-  const isDownloading = translationStatus === 'translating' && translationProgress > 0;
+  const isWorking = translationStatus === 'translating' && translationProgress > 0;
   const percent = Math.round(translationProgress * 100);
   const translationLabel = (() => {
     if (translationStatus === 'needs-consent') return t("lyrics.enableTranslation");
-    if (isDownloading) return t("lyrics.downloadingModel", { percent });
+    // Downloading and translating are reported apart, so neither has to stand in
+    // for the other and sit at a figure that never moves.
+    if (isWorking && translationPhase === 'translate') {
+      return t("lyrics.translatingProgress", { percent });
+    }
+    if (isWorking) return t("lyrics.downloadingModel", { percent });
     if (translationStatus === 'translating') return t("lyrics.translating");
     if (translationStatus === 'failed') return t("lyrics.translationFailed");
     if (translationStatus === 'unavailable') return t("lyrics.translationUnavailable");
@@ -108,7 +117,7 @@ const StyleToolbar: React.FC<StyleToolbarProps> = ({
                 icon={<LyricsModeIcon className="opacity-70" />}
                 label={translationLabel}
               />
-              {isDownloading && <Progress value={percent} className="h-1 w-full" />}
+              {isWorking && <Progress value={percent} className="h-1 w-full" />}
             </div>
           ) : (
             <ToggleOption
