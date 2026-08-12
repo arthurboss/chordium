@@ -61,6 +61,48 @@ export function isLocalModelLoaded(): boolean {
   return pipelinePromise !== null;
 }
 
+/** Fetches the model up front, so it is there before any lyrics need it. */
+export async function downloadLocalModel(onProgress?: (ratio: number) => void): Promise<void> {
+  await getPipeline(onProgress);
+}
+
+/**
+ * Whether the weights are on the device from an earlier visit. The library
+ * stores them in the Cache API under the model's own name, so their presence is
+ * read from there rather than from this session's state.
+ */
+export async function isLocalModelDownloaded(): Promise<boolean> {
+  if (!isLocalModelSupported()) return false;
+  try {
+    for (const name of await caches.keys()) {
+      const cached = await (await caches.open(name)).keys();
+      if (cached.some((request) => request.url.includes(LOCAL_MODEL_ID))) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Removes the weights from the device. Unlike the browser's own language packs,
+ * this model is ours to delete, and it is large enough to be worth reclaiming.
+ */
+export async function deleteLocalModel(): Promise<void> {
+  pipelinePromise = null;
+  if (!isLocalModelSupported()) return;
+  try {
+    for (const name of await caches.keys()) {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        if (request.url.includes(LOCAL_MODEL_ID)) await cache.delete(request);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to delete the translation model:', error);
+  }
+}
+
 /**
  * The model is cached through the Cache API, which only exists in a secure
  * context. Over plain http on anything but localhost it is absent and loading

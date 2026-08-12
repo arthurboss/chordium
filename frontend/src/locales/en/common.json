@@ -84,11 +84,14 @@
     "packDownloading": "Downloading",
     "packUnavailable": "Unavailable",
     "packPrompt": "Download {{language}} to translate lyrics into it.",
-    "removeStoredFor": "Turn off {{language}} for lyrics translation",
-    "removeTitle": "Turn off {{language}}?",
-    "removeBody": "Lyrics will stop being translated into {{language}}, and the translations saved on this device will be deleted. You can turn it back on whenever you like. The browser keeps the language itself; only its own settings can remove that.",
-    "removeConfirm": "Turn off",
-    "removeCancel": "Cancel"
+    "cancel": "Cancel",
+    "modelHeading": "Offline translation model",
+    "modelHint": "This browser has no translator of its own, so one {{size}} MB model covers every language.",
+    "modelDownload": "Download the model",
+    "modelDelete": "Delete the model",
+    "modelDeleteTitle": "Delete the translation model?",
+    "modelDeleteBody": "The {{size}} MB model is removed from this device, and lyrics stop being translated until it is downloaded again. Translations already saved are kept.",
+    "modelDeleteConfirm": "Delete"
   },
   "pageHeader": {
     "backAriaLabel": "back-button",

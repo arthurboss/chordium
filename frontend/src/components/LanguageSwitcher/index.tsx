@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Globe } from "lucide-react";
+import { Download, Globe, Loader2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,26 +14,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Progress } from "@/components/ui/progress";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslationPacks } from "@/hooks/useTranslationPacks";
 import type { TranslatableLanguage } from "@/services/translation/types";
-import LanguageList, { FLAGS, NAME_KEYS } from "./LanguageList";
+import LanguageList, { FLAGS } from "./LanguageList";
 
 /** Asked at most once per visit, so a declined offer is not pushed again. */
 const PROMPT_FLAG = "chordium-language-pack-prompted";
 
 /**
- * Picks the language the app is shown in, and manages the per-language downloads
- * that let song lyrics be translated on the device. Both live together because
- * choosing a language is when the reader finds out lyrics can follow it.
+ * Picks the language the app is shown in, and manages whatever the device needs
+ * before lyrics can be translated. Both live together because choosing a
+ * language is when the reader finds out lyrics can follow it.
  */
 const LanguageSwitcher: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
-  const { statuses, progress, download, removeStored, refresh } = useTranslationPacks();
+  const {
+    backend,
+    statuses,
+    progress,
+    download,
+    modelStatus,
+    modelProgress,
+    modelSizeMb,
+    downloadModel,
+    removeModel,
+    refresh,
+  } = useTranslationPacks();
   const [open, setOpen] = useState(false);
   const [promptedFor, setPromptedFor] = useState<TranslatableLanguage | null>(null);
-  const [pendingRemoval, setPendingRemoval] = useState<TranslatableLanguage | null>(null);
+  const [confirmingModelRemoval, setConfirmingModelRemoval] = useState(false);
   const hasOfferedRef = useRef(false);
 
   const current = i18n.resolvedLanguage;
@@ -72,8 +84,51 @@ const LanguageSwitcher: React.FC = () => {
       promptedFor={promptedFor}
       onSelect={selectLanguage}
       onDownload={download}
-      onRemove={setPendingRemoval}
+      perLanguageDownloads={backend === "chrome"}
     />
+  );
+
+  // Browsers without a translator of their own use one model for every language,
+  // so it is offered once here instead of language by language. It is also the
+  // one download the app itself stores, and so the only one it can remove.
+  const modelSection = backend === "local-model" && (
+    <div className="border-t px-4 py-3">
+      <p className="text-sm font-medium">{t("language.modelHeading")}</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {t("language.modelHint", { size: modelSizeMb })}
+      </p>
+
+      {modelStatus === "downloading" ? (
+        <div className="mt-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            {Math.round(modelProgress * 100)}%
+          </div>
+          <Progress value={Math.round(modelProgress * 100)} className="mt-1 h-1" />
+        </div>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2 w-full"
+          onClick={() =>
+            modelStatus === "present" ? setConfirmingModelRemoval(true) : downloadModel()
+          }
+        >
+          {modelStatus === "present" ? (
+            <>
+              <Trash2 className="mr-2 h-4 w-4" />
+              {t("language.modelDelete")}
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-4 w-4" />
+              {t("language.modelDownload")}
+            </>
+          )}
+        </Button>
+      )}
+    </div>
   );
 
   const trigger = (
@@ -88,8 +143,6 @@ const LanguageSwitcher: React.FC = () => {
   );
 
   const hint = <p className="px-4 pb-3 text-xs text-muted-foreground">{t("language.packHint")}</p>;
-
-  const removalName = pendingRemoval ? t(NAME_KEYS[pendingRemoval]) : "";
 
   return (
     <>
@@ -107,7 +160,10 @@ const LanguageSwitcher: React.FC = () => {
               <SheetDescription className="sr-only">{t("language.packHint")}</SheetDescription>
             </SheetHeader>
             {hint}
-            <div className="min-h-0 overflow-y-auto overscroll-contain">{list}</div>
+            <div className="min-h-0 overflow-y-auto overscroll-contain">
+              {list}
+              {modelSection}
+            </div>
           </SheetContent>
         </Sheet>
       ) : (
@@ -117,32 +173,31 @@ const LanguageSwitcher: React.FC = () => {
             <p className="px-4 pt-4 text-sm font-medium">{t("language.appLanguage")}</p>
             {hint}
             {list}
+            {modelSection}
           </PopoverContent>
         </Popover>
       )}
 
       <AlertDialog
-        open={pendingRemoval !== null}
-        onOpenChange={(next) => !next && setPendingRemoval(null)}
+        open={confirmingModelRemoval}
+        onOpenChange={(next) => !next && setConfirmingModelRemoval(false)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("language.removeTitle", { language: removalName })}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t("language.modelDeleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("language.removeBody", { language: removalName })}
+              {t("language.modelDeleteBody", { size: modelSizeMb })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("language.removeCancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("language.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (pendingRemoval) void removeStored(pendingRemoval);
-                setPendingRemoval(null);
+                void removeModel();
+                setConfirmingModelRemoval(false);
               }}
             >
-              {t("language.removeConfirm")}
+              {t("language.modelDeleteConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,24 +1,36 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getChromePairState, warmChromePair } from '@/services/translation/chrome-translator';
-import { isLocalModelSupported } from '@/services/translation/local-model-translator';
 import {
-  getEnabledLanguages,
-  setLanguageEnabled,
-} from '@/services/translation/enabled-languages';
+  getChromePairState,
+  isChromeTranslatorSupported,
+  warmChromePair,
+} from '@/services/translation/chrome-translator';
 import {
-  getStoredTranslationLanguages,
-  removeTranslationsForLanguage,
-} from '@/storage/services/lyrics-storage';
+  deleteLocalModel,
+  downloadLocalModel,
+  isLocalModelDownloaded,
+  isLocalModelSupported,
+  LOCAL_MODEL_SIZE_MB,
+} from '@/services/translation/local-model-translator';
 import { TRANSLATABLE_LANGUAGES, type TranslatableLanguage } from '@/services/translation/types';
 
 /**
  * How a language stands for translating lyrics into it:
- * - "installed": on, and ready to translate offline included.
- * - "downloadable": off, or on but still missing what it needs.
+ * - "installed": ready to translate, offline included.
+ * - "downloadable": needs a one-off download the reader has to start.
  * - "downloading": that download is running.
  * - "unavailable": this browser cannot translate into it at all.
  */
 export type PackStatus = 'installed' | 'downloadable' | 'downloading' | 'unavailable';
+
+/** Where translations come from on this browser. */
+export type TranslationBackend = 'chrome' | 'local-model' | 'none';
+
+export type ModelStatus = 'absent' | 'downloading' | 'present';
+
+function detectBackend(): TranslationBackend {
+  if (isChromeTranslatorSupported()) return 'chrome';
+  return isLocalModelSupported() ? 'local-model' : 'none';
+}
 
 /**
  * The language a song is most likely written in, for the purpose of reporting on
@@ -31,35 +43,50 @@ function representativeSourceFor(language: TranslatableLanguage): TranslatableLa
   return language === 'en' ? 'pt-BR' : 'en';
 }
 
-async function readStatus(
-  language: TranslatableLanguage,
-  isOn: boolean
-): Promise<PackStatus> {
-  const state = await getChromePairState(representativeSourceFor(language), language);
-  if (state === 'no') return isLocalModelSupported() ? 'downloadable' : 'unavailable';
-  // A language that is off is offered again rather than reported as ready, even
-  // though the browser still holds what it fetched.
-  if (!isOn) return 'downloadable';
-  return state === 'ready' ? 'installed' : 'downloadable';
-}
-
 /**
- * Tracks, per app language, whether lyrics can be translated into it and lets the
- * reader turn one on or off. Languages are handled one at a time rather than as
- * one bundle, so each is offered alone.
+ * Tracks what each of the app's languages needs before lyrics can be translated
+ * into it, and lets the reader fetch it.
+ *
+ * The two backends are managed differently because they are shaped differently.
+ * The browser's own translator keeps a separate pack per language, which it will
+ * not let a page delete, so those are only ever added. The fallback is a single
+ * large model covering every language, which is ours to delete and worth
+ * offering to remove.
  */
 export function useTranslationPacks() {
+  const [backend] = useState<TranslationBackend>(detectBackend);
   const [statuses, setStatuses] = useState<Partial<Record<TranslatableLanguage, PackStatus>>>({});
   const [progress, setProgress] = useState<Partial<Record<TranslatableLanguage, number>>>({});
+  const [modelStatus, setModelStatus] = useState<ModelStatus>('absent');
+  const [modelProgress, setModelProgress] = useState(0);
 
   const refresh = useCallback(async () => {
-    // Translations already on the device count as on, so the languages the app
-    // shipped with are not offered as though they were missing.
-    const enabled = new Set([...getEnabledLanguages(), ...(await getStoredTranslationLanguages())]);
+    if (backend === 'local-model') {
+      // One model serves every language, so they all stand or fall together.
+      const present = await isLocalModelDownloaded();
+      setModelStatus((current) => (current === 'downloading' ? current : present ? 'present' : 'absent'));
+      setStatuses(
+        Object.fromEntries(
+          TRANSLATABLE_LANGUAGES.map((language) => [language, present ? 'installed' : 'downloadable'])
+        )
+      );
+      return;
+    }
+
+    if (backend === 'none') {
+      setStatuses(
+        Object.fromEntries(TRANSLATABLE_LANGUAGES.map((language) => [language, 'unavailable']))
+      );
+      return;
+    }
+
     const entries = await Promise.all(
-      TRANSLATABLE_LANGUAGES.map(
-        async (language) => [language, await readStatus(language, enabled.has(language))] as const
-      )
+      TRANSLATABLE_LANGUAGES.map(async (language) => {
+        const state = await getChromePairState(representativeSourceFor(language), language);
+        const status: PackStatus =
+          state === 'ready' ? 'installed' : state === 'needs-gesture' ? 'downloadable' : 'unavailable';
+        return [language, status] as const;
+      })
     );
     setStatuses((current) => {
       const next = { ...current };
@@ -70,7 +97,7 @@ export function useTranslationPacks() {
       }
       return next;
     });
-  }, []);
+  }, [backend]);
 
   useEffect(() => {
     void refresh();
@@ -83,7 +110,6 @@ export function useTranslationPacks() {
   const download = useCallback((language: TranslatableLanguage) => {
     setProgress((current) => ({ ...current, [language]: 0 }));
     setStatuses((current) => ({ ...current, [language]: 'downloading' }));
-    setLanguageEnabled(language, true);
 
     const warming = warmChromePair(representativeSourceFor(language), language, (ratio) =>
       setProgress((current) => ({ ...current, [language]: ratio }))
@@ -93,20 +119,41 @@ export function useTranslationPacks() {
       return;
     }
     void warming.then(async () => {
-      const settled = await readStatus(language, true);
-      setStatuses((current) => ({ ...current, [language]: settled }));
+      const state = await getChromePairState(representativeSourceFor(language), language);
+      setStatuses((current) => ({
+        ...current,
+        [language]: state === 'ready' ? 'installed' : 'downloadable',
+      }));
     });
   }, []);
 
-  /** Turns a language off and drops what it had stored. */
-  const removeStored = useCallback(
-    async (language: TranslatableLanguage) => {
-      setLanguageEnabled(language, false);
-      await removeTranslationsForLanguage(language);
-      await refresh();
-    },
-    [refresh]
-  );
+  const downloadModel = useCallback(() => {
+    setModelProgress(0);
+    setModelStatus('downloading');
+    void downloadLocalModel((ratio) => setModelProgress(ratio))
+      .then(() => setModelStatus('present'))
+      .catch((error) => {
+        console.error('Failed to download the translation model:', error);
+        setModelStatus('absent');
+      })
+      .finally(() => void refresh());
+  }, [refresh]);
 
-  return { statuses, progress, download, removeStored, refresh };
+  const removeModel = useCallback(async () => {
+    await deleteLocalModel();
+    await refresh();
+  }, [refresh]);
+
+  return {
+    backend,
+    statuses,
+    progress,
+    download,
+    modelStatus,
+    modelProgress,
+    modelSizeMb: LOCAL_MODEL_SIZE_MB,
+    downloadModel,
+    removeModel,
+    refresh,
+  };
 }

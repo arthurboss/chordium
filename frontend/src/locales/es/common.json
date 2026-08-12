@@ -84,11 +84,14 @@
     "packDownloading": "Descargando",
     "packUnavailable": "No disponible",
     "packPrompt": "Descarga {{language}} para traducir las letras a ese idioma.",
-    "removeStoredFor": "Desactivar {{language}} para la traducción de letras",
-    "removeTitle": "¿Desactivar {{language}}?",
-    "removeBody": "Las letras dejarán de traducirse a {{language}}, y se eliminarán las traducciones guardadas en este dispositivo. Puedes volver a activarlo cuando quieras. El navegador conserva el idioma en sí; solo su propia configuración puede quitarlo.",
-    "removeConfirm": "Desactivar",
-    "removeCancel": "Cancelar"
+    "cancel": "Cancelar",
+    "modelHeading": "Modelo de traducción sin conexión",
+    "modelHint": "Este navegador no tiene traductor propio, así que un modelo de {{size}} MB cubre todos los idiomas.",
+    "modelDownload": "Descargar el modelo",
+    "modelDelete": "Eliminar el modelo",
+    "modelDeleteTitle": "¿Eliminar el modelo de traducción?",
+    "modelDeleteBody": "El modelo de {{size}} MB se elimina de este dispositivo, y las letras dejan de traducirse hasta que se descargue de nuevo. Las traducciones ya guardadas se conservan.",
+    "modelDeleteConfirm": "Eliminar"
   },
   "pageHeader": {
     "backAriaLabel": "botón-atrás",

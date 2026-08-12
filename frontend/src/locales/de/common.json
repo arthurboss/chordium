@@ -84,11 +84,14 @@
     "packDownloading": "Wird geladen",
     "packUnavailable": "Nicht verfügbar",
     "packPrompt": "Lade {{language}} herunter, um Liedtexte in diese Sprache zu übersetzen.",
-    "removeStoredFor": "{{language}} für die Liedtext-Übersetzung ausschalten",
-    "removeTitle": "{{language}} ausschalten?",
-    "removeBody": "Liedtexte werden nicht mehr auf {{language}} übersetzt, und die auf diesem Gerät gespeicherten Übersetzungen werden gelöscht. Du kannst es jederzeit wieder einschalten. Die Sprache selbst behält der Browser; nur dessen eigene Einstellungen können sie entfernen.",
-    "removeConfirm": "Ausschalten",
-    "removeCancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "modelHeading": "Offline-Übersetzungsmodell",
+    "modelHint": "Dieser Browser hat keinen eigenen Übersetzer, daher deckt ein Modell mit {{size}} MB alle Sprachen ab.",
+    "modelDownload": "Modell herunterladen",
+    "modelDelete": "Modell löschen",
+    "modelDeleteTitle": "Übersetzungsmodell löschen?",
+    "modelDeleteBody": "Das Modell mit {{size}} MB wird von diesem Gerät entfernt, und Liedtexte werden nicht mehr übersetzt, bis es erneut geladen wird. Bereits gespeicherte Übersetzungen bleiben erhalten.",
+    "modelDeleteConfirm": "Löschen"
   },
   "pageHeader": {
     "backAriaLabel": "zurück-schaltfläche",
