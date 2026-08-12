@@ -218,6 +218,11 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    // The translation worker loads its models through a dynamic import, which
+    // splits its code; the default iife output cannot express that.
+    worker: {
+      format: 'es',
+    },
     build: {
       // Enable tree shaking
       minify: 'terser',
