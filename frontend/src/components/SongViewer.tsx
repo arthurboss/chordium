@@ -85,7 +85,7 @@ const SongViewer = ({
 
   const [fontSize, setFontSize] = useState(14);
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
-  const [version, setVersion] = useState<simplified | full | lyrics>(showLyrics ? lyrics : simplified);
+  const [version, setVersion] = useState<"simplified" | "full" | "lyrics">(showLyrics ? "lyrics" : "simplified");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [translationDisplayMode, setTranslationDisplayMode] = useState<"split-screen" | "single-screen">("split-screen");
 
@@ -124,14 +124,14 @@ const SongViewer = ({
   });
 
   const lyricsChordSheet = useMemo(() => {
-    if (version !== lyrics || !displayLyrics) return null;
-    
+    if (version !== "lyrics" || !displayLyrics) return null;
+
     let finalLyrics = displayLyrics;
-    
+
     if (translationDisplayMode === "single-screen" && showTranslation && sourceLyrics !== displayLyrics) {
       finalLyrics = formatSingleScreenLyrics(sourceLyrics, displayLyrics);
     }
-    
+
     return { ...chordSheetToDisplay, songChords: finalLyrics, rawHtml: undefined };
   }, [version, displayLyrics, chordSheetToDisplay, translationDisplayMode, showTranslation, sourceLyrics]);
 
@@ -277,20 +277,20 @@ const SongViewer = ({
     onViewModeChange?.(mode);
   };
 
-  const handleVersionChange = (newVersion: simplified | full | lyrics) => {
+  const handleVersionChange = (newVersion: "simplified" | "full" | "lyrics") => {
     setVersion(newVersion);
-    onLyricsToggle?.(newVersion === lyrics);
-    
-    if (newVersion === lyrics) {
-      setViewMode(lyrics-only);
-      onViewModeChange?.(lyrics-only);
-    } else if (newVersion === full) {
-      setViewMode(tabs-on);
-      onViewModeChange?.(tabs-on);
+    onLyricsToggle?.(newVersion === "lyrics");
+
+    if (newVersion === "lyrics") {
+      setViewMode("lyrics-only");
+      onViewModeChange?.("lyrics-only");
+    } else if (newVersion === "full") {
+      setViewMode("tabs-on");
+      onViewModeChange?.("tabs-on");
       onToggleArrangement?.(true);
     } else {
-      setViewMode(tabs-on);
-      onViewModeChange?.(tabs-on);
+      setViewMode("tabs-on");
+      onViewModeChange?.("tabs-on");
       onToggleArrangement?.(false);
     }
   };
@@ -312,15 +312,15 @@ const SongViewer = ({
   }, [artist, navigate, songObj.path]);
 
   const handleFullscreenToggle = useCallback(() => {
-    const elem = document.getElementById(chord-sheet-viewer);
+    const elem = document.getElementById("chord-sheet-viewer");
     if (!isFullscreen) {
       if (elem?.requestFullscreen) {
-        elem.requestFullscreen().catch(err => console.error(Fullscreen request failed:, err));
+        elem.requestFullscreen().catch(err => console.error("Fullscreen request failed:", err));
         setIsFullscreen(true);
       }
     } else {
       if (document.fullscreenElement) {
-        document.exitFullscreen().catch(err => console.error(Exit fullscreen failed:, err));
+        document.exitFullscreen().catch(err => console.error("Exit fullscreen failed:", err));
         setIsFullscreen(false);
       }
     }
@@ -330,14 +330,14 @@ const SongViewer = ({
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener(fullscreenchange, handleFullscreenChange);
-    return () => document.removeEventListener(fullscreenchange, handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   return (
     <main
       id="page-chord-viewer"
-      className={`flex-1 w-full mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4 ${isFullscreen ? max-w-full p-0 py-0 : max-w-3xl}`}
+      className={`flex-1 w-full mx-auto py-8 px-4 animate-fade-in flex flex-col gap-4 ${isFullscreen ? "max-w-full p-0" : "max-w-3xl"}`}
     >
       {!isFullscreen && (
         <PageHeader
@@ -387,14 +387,14 @@ const SongViewer = ({
           }
         />
       )}
-      <Card className={`overflow-hidden ${isFullscreen ? rounded-none border-0 : }`}>
+      <Card className={`overflow-hidden ${isFullscreen ? "rounded-none border-0" : ""}`}>
         <StyleToolbar
           fontSize={fontSize}
           setFontSize={setFontSize}
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
           hasTabs={hasTabs}
-          isLyricsMode={version === lyrics}
+          isLyricsMode={version === "lyrics"}
           hasTranslation={hasTranslation}
           showTranslation={showTranslation}
           onToggleTranslation={() => setShowTranslation(!showTranslation)}
@@ -423,7 +423,7 @@ const SongViewer = ({
           <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm text-muted-foreground">
             <Music className="h-3.5 w-3.5" />
             {t("arrangementToggle.editingIndicator", { 
-              arrangement: t(version === full ? "arrangementToggle.full" : version === lyrics ? "lyrics.lyrics" : "arrangementToggle.simplified")
+              arrangement: t(version === "full" ? "arrangementToggle.full" : version === "lyrics" ? "lyrics.lyrics" : "arrangementToggle.simplified")
             })}
           </div>
         </div>
@@ -436,7 +436,7 @@ const SongViewer = ({
         isLoading={finalIsContentLoading}
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}
-        viewMode={version === lyrics ? lyrics-only : viewMode}
+        viewMode={version === "lyrics" ? "lyrics-only" : viewMode}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         editContent={editContent}
