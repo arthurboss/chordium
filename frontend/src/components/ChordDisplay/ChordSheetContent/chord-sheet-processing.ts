@@ -1,4 +1,5 @@
 import { processTabBlocks } from '../tab-splitting';
+import { mergePaginatedTabs } from '../merge-paginated-tabs';
 import { songChordsToRawHtml } from '../song-chords-to-raw-html';
 import {
   normalizeZeroWidthSpaces,
@@ -27,14 +28,38 @@ function transposeHtmlChords(html: string, halfSteps: number): string {
  * Applies all view-mode transformations to raw chord HTML.
  *
  * Order matters: transpose → normalisation → section titles → indent trimming → tab removal
- * → lyrics-only stripping → tab-block column splitting.
+ * → lyrics-only stripping → rejoining the source's tab pages → tab-block column splitting.
+ * The rejoin has to come first of those last two, so the tab is divided for the width it is
+ * read at rather than kept at the width the source happened to publish it.
  */
 export function processHtml(html: string, viewMode: string, maxCols: number, transpose = 0): string {
   let result = transposeHtmlChords(trimPureChordLineIndent(fixInlineSectionTitles(normalizeZeroWidthSpaces(html))), transpose);
   if (viewMode === 'tabs-off' || viewMode === 'lyrics-only') result = removeTabsFromHtml(result);
   if (viewMode === 'lyrics-only') result = removeChordsForLyricsOnly(result);
+  result = mergePaginatedTabs(result);
   if (maxCols > 0) result = processTabBlocks(result, maxCols);
   return result;
+}
+
+const TAB_LINE = /^[EBGDAe]\|/;
+
+/**
+ * The lines fullscreen has to size itself around, as plain text, with tags and entities
+ * back down to the one character each stands for: counting markup would shrink the words
+ * to fit text that is not there.
+ *
+ * Tab lines are left out, because they are the one thing here that reflows. A sung line
+ * cannot be broken without losing which chord belongs over which word, so the words must
+ * shrink to fit it; a tab block can be split into parts instead, and is. Sizing to a tab
+ * line would shrink the whole song for something that had another way out, and would also
+ * put the two calculations in a circle, each waiting on the other.
+ */
+export function fittableLines(html?: string): string[] {
+  if (!html) return [];
+  return html
+    .split('\n')
+    .map((line) => line.replace(/<[^>]*>/g, '').replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, ' '))
+    .filter((line) => !TAB_LINE.test(line.trim()));
 }
 
 /**

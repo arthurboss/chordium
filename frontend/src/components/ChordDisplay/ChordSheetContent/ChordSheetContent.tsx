@@ -1,7 +1,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useContainerColumns } from '../useContainerColumns';
-import { FONT_FAMILY, processHtml, resolveSourceHtml } from './chord-sheet-processing';
+import { useFitScale } from '../useFitScale';
+import { FONT_FAMILY, fittableLines, processHtml, resolveSourceHtml } from './chord-sheet-processing';
 import { ChordLoadingState } from './ChordLoadingState';
 import { ChordEmptyState } from './ChordEmptyState';
 import { ChordSheetPre } from './ChordSheetPre';
@@ -39,14 +40,24 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   const sourceHtml = resolveSourceHtml(rawHtml, songChords);
   const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols, transpose) : undefined;
 
+  const lines = React.useMemo(() => fittableLines(processedHtml), [processedHtml]);
+  const fit = useFitScale(containerRef, lines);
+
   return (
     <div
       ref={containerRef}
       className={cn(
-        '[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border',
+        'chord-sheet-card [font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border',
         className
       )}
-      style={{ '--content-font-size': `${fontSize}px`, fontFamily } as React.CSSProperties}
+      style={{
+        '--content-font-size': `${fontSize}px`,
+        // Fullscreen sizes the words to the width it has spare, which it can only do
+        // knowing how long the longest line is and how wide that really makes it.
+        '--max-line-chars': fit.chars,
+        '--fit-scale': fit.scale,
+        fontFamily,
+      } as React.CSSProperties}
     >
       {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheetPre html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}
     </div>
