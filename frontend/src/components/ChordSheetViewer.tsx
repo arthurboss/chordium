@@ -8,8 +8,11 @@ import ChordEdit from './ChordDisplay/ChordEdit';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
+import { useFullscreen } from '@/hooks/use-fullscreen';
 import { downloadTextFile } from '@/utils/download-utils';
 import { cyAttr } from '@/utils/test-utils';
+
+const CHORD_SHEET_VIEWER_ID = 'chord-sheet-viewer';
 
 interface ChordSheetViewerProps {
   chordSheet: ChordSheet & SongMetadata;
@@ -55,6 +58,8 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
     toggleAutoScroll
   } = useAutoScroll();
 
+  const { isFullscreen, toggleFullscreen } = useFullscreen(CHORD_SHEET_VIEWER_ID);
+
   const {
     fontSize: internalFontSize,
     fontStyle,
@@ -99,7 +104,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   }
 
   return (
-    <div ref={ref} id="chord-sheet-viewer" {...cyAttr('chord-display')}>
+    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} {...cyAttr('chord-display')}>
       <ChordSheetContent
         rawHtml={chordSheet.rawHtml}
         songChords={chordSheet.songChords}
@@ -116,6 +121,8 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
           handleDownload={handleDownload}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={toggleFullscreen}
         />
       )}
     </div>

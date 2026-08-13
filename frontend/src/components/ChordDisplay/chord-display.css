@@ -120,3 +120,11 @@
     overflow-x: auto;
   }
 }
+
+/* Fullscreen hands the viewer the whole screen, which also makes it the scrolling
+   box: without an overflow of its own the chords below the fold are unreachable. */
+#chord-sheet-viewer:fullscreen {
+  overflow-y: auto;
+  background-color: hsl(var(--background));
+  padding: 1rem;
+}
