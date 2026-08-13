@@ -86,7 +86,6 @@ const SongViewer = ({
   const [viewMode, setViewMode] = useState(initialViewMode || "tabs-on");
   const [version, setVersion] = useState<'simplified' | 'full' | 'lyrics'>(showLyrics ? 'lyrics' : 'simplified');
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const { content: lazyContent, isContentLoading: isLazyContentLoading } = useLazyChordSheet({
     path: isFromMyChordSheets ? songObj.path : "",
   });
@@ -282,26 +281,6 @@ const SongViewer = ({
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
 
-
-  const handleFullscreenToggle = () => {
-    const elem = document.getElementById('chord-sheet-viewer');
-    if (!isFullscreen && elem?.requestFullscreen) {
-      elem.requestFullscreen().catch(() => {});
-      setIsFullscreen(true);
-    } else if (isFullscreen && document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-      setIsFullscreen(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   return (
     <main
       id="page-chord-viewer"
@@ -360,8 +339,6 @@ const SongViewer = ({
           viewMode={viewMode}
           setViewMode={handleViewModeChange}
           hasTabs={hasTabs}
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={handleFullscreenToggle}
           isLyricsMode={version === 'lyrics'}
           hasTranslation={hasTranslation}
           showTranslation={showTranslation}
