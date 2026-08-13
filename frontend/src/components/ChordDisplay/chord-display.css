@@ -124,24 +124,23 @@
 /* Fullscreen hands the viewer the whole screen, which also makes it the scrolling
    box: without an overflow of its own the chords below the fold are unreachable. */
 #chord-sheet-viewer:fullscreen {
-  --reading-column: 48rem; /* mirrors the max-w-3xl wrapper the viewer sits in */
+  --reading-column: 46rem; /* the width the viewer has inside the page's max-w-3xl wrapper */
   overflow-y: auto;
   background-color: hsl(var(--background));
   padding-block: 1rem;
+  /* Gutters, rather than a max-width on the children: this makes the element's own
+     content box the reading column, so everything inside keeps the geometry it has on
+     the page. Constraining the children instead moves the sticky controls, and their
+     transition-all then animates that as a slide across the screen. */
+  padding-inline: max(1rem, calc((100% - var(--reading-column)) / 2));
 }
 
-/* Only the height is worth gaining. Left to fill a wide screen the lines stretch far
-   past what can be read in one glance, so the column keeps its on-page width. The
-   controls are left out of this: they carry their own spacing and must look the same
-   fullscreen as they do on the page. */
-#chord-sheet-viewer:fullscreen > *:not(#sticky-bottom-container) {
-  max-width: var(--reading-column);
-  margin-inline: auto;
-  padding-inline: 1rem;
-}
-
-/* Nudging only the right margin keeps the controls at the edge of that column,
-   where they sit on the page, rather than out at the corner of the screen. */
 #chord-sheet-viewer:fullscreen > #sticky-bottom-container {
-  margin-right: max(1rem, calc((100% - var(--reading-column)) / 2 + 1rem));
+  animation: chord-controls-fade-in 300ms ease-in-out;
+}
+
+@keyframes chord-controls-fade-in {
+  from {
+    opacity: 0;
+  }
 }
