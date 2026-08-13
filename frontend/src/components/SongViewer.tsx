@@ -284,7 +284,7 @@ const SongViewer = ({
 
 
   const handleFullscreenToggle = () => {
-    const elem = document.getElementById(chord-sheet-viewer);
+    const elem = document.getElementById('chord-sheet-viewer');
     if (!isFullscreen && elem?.requestFullscreen) {
       elem.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
@@ -298,8 +298,8 @@ const SongViewer = ({
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener(fullscreenchange, handleFullscreenChange);
-    return () => document.removeEventListener(fullscreenchange, handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   return (
