@@ -18,6 +18,9 @@ export interface ChordSheetControlsProps {
   handleDownload?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  canSplit?: boolean;
+  isSplit?: boolean;
+  onToggleSplit?: () => void;
 }
 
 export interface ChordEditProps {

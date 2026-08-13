@@ -109,6 +109,7 @@ const SongViewer = ({
 
   const {
     displayLyrics,
+    translatedLyrics,
     showTranslation,
     setShowTranslation,
     hasTranslation,
@@ -130,6 +131,13 @@ const SongViewer = ({
     if (version !== 'lyrics' || !displayLyrics) return null;
     return { ...chordSheetToDisplay, songChords: displayLyrics, rawHtml: undefined };
   }, [version, displayLyrics, chordSheetToDisplay]);
+
+  // Showing the words beside their translation needs the two apart, which
+  // displayLyrics has already collapsed into whichever one is on show.
+  const lyricsSplit = useMemo(() => {
+    if (version !== 'lyrics' || !translatedLyrics) return undefined;
+    return { original: sourceLyrics, translated: translatedLyrics };
+  }, [version, translatedLyrics, sourceLyrics]);
 
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
@@ -378,6 +386,7 @@ const SongViewer = ({
         effectiveTranspose={effectiveTranspose}
         fontSize={fontSize}
         viewMode={version === 'lyrics' ? 'lyrics-only' : viewMode}
+        lyricsSplit={lyricsSplit}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         editContent={editContent}

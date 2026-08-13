@@ -135,6 +135,11 @@
   padding-inline: max(1rem, calc((100% - var(--reading-column)) / 2));
 }
 
+/* Side by side, each column still has a full column's worth of words to fit. */
+#chord-sheet-viewer:fullscreen[data-split] {
+  --reading-column: 93rem; /* two reading columns and the gap between them */
+}
+
 #chord-sheet-viewer:fullscreen > #sticky-bottom-container {
   animation: chord-controls-fade-in 300ms ease-in-out;
 }

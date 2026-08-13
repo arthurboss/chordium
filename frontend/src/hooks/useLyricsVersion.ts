@@ -145,6 +145,8 @@ export function useLyricsVersion({ path, lyrics }: UseLyricsVersionOptions) {
   return {
     /** Lyrics to render: the translation while it is toggled on, else the original. */
     displayLyrics: showTranslation && translated ? translated : lyrics,
+    /** The translation on its own, for showing it beside the original rather than instead of it. */
+    translatedLyrics: translated,
     showTranslation,
     setShowTranslation,
     hasTranslation: !!translated,

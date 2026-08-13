@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
@@ -25,6 +25,8 @@ interface ChordSheetViewerProps {
   effectiveTranspose?: number;
   fontSize?: number;
   viewMode?: string;
+  /** The words and their translation, when both are available to show at once. */
+  lyricsSplit?: { original: string; translated: string };
   // When provided by a parent, editing state is controlled externally
   isEditing?: boolean;
   setIsEditing?: (v: boolean) => void;
@@ -44,6 +46,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   effectiveTranspose: externalEffectiveTranspose,
   fontSize: externalFontSize,
   viewMode: externalViewMode,
+  lyricsSplit,
   isEditing: externalIsEditing,
   setIsEditing: externalSetIsEditing,
   editContent: externalEditContent,
@@ -59,6 +62,13 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   } = useAutoScroll();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(CHORD_SHEET_VIEWER_ID);
+  const [splitRequested, setSplitRequested] = useState(false);
+
+  // Two columns of words only fit where there is room for them, which is what
+  // fullscreen provides. Deriving this means leaving fullscreen drops the split
+  // rather than leaving it stranded in a column too narrow to read.
+  const canSplit = isFullscreen && !!lyricsSplit;
+  const isSplit = canSplit && splitRequested;
 
   const {
     fontSize: internalFontSize,
@@ -103,17 +113,32 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
     );
   }
 
+  const paneProps = {
+    fontSize,
+    fontStyle,
+    viewMode,
+    transpose: effectiveTranspose,
+    isLoading,
+  };
+
   return (
-    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} {...cyAttr('chord-display')}>
-      <ChordSheetContent
-        rawHtml={chordSheet.rawHtml}
-        songChords={chordSheet.songChords}
-        fontSize={fontSize}
-        fontStyle={fontStyle}
-        viewMode={viewMode}
-        transpose={effectiveTranspose}
-        isLoading={isLoading}
-      />
+    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} data-split={isSplit || undefined} {...cyAttr('chord-display')}>
+      {isSplit && lyricsSplit ? (
+        <div className="flex items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <ChordSheetContent songChords={lyricsSplit.original} {...paneProps} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <ChordSheetContent songChords={lyricsSplit.translated} {...paneProps} />
+          </div>
+        </div>
+      ) : (
+        <ChordSheetContent
+          rawHtml={chordSheet.rawHtml}
+          songChords={chordSheet.songChords}
+          {...paneProps}
+        />
+      )}
       {showControlsBar && (
         <StickyControlsBar
           autoScroll={autoScroll}
@@ -123,6 +148,9 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           handleDownload={handleDownload}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
+          canSplit={canSplit}
+          isSplit={isSplit}
+          onToggleSplit={() => setSplitRequested((s) => !s)}
         />
       )}
     </div>
