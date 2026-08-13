@@ -124,7 +124,23 @@
 /* Fullscreen hands the viewer the whole screen, which also makes it the scrolling
    box: without an overflow of its own the chords below the fold are unreachable. */
 #chord-sheet-viewer:fullscreen {
+  --reading-column: 48rem; /* mirrors the max-w-3xl wrapper the viewer sits in */
   overflow-y: auto;
   background-color: hsl(var(--background));
-  padding: 1rem;
+  padding-block: 1rem;
+}
+
+/* Only the height is worth gaining. Left to fill a wide screen the lines stretch far
+   past what can be read in one glance, so the column keeps its on-page width. */
+#chord-sheet-viewer:fullscreen > * {
+  max-width: var(--reading-column);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* The controls stay at the right edge of that column, where they sit on the page,
+   rather than drifting out to the corner of the screen. */
+#chord-sheet-viewer:fullscreen > #sticky-bottom-container {
+  padding-inline: 0;
+  margin-right: max(1rem, calc((100% - var(--reading-column)) / 2 + 1rem));
 }
