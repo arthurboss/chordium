@@ -119,16 +119,20 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
     viewMode,
     transpose: effectiveTranspose,
     isLoading,
+    // Short words would otherwise sit in a card a fraction of the screen tall.
+    // Growing is inert until fullscreen, which is the only place the viewer is a
+    // column with height to spare.
+    className: 'grow',
   };
 
   return (
     <div ref={ref} id={CHORD_SHEET_VIEWER_ID} data-split={isSplit || undefined} {...cyAttr('chord-display')}>
       {isSplit && lyricsSplit ? (
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
+        <div className="flex grow gap-4">
+          <div className="flex min-w-0 flex-1 flex-col">
             <ChordSheetContent songChords={lyricsSplit.original} {...paneProps} />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 flex-col">
             <ChordSheetContent songChords={lyricsSplit.translated} {...paneProps} />
           </div>
         </div>

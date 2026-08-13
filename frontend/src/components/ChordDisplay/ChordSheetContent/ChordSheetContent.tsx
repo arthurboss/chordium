@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import { useContainerColumns } from '../useContainerColumns';
 import { FONT_FAMILY, processHtml, resolveSourceHtml } from './chord-sheet-processing';
 import { ChordLoadingState } from './ChordLoadingState';
@@ -13,6 +14,7 @@ interface ChordSheetContentProps {
   viewMode: string;
   transpose?: number;
   isLoading?: boolean;
+  className?: string;
 }
 
 /**
@@ -30,6 +32,7 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   viewMode,
   transpose = 0,
   isLoading,
+  className,
 }) => {
   const { containerRef, maxCols } = useContainerColumns(rawHtml);
   const fontFamily = FONT_FAMILY[fontStyle];
@@ -39,7 +42,10 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   return (
     <div
       ref={containerRef}
-      className="[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border"
+      className={cn(
+        '[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border',
+        className
+      )}
       style={{ '--content-font-size': `${fontSize}px`, fontFamily } as React.CSSProperties}
     >
       {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheetPre html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}

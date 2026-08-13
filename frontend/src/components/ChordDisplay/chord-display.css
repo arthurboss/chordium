@@ -133,6 +133,10 @@
      the page. Constraining the children instead moves the sticky controls, and their
      transition-all then animates that as a slide across the screen. */
   padding-inline: max(1rem, calc((100% - var(--reading-column)) / 2));
+  /* A column so the words can grow into whatever height the controls leave them, which
+     a viewport height could not do without overrunning this element's own padding. */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Side by side, each column still has a full column's worth of words to fit. */
