@@ -18,9 +18,9 @@ export interface ChordSheetControlsProps {
   handleDownload?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
-  canSplit?: boolean;
-  isSplit?: boolean;
-  onToggleSplit?: () => void;
+  canInterleave?: boolean;
+  isInterleaved?: boolean;
+  onToggleInterleave?: () => void;
 }
 
 export interface ChordEditProps {

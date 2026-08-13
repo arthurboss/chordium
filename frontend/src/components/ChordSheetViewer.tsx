@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
@@ -10,6 +10,7 @@ import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
 import { useFullscreen } from '@/hooks/use-fullscreen';
 import { downloadTextFile } from '@/utils/download-utils';
+import { interleaveTranslation } from '@/utils/interleave-translation';
 import { cyAttr } from '@/utils/test-utils';
 
 const CHORD_SHEET_VIEWER_ID = 'chord-sheet-viewer';
@@ -62,13 +63,15 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   } = useAutoScroll();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(CHORD_SHEET_VIEWER_ID);
-  const [splitRequested, setSplitRequested] = useState(false);
+  const [interleaveRequested, setInterleaveRequested] = useState(false);
 
-  // Two columns of words only fit where there is room for them, which is what
-  // fullscreen provides. Deriving this means leaving fullscreen drops the split
-  // rather than leaving it stranded in a column too narrow to read.
-  const canSplit = isFullscreen && !!lyricsSplit;
-  const isSplit = canSplit && splitRequested;
+  const canInterleave = isFullscreen && !!lyricsSplit;
+  const isInterleaved = canInterleave && interleaveRequested;
+
+  const interleavedHtml = useMemo(
+    () => (isInterleaved && lyricsSplit ? interleaveTranslation(lyricsSplit.original, lyricsSplit.translated) : undefined),
+    [isInterleaved, lyricsSplit]
+  );
 
   const {
     fontSize: internalFontSize,
@@ -113,36 +116,21 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
     );
   }
 
-  const paneProps = {
-    fontSize,
-    fontStyle,
-    viewMode,
-    transpose: effectiveTranspose,
-    isLoading,
-    // Short words would otherwise sit in a card a fraction of the screen tall.
-    // Growing is inert until fullscreen, which is the only place the viewer is a
-    // column with height to spare.
-    className: 'grow',
-  };
-
   return (
-    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} data-split={isSplit || undefined} {...cyAttr('chord-display')}>
-      {isSplit && lyricsSplit ? (
-        <div className="flex grow flex-col gap-4 lg:flex-row">
-          <div className="flex min-w-0 flex-1 flex-col">
-            <ChordSheetContent songChords={lyricsSplit.original} {...paneProps} />
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col">
-            <ChordSheetContent songChords={lyricsSplit.translated} {...paneProps} />
-          </div>
-        </div>
-      ) : (
-        <ChordSheetContent
-          rawHtml={chordSheet.rawHtml}
-          songChords={chordSheet.songChords}
-          {...paneProps}
-        />
-      )}
+    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} {...cyAttr('chord-display')}>
+      <ChordSheetContent
+        rawHtml={interleavedHtml ?? chordSheet.rawHtml}
+        songChords={interleavedHtml ? undefined : chordSheet.songChords}
+        fontSize={fontSize}
+        fontStyle={fontStyle}
+        viewMode={viewMode}
+        transpose={effectiveTranspose}
+        isLoading={isLoading}
+        // Short words would otherwise sit in a card a fraction of the screen tall.
+        // Growing is inert until fullscreen, which is the only place the viewer is a
+        // column with height to spare.
+        className="grow"
+      />
       {showControlsBar && (
         <StickyControlsBar
           autoScroll={autoScroll}
@@ -152,9 +140,9 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           handleDownload={handleDownload}
           isFullscreen={isFullscreen}
           onToggleFullscreen={toggleFullscreen}
-          canSplit={canSplit}
-          isSplit={isSplit}
-          onToggleSplit={() => setSplitRequested((s) => !s)}
+          canInterleave={canInterleave}
+          isInterleaved={isInterleaved}
+          onToggleInterleave={() => setInterleaveRequested((s) => !s)}
         />
       )}
     </div>

@@ -7,7 +7,7 @@ import { getScrollContainer, scrollContainerTo } from "@/utils/scroll-container"
 import SpeedControl from "./SpeedControl";
 import PlayButton from "./PlayButton";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Columns2, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowUp, Languages, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 function useAtTop(container: HTMLElement | null, offset = 10): boolean {
   return useSyncExternalStore(
@@ -28,9 +28,9 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   setScrollSpeed,
   isFullscreen = false,
   onToggleFullscreen,
-  canSplit = false,
-  isSplit = false,
-  onToggleSplit,
+  canInterleave = false,
+  isInterleaved = false,
+  onToggleInterleave,
 }) => {
   // Fullscreen makes the viewer its own scrolling box, so the controls have to read
   // and drive that element instead of the window.
@@ -65,15 +65,15 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
         >
           <SpeedControl scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
         </div>
-        {canSplit && (
+        {canInterleave && (
           <Button
             variant="outline"
             size="icon"
-            className={`h-10 w-10 rounded-full ${isSplit ? "bg-primary/10 text-primary hover:bg-primary/20" : ""}`}
-            onClick={onToggleSplit}
-            title={isSplit ? "Hide the translation" : "Show the translation beside the lyrics"}
+            className={`h-10 w-10 rounded-full ${isInterleaved ? "bg-primary/10 text-primary hover:bg-primary/20" : ""}`}
+            onClick={onToggleInterleave}
+            title={isInterleaved ? "Hide the translation" : "Show the translation line by line"}
           >
-            <Columns2 size={20} />
+            <Languages size={20} />
           </Button>
         )}
         <Button
