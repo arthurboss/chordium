@@ -128,7 +128,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   return (
     <div ref={ref} id={CHORD_SHEET_VIEWER_ID} data-split={isSplit || undefined} {...cyAttr('chord-display')}>
       {isSplit && lyricsSplit ? (
-        <div className="flex grow gap-4">
+        <div className="flex grow flex-col gap-4 lg:flex-row">
           <div className="flex min-w-0 flex-1 flex-col">
             <ChordSheetContent songChords={lyricsSplit.original} {...paneProps} />
           </div>

@@ -139,9 +139,13 @@
   flex-direction: column;
 }
 
-/* Side by side, each column still has a full column's worth of words to fit. */
-#chord-sheet-viewer:fullscreen[data-split] {
-  --reading-column: 93rem; /* two reading columns and the gap between them */
+/* Only once the two columns sit side by side, which is the lg breakpoint the split
+   layout switches at. Stacked, they are one column of words and keep one column's
+   width. */
+@media (min-width: 64rem) {
+  #chord-sheet-viewer:fullscreen[data-split] {
+    --reading-column: 93rem; /* two reading columns and the gap between them */
+  }
 }
 
 #chord-sheet-viewer:fullscreen > #sticky-bottom-container {
