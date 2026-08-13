@@ -131,16 +131,17 @@
 }
 
 /* Only the height is worth gaining. Left to fill a wide screen the lines stretch far
-   past what can be read in one glance, so the column keeps its on-page width. */
-#chord-sheet-viewer:fullscreen > * {
+   past what can be read in one glance, so the column keeps its on-page width. The
+   controls are left out of this: they carry their own spacing and must look the same
+   fullscreen as they do on the page. */
+#chord-sheet-viewer:fullscreen > *:not(#sticky-bottom-container) {
   max-width: var(--reading-column);
   margin-inline: auto;
   padding-inline: 1rem;
 }
 
-/* The controls stay at the right edge of that column, where they sit on the page,
-   rather than drifting out to the corner of the screen. */
+/* Nudging only the right margin keeps the controls at the edge of that column,
+   where they sit on the page, rather than out at the corner of the screen. */
 #chord-sheet-viewer:fullscreen > #sticky-bottom-container {
-  padding-inline: 0;
   margin-right: max(1rem, calc((100% - var(--reading-column)) / 2 + 1rem));
 }
