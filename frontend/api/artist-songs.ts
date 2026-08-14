@@ -102,12 +102,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // fall through to JSONP
   }
 
-  // 3. JSONP last resort
+  // 3. Source search last resort
   try {
-    const docs = await fetchSourceDocs(artistPath.replace(/-/g, " "));
-    const songs = docs
-      .filter((d) => d.t === "2" && d.d === artistPath && d.u)
-      .map((d) => ({ title: d.m, artist: d.a, path: `${d.d}/${d.u}` }));
+    const hits = await fetchSourceSongs(artistPath.replace(/-/g, " "));
+    // The search is by name rather than by slug, so anything belonging to a
+    // different artist is dropped.
+    const songs = hits.flatMap((hit) =>
+      hit.type === "song" && hit.path.startsWith(`${artistPath}/`)
+        ? [{ title: hit.title, artist: hit.artist, path: hit.path }]
+        : []
+    );
 
     if (songs.length > 0) {
       Promise.all(

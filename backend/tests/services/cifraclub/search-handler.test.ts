@@ -2,21 +2,42 @@ import { describe, it, expect, jest, beforeEach, afterAll } from "@jest/globals"
 import { performSearch } from "../../../services/cifraclub/search-handler.js";
 
 const originalFetch = global.fetch;
-const mockFetch = jest.fn<() => Promise<unknown>>();
+const mockFetch = jest.fn<(url: string) => Promise<unknown>>();
 
-function jsonpResponse(docs: object[]) {
-  return {
-    ok: true,
-    text: async () =>
-      `x({"response":{"numFound":${docs.length},"start":0,"docs":${JSON.stringify(docs)}}})`,
-  };
+const SONG_DOC = { tipo: "2", txt: "Wonderwall", art: "Oasis", dns: "oasis", url: "wonderwall" };
+const ARTIST_DOC = { art: "Oasis", dns: "oasis" };
+
+const SONG_HIT = { type: "song", title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" };
+const ARTIST_HIT = { type: "artist", displayName: "Oasis", path: "oasis", songCount: null };
+
+function json(body: unknown) {
+  return { ok: true, text: async () => JSON.stringify(body) };
 }
 
-const ARTIST_DOC = { t: "1", m: "Oasis", a: "Oasis", d: "oasis" };
-const SONG_DOC = { t: "2", m: "Wonderwall", a: "Oasis", d: "oasis", u: "wonderwall" };
+function jsonp(body: unknown) {
+  return { ok: true, text: async () => `LetrasArtists(${JSON.stringify(body)})` };
+}
 
-const ARTIST_HIT = { type: "artist", displayName: "Oasis", path: "oasis", songCount: null };
-const SONG_HIT = { type: "song", title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" };
+/** Answers each index separately, the way the two live endpoints do. */
+function respondWith({
+  songs = [] as object[],
+  artists = [] as object[],
+  numFound,
+}: { songs?: object[]; artists?: object[]; numFound?: number } = {}) {
+  mockFetch.mockImplementation(async (url: string) => {
+    if (url.includes("/cc/c7/")) {
+      return json({ response: { numFound: numFound ?? songs.length, docs: songs } });
+    }
+    if (url.includes("/letras/artist/")) {
+      return jsonp({ response: { numFound: artists.length, docs: artists } });
+    }
+    throw new Error(`unexpected request: ${url}`);
+  });
+}
+
+function urlsFor(fragment: string): string[] {
+  return mockFetch.mock.calls.map(([url]) => url).filter((url) => url.includes(fragment));
+}
 
 describe("unified search handler", () => {
   beforeEach(() => {
@@ -28,49 +49,72 @@ describe("unified search handler", () => {
     global.fetch = originalFetch;
   });
 
-  it("returns artists and songs together, in the order the source ranked them", async () => {
-    mockFetch.mockResolvedValue(jsonpResponse([ARTIST_DOC, SONG_DOC]));
+  it("leads with the artists when the query names one outright", async () => {
+    respondWith({ songs: [SONG_DOC], artists: [ARTIST_DOC] });
 
     await expect(performSearch("oasis")).resolves.toEqual([ARTIST_HIT, SONG_HIT]);
   });
 
-  it("preserves a song-first ranking rather than grouping by kind", async () => {
-    mockFetch.mockResolvedValue(jsonpResponse([SONG_DOC, ARTIST_DOC]));
+  it("leads with the songs when no artist answers to the query", async () => {
+    respondWith({ songs: [SONG_DOC], artists: [ARTIST_DOC] });
 
     await expect(performSearch("wonderwall")).resolves.toEqual([SONG_HIT, ARTIST_HIT]);
   });
 
-  it("drops documents that cannot be turned into a link", async () => {
-    mockFetch.mockResolvedValue(
-      jsonpResponse([
-        { t: "1", m: "No Slug", a: "No Slug", d: "" },
-        { t: "2", m: "No Song Slug", a: "Oasis", d: "oasis" },
-        SONG_DOC,
-      ])
-    );
+  it("matches an artist name whatever its accents and casing", async () => {
+    respondWith({ artists: [{ art: "Legião Urbana", dns: "legiao-urbana" }] });
 
-    await expect(performSearch("oasis")).resolves.toEqual([SONG_HIT]);
+    const results = await performSearch("legiao urbana");
+
+    expect(results[0]).toMatchObject({ type: "artist", path: "legiao-urbana" });
+  });
+
+  it("asks again for the whole set when the first request did not return it all", async () => {
+    respondWith({ songs: [SONG_DOC], artists: [], numFound: 621 });
+
+    await performSearch("eagles");
+
+    const songRequests = urlsFor("/cc/c7/");
+    expect(songRequests).toHaveLength(2);
+    expect(songRequests[0]).toContain("limit=500");
+    expect(songRequests[1]).toContain("limit=621");
+  });
+
+  it("asks only once when the first request already returned everything", async () => {
+    respondWith({ songs: [SONG_DOC], artists: [] });
+
+    await performSearch("wonderwall");
+
+    expect(urlsFor("/cc/c7/")).toHaveLength(1);
+  });
+
+  it("drops documents that cannot be turned into a link", async () => {
+    respondWith({
+      songs: [{ tipo: "2", txt: "No Slug", art: "Oasis", dns: "oasis" }, SONG_DOC],
+      artists: [{ art: "No Slug" }],
+    });
+
+    await expect(performSearch("wonderwall")).resolves.toEqual([SONG_HIT]);
   });
 
   it("returns an empty list when the source has no matches", async () => {
-    mockFetch.mockResolvedValue(jsonpResponse([]));
+    respondWith({ songs: [], artists: [] });
 
     await expect(performSearch("xyznonexistent")).resolves.toEqual([]);
-  });
-
-  it("sends the whole query as one string", async () => {
-    mockFetch.mockResolvedValue(jsonpResponse([]));
-
-    await performSearch("guns n roses paradise city");
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://solr.sscdn.co/cc/h2/?q=guns%20n%20roses%20paradise%20city&callback=x"
-    );
   });
 
   it("reports a failure rather than an empty result when the source is unreachable", async () => {
     mockFetch.mockRejectedValue(new Error("Network Error"));
 
     await expect(performSearch("oasis")).rejects.toThrow("Network Error");
+  });
+
+  it("still answers with the artists when only the song index is unreachable", async () => {
+    mockFetch.mockImplementation(async (url: string) => {
+      if (url.includes("/cc/c7/")) throw new Error("song index down");
+      return jsonp({ response: { numFound: 1, docs: [ARTIST_DOC] } });
+    });
+
+    await expect(performSearch("oasis")).resolves.toEqual([ARTIST_HIT]);
   });
 });

@@ -8,11 +8,11 @@ export {
 } from "./cascade";
 export {
   unifiedSearch,
-  fetchSourceDocs,
-  toSearchHits,
-  mergeSearchHits,
-  SOURCE_SEARCH_URL,
+  fetchSourceSongs,
+  fetchSourceArtists,
+  artistsLead,
+  SONG_SEARCH_URL,
+  ARTIST_SEARCH_URL,
   type SqlTag,
   type UnifiedSearchOptions,
-  type MergeSearchHitsInput,
 } from "./search";
