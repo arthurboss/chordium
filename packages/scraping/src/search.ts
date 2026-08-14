@@ -128,30 +128,6 @@ export async function fetchSourceArtists(query: string): Promise<SearchHit[]> {
   });
 }
 
-/** Case- and accent-insensitive, so "Legiao" matches "Legião". */
-function normalize(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/**
- * Whether the artists should be shown above the songs.
- *
- * Songs and artists come from two indexes that score against different corpora,
- * so their scores cannot be compared to decide which is the better answer. A name
- * matching the query outright is the one signal that needs no comparison:
- * somebody typing "eagles" is naming an act, whereas "hotel california" names a
- * song that no artist answers to.
- */
-export function artistsLead(query: string, artists: SearchHit[]): boolean {
-  const wanted = normalize(query);
-  return artists.some((hit) => hit.type === "artist" && normalize(hit.displayName) === wanted);
-}
-
 function keyOf(hit: SearchHit): string {
   return `${hit.type}:${hit.path}`;
 }
@@ -168,6 +144,8 @@ function escapeForLike(query: string): string {
  * when the source cannot be reached, since it returns every song it has for a
  * query and ranks artists properly, whereas a substring match over our own rows
  * has no notion of relevance and would offer "Beagles" for "eagles".
+ *
+ * Artists come first in the returned list, songs after.
  */
 export async function unifiedSearch({
   query,
@@ -202,7 +180,11 @@ export async function unifiedSearch({
     throw songsResult.reason;
   }
 
-  const ordered = artistsLead(trimmed, artists) ? [...artists, ...songs] : [...songs, ...artists];
+  // Artists first, always. A query matches far fewer acts than songs, so the
+  // shorter list reads as a way to narrow down rather than as something in the
+  // way, and the act someone named stays visible without scrolling past their
+  // back catalogue.
+  const ordered = [...artists, ...songs];
 
   const seen = new Set<string>();
   const merged = ordered.filter((hit) => {

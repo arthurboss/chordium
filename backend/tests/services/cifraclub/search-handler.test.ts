@@ -49,24 +49,22 @@ describe("unified search handler", () => {
     global.fetch = originalFetch;
   });
 
-  it("leads with the artists when the query names one outright", async () => {
+  it("puts the artists above the songs", async () => {
     respondWith({ songs: [SONG_DOC], artists: [ARTIST_DOC] });
 
     await expect(performSearch("oasis")).resolves.toEqual([ARTIST_HIT, SONG_HIT]);
   });
 
-  it("leads with the songs when no artist answers to the query", async () => {
+  it("keeps the artists above the songs even when the query names a song", async () => {
     respondWith({ songs: [SONG_DOC], artists: [ARTIST_DOC] });
 
-    await expect(performSearch("wonderwall")).resolves.toEqual([SONG_HIT, ARTIST_HIT]);
+    await expect(performSearch("wonderwall")).resolves.toEqual([ARTIST_HIT, SONG_HIT]);
   });
 
-  it("matches an artist name whatever its accents and casing", async () => {
-    respondWith({ artists: [{ art: "Legião Urbana", dns: "legiao-urbana" }] });
+  it("returns songs alone when the query matches no artist", async () => {
+    respondWith({ songs: [SONG_DOC], artists: [] });
 
-    const results = await performSearch("legiao urbana");
-
-    expect(results[0]).toMatchObject({ type: "artist", path: "legiao-urbana" });
+    await expect(performSearch("wonderwall")).resolves.toEqual([SONG_HIT]);
   });
 
   it("asks again for the whole set when the first request did not return it all", async () => {

@@ -10,7 +10,6 @@ export {
   unifiedSearch,
   fetchSourceSongs,
   fetchSourceArtists,
-  artistsLead,
   SONG_SEARCH_URL,
   ARTIST_SEARCH_URL,
   type SqlTag,

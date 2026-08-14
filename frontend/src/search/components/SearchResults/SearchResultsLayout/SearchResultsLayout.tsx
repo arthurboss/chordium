@@ -86,22 +86,22 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     );
   }
 
-  const songs = results.filter((result) => result.type === "song");
-  const artists = results.filter((result) => result.type === "artist");
-
-  // The source ranks artists and songs against each other in one response, so
-  // whichever kind it put first is its best answer to the query and leads here
-  // too. A kind it found nothing of gets no section at all.
-  const sections =
-    results[0].type === "song"
-      ? [
-          { key: "songs", title: t("searchResults.songs"), items: songs },
-          { key: "artists", title: t("searchResults.artists"), items: artists },
-        ]
-      : [
-          { key: "artists", title: t("searchResults.artists"), items: artists },
-          { key: "songs", title: t("searchResults.songs"), items: songs },
-        ];
+  // Artists above songs. A query matches far fewer acts than songs, so the short
+  // list reads as a way to narrow down rather than as something in the way, and
+  // the act someone named stays visible without scrolling past their catalogue.
+  // A kind with nothing in it gets no section at all.
+  const sections = [
+    {
+      key: "artists",
+      title: t("searchResults.artists"),
+      items: results.filter((result) => result.type === "artist"),
+    },
+    {
+      key: "songs",
+      title: t("searchResults.songs"),
+      items: results.filter((result) => result.type === "song"),
+    },
+  ];
 
   const shown = sections.filter((section) => section.items.length > 0);
 
