@@ -28,14 +28,17 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 - **Dark Mode** - Light, dark, and system theme options
 - **Mobile-friendly** - Learn on-the-go with responsive design
 - **File Upload** - Import your own chord sheets with metadata extraction
+- **Song Lyrics with Translation** - Read lyrics in your language, translated on-device with no server or API key
+- **Fullscreen Mode** - Distraction-free fullscreen reading with translated lyrics side-by-side
+- **Language Support** - English, Spanish, Portuguese, and German interface + 100+ language translations for lyrics
 
 ## 🎸 Jam Sessions
 
-Share a chord sheet with other players instantly, fully **offline** on a local network..
+Share a chord sheet with other players on the same WiFi network, fully **offline**.
 
-The host opens a chord sheet and taps **Share** to generate a QR code. Anyone who scans it loads the same chord sheet on their device. 
+The host opens a chord sheet and taps **Share** to generate a QR code or shareable link. Anyone who scans the code or uses the link loads the same chord sheet on their device. 
 
-Join a session by tapping the scan button in the header.
+All players start with the same song. Real-time sync for scroll position, capo, and transpose is coming soon.
 
 ## 💻 Tech Stack
 
@@ -77,6 +80,8 @@ Join a session by tapping the scan button in the header.
 | [Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
 | [PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
 | [Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
+| [Translation System](./docs/translation-system.md) | On-device lyrics translation architecture and setup |
+| [Offline Translation](./docs/offline-functionality.md#song-lyrics-and-translation) | Translation without internet connection |
 
 ## 🚀 Quick Start
 

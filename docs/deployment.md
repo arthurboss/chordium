@@ -30,7 +30,17 @@ Everything deploys automatically from GitHub via Vercel.
 |---|---|---|
 | `VITE_API_URL` | No | Override API base URL (defaults to relative `/api/`) |
 | `POSTGRES_URL` | Yes | Injected automatically by Vercel Postgres (Neon) |
+| `DATABASE_URL_UNPOOLED` | Yes (migrations) | Unpooled connection URL for schema migrations (Neon) |
 | `NODE_ENV` | No | Set to `production` by Vercel automatically |
+
+### Database Configuration
+
+Chordium uses **Neon** (PostgreSQL) via **Vercel Postgres**:
+
+- Vercel automatically injects `POSTGRES_URL` (pooled) and `DATABASE_URL_UNPOOLED` (for migrations)
+- Connection pooling is handled by Neon's built-in connection pooler
+- Schema migrations must use `DATABASE_URL_UNPOOLED` to avoid transaction conflicts with pooled connections
+- For more details on connection strategies, see [Neon Connection Pooling Guide](https://neon.tech/docs/connect/connection-pooling)
 
 ### Vercel Project Settings
 

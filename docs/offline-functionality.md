@@ -12,7 +12,19 @@ The offline system consists of several components that work together to provide 
 - **Offline Indicator**: Visual feedback when offline
 - **Development Testing Tools**: Easy testing of offline scenarios
 
+## Song Lyrics and Translation
+
+Lyrics are bundled with chord sheets and translated on-device:
+
+- **Translation methods**:
+  - Browser's built-in Translator API (if available, zero download)
+  - Local Hugging Face model (downloaded once per language, works fully offline)
+- **Caching**: Translations are cached per song and per language
+- **Privacy**: All translation runs locally on-device; nothing is sent to a server
+
 ## Components
+
+
 
 ### 1. useOffline Hook
 
