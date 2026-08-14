@@ -1,9 +1,9 @@
 import { RecognizerUnavailableError, type RecognitionSession, type Recognizer } from './types';
 
 /**
- * The browser's own SpeechRecognition, preferred wherever it exists because it
- * needs no download of ours, exactly as the browser's translator is preferred over
- * the model that backs it up.
+ * The browser's own SpeechRecognition, preferred wherever it exposes the API
+ * because it needs no download of ours, exactly as the browser's translator is
+ * preferred over the model that backs it up.
  *
  * Where the browser can recognise on the device it is asked to, which also keeps
  * the feature working offline. Where it cannot, it recognises through its vendor
@@ -63,25 +63,37 @@ export function isNativeRecognizerSupported(): boolean {
 }
 
 /**
- * Whether this browser would keep the audio on the device for a language. Nothing
- * depends on the answer being yes: it decides only whether to ask for on-device
- * recognition, since asking for it where it is unavailable fails the whole
- * recognition rather than falling back by itself.
+ * Whether the browser said it can keep the audio on the device, as last asked.
+ *
+ * Held here rather than looked up when needed because the answer arrives as a
+ * promise and listening cannot afford to wait for one: it has to begin in the click
+ * that asked for it. Unknown counts as no, which only means on-device recognition
+ * is not requested on the very first attempt.
  */
-async function canRecogniseLocally(language: string): Promise<boolean> {
+let recognisesLocally = false;
+
+/**
+ * Asks whether on-device recognition is available, for the next time listening
+ * starts. Called while the button is being set up, well away from the click.
+ */
+export async function probeLocalRecognition(language: string): Promise<void> {
   const Recognition = getConstructor();
-  if (!Recognition?.available) return false;
+  if (!Recognition?.available) {
+    recognisesLocally = false;
+    return;
+  }
   try {
-    return (await Recognition.available({ langs: [language], processLocally: true })) === 'available';
+    recognisesLocally =
+      (await Recognition.available({ langs: [language], processLocally: true })) === 'available';
   } catch {
-    return false;
+    recognisesLocally = false;
   }
 }
 
 export function createNativeRecognizer(): Recognizer {
   return {
     id: 'native',
-    async listen(language) {
+    listen(language) {
       const Recognition = getConstructor();
       if (!Recognition) {
         throw new RecognizerUnavailableError('SpeechRecognition is not available');
@@ -92,9 +104,10 @@ export function createNativeRecognizer(): Recognizer {
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-      // Asked for only where it is offered, so that the audio stays on the device
-      // and the search keeps working offline. Elsewhere the default stands.
-      if (await canRecogniseLocally(language)) recognition.processLocally = true;
+      // Requested only where the browser has already said it can, so that the audio
+      // stays on the device and the search keeps working offline. Elsewhere the
+      // default stands, and nothing here waits on an answer.
+      if (recognisesLocally) recognition.processLocally = true;
 
       let heard = '';
       const transcript = new Promise<string>((resolve, reject) => {
@@ -116,6 +129,7 @@ export function createNativeRecognizer(): Recognizer {
         recognition.onend = () => resolve(heard.trim());
       });
 
+      // Started in the same turn as the click, with nothing awaited in between.
       recognition.start();
 
       return {

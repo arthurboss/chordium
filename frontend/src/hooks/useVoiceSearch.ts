@@ -6,6 +6,7 @@ import {
   requiresDownloadConsent,
   resolveRecognizerKind,
 } from '@/services/speech/get-recognizer';
+import { probeLocalRecognition } from '@/services/speech/native-recognizer';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
 import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/speech/types';
 
@@ -25,8 +26,8 @@ interface UseVoiceSearchOptions {
 }
 
 /**
- * Runs one spoken search at a time, from pressing the microphone to handing back
- * what was heard.
+ * Runs one spoken search at a time, from pressing the microphone to handing back what
+ * was heard.
  *
  * Where the browser recognises speech itself the first press opens the microphone.
  * Where it does not, the first press asks for the download instead, so a reader who
@@ -40,8 +41,8 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<RecognitionSession | null>(null);
 
-  // Kept in a ref so a transcript arriving late calls the current handler rather
-  // than the one that happened to be in scope when listening started.
+  // Kept in a ref so a transcript arriving late calls the current handler rather than
+  // the one that happened to be in scope when listening started.
   const onTranscriptRef = useRef(onTranscript);
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
@@ -52,8 +53,11 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       setState('unsupported');
       return;
     }
+    // Asked here, well away from any click, because listening itself cannot wait for
+    // the answer without spending the gesture it depends on.
+    await probeLocalRecognition(language);
     setState((await requiresDownloadConsent()) ? 'needs-setup' : 'idle');
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     void assess();
@@ -63,8 +67,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
 
   /**
    * Closing the microphone is where the waiting starts, so the state moves here
-   * rather than when the transcript lands: by then there is nothing left to wait
-   * for.
+   * rather than when the transcript lands: by then there is nothing left to wait for.
    */
   const stop = useCallback(() => {
     if (!sessionRef.current) return;
@@ -72,39 +75,52 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     sessionRef.current.stop();
   }, []);
 
-  const start = useCallback(async () => {
+  /**
+   * Deliberately not an async function. Safari only allows a recognition that begins
+   * in the click that asked for it, and an await anywhere before listening starts
+   * spends that click: the microphone opens and nothing is ever heard. Everything
+   * that has to be waited for is waited for after listening has begun.
+   */
+  const start = useCallback(() => {
     setError(null);
 
-    // Setting up is its own step, done where the download can be explained and
-    // agreed to rather than sprung on the reader by a press of the microphone.
+    // Setting up is its own step, done where the download can be explained and agreed
+    // to rather than sprung on the reader by a press of the microphone.
     if (state === 'needs-setup') {
       openVoiceSetup();
       return;
     }
     if (state !== 'idle') return;
 
+    let session: RecognitionSession;
     try {
-      const session = await createRecognizer(resolveRecognizerKind()).listen(language);
-      sessionRef.current = session;
-      setState('listening');
-
-      // Settles once the words have been made out, which for the downloaded model
-      // is a moment after the microphone closes and for the browser's own
-      // recogniser is immediate.
-      const transcript = await session.transcript;
-      sessionRef.current = null;
-      setState('idle');
-      if (transcript) onTranscriptRef.current(transcript);
+      session = createRecognizer(resolveRecognizerKind()).listen(language);
     } catch (cause) {
-      sessionRef.current = null;
       setState('idle');
-      setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
-      console.error('Voice search failed:', cause);
+      setError('failed');
+      console.error('Voice search could not start:', cause);
+      return;
     }
+
+    sessionRef.current = session;
+    setState('listening');
+
+    session.transcript
+      .then((transcript) => {
+        sessionRef.current = null;
+        setState('idle');
+        if (transcript) onTranscriptRef.current(transcript);
+      })
+      .catch((cause: unknown) => {
+        sessionRef.current = null;
+        setState('idle');
+        setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
+        console.error('Voice search failed:', cause);
+      });
   }, [language, state]);
 
-  // A microphone left open when the page moves on would keep recording, so any
-  // session still running is abandoned on the way out.
+  // A microphone left open when the page moves on would keep recording, so any session
+  // still running is abandoned on the way out.
   useEffect(
     () => () => {
       sessionRef.current?.abort();

@@ -12,8 +12,8 @@ import {
 export { LOCAL_MODEL_ID, LOCAL_MODEL_SIZE_MB };
 
 /**
- * Recogniser for browsers that cannot do it themselves. The work happens in a
- * worker; this side records the microphone and reports what the worker says back.
+ * Recogniser for browsers that cannot hear a search themselves. The work happens in
+ * a worker; this side records the microphone and reports what the worker says back.
  */
 
 type WorkerMessage =
@@ -66,11 +66,10 @@ function ask(
 }
 
 /**
- * The model is cached through the Cache API, which only exists in a secure
- * context. Over plain http on anything but localhost it is absent and loading the
- * model would stall with no error, so the caller is told up front instead. The
- * microphone is gated the same way, so both halves of this backend stand or fall
- * together.
+ * The model is cached through the Cache API, which only exists in a secure context.
+ * Over plain http on anything but localhost it is absent and loading the model would
+ * stall with no error, so the caller is told up front instead. The microphone is
+ * gated the same way, so both halves of this backend stand or fall together.
  */
 export function isLocalModelSupported(): boolean {
   return (
@@ -84,8 +83,8 @@ export function isLocalModelSupported(): boolean {
 
 /**
  * Counts downloads so a cancellation can be told apart from a later attempt. The
- * library gives no way to abort its own requests, so cancelling stops the app
- * acting on the result and clears whatever reached the cache.
+ * library gives no way to abort its own requests, so cancelling stops the app acting
+ * on the result and clears whatever reached the cache.
  */
 let downloadGeneration = 0;
 let cancelledGeneration = -1;
@@ -110,15 +109,15 @@ export async function downloadLocalModel(
   } catch (error) {
     if (!isCancelled()) throw error;
   }
-  // Only tidy up when nothing newer has taken over, or this would delete the
-  // model a later attempt is busy fetching.
+  // Only tidy up when nothing newer has taken over, or this would delete the model a
+  // later attempt is busy fetching.
   if (downloadGeneration === generation) await deleteLocalModel();
   return 'cancelled';
 }
 
 /**
- * Calls off a download in progress. The caller can move on straight away; the
- * cache is cleared behind them.
+ * Calls off a download in progress. The caller can move on straight away; the cache
+ * is cleared behind them.
  */
 export function cancelLocalModelDownload(): void {
   cancelledGeneration = downloadGeneration;
@@ -134,9 +133,9 @@ function isModelWeights(url: string): boolean {
 }
 
 /**
- * Whether the weights are on the device from an earlier visit. The weights are
- * what make the model usable; its config and tokenizer files are fetched first and
- * are tiny, so counting those would report a part-downloaded model as ready.
+ * Whether the weights are on the device from an earlier visit. The weights are what
+ * make the model usable; its config and tokenizer files are fetched first and are
+ * tiny, so counting those would report a part-downloaded model as ready.
  */
 export async function isLocalModelDownloaded(): Promise<boolean> {
   if (!isLocalModelSupported()) return false;
@@ -161,21 +160,26 @@ export async function deleteLocalModel(): Promise<void> {
         if (isModelFile(request.url)) await cache.delete(request);
       }
     }
-    // The worker holds a loaded copy, which has to go too or it would keep
-    // serving a model the reader has removed.
+    // The worker holds a loaded copy, which has to go too or it would keep serving a
+    // model the reader has removed.
     await ask({ type: 'forget' });
   } catch (error) {
     console.error('Failed to delete the speech model:', error);
   }
 }
 
+interface Recording {
+  stop: () => Promise<Blob>;
+  release: () => void;
+}
+
 /**
  * Opens the microphone and records until told to stop.
  *
- * The container is left to the browser: whatever its MediaRecorder produces, its
- * own decoder reads back, so there is no format to negotiate.
+ * The container is left to the browser: whatever its MediaRecorder produces, its own
+ * decoder reads back, so there is no format to negotiate.
  */
-async function record(): Promise<{ stop: () => Promise<Blob>; abort: () => void }> {
+async function record(): Promise<Recording> {
   let stream: MediaStream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -193,26 +197,26 @@ async function record(): Promise<{ stop: () => Promise<Blob>; abort: () => void 
   const release = () => stream.getTracks().forEach((track) => track.stop());
 
   return {
+    release,
     stop: () =>
       new Promise<Blob>((resolve) => {
-        recorder.onstop = () => {
+        const settle = () => {
           release();
           resolve(new Blob(chunks, { type: recorder.mimeType }));
         };
-        if (recorder.state === 'inactive') recorder.onstop?.(new Event('stop'));
-        else recorder.stop();
+        if (recorder.state === 'inactive') settle();
+        else {
+          recorder.onstop = settle;
+          recorder.stop();
+        }
       }),
-    abort: () => {
-      if (recorder.state !== 'inactive') recorder.stop();
-      release();
-    },
   };
 }
 
 export function createLocalModelRecognizer(): Recognizer {
   return {
     id: 'local-model',
-    async listen(language, onProgress) {
+    listen(language, onProgress) {
       if (!isLocalModelSupported()) {
         throw new RecognizerUnavailableError(
           'Voice search needs a secure context (https or localhost)'
@@ -220,8 +224,6 @@ export function createLocalModelRecognizer(): Recognizer {
       }
       const code = toModelCode(language);
       if (!code) throw new RecognizerUnavailableError(`Unsupported language: ${language}`);
-
-      const recording = await record();
 
       let settle: (text: string) => void = () => {};
       let fail: (error: Error) => void = () => {};
@@ -231,12 +233,17 @@ export function createLocalModelRecognizer(): Recognizer {
       });
 
       let finished = false;
+
+      // Asked for before anything is awaited, so the click that asked for it is not
+      // spent first. What it resolves to is awaited only once listening ends.
+      const recording = record();
+
       const finish = async () => {
         if (finished) return;
         finished = true;
         clearTimeout(timer);
         try {
-          const audio = await decodeRecording(await recording.stop());
+          const audio = await decodeRecording(await (await recording).stop());
           // Nothing was said, so there is nothing to send to the model.
           if (audio.length === 0) {
             settle('');
@@ -250,16 +257,24 @@ export function createLocalModelRecognizer(): Recognizer {
         }
       };
 
-      // A microphone left open would be recorded until the page closed, so
-      // listening ends itself at the cap.
+      // A microphone left open would be recorded until the page closed, so listening
+      // ends itself at the cap.
       const timer = setTimeout(() => void finish(), MAX_LISTEN_MS);
+
+      // A microphone the reader refused settles the session rather than leaving it
+      // listening for something that will never arrive.
+      recording.catch((error: unknown) => {
+        finished = true;
+        clearTimeout(timer);
+        fail(error instanceof Error ? error : new Error(String(error)));
+      });
 
       return {
         stop: () => void finish(),
         abort: () => {
           finished = true;
           clearTimeout(timer);
-          recording.abort();
+          void recording.then((open) => open.release()).catch(() => {});
           settle('');
         },
         transcript,
