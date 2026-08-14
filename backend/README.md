@@ -47,3 +47,8 @@ npm test
 Copy `.env.example` to `.env` and configure:
 
 
+
+## Deprecated Endpoints
+
+- `GET /api/lyrics` - **REMOVED** as of PR #215. Lyrics now come from the chord sheet and are translated on-device.
+

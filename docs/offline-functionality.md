@@ -12,7 +12,21 @@ The offline system consists of several components that work together to provide 
 - **Offline Indicator**: Visual feedback when offline
 - **Development Testing Tools**: Easy testing of offline scenarios
 
+## Song Lyrics and Translation
+
+When viewing lyrics, Chordium offers on-device translation:
+
+- **How it works**: Lyrics are bundled with the chord sheet (not fetched separately)
+- **Two translation methods**:
+  - Browser's built-in Translator API (if available, zero download required)
+  - Local Hugging Face model (downloaded once per language, works fully offline)
+- **Data**: Translations are cached per song and per language for quick access
+- **Privacy**: All translation runs locally on-device; nothing is sent to a server
+- **Removed**: The old serverless lyrics API (`/api/lyrics`) is no longer used
+
 ## Components
+
+
 
 ### 1. useOffline Hook
 
