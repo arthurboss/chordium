@@ -3,18 +3,20 @@ import { useSyncExternalStore } from "react";
 import { ChordSheetControlsProps } from "../../types";
 import StickyBottomContainer from "../../../StickyBottomContainer";
 import { useAtBottom } from "@/hooks/useAtBottom";
+import { getScrollContainer, scrollContainerTo } from "@/utils/scroll-container";
 import SpeedControl from "./SpeedControl";
 import PlayButton from "./PlayButton";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowUp, Languages, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
-function useAtTop(offset = 10): boolean {
+function useAtTop(container: HTMLElement | null, offset = 10): boolean {
   return useSyncExternalStore(
     (cb) => {
-      window.addEventListener("scroll", cb, { passive: true });
-      return () => window.removeEventListener("scroll", cb);
+      const target: HTMLElement | Window = container ?? window;
+      target.addEventListener("scroll", cb, { passive: true });
+      return () => target.removeEventListener("scroll", cb);
     },
-    () => window.scrollY <= offset,
+    () => (container ? container.scrollTop : window.scrollY) <= offset,
     () => true
   );
 }
@@ -24,9 +26,17 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   setAutoScroll,
   scrollSpeed,
   setScrollSpeed,
+  isFullscreen = false,
+  onToggleFullscreen,
+  canInterleave = false,
+  isInterleaved = false,
+  onToggleInterleave,
 }) => {
-  const isAtBottom = useAtBottom({ offset: 60 });
-  const isAtTop = useAtTop();
+  // Fullscreen makes the viewer its own scrolling box, so the controls have to read
+  // and drive that element instead of the window.
+  const scrollContainer = isFullscreen ? getScrollContainer() : null;
+  const isAtBottom = useAtBottom({ element: scrollContainer, offset: 60 });
+  const isAtTop = useAtTop(scrollContainer);
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -34,7 +44,7 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   }, [autoScroll]);
 
   const handleScrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollContainerTo(0);
   };
 
   const speedVisible = autoScroll && !collapsed;
@@ -55,6 +65,26 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
         >
           <SpeedControl scrollSpeed={scrollSpeed} setScrollSpeed={setScrollSpeed} />
         </div>
+        {canInterleave && (
+          <Button
+            variant="outline"
+            size="icon"
+            className={`h-10 w-10 rounded-full ${isInterleaved ? "bg-primary/10 text-primary hover:bg-primary/20" : ""}`}
+            onClick={onToggleInterleave}
+            title={isInterleaved ? "Hide the translation" : "Show the translation line by line"}
+          >
+            <Languages size={20} />
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-10 w-10 rounded-full"
+          onClick={onToggleFullscreen}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+        </Button>
         <Button
           variant="outline"
           size="icon"

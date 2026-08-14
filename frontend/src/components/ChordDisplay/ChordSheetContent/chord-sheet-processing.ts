@@ -38,6 +38,18 @@ export function processHtml(html: string, viewMode: string, maxCols: number, tra
 }
 
 /**
+ * The rendered lines as plain text, with tags and entities back down to the one character
+ * each stands for. Fullscreen sizes the page by the widest of these, so counting markup
+ * would shrink the words to fit text that is not there.
+ */
+export function plainTextLines(html?: string): string[] {
+  if (!html) return [];
+  return html
+    .split('\n')
+    .map((line) => line.replace(/<[^>]*>/g, "").replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, " "));
+}
+
+/**
  * Resolves the HTML source for a chord sheet.
  * Prefers `rawHtml` (scraped); falls back to converting plain-text `songChords`.
  */

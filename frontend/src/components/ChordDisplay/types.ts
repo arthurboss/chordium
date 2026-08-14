@@ -16,6 +16,11 @@ export interface ChordSheetControlsProps {
   scrollSpeed: number;
   setScrollSpeed: (v: number) => void;
   handleDownload?: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+  canInterleave?: boolean;
+  isInterleaved?: boolean;
+  onToggleInterleave?: () => void;
 }
 
 export interface ChordEditProps {

@@ -7,16 +7,22 @@ import { useSyncExternalStore, RefObject } from "react";
  *
  * @param options -
  *   ref: Optional React ref to a scrollable container (HTMLElement). If not provided, listens to window scroll.
+ *   element: Optional scrollable container resolved outside React (e.g. the fullscreen element).
  *   getTotalSize: Optional function to get total scrollable height (for virtualized lists). Required if using ref.
  *   offset: Optional pixel offset from the bottom to consider "at bottom" (default: 50)
  * @returns {boolean} - True if at or near the bottom, false otherwise
  */
 export function useAtBottom(options?: {
   ref?: RefObject<HTMLElement>;
+  element?: HTMLElement | null;
   getTotalSize?: () => number;
   offset?: number;
 }): boolean {
-  const { ref, getTotalSize, offset = 50 } = options || {};
+  const { ref, element, getTotalSize, offset = 50 } = options || {};
+
+  function resolveContainer(): HTMLElement | null {
+    return element ?? ref?.current ?? null;
+  }
 
   // --- Store subscription logic ---
   function subscribe(callback: () => void) {
@@ -25,10 +31,11 @@ export function useAtBottom(options?: {
       if (frame !== null) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(callback);
     };
-    if (ref?.current) {
-      ref.current.addEventListener("scroll", handler, { passive: true });
+    const container = resolveContainer();
+    if (container) {
+      container.addEventListener("scroll", handler, { passive: true });
       return () => {
-        ref.current?.removeEventListener("scroll", handler);
+        container.removeEventListener("scroll", handler);
         if (frame !== null) cancelAnimationFrame(frame);
       };
     } else {
@@ -44,11 +51,11 @@ export function useAtBottom(options?: {
 
   // --- Get current snapshot logic ---
   function getSnapshot() {
-    if (ref?.current) {
-      const el = ref.current;
-      const scrollOffset = el.scrollTop || 0;
-      const clientHeight = el.clientHeight || 0;
-      const totalSize = getTotalSize ? getTotalSize() : el.scrollHeight || 0;
+    const container = resolveContainer();
+    if (container) {
+      const scrollOffset = container.scrollTop || 0;
+      const clientHeight = container.clientHeight || 0;
+      const totalSize = getTotalSize ? getTotalSize() : container.scrollHeight || 0;
       const isScrollable = totalSize > clientHeight + 1;
       return (
         isScrollable && scrollOffset >= totalSize - clientHeight - offset

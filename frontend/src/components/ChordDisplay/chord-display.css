@@ -120,3 +120,95 @@
     overflow-x: auto;
   }
 }
+
+/* Was an inline style on the pre, which outranked every rule: the size has to be
+   settable by the stylesheet for fullscreen to fit the words to the width. */
+#chord-sheet-viewer pre {
+  font-size: inherit;
+}
+
+/* Fullscreen hands the viewer the whole screen, which also makes it the scrolling
+   box: without an overflow of its own the chords below the fold are unreachable. */
+#chord-sheet-viewer:fullscreen {
+  /* As large as the words may get. Physical units are anchored to px and say nothing
+     about the real display, but a CSS pixel is an angular reference: a screen watched
+     from across a room reports a smaller viewport for the same panel, so rem already
+     carries the viewing distance and holds this to a readable size on either. */
+  --fullscreen-max-font: 2rem;
+  /* The page's margin. It gives way on small screens rather than staying fixed, since the
+     words are fitted to what is left inside it and on a phone a fixed margin would take
+     most of the width. */
+  --page-margin: clamp(1rem, 5vmin, 3rem);
+  overflow-y: auto;
+  background-color: hsl(var(--background));
+  padding: 1rem 2rem;
+  /* A column so the words can grow into whatever height the controls leave them, which
+     a viewport height could not do without overrunning this element's own padding. */
+  display: flex;
+  flex-direction: column;
+  /* The card is measured against this, so the container has to be its parent: container
+     units inside a rule on the container itself resolve against the next one out. */
+  container-type: inline-size;
+}
+
+/*
+ * One size for the whole page, set once here.
+ *
+ * Everything inside takes its size from this, so the parts keep their proportions to each
+ * other and there is a single number to reason about. It is whichever is lower of what
+ * stays readable and what still fits on one line: a song whose lines break no longer says
+ * which chord belongs over which word, so the width is a ceiling rather than something to
+ * wrap against.
+ *
+ * The fit divides the width the words actually get by how wide the longest line is. That
+ * width is the container less this page's own margins and borders, and dividing it by 1ch
+ * gives how many characters fit; scaling by 1em over the character count leaves
+ * width / (chars x advance), so the font's own advance cancels out.
+ */
+#chord-sheet-viewer:fullscreen .chord-sheet-card {
+  padding: var(--page-margin);
+  font-size: min(
+    var(--fullscreen-max-font),
+    max(
+      0.75rem,
+      calc(
+        1em * ((100cqi - 2 * var(--page-margin) - 2px) / 1ch) / var(--max-line-chars, 40) *
+          var(--fit-scale, 1)
+      )
+    )
+  );
+}
+
+/* These carry absolute sizes elsewhere, which would not scale with the page: 14px for
+   tabs, the slider's size for part labels, a fixed rem for headings. Inheriting instead is
+   what makes the size above the only one. */
+#chord-sheet-viewer:fullscreen .chord-sheet-card :is(pre, .tablatura, .cnt, .tab-info, .section-title) {
+  font-size: inherit;
+}
+
+/* Nothing may wrap: the size exists to make wrapping unnecessary, and if it is ever wrong
+   the line should run off the edge visibly rather than silently refold. */
+#chord-sheet-viewer:fullscreen .chord-sheet-card :is(pre, .chord-line) {
+  white-space: pre;
+  word-break: normal;
+}
+
+#chord-sheet-viewer:fullscreen .chord-sheet-card pre {
+  overflow-x: auto;
+}
+
+#chord-sheet-viewer:fullscreen > #sticky-bottom-container {
+  animation: chord-controls-fade-in 300ms ease-in-out;
+}
+
+@keyframes chord-controls-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Each translated line sits directly under the line it translates, so colour is what
+   tells the two apart as the eye runs down them. */
+.lyrics-translation {
+  color: hsl(var(--primary));
+}

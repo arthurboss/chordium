@@ -1,6 +1,8 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import { useContainerColumns } from '../useContainerColumns';
-import { FONT_FAMILY, processHtml, resolveSourceHtml } from './chord-sheet-processing';
+import { useFitScale } from '../useFitScale';
+import { FONT_FAMILY, plainTextLines, processHtml, resolveSourceHtml } from './chord-sheet-processing';
 import { ChordLoadingState } from './ChordLoadingState';
 import { ChordEmptyState } from './ChordEmptyState';
 import { ChordSheetPre } from './ChordSheetPre';
@@ -13,6 +15,7 @@ interface ChordSheetContentProps {
   viewMode: string;
   transpose?: number;
   isLoading?: boolean;
+  className?: string;
 }
 
 /**
@@ -30,17 +33,31 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   viewMode,
   transpose = 0,
   isLoading,
+  className,
 }) => {
   const { containerRef, maxCols } = useContainerColumns(rawHtml);
   const fontFamily = FONT_FAMILY[fontStyle];
   const sourceHtml = resolveSourceHtml(rawHtml, songChords);
   const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols, transpose) : undefined;
 
+  const lines = React.useMemo(() => plainTextLines(processedHtml), [processedHtml]);
+  const fit = useFitScale(containerRef, lines);
+
   return (
     <div
       ref={containerRef}
-      className="[font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border"
-      style={{ '--content-font-size': `${fontSize}px`, fontFamily } as React.CSSProperties}
+      className={cn(
+        'chord-sheet-card [font-size:var(--content-font-size,14px)] bg-card mb-4 px-4 py-6 sm:px-6 rounded-lg shadow-xs border',
+        className
+      )}
+      style={{
+        '--content-font-size': `${fontSize}px`,
+        // Fullscreen sizes the words to the width it has spare, which it can only do
+        // knowing how long the longest line is and how wide that really makes it.
+        '--max-line-chars': fit.chars,
+        '--fit-scale': fit.scale,
+        fontFamily,
+      } as React.CSSProperties}
     >
       {isLoading ? <ChordLoadingState /> : processedHtml ? <ChordSheetPre html={processedHtml} fontFamily={fontFamily} /> : <ChordEmptyState />}
     </div>

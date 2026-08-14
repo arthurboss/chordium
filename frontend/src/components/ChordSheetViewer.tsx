@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
@@ -8,8 +8,12 @@ import ChordEdit from './ChordDisplay/ChordEdit';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { useChordDisplaySettings } from '@/hooks/use-chord-display-settings';
 import { useChordEditor } from '@/hooks/use-chord-editor';
+import { useFullscreen } from '@/hooks/use-fullscreen';
 import { downloadTextFile } from '@/utils/download-utils';
+import { interleaveTranslation } from '@/utils/interleave-translation';
 import { cyAttr } from '@/utils/test-utils';
+
+const CHORD_SHEET_VIEWER_ID = 'chord-sheet-viewer';
 
 interface ChordSheetViewerProps {
   chordSheet: ChordSheet & SongMetadata;
@@ -22,6 +26,8 @@ interface ChordSheetViewerProps {
   effectiveTranspose?: number;
   fontSize?: number;
   viewMode?: string;
+  /** The words and their translation, when both are available to show at once. */
+  lyricsSplit?: { original: string; translated: string };
   // When provided by a parent, editing state is controlled externally
   isEditing?: boolean;
   setIsEditing?: (v: boolean) => void;
@@ -41,6 +47,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   effectiveTranspose: externalEffectiveTranspose,
   fontSize: externalFontSize,
   viewMode: externalViewMode,
+  lyricsSplit,
   isEditing: externalIsEditing,
   setIsEditing: externalSetIsEditing,
   editContent: externalEditContent,
@@ -54,6 +61,17 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
     setScrollSpeed,
     toggleAutoScroll
   } = useAutoScroll();
+
+  const { isFullscreen, toggleFullscreen } = useFullscreen(CHORD_SHEET_VIEWER_ID);
+  const [interleaveRequested, setInterleaveRequested] = useState(false);
+
+  const canInterleave = isFullscreen && !!lyricsSplit;
+  const isInterleaved = canInterleave && interleaveRequested;
+
+  const interleavedHtml = useMemo(
+    () => (isInterleaved && lyricsSplit ? interleaveTranslation(lyricsSplit.original, lyricsSplit.translated) : undefined),
+    [isInterleaved, lyricsSplit]
+  );
 
   const {
     fontSize: internalFontSize,
@@ -99,15 +117,19 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   }
 
   return (
-    <div ref={ref} id="chord-sheet-viewer" {...cyAttr('chord-display')}>
+    <div ref={ref} id={CHORD_SHEET_VIEWER_ID} {...cyAttr('chord-display')}>
       <ChordSheetContent
-        rawHtml={chordSheet.rawHtml}
-        songChords={chordSheet.songChords}
+        rawHtml={interleavedHtml ?? chordSheet.rawHtml}
+        songChords={interleavedHtml ? undefined : chordSheet.songChords}
         fontSize={fontSize}
         fontStyle={fontStyle}
         viewMode={viewMode}
         transpose={effectiveTranspose}
         isLoading={isLoading}
+        // Short words would otherwise sit in a card a fraction of the screen tall.
+        // Growing is inert until fullscreen, which is the only place the viewer is a
+        // column with height to spare.
+        className="grow"
       />
       {showControlsBar && (
         <StickyControlsBar
@@ -116,6 +138,11 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           scrollSpeed={scrollSpeed}
           setScrollSpeed={setScrollSpeed}
           handleDownload={handleDownload}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={toggleFullscreen}
+          canInterleave={canInterleave}
+          isInterleaved={isInterleaved}
+          onToggleInterleave={() => setInterleaveRequested((s) => !s)}
         />
       )}
     </div>

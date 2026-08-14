@@ -1,7 +1,11 @@
 import { FOOTER_HEIGHT, NAVBAR_HEIGHT, updateLayoutHeights } from './layout';
+import { getScrollContainer, scrollContainerBy } from './scroll-container';
 
 // Default scroll speed for auto-scroll
 export const DEFAULT_SCROLL_SPEED = 3;
+
+// Pixels per frame per speed step, at the reference refresh rate.
+const SCROLL_AMOUNT_PER_SPEED_STEP = 0.03;
 
 // Interface for auto-scroll state references
 export interface AutoScrollRefs {
@@ -19,6 +23,20 @@ export function getTitleArtistElement(): Element | null {
 }
 
 /**
+ * Whether there is nothing left to scroll. Fullscreen scrolls the viewer itself, which
+ * has no page footer below it, so the page's footer allowance would stop it early.
+ */
+function hasReachedEnd(): boolean {
+  const container = getScrollContainer();
+  if (container) {
+    return container.scrollTop + container.clientHeight >= container.scrollHeight - 1;
+  }
+  const scrollBottom = window.innerHeight + window.scrollY;
+  const limit = document.body.offsetHeight - FOOTER_HEIGHT;
+  return scrollBottom >= limit - 1;
+}
+
+/**
  * Enhanced auto-scroll toggle logic
  * @param enable - Whether to enable or disable auto-scroll
  * @param autoScroll - Current auto-scroll state
@@ -33,6 +51,11 @@ export function handleAutoScrollToggle(
   const shouldEnable = enable !== undefined ? enable : !autoScroll;
   if (!shouldEnable) {
     setAutoScroll(false);
+    return;
+  }
+  // Fullscreen shows the chords alone, with no page header to scroll past first.
+  if (getScrollContainer()) {
+    setAutoScroll(true);
     return;
   }
   const headerEl = getTitleArtistElement();
@@ -74,13 +97,12 @@ export function startAutoScroll(
   setScrollSpeed: (value: number) => void
 ): void {
   updateLayoutHeights();
-  
-  // Get refresh rate from requestAnimationFrame
-  const baseScrollAmount = scrollSpeed * 0.06;
+
+  const baseScrollAmount = scrollSpeed * SCROLL_AMOUNT_PER_SPEED_STEP;
   // Use 60 as the reference FPS to keep speeds consistent across different displays
   const referenceFPS = 60;
   const referenceFrameTime = 1000 / referenceFPS;
-  
+
   const doScroll = (timestamp: number) => {
     if (!refs.lastScrollTimeRef.current) {
       refs.lastScrollTimeRef.current = timestamp;
@@ -91,19 +113,17 @@ export function startAutoScroll(
     const scrollAmount = Math.floor(refs.accumulatedScrollRef.current);
     refs.accumulatedScrollRef.current -= scrollAmount;
     if (scrollAmount > 0) {
-      window.scrollBy({ top: scrollAmount, behavior: 'auto' });
+      scrollContainerBy(scrollAmount);
     }
     refs.lastScrollTimeRef.current = timestamp;
-    const scrollBottom = window.innerHeight + window.scrollY;
-    const limit = document.body.offsetHeight - FOOTER_HEIGHT;
-    if (scrollBottom >= limit - 1) {
+    if (hasReachedEnd()) {
       setAutoScroll(false);
       setScrollSpeed(DEFAULT_SCROLL_SPEED);
       return;
     }
     refs.scrollTimerRef.current = requestAnimationFrame(doScroll);
   };
-  
+
   refs.scrollTimerRef.current = requestAnimationFrame(doScroll);
 }
 
@@ -120,11 +140,30 @@ export function performAutoScroll(
   setAutoScroll: (value: boolean) => void,
   setScrollSpeed: (value: number) => void
 ): (() => void) | undefined {
+  const stopAutoScroll = () => {
+    if (refs.scrollTimerRef.current) {
+      cancelAnimationFrame(refs.scrollTimerRef.current);
+    }
+    refs.lastScrollTimeRef.current = 0;
+    refs.accumulatedScrollRef.current = 0;
+  };
+
+  // Fullscreen scrolls the viewer itself, whose top is where the chords begin, so
+  // replaying from the end is a jump to 0 with nothing to measure or wait for.
+  const container = getScrollContainer();
+  if (container) {
+    if (hasReachedEnd()) {
+      container.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    startAutoScroll(scrollSpeed, refs, setAutoScroll, setScrollSpeed);
+    return stopAutoScroll;
+  }
+
   const mainEl = document.getElementById('chord-sheet-viewer');
   if (mainEl) {
     const mainBottom = mainEl.offsetTop + mainEl.offsetHeight;
     const viewportBottom = window.scrollY + window.innerHeight;
-    
+
     // If we're at or past the bottom, scroll to the top of the header/title (if present), else main element
     if (viewportBottom >= mainBottom - 2) {
       let scrollTarget = mainEl.offsetTop;
@@ -148,7 +187,7 @@ export function performAutoScroll(
         scrollTarget = headerEl.getBoundingClientRect().top + window.scrollY - navbarOffset - 8; // 8px buffer for aesthetics
       }
       window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-      
+
       // Wait for scroll to reach the top, then start auto-scroll
       let rafId: number;
       const waitForTop = () => {
@@ -159,29 +198,19 @@ export function performAutoScroll(
           rafId = requestAnimationFrame(waitForTop);
         }
       };
-      
+
       rafId = requestAnimationFrame(waitForTop);
-      
+
       // Cleanup for this special case
       return () => {
         cancelAnimationFrame(rafId);
-        if (refs.scrollTimerRef.current) {
-          cancelAnimationFrame(refs.scrollTimerRef.current);
-        }
-        refs.lastScrollTimeRef.current = 0;
-        refs.accumulatedScrollRef.current = 0;
+        stopAutoScroll();
       };
     }
   }
-  
+
   // If not at the bottom, start auto-scroll immediately
   startAutoScroll(scrollSpeed, refs, setAutoScroll, setScrollSpeed);
-  
-  return () => {
-    if (refs.scrollTimerRef.current) {
-      cancelAnimationFrame(refs.scrollTimerRef.current);
-    }
-    refs.lastScrollTimeRef.current = 0;
-    refs.accumulatedScrollRef.current = 0;
-  };
+
+  return stopAutoScroll;
 }
