@@ -14,15 +14,13 @@ The offline system consists of several components that work together to provide 
 
 ## Song Lyrics and Translation
 
-When viewing lyrics, Chordium offers on-device translation:
+Lyrics are bundled with chord sheets and translated on-device:
 
-- **How it works**: Lyrics are bundled with the chord sheet (not fetched separately)
-- **Two translation methods**:
-  - Browser's built-in Translator API (if available, zero download required)
+- **Translation methods**:
+  - Browser's built-in Translator API (if available, zero download)
   - Local Hugging Face model (downloaded once per language, works fully offline)
-- **Data**: Translations are cached per song and per language for quick access
+- **Caching**: Translations are cached per song and per language
 - **Privacy**: All translation runs locally on-device; nothing is sent to a server
-- **Removed**: The old serverless lyrics API (`/api/lyrics`) is no longer used
 
 ## Components
 
