@@ -148,8 +148,11 @@
    is what they are sized to. */
 #chord-sheet-viewer:fullscreen .chord-sheet-card {
   container-type: inline-size;
-  /* Set like a page: the head margin belongs inside the paper, not above it. */
-  padding-top: 3rem;
+  /* Set like a page, with even margins inside the paper rather than around it. The words
+     are fitted to what is left, so the margin narrows the column it measures: on a phone a
+     fixed one would take most of the width and leave the words too small to read, so it
+     gives way on small screens and settles at the full margin on large ones. */
+  padding: clamp(1rem, 5vmin, 3rem);
 }
 
 /* Two separate ceilings, whichever is lower: what stays readable, and what still fits
