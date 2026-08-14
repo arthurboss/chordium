@@ -115,6 +115,14 @@ export function handleIndexedDBMigrations(
         recreateSearchCache(db);
         break;
       }
+      case 11: {
+        // Migration to v11: a cached search now records why each song matched,
+        // its title or its words, and entries written before that carry no such
+        // mark. Left in place they would all be filed under the titles, so they
+        // are dropped instead of guessed at; the next search refills them.
+        clearSearchCache(transaction);
+        break;
+      }
       // Add future migrations here
       default:
         break;
@@ -209,4 +217,11 @@ function recreateSearchCache(db: IDBDatabase): void {
   store.createIndex('dataSource', indexes.dataSource, { unique: false });
   store.createIndex('timestamp', indexes.timestamp, { unique: false });
   store.createIndex('expiresAt', indexes.expiresAt, { unique: false });
+}
+
+/** Empties the search cache, leaving its store and indexes in place. */
+function clearSearchCache(transaction?: IDBTransaction | null): void {
+  if (!transaction) return;
+  if (!transaction.db.objectStoreNames.contains(STORES.SEARCH_CACHE)) return;
+  transaction.objectStore(STORES.SEARCH_CACHE).clear();
 }

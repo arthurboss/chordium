@@ -89,7 +89,10 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // Artists above songs. A query matches far fewer acts than songs, so the short
   // list reads as a way to narrow down rather than as something in the way, and
   // the act someone named stays visible without scrolling past their catalogue.
-  // A kind with nothing in it gets no section at all.
+  //
+  // Songs the search names come before songs that merely contain it, kept apart
+  // so that a word buried in a thousand sets of lyrics cannot crowd out the song
+  // actually being looked for. A kind with nothing in it gets no section at all.
   const sections = [
     {
       key: "artists",
@@ -99,7 +102,12 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     {
       key: "songs",
       title: t("searchResults.songs"),
-      items: results.filter((result) => result.type === "song"),
+      items: results.filter((result) => result.type === "song" && result.match !== "lyrics"),
+    },
+    {
+      key: "lyrics",
+      title: t("searchResults.lyricsMatches"),
+      items: results.filter((result) => result.type === "song" && result.match === "lyrics"),
     },
   ];
 

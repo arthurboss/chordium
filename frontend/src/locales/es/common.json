@@ -21,6 +21,7 @@
     "noResults": "No se encontraron resultados.",
     "artists": "Artistas",
     "songs": "Canciones",
+    "lyricsMatches": "Coincidencias en la letra",
     "results": "Resultados"
   },
   "dropZone": {

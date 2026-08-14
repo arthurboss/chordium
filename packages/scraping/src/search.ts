@@ -1,4 +1,4 @@
-import type { Artist, SearchHit, Song } from "@chordium/types";
+import type { Artist, SearchHit, Song, SongMatch } from "@chordium/types";
 
 /**
  * The source's song index. Unlike the index behind its own search box, this one
@@ -128,6 +128,53 @@ export async function fetchSourceArtists(query: string): Promise<SearchHit[]> {
   });
 }
 
+/** Words, lowercased and stripped of accents so "Legiao" reaches "Legião". */
+function tokenize(text: string): string[] {
+  return (text ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/**
+ * Whether a word from the query is answered by one of these words. Either being a
+ * prefix of the other lets "eagles" reach "Eagle's Wings", which is the kind of
+ * near-miss the source itself matches on.
+ */
+function answers(queryWord: string, words: string[]): boolean {
+  return words.some((word) => word.startsWith(queryWord) || queryWord.startsWith(word));
+}
+
+/**
+ * Why a song came back, worked out from its title and artist.
+ *
+ * The source gives no field for this: it matches titles, artist names and the
+ * words of a song alike, and the scoring features it returns describe how a
+ * result was ranked rather than why it was included. So the answer is derived
+ * from the only two pieces of text it does give.
+ *
+ * - Every word of the query accounted for, at least one of them by the title:
+ *   the search names this song. "eagles hotel california" lands here, its title
+ *   carrying two words and the artist the third.
+ * - Every word accounted for but none by the title: the song is here only because
+ *   its artist matched. Those are left out entirely, since the artist is already
+ *   listed and opening them is how their songs are meant to be reached.
+ * - Anything else: the query is somewhere in the words of the song.
+ */
+function classifySong(query: string, hit: SearchHit & { type: "song" }): SongMatch | null {
+  const queryWords = tokenize(query);
+  const titleWords = tokenize(hit.title);
+  const artistWords = tokenize(hit.artist);
+
+  const accountedFor = queryWords.every((word) => answers(word, [...titleWords, ...artistWords]));
+  if (!accountedFor) return "lyrics";
+
+  return queryWords.some((word) => answers(word, titleWords)) ? "title" : null;
+}
+
 function keyOf(hit: SearchHit): string {
   return `${hit.type}:${hit.path}`;
 }
@@ -180,11 +227,24 @@ export async function unifiedSearch({
     throw songsResult.reason;
   }
 
+  // A song reached only through its artist is left out: that artist is already in
+  // the list above, and opening them is how their songs are meant to be reached.
+  const classified = songs.flatMap((hit): SearchHit[] => {
+    if (hit.type !== "song") return [hit];
+    const match = classifySong(trimmed, hit);
+    return match ? [{ ...hit, match }] : [];
+  });
+
   // Artists first, always. A query matches far fewer acts than songs, so the
   // shorter list reads as a way to narrow down rather than as something in the
   // way, and the act someone named stays visible without scrolling past their
-  // back catalogue.
-  const ordered = [...artists, ...songs];
+  // back catalogue. Songs the search names come before songs that merely contain
+  // it, so the weaker kind cannot crowd out the stronger.
+  const ordered = [
+    ...artists,
+    ...classified.filter((hit) => hit.type === "song" && hit.match === "title"),
+    ...classified.filter((hit) => hit.type === "song" && hit.match === "lyrics"),
+  ];
 
   const seen = new Set<string>();
   const merged = ordered.filter((hit) => {

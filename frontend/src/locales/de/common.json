@@ -21,6 +21,7 @@
     "noResults": "Keine Ergebnisse gefunden.",
     "artists": "Künstler",
     "songs": "Lieder",
+    "lyricsMatches": "Treffer im Liedtext",
     "results": "Ergebnisse"
   },
   "dropZone": {
