@@ -228,5 +228,21 @@
     "translationUnavailable": "Traducción no disponible en este navegador",
     "translationRetry": "Reintentando la traducción…",
     "translationNeedsDownload": "Descargar para traducir"
+  },
+  "voiceSearch": {
+    "heading": "Buscar por voz",
+    "hint": "Descarga una vez ({{size}} MB) para buscar hablando, en tu dispositivo.",
+    "hintReady": "Elimínalo para liberar {{size}} MB. La búsqueda por voz dejará de funcionar hasta que lo descargues de nuevo.",
+    "hintNative": "Tu navegador reconoce la voz por su cuenta, así que no hace falta descargar nada.",
+    "download": "Descargar búsqueda por voz",
+    "cancel": "Cancelar descarga ({{percent}}%)",
+    "delete": "Eliminar búsqueda por voz",
+    "deleteTitle": "¿Eliminar el modelo de búsqueda por voz?",
+    "deleteBody": "El modelo de {{size}} MB se elimina de este dispositivo, y la búsqueda por voz dejará de funcionar hasta que se descargue de nuevo.",
+    "deleteConfirm": "Eliminar",
+    "start": "Buscar por voz",
+    "stop": "Dejar de escuchar",
+    "working": "Interpretando lo que dijiste",
+    "setUp": "Activar la búsqueda por voz"
   }
 }

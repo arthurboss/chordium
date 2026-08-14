@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Download, Globe, Trash2, X } from "lucide-react";
+import { Download, Globe, Mic, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -18,6 +18,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useTranslationPacks } from "@/hooks/useTranslationPacks";
 import { onLanguageManagerRequested } from "@/services/translation/language-manager";
+import { onVoiceSetupRequested } from "@/services/speech/speech-manager";
+import { useSpeechModel } from "@/hooks/useSpeechModel";
 import type { TranslatableLanguage } from "@/services/translation/types";
 import LanguageList, { FLAGS } from "./LanguageList";
 
@@ -42,12 +44,16 @@ const LanguageSwitcher: React.FC = () => {
     removeModel,
     refresh,
   } = useTranslationPacks();
+  const speech = useSpeechModel();
   const [open, setOpen] = useState(false);
   const [promptedFor, setPromptedFor] = useState<TranslatableLanguage | null>(null);
   // The language a waiting song is sung in, kept so its own pair is the one
   // fetched rather than the stand-in route used when nobody asked.
   const [pendingSource, setPendingSource] = useState<string | null>(null);
   const [confirmingModelRemoval, setConfirmingModelRemoval] = useState(false);
+  const [confirmingSpeechRemoval, setConfirmingSpeechRemoval] = useState(false);
+  // Pointed out when the reader was sent here by pressing the microphone.
+  const [promptedForVoice, setPromptedForVoice] = useState(false);
 
   const current = i18n.resolvedLanguage;
   const CurrentFlag = FLAGS[current as TranslatableLanguage];
@@ -66,12 +72,24 @@ const LanguageSwitcher: React.FC = () => {
     [i18n, refresh]
   );
 
+  useEffect(
+    () =>
+      onVoiceSetupRequested(() => {
+        setPromptedForVoice(true);
+        setOpen(true);
+        void speech.refresh();
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (next) void refresh();
     else {
       setPromptedFor(null);
       setPendingSource(null);
+      setPromptedForVoice(false);
     }
   };
 
@@ -160,6 +178,72 @@ const LanguageSwitcher: React.FC = () => {
     </div>
   );
 
+  // Hearing a spoken search needs either the browser's own recogniser, which is
+  // ready wherever it exists, or the app's model for browsers without one. Both are
+  // reported here so the one place that manages languages manages this too, which is
+  // also where the microphone sends a reader who still needs the download.
+  const speechPercent = Math.round(speech.progress * 100);
+  const speechSection = speech.backend !== "none" && (
+    <div className="border-t px-4 py-3">
+      <p className="flex items-center gap-1.5 text-sm font-medium">
+        <Mic className="h-3.5 w-3.5" />
+        {t("voiceSearch.heading")}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {speech.backend === "native"
+          ? t("voiceSearch.hintNative")
+          : speech.status === "present"
+            ? t("voiceSearch.hintReady", { size: speech.sizeMb })
+            : t("voiceSearch.hint", { size: speech.sizeMb })}
+      </p>
+
+      {/* Only the fallback has anything to act on. One button carries its whole
+          state: it starts the download, then fills with its progress and offers to
+          stop, then offers to remove it. */}
+      {speech.backend === "local-model" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "relative mt-2 w-full overflow-hidden",
+            promptedForVoice && speech.status !== "present" && "ring-1 ring-primary"
+          )}
+          onClick={() => {
+            if (speech.status === "downloading") speech.cancelDownload();
+            else if (speech.status === "present") setConfirmingSpeechRemoval(true);
+            else speech.download();
+          }}
+        >
+          {speech.status === "downloading" && (
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 bg-primary/25 transition-[width] duration-200"
+              style={{ width: `${speechPercent}%` }}
+            />
+          )}
+          <span className="relative z-10 flex items-center">
+            {speech.status === "downloading" ? (
+              <>
+                <X className="mr-2 h-4 w-4" />
+                {t("voiceSearch.cancel", { percent: speechPercent })}
+              </>
+            ) : speech.status === "present" ? (
+              <>
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t("voiceSearch.delete")}
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                {t("voiceSearch.download")}
+              </>
+            )}
+          </span>
+        </Button>
+      )}
+    </div>
+  );
+
   const trigger = (
     <Button
       variant="outline"
@@ -203,6 +287,7 @@ const LanguageSwitcher: React.FC = () => {
             <div className="min-h-0 overflow-y-auto overscroll-contain">
               {list}
               {modelSection}
+              {speechSection}
             </div>
           </SheetContent>
         </Sheet>
@@ -214,6 +299,7 @@ const LanguageSwitcher: React.FC = () => {
             {perLanguageHint}
             {list}
             {modelSection}
+            {speechSection}
           </PopoverContent>
         </Popover>
       )}
@@ -238,6 +324,31 @@ const LanguageSwitcher: React.FC = () => {
               }}
             >
               {t("language.modelDeleteConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={confirmingSpeechRemoval}
+        onOpenChange={(next) => !next && setConfirmingSpeechRemoval(false)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("voiceSearch.deleteTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("voiceSearch.deleteBody", { size: speech.sizeMb })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("language.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                void speech.remove();
+                setConfirmingSpeechRemoval(false);
+              }}
+            >
+              {t("voiceSearch.deleteConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

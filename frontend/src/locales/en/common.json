@@ -228,5 +228,21 @@
     "translationUnavailable": "Translation unavailable in this browser",
     "translationRetry": "Trying the translation again…",
     "translationNeedsDownload": "Download to translate"
+  },
+  "voiceSearch": {
+    "heading": "Search by voice",
+    "hint": "Download once ({{size}} MB) to search by speaking, on your device.",
+    "hintReady": "Delete to free up {{size}} MB. Searching by voice stops working until you download it again.",
+    "hintNative": "Your browser recognises speech itself, so nothing needs downloading.",
+    "download": "Download voice search",
+    "cancel": "Cancel download ({{percent}}%)",
+    "delete": "Delete voice search",
+    "deleteTitle": "Delete the voice search model?",
+    "deleteBody": "The {{size}} MB model is removed from this device, and searching by voice stops working until it is downloaded again.",
+    "deleteConfirm": "Delete",
+    "start": "Search by voice",
+    "stop": "Stop listening",
+    "working": "Working out what you said",
+    "setUp": "Set up voice search"
   }
 }
