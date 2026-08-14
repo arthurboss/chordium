@@ -166,7 +166,8 @@
     "returnHome": "Zurück zur Startseite"
   },
   "footer": {
-    "source": "Quelle"
+    "source": "Quelle",
+    "version": "Version {{version}}"
   },
   "stickyControlsBar": {
     "capoFret": "Kapodaster-Bund",

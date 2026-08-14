@@ -166,7 +166,8 @@
     "returnHome": "Return to Home"
   },
   "footer": {
-    "source": "Source"
+    "source": "Source",
+    "version": "Version {{version}}"
   },
   "stickyControlsBar": {
     "capoFret": "Capo Fret",

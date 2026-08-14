@@ -2,12 +2,15 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import { readFileSync } from "fs";
 import * as os from "os";
 import { visualizer } from 'rollup-plugin-visualizer';
 import stripTestAttributes from "./src/utils/vite-strip-test-attributes";
 import viteCompression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
+const pkgVersion = JSON.parse(readFileSync(path.resolve(__dirname, "package.json"), "utf-8")).version;
+
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isHttps = process.env.VITE_HTTPS_ENABLED === 'true';
@@ -275,6 +278,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       // Ensure environment variables are available at build time
+      '__APP_VERSION__': JSON.stringify(pkgVersion),
       'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
       'process.env.VERCEL': JSON.stringify(process.env.VERCEL),
       // Distinguishes the production deployment from branch previews, so shared
