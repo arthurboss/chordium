@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { SearchBarProps } from "./SearchBar.types";
 import RoundTrashButton from "@/components/ui/RoundTrashButton";
+import VoiceSearchButton from "../VoiceSearchButton/VoiceSearchButton";
 import { cyAttr } from "@/utils/test-utils";
 
 const SearchBar = ({
@@ -21,6 +22,9 @@ const SearchBar = ({
   onClearSearch,
   clearDisabled = false,
   artistDisabled = false,
+  voiceState,
+  onVoiceStart,
+  onVoiceStop,
 }: SearchBarProps) => {
   const { t } = useTranslation();
 
@@ -82,6 +86,15 @@ const SearchBar = ({
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-grow" />
+
+          {voiceState && voiceState !== "unsupported" && onVoiceStart && onVoiceStop && (
+            <VoiceSearchButton
+              state={voiceState}
+              onStart={onVoiceStart}
+              onStop={onVoiceStop}
+              disabled={!!(loading || artistLoading)}
+            />
+          )}
 
           <RoundTrashButton
             onClick={onClearSearch}

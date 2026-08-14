@@ -1,6 +1,8 @@
 /**
  * Props interface for SearchBar component
  */
+import type { VoiceSearchState } from "@/hooks/useVoiceSearch";
+
 export interface SearchBarProps {
   className?: string;
   artistLoading?: boolean;
@@ -24,4 +26,10 @@ export interface SearchBarProps {
   clearDisabled?: boolean;
   // Whether the artist input should be disabled (when an artist is selected)
   artistDisabled?: boolean;
+  // Where a spoken search has got to. Absent, or "unsupported", hides the button.
+  voiceState?: VoiceSearchState;
+  // Called to begin listening, or to open the setup offer when nothing is downloaded yet
+  onVoiceStart?: () => void;
+  // Called to stop listening once the reader has finished speaking
+  onVoiceStop?: () => void;
 }
