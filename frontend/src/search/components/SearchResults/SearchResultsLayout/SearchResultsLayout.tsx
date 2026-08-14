@@ -29,9 +29,6 @@ function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results = [],
   onResultClick,
-  searchType,
-  artistQuery,
-  songQuery,
   activeArtist,
 }) => {
   const { t } = useTranslation();
@@ -45,54 +42,82 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     );
   }
 
-  const getSectionTitle = (): string => {
-    if (activeArtist && results.length > 0 && results[0].type === "song") {
-      // Prefer activeArtist.displayName unless it's an untouched slug guess
-      // (e.g. "Ac Dc" for path "ac-dc") - in that case the scraped song's real
-      // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
-      // displayName (from the search API, cache, or sessionStorage) always
-      // wins, since it can't be recovered from a per-song scrape.
-      if (activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)) {
-        return activeArtist.displayName;
-      }
-      return results[0].artist || activeArtist.displayName;
-    }
-    switch (searchType) {
-      case "artist":
-        return artistQuery || t("searchResults.artists");
-      case "artist-song":
-        return activeArtist?.displayName || artistQuery || t("searchResults.songs");
-      case "song":
-        return songQuery || t("searchResults.songs");
-      default:
-        return t("searchResults.results");
-    }
-  };
+  const sortControl = (
+    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+      <SelectTrigger className="w-36 bg-card [&>span]:text-left">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="default">{t("sort.default")}</SelectItem>
+        <SelectItem value="az">{t("sort.az")}</SelectItem>
+        <SelectItem value="za">{t("sort.za")}</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
-  const sorted = sortResults(results, sort);
+  const renderItems = (items: SearchResult[]) => (
+    <ResultsList
+      items={sortResults(items, sort)}
+      renderItem={({ item }) => (
+        <ResultCard key={item.path} result={item} onClick={onResultClick} />
+      )}
+    />
+  );
+
+  // One artist's own songs are a single list under that artist's name.
+  if (activeArtist) {
+    // Prefer activeArtist.displayName unless it's an untouched slug guess
+    // (e.g. "Ac Dc" for path "ac-dc") - in that case the scraped song's real
+    // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
+    // displayName (from the search API, cache, or sessionStorage) always
+    // wins, since it can't be recovered from a per-song scrape.
+    const firstSong = results.find((result) => result.type === "song");
+    const title =
+      activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)
+        ? activeArtist.displayName
+        : (firstSong?.type === "song" ? firstSong.artist : "") || activeArtist.displayName;
+
+    return (
+      <div className="flex flex-col gap-8 w-full">
+        <SearchResultsSection title={title} count={results.length} action={sortControl}>
+          {renderItems(results)}
+        </SearchResultsSection>
+      </div>
+    );
+  }
+
+  const songs = results.filter((result) => result.type === "song");
+  const artists = results.filter((result) => result.type === "artist");
+
+  // The source ranks artists and songs against each other in one response, so
+  // whichever kind it put first is its best answer to the query and leads here
+  // too. A kind it found nothing of gets no section at all.
+  const sections =
+    results[0].type === "song"
+      ? [
+          { key: "songs", title: t("searchResults.songs"), items: songs },
+          { key: "artists", title: t("searchResults.artists"), items: artists },
+        ]
+      : [
+          { key: "artists", title: t("searchResults.artists"), items: artists },
+          { key: "songs", title: t("searchResults.songs"), items: songs },
+        ];
+
+  const shown = sections.filter((section) => section.items.length > 0);
 
   return (
     <div className="flex flex-col gap-8 w-full">
-      <SearchResultsSection title={getSectionTitle()} count={results.length}>
-        <div className="flex justify-end mb-2">
-          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="w-36 bg-card [&>span]:text-left">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">{t("sort.default")}</SelectItem>
-              <SelectItem value="az">{t("sort.az")}</SelectItem>
-              <SelectItem value="za">{t("sort.za")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <ResultsList
-          items={sorted}
-          renderItem={({ item }) => (
-            <ResultCard key={item.path} result={item} onClick={onResultClick} />
-          )}
-        />
-      </SearchResultsSection>
+      {shown.map((section, index) => (
+        <SearchResultsSection
+          key={section.key}
+          title={section.title}
+          count={section.items.length}
+          // One sort control for the page, level with the heading it sits beside.
+          action={index === 0 ? sortControl : undefined}
+        >
+          {renderItems(section.items)}
+        </SearchResultsSection>
+      ))}
     </div>
   );
 };

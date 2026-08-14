@@ -2,7 +2,7 @@ import { Song } from "@chordium/types";
 import type { StoredChordSheet } from "@/storage/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { getSearchParamsType } from "@/search/utils";
+import { getSearchQuery } from "@/search/utils";
 
 interface TabNavigationProps {
   myChordSheets: StoredChordSheet[];
@@ -48,7 +48,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
       }
       
       // Handle search context based on query parameters only for non-specific paths
-      if (getSearchParamsType(queryParams)) {
+      if (getSearchQuery(queryParams)) {
         return "search";
       }
       

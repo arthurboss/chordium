@@ -1,110 +1,77 @@
 import React from 'react';
-import { usePropertyFilter } from '@/hooks/usePropertyFilter';
-import { mapArtistsToSearchResults, mapSongsToSearchResults } from '@/search/utils/mappers/search-mappers';
-import { filterSongsByArtistAndTitle } from '@/search/utils/filtering/filterSongsByArtistAndTitle';
-import { normalizeForSearch } from '@/search/utils/normalization/normalizeForSearch';
+import { mapSongsToSearchResults } from '@/search/utils/mappers/search-mappers';
 import { isSlugDerivedName } from '@/utils/url-slug-utils';
-import type { Artist, Song, SearchType } from '@chordium/types';
+import type { Artist, SearchHit, Song } from '@chordium/types';
 import type { SearchResult } from '../SearchResultsLayout/SearchResultsLayout.types';
 
 interface UseSearchResultsViewModelParams {
   isDefault: boolean;
-  searchType: SearchType;
   activeArtist: Artist | null;
-  artists: Artist[];
-  songs: Song[];
+  /** A search's results: artists and songs in the order the source ranked them. */
+  hits: SearchHit[];
   artistSongs: Song[] | null;
-  filterArtist: string;
-  filterSong: string;
+  filteredArtistSongs: Song[];
   handleView: (song: Song) => void;
   handleArtistSelect: (artist: Artist) => void;
 }
 
 export function useSearchResultsViewModel({
   isDefault,
-  searchType,
   activeArtist,
-  artists,
-  songs,
+  hits,
   artistSongs,
-  filterArtist,
-  filterSong,
+  filteredArtistSongs,
   handleView,
   handleArtistSelect,
 }: UseSearchResultsViewModelParams) {
-  // Filtering hooks (must be called unconditionally)
-  const filteredArtists = usePropertyFilter(artists, filterArtist, 'displayName');
-  const filteredArtistSongs = usePropertyFilter(artistSongs || [], filterSong, 'title');
-  
-  // For song searches, filter by both artist and title
-  const filteredSongs = React.useMemo(() => {
-    if (searchType === 'song') {
-      return filterSongsByArtistAndTitle(songs, filterArtist, filterSong);
-    }
-    // For other search types, use simple title filtering
-    if (!filterSong) return songs;
-    const normalizedFilter = normalizeForSearch(filterSong);
-    return songs.filter(song => 
-      normalizeForSearch(song.title).includes(normalizedFilter)
-    );
-  }, [songs, filterArtist, filterSong, searchType]);
-
-  // Build the view model (results + click handler) in a memo for stability
-  const viewModel = React.useMemo(() => {
+  return React.useMemo(() => {
     if (!isDefault) {
       return { results: [] as SearchResult[], onResultClick: (_: SearchResult) => {} };
     }
 
-    if (searchType === 'artist') {
-      if (activeArtist && artistSongs) {
-        // Prefer activeArtist.displayName unless it's an untouched slug guess
-        // (e.g. "Ac Dc" for path "ac-dc") - in that case a scraped song's real
-        // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
-        // displayName (from the search API, cache, or sessionStorage) always
-        // wins, since it can't be recovered from a per-song scrape.
-        const trustedArtistName =
-          activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)
-            ? activeArtist.displayName
-            : undefined;
-        const results = mapSongsToSearchResults(filteredArtistSongs.map(s => ({ ...s, artist: trustedArtistName || s.artist || activeArtist?.displayName })));
-        return {
-          results,
-          onResultClick: (item: SearchResult) => {
-            if (item.type === 'song') handleView(item);
-          },
-        };
-      }
+    // One artist's own song list, already narrowed by the field's current contents
+    if (activeArtist && artistSongs) {
+      // Prefer activeArtist.displayName unless it's an untouched slug guess
+      // (e.g. "Ac Dc" for path "ac-dc") - in that case a scraped song's real
+      // artist name (e.g. "AC/DC") is more trustworthy. A confirmed
+      // displayName (from the search API, cache, or sessionStorage) always
+      // wins, since it can't be recovered from a per-song scrape.
+      const trustedArtistName =
+        activeArtist.displayName && !isSlugDerivedName(activeArtist.displayName, activeArtist.path)
+          ? activeArtist.displayName
+          : undefined;
 
-      const results = mapArtistsToSearchResults(filteredArtists);
+      const results = mapSongsToSearchResults(
+        filteredArtistSongs.map((song) => ({
+          ...song,
+          artist: trustedArtistName || song.artist || activeArtist.displayName,
+        }))
+      );
+
       return {
         results,
         onResultClick: (item: SearchResult) => {
-          if (item.type === 'artist') handleArtistSelect(item);
+          if (item.type === 'song') handleView(item);
         },
       };
     }
 
-    // song search
-    const results = mapSongsToSearchResults(filteredSongs);
+    // A search's results are rendered as they came back, so a click has to handle
+    // either kind: a song opens its chord sheet, an artist opens their songs.
     return {
-      results,
+      results: hits,
       onResultClick: (item: SearchResult) => {
         if (item.type === 'song') handleView(item);
+        else handleArtistSelect(item);
       },
     };
   }, [
     isDefault,
-    searchType,
     activeArtist,
     artistSongs,
     filteredArtistSongs,
-    filteredArtists,
-    filteredSongs,
+    hits,
     handleView,
     handleArtistSelect,
   ]);
-
-  return viewModel;
 }
-
-

@@ -13,10 +13,8 @@ import { SearchResultsLayout } from './SearchResultsLayout/';
 const SearchResults: React.FC<SearchResultsProps> = ({
   setMySongs,
   setActiveTab,
-  artist,
-  song,
-  filterArtist,
-  filterSong,
+  query,
+  filter,
   activeArtist,
   onArtistSelect,
   shouldFetch,
@@ -25,9 +23,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 }) => {
 
   const searchState = useSearchReducer({
-    artist,
-    song,
-    filterSong,
+    query,
+    filter,
     shouldFetch: shouldFetch || false,
     activeArtist,
     onFetchComplete,
@@ -37,18 +34,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setActiveTab,
   });
 
-  const { stateData, handleView, handleArtistSelect, artistSongs } = searchState;
+  const { stateData, handleView, handleArtistSelect, hits, artistSongs, filteredArtistSongs } = searchState;
+  const defaultState = stateData.state === 'default' ? stateData : null;
 
   // Build stable view model for default state rendering
   const { results, onResultClick } = useSearchResultsViewModel({
-    isDefault: stateData.state === 'default',
-    searchType: stateData.searchType,
-    activeArtist: stateData.activeArtist ?? null,
-    artists: searchState.artists,
-    songs: searchState.songs,
+    isDefault: !!defaultState,
+    activeArtist: defaultState?.activeArtist ?? null,
+    hits,
     artistSongs,
-    filterArtist,
-    filterSong,
+    filteredArtistSongs,
     handleView,
     handleArtistSelect,
   });
@@ -56,22 +51,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   switch (stateData.state) {
     case 'loading':
       return <LoadingState message={stateData.message} />;
-    
+
     case 'error':
       return <ErrorState error={stateData.error} />;
-    
+
     default: {
       // Handle empty state first
       if (stateData.isEmpty && stateData.emptyMessage) {
         return <EmptyState message={stateData.emptyMessage} dataTestId="search-empty-state" />;
       }
       return (
-        <SearchResultsLayout 
-          results={results} 
+        <SearchResultsLayout
+          results={results}
           onResultClick={onResultClick}
-          searchType={stateData.searchType}
-          artistQuery={artist}
-          songQuery={song}
           activeArtist={stateData.activeArtist}
         />
       );

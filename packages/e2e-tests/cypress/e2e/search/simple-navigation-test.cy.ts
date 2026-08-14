@@ -10,7 +10,7 @@ describe('Search UX Tests', () => {
     cy.intercept('GET', '/api/cifraclub-search*', []).as('emptySearch');
 
     // Perform a song search with no results
-    cy.get('#song-search-input').type('nonexistentsongname12345');
+    cy.get('#search-input').type('nonexistentsongname12345');
     cy.get('button[type="submit"]').click();
     cy.wait('@emptySearch');
 
@@ -28,7 +28,7 @@ describe('Search input clear UX', () => {
     cy.wait(1000);
     
     // Type a search term and submit
-    cy.get('#song-search-input').type('Wonderwall');
+    cy.get('#search-input').type('Wonderwall');
     cy.get('[data-cy="search-submit-button"]').click();
     
     // Wait for results

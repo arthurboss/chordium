@@ -26,7 +26,7 @@ export default function createSchema(db: IDBDatabase, version: number): void {
       const searchCacheStore = db.createObjectStore(STORES.SEARCH_CACHE, { keyPath: 'searchKey' });
       const searchCacheIndexes = INDEXES.searchCache;
       searchCacheStore.createIndex('timestamp', searchCacheIndexes.timestamp, { unique: false });
-      searchCacheStore.createIndex('searchType', searchCacheIndexes.searchType, { unique: false });
+      searchCacheStore.createIndex('kind', searchCacheIndexes.kind, { unique: false });
       searchCacheStore.createIndex('dataSource', searchCacheIndexes.dataSource, { unique: false });
       searchCacheStore.createIndex('expiresAt', searchCacheIndexes.expiresAt, { unique: false });
     }

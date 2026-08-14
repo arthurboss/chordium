@@ -25,11 +25,17 @@ export const INDEXES = {
     expiresAt: "expiresAt",
   },
   
-  /** Search cache store indexes */
+  /**
+   * Search cache store indexes.
+   *
+   * Paths are nested to match the stored record: these were once declared against
+   * top-level names that the records never had, so none of them ever matched a
+   * value and every index sat empty.
+   */
   searchCache: {
-    timestamp: "timestamp",
-    searchType: "searchType", 
-    dataSource: "dataSource",
-    expiresAt: "expiresAt",
+    timestamp: "storage.timestamp",
+    kind: "search.kind",
+    dataSource: "search.dataSource",
+    expiresAt: "storage.expiresAt",
   },
 } as const;

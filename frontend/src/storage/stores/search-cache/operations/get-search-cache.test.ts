@@ -21,7 +21,7 @@ vi.mock("../../../core/transactions", () => ({
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
 import { executeReadTransaction } from "../../../core/transactions";
-import { Artist } from "@chordium/types";
+import { SearchHit } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
 const mockExecuteTransaction = vi.mocked(executeReadTransaction);
@@ -34,14 +34,11 @@ describe("getSearchCache", () => {
 
   const validCacheEntry: SearchCacheEntry = {
     searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
-    results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
+    results: hillsongArtists as unknown as SearchHit[], // Real fixture data from artists/hillsong.json
     search: {
-      query: {
-        artist: "hillsong",
-        song: null,
-      },
-      searchType: "artist" as const,
-      dataSource: "neon" as const,
+      query: "hillsong",
+      kind: "search" as const,
+      dataSource: "cifraclub" as const,
     },
     storage: {
       timestamp: Date.now(),

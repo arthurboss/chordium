@@ -7,8 +7,7 @@ export { fetchArtistSongs } from "./artist/fetch-artist-songs";
 export * from "./mappers/search-mappers";
 
 // Core search utilities
-export { getSearchParamsType } from "./core/getSearchParamsType";
-export { getQueryDisplayText } from "./core/getQueryDisplayText";
+export { getSearchQuery } from "./core/getSearchQuery";
 
 // Text normalization utilities
 export { normalizeForSearch } from "./normalization/normalizeForSearch";

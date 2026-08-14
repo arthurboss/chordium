@@ -5,7 +5,7 @@
  * @returns Promise resolving to an array of Song objects
  * @throws Error if the artist path is invalid or the API call fails
  */
-import { SEARCH_TYPES, type Song } from "@chordium/types";
+import type { Song } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 import { getApiBaseUrl } from "@/utils/api-base-url";
 import { getNormalizedSearchCacheKey } from "@/search/utils/normalization/getNormalizedSearchCacheKey";
@@ -18,14 +18,9 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
     throw new Error("Invalid artist path");
   }
 
-  // Use normalized searchKey for cache
-  const searchKey = getNormalizedSearchCacheKey(artistPath, "", SEARCH_TYPES.ARTIST_SONG);
+  const searchKey = getNormalizedSearchCacheKey(artistPath, "artist-songs");
   const cachedEntry = await searchCacheService.get(searchKey);
-  if (
-    cachedEntry &&
-    cachedEntry.search.searchType === SEARCH_TYPES.ARTIST_SONG &&
-    cachedEntry.results.length > 0
-  ) {
+  if (cachedEntry && cachedEntry.results.length > 0) {
     // A displayName-only entry (written by storeArtistDisplayName before any
     // songs were fetched) has empty results - fall through to fetch songs
     // rather than treating it as "this artist has zero songs".
@@ -54,12 +49,13 @@ export async function fetchArtistSongs(artistPath: string): Promise<Song[]> {
         searchKey,
         results: data,
         search: {
+          query: artistPath,
+          kind: "artist-songs",
           // Preserve a displayName already cached by storeArtistDisplayName
           // (e.g. from clicking this artist in search results) so fetching
           // the song list doesn't clobber it.
-          query: { artist: artistPath, song: "", displayName: latestEntry?.search.query.displayName },
-          searchType: SEARCH_TYPES.ARTIST_SONG,
-          dataSource: "neon",
+          displayName: latestEntry?.search.displayName,
+          dataSource: "cifraclub",
         },
       });
     }

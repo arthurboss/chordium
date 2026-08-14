@@ -22,7 +22,7 @@ describe('Song Search E2E', () => {
       cy.intercept('GET', '/api/cifraclub-search*').as('songSearch');
       
       // Test the exact scenario that was failing
-      cy.get('#song-search-input').type('imagine');
+      cy.get('#search-input').type('imagine');
       cy.get('button[type="submit"]').click();
 
       // Verify API call and response structure
@@ -66,7 +66,7 @@ describe('Song Search E2E', () => {
     it('should maintain search functionality with unified Song interface', () => {
       cy.intercept('GET', '/api/cifraclub-search*').as('searchRequest');
       
-      cy.get('#song-search-input').type('bohemian rhapsody');
+      cy.get('#search-input').type('bohemian rhapsody');
       cy.get('button[type="submit"]').click();
       
       cy.wait('@searchRequest');
@@ -79,7 +79,7 @@ describe('Song Search E2E', () => {
     it('should handle empty search results gracefully', () => {
       cy.intercept('GET', '/api/cifraclub-search*', []).as('emptySearch');
       
-      cy.get('#song-search-input').type('nonexistentsongname12345');
+      cy.get('#search-input').type('nonexistentsongname12345');
       cy.get('button[type="submit"]').click();
       
       cy.wait('@emptySearch');
@@ -96,7 +96,7 @@ describe('Song Search E2E', () => {
       
       cy.intercept('GET', '/api/cifraclub-search*', { statusCode: 500 }).as('errorSearch');
       
-      cy.get('#song-search-input').type('imagine');
+      cy.get('#search-input').type('imagine');
       cy.get('button[type="submit"]').click();
       
       // Wait for processing and verify app doesn't crash
@@ -116,7 +116,7 @@ describe('Song Search E2E', () => {
       
       const startTime = Date.now();
       
-      cy.get('#song-search-input').type('imagine');
+      cy.get('#search-input').type('imagine');
       cy.get('button[type="submit"]').click();
       
       // Wait for the API call

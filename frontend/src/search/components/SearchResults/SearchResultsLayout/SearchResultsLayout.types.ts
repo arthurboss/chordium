@@ -1,15 +1,11 @@
-import type { Artist, Song, SearchType } from "@chordium/types";
+import type { Artist, SearchHit } from "@chordium/types";
 
-// Discriminated union for search results
-export type SearchResult =
-  | (Song & { type: "song" })
-  | (Artist & { type: "artist" });
+/** A search result as rendered, artists and songs in one list. */
+export type SearchResult = SearchHit;
 
 export interface SearchResultsLayoutProps {
   results: SearchResult[];
   onResultClick: (result: SearchResult) => void;
-  searchType: SearchType;
-  artistQuery?: string;
-  songQuery?: string;
+  /** Set while one artist's song list is open, rather than a search's results. */
   activeArtist?: Artist | null;
 }

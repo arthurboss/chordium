@@ -5,7 +5,7 @@ import storeResults from "../../stores/search-cache/operations/store-results";
 
 /**
  * Implementation of search cache service
- * 
+ *
  * Provides high-level interface for search cache operations,
  * abstracting away store implementation details.
  */
@@ -28,8 +28,7 @@ class SearchCacheServiceImpl implements SearchCacheService {
     options: StoreSearchResultsOptions = {}
   ): Promise<void> {
     const { searchKey, results, search } = cacheData;
-    const { query, searchType, dataSource } = search;
-    return storeResults(searchKey, results, query, searchType, dataSource, options);
+    return storeResults(searchKey, results, search, options);
   }
 
   /**
@@ -59,7 +58,7 @@ class SearchCacheServiceImpl implements SearchCacheService {
 
 /**
  * Create a new search cache service instance
- * 
+ *
  * @returns SearchCacheService instance
  */
 export function createSearchCacheService(): SearchCacheService {
@@ -68,7 +67,7 @@ export function createSearchCacheService(): SearchCacheService {
 
 /**
  * Default search cache service instance
- * 
+ *
  * Pre-configured service ready for use across the application.
  */
 export const searchCacheService = createSearchCacheService();

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock the search-utils module
 vi.mock('@/search/utils', () => ({
-  getSearchParamsType: vi.fn()
+  getSearchQuery: vi.fn()
 }));
 
 // Mock React Router
@@ -10,7 +10,7 @@ vi.mock('react-router-dom', () => ({
   useLocation: vi.fn()
 }));
 
-import { getSearchParamsType } from '@/search/utils';
+import { getSearchQuery } from '@/search/utils';
 
 // Import the determineActiveTab function by recreating it for testing
 const determineActiveTab = (path: string, queryParams: URLSearchParams): string => {
@@ -38,7 +38,7 @@ const determineActiveTab = (path: string, queryParams: URLSearchParams): string 
     
     default:
       // Handle search context based on query parameters only for non-specific paths
-      if (getSearchParamsType(queryParams)) {
+      if (getSearchQuery(queryParams)) {
         return "search";
       }
       
@@ -54,8 +54,8 @@ describe('Tab Navigation Priority', () => {
 
   describe('My Chord Sheets navigation priority', () => {
     it('should prioritize /my-chord-sheets path over query parameters', () => {
-      // Mock getSearchParamsType to return 'song' (which is truthy)
-      vi.mocked(getSearchParamsType).mockReturnValue('song');
+      // Mock getSearchQuery to return 'song' (a non-empty search)
+      vi.mocked(getSearchQuery).mockReturnValue('hotel california');
       
       const queryParams = new URLSearchParams('song=hotel-california');
       const path = '/my-chord-sheets';
@@ -63,13 +63,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('my-chord-sheets');
-      // Verify that getSearchParamsType is not called for My Chord Sheets paths
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for My Chord Sheets paths
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
 
     it('should handle /my-chord-sheets/artist/song routes correctly', () => {
-      // Mock getSearchParamsType to return 'song' (which is truthy) 
-      vi.mocked(getSearchParamsType).mockReturnValue('song');
+      // Mock getSearchQuery to return 'song' (a non-empty search) 
+      vi.mocked(getSearchQuery).mockReturnValue('hotel california');
       
       const queryParams = new URLSearchParams('song=hotel-california');
       const path = '/my-chord-sheets/eagles/hotel-california';
@@ -77,13 +77,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('my-chord-sheets');
-      // Verify that getSearchParamsType is not called for My Chord Sheets paths
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for My Chord Sheets paths
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
 
     it('should handle fallback My Chord Sheets navigation with query params', () => {
-      // Mock getSearchParamsType to return 'song' (which is truthy)
-      vi.mocked(getSearchParamsType).mockReturnValue('song');
+      // Mock getSearchQuery to return 'song' (a non-empty search)
+      vi.mocked(getSearchQuery).mockReturnValue('hotel california');
       
       const queryParams = new URLSearchParams('song=some-song-path');
       const path = '/my-chord-sheets';
@@ -91,13 +91,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('my-chord-sheets');
-      // Verify that getSearchParamsType is not called for My Chord Sheets paths
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for My Chord Sheets paths
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
 
     it('should use query parameters for unknown paths', () => {
-      // Mock getSearchParamsType to return 'song' (which is truthy)
-      vi.mocked(getSearchParamsType).mockReturnValue('song');
+      // Mock getSearchQuery to return 'song' (a non-empty search)
+      vi.mocked(getSearchQuery).mockReturnValue('hotel california');
       
       const queryParams = new URLSearchParams('song=test');
       const path = '/unknown-path';
@@ -105,13 +105,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('search');
-      // Verify that getSearchParamsType IS called for unknown paths
-      expect(getSearchParamsType).toHaveBeenCalledWith(queryParams);
+      // Verify that getSearchQuery IS called for unknown paths
+      expect(getSearchQuery).toHaveBeenCalledWith(queryParams);
     });
 
     it('should handle search paths correctly', () => {
-      // Mock getSearchParamsType to return null
-      vi.mocked(getSearchParamsType).mockReturnValue(null);
+      // Mock getSearchQuery to return null
+      vi.mocked(getSearchQuery).mockReturnValue('');
       
       const queryParams = new URLSearchParams();
       const path = '/search';
@@ -119,13 +119,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('search');
-      // Verify that getSearchParamsType is not called for explicit search paths
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for explicit search paths
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
 
     it('should handle artist paths from search results', () => {
-      // Mock getSearchParamsType to return null
-      vi.mocked(getSearchParamsType).mockReturnValue(null);
+      // Mock getSearchQuery to return null
+      vi.mocked(getSearchQuery).mockReturnValue('');
       
       const queryParams = new URLSearchParams();
       const path = '/artist/eagles';
@@ -133,13 +133,13 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('search');
-      // Verify that getSearchParamsType is not called for artist paths
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for artist paths
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
 
     it('should default to my-chord-sheets for root path', () => {
-      // Mock getSearchParamsType to return null
-      vi.mocked(getSearchParamsType).mockReturnValue(null);
+      // Mock getSearchQuery to return null
+      vi.mocked(getSearchQuery).mockReturnValue('');
       
       const queryParams = new URLSearchParams();
       const path = '/';
@@ -147,8 +147,8 @@ describe('Tab Navigation Priority', () => {
       const result = determineActiveTab(path, queryParams);
       
       expect(result).toBe('my-chord-sheets');
-      // Verify that getSearchParamsType is not called for root path
-      expect(getSearchParamsType).not.toHaveBeenCalled();
+      // Verify that getSearchQuery is not called for root path
+      expect(getSearchQuery).not.toHaveBeenCalled();
     });
   });
 });

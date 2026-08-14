@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import type { Artist, Song, SearchType } from "@chordium/types";
+import type { SearchHit } from "@chordium/types";
 import { searchCacheService } from "@/storage/services/search-cache/search-cache-service";
 
 import { getApiBaseUrl } from "@/utils/api-base-url";
@@ -15,112 +15,58 @@ export const useSearchFetch = ({
   setSearchFetching,
 }: UseSearchFetchOptions) => {
   const isFetching = useRef(false);
-  const lastFetchParams = useRef<{ artist: string; song: string; searchType: SearchType }>({
-    artist: "",
-    song: "",
-    searchType: "artist",
-  });
+  const lastQuery = useRef<string | null>(null);
 
   const fetchSearchResults = useCallback(
-    async (artistParam: string, songParam: string, searchType: SearchType) => {
+    async (query: string) => {
       if (isFetching.current) return;
 
-      const paramsChanged =
-        artistParam !== lastFetchParams.current.artist ||
-        songParam !== lastFetchParams.current.song ||
-        searchType !== lastFetchParams.current.searchType;
-
-      if (!paramsChanged) return;
+      const trimmed = query.trim();
+      if (trimmed === lastQuery.current) return;
 
       isFetching.current = true;
       setSearchFetching(true);
-      lastFetchParams.current = { artist: artistParam, song: songParam, searchType };
+      lastQuery.current = trimmed;
 
       try {
         dispatch({ type: "SEARCH_START" });
 
-        if (!artistParam && !songParam) {
-          dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: [] });
+        if (!trimmed) {
+          dispatch({ type: "SEARCH_SUCCESS", hits: [] });
           if (onFetchComplete) onFetchComplete();
           return;
         }
 
-        // Check cache first
-        const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
-        if (cacheKey) {
-          const cachedEntry = await searchCacheService.get(cacheKey);
-          if (cachedEntry) {
-            const { results, search } = cachedEntry;
-            const isArtistResults = results.length === 0 || ("displayName" in results[0]);
-            if (isArtistResults) {
-              dispatch({
-                type: "SEARCH_SUCCESS",
-                artists: results as Artist[],
-                songs: [],
-              });
-            } else {
-              dispatch({
-                type: "SEARCH_SUCCESS",
-                artists: [],
-                songs: results as Song[],
-              });
-            }
-            if (onFetchComplete) onFetchComplete();
-            return;
-          }
+        const cacheKey = getNormalizedSearchCacheKey(trimmed, "search");
+        const cachedEntry = await searchCacheService.get(cacheKey);
+        if (cachedEntry) {
+          dispatch({ type: "SEARCH_SUCCESS", hits: cachedEntry.results as SearchHit[] });
+          if (onFetchComplete) onFetchComplete();
+          return;
         }
 
-        // Make API call based on search type
-        const baseUrl = getApiBaseUrl();
-        let apiUrl: string;
-        if (!artistParam && songParam) {
-          // Song only search
-          apiUrl = `${baseUrl}/api/cifraclub-search?artist=&song=${encodeURIComponent(songParam)}`;
-        } else {
-          // Artist search or artist+song search
-          apiUrl = `${baseUrl}/api/artists?artist=${encodeURIComponent(artistParam)}&song=${encodeURIComponent(songParam)}`;
-        }
+        const apiUrl = `${getApiBaseUrl()}/api/search?q=${encodeURIComponent(trimmed)}`;
         const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch search results: ${response.status}`);
         }
         const text = await response.text();
-        const data = text ? JSON.parse(text) : [];
+        const hits: SearchHit[] = text ? JSON.parse(text) : [];
 
-        if (!artistParam && songParam) {
-          // Song search
-          dispatch({ type: "SEARCH_SUCCESS", artists: [], songs: data });
+        dispatch({ type: "SEARCH_SUCCESS", hits });
 
-          // Cache results (only if non-empty)
-          const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
-          if (cacheKey && data.length > 0) {
-            await searchCacheService.storeResults({
-              searchKey: cacheKey,
-              results: data,
-              search: {
-                query: { artist: "", song: songParam },
-                searchType: searchType,
-                dataSource: "cifraclub",
-              },
-            });
-          }
-        } else {
-          // Artist search
-          dispatch({ type: "SEARCH_SUCCESS", artists: data, songs: [] });
-
-          // Cache results (only if non-empty)
-          const cacheKey = getNormalizedSearchCacheKey(artistParam, songParam, searchType);
-          if (cacheKey && data.length > 0) {
-            await searchCacheService.storeResults({
-              searchKey: cacheKey,
-              results: data,
-              search: {
-                query: { artist: artistParam, song: songParam || "" },
-                searchType: searchType,
-                dataSource: "neon",
-              },
-            });
-          }
+        // An empty result is not cached: it is as likely to mean the source was
+        // having a bad moment as it is to mean there is nothing to find.
+        if (hits.length > 0) {
+          await searchCacheService.storeResults({
+            searchKey: cacheKey,
+            results: hits,
+            search: {
+              query: trimmed,
+              kind: "search",
+              dataSource: "cifraclub",
+            },
+          });
         }
 
         if (onFetchComplete) onFetchComplete();

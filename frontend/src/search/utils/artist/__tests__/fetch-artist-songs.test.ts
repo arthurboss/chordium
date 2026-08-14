@@ -15,6 +15,20 @@ const mockStoreResults = vi.mocked(searchCacheService.storeResults);
 
 const songs = [{ title: "Sublime", path: "florianopolis-house-of-prayer/sublime", artist: "" }];
 
+function cachedArtist(path: string, displayName: string | undefined, results: unknown[]) {
+  return {
+    searchKey: `${path}|artist-songs`,
+    results,
+    search: {
+      query: path,
+      kind: "artist-songs",
+      displayName,
+      dataSource: "cifraclub",
+    },
+    storage: { timestamp: 0, version: 1, expiresAt: 0 },
+  } as any;
+}
+
 describe("fetchArtistSongs", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,16 +45,9 @@ describe("fetchArtistSongs", () => {
     // navigateToArtist's storeArtistDisplayName call and this fetch.
     mockGet
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        searchKey: "florianopolishouseofprayer||artistsong",
-        results: [],
-        search: {
-          query: { artist: "florianopolis-house-of-prayer", song: "", displayName: "Florianópolis House Of Prayer (fhop music)" },
-          searchType: "artist-song",
-          dataSource: "neon",
-        },
-        storage: { timestamp: 0, version: 1, expiresAt: 0 },
-      } as any);
+      .mockResolvedValueOnce(
+        cachedArtist("florianopolis-house-of-prayer", "Florianópolis House Of Prayer (fhop music)", [])
+      );
 
     await fetchArtistSongs("florianopolis-house-of-prayer");
 
@@ -48,9 +55,10 @@ describe("fetchArtistSongs", () => {
       searchKey: expect.any(String),
       results: songs,
       search: {
-        query: { artist: "florianopolis-house-of-prayer", song: "", displayName: "Florianópolis House Of Prayer (fhop music)" },
-        searchType: "artist-song",
-        dataSource: "neon",
+        query: "florianopolis-house-of-prayer",
+        kind: "artist-songs",
+        displayName: "Florianópolis House Of Prayer (fhop music)",
+        dataSource: "cifraclub",
       },
     });
   });
@@ -64,24 +72,16 @@ describe("fetchArtistSongs", () => {
       searchKey: expect.any(String),
       results: songs,
       search: {
-        query: { artist: "ac-dc", song: "", displayName: undefined },
-        searchType: "artist-song",
-        dataSource: "neon",
+        query: "ac-dc",
+        kind: "artist-songs",
+        displayName: undefined,
+        dataSource: "cifraclub",
       },
     });
   });
 
   it("returns cached songs directly without re-fetching when a non-empty cache entry exists", async () => {
-    mockGet.mockResolvedValue({
-      searchKey: "acdc||artistsong",
-      results: songs,
-      search: {
-        query: { artist: "ac-dc", song: "", displayName: "AC/DC" },
-        searchType: "artist-song",
-        dataSource: "neon",
-      },
-      storage: { timestamp: 0, version: 1, expiresAt: 0 },
-    } as any);
+    mockGet.mockResolvedValue(cachedArtist("ac-dc", "AC/DC", songs));
 
     const result = await fetchArtistSongs("ac-dc");
 
@@ -91,26 +91,8 @@ describe("fetchArtistSongs", () => {
 
   it("fetches songs when the only cache entry is a displayName-only placeholder with empty results", async () => {
     mockGet
-      .mockResolvedValueOnce({
-        searchKey: "acdc||artistsong",
-        results: [],
-        search: {
-          query: { artist: "ac-dc", song: "", displayName: "AC/DC" },
-          searchType: "artist-song",
-          dataSource: "neon",
-        },
-        storage: { timestamp: 0, version: 1, expiresAt: 0 },
-      } as any)
-      .mockResolvedValueOnce({
-        searchKey: "acdc||artistsong",
-        results: [],
-        search: {
-          query: { artist: "ac-dc", song: "", displayName: "AC/DC" },
-          searchType: "artist-song",
-          dataSource: "neon",
-        },
-        storage: { timestamp: 0, version: 1, expiresAt: 0 },
-      } as any);
+      .mockResolvedValueOnce(cachedArtist("ac-dc", "AC/DC", []))
+      .mockResolvedValueOnce(cachedArtist("ac-dc", "AC/DC", []));
 
     const result = await fetchArtistSongs("ac-dc");
 

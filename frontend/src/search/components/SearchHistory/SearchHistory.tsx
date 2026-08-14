@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, User, Music, Search, Trash2 } from "lucide-react";
+import { Clock, User, Search, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -17,7 +17,7 @@ import type { SearchHistoryEntry } from "@/search/hooks/useSearchHistory";
 
 interface SearchHistoryProps {
   history: SearchHistoryEntry[];
-  onSelect: (artist: string, song: string, searchType: string, displayName: string) => void;
+  onSelect: (entry: SearchHistoryEntry) => void;
   onClear: () => void;
 }
 
@@ -58,33 +58,21 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
         </AlertDialog>
       </div>
       <div className="grid grid-cols-1 gap-y-2">
-        {history.map(({ artist, song, searchType, displayName, timestamp }) => {
-          let label: string;
-          let Icon: React.ElementType;
-
-          if (searchType === "artist-song") {
-            label = displayName || artist;
-            Icon = User;
-          } else if (searchType === "song" && artist && song) {
-            label = displayName || `${artist} — ${song}`;
-            Icon = Music;
-          } else if (searchType === "song") {
-            label = song;
-            Icon = Music;
-          } else {
-            label = artist;
-            Icon = Search;
-          }
+        {history.map((entry) => {
+          // An artist opened from results is shown under their real name; a search
+          // is shown as it was typed.
+          const isArtist = entry.kind === "artist-songs";
+          const label = isArtist ? entry.displayName || entry.query : entry.query;
+          const Icon = isArtist ? User : Search;
 
           return (
             <Card
-              key={timestamp}
+              key={entry.timestamp}
               className="overflow-hidden cursor-pointer w-full h-12 min-h-0 opacity-80 hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary transition-colors"
-              onClick={() => onSelect(artist, song, searchType, displayName)}
+              onClick={() => onSelect(entry)}
             >
               <CardContent
                 className="p-4 flex-1 flex flex-row items-center gap-2 min-h-0"
-                onClick={() => onSelect(artist, song, searchType, displayName)}
               >
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary shrink-0"><Icon className="h-4 w-4 text-white" /></div>
                 <div className="min-w-0 flex-1">

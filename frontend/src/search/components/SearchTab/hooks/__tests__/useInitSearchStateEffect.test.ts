@@ -27,15 +27,10 @@ describe("useInitSearchStateEffect", () => {
   const mockOptions = {
     location: { search: "", pathname: "/search" },
     isInitialized: { current: false },
-    setArtistInput: vi.fn(),
-    setSongInput: vi.fn(),
-    setPrevArtistInput: vi.fn(),
-    setPrevSongInput: vi.fn(),
-    setSubmittedArtist: vi.fn(),
-    setSubmittedSong: vi.fn(),
-    setOriginalSearchArtist: vi.fn(),
-    setOriginalSearchSong: vi.fn(),
-    updateSearchStateWithOriginal: vi.fn(),
+    isClearing: false,
+    setInput: vi.fn(),
+    setSubmittedQuery: vi.fn(),
+    setOriginalQuery: vi.fn(),
     setHasSearched: vi.fn(),
     setShouldFetch: vi.fn(),
     setActiveArtist: vi.fn(),
@@ -51,10 +46,9 @@ describe("useInitSearchStateEffect", () => {
 
   it('should initialize with default values when no session storage data exists', () => {
     renderHook(() => useInitSearchStateEffect(mockOptions));
-    
-    // Should not call any setters when no session storage data exists
-    expect(mockOptions.setArtistInput).not.toHaveBeenCalled();
-    expect(mockOptions.setSongInput).not.toHaveBeenCalled();
+
+    expect(mockOptions.setInput).not.toHaveBeenCalled();
+    expect(mockOptions.setSubmittedQuery).not.toHaveBeenCalled();
     expect(mockOptions.setHasSearched).not.toHaveBeenCalled();
   });
 
@@ -63,12 +57,11 @@ describe("useInitSearchStateEffect", () => {
       ...mockOptions,
       isInitialized: { current: true },
     };
-    
+
     renderHook(() => useInitSearchStateEffect(mockOptionsInitialized));
-    
-    // Should not call any setters when already initialized
-    expect(mockOptionsInitialized.setArtistInput).not.toHaveBeenCalled();
-    expect(mockOptionsInitialized.setSongInput).not.toHaveBeenCalled();
+
+    expect(mockOptionsInitialized.setInput).not.toHaveBeenCalled();
+    expect(mockOptionsInitialized.setSubmittedQuery).not.toHaveBeenCalled();
     expect(mockOptionsInitialized.setHasSearched).not.toHaveBeenCalled();
   });
 
@@ -79,29 +72,29 @@ describe("useInitSearchStateEffect", () => {
       isOnArtistPage: vi.fn(() => true),
       getCurrentArtistPath: vi.fn(() => "test-artist"),
     };
-    
+
     // Mock session storage to throw an error
     mockSessionStorage.getItem.mockImplementation(() => {
       throw new Error('Storage error');
     });
-    
+
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    
+
     renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
-    
+
     // Should log warning about storage error
     expect(consoleSpy).toHaveBeenCalledWith(
       'Failed to restore search query from session storage:',
       expect.any(Error)
     );
-    
+
     // Should still set active artist even if session storage fails
     expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
       displayName: "test artist",
       path: "test-artist",
       songCount: null,
     });
-    
+
     consoleSpy.mockRestore();
   });
 
@@ -226,25 +219,44 @@ describe("useInitSearchStateEffect", () => {
     expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle URL parameter initialization for search route', () => {
+  it('should initialize the search from the q parameter', () => {
     const mockOptionsWithSearchParams = {
       ...mockOptions,
-      location: { 
-        search: "?artist=URL%20Artist&song=URL%20Song", 
-        pathname: "/search" 
-      },
+      location: { search: "?q=eagles%20hotel%20california", pathname: "/search" },
     };
-    
+
     renderHook(() => useInitSearchStateEffect(mockOptionsWithSearchParams));
-    
-    // Should initialize from URL parameters
-    expect(mockOptionsWithSearchParams.setArtistInput).toHaveBeenCalledWith("URL Artist");
-    expect(mockOptionsWithSearchParams.setSongInput).toHaveBeenCalledWith("URL Song");
-    expect(mockOptionsWithSearchParams.setSubmittedArtist).toHaveBeenCalledWith("URL Artist");
-    expect(mockOptionsWithSearchParams.setSubmittedSong).toHaveBeenCalledWith("URL Song");
-    expect(mockOptionsWithSearchParams.setOriginalSearchArtist).toHaveBeenCalledWith("URL Artist");
-    expect(mockOptionsWithSearchParams.setOriginalSearchSong).toHaveBeenCalledWith("URL Song");
+
+    expect(mockOptionsWithSearchParams.setInput).toHaveBeenCalledWith("eagles hotel california");
+    expect(mockOptionsWithSearchParams.setSubmittedQuery).toHaveBeenCalledWith("eagles hotel california");
+    expect(mockOptionsWithSearchParams.setOriginalQuery).toHaveBeenCalledWith("eagles hotel california");
     expect(mockOptionsWithSearchParams.setHasSearched).toHaveBeenCalledWith(true);
     expect(mockOptionsWithSearchParams.setShouldFetch).toHaveBeenCalledWith(true);
+  });
+
+  it('joins a link shared before search became one field into a single query', () => {
+    const mockOptionsWithLegacyParams = {
+      ...mockOptions,
+      location: { search: "?artist=Eagles&song=Hotel%20California", pathname: "/search" },
+    };
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithLegacyParams));
+
+    expect(mockOptionsWithLegacyParams.setInput).toHaveBeenCalledWith("Eagles Hotel California");
+    expect(mockOptionsWithLegacyParams.setSubmittedQuery).toHaveBeenCalledWith("Eagles Hotel California");
+    expect(mockOptionsWithLegacyParams.setShouldFetch).toHaveBeenCalledWith(true);
+  });
+
+  it('does nothing while the search is being cleared', () => {
+    const mockOptionsWhileClearing = {
+      ...mockOptions,
+      isClearing: true,
+      location: { search: "?q=eagles", pathname: "/search" },
+    };
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWhileClearing));
+
+    expect(mockOptionsWhileClearing.setInput).not.toHaveBeenCalled();
+    expect(mockOptionsWhileClearing.setShouldFetch).not.toHaveBeenCalled();
   });
 });

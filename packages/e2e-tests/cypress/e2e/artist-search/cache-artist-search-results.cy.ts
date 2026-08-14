@@ -44,8 +44,8 @@ describe('Artist Search Caching', () => {
     cy.wait(1000);
     
     // Clear search input and search again for the same term
-    cy.get('#artist-search-input').clear();
-    cy.get('#artist-search-input').type(TEST_ARTIST);
+    cy.get('#search-input').clear();
+    cy.get('#search-input').type(TEST_ARTIST);
     cy.get('button[type="submit"]').click();
     
     // Wait for search to complete

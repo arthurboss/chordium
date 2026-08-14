@@ -38,7 +38,7 @@ describe('Song Search Caching', () => {
     cy.contains('Search').click();
     
     // Perform song-only search using fixture data
-    cy.get('#song-search-input').type('Wonderful');
+    cy.get('#search-input').type('Wonderful');
     cy.get('button[type="submit"]').click();
     
     // Wait for song search API call
@@ -48,7 +48,7 @@ describe('Song Search Caching', () => {
     cy.get('body').should('contain', 'Search');
     
     // Search for same song again
-    cy.get('#song-search-input').clear().type('Wonderful');
+    cy.get('#search-input').clear().type('Wonderful');
     cy.get('button[type="submit"]').click();
     
     // Wait for search to complete (cache might be used)
@@ -65,7 +65,7 @@ describe('Song Search Caching', () => {
     const songs = ['Wonderful', 'Amazing', 'Beautiful'];
     
     songs.forEach((song) => {
-      cy.get('#song-search-input').clear().type(song);
+      cy.get('#search-input').clear().type(song);
       cy.get('button[type="submit"]').click();
       cy.wait('@songSearchAPI');
       cy.wait(1000);

@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql } from "@vercel/postgres";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
-import { fetchJsonpDocs } from "./_jsonp.js";
+import { fetchSourceDocs } from "@chordium/scraping";
 
 export const config = {
   maxDuration: 60,
@@ -104,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // 3. JSONP last resort
   try {
-    const docs = await fetchJsonpDocs(artistPath.replace(/-/g, " "));
+    const docs = await fetchSourceDocs(artistPath.replace(/-/g, " "));
     const songs = docs
       .filter((d) => d.t === "2" && d.d === artistPath && d.u)
       .map((d) => ({ title: d.m, artist: d.a, path: `${d.d}/${d.u}` }));

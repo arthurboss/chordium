@@ -4,9 +4,10 @@ import type { Artist, Song } from "@chordium/types";
  * Options interface for useSearchReducer hook
  */
 export interface UseSearchReducerOptions {
-  artist: string;
-  song: string;
-  filterSong: string;
+  /** The whole search as typed, artist and title together. */
+  query: string;
+  /** Narrows an artist's song list once one is open. */
+  filter: string;
   shouldFetch: boolean;
   activeArtist: Artist | null;
   onFetchComplete?: () => void;

@@ -45,7 +45,7 @@ describe('Multiple Artist Searches', () => {
     
     artists.forEach((artist) => {
       searchForm.within(() => {
-        cy.get('#artist-search-input')
+        cy.get('#search-input')
           .should('be.visible')
           .clear()
           .type(artist, { delay: 50 });

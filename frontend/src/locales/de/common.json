@@ -12,12 +12,10 @@
     "message": "Diese App befindet sich in Entwicklung. Einige Funktionen arbeiten möglicherweise nicht wie erwartet."
   },
   "searchBar": {
-    "artistPlaceholder": "Nach Künstler suchen",
-    "songPlaceholder": "Nach Lied suchen",
+    "placeholder": "Nach Künstler oder Lied suchen",
     "back": "Zurück",
     "search": "Suchen",
-    "clearAriaLabel": "Suche löschen",
-    "andOr": "und | oder"
+    "clearAriaLabel": "Suche löschen"
   },
   "searchResults": {
     "noResults": "Keine Ergebnisse gefunden.",

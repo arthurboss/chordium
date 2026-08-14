@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
 
 const mockCifraClubService = {
-  search: jest.fn() as jest.MockedFunction<(query: string, type: string) => Promise<unknown[]>>
+  search: jest.fn() as jest.MockedFunction<(query: string) => Promise<unknown[]>>
 };
 
 jest.unstable_mockModule('../../../services/cifraclub.service.js', () => ({
@@ -20,6 +20,9 @@ const mockReqRes = (query: Record<string, unknown> = {}) => {
   return [req, res] as const;
 };
 
+const ARTIST_HIT = { type: 'artist', displayName: 'Adele', path: 'adele', songCount: null };
+const SONG_HIT = { type: 'song', title: 'Hello', artist: 'Adele', path: 'adele/hello' };
+
 describe('searchHandler', () => {
   beforeEach(() => { jest.clearAllMocks(); });
 
@@ -27,28 +30,35 @@ describe('searchHandler', () => {
     const [req, res] = mockReqRes({});
     await searchHandler(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Missing or invalid search query' });
+    expect(res.json).toHaveBeenCalledWith({ error: 'Missing search query' });
   });
 
-  it('returns CifraClub results for artist search', async () => {
-    mockCifraClubService.search.mockResolvedValue([{ displayName: 'Adele', path: 'adele', songCount: null }]);
-    const [req, res] = mockReqRes({ artist: 'Adele' });
+  it('returns 400 if query is only whitespace', async () => {
+    const [req, res] = mockReqRes({ q: '   ' });
     await searchHandler(req, res);
-    expect(mockCifraClubService.search).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith([{ displayName: 'Adele', path: 'adele', songCount: null }]);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(mockCifraClubService.search).not.toHaveBeenCalled();
   });
 
-  it('returns CifraClub results for song search', async () => {
-    mockCifraClubService.search.mockResolvedValue([{ title: 'Hello', artist: 'Adele', path: 'adele/hello' }]);
-    const [req, res] = mockReqRes({ song: 'Hello' });
+  it('returns artists and songs together for a single query', async () => {
+    mockCifraClubService.search.mockResolvedValue([ARTIST_HIT, SONG_HIT]);
+    const [req, res] = mockReqRes({ q: 'adele' });
     await searchHandler(req, res);
-    expect(mockCifraClubService.search).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith([{ title: 'Hello', artist: 'Adele', path: 'adele/hello' }]);
+    expect(mockCifraClubService.search).toHaveBeenCalledWith('adele');
+    expect(res.json).toHaveBeenCalledWith([ARTIST_HIT, SONG_HIT]);
+  });
+
+  it('searches the whole phrase rather than splitting it', async () => {
+    mockCifraClubService.search.mockResolvedValue([SONG_HIT]);
+    const [req, res] = mockReqRes({ q: '  adele hello  ' });
+    await searchHandler(req, res);
+    expect(mockCifraClubService.search).toHaveBeenCalledWith('adele hello');
+    expect(res.json).toHaveBeenCalledWith([SONG_HIT]);
   });
 
   it('returns 500 on error', async () => {
-    mockCifraClubService.search.mockRejectedValue(new Error('CifraClub failed'));
-    const [req, res] = mockReqRes({ artist: 'Adele' });
+    mockCifraClubService.search.mockRejectedValue(new Error('Search source failed'));
+    const [req, res] = mockReqRes({ q: 'adele' });
     await searchHandler(req, res);
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'Search failed' }));

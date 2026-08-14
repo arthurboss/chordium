@@ -1,5 +1,4 @@
 import type { Song, Artist } from "@chordium/types";
-import type { SearchDataState } from "../../../types/SearchDataState";
 
 export interface SearchTabLogicProps {
   setMySongs?: React.Dispatch<React.SetStateAction<Song[]>>;
@@ -10,18 +9,19 @@ export interface SearchTabLogicProps {
 export interface SearchTabLogicResult {
   activeArtist: Artist | null;
   loading: boolean;
-  artistInput: string;
-  songInput: string;
+  /** The search as currently typed. */
+  input: string;
+  /** The search that produced the results on screen. */
+  submittedQuery: string;
+  /** Narrows an open artist's song list. Empty until the box is typed in. */
+  artistFilter: string;
   clearDisabled: boolean;
   hasSearched: boolean;
-  searchState: SearchDataState;
-  submittedArtist: string;
-  submittedSong: string;
   shouldFetch: boolean;
   handleBackToArtistList: () => void;
   handleArtistSelect: (artist: Artist) => void;
-  handleInputChange: (artistValue: string, songValue: string) => void;
-  handleSearchSubmit: (artistValue: string, songValue: string) => void;
+  handleInputChange: (value: string) => void;
+  handleSearchSubmit: (value: string) => void;
   handleLoadingChange: (isLoading: boolean) => void;
   handleClearSearch: () => void;
   setShouldFetch: (val: boolean) => void;

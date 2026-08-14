@@ -46,12 +46,11 @@ vi.mock("react", async () => {
 // Mock useSearchReducer
 vi.mock("@/search", () => ({
   useSearchReducer: () => ({
-    artists: [],
-    songs: [],
+    hits: [],
     artistSongs: [],
+    filteredArtistSongs: [],
     stateData: {
       state: 'default',
-      searchType: 'artist',
       activeArtist: null,
       isEmpty: false,
       emptyMessage: '',
@@ -77,7 +76,6 @@ describe("useSearchTabLogic", () => {
   });
 
   it('should render without crashing', () => {
-    // Simple test to ensure the hook doesn't crash
     expect(() => {
       renderHook(() => useSearchTabLogic(defaultProps));
     }).not.toThrow();
@@ -85,10 +83,9 @@ describe("useSearchTabLogic", () => {
 
   it('should have the expected interface', () => {
     const { result } = renderHook(() => useSearchTabLogic(defaultProps));
-    
-    // Test that the hook returns the expected functions and properties
-    expect(result.current).toHaveProperty('artistInput');
-    expect(result.current).toHaveProperty('songInput');
+
+    expect(result.current).toHaveProperty('input');
+    expect(result.current).toHaveProperty('submittedQuery');
     expect(result.current).toHaveProperty('handleInputChange');
     expect(result.current).toHaveProperty('handleClearSearch');
     expect(result.current).toHaveProperty('hasSearched');
@@ -100,90 +97,127 @@ describe("useSearchTabLogic", () => {
 
   it('should handle input changes correctly', () => {
     const { result } = renderHook(() => useSearchTabLogic(defaultProps));
-    
-    // Test that handleInputChange is callable
+
     expect(typeof result.current.handleInputChange).toBe('function');
-    
-    // Test input change functionality
+
     act(() => {
-      result.current.handleInputChange("Test Artist", "Test Song");
+      result.current.handleInputChange("eagles hotel california");
     });
-    
-    expect(result.current.artistInput).toBe("Test Artist");
-    expect(result.current.songInput).toBe("Test Song");
+
+    expect(result.current.input).toBe("eagles hotel california");
   });
 
-  it('should handle individual field clearing without affecting other fields', () => {
+  it('keeps the submitted search when the field is emptied', () => {
     const { result } = renderHook(() => useSearchTabLogic(defaultProps));
-    
-    // Set initial state
+
     act(() => {
-      result.current.handleInputChange("Test Artist", "Test Song");
+      result.current.handleSearchSubmit("eagles");
     });
-    
-    // Verify initial state
-    expect(result.current.artistInput).toBe("Test Artist");
-    expect(result.current.songInput).toBe("Test Song");
-    
-    // Clear only the artist field
+    expect(result.current.submittedQuery).toBe("eagles");
+
+    // Emptying the field must not discard the results already on screen: only the
+    // trash button does that.
     act(() => {
-      result.current.handleInputChange("", "Test Song");
+      result.current.handleInputChange("");
     });
-    
-    // Verify artist field is cleared but song field remains
-    expect(result.current.artistInput).toBe("");
-    expect(result.current.songInput).toBe("Test Song");
-    
-    // Clear only the song field
+
+    expect(result.current.input).toBe("");
+    expect(result.current.submittedQuery).toBe("eagles");
+    expect(result.current.hasSearched).toBe(true);
+  });
+
+  it('ignores a submit with nothing but whitespace', () => {
+    const { result } = renderHook(() => useSearchTabLogic(defaultProps));
+
     act(() => {
-      result.current.handleInputChange("Test Artist", "");
+      result.current.handleSearchSubmit("   ");
     });
-    
-    // Verify song field is cleared but artist field is restored
-    expect(result.current.artistInput).toBe("Test Artist");
-    expect(result.current.songInput).toBe("");
+
+    expect(result.current.submittedQuery).toBe("");
+    expect(result.current.hasSearched).toBe(false);
+  });
+
+  it('trims the search before submitting it', () => {
+    const { result } = renderHook(() => useSearchTabLogic(defaultProps));
+
+    act(() => {
+      result.current.handleSearchSubmit("  legiao urbana tempo perdido  ");
+    });
+
+    expect(result.current.submittedQuery).toBe("legiao urbana tempo perdido");
   });
 
   it('should handle clear disabled state correctly', () => {
     const { result } = renderHook(() => useSearchTabLogic(defaultProps));
-    
-    // Initially should be disabled (no inputs)
+
+    // Initially should be disabled (no input)
     expect(result.current.clearDisabled).toBe(true);
-    
-    // Add some input
+
     act(() => {
-      result.current.handleInputChange("Test Artist", "");
+      result.current.handleInputChange("eagles");
     });
-    
-    // Should be enabled when there's input
+
     expect(result.current.clearDisabled).toBe(false);
-    
-    // Clear all inputs
+
     act(() => {
-      result.current.handleInputChange("", "");
+      result.current.handleInputChange("");
     });
-    
-    // Should be disabled again
+
     expect(result.current.clearDisabled).toBe(true);
   });
 
+  it('clears everything when the search is cleared', () => {
+    const { result } = renderHook(() => useSearchTabLogic(defaultProps));
+
+    act(() => {
+      result.current.handleSearchSubmit("eagles");
+    });
+
+    act(() => {
+      result.current.handleClearSearch();
+    });
+
+    expect(result.current.input).toBe("");
+    expect(result.current.submittedQuery).toBe("");
+    expect(result.current.hasSearched).toBe(false);
+  });
+
+  it("starts an opened artist's songs unfiltered, then narrows them as the box is typed in", () => {
+    const { result } = renderHook(() => useSearchTabLogic(defaultProps));
+
+    act(() => {
+      result.current.handleSearchSubmit("eagles");
+    });
+    act(() => {
+      result.current.handleArtistSelect({ path: "the-eagles", displayName: "Eagles", songCount: null });
+    });
+
+    // The box is holding the artist's name here. Matching song titles against it
+    // would hide every song not named after the act, which is what made an
+    // artist with 98 songs come up empty.
+    expect(result.current.artistFilter).toBe("");
+
+    act(() => {
+      result.current.handleInputChange("desperado");
+    });
+
+    expect(result.current.artistFilter).toBe("desperado");
+  });
+
   it('should handle session storage errors gracefully', () => {
-    // Mock session storage to throw an error
     mockSessionStorage.setItem.mockImplementation(() => {
       throw new Error('Storage error');
     });
-    
+
     const { result } = renderHook(() => useSearchTabLogic(defaultProps));
-    
-    // Should not crash when session storage fails
+
     expect(() => {
       act(() => {
-        result.current.handleSearchSubmit("Test Artist", "Test Song");
+        result.current.handleSearchSubmit("eagles hotel california");
       });
     }).not.toThrow();
-    
+
     // Should still update local state even if session storage fails
-    expect(result.current.submittedArtist).toBe("Test Artist");
-    expect(result.current.submittedSong).toBe("Test Song");
+    expect(result.current.submittedQuery).toBe("eagles hotel california");
   });
 });

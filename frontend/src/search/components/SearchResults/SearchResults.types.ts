@@ -8,10 +8,10 @@ export interface SearchResultsProps {
   setActiveTab?: (tab: string) => void;
   setSelectedSong?: React.Dispatch<React.SetStateAction<Song | null>>;
   myChordSheets?: Song[];
-  artist: string;
-  song: string;
-  filterArtist: string;
-  filterSong: string;
+  /** The search that produced these results. */
+  query: string;
+  /** Narrows an open artist's song list as the field is typed in. */
+  filter: string;
   activeArtist: Artist | null;
   onArtistSelect: (artist: Artist) => void;
   shouldFetch?: boolean;

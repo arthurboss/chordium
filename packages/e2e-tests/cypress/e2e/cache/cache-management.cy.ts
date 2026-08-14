@@ -20,7 +20,7 @@ describe('Cache Management', () => {
     cy.get('[data-cy="tab-search"]').click();
     
     // Perform search to populate cache
-    cy.get('#artist-search-input').type('Hillsong United');
+    cy.get('#search-input').type('Hillsong United');
     cy.get('button[type="submit"]').click();
     cy.wait('@artistSearchAPI');
     
@@ -28,8 +28,8 @@ describe('Cache Management', () => {
     cy.wait(1000);
     
     // Verify initial cache was created by checking if search works without API call
-    cy.get('#artist-search-input').clear();
-    cy.get('#artist-search-input').type('Hillsong United');
+    cy.get('#search-input').clear();
+    cy.get('#search-input').type('Hillsong United');
     cy.get('button[type="submit"]').click();
     
     // Should not make another API call since cache should be used
@@ -44,7 +44,7 @@ describe('Cache Management', () => {
     cy.get('[data-cy="tab-search"]').click();
     
     // Perform initial search to populate cache
-    cy.get('#artist-search-input').type('Hillsong United');
+    cy.get('#search-input').type('Hillsong United');
     cy.get('button[type="submit"]').click();
     
     // Wait for the API call or cache to load
@@ -54,10 +54,10 @@ describe('Cache Management', () => {
     cy.get('body').should('contain', 'Search');
     
     // Clear the search input
-    cy.get('#artist-search-input').clear();
+    cy.get('#search-input').clear();
     
     // Search again - should work whether using cache or API
-    cy.get('#artist-search-input').type('Hillsong United');
+    cy.get('#search-input').type('Hillsong United');
     cy.get('button[type="submit"]').click();
     
     // Wait for processing
@@ -67,8 +67,8 @@ describe('Cache Management', () => {
     cy.get('body').should('contain', 'Search');
     
     // Test with a different search term to ensure search functionality works
-    cy.get('#artist-search-input').clear();
-    cy.get('#artist-search-input').type('AC/DC');
+    cy.get('#search-input').clear();
+    cy.get('#search-input').type('AC/DC');
     cy.get('button[type="submit"]').click();
     
     // Wait for processing
@@ -84,7 +84,7 @@ describe('Cache Management', () => {
     
     // Perform initial search
     const startTime = Date.now();
-    cy.get('#artist-search-input').type('AC/DC');
+    cy.get('#search-input').type('AC/DC');
     cy.get('button[type="submit"]').click();
     cy.wait('@artistSearchAPI');
     
@@ -100,8 +100,8 @@ describe('Cache Management', () => {
     // Perform same search again (should use cache)
     cy.then(() => {
       const cacheStartTime = Date.now();
-      cy.get('#artist-search-input').clear();
-      cy.get('#artist-search-input').type('AC/DC');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').type('AC/DC');
       cy.get('button[type="submit"]').click();
       
       // Should not make another API call

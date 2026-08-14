@@ -1,84 +1,76 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import SEARCH_TYPES from "../../../constants/searchTypes.js";
+import { describe, it, expect, jest, beforeEach, afterAll } from "@jest/globals";
+import { performSearch } from "../../../services/cifraclub/search-handler.js";
 
-const mockAxiosGet = jest.fn<() => Promise<unknown>>();
+const originalFetch = global.fetch;
+const mockFetch = jest.fn<() => Promise<unknown>>();
 
-jest.unstable_mockModule("axios", () => ({
-  default: { get: mockAxiosGet },
-}));
-
-const { performSearch } = await import(
-  "../../../services/cifraclub/search-handler.js"
-);
-
-function makeJsonp(docs: object[]) {
+function jsonpResponse(docs: object[]) {
   return {
-    data: `x({"response":{"numFound":${docs.length},"start":0,"docs":${JSON.stringify(docs)}}})`,
+    ok: true,
+    text: async () =>
+      `x({"response":{"numFound":${docs.length},"start":0,"docs":${JSON.stringify(docs)}}})`,
   };
 }
 
 const ARTIST_DOC = { t: "1", m: "Oasis", a: "Oasis", d: "oasis" };
-const SONG_DOC   = { t: "2", m: "Wonderwall", a: "Oasis", d: "oasis", u: "wonderwall" };
+const SONG_DOC = { t: "2", m: "Wonderwall", a: "Oasis", d: "oasis", u: "wonderwall" };
 
-describe("CifraClub Search Handler", () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+const ARTIST_HIT = { type: "artist", displayName: "Oasis", path: "oasis", songCount: null };
+const SONG_HIT = { type: "song", title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" };
 
-  describe("performSearch", () => {
-    it("returns artists when searchType is ARTIST", async () => {
-      mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
+describe("unified search handler", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+    global.fetch = mockFetch as unknown as typeof fetch;
+  });
 
-      const result = await performSearch("oasis", SEARCH_TYPES.ARTIST);
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
 
-      expect(result).toEqual([
-        { displayName: "Oasis", path: "oasis", songCount: null },
-      ]);
-    });
+  it("returns artists and songs together, in the order the source ranked them", async () => {
+    mockFetch.mockResolvedValue(jsonpResponse([ARTIST_DOC, SONG_DOC]));
 
-    it("returns songs when searchType is SONG", async () => {
-      mockAxiosGet.mockResolvedValue(makeJsonp([ARTIST_DOC, SONG_DOC]));
+    await expect(performSearch("oasis")).resolves.toEqual([ARTIST_HIT, SONG_HIT]);
+  });
 
-      const result = await performSearch("oasis wonderwall", SEARCH_TYPES.SONG);
+  it("preserves a song-first ranking rather than grouping by kind", async () => {
+    mockFetch.mockResolvedValue(jsonpResponse([SONG_DOC, ARTIST_DOC]));
 
-      expect(result).toEqual([
-        { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
-      ]);
-    });
+    await expect(performSearch("wonderwall")).resolves.toEqual([SONG_HIT, ARTIST_HIT]);
+  });
 
-    it("returns songs when searchType is ARTIST_SONG", async () => {
-      mockAxiosGet.mockResolvedValue(makeJsonp([SONG_DOC]));
+  it("drops documents that cannot be turned into a link", async () => {
+    mockFetch.mockResolvedValue(
+      jsonpResponse([
+        { t: "1", m: "No Slug", a: "No Slug", d: "" },
+        { t: "2", m: "No Song Slug", a: "Oasis", d: "oasis" },
+        SONG_DOC,
+      ])
+    );
 
-      const result = await performSearch("oasis wonderwall", SEARCH_TYPES.ARTIST_SONG);
+    await expect(performSearch("oasis")).resolves.toEqual([SONG_HIT]);
+  });
 
-      expect(result).toEqual([
-        { title: "Wonderwall", artist: "Oasis", path: "oasis/wonderwall" },
-      ]);
-    });
+  it("returns an empty list when the source has no matches", async () => {
+    mockFetch.mockResolvedValue(jsonpResponse([]));
 
-    it("returns empty array when no matching docs", async () => {
-      mockAxiosGet.mockResolvedValue(makeJsonp([]));
+    await expect(performSearch("xyznonexistent")).resolves.toEqual([]);
+  });
 
-      const result = await performSearch("xyznonexistent", SEARCH_TYPES.SONG);
+  it("sends the whole query as one string", async () => {
+    mockFetch.mockResolvedValue(jsonpResponse([]));
 
-      expect(result).toEqual([]);
-    });
+    await performSearch("guns n roses paradise city");
 
-    it("passes query to JSONP endpoint", async () => {
-      mockAxiosGet.mockResolvedValue(makeJsonp([]));
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://solr.sscdn.co/cc/h2/?q=guns%20n%20roses%20paradise%20city&callback=x"
+    );
+  });
 
-      await performSearch("guns n roses", SEARCH_TYPES.SONG);
+  it("reports a failure rather than an empty result when the source is unreachable", async () => {
+    mockFetch.mockRejectedValue(new Error("Network Error"));
 
-      expect(mockAxiosGet).toHaveBeenCalledWith(
-        "https://solr.sscdn.co/cc/h2/",
-        { params: { q: "guns n roses", callback: "x" } }
-      );
-    });
-
-    it("propagates network errors", async () => {
-      mockAxiosGet.mockRejectedValue(new Error("Network Error"));
-
-      await expect(
-        performSearch("test", SEARCH_TYPES.ARTIST)
-      ).rejects.toThrow("Network Error");
-    });
+    await expect(performSearch("oasis")).rejects.toThrow("Network Error");
   });
 });

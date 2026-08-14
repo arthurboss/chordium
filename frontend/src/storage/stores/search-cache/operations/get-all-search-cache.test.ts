@@ -22,7 +22,7 @@ vi.mock("../../../core/transactions", () => ({
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
 import { executeReadTransaction } from "../../../core/transactions";
-import { Artist, Song } from "@chordium/types";
+import { SearchHit } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
 const mockExecuteTransaction = vi.mocked(executeReadTransaction);
@@ -36,14 +36,11 @@ describe("getAllSearchCache", () => {
   const mockCacheEntries: SearchCacheEntry[] = [
     {
       searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
-      results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
+      results: hillsongArtists as unknown as SearchHit[], // Real fixture data from artists/hillsong.json
       search: {
-        query: {
-          artist: "hillsong",
-          song: null,
-        },
-        searchType: "artist" as const,
-        dataSource: "neon" as const,
+        query: "hillsong",
+        kind: "search" as const,
+        dataSource: "cifraclub" as const,
       },
       storage: {
         timestamp: Date.now(),
@@ -53,13 +50,10 @@ describe("getAllSearchCache", () => {
     },
     {
       searchKey: "oceans", // Song search term (from search-types.md: /api/cifraclub-search)
-      results: oceansSearch as Song[], // Real fixture data from cifraclub-search/oceans.json
+      results: oceansSearch as unknown as SearchHit[], // Real fixture data from cifraclub-search/oceans.json
       search: {
-        query: {
-          artist: null,
-          song: "oceans",
-        },
-        searchType: "song" as const,
+        query: "oceans",
+        kind: "search" as const,
         dataSource: "cifraclub" as const,
       },
       storage: {
