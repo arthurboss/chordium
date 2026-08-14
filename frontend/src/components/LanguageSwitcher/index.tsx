@@ -44,7 +44,7 @@ const LanguageSwitcher: React.FC = () => {
     removeModel,
     refresh,
   } = useTranslationPacks();
-  const speech = useSpeechModel(i18n.resolvedLanguage ?? "en");
+  const speech = useSpeechModel();
   const [open, setOpen] = useState(false);
   const [promptedFor, setPromptedFor] = useState<TranslatableLanguage | null>(null);
   // The language a waiting song is sung in, kept so its own pair is the one
@@ -178,10 +178,10 @@ const LanguageSwitcher: React.FC = () => {
     </div>
   );
 
-  // Hearing a spoken search needs either the browser's own recogniser, which
-  // fetches itself, or the app's model. Both are offered here so the one place
-  // that manages languages manages this too, which is also where the microphone
-  // sends a reader who has neither.
+  // Hearing a spoken search needs either the browser's own recogniser, which is
+  // ready wherever it exists, or the app's model for browsers without one. Both are
+  // reported here so the one place that manages languages manages this too, which is
+  // also where the microphone sends a reader who still needs the download.
   const speechPercent = Math.round(speech.progress * 100);
   const speechSection = speech.backend !== "none" && (
     <div className="border-t px-4 py-3">
@@ -190,62 +190,57 @@ const LanguageSwitcher: React.FC = () => {
         {t("voiceSearch.heading")}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {speech.status === "present"
-          ? speech.hasOwnDownload
-            ? t("voiceSearch.hintReadyNative")
-            : t("voiceSearch.hintReady", { size: speech.sizeMb })
-          : speech.hasOwnDownload
-            ? t("voiceSearch.hintNative")
+        {speech.backend === "native"
+          ? t("voiceSearch.hintNative")
+          : speech.status === "present"
+            ? t("voiceSearch.hintReady", { size: speech.sizeMb })
             : t("voiceSearch.hint", { size: speech.sizeMb })}
       </p>
 
-      <Button
-        variant="outline"
-        size="sm"
-        className={cn(
-          "relative mt-2 w-full overflow-hidden",
-          promptedForVoice && speech.status !== "present" && "ring-1 ring-primary"
-        )}
-        onClick={() => {
-          if (speech.status === "downloading") speech.cancelDownload();
-          else if (speech.status === "present") {
-            // The browser owns its recogniser and will not let a page remove it,
-            // so only our own download offers to go.
-            if (!speech.hasOwnDownload) setConfirmingSpeechRemoval(true);
-          } else speech.download();
-        }}
-        disabled={speech.status === "present" && speech.hasOwnDownload}
-      >
-        {speech.status === "downloading" && (
-          <span
-            aria-hidden
-            className="absolute inset-y-0 left-0 bg-primary/25 transition-[width] duration-200"
-            style={{ width: `${speechPercent}%` }}
-          />
-        )}
-        <span className="relative z-10 flex items-center">
-          {speech.status === "downloading" ? (
-            <>
-              <X className="mr-2 h-4 w-4" />
-              {t("voiceSearch.cancel", { percent: speechPercent })}
-            </>
-          ) : speech.status === "present" ? (
-            speech.hasOwnDownload ? (
-              t("voiceSearch.ready")
-            ) : (
+      {/* Only the fallback has anything to act on. One button carries its whole
+          state: it starts the download, then fills with its progress and offers to
+          stop, then offers to remove it. */}
+      {speech.backend === "local-model" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "relative mt-2 w-full overflow-hidden",
+            promptedForVoice && speech.status !== "present" && "ring-1 ring-primary"
+          )}
+          onClick={() => {
+            if (speech.status === "downloading") speech.cancelDownload();
+            else if (speech.status === "present") setConfirmingSpeechRemoval(true);
+            else speech.download();
+          }}
+        >
+          {speech.status === "downloading" && (
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 bg-primary/25 transition-[width] duration-200"
+              style={{ width: `${speechPercent}%` }}
+            />
+          )}
+          <span className="relative z-10 flex items-center">
+            {speech.status === "downloading" ? (
+              <>
+                <X className="mr-2 h-4 w-4" />
+                {t("voiceSearch.cancel", { percent: speechPercent })}
+              </>
+            ) : speech.status === "present" ? (
               <>
                 <Trash2 className="mr-2 h-4 w-4" />
                 {t("voiceSearch.delete")}
               </>
-            )
-          ) : (
-            <>
-              <Download className="mr-2 h-4 w-4" />
-              {t("voiceSearch.download")}
-            </>
-          )}
-        </span>
-      </Button>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                {t("voiceSearch.download")}
+              </>
+            )}
+          </span>
+        </Button>
+      )}
     </div>
   );
 

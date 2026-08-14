@@ -6,36 +6,24 @@ import { isNativeRecognizerSupported } from '../native-recognizer';
  * work, so both halves of it are worth pinning down.
  */
 describe('isNativeRecognizerSupported', () => {
-  const scope = globalThis as Record<string, unknown>;
+  afterEach(() => vi.unstubAllGlobals());
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    delete scope.SpeechRecognition;
+  it('is supported wherever the API exists in a secure context', () => {
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('SpeechRecognition', class {});
+    expect(isNativeRecognizerSupported()).toBe(true);
   });
 
-  function stubRecognition(withProcessLocally: boolean) {
-    class FakeRecognition {}
-    if (withProcessLocally) {
-      Object.defineProperty(FakeRecognition.prototype, 'processLocally', { value: false });
-    }
-    vi.stubGlobal('SpeechRecognition', FakeRecognition);
-  }
-
-  it('is supported when the build implements on-device recognition in a secure context', () => {
+  it('is supported through the prefixed name older builds use', () => {
     vi.stubGlobal('isSecureContext', true);
-    stubRecognition(true);
+    vi.stubGlobal('SpeechRecognition', undefined);
+    vi.stubGlobal('webkitSpeechRecognition', class {});
     expect(isNativeRecognizerSupported()).toBe(true);
   });
 
   it('is unsupported over plain http, where the microphone is refused', () => {
     vi.stubGlobal('isSecureContext', false);
-    stubRecognition(true);
-    expect(isNativeRecognizerSupported()).toBe(false);
-  });
-
-  it('is unsupported on a build that only recognises speech in the cloud', () => {
-    vi.stubGlobal('isSecureContext', true);
-    stubRecognition(false);
+    vi.stubGlobal('SpeechRecognition', class {});
     expect(isNativeRecognizerSupported()).toBe(false);
   });
 

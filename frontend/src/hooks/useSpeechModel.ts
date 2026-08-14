@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  getNativeState,
-  installNative,
-  isNativeRecognizerSupported,
-} from '@/services/speech/native-recognizer';
+import { isNativeRecognizerSupported } from '@/services/speech/native-recognizer';
 import {
   cancelLocalModelDownload,
   deleteLocalModel,
@@ -23,25 +19,19 @@ export type SpeechModelStatus = 'absent' | 'downloading' | 'present';
  * Tracks what this device needs before a spoken search can be heard, and lets the
  * reader fetch it.
  *
- * The two backends are managed differently because they are shaped differently.
- * The browser's own recogniser fetches its model itself and will not let a page
- * delete it, so it is only ever added. Ours is a single download covering every
- * language, which is ours to delete and worth offering to remove.
+ * Only the fallback has anything to manage. Where the browser recognises speech
+ * itself there is nothing to download and nothing to remove, so the section that
+ * uses this says so and offers no action.
  */
-export function useSpeechModel(language: string) {
+export function useSpeechModel() {
   const [backend, setBackend] = useState<SpeechBackend>('none');
   const [status, setStatus] = useState<SpeechModelStatus>('absent');
   const [progress, setProgress] = useState(0);
 
   const refresh = useCallback(async () => {
-    const native = isNativeRecognizerSupported() ? await getNativeState(language) : 'no';
-    if (native !== 'no') {
+    if (isNativeRecognizerSupported()) {
       setBackend('native');
-      // A download in flight is not yet visible to the availability check, so its
-      // own callbacks own the status until it settles.
-      setStatus((current) =>
-        current === 'downloading' ? current : native === 'ready' ? 'present' : 'absent'
-      );
+      setStatus('present');
       return;
     }
 
@@ -53,36 +43,18 @@ export function useSpeechModel(language: string) {
 
     setBackend('local-model');
     const present = await isLocalModelDownloaded();
+    // A download in flight is not yet visible to the cache check, so its own
+    // callbacks own the status until it settles.
     setStatus((current) => (current === 'downloading' ? current : present ? 'present' : 'absent'));
-  }, [language]);
+  }, []);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
-  /**
-   * Must be called straight from a click: the browser refuses to fetch its
-   * recognition model outside a user gesture, and awaiting anything first spends
-   * it. Ours has no such rule, but is started the same way so both read alike.
-   */
   const download = useCallback(() => {
     setProgress(0);
     setStatus('downloading');
-
-    if (backend === 'native') {
-      const installing = installNative(language);
-      if (!installing) {
-        setStatus('absent');
-        return;
-      }
-      void installing.then(async (installed) => {
-        setStatus(installed ? 'present' : 'absent');
-        if (installed) announceSpeechModelChanged();
-        await refresh();
-      });
-      return;
-    }
-
     void downloadLocalModel((ratio) => setProgress(ratio))
       .then((outcome) => {
         setStatus(outcome === 'completed' ? 'present' : 'absent');
@@ -95,7 +67,7 @@ export function useSpeechModel(language: string) {
         setProgress(0);
       })
       .finally(() => void refresh());
-  }, [backend, language, refresh]);
+  }, [refresh]);
 
   /**
    * The library cannot be made to drop its requests, so the reader is taken back
@@ -118,8 +90,6 @@ export function useSpeechModel(language: string) {
     status,
     progress,
     sizeMb: LOCAL_MODEL_SIZE_MB,
-    /** The browser fetches its own recogniser, so its size is not ours to state. */
-    hasOwnDownload: backend === 'native',
     download,
     cancelDownload,
     remove,

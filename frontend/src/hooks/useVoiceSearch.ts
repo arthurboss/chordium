@@ -12,7 +12,7 @@ import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/
 /**
  * Where a spoken search has got to:
  * - "unsupported": this browser cannot hear one at all.
- * - "needs-setup": it could, once something has been downloaded.
+ * - "needs-setup": it could, once the fallback model has been downloaded.
  * - "idle": ready, waiting to be asked.
  * - "listening": the microphone is open.
  * - "working": listening has stopped and the words are being made out.
@@ -28,8 +28,9 @@ interface UseVoiceSearchOptions {
  * Runs one spoken search at a time, from pressing the microphone to handing back
  * what was heard.
  *
- * Nothing is downloaded and no permission is asked for until the microphone is
- * pressed, so a reader who never uses this pays nothing for it.
+ * Where the browser recognises speech itself the first press opens the microphone.
+ * Where it does not, the first press asks for the download instead, so a reader who
+ * never speaks to it is never charged for it.
  */
 export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   const { i18n } = useTranslation();
@@ -47,12 +48,12 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   }, [onTranscript]);
 
   const assess = useCallback(async () => {
-    if (!(await canListen(language))) {
+    if (!canListen()) {
       setState('unsupported');
       return;
     }
-    setState((await requiresDownloadConsent(language)) ? 'needs-setup' : 'idle');
-  }, [language]);
+    setState((await requiresDownloadConsent()) ? 'needs-setup' : 'idle');
+  }, []);
 
   useEffect(() => {
     void assess();
@@ -83,8 +84,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     if (state !== 'idle') return;
 
     try {
-      const kind = await resolveRecognizerKind(language);
-      const session = await createRecognizer(kind).listen(language);
+      const session = await createRecognizer(resolveRecognizerKind()).listen(language);
       sessionRef.current = session;
       setState('listening');
 
@@ -98,9 +98,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     } catch (cause) {
       sessionRef.current = null;
       setState('idle');
-      setError(
-        cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed'
-      );
+      setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
       console.error('Voice search failed:', cause);
     }
   }, [language, state]);

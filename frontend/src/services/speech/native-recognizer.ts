@@ -1,15 +1,13 @@
 import { RecognizerUnavailableError, type RecognitionSession, type Recognizer } from './types';
 
 /**
- * The browser's own SpeechRecognition, used only where it can be made to run on
- * the device.
+ * The browser's own SpeechRecognition, preferred wherever it exists because it
+ * needs no download of ours, exactly as the browser's translator is preferred over
+ * the model that backs it up.
  *
- * Chromium has exposed this API for years, but by default it streams the
- * microphone to the vendor's servers. The app works offline and keeps what it
- * holds on the device, so the cloud path is deliberately not used: this backend is
- * offered only when processLocally is available, which keeps recordings on the
- * machine and costs no download of ours. Everywhere else the model below takes
- * over.
+ * Where the browser can recognise on the device it is asked to, which also keeps
+ * the feature working offline. Where it cannot, it recognises through its vendor
+ * instead, which still costs the reader nothing to set up.
  */
 interface SpeechRecognitionAlternative {
   transcript: string;
@@ -40,10 +38,8 @@ interface SpeechRecognitionInstance {
 
 interface SpeechRecognitionConstructor {
   new (): SpeechRecognitionInstance;
-  /** Whether on-device recognition is installed for these languages. */
+  /** Only on builds that implement on-device recognition. */
   available?(options: { langs: string[]; processLocally: boolean }): Promise<string>;
-  /** Asks the browser to fetch its own on-device model for these languages. */
-  install?(options: { langs: string[] }): Promise<boolean>;
 }
 
 function getConstructor(): SpeechRecognitionConstructor | null {
@@ -55,61 +51,37 @@ function getConstructor(): SpeechRecognitionConstructor | null {
 }
 
 /**
- * Whether this browser can recognise speech without sending it anywhere.
+ * Whether the browser can hear a search at all.
  *
- * The property only exists on builds that implement on-device recognition, so its
- * absence rules the backend out without asking about any particular language. The
- * secure-context check is separate and cannot be inferred from it: the property is
- * on the prototype either way, but the microphone is refused over plain http on
- * anything but localhost, so without this the button would offer a recognition
- * that cannot start.
+ * The secure-context check is not about privacy but about whether it can run: the
+ * microphone is refused over plain http on anything but localhost, so without this
+ * the button would offer a recognition that cannot start.
  */
 export function isNativeRecognizerSupported(): boolean {
   if (typeof globalThis.isSecureContext === 'boolean' && !globalThis.isSecureContext) return false;
+  return getConstructor() !== null;
+}
+
+/**
+ * Whether this browser would keep the audio on the device for a language. Nothing
+ * depends on the answer being yes: it decides only whether to ask for on-device
+ * recognition, since asking for it where it is unavailable fails the whole
+ * recognition rather than falling back by itself.
+ */
+async function canRecogniseLocally(language: string): Promise<boolean> {
   const Recognition = getConstructor();
-  if (!Recognition) return false;
+  if (!Recognition?.available) return false;
   try {
-    return 'processLocally' in Recognition.prototype;
+    return (await Recognition.available({ langs: [language], processLocally: true })) === 'available';
   } catch {
     return false;
   }
 }
 
-/**
- * How the browser's recogniser stands on a language:
- * - "no": it cannot run on the device for this language.
- * - "needs-install": it can, once the browser has fetched its own model.
- * - "ready": it can, right now.
- */
-export type NativeState = 'no' | 'needs-install' | 'ready';
-
-export async function getNativeState(language: string): Promise<NativeState> {
-  const Recognition = getConstructor();
-  if (!Recognition || !isNativeRecognizerSupported() || !Recognition.available) return 'no';
-  try {
-    const status = await Recognition.available({ langs: [language], processLocally: true });
-    if (status === 'unavailable') return 'no';
-    return status === 'available' ? 'ready' : 'needs-install';
-  } catch {
-    return 'no';
-  }
-}
-
-/**
- * Asks the browser to fetch its own recognition model. Must be called straight
- * from a click, for the same reason the translator's language packs are: the
- * browser refuses outside a user gesture, and awaiting anything first spends it.
- */
-export function installNative(language: string): Promise<boolean> | null {
-  const Recognition = getConstructor();
-  if (!Recognition?.install) return null;
-  return Recognition.install({ langs: [language] }).catch(() => false);
-}
-
 export function createNativeRecognizer(): Recognizer {
   return {
     id: 'native',
-    listen(language) {
+    async listen(language) {
       const Recognition = getConstructor();
       if (!Recognition) {
         throw new RecognizerUnavailableError('SpeechRecognition is not available');
@@ -120,7 +92,9 @@ export function createNativeRecognizer(): Recognizer {
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-      recognition.processLocally = true;
+      // Asked for only where it is offered, so that the audio stays on the device
+      // and the search keeps working offline. Elsewhere the default stands.
+      if (await canRecogniseLocally(language)) recognition.processLocally = true;
 
       let heard = '';
       const transcript = new Promise<string>((resolve, reject) => {
@@ -144,11 +118,11 @@ export function createNativeRecognizer(): Recognizer {
 
       recognition.start();
 
-      return Promise.resolve<RecognitionSession>({
+      return {
         stop: () => recognition.stop(),
         abort: () => recognition.abort(),
         transcript,
-      });
+      } satisfies RecognitionSession;
     },
   };
 }
