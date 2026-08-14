@@ -1,5 +1,4 @@
 import { processTabBlocks } from '../tab-splitting';
-import { mergePaginatedTabs } from '../merge-paginated-tabs';
 import { songChordsToRawHtml } from '../song-chords-to-raw-html';
 import {
   normalizeZeroWidthSpaces,
@@ -28,15 +27,12 @@ function transposeHtmlChords(html: string, halfSteps: number): string {
  * Applies all view-mode transformations to raw chord HTML.
  *
  * Order matters: transpose → normalisation → section titles → indent trimming → tab removal
- * → lyrics-only stripping → rejoining the source's tab pages → tab-block column splitting.
- * The rejoin has to come first of those last two, so the tab is divided for the width it is
- * read at rather than kept at the width the source happened to publish it.
+ * → lyrics-only stripping → tab-block column splitting.
  */
 export function processHtml(html: string, viewMode: string, maxCols: number, transpose = 0): string {
   let result = transposeHtmlChords(trimPureChordLineIndent(fixInlineSectionTitles(normalizeZeroWidthSpaces(html))), transpose);
   if (viewMode === 'tabs-off' || viewMode === 'lyrics-only') result = removeTabsFromHtml(result);
   if (viewMode === 'lyrics-only') result = removeChordsForLyricsOnly(result);
-  result = mergePaginatedTabs(result);
   if (maxCols > 0) result = processTabBlocks(result, maxCols);
   return result;
 }
