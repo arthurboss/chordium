@@ -177,9 +177,11 @@
   font-size: 1em;
 }
 
-/* The part labels stay subordinate to what they label. */
+/* The part labels read at the size of the words around them. Their own rule pins them to
+   the slider size, which is not what anything is rendered at once fullscreen fits the
+   words to the width. */
 #chord-sheet-viewer:fullscreen .chord-sheet-card .tab-info {
-  font-size: 0.7em;
+  font-size: 1em;
 }
 
 #chord-sheet-viewer:fullscreen .chord-sheet-card .chord-line {
