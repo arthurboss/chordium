@@ -166,7 +166,8 @@
     "returnHome": "Retornar ao Início"
   },
   "footer": {
-    "source": "Fonte"
+    "source": "Fonte",
+    "version": "Versão {{version}}"
   },
   "stickyControlsBar": {
     "capoFret": "Casa do Capo",

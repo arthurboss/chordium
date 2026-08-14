@@ -216,6 +216,21 @@ docs(readme): update installation instructions
 test(frontend): add unit tests for search functionality
 ```
 
+## 🔢 Versioning
+
+Chordium follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`), tracked in `package.json` (root, `frontend/`, and `backend/` stay in sync) and shown in the app footer.
+
+Bump the version as part of the PR that introduces the change, based on its Conventional Commit type:
+
+| Commit type | Bump |
+|---|---|
+| `fix:` | PATCH |
+| `feat:` | MINOR |
+| `feat!:` / `fix!:` or a `BREAKING CHANGE:` footer | MAJOR |
+| `docs:`, `style:`, `refactor:`, `test:`, `chore:` | none |
+
+While the project is pre-1.0 (`0.x.y`), SemVer allows breaking changes to ship as MINOR bumps, since the public API/UX isn't guaranteed stable yet. `1.0.0` should mark a deliberate decision that the current feature set is a stable baseline, not just "everything currently works."
+
 ## 🐛 Reporting Issues
 
 When reporting issues, please include:

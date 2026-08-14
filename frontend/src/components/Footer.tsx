@@ -6,7 +6,7 @@ const Footer = () => {
 
   return (
     <footer className="mt-auto border-t dark:bg-card">
-      <div className="flex justify-end sm:justify-center py-1 px-4 max-w-3xl mx-auto">
+      <div className="flex justify-between items-center py-1 px-4 max-w-3xl mx-auto">
         <a
           href="https://github.com/arthurboss/chordium"
           className="p-[4px] text-sm text-muted-foreground hover:text-foreground transition-colors flex flex-row-reverse sm:flex-row items-center gap-1.5"
@@ -16,6 +16,12 @@ const Footer = () => {
           <GitHubIcon size={24} />
           <span>{t("footer.source")}</span>
         </a>
+        <span
+          className="p-[4px] text-sm text-muted-foreground"
+          aria-label={t("footer.version", { version: __APP_VERSION__ })}
+        >
+          v{__APP_VERSION__}
+        </span>
       </div>
     </footer>
   );

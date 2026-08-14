@@ -166,7 +166,8 @@
     "returnHome": "Volver a Inicio"
   },
   "footer": {
-    "source": "Fuente"
+    "source": "Fuente",
+    "version": "Versión {{version}}"
   },
   "stickyControlsBar": {
     "capoFret": "Traste Capo",
