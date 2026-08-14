@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useContainerColumns } from '../useContainerColumns';
 import { useFitScale } from '../useFitScale';
-import { FONT_FAMILY, fittableLines, processHtml, resolveSourceHtml } from './chord-sheet-processing';
+import { FONT_FAMILY, plainTextLines, processHtml, resolveSourceHtml } from './chord-sheet-processing';
 import { ChordLoadingState } from './ChordLoadingState';
 import { ChordEmptyState } from './ChordEmptyState';
 import { ChordSheetPre } from './ChordSheetPre';
@@ -40,7 +40,7 @@ const ChordSheetContent: React.FC<ChordSheetContentProps> = ({
   const sourceHtml = resolveSourceHtml(rawHtml, songChords);
   const processedHtml = sourceHtml ? processHtml(sourceHtml, viewMode, maxCols, transpose) : undefined;
 
-  const lines = React.useMemo(() => fittableLines(processedHtml), [processedHtml]);
+  const lines = React.useMemo(() => plainTextLines(processedHtml), [processedHtml]);
   const fit = useFitScale(containerRef, lines);
 
   return (

@@ -135,6 +135,10 @@
      from across a room reports a smaller viewport for the same panel, so rem already
      carries the viewing distance and holds this to a readable size on either. */
   --fullscreen-max-font: 2rem;
+  /* The page's margin. It gives way on small screens rather than staying fixed, since the
+     words are fitted to what is left inside it and on a phone a fixed margin would take
+     most of the width. */
+  --page-margin: clamp(1rem, 5vmin, 3rem);
   overflow-y: auto;
   background-color: hsl(var(--background));
   padding: 1rem 2rem;
@@ -142,60 +146,55 @@
      a viewport height could not do without overrunning this element's own padding. */
   display: flex;
   flex-direction: column;
-}
-
-/* The card is what the words are measured against, not the viewport, so its full width
-   is what they are sized to. */
-#chord-sheet-viewer:fullscreen .chord-sheet-card {
+  /* The card is measured against this, so the container has to be its parent: container
+     units inside a rule on the container itself resolve against the next one out. */
   container-type: inline-size;
-  /* Set like a page, with even margins inside the paper rather than around it. The words
-     are fitted to what is left, so the margin narrows the column it measures: on a phone a
-     fixed one would take most of the width and leave the words too small to read, so it
-     gives way on small screens and settles at the full margin on large ones. */
-  padding: clamp(1rem, 5vmin, 3rem);
 }
 
-/* Two separate ceilings, whichever is lower: what stays readable, and what still fits
-   on one line. A line that outgrows the width would have to break, and a song whose
-   lines break no longer says which chord belongs over which word.
-   For the fit, dividing the card's inline size by 1ch gives how many characters
-   currently fit, and scaling by 1em over the count leaves 100cqi / (chars x advance),
-   so the font's own advance cancels out. */
-#chord-sheet-viewer:fullscreen .chord-sheet-card pre {
+/*
+ * One size for the whole page, set once here.
+ *
+ * Everything inside takes its size from this, so the parts keep their proportions to each
+ * other and there is a single number to reason about. It is whichever is lower of what
+ * stays readable and what still fits on one line: a song whose lines break no longer says
+ * which chord belongs over which word, so the width is a ceiling rather than something to
+ * wrap against.
+ *
+ * The fit divides the width the words actually get by how wide the longest line is. That
+ * width is the container less this page's own margins and borders, and dividing it by 1ch
+ * gives how many characters fit; scaling by 1em over the character count leaves
+ * width / (chars x advance), so the font's own advance cancels out.
+ */
+#chord-sheet-viewer:fullscreen .chord-sheet-card {
+  padding: var(--page-margin);
   font-size: min(
-    var(--fullscreen-max-font, 2rem),
-    max(0.75rem, calc(1em * (100cqi / 1ch) / var(--max-line-chars, 40) * var(--fit-scale, 1)))
+    var(--fullscreen-max-font),
+    max(
+      0.75rem,
+      calc(
+        1em * ((100cqi - 2 * var(--page-margin) - 2px) / 1ch) / var(--max-line-chars, 40) *
+          var(--fit-scale, 1)
+      )
+    )
   );
-  /* Nothing may wrap: the size above exists to make wrapping unnecessary, and if it is
-     ever wrong the line should run off the edge visibly rather than silently refold. */
-  white-space: pre;
-  overflow-x: auto;
 }
 
-/* Tabs are pinned to 14px elsewhere, which would leave them a fraction of the size of
-   the words beside them. They ride with the words instead, and because a tab block can be
-   split into parts to fit, the split is what absorbs the extra width rather than the size. */
-#chord-sheet-viewer:fullscreen .chord-sheet-card .tablatura,
-#chord-sheet-viewer:fullscreen .chord-sheet-card .cnt {
-  font-size: 1em;
+/* These carry absolute sizes elsewhere, which would not scale with the page: 14px for
+   tabs, the slider's size for part labels, a fixed rem for headings. Inheriting instead is
+   what makes the size above the only one. */
+#chord-sheet-viewer:fullscreen .chord-sheet-card :is(pre, .tablatura, .cnt, .tab-info, .section-title) {
+  font-size: inherit;
 }
 
-/* The part labels read at the size of the words around them. Their own rule pins them to
-   the slider size, which is not what anything is rendered at once fullscreen fits the
-   words to the width. */
-#chord-sheet-viewer:fullscreen .chord-sheet-card .tab-info {
-  font-size: 1em;
-}
-
-#chord-sheet-viewer:fullscreen .chord-sheet-card .chord-line {
+/* Nothing may wrap: the size exists to make wrapping unnecessary, and if it is ever wrong
+   the line should run off the edge visibly rather than silently refold. */
+#chord-sheet-viewer:fullscreen .chord-sheet-card :is(pre, .chord-line) {
   white-space: pre;
   word-break: normal;
 }
 
-/* Headings ride with the words rather than staying at a fixed size beside them, which
-   also keeps them within the width the words were measured for. */
-#chord-sheet-viewer:fullscreen .chord-sheet-card .section-title {
-  font-size: 1em;
+#chord-sheet-viewer:fullscreen .chord-sheet-card pre {
+  overflow-x: auto;
 }
 
 #chord-sheet-viewer:fullscreen > #sticky-bottom-container {

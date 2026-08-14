@@ -37,25 +37,16 @@ export function processHtml(html: string, viewMode: string, maxCols: number, tra
   return result;
 }
 
-const TAB_LINE = /^[EBGDAe]\|/;
-
 /**
- * The lines fullscreen has to size itself around, as plain text, with tags and entities
- * back down to the one character each stands for: counting markup would shrink the words
- * to fit text that is not there.
- *
- * Tab lines are left out, because they are the one thing here that reflows. A sung line
- * cannot be broken without losing which chord belongs over which word, so the words must
- * shrink to fit it; a tab block can be split into parts instead, and is. Sizing to a tab
- * line would shrink the whole song for something that had another way out, and would also
- * put the two calculations in a circle, each waiting on the other.
+ * The rendered lines as plain text, with tags and entities back down to the one character
+ * each stands for. Fullscreen sizes the page by the widest of these, so counting markup
+ * would shrink the words to fit text that is not there.
  */
-export function fittableLines(html?: string): string[] {
+export function plainTextLines(html?: string): string[] {
   if (!html) return [];
   return html
     .split('\n')
-    .map((line) => line.replace(/<[^>]*>/g, '').replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, ' '))
-    .filter((line) => !TAB_LINE.test(line.trim()));
+    .map((line) => line.replace(/<[^>]*>/g, "").replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, " "));
 }
 
 /**
