@@ -17,6 +17,16 @@ export const LOCAL_MODEL_ID = 'Xenova/nllb-200-distilled-600M';
  */
 export const LOCAL_MODEL_SIZE_MB = 850;
 
+/**
+ * The exact commit the weights come from. Left unpinned the runtime resolves
+ * whatever the branch points at now, so weights republished upstream can leave a
+ * device holding one file from before the change and another from after, and a
+ * session built from the pair either refuses to load or answers with nonsense.
+ * Moving to newer weights is a deliberate change here, since it costs every
+ * reader the whole download a second time.
+ */
+export const LOCAL_MODEL_REVISION = '261c31d1a5732c67cdd16d80e8d6088507c7ccea';
+
 /** The model names languages by its own script-qualified codes. */
 const MODEL_CODES: Record<string, string> = {
   en: 'eng_Latn',

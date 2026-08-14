@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { LOCAL_MODEL_ID, LOCAL_MODEL_SIZE_MB } from './local-model-config';
+import { LOCAL_MODEL_ID, LOCAL_MODEL_REVISION, LOCAL_MODEL_SIZE_MB } from './local-model-config';
 
 /**
  * Runs the fallback translator away from the main thread.
@@ -66,6 +66,9 @@ async function getPipeline(
     pipelinePromise = (async () => {
       const { pipeline } = await import('@huggingface/transformers');
       return (await pipeline('translation', LOCAL_MODEL_ID, {
+        // Pinned so a device never ends up with weights from either side of an
+        // upstream change.
+        revision: LOCAL_MODEL_REVISION,
         // The runtime cannot build a session from the other quantisations this
         // model publishes.
         dtype: 'q8',
