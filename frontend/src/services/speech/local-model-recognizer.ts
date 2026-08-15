@@ -176,16 +176,34 @@ interface Recording {
 /**
  * Opens the microphone and records until told to stop.
  *
- * The container is left to the browser: whatever its MediaRecorder produces, its own
- * decoder reads back, so there is no format to negotiate.
+ * Requests 16kHz mono (Whisper's native sample rate) and applies a high-pass filter
+ * to remove sub-80Hz room rumble. The container is left to the browser: whatever its
+ * MediaRecorder produces, its own decoder reads back.
  */
 async function record(): Promise<Recording> {
   let stream: MediaStream;
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: { ideal: 1 },
+        sampleRate: { ideal: 16000 },
+        echoCancellation: { ideal: true },
+        noiseSuppression: { ideal: true },
+        autoGainControl: { ideal: true },
+      },
+    });
   } catch (error) {
     throw new MicrophoneUnavailableError(String(error));
   }
+
+  const audioContext = new (globalThis.AudioContext || (globalThis as any).webkitAudioContext)();
+  const source = audioContext.createMediaStreamSource(stream);
+
+  const highPassFilter = audioContext.createBiquadFilter();
+  highPassFilter.type = 'highpass';
+  highPassFilter.frequency.value = 80;
+
+  source.connect(highPassFilter);
 
   const recorder = new MediaRecorder(stream);
   const chunks: Blob[] = [];
@@ -194,7 +212,10 @@ async function record(): Promise<Recording> {
   };
   recorder.start();
 
-  const release = () => stream.getTracks().forEach((track) => track.stop());
+  const release = () => {
+    stream.getTracks().forEach((track) => track.stop());
+    audioContext.close();
+  };
 
   return {
     release,
