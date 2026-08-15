@@ -85,8 +85,13 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         : (firstSong?.type === "song" ? firstSong.artist : "") || activeArtist.displayName;
 
     return (
-      <div className="flex flex-col gap-8 w-full">
-        <SearchResultsSection title={title} count={results.length} action={sortControl}>
+      <div className="flex flex-col w-full">
+        <SearchResultsSection
+          title={title}
+          count={results.length}
+          action={sortControl}
+          defaultOpen
+        >
           {renderItems(results)}
         </SearchResultsSection>
       </div>
@@ -126,7 +131,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   const shown = sections.filter((section) => section.items.length > 0);
 
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="flex flex-col gap-2 w-full">
       {shown.map((section, index) => (
         <SearchResultsSection
           key={section.key}

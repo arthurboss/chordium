@@ -18,4 +18,10 @@ export interface SearchResultsSectionProps {
    * of its own above the results.
    */
   action?: React.ReactNode;
+  /**
+   * Whether the section starts open. Search results start closed so that three
+   * long lists arrive as three headings; one artist's own songs start open,
+   * being the whole point of that page.
+   */
+  defaultOpen?: boolean;
 }
