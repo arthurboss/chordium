@@ -1,60 +1,58 @@
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import io, { Socket } from 'socket.io-client';
 import { 
   JamSessionConfig,
   SessionConnection,
   PeerConnection,
   ConnectionStringData,
-  SignalingMessage,
-  RTCConfig,
   PeerConnectionHandlers,
-  DataHandler,
-  ConnectHandler,
-  DisconnectHandler,
-  ErrorHandler
 } from './types';
 
-const DEFAULT_RTC_CONFIG: RTCConfiguration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-  ],
-  iceTransportPolicy: 'all',
-  bundlePolicy: 'max-bundle',
-  rtcpMuxPolicy: 'require',
-  // @ts-ignore - sdpSemantics is valid in WebRTC but not in TypeScript types yet
-  sdpSemantics: 'unified-plan',
-} as RTCConfiguration;
+export interface JamSessionState {
+  scrollPercent: number;
+  capo: number;
+  transpose: number;
+  currentPage: number;
+}
 
 export class JamSessionService {
   private sessionId: string = '';
   private hostId: string = '';
   public readonly peerId: string;
-  private connections: Map<string, SessionConnection> = new Map();
   private isHost: boolean = false;
+  private socket: Socket | null = null;
+  private currentState: JamSessionState = {
+    scrollPercent: 0,
+    capo: 0,
+    transpose: 0,
+    currentPage: 0,
+  };
+  private connectedPeers: Set<string> = new Set();
   private onStateUpdate: (state: {
     isHost: boolean;
     sessionId: string | null;
     connectedPeers: string[];
     isConnected: boolean;
   }) => void = () => {};
+  private onStateChanged: (state: JamSessionState) => void = () => {};
   private handlers: Partial<PeerConnectionHandlers> = {
     onData: (data) => console.log('Received data:', data),
     onConnect: () => console.log('Peer connected'),
     onDisconnect: () => console.log('Peer disconnected'),
     onError: (error) => console.error('Peer connection error:', error),
   };
+  private heartbeatInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.peerId = uuidv4();
   }
 
-  // Initialize the session as host
   public async initialize() {
-    this.sessionId = uuidv4();
-    this.hostId = this.peerId; // Use the peerId as hostId for the host
+    this.sessionId = uuidv4().substring(0, 8);
+    this.hostId = this.peerId;
     this.isHost = true;
+    this.connectSocket();
     
     console.log(`Initializing jam session as host. Session ID: ${this.sessionId}`);
     this.notifyStateUpdate();
@@ -65,17 +63,69 @@ export class JamSessionService {
     };
   }
 
-  // Set event handlers for peer connection events
+  private connectSocket(): void {
+    if (this.socket?.connected) return;
+    
+    const apiUrl = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3001`;
+    this.socket = io(apiUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Connected to jam session server');
+      if (this.isHost && this.sessionId) {
+        this.socket?.emit('jam:create-session', 
+          { hostId: this.hostId }, 
+          (res: any) => {
+            console.log('Session created:', res.sessionId);
+          }
+        );
+      }
+    });
+
+    this.socket.on('jam:peer-joined', (data: { peerId: string }) => {
+      console.log('Peer joined:', data.peerId);
+      this.connectedPeers.add(data.peerId);
+      this.notifyStateUpdate();
+      this.handlers.onConnect?.();
+    });
+
+    this.socket.on('jam:peer-left', (data: { peerId: string }) => {
+      console.log('Peer left:', data.peerId);
+      this.connectedPeers.delete(data.peerId);
+      this.notifyStateUpdate();
+      this.handlers.onDisconnect?.();
+    });
+
+    this.socket.on('jam:state-update', (data: { state: JamSessionState; isHost: boolean }) => {
+      if (!this.isHost) {
+        // Peer receives state from host
+        this.currentState = data.state;
+        this.onStateChanged(data.state);
+        console.log('Applied state update from host:', data.state);
+      }
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Disconnected from jam session server');
+      this.connectedPeers.clear();
+      this.notifyStateUpdate();
+    });
+
+    this.socket.on('connect_error', (error: any) => {
+      console.error('Connection error:', error);
+      this.handlers.onError?.(new Error(error.message || 'Connection failed'));
+    });
+  }
+
   public setHandlers(handlers: Partial<PeerConnectionHandlers>) {
     this.handlers = { ...this.handlers, ...handlers };
   }
 
-  // Helper to get a peer connection by ID
-  private getPeerConnection(peerId: string): SessionConnection | undefined {
-    return this.connections.get(peerId);
-  }
-  
-  // Set the session ID and host ID from a connection string
   public setSessionFromConnectionString(connectionString: string): boolean {
     try {
       const data = JSON.parse(connectionString);
@@ -89,6 +139,7 @@ export class JamSessionService {
       this.isHost = false;
       
       console.log(`Joining jam session as peer. Session ID: ${this.sessionId}`);
+      this.connectSocket();
       this.notifyStateUpdate();
       
       return true;
@@ -98,15 +149,29 @@ export class JamSessionService {
     }
   }
 
-  // Connect to a peer using a connection string from QR code
   public async connectToPeer(connectionString: string): Promise<boolean> {
     try {
       if (!this.setSessionFromConnectionString(connectionString)) {
         throw new Error('Invalid connection string');
       }
       
-      // In a real implementation, this would establish a WebRTC connection
-      // For now, we'll simulate a successful connection
+      // Connect via Socket.IO
+      if (this.socket) {
+        this.socket.emit('jam:join-session', 
+          { sessionId: this.sessionId, peerId: this.peerId },
+          (res: any) => {
+            if (res.success) {
+              console.log('Successfully joined jam session');
+              this.startHeartbeat();
+              this.handlers.onConnect?.();
+            } else {
+              console.error('Failed to join session:', res.error);
+              toast.error(res.error || 'Failed to join jam session');
+            }
+          }
+        );
+      }
+      
       return true;
     } catch (error) {
       console.error('Failed to connect to peer:', error);
@@ -115,181 +180,7 @@ export class JamSessionService {
     }
   }
 
-  // Start a WebRTC connection with a peer
-  private async startPeerConnection(peerId: string, initiator: boolean): Promise<SessionConnection> {
-    console.log(`Starting ${initiator ? 'initiator' : 'receiver'} connection to ${peerId}`);
-    
-    const connection = new RTCPeerConnection(DEFAULT_RTC_CONFIG);
-    let dataChannel: RTCDataChannel | null = null;
-    
-    // Create data channel if we're the initiator
-    if (initiator) {
-      dataChannel = connection.createDataChannel('jam-session');
-      this.setupDataChannel(peerId, dataChannel);
-    }
-    
-    // Set up ICE candidate handler
-    connection.onicecandidate = (event) => {
-      if (event.candidate) {
-        // In a real implementation, this would be sent via signaling
-        console.log('Generated ICE candidate:', event.candidate);
-      }
-    };
-    
-    // Handle incoming data channel (for non-initiators)
-    connection.ondatachannel = (event) => {
-      const incomingChannel = event.channel;
-      if (incomingChannel.label === 'jam-session') {
-        dataChannel = incomingChannel;
-        this.setupDataChannel(peerId, dataChannel);
-      }
-    };
-    
-    // Set up connection state handling
-    connection.onconnectionstatechange = () => {
-      console.log(`Connection state changed to: ${connection.connectionState}`);
-      
-      if (connection.connectionState === 'connected') {
-        this.handlers.onConnect?.();
-      } else if (connection.connectionState === 'disconnected' || 
-                 connection.connectionState === 'failed' || 
-                 connection.connectionState === 'closed') {
-        this.connections.delete(peerId);
-        this.notifyStateUpdate();
-        this.handlers.onDisconnect?.();
-      }
-    };
-    
-    // Create the peer connection wrapper
-    const peerConnection: PeerConnection = {
-      connected: false,
-      send: (data: any) => {
-        if (dataChannel?.readyState === 'open') {
-          const message = typeof data === 'string' ? data : JSON.stringify(data);
-          dataChannel.send(message);
-        } else {
-          console.warn('Cannot send data - data channel not open');
-        }
-      },
-      destroy: () => {
-        connection.close();
-        this.connections.delete(peerId);
-        this.notifyStateUpdate();
-      },
-      signal: async (data: RTCSessionDescriptionInit | RTCIceCandidateInit) => {
-        try {
-          if ('type' in data && (data.type === 'offer' || data.type === 'answer')) {
-            await connection.setRemoteDescription(new RTCSessionDescription(data));
-            
-            // If we received an offer, create an answer
-            if (data.type === 'offer') {
-              const answer = await connection.createAnswer();
-              await connection.setLocalDescription(answer);
-              // In a real implementation, this would be sent via signaling
-              console.log('Generated answer:', answer);
-            }
-          } else if ('candidate' in data) {
-            await connection.addIceCandidate(new RTCIceCandidate(data));
-          }
-        } catch (error) {
-          console.error('Error handling signal:', error);
-          this.handlers.onError?.(error as Error);
-        }
-      },
-    };
-    
-    // Create the session connection
-    const sessionConnection: SessionConnection = {
-      peer: peerConnection,
-      peerId,
-      dataChannel: dataChannel || undefined,
-    };
-    
-    // If we're the initiator, create an offer
-    if (initiator) {
-      try {
-        const offer = await connection.createOffer();
-        await connection.setLocalDescription(offer);
-        // In a real implementation, this would be sent via signaling
-        console.log('Generated offer:', offer);
-      } catch (error) {
-        console.error('Error creating offer:', error);
-        this.handlers.onError?.(error as Error);
-      }
-    }
-    
-    // Store the connection
-    this.connections.set(peerId, sessionConnection);
-    this.notifyStateUpdate();
-    
-    return sessionConnection;
-  }
-  
-  // Set up a data channel with event handlers
-  private setupDataChannel(peerId: string, dataChannel: RTCDataChannel) {
-    dataChannel.onopen = () => {
-      console.log(`Data channel opened with ${peerId}`);
-      this.connections.get(peerId)!.peer.connected = true;
-      this.notifyStateUpdate();
-      this.handlers.onConnect?.();
-    };
-    
-    dataChannel.onclose = () => {
-      console.log(`Data channel closed with ${peerId}`);
-      this.connections.get(peerId)!.peer.connected = false;
-      this.notifyStateUpdate();
-      this.handlers.onDisconnect?.();
-    };
-    
-    dataChannel.onerror = (error) => {
-      console.error('Data channel error:', error);
-      this.handlers.onError?.(new Error('Data channel error'));
-    };
-    
-    dataChannel.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.handlers.onData?.(data);
-      } catch (error) {
-        console.error('Error parsing message:', error);
-        this.handlers.onError?.(error as Error);
-      }
-    };
-  }
-
-  // Process a signaling message from a peer
-  public async handleSignal(peerId: string, message: SignalingMessage): Promise<void> {
-    console.log(`Received signal from ${peerId}:`, message);
-    
-    let connection = this.connections.get(peerId);
-    
-    // If we don't have a connection yet and this is an offer, create one
-    if (!connection && message.type === 'offer') {
-      connection = await this.startPeerConnection(peerId, false);
-    }
-    
-    // Forward the signal to the peer connection
-    if (connection) {
-      await connection.peer.signal(message);
-    } else {
-      console.warn(`Received signal for unknown peer: ${peerId}`);
-    }
-  }
-  
-  // Generate a connection string for sharing via QR code
-  public generateConnectionString(): string {
-    return JSON.stringify({
-      type: 'jam-session-invite',
-      version: '1.0',
-      sessionId: this.sessionId,
-      hostId: this.hostId,
-      peerId: this.peerId,
-      timestamp: Date.now(),
-    });
-  }
-  
-  // Process a connection string from a QR code
-  public processConnectionString(connectionString: string): boolean {
+  public async processConnectionString(connectionString: string): Promise<boolean> {
     try {
       const data = JSON.parse(connectionString);
       
@@ -297,17 +188,15 @@ export class JamSessionService {
         throw new Error('Invalid connection string format');
       }
       
-      // If we're the host, don't process our own connection string
       if (this.isHost && data.hostId === this.hostId) {
         return false;
       }
       
-      // If we're not in a session, join the session
       if (!this.sessionId) {
         this.sessionId = data.sessionId;
         this.hostId = data.hostId;
-        // Keep the existing peerId, don't generate a new one
         this.isHost = false;
+        this.connectSocket();
         this.notifyStateUpdate();
       }
       
@@ -318,60 +207,75 @@ export class JamSessionService {
     }
   }
 
-  private handleData(peerId: string, data: any): void {
-    try {
-      const message = typeof data === 'string' ? JSON.parse(data) : data;
-      console.log('Received data from peer:', peerId, message);
-      
-      // Handle the received data (e.g., UI state updates)
-      if (message.type === 'ui-state') {
-        // In a real implementation, this would update the UI state
-        console.log('UI state update from peer:', message.state);
-      }
-    } catch (error) {
-      console.error('Error parsing message from peer:', error);
+  public broadcastState(state: Partial<JamSessionState>): void {
+    this.currentState = { ...this.currentState, ...state };
+    
+    if (this.isHost && this.socket?.connected) {
+      this.socket.emit('jam:broadcast-state', {
+        sessionId: this.sessionId,
+        state: this.currentState,
+        isHost: true,
+      });
+      console.log('Broadcast state:', this.currentState);
     }
   }
 
-  // Send UI state to all connected peers
-  public broadcastState(state: any): void {
-    if (this.connections.size === 0) return;
-    
-    const message = {
-      type: 'ui-state' as const,
-      state,
+  public generateConnectionString(): string {
+    return JSON.stringify({
+      type: 'jam-session-invite',
+      version: '1.0',
+      sessionId: this.sessionId,
+      hostId: this.hostId,
+      peerId: this.peerId,
       timestamp: Date.now(),
-    };
-
-    const messageString = JSON.stringify(message);
-    
-    this.connections.forEach((connection) => {
-      if (connection.peer.connected && connection.peer.send) {
-        try {
-          connection.peer.send(messageString);
-        } catch (error) {
-          console.error('Error sending data to peer:', error);
-        }
-      }
     });
   }
 
-  // Clean up resources
-  public destroy(): void {
-    this.connections.forEach((connection) => {
-      try {
-        if (connection.peer.destroy) {
-          connection.peer.destroy();
-        }
-      } catch (error) {
-        console.error('Error destroying peer connection:', error);
-      }
-    });
+  public setOnStateChanged(callback: (state: JamSessionState) => void): void {
+    this.onStateChanged = callback;
+  }
+
+  public getCurrentState(): JamSessionState {
+    return this.currentState;
+  }
+
+  private startHeartbeat(): void {
+    if (this.heartbeatInterval) return;
     
-    this.connections.clear();
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket?.connected) {
+        this.socket.emit('jam:heartbeat', {
+          sessionId: this.sessionId,
+          peerId: this.peerId,
+        });
+      }
+    }, 10000);
+  }
+
+  public destroy(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+
+    if (this.socket?.connected) {
+      this.socket.emit('jam:leave-session', {
+        sessionId: this.sessionId,
+        peerId: this.peerId,
+      });
+      this.socket.disconnect();
+    }
+    
     this.sessionId = '';
     this.hostId = '';
     this.isHost = false;
+    this.connectedPeers.clear();
+    this.currentState = {
+      scrollPercent: 0,
+      capo: 0,
+      transpose: 0,
+      currentPage: 0,
+    };
     this.notifyStateUpdate();
   }
 
@@ -379,12 +283,11 @@ export class JamSessionService {
     this.onStateUpdate({
       isHost: this.isHost,
       sessionId: this.sessionId,
-      connectedPeers: Array.from(this.connections.keys()),
-      isConnected: this.connections.size > 0 || this.isHost,
+      connectedPeers: Array.from(this.connectedPeers),
+      isConnected: this.socket?.connected || false,
     });
   }
 
-  // Set state update callback
   public setOnStateUpdate(callback: (state: {
     isHost: boolean;
     sessionId: string | null;
@@ -392,10 +295,8 @@ export class JamSessionService {
     isConnected: boolean;
   }) => void): void {
     this.onStateUpdate = callback;
-    // Trigger an initial update
     this.notifyStateUpdate();
   }
 }
 
-// Singleton instance
 export const jamSessionService = new JamSessionService();
