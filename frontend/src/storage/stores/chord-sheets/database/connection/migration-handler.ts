@@ -123,6 +123,14 @@ export function handleIndexedDBMigrations(
         clearSearchCache(transaction);
         break;
       }
+      case 12: {
+        // Migration to v12: a search now keeps only the first handful of songs
+        // matched through their words. Entries cached before that hold the whole
+        // tail, so they are emptied rather than left to show a different number
+        // of results from a fresh search for the next thirty days.
+        clearSearchCache(transaction);
+        break;
+      }
       // Add future migrations here
       default:
         break;

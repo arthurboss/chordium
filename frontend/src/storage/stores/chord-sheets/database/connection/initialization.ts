@@ -16,6 +16,14 @@ export default async function initializeDatabase(): Promise<IDBDatabase> {
             `Failed to open database: ${request.error?.message || "Unknown error"}`
           )
         );
+      // Another tab holding the previous version blocks the upgrade. Report it
+      // rather than waiting for a release that may never come.
+      request.onblocked = () =>
+        reject(
+          new Error(
+            "Database upgrade is blocked by another open tab. Close it and reload."
+          )
+        );
       request.onsuccess = () => resolve(request.result);
       request.onupgradeneeded = (event) => {
         const target = event.target as IDBOpenDBRequest;

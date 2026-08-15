@@ -46,7 +46,7 @@ function urlsFor(fragment: string): string[] {
   return mockFetch.mock.calls.map(([url]) => url).filter((url) => url.includes(fragment));
 }
 
-/** Enough lyrics-matching songs to satisfy the first request's appetite. */
+/** As many lyrics-matching songs as the first request needs to be satisfied. */
 function lyricsDocs(count: number): object[] {
   return Array.from({ length: count }, (_, i) => ({
     tipo: "2",
@@ -145,7 +145,7 @@ describe("unified search handler", () => {
     });
 
     it("does not ask twice when the small window already found enough", async () => {
-      respondWith({ songs: lyricsDocs(25), artists: [], numFound: 5000 });
+      respondWith({ songs: lyricsDocs(30), artists: [], numFound: 5000 });
 
       await performSearch("tonight");
 

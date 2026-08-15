@@ -55,20 +55,11 @@ describe("SearchResultsSection", () => {
     expect(heading).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("counts what it holds", () => {
+  it("counts what it holds, as a number needing no translation", () => {
     renderSection({ count: 3 });
-    expect(screen.getByRole("button", { name: /3 results/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /\(3\)/ })).toBeInTheDocument();
   });
 
-  it("says one when there is one, rather than one results", () => {
-    renderSection({ count: 1 });
-    expect(screen.getByRole("button", { name: /1 result\b/ })).toBeInTheDocument();
-  });
-
-  it("reports how many were found when it is showing only some", () => {
-    renderSection({ count: 25, total: 89 });
-    expect(screen.getByRole("button", { name: /25 of 89/ })).toBeInTheDocument();
-  });
 
   it("keeps the action out of the toggle, so the sort control does not open the section", async () => {
     const user = userEvent.setup();

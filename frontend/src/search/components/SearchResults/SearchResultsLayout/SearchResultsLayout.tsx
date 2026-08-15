@@ -15,12 +15,6 @@ import {
 
 type SortOption = "default" | "az" | "za";
 
-/**
- * How many songs matched through their words are listed. These are the weakest
- * results and the longest tail - a common word turns up in hundreds of songs - so
- * the section shows a browsable few and says how many were found.
- */
-const LYRICS_SHOWN = 25;
 
 function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
   if (sort === "default") return items;
@@ -51,7 +45,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
   const sortControl = (
     <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-      <SelectTrigger className="w-36 bg-card [&>span]:text-left">
+      <SelectTrigger className="h-7 w-auto gap-1 bg-card px-2 text-xs [&>span]:text-left">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -105,7 +99,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // Songs the search names come before songs that merely contain it, kept apart
   // so that a word buried in a thousand sets of lyrics cannot crowd out the song
   // actually being looked for. A kind with nothing in it gets no section at all.
-  const sections: { key: string; title: string; items: SearchResult[]; total?: number }[] = [
+  const sections: { key: string; title: string; items: SearchResult[] }[] = [
     {
       key: "artists",
       title: t("searchResults.artists"),
@@ -123,21 +117,19 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     sections.push({
       key: "lyrics",
       title: t("searchResults.lyricsMatches"),
-      items: lyrics.slice(0, LYRICS_SHOWN),
-      total: lyrics.length,
+      items: lyrics,
     });
   }
 
   const shown = sections.filter((section) => section.items.length > 0);
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col w-full">
       {shown.map((section, index) => (
         <SearchResultsSection
           key={section.key}
           title={section.title}
           count={section.items.length}
-          total={section.total}
           // One sort control for the page, level with the heading it sits beside.
           action={index === 0 ? sortControl : undefined}
         >

@@ -31,11 +31,15 @@ const FIRST_ROWS = 50;
 const MAX_ROWS = 500;
 
 /**
- * How many songs matched through their words are kept. These are the weakest
- * results and the longest tail, so the section is trimmed to a browsable few
- * while songs named by the search are all kept.
+ * How many songs matched through their words are kept.
+ *
+ * These are the weakest results and the longest tail: a common word turns up in
+ * hundreds of songs. Only songs the search actually names are kept in full.
+ *
+ * Also the point at which the first request is judged to have found enough, so a
+ * wider one is not asked for once this many have turned up.
  */
-export const LYRICS_LIMIT = 25;
+export const LYRICS_LIMIT = 30;
 
 /** A song exactly as the source returns it. */
 interface SourceSongDoc {
@@ -315,10 +319,11 @@ export async function unifiedSearch({
   // reads as a way to narrow down. Songs the search names come before songs that
   // merely mention it, which the list itself trims to a browsable few while still
   // reporting how many were found.
-  const hits = [...artists, ...titled, ...lyrical];
+  // Artists and songs the search names are kept in full; only the tail is trimmed.
+  const hits = [...artists, ...titled, ...lyrical.slice(0, LYRICS_LIMIT)];
 
   if (sql) {
-    void seedStoredRows({ sql, hits });
+    void seedStoredRows({ sql, hits: [...artists, ...titled, ...lyrical] });
   }
 
   return hits;

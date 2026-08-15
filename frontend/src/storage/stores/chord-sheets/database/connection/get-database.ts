@@ -47,6 +47,11 @@ export default function getDatabase(): Promise<IDBDatabase> {
       db.onclose = resetConnection;
       db.onerror = resetConnection;
 
+      // Let go when another tab opens a newer version, so its upgrade is not
+      // blocked by this connection. Closing runs onclose, which clears the cache,
+      // so the next call reopens at the new version.
+      db.onversionchange = () => db.close();
+
       return db;
     })
     .catch((error) => {
