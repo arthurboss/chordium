@@ -79,6 +79,15 @@ export interface UnifiedSearchOptions {
   query: string;
   /** Omitted when no database is configured; the search then runs on the source alone. */
   sql?: SqlTag;
+  /**
+   * Hands work that outlives the reply to whatever is hosting this.
+   *
+   * A serverless function can be frozen the moment it responds, which would
+   * abandon the recording half-done, so there it is handed to the platform to
+   * keep alive. A long-running server needs nothing and simply lets it finish.
+   * Either way the reply has already gone: nobody waits for it.
+   */
+  defer?: (work: Promise<unknown>) => void;
 }
 
 async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
@@ -278,6 +287,7 @@ function mergeByPath(ranked: SearchHit[], extra: SearchHit[]): SearchHit[] {
 export async function unifiedSearch({
   query,
   sql,
+  defer,
 }: UnifiedSearchOptions): Promise<SearchHit[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
@@ -323,7 +333,9 @@ export async function unifiedSearch({
   const hits = [...artists, ...titled, ...lyrical.slice(0, LYRICS_LIMIT)];
 
   if (sql) {
-    void seedStoredRows({ sql, hits: [...artists, ...titled, ...lyrical] });
+    const recording = seedStoredRows({ sql, hits: [...artists, ...titled, ...lyrical] });
+    if (defer) defer(recording);
+    else void recording;
   }
 
   return hits;
@@ -338,21 +350,51 @@ interface SeedStoredRowsInput {
  * Records what the source knew, so a later search can still be answered if it
  * becomes unreachable. Deliberately not awaited and individually caught: seeding
  * is a side benefit, never a reason to fail a search.
+ *
+ * Everything found goes in one statement per table. Written a row at a time this
+ * was a separate round trip each: a search for a common word finds several
+ * hundred, and two hundred of them took ten seconds against the database, which
+ * held up the searches that came after. As one statement the same two hundred
+ * take about a second, and stand a chance of finishing before a serverless
+ * function is frozen after replying.
  */
-function seedStoredRows({ sql, hits }: SeedStoredRowsInput): void {
-  const writes = hits.map((hit) =>
-    hit.type === "artist"
-      ? sql`
-          INSERT INTO artists ("displayName", path, "songCount")
-          VALUES (${hit.displayName}, ${hit.path}, ${hit.songCount})
-          ON CONFLICT (path) DO NOTHING
-        `.catch(() => undefined)
-      : sql`
-          INSERT INTO songs (title, artist, path)
-          VALUES (${hit.title}, ${hit.artist}, ${hit.path})
-          ON CONFLICT (path) DO NOTHING
-        `.catch(() => undefined)
+function seedStoredRows({ sql, hits }: SeedStoredRowsInput): Promise<unknown> {
+  const artists = hits.filter(
+    (hit): hit is Extract<SearchHit, { type: "artist" }> => hit.type === "artist"
+  );
+  const songs = hits.filter(
+    (hit): hit is Extract<SearchHit, { type: "song" }> => hit.type === "song"
   );
 
-  void Promise.all(writes).catch(() => undefined);
+  const writes: Promise<unknown>[] = [];
+
+  if (artists.length > 0) {
+    writes.push(
+      sql`
+        INSERT INTO artists ("displayName", path, "songCount")
+        SELECT * FROM UNNEST(
+          ${artists.map((artist) => artist.displayName)}::text[],
+          ${artists.map((artist) => artist.path)}::text[],
+          ${artists.map((artist) => artist.songCount)}::int[]
+        )
+        ON CONFLICT (path) DO NOTHING
+      `.catch(() => undefined)
+    );
+  }
+
+  if (songs.length > 0) {
+    writes.push(
+      sql`
+        INSERT INTO songs (title, artist, path)
+        SELECT * FROM UNNEST(
+          ${songs.map((song) => song.title)}::text[],
+          ${songs.map((song) => song.artist)}::text[],
+          ${songs.map((song) => song.path)}::text[]
+        )
+        ON CONFLICT (path) DO NOTHING
+      `.catch(() => undefined)
+    );
+  }
+
+  return Promise.all(writes).catch(() => undefined);
 }
