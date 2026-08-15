@@ -70,6 +70,7 @@ async function getPipeline(
         // upstream change.
         revision: LOCAL_MODEL_REVISION,
         dtype: 'q8',
+        device: 'webgpu',
         progress_callback: onProgress,
       })) as unknown as TranscribePipeline;
     })().catch((error) => {
