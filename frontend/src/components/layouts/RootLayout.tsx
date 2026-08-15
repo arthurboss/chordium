@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { JamSessionProvider } from "@/features/jam-session/JamSessionProvider";
 import { ActiveChordSheetProvider } from "@/features/jam-session/ActiveChordSheetContext";
+import { JamSessionBanner } from "@/features/jam-session/components/JamSessionBanner";
 
 const RootLayout = () => {
   return (
@@ -15,6 +16,7 @@ const RootLayout = () => {
           <ActiveChordSheetProvider>
             <div id="app-layout" className="flex flex-col min-h-dvh">
               <Header />
+              <JamSessionBanner />
               <Outlet />
               <Footer />
             </div>
