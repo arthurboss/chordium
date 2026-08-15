@@ -8,7 +8,7 @@ describe('Cache Management', () => {
       win.indexedDB.deleteDatabase('chordium');
     });
     
-    cy.intercept('GET', '**/api/artists**', {
+    cy.intercept('GET', '**/api/search**', {
       fixture: 'artists.json'
     }).as('artistSearchAPI');
     

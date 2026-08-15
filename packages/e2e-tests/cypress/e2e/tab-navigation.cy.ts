@@ -87,7 +87,7 @@ describe.skip('Tab Navigation URL Tests', () => {
     cy.get('[data-cy="tab-my-chord-sheets"][data-state="active"]').should('contain.text', 'My Chord Sheets');
     
     // URL should include a song parameter
-    cy.url().should('include', 'song=');
+    cy.url().should('include', 'q=');
   });
 
   it.skip('should load correct tab when navigating directly to URL with path', () => {
@@ -193,7 +193,7 @@ describe.skip('Tab and SongCard Keyboard Navigation', () => {
         cy.get(`[data-cy="view-btn-${songId}"]`).click();
         
         // Verify we've navigated to the chord sheet page
-        cy.url().should('include', 'song=');
+        cy.url().should('include', 'q=');
         cy.contains('h1', 'Hotel California').should('be.visible');
       }
     });

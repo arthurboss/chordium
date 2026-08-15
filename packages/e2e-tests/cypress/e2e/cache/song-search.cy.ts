@@ -22,11 +22,11 @@ describe('Song Search Caching', () => {
       win.indexedDB.deleteDatabase('chordium');
     });
     
-    cy.intercept('GET', '**/api/artists**', {
+    cy.intercept('GET', '**/api/search**', {
       fixture: 'artists.json'
     }).as('artistSearchAPI');
     
-    cy.intercept('GET', '**/api/cifraclub-search**', {
+    cy.intercept('GET', '**/api/search**', {
       fixture: 'cifraclub-search.json'
     }).as('songSearchAPI');
     

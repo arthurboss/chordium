@@ -17,8 +17,7 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     
     // 2. Go to Search tab and search for "Wonderwall"
     cy.get('[data-cy="tab-search"]').click();
-    cy.get('#artist-search-input').type('Oasis');
-    cy.get('#song-search-input').type('Wonderwall');
+    cy.get('#search-input').type('Oasis Wonderwall');
     cy.get('[data-cy="search-submit-button"]').click();
     
     // Wait for search results to load (or no results)
@@ -61,8 +60,8 @@ describe('Enhanced Song Selection - E2E Integration', () => {
     cy.get('[data-cy="tab-search"]').click();
     
     // 3. Verify search functionality works
-    cy.get('#artist-search-input').should('be.visible');
-    cy.get('#song-search-input').should('be.visible');
+    cy.get('#search-input').should('be.visible');
+    cy.get('#search-input').should('be.visible');
     
     // 4. The test should verify that sample songs still appear and behave correctly
     cy.get('[data-cy="tab-my-chord-sheets"]').click();

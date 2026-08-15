@@ -16,12 +16,12 @@ describe('Search to Chord Sheet Navigation E2E', () => {
 
   it('should navigate from search results to chord sheet page when clicking on result', () => {
     // Mock the search API call
-    cy.intercept('GET', '/api/cifraclub-search*', {
+    cy.intercept('GET', '/api/search*', {
       fixture: 'search-results-sample.json'
     }).as('songSearch');
 
     // Perform a song search
-    cy.get('#song-search-input').type('wonderwall');
+    cy.get('#search-input').type('wonderwall');
     cy.get('button[type="submit"]').click();
     
     // Wait for search results
@@ -32,6 +32,7 @@ describe('Search to Chord Sheet Navigation E2E', () => {
     cy.get('body').should('contain', 'Search');
     
     // Click on the first search result card
+    cy.openResultSections();
     cy.get('[data-cy^="song-card-compact-"]').first().click();
     
     // Should navigate to the chord sheet page
@@ -43,7 +44,7 @@ describe('Search to Chord Sheet Navigation E2E', () => {
 
   it('should navigate from artist search results to chord sheet page', () => {
     // Mock the artist search API call
-    cy.intercept('GET', '/api/artists*', {
+    cy.intercept('GET', '/api/search*', {
       fixture: 'artist-search-results.json'
     }).as('artistSearch');
     
@@ -53,13 +54,14 @@ describe('Search to Chord Sheet Navigation E2E', () => {
     }).as('artistSongs');
 
     // Perform an artist search
-    cy.get('#artist-search-input').type('oasis');
+    cy.get('#search-input').type('oasis');
     cy.get('button[type="submit"]').click();
     
     // Wait for artist search results
     cy.wait('@artistSearch');
     
     // Click on the first artist result
+    cy.openResultSections();
     cy.get('[data-cy^="artist-card-compact-"]').first().click();
     
     // Wait for artist songs to load
@@ -70,6 +72,7 @@ describe('Search to Chord Sheet Navigation E2E', () => {
     cy.get('body').should('contain', 'Search');
     
     // Click on the first song in artist songs
+    cy.openResultSections();
     cy.get('[data-cy^="song-card-compact-"]').first().click();
     
     // Should navigate to the chord sheet page
@@ -81,7 +84,7 @@ describe('Search to Chord Sheet Navigation E2E', () => {
 
   it('should handle external song URLs properly in chord sheet viewer', () => {
     // Mock search with external URLs
-    cy.intercept('GET', '/api/cifraclub-search*', {
+    cy.intercept('GET', '/api/search*', {
       statusCode: 200,
       body: [
         {
@@ -93,11 +96,12 @@ describe('Search to Chord Sheet Navigation E2E', () => {
     }).as('songSearch');
 
     // Perform search
-    cy.get('#song-search-input').type('wonderwall');
+    cy.get('#search-input').type('wonderwall');
     cy.get('button[type="submit"]').click();
     cy.wait(2000);
     
     // Click on the search result
+    cy.openResultSections();
     cy.get('[data-cy^="song-card-compact-"]').first().click();
     
     // Should navigate to the chord sheet page
@@ -111,14 +115,15 @@ describe('Search to Chord Sheet Navigation E2E', () => {
 
   it('should navigate back to search results from chord sheet viewer', () => {
     // Mock search
-    cy.intercept('GET', '/api/cifraclub-search*', {
+    cy.intercept('GET', '/api/search*', {
       fixture: 'search-results-sample.json'
     }).as('songSearch');
 
     // Perform search and navigate to song
-    cy.get('#song-search-input').type('wonderwall');
+    cy.get('#search-input').type('wonderwall');
     cy.get('button[type="submit"]').click();
     cy.wait(2000);
+    cy.openResultSections();
     cy.get('[data-cy^="song-card-compact-"]').first().click();
     
     // Should be in chord sheet viewer

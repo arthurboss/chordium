@@ -8,7 +8,7 @@ export const setupIntercepts = () => {
   });
   
   // Mock artist search endpoint
-  cy.intercept('GET', '**/api/artists**', (req) => {
+  cy.intercept('GET', '**/api/search**', (req) => {
     console.log('Intercepted artist search request:', req.query);
     req.reply({
       statusCode: 200,
@@ -18,7 +18,7 @@ export const setupIntercepts = () => {
   }).as('artistSearch');
   
   // Mock CifraClub endpoint
-  cy.intercept('GET', '**/api/cifraclub-search**', (req) => {
+  cy.intercept('GET', '**/api/search**', (req) => {
     console.log('Intercepted CifraClub search request:', req.query);
     req.reply({ 
       statusCode: 200, 

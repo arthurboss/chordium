@@ -19,7 +19,7 @@ describe('Song Search E2E', () => {
   describe('Song-Only Search', () => {
     it('should successfully search for songs and display results with unified Song interface', () => {
       // Set up intercept before the action
-      cy.intercept('GET', '/api/cifraclub-search*').as('songSearch');
+      cy.intercept('GET', '/api/search*').as('songSearch');
       
       // Test the exact scenario that was failing
       cy.get('#search-input').type('imagine');
@@ -40,7 +40,9 @@ describe('Song Search E2E', () => {
         // Verify the API returns unified Song interface (only if not an error)
         expect(responseBody).to.be.an('array');
         if (responseBody?.length && responseBody.length > 0) {
-          const firstSong = responseBody[0];
+          // Artists and songs come back in one list, each tagged with which it is,
+          // so a song is picked out rather than assuming the first result is one.
+          const firstSong = responseBody.find((hit: { type?: string }) => hit.type === "song") ?? responseBody[0];
           
           // Should have unified Song interface fields
           expect(firstSong).to.have.property('title');
@@ -60,11 +62,12 @@ describe('Song Search E2E', () => {
 
       // Verify UI displays results correctly - check for any song results
       cy.get('[data-cy="songs-view"], .grid', { timeout: 10000 }).should('be.visible');
+      cy.openResultSections();
       cy.get('[data-cy="result-card"], .grid > div', { timeout: 10000 }).should('have.length.greaterThan', 0);
     });    
     
     it('should maintain search functionality with unified Song interface', () => {
-      cy.intercept('GET', '/api/cifraclub-search*').as('searchRequest');
+      cy.intercept('GET', '/api/search*').as('searchRequest');
       
       cy.get('#search-input').type('bohemian rhapsody');
       cy.get('button[type="submit"]').click();
@@ -77,7 +80,7 @@ describe('Song Search E2E', () => {
     });
 
     it('should handle empty search results gracefully', () => {
-      cy.intercept('GET', '/api/cifraclub-search*', []).as('emptySearch');
+      cy.intercept('GET', '/api/search*', []).as('emptySearch');
       
       cy.get('#search-input').type('nonexistentsongname12345');
       cy.get('button[type="submit"]').click();
@@ -94,7 +97,7 @@ describe('Song Search E2E', () => {
         win.indexedDB.deleteDatabase('chordium');
       });
       
-      cy.intercept('GET', '/api/cifraclub-search*', { statusCode: 500 }).as('errorSearch');
+      cy.intercept('GET', '/api/search*', { statusCode: 500 }).as('errorSearch');
       
       cy.get('#search-input').type('imagine');
       cy.get('button[type="submit"]').click();
@@ -112,7 +115,7 @@ describe('Song Search E2E', () => {
         win.indexedDB.deleteDatabase('chordium');
       });
       
-      cy.intercept('GET', '/api/cifraclub-search*').as('songSearch');
+      cy.intercept('GET', '/api/search*').as('songSearch');
       
       const startTime = Date.now();
       

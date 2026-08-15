@@ -3,6 +3,12 @@ export {};
 declare module 'cypress' {
   interface Chainable {
     /**
+     * Open every closed result section. Search results arrive collapsed, so
+     * anything asserting on a result card has to open them first.
+     */
+    openResultSections(): Chainable;
+
+    /**
      * Navigate to the "My Songs" tab and open a specific song by title
      */
     openSong(songTitle: string): Chainable;
@@ -123,4 +129,25 @@ Cypress.Commands.add('pressTab', { prevSubject: true }, (subject) => {
   
   // Return nothing or undefined to avoid the Cypress error
   return undefined;
+});
+
+/**
+ * Opens every closed result section.
+ *
+ * Results are presented as collapsed sections, so the cards inside are not in the
+ * page until a heading is pressed. Anything asserting on a card opens them first.
+ */
+Cypress.Commands.add('openResultSections', () => {
+  const isSection = (_index: number, el: HTMLElement) => el.querySelector('h2') !== null;
+
+  // The results area appears the moment a search is submitted, ahead of the
+  // results themselves, so wait for a heading to exist before opening anything.
+  cy.get('button[aria-expanded]', { timeout: 20000 })
+    .filter(isSection)
+    .should('have.length.greaterThan', 0)
+    .then(($sections) => {
+      $sections.filter('[aria-expanded="false"]').each((_index, el) => {
+        cy.wrap(el).click({ force: true });
+      });
+    });
 });

@@ -16,3 +16,13 @@ Cypress.on('uncaught:exception', (err) => {
   // Returning false prevents Cypress from failing the test
   return false;
 });
+
+
+// Searches are cached in IndexedDB, which Cypress does not clear between tests.
+// Left in place, a second test searching the same words is answered from the cache
+// and never calls the API, so any cy.wait() on that request waits for nothing.
+afterEach(() => {
+  cy.window({ log: false }).then((win) => {
+    win.indexedDB.deleteDatabase('chordium-v1');
+  });
+});

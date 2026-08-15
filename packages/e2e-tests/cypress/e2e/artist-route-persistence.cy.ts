@@ -9,13 +9,14 @@ describe('Artist Route Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and search
-    cy.get('input[placeholder="Search for an artist"]').type('Hillsong');
+    cy.get('input[placeholder="Search for an artist or song"]').type('Hillsong');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for results to appear
     cy.get('[data-cy="search-results-area"]').should('be.visible');
 
     // Click on an artist to navigate to artist page
+    cy.openResultSections();
     cy.get('[data-cy^="artist-card-compact-"]').first().click();
 
     // Verify we're on an artist route (URL should be /artist-name)
@@ -52,7 +53,7 @@ describe('Artist Route Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and search
-    cy.get('input[placeholder="Search for an artist"]').type('Hillsong');
+    cy.get('input[placeholder="Search for an artist or song"]').type('Hillsong');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for results to appear
@@ -76,7 +77,7 @@ describe('Artist Route Persistence', () => {
       cy.get('[data-cy="search-results-area"]').should('be.visible');
       
       // Verify search fields still have values
-      cy.get('input[placeholder="Search for an artist"]').should('have.value', 'Hillsong');
+      cy.get('input[placeholder="Search for an artist or song"]').should('have.value', 'Hillsong');
     });
   });
 
@@ -87,13 +88,14 @@ describe('Artist Route Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and search
-    cy.get('input[placeholder="Search for an artist"]').type('Hillsong');
+    cy.get('input[placeholder="Search for an artist or song"]').type('Hillsong');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for results to appear
     cy.get('[data-cy="search-results-area"]').should('be.visible');
 
     // Click on an artist to navigate to artist page
+    cy.openResultSections();
     cy.get('[data-cy^="artist-card-compact-"]').first().click();
 
     // Verify we're on an artist route
@@ -107,7 +109,7 @@ describe('Artist Route Persistence', () => {
     cy.get('[data-cy="search-results-area"]').should('be.visible');
     
     // Verify search fields still have the original search query
-    cy.get('input[placeholder="Search for an artist"]').should('have.value', 'Hillsong');
+    cy.get('input[placeholder="Search for an artist or song"]').should('have.value', 'Hillsong');
   });
 
   it('debug: logs URL changes during tab switching', () => {
@@ -117,13 +119,14 @@ describe('Artist Route Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and search
-    cy.get('input[placeholder="Search for an artist"]').type('Hillsong');
+    cy.get('input[placeholder="Search for an artist or song"]').type('Hillsong');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for results to appear
     cy.get('[data-cy="search-results-area"]').should('be.visible');
 
     // Click on an artist to navigate to artist page
+    cy.openResultSections();
     cy.get('[data-cy^="artist-card-compact-"]').first().click();
 
     // Log the artist URL

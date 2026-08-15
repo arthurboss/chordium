@@ -1,65 +1,38 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-interface CacheItem {
-  key: string;
-  timestamp: number;
-  accessCount: number;
-  results: unknown;
-  query: {
-    artist?: string;
-    song?: string;
-  };
-}
-
-interface CacheData {
-  items: CacheItem[];
-}
-
 describe('Combined Search Caching', () => {
   beforeEach(() => {
-    // Clear IndexedDB before each test
-    cy.window().then((win) => {
-      win.indexedDB.deleteDatabase('chordium');
-    });
-    
-    cy.intercept('GET', '**/api/artists**', {
+    cy.intercept('GET', '**/api/search**', {
       fixture: 'artists.json'
-    }).as('artistSearchAPI');
-    
-    cy.intercept('GET', '**/api/cifraclub-search**', {
-      fixture: 'cifraclub-search.json'
-    }).as('songSearchAPI');
-    
+    }).as('searchAPI');
+
     cy.visit('/');
   });
 
   it('should cache artist+song combinations separately', () => {
     // Navigate to Search tab
     cy.contains('Search').click();
-    
-    // Search for artist only
-    cy.get('#artist-search-input').type('Hillsong United');
+
+    // Each search is for something different, so each has to reach the API. Were
+    // they sharing one cache entry, the later ones would be answered from it and
+    // never ask, which is what this is checking.
+    cy.get('#search-input').type('Hillsong United');
     cy.get('button[type="submit"]').click();
-    cy.wait('@artistSearchAPI');
-    cy.wait(1000);
-    
-    // Search for song only
-    cy.get('#artist-search-input').clear();
-    cy.get('#song-search-input').type('Wonderful');
+    cy.wait('@searchAPI');
+
+    cy.get('#search-input').clear();
+    cy.get('#search-input').type('Wonderful');
     cy.get('button[type="submit"]').click();
-    cy.wait('@songSearchAPI');
-    cy.wait(1000);
-    
-    // Search for combined artist+song
-    cy.get('#artist-search-input').type('Hillsong United');
-    cy.get('#song-search-input').clear().type('Wonderful');
+    cy.wait('@searchAPI');
+
+    cy.get('#search-input').clear().type('Hillsong United Wonderful');
     cy.get('button[type="submit"]').click();
-    cy.wait(1000);
-    
-    // Verify all searches completed successfully
-    cy.get('body').should('contain', 'Search');
-    
-    // Wait for any final processing
-    cy.wait(1000);
+    cy.wait('@searchAPI');
+
+    // Searching the first term again is answered from its own entry, so the URL
+    // still reflects it even though nothing was fetched.
+    cy.get('#search-input').clear().type('Hillsong United');
+    cy.get('button[type="submit"]').click();
+    cy.url().should('include', 'q=Hillsong%20United');
   });
 });

@@ -7,7 +7,7 @@ describe('Search UX Tests', () => {
     cy.wait(1000);
 
     // Mock the search API to return empty results
-    cy.intercept('GET', '/api/cifraclub-search*', []).as('emptySearch');
+    cy.intercept('GET', '/api/search*', []).as('emptySearch');
 
     // Perform a song search with no results
     cy.get('#search-input').type('nonexistentsongname12345');

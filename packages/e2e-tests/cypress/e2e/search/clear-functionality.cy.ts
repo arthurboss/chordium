@@ -15,7 +15,7 @@ describe('Search Clear Functionality E2E', () => {
     });
     
     // Mock the search API to return consistent results
-    cy.intercept('GET', '/api/cifraclub-search*', {
+    cy.intercept('GET', '/api/search*', {
       statusCode: 200,
       body: [
         {
@@ -37,23 +37,21 @@ describe('Search Clear Functionality E2E', () => {
   describe('Individual Input Field Clearing', () => {
     it('should clear artist field individually without affecting URL or session storage', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Verify search was performed and URL updated
-      cy.url().should('include', 'artist=Test%20Artist');
-      cy.url().should('include', 'song=Test%20Song');
+      cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
       
       // Clear only the artist field
-      cy.get('#artist-search-input').clear();
+      cy.get('#search-input').clear();
       
       // Verify artist field is cleared
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', 'Test Song');
+      cy.get('#search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', 'Test Song');
       
       // Verify session storage still contains the original search query
       cy.window().then((win) => {
@@ -66,25 +64,23 @@ describe('Search Clear Functionality E2E', () => {
       });
       
       // Verify URL still contains the original search query (not cleared)
-      cy.url().should('include', 'artist=Test%20Artist');
-      cy.url().should('include', 'song=Test%20Song');
+      cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
     });
 
     it('should clear song field individually without affecting URL or session storage', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Clear only the song field
-      cy.get('#song-search-input').clear();
+      cy.get('#search-input').clear();
       
       // Verify song field is cleared
-      cy.get('#artist-search-input').should('have.value', 'Test Artist');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', 'Test Artist');
+      cy.get('#search-input').should('have.value', '');
       
       // Verify session storage still contains the original search query
       cy.window().then((win) => {
@@ -97,26 +93,22 @@ describe('Search Clear Functionality E2E', () => {
       });
       
       // Verify URL still contains the original search query
-      cy.url().should('include', 'artist=Test%20Artist');
-      cy.url().should('include', 'song=Test%20Song');
+      cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
     });
 
     it('should clear both fields individually without affecting URL or session storage', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Clear both fields individually
-      cy.get('#artist-search-input').clear();
-      cy.get('#song-search-input').clear();
+      cy.get('#search-input').clear();
       
       // Verify both fields are cleared
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
       
       // Verify session storage still contains the original search query
       cy.window().then((win) => {
@@ -129,38 +121,34 @@ describe('Search Clear Functionality E2E', () => {
       });
       
       // Verify URL still contains the original search query
-      cy.url().should('include', 'artist=Test%20Artist');
-      cy.url().should('include', 'song=Test%20Song');
+      cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
     });
 
     it('should require only one click for individual field clears', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Clear artist field with single click
-      cy.get('#artist-search-input').clear();
-      cy.get('#artist-search-input').should('have.value', '');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').should('have.value', '');
       
       // Clear song field with single click
-      cy.get('#song-search-input').clear();
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').should('have.value', '');
       
       // Verify both fields remain cleared
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
     });
   });
 
   describe('Full Clear with Trash Button', () => {
     it('should clear all input fields when using trash button', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
@@ -170,14 +158,12 @@ describe('Search Clear Functionality E2E', () => {
       cy.get('[data-cy="clear-search-button"]').click();
       
       // Verify all fields are cleared
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
     });
 
     it('should clear session storage when using trash button', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
@@ -201,16 +187,14 @@ describe('Search Clear Functionality E2E', () => {
 
     it('should clear URL parameters when using trash button', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Verify URL contains query parameters
-      cy.url().should('include', 'artist=Test%20Artist');
-      cy.url().should('include', 'song=Test%20Song');
+      cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
       
       // Click the trash button for full clear
       cy.get('[data-cy="clear-search-button"]').click();
@@ -221,8 +205,7 @@ describe('Search Clear Functionality E2E', () => {
 
     it('should require only one click for trash button clear', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
@@ -232,8 +215,7 @@ describe('Search Clear Functionality E2E', () => {
       cy.get('[data-cy="clear-search-button"]').click();
       
       // Verify everything is cleared with single click
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
       
       // Verify session storage is cleared
       cy.window().then((win) => {
@@ -249,8 +231,7 @@ describe('Search Clear Functionality E2E', () => {
   describe('Clear Behavior Consistency', () => {
     it('should maintain clear behavior after tab switching', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
@@ -261,17 +242,16 @@ describe('Search Clear Functionality E2E', () => {
       cy.get('[data-cy="tab-search"]').click();
       
       // Verify search state is restored
-      cy.get('#artist-search-input').should('have.value', 'Test Artist');
-      cy.get('#song-search-input').should('have.value', 'Test Song');
+      cy.get('#search-input').should('have.value', 'Test Artist');
+      cy.get('#search-input').should('have.value', 'Test Song');
       
       // Test individual field clear still works
-      cy.get('#artist-search-input').clear();
-      cy.get('#artist-search-input').should('have.value', '');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').should('have.value', '');
       
       // Test trash button clear still works
       cy.get('[data-cy="clear-search-button"]').click();
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
     });
 
     it('should handle clear operations with special characters', () => {
@@ -279,35 +259,33 @@ describe('Search Clear Functionality E2E', () => {
       const artistWithSpecialChars = 'Leonardo Gonçalves';
       const songWithSpecialChars = 'Test Song (Live)';
       
-      cy.get('#artist-search-input').type(artistWithSpecialChars);
-      cy.get('#song-search-input').type(songWithSpecialChars);
+      cy.get('#search-input').type(artistWithSpecialChars);
+      cy.get('#search-input').type(songWithSpecialChars);
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Clear artist field
-      cy.get('#artist-search-input').clear();
-      cy.get('#artist-search-input').should('have.value', '');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').should('have.value', '');
       
       // Clear song field
-      cy.get('#song-search-input').clear();
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').clear();
+      cy.get('#search-input').should('have.value', '');
       
       // Use trash button for full clear
       cy.get('[data-cy="clear-search-button"]').click();
       
       // Verify everything is cleared
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
     });
   });
 
   describe('Clear State Management', () => {
     it('should not trigger unnecessary API calls after clearing', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
@@ -317,8 +295,7 @@ describe('Search Clear Functionality E2E', () => {
       cy.intercept('GET', '/api/*').as('apiCall');
       
       // Clear individual fields
-      cy.get('#artist-search-input').clear();
-      cy.get('#song-search-input').clear();
+      cy.get('#search-input').clear();
       
       // Wait a bit to ensure no API calls are made
       cy.wait(1000);
@@ -329,16 +306,14 @@ describe('Search Clear Functionality E2E', () => {
 
     it('should maintain clear state after page refresh', () => {
       // Perform a search first
-      cy.get('#artist-search-input').type('Test Artist');
-      cy.get('#song-search-input').type('Test Song');
+      cy.get('#search-input').type('Test Artist Test Song');
       cy.get('[data-cy="search-submit-button"]').click();
       
       // Wait for API call
       cy.wait('@searchAPI');
       
       // Clear fields
-      cy.get('#artist-search-input').clear();
-      cy.get('#song-search-input').clear();
+      cy.get('#search-input').clear();
       
       // Refresh the page
       cy.reload();
@@ -347,8 +322,7 @@ describe('Search Clear Functionality E2E', () => {
       cy.get('[data-cy="tab-search"]').click();
       
       // Fields should remain cleared (session storage preserved the cleared state)
-      cy.get('#artist-search-input').should('have.value', '');
-      cy.get('#song-search-input').should('have.value', '');
+      cy.get('#search-input').should('have.value', '');
     });
   });
 });
