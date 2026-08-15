@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { sql } from "@vercel/postgres";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
-import { fetchSourceDocs } from "@chordium/scraping";
+import { fetchSongsForArtist } from "@chordium/scraping";
 
 export const config = {
   maxDuration: 60,
@@ -104,14 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // 3. Source search last resort
   try {
-    const hits = await fetchSourceSongs(artistPath.replace(/-/g, " "));
-    // The search is by name rather than by slug, so anything belonging to a
-    // different artist is dropped.
-    const songs = hits.flatMap((hit) =>
-      hit.type === "song" && hit.path.startsWith(`${artistPath}/`)
-        ? [{ title: hit.title, artist: hit.artist, path: hit.path }]
-        : []
-    );
+    const songs = await fetchSongsForArtist(artistPath);
 
     if (songs.length > 0) {
       Promise.all(

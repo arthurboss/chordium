@@ -6,8 +6,11 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
   children,
   className = '',
   count,
+  total,
   action,
 }) => {
+  const trimmed = total !== undefined && count !== undefined && total > count;
+
   return (
     <section className={`w-full ${className}`}>
       {/* Equal-width spacers on both sides keep the heading centred whether or
@@ -18,7 +21,9 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
           {title}
           {count !== undefined && (
             <span className="ml-2 text-sm text-muted-foreground font-normal">
-              ({count} result{count !== 1 ? 's' : ''})
+              {trimmed
+                ? `(${count} of ${total})`
+                : `(${count} result${count !== 1 ? 's' : ''})`}
             </span>
           )}
         </h2>

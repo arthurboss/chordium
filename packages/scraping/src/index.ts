@@ -9,6 +9,7 @@ export {
 export {
   unifiedSearch,
   fetchSourceSongs,
+  fetchSongsForArtist,
   fetchSourceArtists,
   SONG_SEARCH_URL,
   ARTIST_SEARCH_URL,

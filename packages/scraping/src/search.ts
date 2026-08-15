@@ -2,28 +2,43 @@ import type { Artist, SearchHit, Song, SongMatch } from "@chordium/types";
 
 /**
  * The source's song index. Unlike the index behind its own search box, this one
- * honours a row limit, so a search can be answered completely rather than with
- * the first handful.
+ * honours a row limit, so a search can be answered properly rather than with the
+ * first handful.
  */
 export const SONG_SEARCH_URL = "https://solr.sscdn.co/cc/c7/";
 
 /**
  * The artist index, which ranks by relevance and popularity. It caps its own
- * response at a dozen or so and ignores any attempt to page past that, which is
- * fine: a dozen well-ranked acts answers "who did I mean" better than hundreds
- * of substring matches would.
+ * response at a dozen or so and ignores any attempt to page past that.
  */
 export const ARTIST_SEARCH_URL = "https://solr.sscdn.co/letras/artist/";
 
 /**
- * Rows asked for on the first attempt. Chosen to answer most searches in a
- * single request; the few that have more are asked for again in full.
+ * Rows asked for on the first attempt.
+ *
+ * Most searches are answered by this alone: a query naming a song is met by songs
+ * of that name, which the source ranks first. Only a query that turns out to be
+ * mostly one artist's catalogue needs more, and it asks for more only then.
  */
-const SONG_ROWS = 500;
+const FIRST_ROWS = 50;
+
+/**
+ * The most rows ever asked for. The source reports tens of thousands of matches
+ * for an ordinary word - a hundred thousand for "love" - and every row costs
+ * about three quarters of a kilobyte whether it is wanted or not, so the window
+ * is bounded rather than following whatever total is reported.
+ */
+const MAX_ROWS = 500;
+
+/**
+ * How many songs matched through their words are kept. These are the weakest
+ * results and the longest tail, so the section is trimmed to a browsable few
+ * while songs named by the search are all kept.
+ */
+export const LYRICS_LIMIT = 25;
 
 /** A song exactly as the source returns it. */
 interface SourceSongDoc {
-  /** "2" for a song. */
   tipo?: string;
   /** Song title. */
   txt?: string;
@@ -37,9 +52,7 @@ interface SourceSongDoc {
 
 /** An artist exactly as the source returns it. */
 interface SourceArtistDoc {
-  /** Artist name. */
   art?: string;
-  /** Artist slug, shared with the chord sheet site. */
   dns?: string;
 }
 
@@ -60,13 +73,8 @@ export type SqlTag = <T = Record<string, unknown>>(
 
 export interface UnifiedSearchOptions {
   query: string;
-  /**
-   * Omitted when no database is configured, in which case the search runs
-   * against the source alone rather than failing.
-   */
+  /** Omitted when no database is configured; the search then runs on the source alone. */
   sql?: SqlTag;
-  /** Rows requested from the song index before asking for the rest. */
-  rows?: number;
 }
 
 async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
@@ -81,58 +89,11 @@ async function fetchSolr<T>(url: string): Promise<SolrResponse<T>> {
   return JSON.parse(unpadded);
 }
 
-function songUrl(query: string, rows: number): string {
-  return `${SONG_SEARCH_URL}?search=2&q=${encodeURIComponent(query)}&limit=${rows}`;
-}
-
-function toSongHit(doc: SourceSongDoc): SearchHit | null {
-  if (!doc.txt || !doc.dns || !doc.url) return null;
-  return { type: "song", title: doc.txt, artist: doc.art ?? "", path: `${doc.dns}/${doc.url}` };
-}
-
-function toArtistHit(doc: SourceArtistDoc): SearchHit | null {
-  if (!doc.art || !doc.dns) return null;
-  return { type: "artist", displayName: doc.art, path: doc.dns, songCount: null };
-}
-
-/**
- * Every song the source has for a query.
- *
- * Asked for in one request where possible. The response reports how many exist
- * in total, so a query with more than the first request asked for is asked again
- * for exactly that many, rather than being silently cut short.
- */
-export async function fetchSourceSongs(query: string, rows = SONG_ROWS): Promise<SearchHit[]> {
-  let body = await fetchSolr<SourceSongDoc>(songUrl(query, rows));
-
-  const total = body.response?.numFound ?? 0;
-  const returned = body.response?.docs?.length ?? 0;
-  if (total > returned) {
-    body = await fetchSolr<SourceSongDoc>(songUrl(query, total));
-  }
-
-  return (body.response?.docs ?? []).flatMap((doc) => {
-    const hit = toSongHit(doc);
-    return hit ? [hit] : [];
-  });
-}
-
-/** The artists the source considers the best answers to a query, in its order. */
-export async function fetchSourceArtists(query: string): Promise<SearchHit[]> {
-  const url = `${ARTIST_SEARCH_URL}?q=${encodeURIComponent(query)}&wt=json&callback=LetrasArtists`;
-  const body = await fetchSolr<SourceArtistDoc>(url);
-
-  return (body.response?.docs ?? []).flatMap((doc) => {
-    const hit = toArtistHit(doc);
-    return hit ? [hit] : [];
-  });
-}
-
 /** Words, lowercased and stripped of accents so "Legiao" reaches "Legião". */
 function tokenize(text: string): string[] {
   return (text ?? "")
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9 ]+/g, " ")
     .split(/\s+/)
@@ -141,8 +102,7 @@ function tokenize(text: string): string[] {
 
 /**
  * Whether a word from the query is answered by one of these words. Either being a
- * prefix of the other lets "eagles" reach "Eagle's Wings", which is the kind of
- * near-miss the source itself matches on.
+ * prefix of the other lets "eagles" reach "Eagle's Wings".
  */
 function answers(queryWord: string, words: string[]): boolean {
   return words.some((word) => word.startsWith(queryWord) || queryWord.startsWith(word));
@@ -153,30 +113,103 @@ function answers(queryWord: string, words: string[]): boolean {
  *
  * The source gives no field for this: it matches titles, artist names and the
  * words of a song alike, and the scoring features it returns describe how a
- * result was ranked rather than why it was included. So the answer is derived
- * from the only two pieces of text it does give.
+ * result was ranked rather than why it was included.
  *
- * - Every word of the query accounted for, at least one of them by the title:
- *   the search names this song. "eagles hotel california" lands here, its title
- *   carrying two words and the artist the third.
- * - Every word accounted for but none by the title: the song is here only because
- *   its artist matched. Those are left out entirely, since the artist is already
- *   listed and opening them is how their songs are meant to be reached.
- * - Anything else: the query is somewhere in the words of the song.
+ * Returns null for a song reached only through its artist. Those are left out:
+ * the artist is listed in their own right, and opening them is how their songs
+ * are meant to be reached.
  */
-function classifySong(query: string, hit: SearchHit & { type: "song" }): SongMatch | null {
+function classifySong(query: string, title: string, artist: string): SongMatch | null {
   const queryWords = tokenize(query);
-  const titleWords = tokenize(hit.title);
-  const artistWords = tokenize(hit.artist);
+  const titleWords = tokenize(title);
+  const artistWords = tokenize(artist);
 
-  const accountedFor = queryWords.every((word) => answers(word, [...titleWords, ...artistWords]));
-  if (!accountedFor) return "lyrics";
-
+  if (!queryWords.every((word) => answers(word, [...titleWords, ...artistWords]))) {
+    return "lyrics";
+  }
   return queryWords.some((word) => answers(word, titleWords)) ? "title" : null;
 }
 
-function keyOf(hit: SearchHit): string {
-  return `${hit.type}:${hit.path}`;
+interface SongPage {
+  titled: SearchHit[];
+  lyrical: SearchHit[];
+  /** Rows the source holds in total, which is far more than is ever asked for. */
+  total: number;
+  fetched: number;
+}
+
+async function fetchSongPage(query: string, rows: number): Promise<SongPage> {
+  const url = `${SONG_SEARCH_URL}?search=2&q=${encodeURIComponent(query)}&limit=${rows}`;
+  const body = await fetchSolr<SourceSongDoc>(url);
+  const docs = body.response?.docs ?? [];
+
+  const titled: SearchHit[] = [];
+  const lyrical: SearchHit[] = [];
+  for (const doc of docs) {
+    if (!doc.txt || !doc.dns || !doc.url) continue;
+    const match = classifySong(query, doc.txt, doc.art ?? "");
+    if (!match) continue;
+    const hit: SearchHit = {
+      type: "song",
+      title: doc.txt,
+      artist: doc.art ?? "",
+      path: `${doc.dns}/${doc.url}`,
+      match,
+    };
+    (match === "title" ? titled : lyrical).push(hit);
+  }
+
+  return { titled, lyrical, total: body.response?.numFound ?? docs.length, fetched: docs.length };
+}
+
+/**
+ * The songs for a query, asking for as few rows as will do.
+ *
+ * A first small request answers most searches outright. It falls short only when
+ * the results turn out to be mostly one artist's catalogue, which is discarded,
+ * and that shows up as too few songs to fill the sections; then, and only then,
+ * a wider request is made.
+ */
+export async function fetchSourceSongs(query: string): Promise<SongPage> {
+  const first = await fetchSongPage(query, FIRST_ROWS);
+
+  const exhausted = first.fetched >= first.total;
+  const enough = first.lyrical.length >= LYRICS_LIMIT;
+  if (exhausted || enough) return first;
+
+  return fetchSongPage(query, Math.min(first.total, MAX_ROWS));
+}
+
+/**
+ * The songs the source holds for one artist, found by searching their name and
+ * keeping only what belongs to them.
+ *
+ * Deliberately separate from the search proper, which discards songs reached
+ * through their artist: here that is precisely what is wanted. A last resort for
+ * when the artist's own page cannot be read.
+ */
+export async function fetchSongsForArtist(artistPath: string): Promise<Song[]> {
+  const name = artistPath.replace(/-/g, " ");
+  const url = `${SONG_SEARCH_URL}?search=2&q=${encodeURIComponent(name)}&limit=${MAX_ROWS}`;
+  const body = await fetchSolr<SourceSongDoc>(url);
+
+  return (body.response?.docs ?? []).flatMap((doc): Song[] => {
+    // Searched by name, so anything belonging to another artist is dropped.
+    if (!doc.txt || !doc.url || doc.dns !== artistPath) return [];
+    return [{ title: doc.txt, artist: doc.art ?? "", path: `${doc.dns}/${doc.url}` }];
+  });
+}
+
+/** The artists the source considers the best answers to a query, in its order. */
+export async function fetchSourceArtists(query: string): Promise<SearchHit[]> {
+  const url = `${ARTIST_SEARCH_URL}?q=${encodeURIComponent(query)}&wt=json&callback=LetrasArtists`;
+  const body = await fetchSolr<SourceArtistDoc>(url);
+
+  return (body.response?.docs ?? []).flatMap((doc) =>
+    doc.art && doc.dns
+      ? [{ type: "artist", displayName: doc.art, path: doc.dns, songCount: null } as SearchHit]
+      : []
+  );
 }
 
 /** `%` and `_` are wildcards to ILIKE, so a query containing them is escaped. */
@@ -185,132 +218,115 @@ function escapeForLike(query: string): string {
 }
 
 /**
- * Searches artists and songs together from one query string.
+ * Artists held in our own tables whose name contains the query anywhere.
  *
- * The source answers both, and our own tables stand behind it: they are read only
- * when the source cannot be reached, since it returns every song it has for a
- * query and ranks artists properly, whereas a substring match over our own rows
- * has no notion of relevance and would offer "Beagles" for "eagles".
- *
- * Artists come first in the returned list, songs after.
+ * Worth reading alongside the source rather than only when it fails: the source
+ * matches the starts of words, so "eagle" reaches "Eagle-Eye Cherry" but never
+ * "Beagles", and it holds nothing for acts the mirror has picked up since. A
+ * plain substring match finds both.
  */
+async function fetchStoredArtists(sql: SqlTag, query: string, limit = 100): Promise<SearchHit[]> {
+  const { rows } = await sql<Artist>`
+    SELECT "displayName", path, "songCount"
+    FROM artists
+    WHERE "displayName" ILIKE ${`%${escapeForLike(query)}%`}
+    ORDER BY "displayName"
+    LIMIT ${limit}
+  `;
+  return rows.map((artist): SearchHit => ({ ...artist, type: "artist" }));
+}
+
+async function fetchStoredSongs(sql: SqlTag, query: string, limit = 200): Promise<SearchHit[]> {
+  const pattern = `%${escapeForLike(query)}%`;
+  const { rows } = await sql<Song>`
+    SELECT title, artist, path
+    FROM songs
+    WHERE title ILIKE ${pattern} OR artist ILIKE ${pattern}
+    ORDER BY title
+    LIMIT ${limit}
+  `;
+  return rows.flatMap((song): SearchHit[] => {
+    const match = classifySong(query, song.title, song.artist);
+    return match ? [{ ...song, type: "song", match }] : [];
+  });
+}
+
+/**
+ * Merges two lists of the same kind, keeping the first one's order and adding only
+ * what the second holds that the first does not.
+ *
+ * The database mirrors the source, so most of what comes back appears in both.
+ * The source is ranked and goes first; our own rows follow, contributing whatever
+ * it did not know about.
+ */
+function mergeByPath(ranked: SearchHit[], extra: SearchHit[]): SearchHit[] {
+  const seen = new Set(ranked.map((hit) => `${hit.type}:${hit.path}`));
+  const merged = [...ranked];
+  for (const hit of extra) {
+    const key = `${hit.type}:${hit.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(hit);
+  }
+  return merged;
+}
+
 export async function unifiedSearch({
   query,
   sql,
-  rows = SONG_ROWS,
 }: UnifiedSearchOptions): Promise<SearchHit[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
 
-  const [songsResult, artistsResult] = await Promise.allSettled([
-    fetchSourceSongs(trimmed, rows),
-    fetchSourceArtists(trimmed),
-  ]);
+  const [songsResult, artistsResult, storedArtistsResult, storedSongsResult] =
+    await Promise.allSettled([
+      fetchSourceSongs(trimmed),
+      fetchSourceArtists(trimmed),
+      sql ? fetchStoredArtists(sql, trimmed) : Promise.resolve([]),
+      sql ? fetchStoredSongs(sql, trimmed) : Promise.resolve([]),
+    ]);
 
-  let songs = songsResult.status === "fulfilled" ? songsResult.value : [];
-  let artists = artistsResult.status === "fulfilled" ? artistsResult.value : [];
+  const songs: SongPage =
+    songsResult.status === "fulfilled"
+      ? songsResult.value
+      : { titled: [], lyrical: [], total: 0, fetched: 0 };
+  const sourceArtists = artistsResult.status === "fulfilled" ? artistsResult.value : [];
+  const storedArtists = storedArtistsResult.status === "fulfilled" ? storedArtistsResult.value : [];
+  const storedSongs = storedSongsResult.status === "fulfilled" ? storedSongsResult.value : [];
 
-  const songsFailed = songsResult.status === "rejected";
-  const artistsFailed = artistsResult.status === "rejected";
-
-  // Whatever the source could not answer for, fall back to what we hold.
-  if (sql && (songsFailed || artistsFailed)) {
-    const stored = await fetchStored({ sql, query: trimmed, songs: songsFailed, artists: artistsFailed });
-    if (songsFailed) songs = stored.songs;
-    if (artistsFailed) artists = stored.artists;
-  }
-
-  // Both sides unreachable with nothing held back is a failed search, not an
-  // empty one: saying so is the difference between "no such song" and "we could
-  // not look".
-  if (songsFailed && artistsFailed && songs.length === 0 && artists.length === 0) {
+  const bothSourcesFailed =
+    songsResult.status === "rejected" && artistsResult.status === "rejected";
+  if (bothSourcesFailed && storedArtists.length === 0 && storedSongs.length === 0) {
+    // Nothing answered and nothing held: a failed search, not an empty one.
     throw songsResult.reason;
   }
 
-  // A song reached only through its artist is left out: that artist is already in
-  // the list above, and opening them is how their songs are meant to be reached.
-  const classified = songs.flatMap((hit): SearchHit[] => {
-    if (hit.type !== "song") return [hit];
-    const match = classifySong(trimmed, hit);
-    return match ? [{ ...hit, match }] : [];
-  });
+  const artists = mergeByPath(sourceArtists, storedArtists);
+  const titled = mergeByPath(
+    songs.titled,
+    storedSongs.filter((hit) => hit.type === "song" && hit.match === "title")
+  );
+  const lyrical = mergeByPath(
+    songs.lyrical,
+    storedSongs.filter((hit) => hit.type === "song" && hit.match === "lyrics")
+  );
 
-  // Artists first, always. A query matches far fewer acts than songs, so the
-  // shorter list reads as a way to narrow down rather than as something in the
-  // way, and the act someone named stays visible without scrolling past their
-  // back catalogue. Songs the search names come before songs that merely contain
-  // it, so the weaker kind cannot crowd out the stronger.
-  const ordered = [
-    ...artists,
-    ...classified.filter((hit) => hit.type === "song" && hit.match === "title"),
-    ...classified.filter((hit) => hit.type === "song" && hit.match === "lyrics"),
-  ];
-
-  const seen = new Set<string>();
-  const merged = ordered.filter((hit) => {
-    const key = keyOf(hit);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  // Artists first: a query matches far fewer acts than songs, so the short list
+  // reads as a way to narrow down. Songs the search names come before songs that
+  // merely mention it, which the list itself trims to a browsable few while still
+  // reporting how many were found.
+  const hits = [...artists, ...titled, ...lyrical];
 
   if (sql) {
-    void seedStoredRows({ sql, merged });
+    void seedStoredRows({ sql, hits });
   }
 
-  return merged;
-}
-
-interface FetchStoredInput {
-  sql: SqlTag;
-  query: string;
-  songs: boolean;
-  artists: boolean;
-}
-
-async function fetchStored({
-  sql,
-  query,
-  songs,
-  artists,
-}: FetchStoredInput): Promise<{ songs: SearchHit[]; artists: SearchHit[] }> {
-  const pattern = `%${escapeForLike(query)}%`;
-
-  const [songRows, artistRows] = await Promise.allSettled([
-    songs
-      ? sql<Song>`
-          SELECT title, artist, path
-          FROM songs
-          WHERE title ILIKE ${pattern} OR artist ILIKE ${pattern}
-          ORDER BY title
-          LIMIT 200
-        `
-      : Promise.resolve({ rows: [] as Song[] }),
-    artists
-      ? sql<Artist>`
-          SELECT "displayName", path, "songCount"
-          FROM artists
-          WHERE "displayName" ILIKE ${pattern}
-          LIMIT 50
-        `
-      : Promise.resolve({ rows: [] as Artist[] }),
-  ]);
-
-  return {
-    songs:
-      songRows.status === "fulfilled"
-        ? songRows.value.rows.map((song): SearchHit => ({ ...song, type: "song" }))
-        : [],
-    artists:
-      artistRows.status === "fulfilled"
-        ? artistRows.value.rows.map((artist): SearchHit => ({ ...artist, type: "artist" }))
-        : [],
-  };
+  return hits;
 }
 
 interface SeedStoredRowsInput {
   sql: SqlTag;
-  merged: SearchHit[];
+  hits: SearchHit[];
 }
 
 /**
@@ -318,8 +334,8 @@ interface SeedStoredRowsInput {
  * becomes unreachable. Deliberately not awaited and individually caught: seeding
  * is a side benefit, never a reason to fail a search.
  */
-function seedStoredRows({ sql, merged }: SeedStoredRowsInput): void {
-  const writes = merged.map((hit) =>
+function seedStoredRows({ sql, hits }: SeedStoredRowsInput): void {
+  const writes = hits.map((hit) =>
     hit.type === "artist"
       ? sql`
           INSERT INTO artists ("displayName", path, "songCount")
