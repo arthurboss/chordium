@@ -1,11 +1,13 @@
 import express, { type Application } from 'express';
 import cors from 'cors';
 import type { Server } from 'http';
+import http from 'http';
 import config from './config/config.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import apiRoutes from './routes/api.js';
 import logger from './utils/logger.js';
 import puppeteerService from './services/puppeteer.service.js';
+import setupJamSessionSocket from './services/jam-session.socket.js';
 
 class App {
   public app: Application;
@@ -112,11 +114,18 @@ class App {
     puppeteerService.init().catch((error) => {
       logger.warn('Puppeteer failed to initialize on startup — will retry on first use:', error);
     });
-    // Start the server
+    
+    // Start the HTTP server
     const port = config.server.port;
-    this.server = this.app.listen(port, () => {
+    this.server = http.createServer(this.app);
+    
+    // Setup Socket.IO for jam sessions
+    setupJamSessionSocket(this.server);
+    
+    this.server.listen(port, () => {
       logger.info(`Server is running on port ${port}`);
     });
+    
     return this.server;
   }
 }
