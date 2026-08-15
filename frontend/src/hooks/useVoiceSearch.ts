@@ -92,31 +92,43 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     }
     if (state !== 'idle') return;
 
-    let session: RecognitionSession;
-    try {
-      session = createRecognizer(resolveRecognizerKind()).listen(language);
-    } catch (cause) {
-      setState('idle');
-      setError('failed');
-      console.error('Voice search could not start:', cause);
-      return;
-    }
+    let retryCount = 0;
+    const MAX_RETRIES = 1;
 
-    sessionRef.current = session;
-    setState('listening');
+    const attempt = () => {
+      let session: RecognitionSession;
+      try {
+        session = createRecognizer(resolveRecognizerKind()).listen(language);
+      } catch (cause) {
+        setState('idle');
+        setError('failed');
+        console.error('Voice search could not start:', cause);
+        return;
+      }
 
-    session.transcript
-      .then((transcript) => {
-        sessionRef.current = null;
-        setState('idle');
-        if (transcript) onTranscriptRef.current(transcript);
-      })
-      .catch((cause: unknown) => {
-        sessionRef.current = null;
-        setState('idle');
-        setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
-        console.error('Voice search failed:', cause);
-      });
+      sessionRef.current = session;
+      setState('listening');
+
+      session.transcript
+        .then((transcript) => {
+          sessionRef.current = null;
+          setState('idle');
+          if (!transcript && retryCount < MAX_RETRIES) {
+            retryCount++;
+            attempt();
+            return;
+          }
+          if (transcript) onTranscriptRef.current(transcript);
+        })
+        .catch((cause: unknown) => {
+          sessionRef.current = null;
+          setState('idle');
+          setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
+          console.error('Voice search failed:', cause);
+        });
+    };
+
+    attempt();
   }, [language, state]);
 
   // A microphone left open when the page moves on would keep recording, so any session
