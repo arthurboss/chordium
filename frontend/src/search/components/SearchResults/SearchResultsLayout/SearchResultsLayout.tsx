@@ -62,12 +62,15 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     </Select>
   );
 
-  // Three columns, the outer two the same width, so the title lands in the
-  // true center of the card rather than just the space left of the control.
+  // On a narrow screen the title hugs the left edge, level with the sort
+  // control, since there's no room to spare for centering it. From sm up, the
+  // leading spacer joins the layout as a real grid column - matching the
+  // trailing one - so the title lands in the card's true center rather than
+  // just the space left of the control.
   const resultsHeader = (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 pb-3">
-      <div />
-      <h2 className="text-center text-xl font-semibold">{t("searchResults.results")}</h2>
+    <div className="flex items-center justify-between gap-2 pb-3 sm:grid sm:grid-cols-[1fr_auto_1fr]">
+      <div className="hidden sm:block" />
+      <h2 className="text-left text-xl font-semibold sm:text-center">{t("searchResults.results")}</h2>
       <div className="flex justify-end">{sortControl}</div>
     </div>
   );
@@ -95,9 +98,9 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         : (firstSong?.type === "song" ? firstSong.artist : "") || activeArtist.displayName;
 
     return (
-      <FormContainer>
+      <FormContainer contentClassName="pb-2">
         {resultsHeader}
-        <SearchResultsSection title={title} count={results.length} defaultOpen>
+        <SearchResultsSection title={title} count={results.length} defaultOpen hideDivider>
           {renderItems(results)}
         </SearchResultsSection>
       </FormContainer>
@@ -136,14 +139,15 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   const shown = sections.filter((section) => section.items.length > 0);
 
   return (
-    <FormContainer>
+    <FormContainer contentClassName="pb-2">
       {resultsHeader}
-      <div className="flex flex-col w-full gap-4">
-        {shown.map((section) => (
+      <div className="flex flex-col w-full gap-2">
+        {shown.map((section, index) => (
           <SearchResultsSection
             key={section.key}
             title={section.title}
             count={section.items.length}
+            hideDivider={index === shown.length - 1}
           >
             {renderItems(section.items)}
           </SearchResultsSection>

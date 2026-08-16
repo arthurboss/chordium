@@ -57,7 +57,12 @@ describe("SearchResultsSection", () => {
 
   it("counts what it holds, as a number needing no translation", () => {
     renderSection({ count: 3 });
-    expect(screen.getByRole("button", { name: /\(3\)/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Songs.*3/ })).toBeInTheDocument();
+  });
+
+  it("caps an overflowing count instead of growing to fit it", () => {
+    renderSection({ count: 12345 });
+    expect(screen.getByRole("button", { name: /Songs.*999\+/ })).toBeInTheDocument();
   });
 
 

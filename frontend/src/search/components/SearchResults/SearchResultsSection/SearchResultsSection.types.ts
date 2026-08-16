@@ -19,4 +19,10 @@ export interface SearchResultsSectionProps {
    * being the whole point of that page.
    */
   defaultOpen?: boolean;
+  /**
+   * Omits the divider below this section. Set on the last section in a list,
+   * since the divider marks it off from the next heading rather than from its
+   * own content, and there is no next heading after the last one.
+   */
+  hideDivider?: boolean;
 }
