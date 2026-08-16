@@ -136,6 +136,38 @@
     word-break: break-word;
     overflow-wrap: break-word;
   }
+
+  /*
+   * Single source of truth for a field's focus color: its own border, an attached
+   * trailing button's divider, and the in-field clear button's border all read
+   * --field-border, so they recolor in lockstep on focus instead of each having
+   * its own focus-within rule whose transition can drift out of sync in timing.
+   */
+  .form-field-shell {
+    --field-border: hsl(var(--input));
+    border-color: var(--field-border);
+    transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+  }
+
+  .form-field-shell:focus-within {
+    --field-border: hsl(var(--ring));
+    box-shadow: 0 0 0 1px hsl(var(--ring));
+  }
+
+  .form-field-shell__trailing {
+    border-left-color: var(--field-border);
+    transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  }
+
+  /* Disabled means the button can't act on the focus, so its divider stays neutral. */
+  .form-field-shell__trailing:disabled {
+    border-left-color: hsl(var(--input));
+  }
+
+  .form-field-shell__clear {
+    border-color: var(--field-border);
+    transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  }
 }
 
 /* Sonner toast — match Sonner specificity to override theme defaults */
