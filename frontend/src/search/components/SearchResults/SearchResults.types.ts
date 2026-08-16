@@ -17,4 +17,9 @@ export interface SearchResultsProps {
   shouldFetch?: boolean;
   onFetchComplete?: () => void;
   onLoadingChange?: (loading: boolean) => void;
+  /** Forwarded to the results card's back button. */
+  onBackClick?: () => void;
+  /** Forwarded to the results card's clear (trash) button. */
+  onClearSearch?: () => void;
+  clearDisabled?: boolean;
 }

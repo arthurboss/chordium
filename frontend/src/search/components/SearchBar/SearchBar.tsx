@@ -1,10 +1,8 @@
-import { ArrowLeft, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import FormField from "@/components/ui/form-field";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { SearchBarProps } from "./SearchBar.types";
-import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import VoiceSearchButton from "../VoiceSearchButton/VoiceSearchButton";
 import { cyAttr } from "@/utils/test-utils";
 
@@ -14,11 +12,7 @@ const SearchBar = ({
   value = "",
   onInputChange,
   onSearchSubmit,
-  showBackButton = false,
-  onBackClick,
   isSearchDisabled = false,
-  onClearSearch,
-  clearDisabled = false,
   voiceState,
   onVoiceStart,
   onVoiceStop,
@@ -29,6 +23,8 @@ const SearchBar = ({
     e.preventDefault();
     onSearchSubmit(value);
   };
+
+  const hasVoice = voiceState && voiceState !== "unsupported" && onVoiceStart && onVoiceStop;
 
   return (
     <form className={`w-full ${className}`} onSubmit={handleSubmit} id="search-form">
@@ -52,40 +48,22 @@ const SearchBar = ({
           }
         />
 
-        <Separator className="my-2" />
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={onBackClick}
-            className="h-10 w-10 rounded-full"
-            disabled={!!(loading || !showBackButton || !onBackClick)}
-            aria-label={t("searchBar.back")}
-            {...cyAttr("back-button")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-grow" />
-
-          {voiceState && voiceState !== "unsupported" && onVoiceStart && onVoiceStop && (
-            <VoiceSearchButton
-              state={voiceState}
-              onStart={onVoiceStart}
-              onStop={onVoiceStop}
-              disabled={loading}
-            />
-          )}
-
-          <RoundTrashButton
-            onClick={onClearSearch}
-            aria-label={t("searchBar.clearAriaLabel")}
-            tabIndex={0}
-            disabled={clearDisabled}
-            {...cyAttr("clear-search-button")}
-          />
-        </div>
+        {/* Back and clear moved to the results card - they act on results, not
+            the field, and that's where a reader looks for them now. Only voice
+            is still about the field itself, so it's the only thing left here. */}
+        {hasVoice && (
+          <>
+            <Separator className="my-2" />
+            <div className="flex items-center justify-end">
+              <VoiceSearchButton
+                state={voiceState}
+                onStart={onVoiceStart}
+                onStop={onVoiceStop}
+                disabled={loading}
+              />
+            </div>
+          </>
+        )}
       </div>
     </form>
   );

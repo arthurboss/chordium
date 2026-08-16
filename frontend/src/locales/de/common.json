@@ -23,7 +23,9 @@
     "songs": "Lieder",
     "lyricsMatches": "Treffer im Liedtext",
     "results": "Ergebnisse",
-    "loadingArtistSongs": "Lieder werden geladen..."
+    "loadingArtistSongs": "Lieder werden geladen...",
+    "noSongsForArtist": "Keine Lieder für {{artist}} gefunden.",
+    "filterPlaceholder": "Ergebnisse filtern..."
   },
   "dropZone": {
     "title": "Akkordblatt hochladen",

@@ -14,11 +14,12 @@ export interface SearchResultsSectionProps {
    */
   action?: React.ReactNode;
   /**
-   * Whether the section starts open. Search results start closed so that three
-   * long lists arrive as three headings; one artist's own songs start open,
-   * being the whole point of that page.
+   * Controlled rather than owning its own state, so a parent coordinating
+   * several sections (only one open at a time) can close the others the
+   * moment one of them opens.
    */
-  defaultOpen?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   /**
    * Omits the divider below this section. Set on the last section in a list,
    * since the divider marks it off from the next heading rather than from its

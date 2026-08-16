@@ -23,7 +23,9 @@
     "songs": "Músicas",
     "lyricsMatches": "Correspondências na letra",
     "results": "Resultados",
-    "loadingArtistSongs": "Carregando músicas do artista..."
+    "loadingArtistSongs": "Carregando músicas do artista...",
+    "noSongsForArtist": "Nenhuma música encontrada para {{artist}}.",
+    "filterPlaceholder": "Filtrar resultados..."
   },
   "dropZone": {
     "title": "Importar uma cifra",

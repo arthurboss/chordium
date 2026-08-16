@@ -15,12 +15,16 @@ export const determineUIState = (state: SearchResultsState) => {
     };
   }
 
-  // Unified error state - any error shows error
+  // Unified error state - any error shows error. The message itself comes
+  // from the network/source layer when there is one, so it's left as-is;
+  // only the fallback, for when neither side produced any text, is app copy
+  // and needs a translation key rather than English.
   if (state.error || state.artistSongsError) {
-    const errorMessage = state.error?.message || state.artistSongsError || "An error occurred";
+    const errorMessage = state.error?.message || state.artistSongsError;
     return {
       state: "error" as const,
-      error: errorMessage
+      error: errorMessage,
+      errorFallbackKey: errorMessage ? undefined : "errors:boundary.unknownError"
     };
   }
 
@@ -39,8 +43,7 @@ export const determineUIState = (state: SearchResultsState) => {
     hasResults,
     isEmpty,
     activeArtist: state.activeArtist,
-    emptyMessage: isEmpty && state.activeArtist
-      ? `No songs found for ${state.activeArtist.displayName}.`
-      : undefined
+    emptyMessageKey: isEmpty && state.activeArtist ? "searchResults.noSongsForArtist" : undefined,
+    emptyMessageArtist: isEmpty ? state.activeArtist?.displayName : undefined
   };
 };

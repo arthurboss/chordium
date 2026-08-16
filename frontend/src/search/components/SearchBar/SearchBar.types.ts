@@ -10,15 +10,8 @@ export interface SearchBarProps {
   value: string;
   onInputChange: (value: string) => void;
   onSearchSubmit: (value: string) => void;
-  // Whether to show the back button
-  showBackButton?: boolean;
-  // Called when the back button is clicked
-  onBackClick?: () => void;
   // Whether the search button should be disabled
   isSearchDisabled?: boolean;
-  // Add clear search props
-  onClearSearch?: () => void;
-  clearDisabled?: boolean;
   // Where a spoken search has got to. Absent, or "unsupported", hides the button.
   voiceState?: VoiceSearchState;
   // Called to begin listening, or to open the setup offer when nothing is downloaded yet

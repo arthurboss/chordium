@@ -16,4 +16,20 @@ export interface SearchResultsLayoutProps {
   loading?: boolean;
   /** Already-translated text for the loading indicator, if not the default. */
   loadingMessage?: string;
+  /**
+   * Already-translated error text. Shown in the sections' own place, same as
+   * loading, so the card and its back/clear buttons stay put and reachable
+   * rather than the whole page swapping to a standalone error view.
+   */
+  error?: string | null;
+  /**
+   * Already-translated text for the empty-results state, if not the generic
+   * "no results" copy - e.g. an active artist with no songs at all.
+   */
+  emptyMessage?: string;
+  /** Called when the back button is pressed. Disabled without one, or without an active artist. */
+  onBackClick?: () => void;
+  /** Called when the clear (trash) button is pressed. */
+  onClearSearch?: () => void;
+  clearDisabled?: boolean;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SearchResultsSectionProps } from './SearchResultsSection.types';
@@ -9,35 +9,41 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
   className = '',
   count,
   action,
-  defaultOpen = false,
+  open,
+  onOpenChange,
   hideDivider = false,
 }) => {
-  const [open, setOpen] = useState(defaultOpen);
-
   const displayCount = count !== undefined && count > 999 ? "999+" : count;
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className={`w-full ${className}`}>
+    <Collapsible open={open} onOpenChange={onOpenChange} className={`w-full ${className}`}>
       <div className="flex items-center gap-1.5">
         <CollapsibleTrigger
           // Turned from the state we already hold rather than a group-data
           // variant, which this build does not generate. Nothing here changes
           // size on toggle - the chevron below is the only thing that moves.
-          className="flex flex-1 items-center gap-1.5 rounded-md py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="group flex flex-1 items-center gap-1.5 rounded-md py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           {/* Same colors as the tabs above: muted while shut, foreground once
-              open - open here plays the part active does there. */}
+              open - open here plays the part active does there. Hovering
+              previews that foreground color even while still shut. */}
           <h3
-            className={`flex-1 truncate text-base font-semibold tracking-tight ${
-              open ? 'text-foreground' : 'text-muted-foreground'
+            className={`flex-1 truncate text-base font-semibold tracking-tight transition-colors ${
+              open ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
             }`}
           >
             {title}
           </h3>
           {/* Fixed width, so a count never nudges anything else over. Caps out
-              at "999+" instead of growing wider for whatever comes after it. */}
+              at "999+" instead of growing wider for whatever comes after it.
+              Its border recolors the same way the chevron does once open, no
+              glow though - just the color change. */}
           {displayCount !== undefined && (
-            <span className="flex w-10 shrink-0 items-center justify-center self-stretch rounded-md border border-border/70 bg-background font-mono text-[11px] tabular-nums text-muted-foreground">
+            <span
+              className={`flex w-10 shrink-0 items-center justify-center self-stretch rounded-md border bg-background font-mono text-[11px] tabular-nums text-muted-foreground transition-colors duration-300 ${
+                open ? 'border-primary' : 'border-border/70'
+              }`}
+            >
               {displayCount}
             </span>
           )}

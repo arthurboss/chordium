@@ -1,14 +1,26 @@
+import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, it, expect } from "vitest";
 import SearchResultsSection from "../SearchResultsSection";
 
-function renderSection(props: Partial<React.ComponentProps<typeof SearchResultsSection>> = {}) {
-  return render(
-    <SearchResultsSection title="Songs" count={3} {...props}>
-      <p>the results</p>
-    </SearchResultsSection>
-  );
+// The component is controlled (no state of its own), since a parent
+// coordinating several sections needs to be able to close one the moment
+// another opens. This wrapper supplies that state for the tests, the same way
+// SearchResultsLayout does in the app.
+function renderSection({
+  defaultOpen = false,
+  ...props
+}: Partial<React.ComponentProps<typeof SearchResultsSection>> & { defaultOpen?: boolean } = {}) {
+  function Wrapper() {
+    const [open, setOpen] = React.useState(defaultOpen);
+    return (
+      <SearchResultsSection title="Songs" count={3} open={open} onOpenChange={setOpen} {...props}>
+        <p>the results</p>
+      </SearchResultsSection>
+    );
+  }
+  return render(<Wrapper />);
 }
 
 describe("SearchResultsSection", () => {
@@ -73,5 +85,23 @@ describe("SearchResultsSection", () => {
     await user.click(screen.getByRole("button", { name: "Relevance" }));
 
     expect(screen.getByRole("button", { name: /Songs/ })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("defers to the parent's toggle rather than flipping its own state", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = () => {};
+    render(
+      <SearchResultsSection title="Songs" count={3} open={false} onOpenChange={onOpenChange}>
+        <p>the results</p>
+      </SearchResultsSection>
+    );
+    const heading = screen.getByRole("button", { name: /Songs/ });
+
+    await user.click(heading);
+
+    // A no-op handler means a controlling parent chose not to open it - the
+    // section itself has no state left to fall back on.
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("the results")).not.toBeInTheDocument();
   });
 });

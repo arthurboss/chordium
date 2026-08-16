@@ -16,6 +16,7 @@ export { isAccentInsensitiveMatch } from "./normalization/accentInsensitiveMatch
 
 // Filtering utilities
 export { filterArtistsByNameOrPath } from "./filtering/filterArtistsByName";
+export { filterSearchHitsByText } from "./filtering/filterSearchHitsByText";
 
 // Formatting utilities
 export { formatSearchResult } from "./formatting/formatSearchResult";

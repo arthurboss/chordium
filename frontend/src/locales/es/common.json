@@ -23,7 +23,9 @@
     "songs": "Canciones",
     "lyricsMatches": "Coincidencias en la letra",
     "results": "Resultados",
-    "loadingArtistSongs": "Cargando canciones del artista..."
+    "loadingArtistSongs": "Cargando canciones del artista...",
+    "noSongsForArtist": "No se encontraron canciones de {{artist}}.",
+    "filterPlaceholder": "Filtrar resultados..."
   },
   "dropZone": {
     "title": "Importar acordes",

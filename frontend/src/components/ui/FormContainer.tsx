@@ -15,7 +15,7 @@ const FormContainer: React.FC<FormContainerProps> = ({
 }) => {
   return (
     <div className={`w-full max-w-3xl mx-auto ${className}`}>
-      <Card className="mb-2">
+      <Card>
         <CardContent className={`p-4 ${contentClassName}`}>
           {children}
         </CardContent>
