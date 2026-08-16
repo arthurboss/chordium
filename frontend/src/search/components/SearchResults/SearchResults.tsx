@@ -1,11 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchReducer } from '@/search';
 
 import { SearchResultsProps } from './SearchResults.types';
 
 
 import ErrorState from '@/components/ErrorState';
-import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import { useSearchResultsViewModel } from './hooks/useSearchResultsViewModel';
 import { SearchResultsLayout } from './SearchResultsLayout/';
@@ -21,6 +21,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onFetchComplete,
   onLoadingChange,
 }) => {
+  const { t } = useTranslation();
 
   const searchState = useSearchReducer({
     query,
@@ -50,7 +51,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   switch (stateData.state) {
     case 'loading':
-      return <LoadingState message={stateData.message} />;
+      return (
+        <SearchResultsLayout
+          loading
+          loadingMessage={stateData.messageKey ? t(stateData.messageKey) : undefined}
+          results={results}
+          onResultClick={onResultClick}
+          activeArtist={null}
+        />
+      );
 
     case 'error':
       return <ErrorState error={stateData.error} />;

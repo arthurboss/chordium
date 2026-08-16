@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ResultsList from "@/components/ui/ResultsList";
 import FormContainer from "@/components/ui/FormContainer";
+import LoadingState from "@/components/LoadingState";
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
 import type { SearchResult, SearchResultsLayoutProps } from "./SearchResultsLayout.types";
 import { isSlugDerivedName } from "@/utils/url-slug-utils";
@@ -32,25 +33,19 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results = [],
   onResultClick,
   activeArtist,
+  loading = false,
+  loadingMessage,
 }) => {
   const { t } = useTranslation();
   const [sort, setSort] = useState<SortOption>("default");
 
-  if (results.length === 0) {
-    return (
-      <FormContainer>
-        <div className="p-8 text-center text-muted-foreground" data-cy="search-no-chord-sheets-found">
-          {t("searchResults.noResults")}
-        </div>
-      </FormContainer>
-    );
-  }
-
   // The container is the same card as the search bar, so the trigger's own
   // background is swapped to bg-background - otherwise it'd blend into that card
   // the same way a result row would if left at its own default card color.
+  // Disabled while loading: sorting a list that's about to be replaced makes
+  // no sense, and it visibly says so rather than just quietly doing nothing.
   const sortControl = (
-    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)} disabled={loading}>
       <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs [&>span]:text-left">
         <SelectValue />
       </SelectTrigger>
@@ -74,6 +69,28 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       <div className="flex justify-end">{sortControl}</div>
     </div>
   );
+
+  // Rendered in the sections' own place, inside the same card and behind the
+  // same header, so a search in flight doesn't swap the whole layout out for
+  // a differently-sized one and back again a moment later.
+  if (loading) {
+    return (
+      <FormContainer contentClassName="pb-2">
+        {resultsHeader}
+        <LoadingState message={loadingMessage} />
+      </FormContainer>
+    );
+  }
+
+  if (results.length === 0) {
+    return (
+      <FormContainer>
+        <div className="p-8 text-center text-muted-foreground" data-cy="search-no-chord-sheets-found">
+          {t("searchResults.noResults")}
+        </div>
+      </FormContainer>
+    );
+  }
 
   const renderItems = (items: SearchResult[]) => (
     <ResultsList

@@ -23,9 +23,15 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
           // Turned from the state we already hold rather than a group-data
           // variant, which this build does not generate. Nothing here changes
           // size on toggle - the chevron below is the only thing that moves.
-          className="flex flex-1 items-center gap-1.5 rounded-md py-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="flex flex-1 items-center gap-1.5 rounded-md py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <h3 className="flex-1 truncate text-base font-semibold tracking-tight">
+          {/* Same colors as the tabs above: muted while shut, foreground once
+              open - open here plays the part active does there. */}
+          <h3
+            className={`flex-1 truncate text-base font-semibold tracking-tight ${
+              open ? 'text-foreground' : 'text-muted-foreground'
+            }`}
+          >
             {title}
           </h3>
           {/* Fixed width, so a count never nudges anything else over. Caps out
@@ -50,7 +56,7 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
         {action}
       </div>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-        <div className="pt-3">{children}</div>
+        {children}
       </CollapsibleContent>
       {/* Divides this closed heading from the next one. Gone once expanded -
           the content itself fills that role - and skipped on the last section,

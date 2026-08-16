@@ -5,11 +5,13 @@ import type { SearchResultsState } from "../../../types/searchResultsState";
  * Returns simplified state: loading, error, or default
  */
 export const determineUIState = (state: SearchResultsState) => {
-  // Unified loading state - any loading activity shows loading
+  // Unified loading state - any loading activity shows loading. A translation
+  // key rather than English text, since this function has no i18n context of
+  // its own - the view translates it right before display.
   if (state.loading || state.artistSongsLoading) {
     return {
       state: "loading" as const,
-      message: state.artistSongsLoading ? "Loading artist songs..." : undefined
+      messageKey: state.artistSongsLoading ? "searchResults.loadingArtistSongs" : undefined
     };
   }
 

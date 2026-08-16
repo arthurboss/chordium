@@ -22,7 +22,8 @@
     "artists": "Artists",
     "songs": "Songs",
     "lyricsMatches": "Lyrics matches",
-    "results": "Results"
+    "results": "Results",
+    "loadingArtistSongs": "Loading artist songs..."
   },
   "dropZone": {
     "title": "Upload a chord sheet",

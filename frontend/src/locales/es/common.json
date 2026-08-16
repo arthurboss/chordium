@@ -22,7 +22,8 @@
     "artists": "Artistas",
     "songs": "Canciones",
     "lyricsMatches": "Coincidencias en la letra",
-    "results": "Resultados"
+    "results": "Resultados",
+    "loadingArtistSongs": "Cargando canciones del artista..."
   },
   "dropZone": {
     "title": "Importar acordes",
