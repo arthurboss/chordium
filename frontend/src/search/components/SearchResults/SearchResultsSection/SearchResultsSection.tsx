@@ -27,12 +27,12 @@ const SearchResultsSection: React.FC<SearchResultsSectionProps> = ({
             className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
             aria-hidden="true"
           />
-          <h2 className="text-lg font-medium">
+          <h3 className="text-lg font-medium">
             {title}
             {tally && (
               <span className="ml-2 text-sm text-muted-foreground font-normal">{tally}</span>
             )}
-          </h2>
+          </h3>
         </CollapsibleTrigger>
         {action}
       </div>

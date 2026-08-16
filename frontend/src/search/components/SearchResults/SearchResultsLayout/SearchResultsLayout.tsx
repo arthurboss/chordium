@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ResultsList from "@/components/ui/ResultsList";
+import FormContainer from "@/components/ui/FormContainer";
 import SearchResultsSection from "../SearchResultsSection/SearchResultsSection";
 import type { SearchResult, SearchResultsLayoutProps } from "./SearchResultsLayout.types";
 import { isSlugDerivedName } from "@/utils/url-slug-utils";
@@ -37,15 +38,20 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
   if (results.length === 0) {
     return (
-      <div className="p-8 text-center text-muted-foreground" data-cy="search-no-chord-sheets-found">
-        {t("searchResults.noResults")}
-      </div>
+      <FormContainer>
+        <div className="p-8 text-center text-muted-foreground" data-cy="search-no-chord-sheets-found">
+          {t("searchResults.noResults")}
+        </div>
+      </FormContainer>
     );
   }
 
+  // The container is the same card as the search bar, so the trigger's own
+  // background is swapped to bg-background - otherwise it'd blend into that card
+  // the same way a result row would if left at its own default card color.
   const sortControl = (
     <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-      <SelectTrigger className="h-7 w-auto gap-1 bg-card px-2 text-xs [&>span]:text-left">
+      <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs [&>span]:text-left">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -54,6 +60,16 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         <SelectItem value="za">{t("sort.za")}</SelectItem>
       </SelectContent>
     </Select>
+  );
+
+  // Three columns, the outer two the same width, so the title lands in the
+  // true center of the card rather than just the space left of the control.
+  const resultsHeader = (
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 pb-3">
+      <div />
+      <h2 className="text-center text-xl font-semibold">{t("searchResults.results")}</h2>
+      <div className="flex justify-end">{sortControl}</div>
+    </div>
   );
 
   const renderItems = (items: SearchResult[]) => (
@@ -79,16 +95,12 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
         : (firstSong?.type === "song" ? firstSong.artist : "") || activeArtist.displayName;
 
     return (
-      <div className="flex flex-col w-full">
-        <SearchResultsSection
-          title={title}
-          count={results.length}
-          action={sortControl}
-          defaultOpen
-        >
+      <FormContainer>
+        {resultsHeader}
+        <SearchResultsSection title={title} count={results.length} defaultOpen>
           {renderItems(results)}
         </SearchResultsSection>
-      </div>
+      </FormContainer>
     );
   }
 
@@ -124,19 +136,20 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   const shown = sections.filter((section) => section.items.length > 0);
 
   return (
-    <div className="flex flex-col w-full">
-      {shown.map((section, index) => (
-        <SearchResultsSection
-          key={section.key}
-          title={section.title}
-          count={section.items.length}
-          // One sort control for the page, level with the heading it sits beside.
-          action={index === 0 ? sortControl : undefined}
-        >
-          {renderItems(section.items)}
-        </SearchResultsSection>
-      ))}
-    </div>
+    <FormContainer>
+      {resultsHeader}
+      <div className="flex flex-col w-full gap-4">
+        {shown.map((section) => (
+          <SearchResultsSection
+            key={section.key}
+            title={section.title}
+            count={section.items.length}
+          >
+            {renderItems(section.items)}
+          </SearchResultsSection>
+        ))}
+      </div>
+    </FormContainer>
   );
 };
 
