@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import ResultsList from "@/components/ui/ResultsList";
 import FormContainer from "@/components/ui/FormContainer";
@@ -23,6 +24,7 @@ import {
 
 type SortOption = "default" | "az" | "za";
 
+const SECTION_PARAM = "section";
 
 function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
   if (sort === "default") return items;
@@ -49,29 +51,61 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 }) => {
   const { t } = useTranslation();
   const [sort, setSort] = useState<SortOption>("default");
-  // Which section, if any, a reader has selected out of the overview. Set,
-  // the overview gives way to just that section - title, its own filter and
-  // sort, and its results - rather than the other sections merely collapsing
-  // alongside it.
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Which section, if any, a reader has selected out of the overview - seeded
+  // from the URL so that returning here (e.g. the browser's back button, from
+  // a chord sheet reached from within it) lands back on that section rather
+  // than the overview it was picked from. Kept in sync going forward below.
+  const [selectedKey, setSelectedKey] = useState<string | null>(searchParams.get(SECTION_PARAM));
   // Scoped to whichever section is selected - starting over, filter-wise,
   // each time a different one is opened rather than carrying text across.
   const [sectionFilter, setSectionFilter] = useState("");
-  // The single-artist view only ever has one section, but still gets its own
-  // open state rather than being permanently open, so it can still be closed.
-  const [artistSectionOpen, setArtistSectionOpen] = useState(true);
 
   const hasResults = results.length > 0;
 
   function selectSection(key: string) {
     setSelectedKey(key);
     setSectionFilter("");
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set(SECTION_PARAM, key);
+      return next;
+    }, { replace: true });
   }
 
   function backToOverview() {
     setSelectedKey(null);
     setSectionFilter("");
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete(SECTION_PARAM);
+      return next;
+    }, { replace: true });
   }
+
+  // A genuinely new search - results is the same array the reducer holds, so
+  // its identity only changes when a fetch actually completes - leaves
+  // whatever section was selected behind rather than keeping it selected for
+  // results it was never chosen for. Skipped on the render that mounts this
+  // component, so a section restored from the URL above survives it.
+  const skipNextReset = useRef(true);
+  useEffect(() => {
+    if (skipNextReset.current) {
+      skipNextReset.current = false;
+      return;
+    }
+    setSelectedKey(null);
+    setSectionFilter("");
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete(SECTION_PARAM);
+      return next;
+    }, { replace: true });
+    // setSearchParams is not stable across renders in all router versions;
+    // omitted deliberately, since including it would re-run this on every
+    // navigation rather than only when the results themselves change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results]);
 
   // Back and clear now live here rather than on the search bar: both act on
   // results (leave this artist, leave a selected section, clear this search),
@@ -108,27 +142,89 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // needed. On a narrow screen there's no room for three across, so the title
   // takes the left edge and both buttons reorder to the right, together,
   // within an easy thumb's reach - order flips at sm, position never moves.
-  const renderHeader = (backOnClick: (() => void) | undefined, backDisabled: boolean) => (
+  // The title itself becomes whatever's actually showing - a section's own
+  // name, or an artist's - rather than staying "Results" once there's
+  // somewhere more specific to say.
+  const renderHeader = (
+    backOnClick: (() => void) | undefined,
+    backDisabled: boolean,
+    title: string = t("searchResults.results")
+  ) => (
     <div className="flex items-center gap-2 pb-3">
       <div className="order-2 sm:order-1">{renderBackButton(backOnClick, backDisabled)}</div>
-      <h2 className="order-1 sm:order-2 flex-1 text-left text-xl font-semibold sm:text-center">
-        {t("searchResults.results")}
+      <h2 className="order-1 sm:order-2 flex-1 truncate text-left text-xl font-semibold sm:text-center">
+        {title}
       </h2>
       <div className="order-3">{trashButton}</div>
     </div>
+  );
+
+  // Reused everywhere a list needs sorting scoped to whatever's actually on
+  // screen - a selected section, an artist's songs, or (disabled) neither yet.
+  // The offset that would otherwise ring the control from a short distance
+  // away is dropped, so the highlight sits right on the border it's for.
+  const sortControl = (
+    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)} disabled={loading}>
+      <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="default">{t("sort.default")}</SelectItem>
+        <SelectItem value="az">{t("sort.az")}</SelectItem>
+        <SelectItem value="za">{t("sort.za")}</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  // The divider and filter/sort row a selected section or an active artist's
+  // song list both show below their own title - local to whichever list is
+  // actually on screen, and to the one search that already fetched it, so
+  // narrowing it is never a network call.
+  const renderDetailControls = (filterDisabled: boolean) => (
+    <>
+      <div
+        className="h-px bg-linear-to-r from-border/60 from-25% to-transparent"
+        aria-hidden="true"
+      />
+      <div className="flex items-center gap-2 pb-3 pt-2">
+        <Input
+          value={sectionFilter}
+          onChange={(e) => setSectionFilter(e.target.value)}
+          disabled={filterDisabled}
+          placeholder={t("searchResults.filterPlaceholder")}
+          className="h-7 flex-1 bg-background text-xs"
+          {...cyAttr("results-filter-input")}
+        />
+        {sortControl}
+      </div>
+    </>
   );
 
   // Rendered in the sections' own place, inside the same card and behind the
   // same header, so a search in flight - or one that failed, or found
   // nothing - doesn't swap the whole layout out for a differently-sized one
   // and back again a moment later. Back and clear stay reachable throughout.
-  // None of these three have a section (or an artist) to leave, so back stays
-  // disabled unless one's already active - which the outer branches below
-  // never are while loading, erroring, or turning up nothing.
+  //
+  // An artist mid-fetch is the one loading case with somewhere more specific
+  // to preserve: its own title, divider, and (disabled) filter/sort row stay
+  // exactly as they'd look once loaded, and only the results themselves - not
+  // the whole card - give way to the loading state. Selecting an artist is
+  // the only click in this component that ever costs a network round trip,
+  // so it's the one case worth this: nothing above the results needs to
+  // rebuild itself while the songs it's about to show are on their way.
   if (loading) {
+    if (activeArtist) {
+      return (
+        <FormContainer contentClassName="pb-2">
+          {renderHeader(onBackClick, true, activeArtist.displayName)}
+          {renderDetailControls(true)}
+          <LoadingState message={loadingMessage} />
+        </FormContainer>
+      );
+    }
     return (
       <FormContainer contentClassName="pb-2">
-        {renderHeader(onBackClick, !!(loading || !activeArtist))}
+        {renderHeader(onBackClick, true)}
         <LoadingState message={loadingMessage} />
       </FormContainer>
     );
@@ -163,24 +259,9 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
     />
   );
 
-  // Reused by both the drilled-into section below and, one day, anywhere else
-  // that needs a sort control scoped to whatever list is actually on screen.
-  // Disabled while loading - nothing to sort while a different list is about
-  // to replace this one.
-  const sortControl = (
-    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)} disabled={loading}>
-      <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs [&>span]:text-left">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="default">{t("sort.default")}</SelectItem>
-        <SelectItem value="az">{t("sort.az")}</SelectItem>
-        <SelectItem value="za">{t("sort.za")}</SelectItem>
-      </SelectContent>
-    </Select>
-  );
-
-  // One artist's own songs are a single list under that artist's name.
+  // One artist's own songs are a single list under that artist's name - the
+  // last of three steps (overview, a section, one artist's songs), so it
+  // carries the same filter/sort row as the step before it.
   if (activeArtist) {
     // Prefer activeArtist.displayName unless it's an untouched slug guess
     // (e.g. "Ac Dc" for path "ac-dc") - in that case the scraped song's real
@@ -195,16 +276,9 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
 
     return (
       <FormContainer contentClassName="pb-2">
-        {renderHeader(onBackClick, !!loading)}
-        <SearchResultsSection
-          title={title}
-          count={results.length}
-          hideDivider
-          open={artistSectionOpen}
-          onOpenChange={setArtistSectionOpen}
-        >
-          {artistSectionOpen ? renderItems(results) : null}
-        </SearchResultsSection>
+        {renderHeader(onBackClick, false, title)}
+        {renderDetailControls(false)}
+        {renderItems(filterSearchHitsByText(results, sectionFilter))}
       </FormContainer>
     );
   }
@@ -249,31 +323,13 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       {/* activeArtist is always null down here - the branch above already
           returned if it wasn't - so back's only job left is leaving a
           selected section, and it's disabled without one. */}
-      {renderHeader(selectedSection ? backToOverview : onBackClick, !selectedSection)}
+      {renderHeader(selectedSection ? backToOverview : onBackClick, !selectedSection, selectedSection?.title)}
       {selectedSection ? (
         <div className="flex w-full flex-col">
-          <h3 className="text-base font-semibold tracking-tight text-foreground">
-            {selectedSection.title}
-          </h3>
-          {/* Marks off the title from the filter/sort row below it, the same
-              rule as between two sections in the overview - just relocated,
-              since this section no longer has any siblings to sit beside. */}
-          <div
-            className="mt-2 h-px bg-linear-to-r from-border/60 from-25% to-transparent"
-            aria-hidden="true"
-          />
-          {/* Local to this section and to the one search already fetched it
-              from - no network call, just narrowing what's already in memory. */}
-          <div className="flex items-center gap-2 pb-3 pt-2">
-            <Input
-              value={sectionFilter}
-              onChange={(e) => setSectionFilter(e.target.value)}
-              placeholder={t("searchResults.filterPlaceholder")}
-              className="h-7 flex-1 bg-background text-xs"
-              {...cyAttr("results-filter-input")}
-            />
-            {sortControl}
-          </div>
+          {renderDetailControls(false)}
+          {/* Only the selected section's rows are ever mounted - each list is
+              already in memory from the one search request, but there's no
+              reason to pay to render three of them when at most one shows. */}
           {renderItems(filterSearchHitsByText(selectedSection.items, sectionFilter))}
         </div>
       ) : (

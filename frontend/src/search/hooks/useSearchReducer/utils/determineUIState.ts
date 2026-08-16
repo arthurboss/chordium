@@ -7,11 +7,15 @@ import type { SearchResultsState } from "../../../types/searchResultsState";
 export const determineUIState = (state: SearchResultsState) => {
   // Unified loading state - any loading activity shows loading. A translation
   // key rather than English text, since this function has no i18n context of
-  // its own - the view translates it right before display.
+  // its own - the view translates it right before display. activeArtist is
+  // carried over here too - it's already set by the time its songs start
+  // loading - so the view can keep showing that artist's own title and
+  // controls instead of a context-free loading screen while they arrive.
   if (state.loading || state.artistSongsLoading) {
     return {
       state: "loading" as const,
-      messageKey: state.artistSongsLoading ? "searchResults.loadingArtistSongs" : undefined
+      messageKey: state.artistSongsLoading ? "searchResults.loadingArtistSongs" : undefined,
+      activeArtist: state.activeArtist
     };
   }
 

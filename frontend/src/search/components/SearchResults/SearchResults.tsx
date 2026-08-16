@@ -62,7 +62,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           loadingMessage={stateData.messageKey ? t(stateData.messageKey) : undefined}
           results={results}
           onResultClick={onResultClick}
-          activeArtist={null}
+          activeArtist={stateData.activeArtist ?? null}
           {...backAndClearProps}
         />
       );
