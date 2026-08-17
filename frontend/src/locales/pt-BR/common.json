@@ -245,6 +245,7 @@
     "start": "Pesquisar por voz",
     "stop": "Parar de ouvir",
     "working": "Interpretando o que você disse",
-    "setUp": "Ativar a pesquisa por voz"
+    "setUp": "Ativar a pesquisa por voz",
+    "allowMicrophone": "Permitir o microfone"
   }
 }

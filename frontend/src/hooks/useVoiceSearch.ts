@@ -6,6 +6,11 @@ import {
   requiresDownloadConsent,
   resolveRecognizerKind,
 } from '@/services/speech/get-recognizer';
+import {
+  forgetMicrophoneGrant,
+  isMicrophoneGranted,
+  requestMicrophone,
+} from '@/services/speech/microphone-permission';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
 import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/speech/types';
 
@@ -13,11 +18,18 @@ import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/
  * Where a spoken search has got to:
  * - "unsupported": this browser cannot hear one at all.
  * - "needs-setup": it could, once the fallback model has been downloaded.
+ * - "needs-permission": it could, once the reader has allowed the microphone.
  * - "idle": ready, waiting to be asked.
  * - "listening": the microphone is open.
  * - "working": listening has stopped and the words are being made out.
  */
-export type VoiceSearchState = 'unsupported' | 'needs-setup' | 'idle' | 'listening' | 'working';
+export type VoiceSearchState =
+  | 'unsupported'
+  | 'needs-setup'
+  | 'needs-permission'
+  | 'idle'
+  | 'listening'
+  | 'working';
 
 interface UseVoiceSearchOptions {
   /** Called with the transcript, once there is one worth acting on. */
@@ -39,6 +51,9 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   const [state, setState] = useState<VoiceSearchState>('unsupported');
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<RecognitionSession | null>(null);
+  // Guards against a second press asking for the microphone while the first prompt is
+  // still up, which the state cannot express without misdescribing itself.
+  const requestingRef = useRef(false);
 
   // Kept in a ref so a transcript arriving late calls the current handler rather than
   // the one that happened to be in scope when listening started.
@@ -52,7 +67,18 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       setState('unsupported');
       return;
     }
-    setState((await requiresDownloadConsent()) ? 'needs-setup' : 'idle');
+    if (await requiresDownloadConsent()) {
+      setState('needs-setup');
+      return;
+    }
+    // Only the browser's own recogniser needs asking ahead of the press. The model
+    // opens the microphone itself and waits for the grant before it records, so it
+    // has nothing to race.
+    if (resolveRecognizerKind() === 'native' && !(await isMicrophoneGranted())) {
+      setState('needs-permission');
+      return;
+    }
+    setState('idle');
   }, []);
 
   useEffect(() => {
@@ -86,6 +112,29 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       openVoiceSetup();
       return;
     }
+
+    // Asking is its own press, because it is the one thing here that has to be waited
+    // for. A recognition started in this press would run while the prompt is still up
+    // and hear nothing, which is the whole bug this avoids. The press after this one
+    // starts listening with the microphone already open.
+    if (state === 'needs-permission') {
+      // The state is left alone while the prompt is up: "working" would say the words
+      // are being made out, which is not what is happening. A second press would only
+      // ask twice, so it is dropped instead.
+      if (requestingRef.current) return;
+      requestingRef.current = true;
+      void requestMicrophone()
+        .then(() => setState('idle'))
+        .catch((cause: unknown) => {
+          setError('microphone');
+          console.error('The microphone was not allowed:', cause);
+        })
+        .finally(() => {
+          requestingRef.current = false;
+        });
+      return;
+    }
+
     if (state !== 'idle') return;
 
     let retryCount = 0;
@@ -118,8 +167,13 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
         })
         .catch((cause: unknown) => {
           sessionRef.current = null;
-          setState('idle');
-          setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
+          const refused = cause instanceof MicrophoneUnavailableError;
+          // A grant withdrawn in browser settings after the fact leaves a remembered
+          // one that is no longer true, so it is dropped and asked for again rather
+          // than kept and retried against a microphone that will keep refusing.
+          if (refused) forgetMicrophoneGrant();
+          setState(refused ? 'needs-permission' : 'idle');
+          setError(refused ? 'microphone' : 'failed');
           console.error('Voice search failed:', cause);
         });
     };

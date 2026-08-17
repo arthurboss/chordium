@@ -245,6 +245,7 @@
     "start": "Search by voice",
     "stop": "Stop listening",
     "working": "Working out what you said",
-    "setUp": "Set up voice search"
+    "setUp": "Set up voice search",
+    "allowMicrophone": "Allow the microphone"
   }
 }

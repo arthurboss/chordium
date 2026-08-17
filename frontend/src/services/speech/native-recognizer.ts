@@ -1,4 +1,9 @@
-import { RecognizerUnavailableError, type RecognitionSession, type Recognizer } from './types';
+import {
+  MicrophoneUnavailableError,
+  RecognizerUnavailableError,
+  type RecognitionSession,
+  type Recognizer,
+} from './types';
 
 /**
  * The browser's own SpeechRecognition, preferred wherever it exposes the API
@@ -98,6 +103,10 @@ export function createNativeRecognizer(): Recognizer {
         recognition.onerror = (event) => {
           const error = event.error ?? 'unknown';
           if (error === 'no-speech' || error === 'aborted') resolve('');
+          // Told apart from any other failure so that the reader is asked for the
+          // microphone again rather than shown a fault they cannot act on.
+          else if (error === 'not-allowed' || error === 'service-not-allowed')
+            reject(new MicrophoneUnavailableError(`The microphone was refused: ${error}`));
           else reject(new RecognizerUnavailableError(`Speech recognition failed: ${error}`));
         };
         // Settled on end rather than on the first result, so a recognition that

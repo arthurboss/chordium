@@ -23,9 +23,11 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
   const listening = state === "listening";
   const working = state === "working";
   const needsSetup = state === "needs-setup";
+  const needsPermission = state === "needs-permission";
 
   const label = (() => {
     if (needsSetup) return t("voiceSearch.setUp");
+    if (needsPermission) return t("voiceSearch.allowMicrophone");
     if (listening) return t("voiceSearch.stop");
     if (working) return t("voiceSearch.working");
     return t("voiceSearch.start");
@@ -39,7 +41,9 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
       className={cn(
         "relative h-10 w-10 rounded-full",
         listening && "border-destructive text-destructive",
-        needsSetup && "border-dashed text-muted-foreground"
+        // Dashed for both, because both mean the press opens a step of its own rather
+        // than the microphone.
+        (needsSetup || needsPermission) && "border-dashed text-muted-foreground"
       )}
       // Pressed again to finish speaking, which is how a reader says they are done
       // rather than waiting out the cap.

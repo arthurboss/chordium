@@ -245,6 +245,7 @@
     "start": "Per Sprache suchen",
     "stop": "Aufnahme beenden",
     "working": "Das Gesagte wird ausgewertet",
-    "setUp": "Sprachsuche einrichten"
+    "setUp": "Sprachsuche einrichten",
+    "allowMicrophone": "Mikrofon erlauben"
   }
 }
