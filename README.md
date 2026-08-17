@@ -4,41 +4,32 @@
 
 <h1 align="center">Chordium</h1>
 
-A modern, minimalist chord viewer app for beginner guitar players and hobbyists.
+<p align="center">
+  <a href="https://chordium.vercel.app"><img src="https://img.shields.io/badge/demo-live-brightgreen" alt="Live Demo"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
 
-Chordium focuses on providing a distraction-free experience for learning and practicing guitar chords.
+The distraction-free way to find, read, and play guitar chords, right in your browser.
 
 ## 🎬 Demo
 
 ![Chordium Demo](./assets/chordium-demo.gif)
 
-_Experience Chordium's clean interface, smart search, and intuitive chord display in action._
-
 🎵 **[Try it live](https://chordium.vercel.app)**
 
 ## 🎯 Features
 
-Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter:
-
-- **Install-less App (PWA)** - Works offline and installs like a native app
-- **Clean Interface** - Distraction-free chord viewing experience
-- **Smart Search** - Find songs and artists with intelligent caching
-- **Transpose & Capo** - Shift chords to any key or capo position on the fly
-- **Auto-scrolling** - Practice at your own pace with speed controls
-- **Dark Mode** - Light, dark, and system theme options
-- **Mobile-friendly** - Learn on-the-go with responsive design
+- **Smart Search** - Find songs and artists by text or voice, with intelligent caching
+- **Song Lyrics with Translation** - Read lyrics translated into your language, instantly
 - **File Upload** - Import your own chord sheets with metadata extraction
-- **Song Lyrics with Translation** - Read lyrics in your language, translated on-device with no server or API key
+- **Works Offline** - Install as a native app, fully functional without internet
+- **Transpose & Capo** - Shift chords to any key or capo position on the fly
 - **Fullscreen Mode** - Distraction-free fullscreen reading with translated lyrics side-by-side
-- **Language Support** - English, Spanish, Portuguese, and German interface + 100+ language translations for lyrics
+- **Auto-scrolling** - Practice at your own pace with speed controls
 
 ## 🎸 Jam Sessions
 
-Share a chord sheet with other players on the same WiFi network, fully **offline**.
-
-The host opens a chord sheet and taps **Share** to generate a QR code or shareable link. Anyone who scans the code or uses the link loads the same chord sheet on their device. 
-
-All players start with the same song. Real-time sync for scroll position, capo, and transpose is coming soon.
+Scan a QR code or tap a link to instantly share the exact chord sheet you're viewing — no account, no server round-trip, ready to play the moment it opens.
 
 ## 💻 Tech Stack
 
@@ -62,6 +53,7 @@ All players start with the same song. Real-time sync for scroll position, capo, 
 - **npm Workspaces** - Monorepo dependency management
 - **@chordium/types** - Shared TypeScript types published to npm
 - **Vitest** + **Jest** + **Cypress** - Comprehensive testing
+- **OpenAI Whisper** - On-device voice search ([original](https://github.com/openai/whisper), [ONNX model](https://huggingface.co/onnx-community/whisper-base))
 
 ## 📚 Documentation
 
@@ -86,13 +78,13 @@ All players start with the same song. Real-time sync for scroll position, capo, 
 ## 🚀 Quick Start
 
 ```sh
-# Clone and install
 git clone https://github.com/arthurboss/chordium.git
 cd chordium
 npm install
+npm run dev
 ```
 
-See [Getting Started](./docs/getting-started.md) for development setup and commands.
+See [Getting Started](./docs/getting-started.md) for full setup and commands.
 
 ## 📝 License
 
