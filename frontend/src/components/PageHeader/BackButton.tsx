@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cyAttr } from "@/utils/test-utils";
 
 interface BackButtonProps {
   onBack: () => void;
@@ -20,6 +21,7 @@ const BackButton = ({ onBack }: BackButtonProps) => {
       className="flex-shrink-0 h-10 w-10 rounded-full"
       tabIndex={0}
       aria-label={t("pageHeader.backAriaLabel")}
+      {...cyAttr("chord-sheet-back-button")}
     >
       <ArrowLeft className="h-4 w-4" />
     </Button>

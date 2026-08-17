@@ -62,6 +62,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           loadingMessage={stateData.messageKey ? t(stateData.messageKey) : undefined}
           results={results}
           onResultClick={onResultClick}
+          query={query}
           activeArtist={stateData.activeArtist ?? null}
           {...backAndClearProps}
         />
@@ -73,6 +74,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           error={stateData.error || (stateData.errorFallbackKey ? t(stateData.errorFallbackKey) : '')}
           results={results}
           onResultClick={onResultClick}
+          query={query}
           activeArtist={activeArtist}
           {...backAndClearProps}
         />
@@ -88,6 +90,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             results={[]}
             emptyMessage={t(stateData.emptyMessageKey, { artist: stateData.emptyMessageArtist })}
             onResultClick={onResultClick}
+            query={query}
             activeArtist={stateData.activeArtist}
             {...backAndClearProps}
           />
@@ -97,6 +100,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <SearchResultsLayout
           results={results}
           onResultClick={onResultClick}
+          query={query}
           activeArtist={stateData.activeArtist}
           {...backAndClearProps}
         />

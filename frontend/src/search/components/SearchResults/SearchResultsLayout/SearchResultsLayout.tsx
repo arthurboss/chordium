@@ -25,6 +25,14 @@ import {
 type SortOption = "default" | "az" | "za";
 
 const SECTION_PARAM = "section";
+// A synchronous, side-channel fallback for restoring the selected section:
+// written the moment one is picked, read (and consumed) once on mount. Never
+// touched from a reactive effect - only from selectSection/backToOverview
+// below, each the only navigation happening at the moment it runs - since an
+// artist's own page is reached by its own path with no room for a section
+// param, and this is what recovers it on return without racing that page's
+// own navigate() call the way writing to the URL here has.
+const SECTION_RETURN_KEY = "chordium_search_return_section";
 
 function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
   if (sort === "default") return items;
@@ -40,6 +48,7 @@ function sortResults(items: SearchResult[], sort: SortOption): SearchResult[] {
 const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   results = [],
   onResultClick,
+  query,
   activeArtist,
   loading = false,
   loadingMessage,
@@ -55,8 +64,23 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // Which section, if any, a reader has selected out of the overview - seeded
   // from the URL so that returning here (e.g. the browser's back button, from
   // a chord sheet reached from within it) lands back on that section rather
-  // than the overview it was picked from. Kept in sync going forward below.
-  const [selectedKey, setSelectedKey] = useState<string | null>(searchParams.get(SECTION_PARAM));
+  // than the overview it was picked from. Falls back to the remembered
+  // section when the URL doesn't have one - e.g. coming back from an
+  // artist's own page, whose URL has no room for this param. Left in place
+  // rather than consumed here: reaching a chord sheet and back remounts this
+  // component while still within the artist flow, and clearing the memory on
+  // that read - before it was actually needed - left nothing for the mount
+  // that follows leaving the artist for good. It's cleared once a genuine
+  // reset happens instead, below.
+  const [selectedKey, setSelectedKey] = useState<string | null>(() => {
+    const fromUrl = searchParams.get(SECTION_PARAM);
+    if (fromUrl) return fromUrl;
+    try {
+      return sessionStorage.getItem(SECTION_RETURN_KEY);
+    } catch {
+      return null;
+    }
+  });
   // Scoped to whichever section is selected - starting over, filter-wise,
   // each time a different one is opened rather than carrying text across.
   const [sectionFilter, setSectionFilter] = useState("");
@@ -71,6 +95,7 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       next.set(SECTION_PARAM, key);
       return next;
     }, { replace: true });
+    try { sessionStorage.setItem(SECTION_RETURN_KEY, key); } catch {}
   }
 
   function backToOverview() {
@@ -81,31 +106,60 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
       next.delete(SECTION_PARAM);
       return next;
     }, { replace: true });
+    try { sessionStorage.removeItem(SECTION_RETURN_KEY); } catch {}
   }
 
-  // A genuinely new search - results is the same array the reducer holds, so
-  // its identity only changes when a fetch actually completes - leaves
-  // whatever section was selected behind rather than keeping it selected for
-  // results it was never chosen for. Skipped on the render that mounts this
-  // component, so a section restored from the URL above survives it.
-  const skipNextReset = useRef(true);
+  // The only way to reach one artist's own songs is by first selecting them
+  // out of the Artists section - there's nowhere else in this view a single
+  // artist's card is ever shown - so leaving that artist goes back to the
+  // Artists section specifically, not whatever was selected before. Tracks
+  // the artist's own path rather than the boolean of whether one is active,
+  // so switching between two different artists (were that ever reachable)
+  // wouldn't be mistaken for staying put. Compares against a ref rather than
+  // running on every render, since activeArtist re-fetching its own songs
+  // (loading -> loaded) touches this component's props without the artist
+  // itself changing.
+  //
+  // Deliberately never touches the URL itself here. Entering or leaving an
+  // artist's own page fires this same state change at the very same moment
+  // as that page's own navigate() call, and the two have repeatedly raced -
+  // this effect's own replace sometimes winning and discarding the search
+  // query entirely (down to a bare "?section=artists", query and all). Local
+  // state alone is enough: this component doesn't unmount across that
+  // transition, so it's still there to read once back. The URL's section
+  // param is instead only ever written by selectSection/backToOverview
+  // below, each the sole navigation happening at the moment it runs.
+  const prevArtistPath = useRef(activeArtist?.path ?? null);
   useEffect(() => {
-    if (skipNextReset.current) {
-      skipNextReset.current = false;
-      return;
+    const prevPath = prevArtistPath.current;
+    const currentPath = activeArtist?.path ?? null;
+    prevArtistPath.current = currentPath;
+    if (prevPath === currentPath) return;
+
+    setSectionFilter("");
+    const leavingArtist = !!prevPath && !currentPath;
+    if (leavingArtist) {
+      setSelectedKey("artists");
+      try { sessionStorage.setItem(SECTION_RETURN_KEY, "artists"); } catch {}
     }
+  }, [activeArtist]);
+
+  // A genuinely new search clears back to the overview, same as leaving any
+  // other selected section does - whatever was selected or typed belonged to
+  // a list that's no longer the one on screen. Driven by the query itself
+  // rather than by the results arriving, since leaving an artist also
+  // changes results (back to this search's own hits) without it being a new
+  // search - that overlap once caused this to fire a second, spurious time
+  // right after the effect above had just restored the Artists section,
+  // wiping it out again the moment the search's hits actually arrived.
+  const prevQuery = useRef(query);
+  useEffect(() => {
+    if (prevQuery.current === query) return;
+    prevQuery.current = query;
     setSelectedKey(null);
     setSectionFilter("");
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete(SECTION_PARAM);
-      return next;
-    }, { replace: true });
-    // setSearchParams is not stable across renders in all router versions;
-    // omitted deliberately, since including it would re-run this on every
-    // navigation rather than only when the results themselves change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [results]);
+    try { sessionStorage.removeItem(SECTION_RETURN_KEY); } catch {}
+  }, [query]);
 
   // Back and clear now live here rather than on the search bar: both act on
   // results (leave this artist, leave a selected section, clear this search),

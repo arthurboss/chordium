@@ -6,6 +6,13 @@ export type SearchResult = SearchHit;
 export interface SearchResultsLayoutProps {
   results: SearchResult[];
   onResultClick: (result: SearchResult) => void;
+  /**
+   * The search query these results belong to. Used only to notice when a
+   * genuinely new search has landed (as opposed to results merely settling
+   * mid-transition, e.g. while leaving an artist's page), so a previously
+   * selected section can be cleared back to the overview.
+   */
+  query?: string;
   /** Set while one artist's song list is open, rather than a search's results. */
   activeArtist?: Artist | null;
   /**
