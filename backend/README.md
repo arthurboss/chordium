@@ -37,10 +37,14 @@ npm test
 
 ## API Endpoints
 
-- `GET /api/artists?artist=<name>` - Search for artists matching a name
-- `GET /api/cifraclub-search?artist=<name>&song=<title>` - Search songs (artist and/or song parameters)
+- `GET /api/search?q=<query>` - Unified search: matches artists and songs (by title or lyrics) in one request, returning a single tagged list
 - `GET /api/artist-songs?artistPath=<path>` - Get all songs by a specific artist
-- `GET /api/cifraclub-song?url=<artist/song>` - Get chord sheet + metadata in one request
+- `GET /api/cifraclub-song?url=<artist/song>` - Get chord sheet + metadata in one request (prefers the simplified arrangement)
+- `GET /api/cifraclub-song-full?url=<artist/song>` - Get the full (tabbed) arrangement
+- `GET /api/cifraclub-song-metadata?url=<artist/song>` - Metadata only (local dev backend only, no Vercel equivalent; not called by the frontend)
+- `GET /api/cifraclub-chord-sheet?url=<artist/song>` - Chord sheet content only (local dev backend only, no Vercel equivalent; not called by the frontend)
+
+See [Search & Artist-Songs Requests](../docs/dev-guides/search-types.md) for request/response shapes and caching.
 
 ## Environment
 

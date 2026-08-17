@@ -1,61 +1,44 @@
-# 🎵 Search Like a Pro!
+# Search Guide
 
-## ⚡ What You Can Expect
+Behavior reference for the search UI. For request/response shapes, see [Search & Artist-Songs Requests](./dev-guides/search-types.md).
 
-✨ **Instant Filtering**: Type in the artist or song fields to instantly filter your current results (no waiting around!)
+## Results
 
-🔍 **Smart Searching**: Press Enter or click Search to find fresh results from the internet
+A query is matched against artists and songs at once. The response is split into up to three sections, each shown only if it has matches:
 
-🎯 **Precise Filtering**: After searching, type in the song field to narrow down your results without starting over
+- **Artists**: acts whose name matches.
+- **Songs**: songs whose title matches, most relevant first.
+- **Lyrics matches**: songs that match by lyrics rather than title, kept separate so a phrase common in lyrics can't crowd out a title match.
 
-🔄 **Real-time Updates**: The results you see always match what you've typed in the search fields
+## Drilling Into a Section
 
-⚡ **Lightning Fast**: The page stays fast and responsive while you type - no unnecessary internet requests
+Selecting a section (e.g. "Artists") replaces the overview with that section's full list, its own filter box, and a sort control (Relevance / A to Z / Z to A). Only one view renders at a time: the overview, or the drilled-into section.
 
----
+## Opening an Artist
 
-## 🎭 Search Types
+Reachable only from the Artists section. Opens the artist's own page (`/:artist`) with their full song list, same filter and sort controls. The Artists section's filter text does not carry over.
 
-### 🎤 Artist Search
+## Filtering
 
-Type just an artist name (like "Adele") to find all their songs
+Scoped to whatever list is currently on screen (a drilled section, or an artist's songs), matched against title and, for songs, artist. Client-side only: no request is made while typing. Clearing it restores the full list.
 
-### 🎵 Song Search
+## Back Navigation
 
-Type just a song name (like "Hello") to find that song by any artist
+Retraces exactly one step:
 
-### 🎼 Artist-Song Search
+- Artist's own songs -> the Artists section (the only place it could have been opened from), not the overview.
+- Drilled-into section -> the overview.
+- Overview -> wherever search was entered from.
 
-Type both artist and song (like "Adele Hello") to find a specific song
+A chord sheet's own back button returns to the artist's song list with the filter cleared; **Back** from there returns to the Artists section.
 
-> 💡 **Pro Tip**: The search automatically knows what type you want based on which fields you fill!
+## Clear
 
----
+Resets the query, all results, and the URL.
 
-## 🎛️ How Filtering Works
+## URL
 
-### After an Artist Search 🎤
-
-Type in the song field to filter through that artist's songs
-
-### After a Song Search 🎵
-
-Type in the artist field to filter through artists who recorded that song
-
-### After an Artist-Song Search 🎼
-
-Type in either field to refine your search within the current results
-
-> 🧹 **Clear Button**: Clicking the Clear button or clearing both fields will remove all results from the page, giving you a fresh start!
-
----
-
-## 🌐 URL Behavior
-
-🔗 **Smart URLs**: The web address updates when you submit a search
-
-🧹 **Clean Slate**: When you clear the search fields (or use the Clear button), all results are removed from the page and the web address clears too
-
-📌 **Bookmark Friendly**: Your search stays saved in the web address so you can bookmark or share it
-
-⚡ **Performance First**: The web address only changes when you submit a search, not while you're typing
+- `?q=<query>` reflects the submitted query.
+- `&section=<key>` reflects a drilled-into section; added and removed client-side, no new request.
+- A new search resets any drilled-into section back to the overview.
+- The URL changes only on submit, or when drilling in/out of a section: never while typing or filtering.

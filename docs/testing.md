@@ -12,25 +12,24 @@ npm run test:fe
 # Run only backend tests
 npm run test:be
 
-# Run e2e tests
-cd frontend && npm run test:e2e
+# Run e2e tests (from the repo root)
+npm run test:e2e
 ```
 
 ## Testing Frameworks
 
 - **Vitest** - Frontend unit testing
 - **Jest** - Backend unit testing
-- **Cypress** - End-to-end testing
+- **Cypress** (in `packages/e2e-tests/`) - End-to-end testing
 
 ## Important Notes
 
-- **Song Search Tests**: The `cypress/e2e/search/song-search.cy.ts` tests are excluded from GitHub Actions because they use real web scraping from external sites. These should only be run locally to avoid unnecessary load on external services.
-- **Cache Tests**: Cache-specific e2e tests are run separately in CI to isolate their concerns.
-- **GitHub Actions**: Only non-scraping, non-cache tests run automatically on GitHub to keep CI fast and avoid external dependencies.
+- **e2e tests aren't run automatically in CI** - none of the active workflows in `.github/workflows/` invoke Cypress; run `npm run test:e2e` locally against a running dev server (see [`packages/e2e-tests/README.md`](../packages/e2e-tests/README.md)).
+- **Real-network specs**: `enhanced-song-selection.cy.ts` and part of `browser-navigation.cy.ts` make real requests against CifraClub rather than mocking them - run those locally only, to avoid unnecessary scraping load. Prefer `cy.intercept()` (see `search/artist-section-navigation.cy.ts`) for anything new.
+- Cache correctness is covered by unit tests against the real (fake-IndexedDB-backed) storage services, not a dedicated e2e suite - see [Cache E2E Testing](./cache-e2e-testing.md) for why, and where.
 
 ## Test Organization
 
 For detailed information about test organization and structure, see:
-- [Backend Tests README](../backend/tests/README.md)
-- [Frontend Test Organization](./test-organization.md)
 - [Cache E2E Testing](./cache-e2e-testing.md)
+- [Project Structure](./project-structure.md)
