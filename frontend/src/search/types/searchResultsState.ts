@@ -1,4 +1,4 @@
-import type { Artist, Song } from '@chordium/types';
+import type { Artist, SearchHit, Song } from '@chordium/types';
 
 /**
  * State interface for search results reducer
@@ -11,8 +11,8 @@ export interface SearchResultsState {
   artistSongsError: string | null;
   activeArtist: Artist | null;
   artistSongs: Song[] | null;
-  artists: Artist[];
-  songs: Song[];
+  /** Artists and songs in one list, in the order the source ranked them. */
+  hits: SearchHit[];
   filteredArtistSongs: Song[];
   searchFetching: boolean;
   artistSongsFetching: boolean;

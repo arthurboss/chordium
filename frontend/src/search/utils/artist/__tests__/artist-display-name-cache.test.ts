@@ -21,12 +21,13 @@ describe("artist-display-name-cache", () => {
   describe("getStoredArtistDisplayName", () => {
     it("returns the cached displayName when present", async () => {
       mockGet.mockResolvedValue({
-        searchKey: "acdc||artistsong",
+        searchKey: "acdc|artist-songs",
         results: [],
         search: {
-          query: { artist: "ac-dc", song: "", displayName: "AC/DC" },
-          searchType: "artist-song",
-          dataSource: "neon",
+          query: "ac-dc",
+          kind: "artist-songs",
+          displayName: "AC/DC",
+          dataSource: "cifraclub",
         },
         storage: { timestamp: 0, version: 1, expiresAt: 0 },
       } as any);
@@ -46,12 +47,12 @@ describe("artist-display-name-cache", () => {
 
     it("returns null when the cache entry has no displayName", async () => {
       mockGet.mockResolvedValue({
-        searchKey: "oasis||artistsong",
+        searchKey: "oasis|artist-songs",
         results: [],
         search: {
-          query: { artist: "oasis", song: "" },
-          searchType: "artist-song",
-          dataSource: "neon",
+          query: "oasis",
+          kind: "artist-songs",
+          dataSource: "cifraclub",
         },
         storage: { timestamp: 0, version: 1, expiresAt: 0 },
       } as any);
@@ -80,9 +81,10 @@ describe("artist-display-name-cache", () => {
         searchKey: expect.any(String),
         results: [],
         search: {
-          query: { artist: "florianopolis-house-of-prayer", song: "", displayName: "Florianópolis House Of Prayer (fhop music)" },
-          searchType: "artist-song",
-          dataSource: "neon",
+          query: "florianopolis-house-of-prayer",
+          kind: "artist-songs",
+          displayName: "Florianópolis House Of Prayer (fhop music)",
+          dataSource: "cifraclub",
         },
       });
     });
@@ -90,12 +92,12 @@ describe("artist-display-name-cache", () => {
     it("preserves already-cached songs when updating just the displayName", async () => {
       const existingSongs = [{ title: "Sublime", path: "florianopolis-house-of-prayer/sublime", artist: "Florianopolis House Of Prayer" }];
       mockGet.mockResolvedValue({
-        searchKey: "florianopolishouseofprayer||artistsong",
+        searchKey: "florianopolishouseofprayer|artist-songs",
         results: existingSongs,
         search: {
-          query: { artist: "florianopolis-house-of-prayer", song: "" },
-          searchType: "artist-song",
-          dataSource: "neon",
+          query: "florianopolis-house-of-prayer",
+          kind: "artist-songs",
+          dataSource: "cifraclub",
         },
         storage: { timestamp: 0, version: 1, expiresAt: 0 },
       } as any);
@@ -106,9 +108,10 @@ describe("artist-display-name-cache", () => {
         searchKey: expect.any(String),
         results: existingSongs,
         search: {
-          query: { artist: "florianopolis-house-of-prayer", song: "", displayName: "Florianópolis House Of Prayer (fhop music)" },
-          searchType: "artist-song",
-          dataSource: "neon",
+          query: "florianopolis-house-of-prayer",
+          kind: "artist-songs",
+          displayName: "Florianópolis House Of Prayer (fhop music)",
+          dataSource: "cifraclub",
         },
       });
     });

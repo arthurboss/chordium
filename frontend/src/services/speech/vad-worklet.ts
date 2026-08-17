@@ -1,6 +1,27 @@
 /// <reference lib="webworker" />
 
 /**
+ * The AudioWorklet globals.
+ *
+ * TypeScript ships no lib for these: a worklet runs in its own scope, separate
+ * from the window and from a worker, and they exist nowhere else. Declared here
+ * rather than pulled in as a dependency, since this is the only file that runs
+ * in that scope.
+ */
+declare abstract class AudioWorkletProcessor {
+  /** Channel back to the AudioWorkletNode on the main thread. */
+  readonly port: MessagePort;
+}
+
+declare function registerProcessor(
+  name: string,
+  processor: new () => AudioWorkletProcessor
+): void;
+
+/** Sample rate of the audio context the worklet was created in. */
+declare const sampleRate: number;
+
+/**
  * AudioWorklet for energy-based voice activity detection.
  *
  * Continuously analyzes audio energy, tracks an adaptive noise floor,

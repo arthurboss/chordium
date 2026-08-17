@@ -11,10 +11,9 @@ export const initialSearchState: SearchResultsState = {
   artistSongsError: null,
   activeArtist: null,
   artistSongs: null,
-  artists: [],
-  songs: [],
+  hits: [],
   filteredArtistSongs: [],
-  
+
   // API fetching states
   searchFetching: false,
   artistSongsFetching: false,

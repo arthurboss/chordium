@@ -2,20 +2,17 @@ import { useEffect, useRef } from "react";
 import { fromSlug } from "@/utils/url-slug-utils";
 import { ARTIST_DISPLAY_NAME_KEY } from "@/search/utils/navigation/navigateToArtist";
 import { getStoredArtistDisplayName } from "@/search/utils/artist/artist-display-name-cache";
+import { readQueryFromUrl, readStoredSearch } from "./storedSearch";
 import type { Artist } from "@chordium/types";
 
 interface InitSearchStateOptions {
   location: { search: string; pathname: string };
   isInitialized: React.MutableRefObject<boolean>;
-  setArtistInput: (artist: string) => void;
-  setSongInput: (song: string) => void;
-  setPrevArtistInput: (artist: string) => void;
-  setPrevSongInput: (song: string) => void;
-  setSubmittedArtist: (artist: string) => void;
-  setSubmittedSong: (song: string) => void;
-  setOriginalSearchArtist: (artist: string | null) => void;
-  setOriginalSearchSong: (song: string | null) => void;
-  updateSearchStateWithOriginal: (state: { artist: string; song: string; results: unknown[] }) => void;
+  isClearing: boolean;
+  activeArtist: Artist | null;
+  setInput: (value: string) => void;
+  setSubmittedQuery: (value: string) => void;
+  setOriginalQuery: (value: string) => void;
   setHasSearched: (val: boolean) => void;
   setShouldFetch: (val: boolean) => void;
   setActiveArtist: (artist: Artist) => void;
@@ -27,15 +24,11 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
   const {
     location,
     isInitialized,
-    setArtistInput,
-    setSongInput,
-    setPrevArtistInput,
-    setPrevSongInput,
-    setSubmittedArtist,
-    setSubmittedSong,
-    setOriginalSearchArtist,
-    setOriginalSearchSong,
-    updateSearchStateWithOriginal,
+    isClearing,
+    activeArtist,
+    setInput,
+    setSubmittedQuery,
+    setOriginalQuery,
     setHasSearched,
     setShouldFetch,
     setActiveArtist,
@@ -43,134 +36,106 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
     getCurrentArtistPath
   } = options;
 
-  const lastProcessedParams = useRef<string>('');
+  const lastProcessedQuery = useRef<string>('');
 
   useEffect(() => {
     // Reset initialization flag when pathname changes to allow re-initialization
     // This is needed when switching back to the search tab from other tabs
     isInitialized.current = false;
-    lastProcessedParams.current = '';
+    lastProcessedQuery.current = '';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   useEffect(() => {
+    if (isClearing) return;
 
-    // Handle /search route with query parameters
+    // Handle /search route with a query parameter
     if (location.pathname === '/search') {
-      const searchParams = new URLSearchParams(location.search);
-      const artistParam = searchParams.get('artist');
-      const songParam = searchParams.get('song');
-      
-      if (artistParam || songParam) {
-        // Only initialize if we haven't already processed these parameters
-        // This prevents overwriting an existing search query
-        const currentParamsKey = `${artistParam || ''}|${songParam || ''}`;
-        if (currentParamsKey !== lastProcessedParams.current && !isInitialized.current) {
-          setArtistInput(artistParam || '');
-          setSongInput(songParam || '');
-          setPrevArtistInput(artistParam || '');
-          setPrevSongInput(songParam || '');
-          setSubmittedArtist(artistParam || '');
-          setSubmittedSong(songParam || '');
-          // Preserve the original search query for navigation back
-          setOriginalSearchArtist(artistParam);
-          setOriginalSearchSong(songParam);
-          updateSearchStateWithOriginal({ artist: artistParam || '', song: songParam || '', results: [] });
+      const query = readQueryFromUrl(location.search);
+
+      if (query) {
+        // Only initialize once per query, so an existing search is not overwritten
+        if (query !== lastProcessedQuery.current && !isInitialized.current) {
+          setInput(query);
+          setSubmittedQuery(query);
+          setOriginalQuery(query);
           setHasSearched(true);
           setShouldFetch(true);
           isInitialized.current = true;
-          lastProcessedParams.current = currentParamsKey;
+          lastProcessedQuery.current = query;
         }
       } else {
-        // No search params - don't reset if we have an existing search query
-        if (!isInitialized.current) {
-          isInitialized.current = true;
-        }
-        lastProcessedParams.current = '';
-      }
-    }
-    // Handle /:artist route
-    else if (isOnArtistPage() && !isInitialized.current) {
-      const artistPath = getCurrentArtistPath();
-      
-      if (artistPath) {
-        // Prefer stored displayName (set when navigating from artist selection) over
-        // fromSlug. Kept (not removed) so it survives repeated back-navigation to
-        // this artist; it's keyed by path and overwritten when a different artist
-        // is selected, so it can't go stale for the wrong artist.
-        let artistName = fromSlug(artistPath);
-        try {
-          const stored = sessionStorage.getItem(ARTIST_DISPLAY_NAME_KEY);
-          if (stored) {
-            const { path: storedPath, displayName } = JSON.parse(stored);
-            if (storedPath === artistPath && displayName) {
-              artistName = displayName;
-            }
-          }
-        } catch {}
-        
-        setActiveArtist({
-          displayName: artistName,
-          path: artistPath,
-          songCount: null,
-        });
-
-        // The displayName exactly as returned by the search API (e.g.
-        // "Florianópolis House Of Prayer (fhop music)") is the most trustworthy
-        // source available, since it doesn't depend on the source page's DOM
-        // markup or a slug guess. It's looked up async (IndexedDB), so it can
-        // upgrade the name set above once it resolves, e.g. on a fresh tab
-        // where sessionStorage is empty but this artist was searched before.
-        getStoredArtistDisplayName(artistPath).then((cachedDisplayName) => {
-          if (cachedDisplayName && cachedDisplayName !== artistName) {
-            setActiveArtist({
-              displayName: cachedDisplayName,
-              path: artistPath,
-              songCount: null,
-            });
-          }
-        });
-        
-        // Restore the original search query from session storage if present.
-        // If absent (e.g. navigating here from a chord sheet artist link), fall
-        // back to the artist display name so the input field is not left empty.
-        let restoredFromSession = false;
-        try {
-          const storedQuery = sessionStorage.getItem('chordium_search_query');
-          if (storedQuery) {
-            const { artist, song } = JSON.parse(storedQuery);
-            if (artist || song) {
-              setArtistInput(artist || '');
-              setSongInput(song || '');
-              setPrevArtistInput(artist || '');
-              setPrevSongInput(song || '');
-              setSubmittedArtist(artist || '');
-              setSubmittedSong(song || '');
-              setOriginalSearchArtist(artist || '');
-              setOriginalSearchSong(song || '');
-              setHasSearched(true);
-              restoredFromSession = true;
-            }
-          }
-        } catch (error) {
-          console.warn('Failed to restore search query from session storage:', error);
-        }
-
-        if (!restoredFromSession) {
-          setArtistInput(artistName);
-          setPrevArtistInput(artistName);
-        }
-        
-        // Don't set submittedArtist here - preserve the original search query
-        // This allows the back button to return to the original search results
-        setHasSearched(true);
-        
-        // Note: Don't set setShouldFetch(true) here because that would trigger
-        // an artist search instead of artist songs fetching.
-        // The activeArtist effect in useSearchReducer will handle songs fetching.
+        // No query - don't reset if there is an existing search in progress
         isInitialized.current = true;
+        lastProcessedQuery.current = '';
       }
+      return;
+    }
+
+    // Handle /:artist route
+    if (isOnArtistPage() && !isInitialized.current) {
+      const artistPath = getCurrentArtistPath();
+      if (!artistPath) return;
+
+      // An in-app artist click already sets activeArtist itself, in the same
+      // transition as the navigate that lands here - re-deriving it from the
+      // URL a moment later would just force a redundant extra render (and,
+      // since it defaults songCount to null, a slightly worse-informed one)
+      // for no visible benefit. Only a genuine fresh load of this URL - a
+      // refresh, or a direct link - reaches this with no activeArtist yet.
+      if (activeArtist?.path === artistPath) {
+        isInitialized.current = true;
+        return;
+      }
+
+      // Prefer stored displayName (set when navigating from artist selection) over
+      // fromSlug. Kept (not removed) so it survives repeated back-navigation to
+      // this artist; it's keyed by path and overwritten when a different artist
+      // is selected, so it can't go stale for the wrong artist.
+      let artistName = fromSlug(artistPath);
+      try {
+        const stored = sessionStorage.getItem(ARTIST_DISPLAY_NAME_KEY);
+        if (stored) {
+          const { path: storedPath, displayName } = JSON.parse(stored);
+          if (storedPath === artistPath && displayName) {
+            artistName = displayName;
+          }
+        }
+      } catch {}
+
+      setActiveArtist({ displayName: artistName, path: artistPath, songCount: null });
+
+      // The displayName exactly as returned by the search API (e.g.
+      // "Florianópolis House Of Prayer (fhop music)") is the most trustworthy
+      // source available, since it doesn't depend on the source page's DOM
+      // markup or a slug guess. It's looked up async (IndexedDB), so it can
+      // upgrade the name set above once it resolves, e.g. on a fresh tab
+      // where sessionStorage is empty but this artist was searched before.
+      getStoredArtistDisplayName(artistPath).then((cachedDisplayName) => {
+        if (cachedDisplayName && cachedDisplayName !== artistName) {
+          setActiveArtist({ displayName: cachedDisplayName, path: artistPath, songCount: null });
+        }
+      });
+
+      // Restore the search that led here if there is one. If absent (e.g. arriving
+      // from a chord sheet's artist link), fall back to the artist name so the
+      // field is not left empty.
+      const stored = readStoredSearch();
+      if (stored?.query) {
+        setInput(stored.query);
+        setSubmittedQuery(stored.query);
+        setOriginalQuery(stored.query);
+      } else {
+        setInput(artistName);
+      }
+
+      setHasSearched(true);
+
+      // Note: shouldFetch stays false here. Setting it would run a search for the
+      // artist's name; the activeArtist effect in useSearchReducer fetches that
+      // artist's songs instead.
+      isInitialized.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search, location.pathname, updateSearchStateWithOriginal, isOnArtistPage, getCurrentArtistPath]);
+  }, [location.search, location.pathname, isClearing, isOnArtistPage, getCurrentArtistPath]);
 }

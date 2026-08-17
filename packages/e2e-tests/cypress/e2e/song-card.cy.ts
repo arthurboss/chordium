@@ -24,7 +24,7 @@ describe.skip('SongCard E2E Tests', () => {
       cy.get(`[data-cy="view-chords-btn-${songId}"]`).click();
       
       // Verify that we've navigated to the chord sheet page
-      cy.url().should('include', 'song=hotel-california');
+      cy.url().should('include', 'q=hotel-california');
       cy.contains('h1', 'Hotel California').should('be.visible');
       cy.contains('Eagles').should('be.visible');
       
@@ -39,7 +39,7 @@ describe.skip('SongCard E2E Tests', () => {
       cy.get(`[data-cy="song-card-content-${songId}"]`).click();
       
       // Verify that we've navigated to the chord sheet page
-      cy.url().should('include', 'song=hotel-california');
+      cy.url().should('include', 'q=hotel-california');
       cy.contains('h1', 'Hotel California').should('be.visible');
       cy.contains('Eagles').should('be.visible');
     });

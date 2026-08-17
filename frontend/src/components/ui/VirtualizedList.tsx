@@ -85,15 +85,19 @@ function VirtualizedList<T>({
       </div>
 
       <div className='relative w-full z-10'>
-        {!isAtBottom && (<div className="pointer-events-none absolute h-8 w-full translate-y-[-2rem] bg-background backdrop-blur-xl" style={{
-          maskImage:
-            'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, black 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 20%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.9) 80%, black 100%)',
+        {/* Fades straight into the container's own background color rather than
+            masking a blurred view of the cards behind it - that blur had no
+            fixed color of its own, so the fade never quite matched the
+            container in either theme. This list only ever sits inside the
+            results card, so it reads --card, the same token that card is
+            painted with, rather than the page's own --background. */}
+        {!isAtBottom && (<div className="pointer-events-none absolute h-8 w-full translate-y-[-2rem]" style={{
+          background:
+            'linear-gradient(to bottom, hsl(var(--card) / 0) 0%, hsl(var(--card) / 0.1) 20%, hsl(var(--card) / 0.6) 50%, hsl(var(--card) / 0.9) 80%, hsl(var(--card)) 100%)',
         }}
         />)}
 
-        <div className="flex justify-center w-fit mx-auto translate-y-[-2rem]">
+        <div className="flex justify-center w-fit mx-auto translate-y-[-1rem]">
           <ScrollArrow
             parentRef={parentRef}
             getTotalSize={getTotalSize}

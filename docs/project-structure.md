@@ -5,15 +5,17 @@ chordium/
 ├── frontend/           # React/Vite frontend application
 │   ├── src/           # Frontend source code
 │   ├── public/        # Static assets
-│   ├── dist/          # Build output
-│   └── cypress/       # E2E tests
-├── backend/           # Node.js/Express API server (local dev only)
+│   ├── api/           # Vercel serverless functions (production API)
+│   └── dist/          # Build output
+├── backend/           # Node.js/Express API server (local dev only, mirrors frontend/api/)
 │   ├── controllers/   # API route handlers
 │   ├── services/      # Business logic services
 │   ├── utils/         # Backend utilities
 │   └── tests/         # Backend tests
 ├── packages/          # Shared packages (npm workspaces)
-│   └── types/         # @chordium/types - Shared TypeScript types package
+│   ├── types/         # @chordium/types - Shared TypeScript types package
+│   ├── scraping/       # @chordium/scraping - Shared CifraClub scraping logic
+│   └── e2e-tests/      # @chordium/e2e-tests - Cypress end-to-end tests
 ├── shared/            # Shared resources
 │   └── fixtures/      # Shared test fixtures
 ├── docs/              # Project documentation

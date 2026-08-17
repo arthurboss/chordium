@@ -1,33 +1,31 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchReducer } from '@/search';
 
 import { SearchResultsProps } from './SearchResults.types';
 
-
-import ErrorState from '@/components/ErrorState';
-import LoadingState from '@/components/LoadingState';
-import EmptyState from '@/components/EmptyState';
 import { useSearchResultsViewModel } from './hooks/useSearchResultsViewModel';
 import { SearchResultsLayout } from './SearchResultsLayout/';
 
 const SearchResults: React.FC<SearchResultsProps> = ({
   setMySongs,
   setActiveTab,
-  artist,
-  song,
-  filterArtist,
-  filterSong,
+  query,
+  filter,
   activeArtist,
   onArtistSelect,
   shouldFetch,
   onFetchComplete,
   onLoadingChange,
+  onBackClick,
+  onClearSearch,
+  clearDisabled,
 }) => {
+  const { t } = useTranslation();
 
   const searchState = useSearchReducer({
-    artist,
-    song,
-    filterSong,
+    query,
+    filter,
     shouldFetch: shouldFetch || false,
     activeArtist,
     onFetchComplete,
@@ -37,42 +35,74 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     setActiveTab,
   });
 
-  const { stateData, handleView, handleArtistSelect, artistSongs } = searchState;
+  const { stateData, handleView, handleArtistSelect, hits, artistSongs, filteredArtistSongs } = searchState;
+  const defaultState = stateData.state === 'default' ? stateData : null;
 
   // Build stable view model for default state rendering
   const { results, onResultClick } = useSearchResultsViewModel({
-    isDefault: stateData.state === 'default',
-    searchType: stateData.searchType,
-    activeArtist: stateData.activeArtist ?? null,
-    artists: searchState.artists,
-    songs: searchState.songs,
+    isDefault: !!defaultState,
+    activeArtist: defaultState?.activeArtist ?? null,
+    hits,
     artistSongs,
-    filterArtist,
-    filterSong,
+    filteredArtistSongs,
     handleView,
     handleArtistSelect,
   });
 
+  // Back and clear are forwarded to every branch below: whichever state a
+  // search is in, both stay reachable rather than only existing while results
+  // have actually loaded.
+  const backAndClearProps = { onBackClick, onClearSearch, clearDisabled };
+
   switch (stateData.state) {
     case 'loading':
-      return <LoadingState message={stateData.message} />;
-    
+      return (
+        <SearchResultsLayout
+          loading
+          loadingMessage={stateData.messageKey ? t(stateData.messageKey) : undefined}
+          results={results}
+          onResultClick={onResultClick}
+          query={query}
+          activeArtist={stateData.activeArtist ?? null}
+          {...backAndClearProps}
+        />
+      );
+
     case 'error':
-      return <ErrorState error={stateData.error} />;
-    
+      return (
+        <SearchResultsLayout
+          error={stateData.error || (stateData.errorFallbackKey ? t(stateData.errorFallbackKey) : '')}
+          results={results}
+          onResultClick={onResultClick}
+          query={query}
+          activeArtist={activeArtist}
+          {...backAndClearProps}
+        />
+      );
+
     default: {
-      // Handle empty state first
-      if (stateData.isEmpty && stateData.emptyMessage) {
-        return <EmptyState message={stateData.emptyMessage} dataTestId="search-empty-state" />;
+      // An active artist with no songs at all gets its own wording, still
+      // inside the same card - a search that simply found nothing is worded
+      // differently by the results list itself, further down.
+      if (stateData.isEmpty && stateData.emptyMessageKey) {
+        return (
+          <SearchResultsLayout
+            results={[]}
+            emptyMessage={t(stateData.emptyMessageKey, { artist: stateData.emptyMessageArtist })}
+            onResultClick={onResultClick}
+            query={query}
+            activeArtist={stateData.activeArtist}
+            {...backAndClearProps}
+          />
+        );
       }
       return (
-        <SearchResultsLayout 
-          results={results} 
+        <SearchResultsLayout
+          results={results}
           onResultClick={onResultClick}
-          searchType={stateData.searchType}
-          artistQuery={artist}
-          songQuery={song}
+          query={query}
           activeArtist={stateData.activeArtist}
+          {...backAndClearProps}
         />
       );
     }

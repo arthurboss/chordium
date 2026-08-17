@@ -2,8 +2,7 @@
  * Type definitions for store-results operation
  */
 
-import type { Artist, Song, SearchType, DataSource } from "@chordium/types";
-import type { SearchQuery } from "@/search/types/searchQuery";
+import type { SearchCacheEntry } from "../../../types/search-cache";
 
 /**
  * Cache storage options for store-results
@@ -20,9 +19,7 @@ export interface StoreCacheOptions {
  */
 export type StoreResultsFunction = (
   searchKey: string,
-  results: Artist[] | Song[],
-  query: SearchQuery,
-  searchType: SearchType,
-  dataSource: DataSource,
+  results: SearchCacheEntry['results'],
+  search: SearchCacheEntry['search'],
   options?: StoreCacheOptions
 ) => Promise<void>;

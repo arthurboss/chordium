@@ -12,18 +12,20 @@
     "message": "Este aplicativo está em desenvolvimento. Alguns recursos podem não funcionar como esperado."
   },
   "searchBar": {
-    "artistPlaceholder": "Pesquisar artista",
-    "songPlaceholder": "Pesquisar música",
+    "placeholder": "Pesquisar artista ou música",
     "back": "Voltar",
     "search": "Pesquisar",
-    "clearAriaLabel": "Limpar pesquisa",
-    "andOr": "e | ou"
+    "clearAriaLabel": "Limpar pesquisa"
   },
   "searchResults": {
     "noResults": "Nenhum resultado encontrado.",
     "artists": "Artistas",
     "songs": "Músicas",
-    "results": "Resultados"
+    "lyricsMatches": "Correspondências na letra",
+    "results": "Resultados",
+    "loadingArtistSongs": "Carregando músicas do artista...",
+    "noSongsForArtist": "Nenhuma música encontrada para {{artist}}.",
+    "filterPlaceholder": "Filtrar resultados..."
   },
   "dropZone": {
     "title": "Importar uma cifra",

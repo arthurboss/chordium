@@ -10,7 +10,7 @@ describe('Tab State Persistence', () => {
     });
     
     // Mock the search API to return consistent results
-    cy.intercept('GET', '/api/cifraclub-search*', {
+    cy.intercept('GET', '/api/search*', {
       statusCode: 200,
       body: [
         {
@@ -32,8 +32,7 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields
-    cy.get('#artist-search-input').type('The Beatles');
-    cy.get('#song-search-input').type('Yesterday');
+    cy.get('#search-input').type('The Beatles Yesterday');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for API call
@@ -47,8 +46,8 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // The search fields and results should still be present (restored from session storage)
-    cy.get('#artist-search-input').should('have.value', 'The Beatles');
-    cy.get('#song-search-input').should('have.value', 'Yesterday');
+    cy.get('#search-input').should('have.value', 'The Beatles');
+    cy.get('#search-input').should('have.value', 'Yesterday');
     cy.contains('Yesterday').should('be.visible');
   });
 
@@ -57,8 +56,7 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields
-    cy.get('#artist-search-input').type('Leonardo Gonçalves');
-    cy.get('#song-search-input').type('Test Song');
+    cy.get('#search-input').type('Leonardo Gonçalves Test Song');
 
     // Submit search to populate session storage
     cy.get('[data-cy="search-submit-button"]').click();
@@ -83,8 +81,8 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Search fields should be restored from session storage
-    cy.get('#artist-search-input').should('have.value', 'Leonardo Gonçalves');
-    cy.get('#song-search-input').should('have.value', 'Test Song');
+    cy.get('#search-input').should('have.value', 'Leonardo Gonçalves');
+    cy.get('#search-input').should('have.value', 'Test Song');
   });
 
   it('restores last route when navigating back to search tab', () => {
@@ -92,8 +90,7 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and submit
-    cy.get('#artist-search-input').type('Test Artist');
-    cy.get('#song-search-input').type('Test Song');
+    cy.get('#search-input').type('Test Artist Test Song');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for API call
@@ -107,8 +104,7 @@ describe('Tab State Persistence', () => {
 
     // Should return to search page with query parameters
     cy.url().should('include', '/search');
-    cy.url().should('include', 'artist=Test%20Artist');
-    cy.url().should('include', 'song=Test%20Song');
+    cy.url().should('include', 'q=Test%20Artist%20Test%20Song');
   });
 
   it('preserves My Chord Sheets tab scroll position', () => {
@@ -133,8 +129,7 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Fill in search fields and submit
-    cy.get('#artist-search-input').type('Test Artist');
-    cy.get('#song-search-input').type('Test Song');
+    cy.get('#search-input').type('Test Artist Test Song');
     cy.get('[data-cy="search-submit-button"]').click();
 
     // Wait for API call
@@ -153,7 +148,7 @@ describe('Tab State Persistence', () => {
     cy.get('[data-cy="tab-search"]').click();
 
     // Search state should still be preserved
-    cy.get('#artist-search-input').should('have.value', 'Test Artist');
-    cy.get('#song-search-input').should('have.value', 'Test Song');
+    cy.get('#search-input').should('have.value', 'Test Artist');
+    cy.get('#search-input').should('have.value', 'Test Song');
   });
 });

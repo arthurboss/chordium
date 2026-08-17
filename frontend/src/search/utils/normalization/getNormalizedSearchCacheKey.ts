@@ -1,16 +1,17 @@
+import type { SearchEntryKind } from "@/search/types/SearchDataState";
 import { normalizeForSearch } from "../";
 
 /**
  * Generates a normalized cache key for search cache operations.
- * Always use this to build the cache key from artist, song, and searchType input.
+ * Always use this to build the cache key, so that the same search typed with
+ * different casing or accents resolves to one entry.
+ *
+ * @param query The phrase that was searched for, or an artist path for that
+ *              artist's song list.
  */
 export function getNormalizedSearchCacheKey(
-  artist: string,
-  song: string,
-  searchType: string
+  query: string,
+  kind: SearchEntryKind
 ): string {
-  const normArtist = normalizeForSearch(artist || "");
-  const normSong = normalizeForSearch(song || "");
-  const normType = normalizeForSearch(searchType || "");
-  return `${normArtist}|${normSong}|${normType}`;
+  return `${normalizeForSearch(query || "")}|${kind}`;
 }

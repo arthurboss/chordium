@@ -7,10 +7,10 @@ Chordium deploys entirely on Vercel — frontend, serverless API functions, and 
 ```
 Frontend + API (Vercel)
 ├── React App (SPA)
-├── /api/artists               — Artist search (DB + external source)
-├── /api/cifraclub-search      — Song search (DB + external source)
-├── /api/artist-songs          — Artist song list (DB → Puppeteer scrape → fallback)
-└── /api/cifraclub-song        — Chord sheet + metadata (Puppeteer via @sparticuz/chromium)
+├── /api/search                — Unified artist and song search
+├── /api/artist-songs          — Songs by a specific artist
+├── /api/cifraclub-song        — Chord sheet + metadata (simplified arrangement)
+└── /api/cifraclub-song-full   — Full (tabbed) chord sheet arrangement
 
 Database (Neon)
 ├── artists

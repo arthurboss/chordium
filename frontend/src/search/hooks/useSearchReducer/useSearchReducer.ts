@@ -9,9 +9,8 @@ import { useArtistSongsFetch } from "./handlers/useArtistSongsFetch";
 import type { UseSearchReducerOptions } from "./useSearchReducer.types";
 
 export const useSearchReducer = ({
-  artist,
-  song,
-  filterSong,
+  query,
+  filter,
   shouldFetch,
   activeArtist,
   onFetchComplete,
@@ -56,19 +55,12 @@ export const useSearchReducer = ({
     setArtistSongsFetching: (value) => dispatch({ type: "SET_ARTIST_SONGS_FETCHING", fetching: value }),
   });
 
-  // Memoized search type calculation to avoid recalculating on every render
-  const searchType = useMemo(() => {
-    if (song) return "song"; // Backend treats artist+song as song search
-    if (artist) return "artist";
-    return "artist"; // Default fallback
-  }, [artist, song]);
-
-  // Effect: Handle search fetch when shouldFetch changes - optimized with memoized search type
+  // Effect: Handle search fetch when shouldFetch changes
   useEffect(() => {
-    if (shouldFetch && (artist || song)) {
-      fetchSearchResults(artist, song, searchType);
+    if (shouldFetch && query) {
+      fetchSearchResults(query);
     }
-  }, [shouldFetch, searchType, fetchSearchResults]);
+  }, [shouldFetch, query, fetchSearchResults]);
 
   // Effect: Handle active artist changes - optimized to avoid unnecessary re-runs
   useEffect(() => {
@@ -89,17 +81,19 @@ export const useSearchReducer = ({
 
   // Effect: Handle filter changes for artist songs - optimized to avoid unnecessary dispatches
   useEffect(() => {
-    if (state.artistSongs && filterSong !== state.lastAppliedFilter) {
-      dispatch({ type: "FILTER_ARTIST_SONGS", filter: filterSong });
+    if (state.artistSongs && filter !== state.lastAppliedFilter) {
+      dispatch({ type: "FILTER_ARTIST_SONGS", filter });
     }
-  }, [filterSong, state.artistSongs, state.lastAppliedFilter, dispatch]);
+  }, [filter, state.artistSongs, state.lastAppliedFilter, dispatch]);
 
   // Generate UI state data
   const stateData = useMemo(() => determineUIState(state), [state]);
 
   // Song actions
   const songActions = useSongActions({
-    memoizedSongs: state.activeArtist ? state.artistSongs || [] : state.songs,
+    memoizedSongs: state.activeArtist
+      ? state.artistSongs || []
+      : state.hits.flatMap((hit) => (hit.type === "song" ? [hit] : [])),
     setMySongs,
   });
 
@@ -120,8 +114,7 @@ export const useSearchReducer = ({
     isLoading,
 
     // Data
-    artists: state.artists,
-    songs: state.songs,
+    hits: state.hits,
     artistSongs: state.artistSongs,
     filteredArtistSongs: state.filteredArtistSongs,
     activeArtist: state.activeArtist,

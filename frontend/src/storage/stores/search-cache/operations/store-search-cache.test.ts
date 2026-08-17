@@ -21,7 +21,7 @@ vi.mock("../../../core/transactions", () => ({
 // Import mocked functions
 import { getDatabase } from "../../chord-sheets/database/connection";
 import { executeWriteTransaction } from "../../../core/transactions";
-import { Artist } from "@chordium/types";
+import { SearchHit } from "@chordium/types";
 
 const mockGetDatabase = vi.mocked(getDatabase);
 const mockExecuteTransaction = vi.mocked(executeWriteTransaction);
@@ -34,14 +34,11 @@ describe("storeSearchCache", () => {
 
   const validCacheEntry: SearchCacheEntry = {
     searchKey: "hillsong", // Artist search term (from search-types.md: /api/artists)
-    results: hillsongArtists as Artist[], // Real fixture data from artists/hillsong.json
+    results: hillsongArtists as unknown as SearchHit[], // Real fixture data from artists/hillsong.json
     search: {
-      query: {
-        artist: "hillsong",
-        song: null,
-      },
-      searchType: "artist" as const,
-      dataSource: "neon" as const,
+      query: "hillsong",
+      kind: "search" as const,
+      dataSource: "cifraclub" as const,
     },
     storage: {
       timestamp: Date.now(),
@@ -65,7 +62,8 @@ describe("storeSearchCache", () => {
       ...validCacheEntry,
       results: [
         {
-          searchKey: "hillsong-en-espaol",
+          type: "artist" as const,
+          path: "hillsong-en-espaol",
           displayName: "Hillsong en Español (Updated)",
           songCount: 130,
         },
@@ -108,7 +106,8 @@ describe("storeSearchCache", () => {
     const largeCacheEntry: SearchCacheEntry = {
       ...validCacheEntry,
       results: Array.from({ length: 1000 }, (_, i) => ({
-        searchKey: `hillsong-song-${i}`,
+        type: "artist" as const,
+        path: `hillsong-song-${i}`,
         displayName: `Hillsong Song ${i}`,
         songCount: i,
       })),

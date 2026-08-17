@@ -1,5 +1,7 @@
 # Chordium Monorepo Architecture
 
+> ⚠️ **Stale: predates Turborepo adoption.** The "Scripts Architecture" and "Development Workflow" sections below still show plain `npm run dev:fe & npm run dev:be`-style root scripts. The real root `package.json` runs everything through `turbo run ... --filter=...` instead (see [Turborepo Adoption](./technical-decisions/turborepo-adoption.md)). Needs a rewrite of those two sections against the current `package.json`, tracked as a separate follow-up.
+
 This document explains the monorepo structure, architecture decisions, and workspace management for Chordium.
 
 ## 🏗️ Architecture Overview
@@ -23,20 +25,21 @@ chordium/
 │   │   ├── services/          # Frontend services
 │   │   └── types/             # Frontend-specific types
 │   ├── public/                # Static assets
-│   └── cypress/               # E2E tests
-├── backend/                    # Node.js + Express API server (local dev only)
+│   └── api/                   # Vercel serverless functions (production API)
+├── backend/                    # Node.js + Express API server (local dev only, mirrors frontend/api/)
 │   ├── controllers/           # API route handlers
 │   ├── services/              # Business logic services
 │   ├── utils/                 # Backend utilities
 │   ├── tests/                 # Backend tests
 │   └── types/                 # Backend-specific types
 ├── packages/                   # Shared packages (npm workspaces)
-│   └── types/                 # @chordium/types - Shared TypeScript types package
+│   ├── types/                  # @chordium/types - Shared TypeScript types package
+│   ├── scraping/                # @chordium/scraping - Shared CifraClub scraping logic
+│   └── e2e-tests/               # @chordium/e2e-tests - Cypress end-to-end tests
 ├── shared/                     # Shared resources
 │   └── fixtures/              # Shared test fixtures
 ├── docs/                       # Project documentation
-├── scripts/                    # Build and utility scripts
-└── cypress/                    # End-to-end tests
+└── scripts/                    # Build and utility scripts
 ```
 
 ## 🔧 Workspace Configuration
@@ -47,7 +50,9 @@ chordium/
   "workspaces": [
     "frontend",
     "backend",
-    "packages/types"
+    "packages/types",
+    "packages/scraping",
+    "packages/e2e-tests"
   ]
 }
 ```
@@ -173,13 +178,13 @@ Everything deploys automatically to Vercel from `main`. There is no separate bac
 
 ### Production (Vercel)
 - **Frontend:** React SPA built with Vite, served as static files
-- **API:** Serverless functions in `frontend/api/` (artists, search, chord sheets)
+- **API:** Serverless functions in `frontend/api/` (unified search, artist songs, chord sheets)
 - **Database:** Neon (via Vercel Postgres), connection injected automatically
 - **Environment variables:** Configured in the Vercel dashboard
 
 ### Local Development
 - **Frontend:** Vite dev server (`npm run dev:fe`)
-- **Backend (Express):** `npm run dev:be` — mirrors the Vercel API functions locally, used for chord sheet and scraping work
+- **Backend (Express):** `npm run dev:be` mirrors the Vercel API functions locally, used for chord sheet and scraping work
 - The Express backend in `backend/` is **not deployed**; it exists solely as a local dev convenience
 
 ### API Contracts

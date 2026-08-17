@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { DataSource, SearchType } from "@chordium/types";
+import type { DataSource } from "@chordium/types";
 import type { SearchCacheEntry } from "../../types/search-cache";
 import type { SearchCacheService } from "./search-cache-service.types";
 import { createSearchCacheService } from "./search-cache-service";
@@ -19,26 +19,24 @@ vi.mock("../../stores/search-cache/operations/store-results", () => ({
 
 describe("SearchCacheService", () => {
   let service: SearchCacheService;
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
     service = createSearchCacheService();
   });
 
   describe("get", () => {
-    it("should retrieve cached search results by path", async () => {
+    it("should retrieve cached search results by key", async () => {
       const mockEntry: SearchCacheEntry = {
-        searchKey: "hillsong",
+        searchKey: "hillsong|search",
         search: {
-          query: {
-            artist: "hillsong",
-            song: null,
-          },
-          searchType: "artist" as SearchType,
-          dataSource: "neon" as DataSource,
+          query: "hillsong",
+          kind: "search",
+          dataSource: "cifraclub" as DataSource,
         },
-        results: [{ 
-          path: "hillsong-united", 
+        results: [{
+          type: "artist",
+          path: "hillsong-united",
           displayName: "Hillsong United",
           songCount: 150,
         }],
@@ -52,9 +50,9 @@ describe("SearchCacheService", () => {
       const { getSearchCache } = await import("../../stores/search-cache/operations");
       vi.mocked(getSearchCache).mockResolvedValue(mockEntry);
 
-      const result = await service.get("hillsong");
+      const result = await service.get("hillsong|search");
 
-      expect(getSearchCache).toHaveBeenCalledWith("hillsong", true);
+      expect(getSearchCache).toHaveBeenCalledWith("hillsong|search", true);
       expect(result).toEqual(mockEntry);
     });
 
@@ -79,52 +77,49 @@ describe("SearchCacheService", () => {
 
   describe("storeResults", () => {
     it("should store search results with correct parameters", async () => {
-      const mockResults = [{ path: "hillsong-united", displayName: "Hillsong United", songCount: 10 }];
+      const mockResults = [
+        { type: "artist" as const, path: "hillsong-united", displayName: "Hillsong United", songCount: 10 },
+      ];
+      const search = {
+        query: "hillsong",
+        kind: "search" as const,
+        dataSource: "cifraclub" as DataSource,
+      };
       const storeResults = await import("../../stores/search-cache/operations/store-results");
       vi.mocked(storeResults.default).mockResolvedValue();
 
-      await service.storeResults({
-        searchKey: "hillsong",
-        results: mockResults,
-        search: {
-          query: { artist: "hillsong", song: null },
-          searchType: "artist" as SearchType,
-          dataSource: "neon" as DataSource,
-        }
-      });
+      await service.storeResults({ searchKey: "hillsong|search", results: mockResults, search });
 
       expect(storeResults.default).toHaveBeenCalledWith(
-        "hillsong",
+        "hillsong|search",
         mockResults,
-        { artist: "hillsong", song: null },
-        "artist",
-        "neon",
+        search,
         {}
       );
     });
 
     it("should pass through custom TTL options", async () => {
-      const mockResults = [{ path: "test", title: "Test Song", artist: "Artist", tags: [] }];
+      const mockResults = [
+        { type: "song" as const, path: "artist/test", title: "Test Song", artist: "Artist" },
+      ];
+      const search = {
+        query: "test query",
+        kind: "search" as const,
+        dataSource: "cifraclub" as DataSource,
+      };
       const customTTL = 7 * 24 * 60 * 60 * 1000; // 7 days
       const storeResults = await import("../../stores/search-cache/operations/store-results");
       vi.mocked(storeResults.default).mockResolvedValue();
 
-      await service.storeResults({
-        searchKey: "test-path",
-        results: mockResults,
-        search: {
-          query: { artist: null, song: "test query" },
-          searchType: "song" as SearchType,
-          dataSource: "cifraclub" as DataSource,
-        }
-      }, { ttl: customTTL });
+      await service.storeResults(
+        { searchKey: "test-path", results: mockResults, search },
+        { ttl: customTTL }
+      );
 
       expect(storeResults.default).toHaveBeenCalledWith(
         "test-path",
         mockResults,
-        { artist: null, song: "test query" },
-        "song",
-        "cifraclub",
+        search,
         { ttl: customTTL }
       );
     });
@@ -157,21 +152,13 @@ describe("SearchCacheService", () => {
       const mockEntries: SearchCacheEntry[] = [
         {
           searchKey: "entry1",
-          search: { 
-            query: { artist: "test1", song: null }, 
-            searchType: "artist" as SearchType, 
-            dataSource: "neon" as DataSource 
-          },
+          search: { query: "test1", kind: "search", dataSource: "cifraclub" as DataSource },
           results: [],
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },
         },
         {
-          searchKey: "entry2", 
-          search: { 
-            query: { artist: null, song: "test2" }, 
-            searchType: "song" as SearchType, 
-            dataSource: "cifraclub" as DataSource 
-          },
+          searchKey: "entry2",
+          search: { query: "test2", kind: "artist-songs", dataSource: "cifraclub" as DataSource },
           results: [],
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },
         },
@@ -193,11 +180,7 @@ describe("SearchCacheService", () => {
       const mockEntries: SearchCacheEntry[] = [
         {
           searchKey: "test1",
-          search: { 
-            query: { artist: "test1", song: null }, 
-            searchType: "artist" as SearchType, 
-            dataSource: "neon" as DataSource 
-          },
+          search: { query: "test1", kind: "search", dataSource: "cifraclub" as DataSource },
           results: [],
           storage: { timestamp: Date.now(), version: 1, expiresAt: null },
         },

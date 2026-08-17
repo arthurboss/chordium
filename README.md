@@ -19,8 +19,15 @@ The distraction-free way to find, read, and play guitar chords, right in your br
 
 ## 🎯 Features
 
-- **Smart Search** - Find songs and artists by text or voice, with intelligent caching
-- **Song Lyrics with Translation** - Read lyrics translated into your language, instantly
+Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter:
+
+- **Install-less App (PWA)** - Works offline and installs like a native app
+- **Clean Interface** - Distraction-free chord viewing experience
+- **Smart Search** - Search by artist, song title, or lyrics. Voice-enabled for hands-free searching
+- **Transpose & Capo** - Shift chords to any key or capo position on the fly
+- **Auto-scrolling** - Practice at your own pace with speed controls
+- **Dark Mode** - Light, dark, and system theme options
+- **Mobile-friendly** - Learn on-the-go with responsive design
 - **File Upload** - Import your own chord sheets with metadata extraction
 - **Works Offline** - Install as a native app, fully functional without internet
 - **Transpose & Capo** - Shift chords to any key or capo position on the fly
@@ -72,7 +79,6 @@ Scan a QR code or tap a link to instantly share the exact chord sheet you're vie
 | [Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
 | [PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
 | [Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
-| [Translation System](./docs/translation-system.md) | On-device lyrics translation architecture and setup |
 | [Offline Translation](./docs/offline-functionality.md#song-lyrics-and-translation) | Translation without internet connection |
 
 ## 🚀 Quick Start

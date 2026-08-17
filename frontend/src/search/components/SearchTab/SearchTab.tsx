@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import FormContainer from "@/components/ui/FormContainer";
 import SearchBar from "../SearchBar/SearchBar";
@@ -6,10 +6,9 @@ import { SearchResults } from "../SearchResults";
 import SearchHistory from "../SearchHistory/SearchHistory";
 import { cyAttr } from "@/utils/test-utils/cy-attr";
 import { useSearchTabLogic } from "./hooks/useSearchTabLogic";
-import { useSearchHistory } from "@/search/hooks/useSearchHistory";
+import { useSearchHistory, type SearchHistoryEntry } from "@/search/hooks/useSearchHistory";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
-import { parseVoiceQuery } from "@/services/speech/parse-voice-query";
-import { useTranslation } from "react-i18next";
+import { tidyTranscript } from "@/services/speech/tidy-transcript";
 
 import type { SearchTabProps } from "./SearchTab.types";
 
@@ -18,13 +17,11 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
    const {
       activeArtist,
       loading,
-      artistInput,
-      songInput,
+      input,
+      submittedQuery,
+      artistFilter,
       clearDisabled,
       hasSearched,
-      searchState,
-      submittedArtist,
-      submittedSong,
       shouldFetch,
       handleBackToArtistList,
       handleArtistSelect,
@@ -38,49 +35,57 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
    } = logic;
 
    const { history, refresh } = useSearchHistory();
-   const { i18n } = useTranslation();
+
+   // Wherever a search is submitted from - the button, Enter, voice, or
+   // picking a past search - the reader's attention lands back on the search
+   // bar rather than staying wherever the trigger happened to be, since that's
+   // where the results this scroll is in service of start appearing from.
+   const searchBarRef = useRef<HTMLDivElement>(null);
+   function submitAndScrollToSearchBar(query: string) {
+      handleSearchSubmit(query);
+      searchBarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+   }
 
    // What was heard is submitted straight away: the reader has already said what
    // they wanted, so making them press search again would be asking twice.
    const voice = useVoiceSearch({
       onTranscript: (transcript) => {
-         const { artist, song } = parseVoiceQuery(transcript, i18n.resolvedLanguage);
-         handleInputChange(artist, song);
-         handleSearchSubmit(artist, song);
+         const query = tidyTranscript(transcript);
+         handleInputChange(query);
+         submitAndScrollToSearchBar(query);
       },
    });
 
-   function handleHistorySelect(artist: string, song: string, searchType: string, displayName: string) {
+   function handleHistorySelect(entry: SearchHistoryEntry) {
       refresh();
-      if (searchType === "artist-song") {
-        handleArtistSelect({ path: artist, displayName: displayName || artist, songCount: null });
-      } else {
-        handleInputChange(artist, song);
-        handleSearchSubmit(artist, song);
+      if (entry.kind === "artist-songs") {
+        handleArtistSelect({
+          path: entry.query,
+          displayName: entry.displayName || entry.query,
+          songCount: null,
+        });
+        return;
       }
+      handleInputChange(entry.query);
+      submitAndScrollToSearchBar(entry.query);
    }
 
    return (
       <div className="flex flex-col gap-4">
+         <div ref={searchBarRef}>
          <FormContainer>
             <SearchBar
-               artistValue={artistInput}
-               songValue={songInput}
+               value={input}
                onInputChange={handleInputChange}
-               onSearchSubmit={handleSearchSubmit}
+               onSearchSubmit={submitAndScrollToSearchBar}
                loading={loading}
-               showBackButton={!!activeArtist}
-               onBackClick={activeArtist ? handleBackToArtistList : undefined}
-               isSearchDisabled={!artistInput && !songInput}
-               artistLoading={loading}
-               onClearSearch={() => { handleClearSearch(); refresh(); }}
-               clearDisabled={clearDisabled}
-               artistDisabled={!!activeArtist}
+               isSearchDisabled={!input.trim()}
                voiceState={voice.state}
                onVoiceStart={voice.start}
                onVoiceStop={voice.stop}
             />
          </FormContainer>
+         </div>
          {!hasSearched && (
             <SearchHistory history={history} onSelect={handleHistorySelect} onClear={refresh} />
          )}
@@ -89,15 +94,16 @@ const SearchTab: React.FC<SearchTabProps> = (props) => {
                <SearchResults
                   setMySongs={setMySongs}
                   setActiveTab={setActiveTab}
-                  artist={hasSearched ? submittedArtist : searchState.query.artist}
-                  song={hasSearched ? submittedSong : searchState.query.song}
-                  filterArtist={activeArtist ? submittedArtist : artistInput}
-                  filterSong={songInput}
+                  query={submittedQuery}
+                  filter={artistFilter}
                   activeArtist={activeArtist}
                   onArtistSelect={handleArtistSelect}
                   shouldFetch={shouldFetch}
                   onLoadingChange={handleLoadingChange}
                   onFetchComplete={() => setShouldFetch(false)}
+                  onBackClick={activeArtist ? handleBackToArtistList : undefined}
+                  onClearSearch={() => { handleClearSearch(); refresh(); }}
+                  clearDisabled={clearDisabled}
                />
             </div>
          )}

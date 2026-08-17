@@ -81,8 +81,8 @@ describe('Browser Navigation Tests', () => {
     
     // Note: Input fields should NOT be populated from URL parameters
     // They should only get values from session storage or user input
-    cy.get('input[placeholder="Artist"]').should('have.value', '');
-    cy.get('input[placeholder="Song"]').should('have.value', '');
+    cy.get('input[placeholder="Search for an artist or song"]').should('have.value', '');
+    cy.get('input[placeholder="Search for an artist or song"]').should('have.value', '');
   });
   
   // Testing a stub for browser back behavior - simulated through direct navigation

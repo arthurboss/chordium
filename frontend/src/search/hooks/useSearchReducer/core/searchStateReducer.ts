@@ -18,31 +18,26 @@ export const searchStateReducer = (
         artistSongsError: null,
       };
 
-    case "SEARCH_SUCCESS": {
-      const newState = {
+    case "SEARCH_SUCCESS":
+      return {
         ...state,
         loading: false,
         error: null,
         artistSongsError: null,
-        artists: action.artists,
-        songs: action.songs,
+        hits: action.hits,
         hasSearched: true,
         // Clear artist-related state when a new search is performed
         activeArtist: null,
         artistSongs: null,
         filteredArtistSongs: [],
       };
-      
-      return newState;
-    }
 
     case "SEARCH_ERROR":
       return {
         ...state,
         loading: false,
         error: action.error,
-        artists: [],
-        songs: [],
+        hits: [],
         artistSongs: null,
         filteredArtistSongs: [],
         hasSearched: true,
@@ -85,8 +80,7 @@ export const searchStateReducer = (
         ...state,
         loading: false,
         error: null,
-        artists: [],
-        songs: [],
+        hits: [],
         hasSearched: false,
         activeArtist: null,
         artistSongs: null,

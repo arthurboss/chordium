@@ -7,8 +7,7 @@ export { fetchArtistSongs } from "./artist/fetch-artist-songs";
 export * from "./mappers/search-mappers";
 
 // Core search utilities
-export { getSearchParamsType } from "./core/getSearchParamsType";
-export { getQueryDisplayText } from "./core/getQueryDisplayText";
+export { getSearchQuery } from "./core/getSearchQuery";
 
 // Text normalization utilities
 export { normalizeForSearch } from "./normalization/normalizeForSearch";
@@ -17,6 +16,7 @@ export { isAccentInsensitiveMatch } from "./normalization/accentInsensitiveMatch
 
 // Filtering utilities
 export { filterArtistsByNameOrPath } from "./filtering/filterArtistsByName";
+export { filterSearchHitsByText } from "./filtering/filterSearchHitsByText";
 
 // Formatting utilities
 export { formatSearchResult } from "./formatting/formatSearchResult";

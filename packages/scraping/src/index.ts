@@ -6,3 +6,13 @@ export {
   type ArrangementVariant,
   type PageLike,
 } from "./cascade";
+export {
+  unifiedSearch,
+  fetchSourceSongs,
+  fetchSongsForArtist,
+  fetchSourceArtists,
+  SONG_SEARCH_URL,
+  ARTIST_SEARCH_URL,
+  type SqlTag,
+  type UnifiedSearchOptions,
+} from "./search";

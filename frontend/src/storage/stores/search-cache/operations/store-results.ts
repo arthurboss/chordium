@@ -1,33 +1,26 @@
 import type { SearchCacheEntry } from "../../../types/search-cache";
-import type { StoreResultsFunction, SearchQuery, StoreCacheOptions } from "./store-results.types";
-import type { Artist, Song, SearchType, DataSource } from "@chordium/types";
+import type { StoreResultsFunction, StoreCacheOptions } from "./store-results.types";
 import storeSearchCache from "./store-search-cache";
 import { getDefaultTTL } from "../utils/get-default-ttl";
 
 /**
  * Store search results from API data
- * 
+ *
  * Creates a complete SearchCacheEntry from API results and stores it.
  * Handles TTL calculation and entry structure creation.
  */
 const storeResults: StoreResultsFunction = async (
   searchKey: string,
-  results: Artist[] | Song[],
-  query: SearchQuery,
-  searchType: SearchType,
-  dataSource: DataSource,
+  results: SearchCacheEntry['results'],
+  search: SearchCacheEntry['search'],
   options: StoreCacheOptions = {}
 ): Promise<void> => {
-  const ttl = options.ttl || getDefaultTTL(dataSource);
-  
+  const ttl = options.ttl || getDefaultTTL(search.dataSource);
+
   const entry: SearchCacheEntry = {
     searchKey,
     results,
-    search: {
-      query,
-      searchType,
-      dataSource,
-    },
+    search,
     storage: {
       timestamp: Date.now(),
       version: 1,

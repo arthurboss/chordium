@@ -1,15 +1,42 @@
-import type { Artist, Song, SearchType } from "@chordium/types";
+import type { Artist, SearchHit } from "@chordium/types";
 
-// Discriminated union for search results
-export type SearchResult =
-  | (Song & { type: "song" })
-  | (Artist & { type: "artist" });
+/** A search result as rendered, artists and songs in one list. */
+export type SearchResult = SearchHit;
 
 export interface SearchResultsLayoutProps {
   results: SearchResult[];
   onResultClick: (result: SearchResult) => void;
-  searchType: SearchType;
-  artistQuery?: string;
-  songQuery?: string;
+  /**
+   * The search query these results belong to. Used only to notice when a
+   * genuinely new search has landed (as opposed to results merely settling
+   * mid-transition, e.g. while leaving an artist's page), so a previously
+   * selected section can be cleared back to the overview.
+   */
+  query?: string;
+  /** Set while one artist's song list is open, rather than a search's results. */
   activeArtist?: Artist | null;
+  /**
+   * Shows a loading indicator in place of the sections, inside the same card
+   * and with the same "Results" header (its sort control disabled), instead of
+   * swapping to a whole separate, differently-sized state while a search runs.
+   */
+  loading?: boolean;
+  /** Already-translated text for the loading indicator, if not the default. */
+  loadingMessage?: string;
+  /**
+   * Already-translated error text. Shown in the sections' own place, same as
+   * loading, so the card and its back/clear buttons stay put and reachable
+   * rather than the whole page swapping to a standalone error view.
+   */
+  error?: string | null;
+  /**
+   * Already-translated text for the empty-results state, if not the generic
+   * "no results" copy - e.g. an active artist with no songs at all.
+   */
+  emptyMessage?: string;
+  /** Called when the back button is pressed. Disabled without one, or without an active artist. */
+  onBackClick?: () => void;
+  /** Called when the clear (trash) button is pressed. */
+  onClearSearch?: () => void;
+  clearDisabled?: boolean;
 }

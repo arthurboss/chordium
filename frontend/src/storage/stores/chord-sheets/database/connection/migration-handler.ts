@@ -9,6 +9,7 @@
 // Types are provided by the DOM, no need to import from 'idb'.
 import createSchema from './create-schema';
 import { STORES } from '../../../../core/config/stores';
+import { INDEXES } from '../../../../core/config/indexes';
 
 /**
  * Handles all IndexedDB migrations from oldVersion to newVersion.
@@ -101,6 +102,35 @@ export function handleIndexedDBMigrations(
         clearScrapedLyrics(transaction);
         break;
       }
+      case 10: {
+        // Migration to v10: a search is now one phrase rather than an artist
+        // field and a song field, so every cached entry is keyed and shaped for
+        // a contract that no longer exists. Nothing here is worth converting,
+        // since the cache refills from the next search.
+        //
+        // The store is replaced rather than emptied so its indexes can be
+        // repointed at the values they name: they were declared against
+        // top-level fields that these records keep one level down, so every one
+        // of them had been indexing nothing.
+        recreateSearchCache(db);
+        break;
+      }
+      case 11: {
+        // Migration to v11: a cached search now records why each song matched,
+        // its title or its words, and entries written before that carry no such
+        // mark. Left in place they would all be filed under the titles, so they
+        // are dropped instead of guessed at; the next search refills them.
+        clearSearchCache(transaction);
+        break;
+      }
+      case 12: {
+        // Migration to v12: a search now keeps only the first handful of songs
+        // matched through their words. Entries cached before that hold the whole
+        // tail, so they are emptied rather than left to show a different number
+        // of results from a fresh search for the next thirty days.
+        clearSearchCache(transaction);
+        break;
+      }
       // Add future migrations here
       default:
         break;
@@ -177,4 +207,29 @@ function dropLyricsExpiry(transaction?: IDBTransaction | null): void {
     if (expiresAt !== undefined) cursor.update(record);
     cursor.continue();
   };
+}
+
+/**
+ * Replaces the search cache store, discarding entries written when a search was
+ * an artist field and a song field, and declaring its indexes against the paths
+ * the records actually use.
+ */
+function recreateSearchCache(db: IDBDatabase): void {
+  if (db.objectStoreNames.contains(STORES.SEARCH_CACHE)) {
+    db.deleteObjectStore(STORES.SEARCH_CACHE);
+  }
+
+  const store = db.createObjectStore(STORES.SEARCH_CACHE, { keyPath: 'searchKey' });
+  const indexes = INDEXES.searchCache;
+  store.createIndex('kind', indexes.kind, { unique: false });
+  store.createIndex('dataSource', indexes.dataSource, { unique: false });
+  store.createIndex('timestamp', indexes.timestamp, { unique: false });
+  store.createIndex('expiresAt', indexes.expiresAt, { unique: false });
+}
+
+/** Empties the search cache, leaving its store and indexes in place. */
+function clearSearchCache(transaction?: IDBTransaction | null): void {
+  if (!transaction) return;
+  if (!transaction.db.objectStoreNames.contains(STORES.SEARCH_CACHE)) return;
+  transaction.objectStore(STORES.SEARCH_CACHE).clear();
 }

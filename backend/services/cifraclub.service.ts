@@ -2,7 +2,7 @@ import config from "../config/config.js";
 import { performSearch } from "./cifraclub/search-handler.js";
 import { fetchArtistSongs } from "./cifraclub/artist-songs-handler.js";
 import { fetchWithProgressiveExtraction, fetchPreferredChordSheet, fetchFullChordSheet, type CascadeResult } from "../utils/chord-sheet-fetcher.js";
-import type { Artist, Song, ChordSheet, SongMetadata, SearchType } from "../../shared/types/index.js";
+import type { Song, ChordSheet, SongMetadata, SearchHit } from "../../shared/types/index.js";
 
 class CifraClubService {
   public readonly baseUrl: string;
@@ -11,11 +11,8 @@ class CifraClubService {
     this.baseUrl = config.cifraClub.baseUrl;
   }
 
-  async search(
-    query: string,
-    searchType: SearchType
-  ): Promise<Artist[] | Song[]> {
-    return performSearch(query, searchType);
+  async search(query: string): Promise<SearchHit[]> {
+    return performSearch(query);
   }
 
   async getArtistSongs(artistUrl: string): Promise<Song[]> {

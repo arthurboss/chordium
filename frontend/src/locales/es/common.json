@@ -12,18 +12,20 @@
     "message": "Esta aplicación está en desarrollo. Algunas características pueden no funcionar como se esperaba."
   },
   "searchBar": {
-    "artistPlaceholder": "Buscar artista",
-    "songPlaceholder": "Buscar canción",
+    "placeholder": "Buscar artista o canción",
     "back": "Atrás",
     "search": "Buscar",
-    "clearAriaLabel": "Limpiar búsqueda",
-    "andOr": "y | o"
+    "clearAriaLabel": "Limpiar búsqueda"
   },
   "searchResults": {
     "noResults": "No se encontraron resultados.",
     "artists": "Artistas",
     "songs": "Canciones",
-    "results": "Resultados"
+    "lyricsMatches": "Coincidencias en la letra",
+    "results": "Resultados",
+    "loadingArtistSongs": "Cargando canciones del artista...",
+    "noSongsForArtist": "No se encontraron canciones de {{artist}}.",
+    "filterPlaceholder": "Filtrar resultados..."
   },
   "dropZone": {
     "title": "Importar acordes",

@@ -60,7 +60,7 @@ describe('My Chord Sheets Navigation Verification', () => {
     
     // URL should still include /my-chord-sheets
     cy.url().should('include', '/my-chord-sheets');
-    cy.url().should('include', 'song=');
+    cy.url().should('include', 'q=');
   });
 
   it('should not affect search functionality', () => {

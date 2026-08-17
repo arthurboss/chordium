@@ -12,18 +12,20 @@
     "message": "This app is in development. Some features may not work as expected."
   },
   "searchBar": {
-    "artistPlaceholder": "Search for an artist",
-    "songPlaceholder": "Search for a song",
+    "placeholder": "Search for an artist or song",
     "back": "Back",
     "search": "Search",
-    "clearAriaLabel": "Clear search",
-    "andOr": "and | or"
+    "clearAriaLabel": "Clear search"
   },
   "searchResults": {
     "noResults": "No results were found.",
     "artists": "Artists",
     "songs": "Songs",
-    "results": "Results"
+    "lyricsMatches": "Lyrics matches",
+    "results": "Results",
+    "loadingArtistSongs": "Loading artist songs...",
+    "noSongsForArtist": "No songs found for {{artist}}.",
+    "filterPlaceholder": "Filter results..."
   },
   "dropZone": {
     "title": "Upload a chord sheet",
