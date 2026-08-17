@@ -35,5 +35,9 @@
   "jamSessionJoinFailed": "No se pudo unir a la sesión. Verifica la cadena de conexión e inténtalo de nuevo.",
   "jamSessionInvalidString": "Cadena de conexión no válida",
   "connectionStringCopied": "¡Cadena de conexión copiada al portapapeles!",
-  "cameraError": "No se pudo acceder a la cámara. Por favor, verifica los permisos."
+  "cameraError": "No se pudo acceder a la cámara. Por favor, verifica los permisos.",
+  "voiceMicrophoneDenied": "Micrófono no permitido",
+  "voiceMicrophoneDeniedDesc": "Permite el acceso al micrófono en la configuración del navegador para buscar por voz.",
+  "voiceSearchFailed": "Error en la búsqueda por voz",
+  "voiceSearchFailedDesc": "Algo salió mal al escuchar. Por favor, inténtalo de nuevo."
 }

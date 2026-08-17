@@ -35,5 +35,9 @@
   "jamSessionJoinFailed": "Beitritt zur Jam-Session fehlgeschlagen. Bitte prüfe den Verbindungscode und versuche es erneut.",
   "jamSessionInvalidString": "Ungültiger Verbindungscode",
   "connectionStringCopied": "Verbindungscode in die Zwischenablage kopiert!",
-  "cameraError": "Kein Zugriff auf die Kamera. Bitte prüfe die Berechtigungen."
+  "cameraError": "Kein Zugriff auf die Kamera. Bitte prüfe die Berechtigungen.",
+  "voiceMicrophoneDenied": "Mikrofon nicht erlaubt",
+  "voiceMicrophoneDeniedDesc": "Erlaube den Zugriff auf das Mikrofon in den Browsereinstellungen, um per Sprache zu suchen.",
+  "voiceSearchFailed": "Sprachsuche fehlgeschlagen",
+  "voiceSearchFailedDesc": "Beim Zuhören ist etwas schiefgegangen. Bitte versuche es erneut."
 }

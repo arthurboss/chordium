@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import {
   canListen,
   createRecognizer,
@@ -191,5 +192,27 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     []
   );
 
-  return { state, error, start, stop, clearError: () => setError(null) };
+  /**
+   * A failure the reader can see, rather than a button that quietly slides back to
+   * where it started and leaves them guessing whether it heard anything.
+   *
+   * Cleared once shown so that the same failure twice running is said twice: without
+   * that, a second identical failure would not change the value and would go
+   * unmentioned.
+   */
+  useEffect(() => {
+    if (!error) return;
+    if (error === 'microphone') {
+      toast.error(i18n.t('notifications:voiceMicrophoneDenied'), {
+        description: i18n.t('notifications:voiceMicrophoneDeniedDesc'),
+      });
+    } else {
+      toast.error(i18n.t('notifications:voiceSearchFailed'), {
+        description: i18n.t('notifications:voiceSearchFailedDesc'),
+      });
+    }
+    setError(null);
+  }, [error, i18n]);
+
+  return { state, error, start, stop };
 }

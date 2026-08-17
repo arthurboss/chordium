@@ -35,5 +35,9 @@
   "jamSessionJoinFailed": "Failed to join the jam session. Please check the connection string and try again.",
   "jamSessionInvalidString": "Invalid connection string",
   "connectionStringCopied": "Connection string copied to clipboard!",
-  "cameraError": "Could not access camera. Please check permissions."
+  "cameraError": "Could not access camera. Please check permissions.",
+  "voiceMicrophoneDenied": "Microphone not allowed",
+  "voiceMicrophoneDeniedDesc": "Allow access to the microphone in your browser settings to search by voice.",
+  "voiceSearchFailed": "Voice search failed",
+  "voiceSearchFailedDesc": "Something went wrong while listening. Please try again."
 }

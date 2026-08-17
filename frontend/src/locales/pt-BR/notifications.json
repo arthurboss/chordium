@@ -35,5 +35,9 @@
   "jamSessionJoinFailed": "Falha ao entrar na sessão. Por favor, verifique a string de conexão e tente novamente.",
   "jamSessionInvalidString": "String de conexão inválida",
   "connectionStringCopied": "String de conexão copiada para a área de transferência!",
-  "cameraError": "Não foi possível acessar a câmera. Por favor, verifique as permissões."
+  "cameraError": "Não foi possível acessar a câmera. Por favor, verifique as permissões.",
+  "voiceMicrophoneDenied": "Microfone não permitido",
+  "voiceMicrophoneDeniedDesc": "Permita o acesso ao microfone nas configurações do navegador para pesquisar por voz.",
+  "voiceSearchFailed": "Falha na pesquisa por voz",
+  "voiceSearchFailedDesc": "Algo deu errado ao ouvir. Por favor, tente novamente."
 }
