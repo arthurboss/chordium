@@ -51,36 +51,20 @@ function getConstructor(): SpeechRecognitionConstructor | null {
 }
 
 /**
- * Whether the browser is known to have Mojo service issues with SpeechRecognition.
- * Samsung Internet and Comet browser crash when trying to use OnDeviceSpeechRecognition,
- * even though they report having the API.
- */
-function isBrowserWithKnownSpeechIssues(): boolean {
-  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-  return /SamsungBrowser|CometBrowser/i.test(ua);
-}
-
-/**
  * Whether the browser can hear a search at all.
  *
- * The secure-context check is not about privacy but about whether it can run: the
- * microphone is refused over plain http on anything but localhost, so without this
- * the button would offer a recognition that cannot start.
- *
- * Samsung Internet and Comet browser are skipped even if they report having the API,
- * because they crash with Mojo errors during setup.
+ * Disabled outright rather than feature-detected: several Chromium forks (Samsung
+ * Internet, and Perplexity's Comet browser) terminate the renderer process with a
+ * Mojo IPC error ("No binder found for interface media.mojom.OnDeviceSpeechRecognition")
+ * the instant SpeechRecognition is constructed, even though the constructor itself
+ * is present. That crash happens below the JS layer - no try/catch around `new
+ * Recognition()` can prevent it - so it cannot be ruled out by feature-testing the
+ * constructor first. Comet makes this worse by reporting an unmodified Chrome/Android
+ * user agent, so it cannot be told apart from a real Chrome by user agent either.
+ * Voice search always falls back to the bundled local model instead.
  */
 export function isNativeRecognizerSupported(): boolean {
-  if (typeof globalThis.isSecureContext === 'boolean' && !globalThis.isSecureContext) return false;
-  if (isBrowserWithKnownSpeechIssues()) return false;
-  const Recognition = getConstructor();
-  if (!Recognition) return false;
-  try {
-    new Recognition();
-    return true;
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 /**
@@ -120,19 +104,14 @@ export function createNativeRecognizer(): Recognizer {
         throw new RecognizerUnavailableError('SpeechRecognition is not available');
       }
 
-      let recognition;
-      try {
-        recognition = new Recognition();
-      } catch (err) {
-        throw new RecognizerUnavailableError(
-          `Failed to instantiate SpeechRecognition: ${err instanceof Error ? err.message : 'Unknown error'}`
-        );
-      }
-
+      const recognition = new Recognition();
       recognition.lang = language;
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
+      // Requested only where the browser has already said it can, so that the audio
+      // stays on the device and the search keeps working offline. Elsewhere the
+      // default stands, and nothing here waits on an answer.
       if (recognisesLocally) recognition.processLocally = true;
 
       let heard = '';
@@ -143,14 +122,19 @@ export function createNativeRecognizer(): Recognizer {
             if (result.isFinal) heard += result[0].transcript;
           }
         };
+        // "no-speech" and "aborted" are ordinary outcomes of a reader who changed
+        // their mind, so they settle empty rather than as failures.
         recognition.onerror = (event) => {
           const error = event.error ?? 'unknown';
           if (error === 'no-speech' || error === 'aborted') resolve('');
           else reject(new RecognizerUnavailableError(`Speech recognition failed: ${error}`));
         };
+        // Settled on end rather than on the first result, so a recognition that
+        // hears nothing finishes as an empty transcript instead of hanging.
         recognition.onend = () => resolve(heard.trim());
       });
 
+      // Started in the same turn as the click, with nothing awaited in between.
       recognition.start();
 
       return {

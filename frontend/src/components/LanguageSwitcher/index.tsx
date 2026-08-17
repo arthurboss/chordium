@@ -85,8 +85,10 @@ const LanguageSwitcher: React.FC = () => {
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    if (next) void refresh();
-    else {
+    if (next) {
+      void refresh();
+      void speech.refresh();
+    } else {
       setPromptedFor(null);
       setPendingSource(null);
       setPromptedForVoice(false);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { isNativeRecognizerSupported } from '@/services/speech/native-recognizer';
 import {
   cancelLocalModelDownload,
@@ -22,6 +22,9 @@ export type SpeechModelStatus = 'absent' | 'downloading' | 'present';
  * Only the fallback has anything to manage. Where the browser recognises speech
  * itself there is nothing to download and nothing to remove, so the section that
  * uses this says so and offers no action.
+ *
+ * Nothing here runs until `refresh` is called: this is only relevant once the
+ * reader opens the panel that shows it, not on every page load.
  */
 export function useSpeechModel() {
   const [backend, setBackend] = useState<SpeechBackend>('none');
@@ -47,10 +50,6 @@ export function useSpeechModel() {
     // callbacks own the status until it settles.
     setStatus((current) => (current === 'downloading' ? current : present ? 'present' : 'absent'));
   }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
 
   const download = useCallback(() => {
     setProgress(0);
