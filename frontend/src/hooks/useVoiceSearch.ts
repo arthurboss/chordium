@@ -6,7 +6,6 @@ import {
   requiresDownloadConsent,
   resolveRecognizerKind,
 } from '@/services/speech/get-recognizer';
-import { probeLocalRecognition } from '@/services/speech/native-recognizer';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
 import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/speech/types';
 
@@ -53,11 +52,8 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       setState('unsupported');
       return;
     }
-    // Asked here, well away from any click, because listening itself cannot wait for
-    // the answer without spending the gesture it depends on.
-    await probeLocalRecognition(language);
     setState((await requiresDownloadConsent()) ? 'needs-setup' : 'idle');
-  }, [language]);
+  }, []);
 
   useEffect(() => {
     void assess();
