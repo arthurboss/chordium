@@ -34,3 +34,65 @@ describe('isNativeRecognizerSupported', () => {
     expect(isNativeRecognizerSupported()).toBe(false);
   });
 });
+
+/**
+ * On-device recognition kills the renderer process on Chromium builds that
+ * advertise SpeechRecognition without providing media.mojom.OnDeviceSpeechRecognition
+ * (Samsung Internet, Perplexity's Comet). The crash is below the JS layer and so
+ * cannot be caught, which is why it must never be asked for in the first place.
+ */
+describe('on-device recognition', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('never probes SpeechRecognition.available()', async () => {
+    const available = vi.fn().mockResolvedValue('available');
+    class Recognition {
+      static available = available;
+      lang = '';
+      continuous = false;
+      interimResults = false;
+      maxAlternatives = 1;
+      onresult = null;
+      onerror = null;
+      onend: (() => void) | null = null;
+      start() {
+        this.onend?.();
+      }
+      stop() {}
+      abort() {}
+    }
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('SpeechRecognition', Recognition);
+
+    const { createNativeRecognizer } = await import('../native-recognizer');
+    await createNativeRecognizer().listen('en').transcript;
+
+    expect(available).not.toHaveBeenCalled();
+  });
+
+  it('never sets processLocally on the recognition it starts', async () => {
+    const seen: Record<string, unknown> = {};
+    class Recognition {
+      lang = '';
+      continuous = false;
+      interimResults = false;
+      maxAlternatives = 1;
+      onresult = null;
+      onerror = null;
+      onend: (() => void) | null = null;
+      start() {
+        Object.assign(seen, { ...this });
+        this.onend?.();
+      }
+      stop() {}
+      abort() {}
+    }
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('SpeechRecognition', Recognition);
+
+    const { createNativeRecognizer } = await import('../native-recognizer');
+    await createNativeRecognizer().listen('en').transcript;
+
+    expect(seen).not.toHaveProperty('processLocally');
+  });
+});

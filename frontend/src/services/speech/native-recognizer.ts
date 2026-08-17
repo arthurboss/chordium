@@ -5,9 +5,10 @@ import { RecognizerUnavailableError, type RecognitionSession, type Recognizer } 
  * because it needs no download of ours, exactly as the browser's translator is
  * preferred over the model that backs it up.
  *
- * Where the browser can recognise on the device it is asked to, which also keeps
- * the feature working offline. Where it cannot, it recognises through its vendor
- * instead, which still costs the reader nothing to set up.
+ * Recognition is left to the browser's default, which recognises through its
+ * vendor. On-device recognition is deliberately never requested: asking for it
+ * kills the renderer process outright on several Chromium builds. See
+ * `createNativeRecognizer` below.
  */
 interface SpeechRecognitionAlternative {
   transcript: string;
@@ -27,7 +28,6 @@ interface SpeechRecognitionInstance {
   continuous: boolean;
   interimResults: boolean;
   maxAlternatives: number;
-  processLocally?: boolean;
   start(): void;
   stop(): void;
   abort(): void;
@@ -38,8 +38,6 @@ interface SpeechRecognitionInstance {
 
 interface SpeechRecognitionConstructor {
   new (): SpeechRecognitionInstance;
-  /** Only on builds that implement on-device recognition. */
-  available?(options: { langs: string[]; processLocally: boolean }): Promise<string>;
 }
 
 function getConstructor(): SpeechRecognitionConstructor | null {
@@ -62,34 +60,6 @@ export function isNativeRecognizerSupported(): boolean {
   return getConstructor() !== null;
 }
 
-/**
- * Whether the browser said it can keep the audio on the device, as last asked.
- *
- * Held here rather than looked up when needed because the answer arrives as a
- * promise and listening cannot afford to wait for one: it has to begin in the click
- * that asked for it. Unknown counts as no, which only means on-device recognition
- * is not requested on the very first attempt.
- */
-let recognisesLocally = false;
-
-/**
- * Asks whether on-device recognition is available, for the next time listening
- * starts. Called while the button is being set up, well away from the click.
- */
-export async function probeLocalRecognition(language: string): Promise<void> {
-  const Recognition = getConstructor();
-  if (!Recognition?.available) {
-    recognisesLocally = false;
-    return;
-  }
-  try {
-    recognisesLocally =
-      (await Recognition.available({ langs: [language], processLocally: true })) === 'available';
-  } catch {
-    recognisesLocally = false;
-  }
-}
-
 export function createNativeRecognizer(): Recognizer {
   return {
     id: 'native',
@@ -104,10 +74,16 @@ export function createNativeRecognizer(): Recognizer {
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-      // Requested only where the browser has already said it can, so that the audio
-      // stays on the device and the search keeps working offline. Elsewhere the
-      // default stands, and nothing here waits on an answer.
-      if (recognisesLocally) recognition.processLocally = true;
+      // On-device recognition is never asked for, neither by probing
+      // SpeechRecognition.available({processLocally: true}) nor by setting
+      // `processLocally` here. Both reach for media.mojom.OnDeviceSpeechRecognition,
+      // and on Chromium builds that advertise the API without providing that
+      // interface (Samsung Internet, and Perplexity's Comet) the browser kills the
+      // renderer process on the spot: "No binder found for interface
+      // media.mojom.OnDeviceSpeechRecognition". That happens below the JS layer, so
+      // it cannot be caught, and Comet reports an unmodified Chrome user agent, so
+      // affected builds cannot be told apart from a working one beforehand. Vendor
+      // recognition, which is the default, works on all of them.
 
       let heard = '';
       const transcript = new Promise<string>((resolve, reject) => {
