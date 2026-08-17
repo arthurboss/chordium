@@ -28,6 +28,7 @@ describe("useInitSearchStateEffect", () => {
     location: { search: "", pathname: "/search" },
     isInitialized: { current: false },
     isClearing: false,
+    activeArtist: null,
     setInput: vi.fn(),
     setSubmittedQuery: vi.fn(),
     setOriginalQuery: vi.fn(),
@@ -217,6 +218,39 @@ describe("useInitSearchStateEffect", () => {
     });
 
     expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips re-deriving activeArtist when it already matches the current path - set synchronously by an in-app artist click', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/ac-dc" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "ac-dc"),
+      activeArtist: { displayName: "AC/DC", path: "ac-dc", songCount: 95 },
+    };
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).not.toHaveBeenCalled();
+    expect(mockOptionsWithArtistPage.setInput).not.toHaveBeenCalled();
+  });
+
+  it('re-derives activeArtist from the URL when landing on a different artist than the one already active', () => {
+    const mockOptionsWithArtistPage = {
+      ...mockOptions,
+      location: { search: "", pathname: "/oasis" },
+      isOnArtistPage: vi.fn(() => true),
+      getCurrentArtistPath: vi.fn(() => "oasis"),
+      activeArtist: { displayName: "AC/DC", path: "ac-dc", songCount: 95 },
+    };
+
+    renderHook(() => useInitSearchStateEffect(mockOptionsWithArtistPage));
+
+    expect(mockOptionsWithArtistPage.setActiveArtist).toHaveBeenCalledWith({
+      displayName: "oasis",
+      path: "oasis",
+      songCount: null,
+    });
   });
 
   it('should initialize the search from the q parameter', () => {

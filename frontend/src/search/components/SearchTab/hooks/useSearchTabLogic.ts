@@ -97,6 +97,7 @@ export function useSearchTabLogic(
     location,
     isInitialized,
     isClearing,
+    activeArtist,
     setInput,
     setSubmittedQuery,
     setOriginalQuery,
@@ -146,15 +147,19 @@ export function useSearchTabLogic(
   }
 
   function handleArtistSelect(artist) {
-    setActiveArtist(artist);
+    // setActiveArtist and the URL change land in the same transition, so they
+    // commit together as one paint instead of the artist switch forcing an
+    // urgent render that the URL update then trails behind - the mismatch
+    // between the two is what read as the results card blinking.
     startTransition(() => {
+      setActiveArtist(artist);
       navigateToArtist(artist);
     });
   }
 
   function handleBackToArtistList() {
-    setActiveArtist(null);
     startTransition(() => {
+      setActiveArtist(null);
       // Return to the search that led here, not to whatever is in the field now
       const query = originalQuery || submittedQuery;
       navigate(query ? `/search?q=${encodeURIComponent(query)}` : "/search", { replace: true });

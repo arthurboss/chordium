@@ -9,6 +9,7 @@ interface InitSearchStateOptions {
   location: { search: string; pathname: string };
   isInitialized: React.MutableRefObject<boolean>;
   isClearing: boolean;
+  activeArtist: Artist | null;
   setInput: (value: string) => void;
   setSubmittedQuery: (value: string) => void;
   setOriginalQuery: (value: string) => void;
@@ -24,6 +25,7 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
     location,
     isInitialized,
     isClearing,
+    activeArtist,
     setInput,
     setSubmittedQuery,
     setOriginalQuery,
@@ -74,6 +76,17 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
     if (isOnArtistPage() && !isInitialized.current) {
       const artistPath = getCurrentArtistPath();
       if (!artistPath) return;
+
+      // An in-app artist click already sets activeArtist itself, in the same
+      // transition as the navigate that lands here - re-deriving it from the
+      // URL a moment later would just force a redundant extra render (and,
+      // since it defaults songCount to null, a slightly worse-informed one)
+      // for no visible benefit. Only a genuine fresh load of this URL - a
+      // refresh, or a direct link - reaches this with no activeArtist yet.
+      if (activeArtist?.path === artistPath) {
+        isInitialized.current = true;
+        return;
+      }
 
       // Prefer stored displayName (set when navigating from artist selection) over
       // fromSlug. Kept (not removed) so it survives repeated back-navigation to

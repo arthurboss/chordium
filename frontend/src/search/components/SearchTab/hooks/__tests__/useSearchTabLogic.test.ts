@@ -34,12 +34,14 @@ Object.defineProperty(window, 'sessionStorage', {
   writable: true,
 });
 
-// Mock useTransition
+// Mock useTransition - runs its callback synchronously, same as real
+// startTransition does for the state updates inside it; only the "is this
+// deferred" pending flag is faked.
 vi.mock("react", async () => {
   const actual = await vi.importActual("react");
   return {
     ...actual,
-    useTransition: () => [false, vi.fn()],
+    useTransition: () => [false, (callback: () => void) => callback()],
   };
 });
 
