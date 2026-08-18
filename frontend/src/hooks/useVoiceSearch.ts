@@ -52,6 +52,9 @@ const BLOCKED_TOAST_ID = 'voice-microphone-blocked';
  */
 let lingeringIndicatorExplained = false;
 
+/** Long enough to read two sentences without having to catch them. */
+const LINGERING_INDICATOR_TOAST_MS = 7000;
+
 /**
  * Where each platform hides the setting. Spelled out rather than assembled from the
  * platform name so that every key can be found by searching for it.
@@ -158,6 +161,9 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     lingeringIndicatorExplained = true;
     toast.info(i18n.t('notifications:voiceMicrophoneLingers'), {
       description: i18n.t('notifications:voiceMicrophoneLingersDesc'),
+      // Longer than a toast's usual few seconds: it is two sentences explaining
+      // something alarming, and the default gives barely enough time to read one.
+      duration: LINGERING_INDICATOR_TOAST_MS,
     });
   }, [i18n]);
 

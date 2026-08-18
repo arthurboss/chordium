@@ -348,6 +348,8 @@ describe('useVoiceSearch explains the lingering microphone indicator', () => {
     await waitFor(() =>
       expect(toastInfo).toHaveBeenCalledWith('notifications:voiceMicrophoneLingers', {
         description: 'notifications:voiceMicrophoneLingersDesc',
+        // Two sentences about something alarming, so longer than a toast's usual few.
+        duration: 7000,
       })
     );
   });
