@@ -91,7 +91,36 @@ export function createNativeRecognizer(): Recognizer {
       // recognition, which is the default, works on all of them.
 
       let heard = '';
+
+      /**
+       * Lets go of the microphone, once and for all.
+       *
+       * Safari holds it after a recognition has ended, so the reader was still shown
+       * as being listened to long after their search had come back, with nothing on the
+       * page that would stop it. Chrome lets go by itself. Aborting makes both let go,
+       * and the handlers come off first so that aborting cannot arrive back through
+       * them.
+       */
+      let releasing = false;
+      const release = () => {
+        if (releasing) return;
+        releasing = true;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+        try {
+          recognition.abort();
+        } catch {
+          // Already finished, so there is nothing left to let go of.
+        }
+      };
+
+      // Held so that abandoning a session settles it rather than leaving whoever is
+      // waiting on the transcript waiting for good.
+      let giveUp!: (transcript: string) => void;
+
       const transcript = new Promise<string>((resolve, reject) => {
+        giveUp = resolve;
         recognition.onresult = (event) => {
           for (let i = 0; i < event.results.length; i += 1) {
             const result = event.results[i];
@@ -102,6 +131,7 @@ export function createNativeRecognizer(): Recognizer {
         // their mind, so they settle empty rather than as failures.
         recognition.onerror = (event) => {
           const error = event.error ?? 'unknown';
+          release();
           if (error === 'no-speech' || error === 'aborted') resolve('');
           // Told apart from any other failure so that the reader is asked for the
           // microphone again rather than shown a fault they cannot act on.
@@ -111,15 +141,23 @@ export function createNativeRecognizer(): Recognizer {
         };
         // Settled on end rather than on the first result, so a recognition that
         // hears nothing finishes as an empty transcript instead of hanging.
-        recognition.onend = () => resolve(heard.trim());
+        recognition.onend = () => {
+          release();
+          resolve(heard.trim());
+        };
       });
 
       // Started in the same turn as the click, with nothing awaited in between.
       recognition.start();
 
       return {
+        // Asking it to stop is asking for what it heard, so the microphone is let go
+        // when the recognition reports itself ended rather than here.
         stop: () => recognition.stop(),
-        abort: () => recognition.abort(),
+        abort: () => {
+          release();
+          giveUp('');
+        },
         transcript,
       } satisfies RecognitionSession;
     },

@@ -96,3 +96,97 @@ describe('on-device recognition', () => {
     expect(seen).not.toHaveProperty('processLocally');
   });
 });
+
+/**
+ * Safari holds the microphone after a recognition has ended, so the reader was left
+ * shown as being listened to long after their search had come back, with nothing on
+ * the page that would stop it. Chrome lets go by itself, which is why this only
+ * showed there.
+ */
+describe('letting go of the microphone', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** A recognition that records what was asked of it and can be driven by hand. */
+  function stubRecognition() {
+    const calls: string[] = [];
+    class Recognition {
+      lang = '';
+      continuous = false;
+      interimResults = false;
+      maxAlternatives = 1;
+      onresult: ((event: unknown) => void) | null = null;
+      onerror: ((event: { error?: string }) => void) | null = null;
+      onend: (() => void) | null = null;
+      static latest: Recognition | null = null;
+      constructor() {
+        Recognition.latest = this;
+      }
+      start() {
+        calls.push('start');
+      }
+      stop() {
+        calls.push('stop');
+      }
+      abort() {
+        calls.push('abort');
+      }
+    }
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('SpeechRecognition', Recognition);
+    return { calls, get current() { return Recognition.latest!; } };
+  }
+
+  it('lets go once the recognition reports itself ended', async () => {
+    const stub = stubRecognition();
+    const { createNativeRecognizer } = await import('../native-recognizer');
+
+    const session = createNativeRecognizer().listen('en');
+    stub.current.onend?.();
+    await session.transcript;
+
+    expect(stub.calls).toContain('abort');
+  });
+
+  /** Aborting twice, or after it has already ended, must not reach for it again. */
+  it('lets go only once, however often it is asked', async () => {
+    const stub = stubRecognition();
+    const { createNativeRecognizer } = await import('../native-recognizer');
+
+    const session = createNativeRecognizer().listen('en');
+    stub.current.onend?.();
+    await session.transcript;
+    session.abort();
+    session.abort();
+
+    expect(stub.calls.filter((call) => call === 'abort')).toHaveLength(1);
+  });
+
+  /**
+   * Abandoning a session has to settle it too, or whoever is waiting on the transcript
+   * waits for good. A reader who changed their mind said nothing, so it settles empty.
+   */
+  it('settles empty when abandoned, rather than leaving the caller waiting', async () => {
+    const stub = stubRecognition();
+    const { createNativeRecognizer } = await import('../native-recognizer');
+
+    const session = createNativeRecognizer().listen('en');
+    session.abort();
+
+    await expect(session.transcript).resolves.toBe('');
+  });
+
+  /**
+   * Asking it to stop is asking for what it heard, so the microphone stays until the
+   * recognition itself reports ended: letting go here would cut off the answer.
+   */
+  it('does not let go merely because it was asked to stop', async () => {
+    const stub = stubRecognition();
+    const { createNativeRecognizer } = await import('../native-recognizer');
+
+    const session = createNativeRecognizer().listen('en');
+    session.stop();
+
+    expect(stub.calls).toContain('stop');
+    expect(stub.calls).not.toContain('abort');
+  });
+});
