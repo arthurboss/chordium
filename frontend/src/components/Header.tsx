@@ -28,7 +28,7 @@ const Header = () => {
             <img
               src={logoSrc}
               alt="Chordium"
-              width={382}
+              width={411}
               height={100}
               className="h-8 w-auto"
               onError={() => setFailedSrc(logoSrc)}
