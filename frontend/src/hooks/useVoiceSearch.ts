@@ -80,9 +80,6 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   // Guards against a second press asking for the microphone while the first prompt is
   // still up, which the state cannot express without misdescribing itself.
   const requestingRef = useRef(false);
-  // Held from the moment permission is granted until listening has its own hold on the
-  // device, so that it is never taken down and brought back up in between.
-  const heldStreamRef = useRef<MediaStream | null>(null);
 
   // Kept in a ref so a transcript arriving late calls the current handler rather than
   // the one that happened to be in scope when listening started.
@@ -133,12 +130,6 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     sessionRef.current.stop();
   }, []);
 
-  const releaseHeldMicrophone = useCallback(() => {
-    if (!heldStreamRef.current) return;
-    releaseMicrophone(heldStreamRef.current);
-    heldStreamRef.current = null;
-  }, []);
-
   /**
    * Opens the microphone and hands back what was heard.
    *
@@ -161,7 +152,6 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
         } catch (cause) {
           setState('idle');
           if (!quietly) setError('failed');
-          releaseHeldMicrophone();
           console.error('Voice search could not start:', cause);
           return false;
         }
@@ -178,12 +168,10 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
               attempt();
               return;
             }
-            releaseHeldMicrophone();
             if (transcript) onTranscriptRef.current(transcript);
           })
           .catch((cause: unknown) => {
             sessionRef.current = null;
-            releaseHeldMicrophone();
             const unavailable = cause instanceof MicrophoneUnavailableError;
             // A grant withdrawn in browser settings after the fact leaves a remembered
             // one that is no longer true, so it is dropped and asked for again rather
@@ -200,7 +188,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
 
       return attempt();
     },
-    [language, releaseHeldMicrophone]
+    [language]
   );
 
   /**
@@ -238,11 +226,20 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       requestingRef.current = true;
       void requestMicrophone()
         .then((stream) => {
-          heldStreamRef.current = stream;
+          // Let go before listening takes over, not after. Android hands the
+          // microphone to one holder at a time, so keeping ours open left its
+          // recogniser listening to nothing at all: it started, heard silence and
+          // reported it, on every browser there. Desktop shares the device happily,
+          // which is why one press worked there and nowhere else.
+          releaseMicrophone(stream);
           // Quietly, because a browser that insists on the press itself will refuse
-          // this and that is not a failure worth reporting: it leaves the button idle
-          // and pulsing, which asks for the press it wants.
-          if (!beginListening(true)) releaseHeldMicrophone();
+          // this and that is not a failure worth reporting. The reader is told it is
+          // ready and asked for the press the browser wants instead.
+          if (!beginListening(true)) {
+            toast.info(i18n.t('notifications:voiceMicrophoneReady'), {
+              description: i18n.t('notifications:voiceMicrophoneReadyDesc'),
+            });
+          }
         })
         .catch((cause: unknown) => {
           const refused = cause instanceof MicrophoneUnavailableError && cause.denied;
@@ -259,7 +256,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     if (state !== 'idle') return;
 
     beginListening();
-  }, [beginListening, releaseHeldMicrophone, state]);
+  }, [beginListening, i18n, state]);
 
   // A microphone left open when the page moves on would keep recording, so any session
   // still running is abandoned on the way out.
@@ -267,8 +264,6 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     () => () => {
       sessionRef.current?.abort();
       sessionRef.current = null;
-      if (heldStreamRef.current) releaseMicrophone(heldStreamRef.current);
-      heldStreamRef.current = null;
     },
     []
   );

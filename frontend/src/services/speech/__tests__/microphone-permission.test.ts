@@ -101,11 +101,11 @@ describe('requestMicrophone', () => {
   });
 
   /**
-   * Releasing it here would take the device down again, and listening that starts
-   * straight afterwards would open against a microphone still being torn down and
-   * hear nothing. That is the whole reason the caller is given it to hold.
+   * Handed back rather than closed here, so that the caller decides when to let go:
+   * Android allows one holder at a time, and releasing has to happen before listening
+   * reaches for the device rather than whenever this call happens to finish.
    */
-  it('hands the stream back still open, for listening to take over', async () => {
+  it('hands the stream back still open, for the caller to let go of', async () => {
     const stop = vi.fn();
     const stream = { getTracks: () => [{ stop }] };
     vi.stubGlobal('navigator', {
@@ -162,7 +162,7 @@ describe('requestMicrophone', () => {
 });
 
 describe('releaseMicrophone', () => {
-  it('closes the device, once listening has its own hold on it', () => {
+  it('closes the device, so that whatever listens next can have it', () => {
     const stop = vi.fn();
 
     releaseMicrophone({ getTracks: () => [{ stop }] } as unknown as MediaStream);

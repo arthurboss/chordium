@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { Loader2, Mic, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -11,9 +10,6 @@ interface VoiceSearchButtonProps {
   onStop: () => void;
   disabled?: boolean;
 }
-
-/** Two pulses: the ping cycle is a second, and longer than that starts to nag. */
-const JUST_ALLOWED_MS = 2000;
 
 /**
  * Asks for a spoken search, as a segment of the search field itself sitting ahead of
@@ -31,31 +27,6 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
   const needsSetup = state === "needs-setup";
   const needsPermission = state === "needs-permission";
   const blocked = state === "blocked";
-
-  /**
-   * Pulsed once the microphone has just been allowed, because the press that allowed
-   * it was not the press that listens: attention is on the system prompt at that
-   * moment, and the icon settling from muted to ordinary is easy to return to and
-   * miss. It says the next press is the one that hears you.
-   */
-  const [justAllowed, setJustAllowed] = useState(false);
-  const previousState = useRef(state);
-  useEffect(() => {
-    const wasAwaitingPermission = previousState.current === "needs-permission";
-    previousState.current = state;
-    if (wasAwaitingPermission && state === "idle") setJustAllowed(true);
-    // Pressing it is the point of the hint, so anything but waiting to be pressed
-    // ends it early.
-    else if (state !== "idle") setJustAllowed(false);
-  }, [state]);
-
-  // Timed against the hint rather than the state, so that pressing record while it
-  // pulses does not cancel the timer and strand the pulse on forever.
-  useEffect(() => {
-    if (!justAllowed) return;
-    const settle = setTimeout(() => setJustAllowed(false), JUST_ALLOWED_MS);
-    return () => clearTimeout(settle);
-  }, [justAllowed]);
 
   const label = (() => {
     if (needsSetup) return t("voiceSearch.setUp");
@@ -95,23 +66,22 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
       ) : (
         <Mic className="h-4 w-4" />
       )}
-      {(listening || justAllowed) && (
+      {listening && (
         <span
           aria-hidden
-          className={cn(
-            // Inset rather than centred by a translate, because ping animates the
-            // transform: a translate here would be dropped the moment it began and
-            // the ring would expand from the corner.
-            //
-            // Inset by a quarter of the segment leaves a ring half its width, so that
-            // ping doubling it lands exactly on the segment's own bounds. The field
-            // clips whatever leaves it, so a wider ring would expand into a straight
-            // edge.
-            "absolute inset-2.5 animate-ping rounded-full border motion-reduce:animate-none",
-            // Red says recording. Being ready is not an alarm, so it borrows the
-            // ordinary accent instead.
-            listening ? "border-destructive" : "border-primary"
-          )}
+          // Kept for recording alone. It once said "ready" too, in another colour, but
+          // a ring pulsing beside a microphone reads as live whatever colour it is,
+          // and saying "ready" and "recording" the same way left a reader who did not
+          // already know the app unable to tell which was which. Being ready is said
+          // in words now.
+          //
+          // Inset rather than centred by a translate, because ping animates the
+          // transform: a translate here would be dropped the moment it began and the
+          // ring would expand from the corner. Inset by a quarter of the segment
+          // leaves a ring half its width, so that ping doubling it lands exactly on
+          // the segment's own bounds; the field clips whatever leaves it, so a wider
+          // ring would expand into a straight edge.
+          className="absolute inset-2.5 animate-ping rounded-full border border-destructive motion-reduce:animate-none"
         />
       )}
     </button>

@@ -47,5 +47,7 @@
   "voiceMicrophoneBlockedChrome": "Klicke auf das Schloss in der Adressleiste, setze Mikrofon auf Erlauben und lade die Seite neu.",
   "voiceMicrophoneBlockedFirefox": "Klicke auf das Schloss in der Adressleiste, hebe die Mikrofon-Blockierung auf und lade die Seite neu.",
   "voiceMicrophoneBlockedGeneric": "Erlaube das Mikrofon für diese Seite in den Browsereinstellungen und lade die Seite neu.",
-  "voiceMicrophoneBlockedDismiss": "Verstanden"
+  "voiceMicrophoneBlockedDismiss": "Verstanden",
+  "voiceMicrophoneReady": "Mikrofon bereit",
+  "voiceMicrophoneReadyDesc": "Tippe auf das Mikrofon, um zu sprechen."
 }

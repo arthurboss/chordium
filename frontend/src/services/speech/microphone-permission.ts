@@ -69,11 +69,12 @@ export async function getMicrophonePermission(): Promise<MicrophonePermission> {
 /**
  * Asks for the microphone and hands back the open stream.
  *
- * The stream is not what was wanted, since the recogniser opens its own, but it is
- * worth holding rather than dropping: releasing it the moment the grant arrives
- * takes the device down again, and listening that starts straight afterwards can
- * open against a microphone still being torn down and hear nothing. Held until
- * listening has its own hold, the device never goes down in between.
+ * The stream is not what was wanted, since the recogniser opens its own. It is handed
+ * back rather than closed here so that the caller decides when to let go, which
+ * matters: Android hands the microphone to one holder at a time, so ours has to be
+ * released before listening reaches for it, or its recogniser starts against a device
+ * it cannot have and reports silence. Desktop shares it happily and does not care
+ * either way.
  *
  * The caller owns it, and must release it with `releaseMicrophone`.
  */
@@ -121,7 +122,10 @@ export function getMicrophoneResetPlatform(): MicrophoneResetPlatform {
   return 'generic';
 }
 
-/** Lets go of a stream from `requestMicrophone`, closing the device with it. */
+/**
+ * Lets go of a stream from `requestMicrophone`, closing the device with it, so that
+ * whatever listens next can have it.
+ */
 export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach((track) => track.stop());
 }

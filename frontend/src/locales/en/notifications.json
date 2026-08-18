@@ -47,5 +47,7 @@
   "voiceMicrophoneBlockedChrome": "Click the padlock in the address bar, set Microphone to Allow, then reload the page.",
   "voiceMicrophoneBlockedFirefox": "Click the padlock in the address bar, remove the microphone block, then reload the page.",
   "voiceMicrophoneBlockedGeneric": "Allow the microphone for this site in your browser settings, then reload the page.",
-  "voiceMicrophoneBlockedDismiss": "Got it"
+  "voiceMicrophoneBlockedDismiss": "Got it",
+  "voiceMicrophoneReady": "Microphone ready",
+  "voiceMicrophoneReadyDesc": "Tap the microphone to speak."
 }

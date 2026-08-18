@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 
 const toastError = vi.hoisted(() => vi.fn());
+const toastInfo = vi.hoisted(() => vi.fn());
 const canListen = vi.hoisted(() => vi.fn());
 const requiresDownloadConsent = vi.hoisted(() => vi.fn());
 const resolveRecognizerKind = vi.hoisted(() => vi.fn());
@@ -11,7 +12,7 @@ const forgetMicrophoneGrant = vi.hoisted(() => vi.fn());
 const requestMicrophone = vi.hoisted(() => vi.fn());
 const releaseMicrophone = vi.hoisted(() => vi.fn());
 
-vi.mock('sonner', () => ({ toast: { error: toastError, dismiss: vi.fn() } }));
+vi.mock('sonner', () => ({ toast: { error: toastError, info: toastInfo, dismiss: vi.fn() } }));
 
 // Keys stand in for the copy, so a message only needs to be distinguishable.
 vi.mock('react-i18next', () => ({
@@ -174,14 +175,24 @@ describe('useVoiceSearch listens as soon as the microphone is allowed', () => {
   });
 
   /**
-   * Released only once listening holds the device itself, so it never goes down and
-   * comes back up in between, which is what left the first recording silent.
+   * Android hands the microphone to one holder at a time, so ours has to be let go
+   * before listening reaches for it. Held across the handover, its recogniser started
+   * against a device it could not have and reported silence on every browser there.
    */
-  it('keeps the microphone open across the handover', async () => {
+  it('lets go of the microphone before listening reaches for it', async () => {
+    const order: string[] = [];
+    releaseMicrophone.mockImplementation(() => void order.push('release'));
+    createRecognizer.mockImplementation(() => {
+      order.push('listen');
+      return {
+        id: 'native',
+        listen: () => ({ stop: vi.fn(), abort: vi.fn(), transcript: new Promise<string>(() => {}) }),
+      };
+    });
+
     await pressOnce();
 
-    await waitFor(() => expect(createRecognizer).toHaveBeenCalled());
-    expect(releaseMicrophone).not.toHaveBeenCalled();
+    await waitFor(() => expect(order).toEqual(['release', 'listen']));
   });
 
   /**
@@ -200,8 +211,11 @@ describe('useVoiceSearch listens as soon as the microphone is allowed', () => {
     const { result } = await pressOnce();
 
     await waitFor(() => expect(result.current.state).toBe('idle'));
+    // Said in words, because a pulsing ring beside a microphone reads as recording.
+    expect(toastInfo).toHaveBeenCalledWith('notifications:voiceMicrophoneReady', {
+      description: 'notifications:voiceMicrophoneReadyDesc',
+    });
     expect(toastError).not.toHaveBeenCalled();
-    expect(releaseMicrophone).toHaveBeenCalled();
   });
 });
 

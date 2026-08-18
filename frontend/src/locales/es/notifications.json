@@ -47,5 +47,7 @@
   "voiceMicrophoneBlockedChrome": "Haz clic en el candado en la barra de direcciones, pon Micrófono en Permitir y recarga la página.",
   "voiceMicrophoneBlockedFirefox": "Haz clic en el candado en la barra de direcciones, quita el bloqueo del micrófono y recarga la página.",
   "voiceMicrophoneBlockedGeneric": "Permite el micrófono para este sitio en la configuración del navegador y recarga la página.",
-  "voiceMicrophoneBlockedDismiss": "Entendido"
+  "voiceMicrophoneBlockedDismiss": "Entendido",
+  "voiceMicrophoneReady": "Micrófono listo",
+  "voiceMicrophoneReadyDesc": "Toca el micrófono para hablar."
 }
