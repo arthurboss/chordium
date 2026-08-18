@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
+import VirtualizedList from "@/components/ui/VirtualizedList";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
+import { CARD_HEIGHTS } from "@/constants/ui-constants";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
 
 function sortChordSheets(items: ChordSheetListItem[], sort: SortOption): ChordSheetListItem[] {
@@ -32,17 +33,12 @@ const ChordSheetList = ({
   onChordSheetSelect,
   onDeleteChordSheet,
   onUploadClick,
-  tabState,
-  setTabState,
 }: ChordSheetListProps) => {
   const { t } = useTranslation();
-  const listRef = useRef<HTMLDivElement>(null);
   const [sort, setSort] = useState<SortOption>("recent");
 
-  useRestoreScrollPosition(listRef, tabState?.scroll);
-  usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
-
   const sorted = sortChordSheets(chordSheets, sort);
+  const shouldVirtualize = sorted.length >= 15;
 
   return (
     <div>
@@ -61,7 +57,22 @@ const ChordSheetList = ({
               </SelectContent>
             </Select>
           </div>
-          <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
+
+          {shouldVirtualize ? (
+            <VirtualizedList
+              items={sorted}
+              itemHeight={CARD_HEIGHTS.RESULT_CARD}
+              renderItem={({ item, style }) => (
+                <div style={style}>
+                  <ChordSheetCard
+                    chordSheet={item}
+                    onView={onChordSheetSelect}
+                    onDelete={() => onDeleteChordSheet(item.path)}
+                  />
+                </div>
+              )}
+            />
+          ) : (
             <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {sorted.map((storedChordSheet, index) => (
                 <ChordSheetCard
@@ -72,7 +83,7 @@ const ChordSheetList = ({
                 />
               ))}
             </div>
-          </div>
+          )}
         </>
       ) : (
         <div className="text-center py-8">
