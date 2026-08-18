@@ -135,6 +135,13 @@ export default defineConfig(({ mode }) => {
         workbox: {
           cleanupOutdatedCaches: true,
           clientsClaim: true,
+          // Activated without waiting to be asked, because asking is not always
+          // possible: a build that crashes on load never renders the prompt that
+          // would accept the next one, which leaves the reader stuck on the broken
+          // build with no way forward. skipWaiting is run by the incoming worker, so
+          // it takes over regardless of what the installed one would have done, and
+          // is what makes a bad release recoverable at all.
+          skipWaiting: true,
 
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,json}'],
           // Re-enable navigateFallback but with better caching

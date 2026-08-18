@@ -17,6 +17,14 @@
     "search": "Search",
     "clearAriaLabel": "Clear search"
   },
+  "searchHistory": {
+    "heading": "Recent searches",
+    "clear": "Clear",
+    "clearTitle": "Clear recent searches?",
+    "clearBody": "Recent searches and the results saved with them are removed, so searching for them again needs a connection. This cannot be undone.",
+    "clearConfirm": "Clear",
+    "cancel": "Cancel"
+  },
   "searchResults": {
     "noResults": "No results were found.",
     "artists": "Artists",
@@ -235,7 +243,6 @@
     "heading": "Search by voice",
     "hint": "Download once ({{size}} MB) to search by speaking, on your device.",
     "hintReady": "Delete to free up {{size}} MB. Searching by voice stops working until you download it again.",
-    "hintNative": "Your browser recognises speech itself, so nothing needs downloading.",
     "download": "Download voice search",
     "cancel": "Cancel download ({{percent}}%)",
     "delete": "Delete voice search",
@@ -245,6 +252,8 @@
     "start": "Search by voice",
     "stop": "Stop listening",
     "working": "Working out what you said",
-    "setUp": "Set up voice search"
+    "setUp": "Set up voice search",
+    "allowMicrophone": "Allow the microphone",
+    "blocked": "Microphone blocked"
   }
 }

@@ -183,25 +183,27 @@ const LanguageSwitcher: React.FC = () => {
   // reported here so the one place that manages languages manages this too, which is
   // also where the microphone sends a reader who still needs the download.
   const speechPercent = Math.round(speech.progress * 100);
-  const speechSection = speech.backend !== "none" && (
+  /*
+   * Only shown where there is something to do about it. A browser that recognises
+   * speech itself needs nothing downloaded, nothing removed and nothing decided, so
+   * saying as much was telling the reader about a setting that is not a setting.
+   *
+   * One button carries the whole state: it starts the download, then fills with its
+   * progress and offers to stop, then offers to remove it.
+   */
+  const speechSection = speech.backend === "local-model" && (
     <div className="border-t px-4 py-3">
       <p className="flex items-center gap-1.5 text-sm font-medium">
         <Mic className="h-3.5 w-3.5" />
         {t("voiceSearch.heading")}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {speech.backend === "native"
-          ? t("voiceSearch.hintNative")
-          : speech.status === "present"
-            ? t("voiceSearch.hintReady", { size: speech.sizeMb })
-            : t("voiceSearch.hint", { size: speech.sizeMb })}
+        {speech.status === "present"
+          ? t("voiceSearch.hintReady", { size: speech.sizeMb })
+          : t("voiceSearch.hint", { size: speech.sizeMb })}
       </p>
 
-      {/* Only the fallback has anything to act on. One button carries its whole
-          state: it starts the download, then fills with its progress and offers to
-          stop, then offers to remove it. */}
-      {speech.backend === "local-model" && (
-        <Button
+      <Button
           variant="outline"
           size="sm"
           className={cn(
@@ -238,9 +240,8 @@ const LanguageSwitcher: React.FC = () => {
                 {t("voiceSearch.download")}
               </>
             )}
-          </span>
-        </Button>
-      )}
+        </span>
+      </Button>
     </div>
   );
 

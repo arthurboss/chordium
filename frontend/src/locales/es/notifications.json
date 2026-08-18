@@ -35,5 +35,21 @@
   "jamSessionJoinFailed": "No se pudo unir a la sesión. Verifica la cadena de conexión e inténtalo de nuevo.",
   "jamSessionInvalidString": "Cadena de conexión no válida",
   "connectionStringCopied": "¡Cadena de conexión copiada al portapapeles!",
-  "cameraError": "No se pudo acceder a la cámara. Por favor, verifica los permisos."
+  "cameraError": "No se pudo acceder a la cámara. Por favor, verifica los permisos.",
+  "voiceMicrophoneDenied": "Micrófono no permitido",
+  "voiceMicrophoneDeniedDesc": "Permite el acceso al micrófono en la configuración del navegador para buscar por voz.",
+  "voiceSearchFailed": "Error en la búsqueda por voz",
+  "voiceSearchFailedDesc": "Algo salió mal al escuchar. Por favor, inténtalo de nuevo.",
+  "voiceMicrophoneBlocked": "Micrófono bloqueado",
+  "voiceMicrophoneBlockedIos": "Toca aA en la barra de direcciones, elige Ajustes del sitio web, pon Micrófono en Permitir y recarga la página.",
+  "voiceMicrophoneBlockedSafari": "Abre Safari, elige Ajustes para esta web, pon Micrófono en Permitir y recarga la página.",
+  "voiceMicrophoneBlockedAndroid": "Toca el candado en la barra de direcciones, abre Permisos, pon Micrófono en Permitir y recarga la página.",
+  "voiceMicrophoneBlockedChrome": "Haz clic en el candado en la barra de direcciones, pon Micrófono en Permitir y recarga la página.",
+  "voiceMicrophoneBlockedFirefox": "Haz clic en el candado en la barra de direcciones, quita el bloqueo del micrófono y recarga la página.",
+  "voiceMicrophoneBlockedGeneric": "Permite el micrófono para este sitio en la configuración del navegador y recarga la página.",
+  "voiceMicrophoneBlockedDismiss": "Entendido",
+  "voiceMicrophoneReady": "Micrófono listo",
+  "voiceMicrophoneReadyDesc": "Toca el micrófono para hablar.",
+  "voiceMicrophoneLingers": "Safari deja encendido el indicador del micrófono",
+  "voiceMicrophoneLingersDesc": "No se está grabando nada. Es un error de Safari, y el indicador desaparece al recargar o cerrar la pestaña."
 }

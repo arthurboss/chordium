@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import {
   canListen,
   createRecognizer,
   requiresDownloadConsent,
   resolveRecognizerKind,
 } from '@/services/speech/get-recognizer';
+import {
+  forgetMicrophoneGrant,
+  getMicrophonePermission,
+  getMicrophoneResetPlatform,
+  releaseMicrophone,
+  requestMicrophone,
+  type MicrophoneResetPlatform,
+} from '@/services/speech/microphone-permission';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
 import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/speech/types';
 
@@ -13,11 +22,51 @@ import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/
  * Where a spoken search has got to:
  * - "unsupported": this browser cannot hear one at all.
  * - "needs-setup": it could, once the fallback model has been downloaded.
+ * - "needs-permission": it could, once the reader has allowed the microphone.
+ * - "blocked": the microphone was refused, and only browser settings can undo it.
  * - "idle": ready, waiting to be asked.
  * - "listening": the microphone is open.
  * - "working": listening has stopped and the words are being made out.
  */
-export type VoiceSearchState = 'unsupported' | 'needs-setup' | 'idle' | 'listening' | 'working';
+export type VoiceSearchState =
+  | 'unsupported'
+  | 'needs-setup'
+  | 'needs-permission'
+  | 'blocked'
+  | 'idle'
+  | 'listening'
+  | 'working';
+
+/**
+ * Given to every telling of a refused microphone, so that pressing again replaces the
+ * one already up rather than stacking another behind it. Its own id and no wider, so
+ * anything else with something to say still gets said.
+ */
+const BLOCKED_TOAST_ID = 'voice-microphone-blocked';
+
+/**
+ * Said once a session, and not once per search, which would be nagging: the reader only
+ * needs telling why the indicator is lit, not reminding of it every time they speak.
+ * Module-level so that it survives moving between pages, and resets on a reload, which
+ * is also what clears the indicator.
+ */
+let lingeringIndicatorExplained = false;
+
+/** Long enough to read two sentences without having to catch them. */
+const LINGERING_INDICATOR_TOAST_MS = 7000;
+
+/**
+ * Where each platform hides the setting. Spelled out rather than assembled from the
+ * platform name so that every key can be found by searching for it.
+ */
+const RESET_HINTS: Record<MicrophoneResetPlatform, string> = {
+  ios: 'notifications:voiceMicrophoneBlockedIos',
+  safari: 'notifications:voiceMicrophoneBlockedSafari',
+  android: 'notifications:voiceMicrophoneBlockedAndroid',
+  chrome: 'notifications:voiceMicrophoneBlockedChrome',
+  firefox: 'notifications:voiceMicrophoneBlockedFirefox',
+  generic: 'notifications:voiceMicrophoneBlockedGeneric',
+};
 
 interface UseVoiceSearchOptions {
   /** Called with the transcript, once there is one worth acting on. */
@@ -39,6 +88,9 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   const [state, setState] = useState<VoiceSearchState>('unsupported');
   const [error, setError] = useState<string | null>(null);
   const sessionRef = useRef<RecognitionSession | null>(null);
+  // Guards against a second press asking for the microphone while the first prompt is
+  // still up, which the state cannot express without misdescribing itself.
+  const requestingRef = useRef(false);
 
   // Kept in a ref so a transcript arriving late calls the current handler rather than
   // the one that happened to be in scope when listening started.
@@ -52,7 +104,25 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       setState('unsupported');
       return;
     }
-    setState((await requiresDownloadConsent()) ? 'needs-setup' : 'idle');
+    if (await requiresDownloadConsent()) {
+      setState('needs-setup');
+      return;
+    }
+    // Only the browser's own recogniser needs asking ahead of the press. The model
+    // opens the microphone itself and waits for the grant before it records, so it
+    // has nothing to race.
+    if (resolveRecognizerKind() === 'native') {
+      const permission = await getMicrophonePermission();
+      if (permission === 'denied') {
+        setState('blocked');
+        return;
+      }
+      if (permission === 'prompt') {
+        setState('needs-permission');
+        return;
+      }
+    }
+    setState('idle');
   }, []);
 
   useEffect(() => {
@@ -72,6 +142,94 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   }, []);
 
   /**
+   * Says why the microphone indicator is still lit, where it will be.
+   *
+   * WebKit never unsets its audio session after speech recognition finishes, so macOS
+   * and iOS keep showing the microphone as in use until the tab is reloaded or closed:
+   * https://bugs.webkit.org/show_bug.cgi?id=219671, open since 2020. Nothing is being
+   * recorded, but a reader has no way of knowing that, and an app that looks like it is
+   * listening after it was asked to stop is worth a sentence rather than a shrug.
+   *
+   * Every browser on iOS is WebKit, so this is not Safari's alone. The model backend
+   * closes the device properly and says nothing.
+   */
+  const explainLingeringIndicator = useCallback(() => {
+    if (lingeringIndicatorExplained) return;
+    if (resolveRecognizerKind() !== 'native') return;
+    const platform = getMicrophoneResetPlatform();
+    if (platform !== 'ios' && platform !== 'safari') return;
+    lingeringIndicatorExplained = true;
+    toast.info(i18n.t('notifications:voiceMicrophoneLingers'), {
+      description: i18n.t('notifications:voiceMicrophoneLingersDesc'),
+      // Longer than a toast's usual few seconds: it is two sentences explaining
+      // something alarming, and the default gives barely enough time to read one.
+      duration: LINGERING_INDICATOR_TOAST_MS,
+    });
+  }, [i18n]);
+
+  /**
+   * Opens the microphone and hands back what was heard.
+   *
+   * Reports nothing when asked to stay quiet, which is how it is called straight after
+   * a grant: a browser that wants the press itself will refuse that start, and saying
+   * so would be reporting our own attempt as the reader's failure. The button is left
+   * pulsing to invite the press instead.
+   *
+   * Returns whether listening began.
+   */
+  const beginListening = useCallback(
+    (quietly = false) => {
+      let retryCount = 0;
+      const MAX_RETRIES = 1;
+
+      const attempt = (): boolean => {
+        let session: RecognitionSession;
+        try {
+          session = createRecognizer(resolveRecognizerKind()).listen(language);
+        } catch (cause) {
+          setState('idle');
+          if (!quietly) setError('failed');
+          console.error('Voice search could not start:', cause);
+          return false;
+        }
+
+        sessionRef.current = session;
+        setState('listening');
+
+        session.transcript
+          .then((transcript) => {
+            sessionRef.current = null;
+            setState('idle');
+            if (!transcript && retryCount < MAX_RETRIES) {
+              retryCount++;
+              attempt();
+              return;
+            }
+            explainLingeringIndicator();
+            if (transcript) onTranscriptRef.current(transcript);
+          })
+          .catch((cause: unknown) => {
+            sessionRef.current = null;
+            const unavailable = cause instanceof MicrophoneUnavailableError;
+            // A grant withdrawn in browser settings after the fact leaves a remembered
+            // one that is no longer true, so it is dropped and asked for again rather
+            // than kept and retried against a microphone that will keep refusing.
+            if (unavailable) forgetMicrophoneGrant();
+            const refused = unavailable && cause.denied;
+            setState(refused ? 'blocked' : unavailable ? 'needs-permission' : 'idle');
+            setError(refused ? 'blocked' : unavailable ? 'microphone' : 'failed');
+            console.error('Voice search failed:', cause);
+          });
+
+        return true;
+      };
+
+      return attempt();
+    },
+    [language, explainLingeringIndicator]
+  );
+
+  /**
    * Deliberately not an async function. Safari only allows a recognition that begins
    * in the click that asked for it, and an await anywhere before listening starts
    * spends that click: the microphone opens and nothing is ever heard. Everything
@@ -86,46 +244,57 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       openVoiceSetup();
       return;
     }
-    if (state !== 'idle') return;
 
-    let retryCount = 0;
-    const MAX_RETRIES = 1;
+    // Asking again would be refused without so much as a prompt, so the steps out of
+    // it are repeated instead. Said on a press rather than on sight, since that is when
+    // the reader has just asked to be heard and is looking for why they were not.
+    if (state === 'blocked') {
+      setError('blocked');
+      return;
+    }
 
-    const attempt = () => {
-      let session: RecognitionSession;
-      try {
-        session = createRecognizer(resolveRecognizerKind()).listen(language);
-      } catch (cause) {
-        setState('idle');
-        setError('failed');
-        console.error('Voice search could not start:', cause);
-        return;
-      }
-
-      sessionRef.current = session;
-      setState('listening');
-
-      session.transcript
-        .then((transcript) => {
-          sessionRef.current = null;
-          setState('idle');
-          if (!transcript && retryCount < MAX_RETRIES) {
-            retryCount++;
-            attempt();
-            return;
+    // Permission is the one thing here that has to be waited for, so it is asked for
+    // on its own and listening follows it directly. The reader presses once: the
+    // prompt answers, and what they say next is already being heard.
+    if (state === 'needs-permission') {
+      // A second press while the prompt is up would only ask twice, so it is dropped.
+      // The state is left alone meanwhile: "working" would say the words are being
+      // made out, which is not what is happening.
+      if (requestingRef.current) return;
+      requestingRef.current = true;
+      void requestMicrophone()
+        .then((stream) => {
+          // Let go before listening takes over, not after. Android hands the
+          // microphone to one holder at a time, so keeping ours open left its
+          // recogniser listening to nothing at all: it started, heard silence and
+          // reported it, on every browser there. Desktop shares the device happily,
+          // which is why one press worked there and nowhere else.
+          releaseMicrophone(stream);
+          // Quietly, because a browser that insists on the press itself will refuse
+          // this and that is not a failure worth reporting. The reader is told it is
+          // ready and asked for the press the browser wants instead.
+          if (!beginListening(true)) {
+            toast.info(i18n.t('notifications:voiceMicrophoneReady'), {
+              description: i18n.t('notifications:voiceMicrophoneReadyDesc'),
+            });
           }
-          if (transcript) onTranscriptRef.current(transcript);
         })
         .catch((cause: unknown) => {
-          sessionRef.current = null;
-          setState('idle');
-          setError(cause instanceof MicrophoneUnavailableError ? 'microphone' : 'failed');
-          console.error('Voice search failed:', cause);
+          const refused = cause instanceof MicrophoneUnavailableError && cause.denied;
+          if (refused) setState('blocked');
+          setError(refused ? 'blocked' : 'microphone');
+          console.error('The microphone was not allowed:', cause);
+        })
+        .finally(() => {
+          requestingRef.current = false;
         });
-    };
+      return;
+    }
 
-    attempt();
-  }, [language, state]);
+    if (state !== 'idle') return;
+
+    beginListening();
+  }, [beginListening, i18n, state]);
 
   // A microphone left open when the page moves on would keep recording, so any session
   // still running is abandoned on the way out.
@@ -137,5 +306,39 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     []
   );
 
-  return { state, error, start, stop, clearError: () => setError(null) };
+  /**
+   * A failure the reader can see, rather than a button that quietly slides back to
+   * where it started and leaves them guessing whether it heard anything.
+   *
+   * Cleared once shown so that the same failure twice running is said twice: without
+   * that, a second identical failure would not change the value and would go
+   * unmentioned.
+   */
+  useEffect(() => {
+    if (!error) return;
+    if (error === 'blocked') {
+      // Kept until dismissed: steps that fade before they are read are no steps at
+      // all, and there is nothing to retry in the meantime.
+      toast.error(i18n.t('notifications:voiceMicrophoneBlocked'), {
+        id: BLOCKED_TOAST_ID,
+        description: i18n.t(RESET_HINTS[getMicrophoneResetPlatform()]),
+        duration: Infinity,
+        action: {
+          label: i18n.t('notifications:voiceMicrophoneBlockedDismiss'),
+          onClick: () => toast.dismiss(BLOCKED_TOAST_ID),
+        },
+      });
+    } else if (error === 'microphone') {
+      toast.error(i18n.t('notifications:voiceMicrophoneDenied'), {
+        description: i18n.t('notifications:voiceMicrophoneDeniedDesc'),
+      });
+    } else {
+      toast.error(i18n.t('notifications:voiceSearchFailed'), {
+        description: i18n.t('notifications:voiceSearchFailedDesc'),
+      });
+    }
+    setError(null);
+  }, [error, i18n]);
+
+  return { state, error, start, stop };
 }
