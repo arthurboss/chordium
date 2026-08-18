@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ShareSession } from "@/features/jam-session";
@@ -12,40 +12,37 @@ const Header = () => {
   const { isDark } = useTheme();
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageLoaded(false);
+    img.src = isDark ? "logo-dark.png" : "logo-light.png";
+  }, [isDark]);
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 shadow-xs backdrop-blur-xs dark:bg-card">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-full items-start justify-between gap-4 px-4 py-2">
         <Link
           to="/"
-          className="flex items-center rounded-md transition-opacity hover:opacity-90"
+          className="flex-shrink-0 rounded-md transition-opacity hover:opacity-90"
           tabIndex={0}
           aria-label={t("header.homeAriaLabel")}
         >
           {imageLoaded && (
             <img
               src={isDark ? "logo-dark.png" : "logo-light.png"}
-              alt=""
-              width={32}
-              height={32}
-              onError={() => setImageLoaded(false)}
+              alt="Chordium"
+              width={800}
+              height={120}
+              style={{ height: "auto", width: "auto", maxWidth: "800px" }}
             />
           )}
           {!imageLoaded && (
-            <img
-              src={isDark ? "logo-dark.png" : "logo-light.png"}
-              alt=""
-              width={32}
-              height={32}
-              onLoad={() => setImageLoaded(true)}
-              style={{ display: "none" }}
-            />
+            <h1 className="text-3xl font-semibold">Chordium</h1>
           )}
-          <h1 className="text-2xl font-semibold">
-            {imageLoaded ? "hordium" : "Chordium"}
-          </h1>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <ShareSession />
           <OfflineIndicator />
           <LanguageSwitcher />
