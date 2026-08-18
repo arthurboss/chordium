@@ -249,6 +249,28 @@ describe('useVoiceSearch explains a refused microphone', () => {
   });
 
   /**
+   * Pressing a blocked microphone is the natural thing to do, and doing it a few times
+   * over should not bury the page in identical toasts. The id is what sonner replaces
+   * on, so the same one every time leaves one toast however many presses there were.
+   */
+  it('replaces its own telling rather than stacking one per press', async () => {
+    getMicrophonePermission.mockResolvedValue('denied');
+    const { result } = renderHook(() => useVoiceSearch({ onTranscript: vi.fn() }));
+    await waitFor(() => expect(result.current.state).toBe('blocked'));
+
+    for (let press = 0; press < 3; press += 1) {
+      await act(async () => {
+        result.current.start();
+      });
+    }
+
+    await waitFor(() => expect(toastError).toHaveBeenCalledTimes(3));
+    const ids = toastError.mock.calls.map(([, options]) => options.id);
+    expect(new Set(ids).size).toBe(1);
+    expect(ids[0]).toBeTruthy();
+  });
+
+  /**
    * Refused at the prompt rather than beforehand, which is the mistaken tap this is
    * really for: the reader meant to allow it and hit the wrong button.
    */

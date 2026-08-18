@@ -38,6 +38,13 @@ export type VoiceSearchState =
   | 'working';
 
 /**
+ * Given to every telling of a refused microphone, so that pressing again replaces the
+ * one already up rather than stacking another behind it. Its own id and no wider, so
+ * anything else with something to say still gets said.
+ */
+const BLOCKED_TOAST_ID = 'voice-microphone-blocked';
+
+/**
  * Where each platform hides the setting. Spelled out rather than assembled from the
  * platform name so that every key can be found by searching for it.
  */
@@ -279,12 +286,13 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     if (error === 'blocked') {
       // Kept until dismissed: steps that fade before they are read are no steps at
       // all, and there is nothing to retry in the meantime.
-      const shown = toast.error(i18n.t('notifications:voiceMicrophoneBlocked'), {
+      toast.error(i18n.t('notifications:voiceMicrophoneBlocked'), {
+        id: BLOCKED_TOAST_ID,
         description: i18n.t(RESET_HINTS[getMicrophoneResetPlatform()]),
         duration: Infinity,
         action: {
           label: i18n.t('notifications:voiceMicrophoneBlockedDismiss'),
-          onClick: () => toast.dismiss(shown),
+          onClick: () => toast.dismiss(BLOCKED_TOAST_ID),
         },
       });
     } else if (error === 'microphone') {
