@@ -39,5 +39,13 @@
   "voiceMicrophoneDenied": "Microfone não permitido",
   "voiceMicrophoneDeniedDesc": "Permita o acesso ao microfone nas configurações do navegador para pesquisar por voz.",
   "voiceSearchFailed": "Falha na pesquisa por voz",
-  "voiceSearchFailedDesc": "Algo deu errado ao ouvir. Por favor, tente novamente."
+  "voiceSearchFailedDesc": "Algo deu errado ao ouvir. Por favor, tente novamente.",
+  "voiceMicrophoneBlocked": "Microfone bloqueado",
+  "voiceMicrophoneBlockedIos": "Toque em aA na barra de endereço, escolha Configurações do site, defina Microfone como Permitir e recarregue a página.",
+  "voiceMicrophoneBlockedSafari": "Abra o Safari, escolha Configurações para este site, defina Microfone como Permitir e recarregue a página.",
+  "voiceMicrophoneBlockedAndroid": "Toque no cadeado na barra de endereço, abra Permissões, defina Microfone como Permitir e recarregue a página.",
+  "voiceMicrophoneBlockedChrome": "Clique no cadeado na barra de endereço, defina Microfone como Permitir e recarregue a página.",
+  "voiceMicrophoneBlockedFirefox": "Clique no cadeado na barra de endereço, remova o bloqueio do microfone e recarregue a página.",
+  "voiceMicrophoneBlockedGeneric": "Permita o microfone para este site nas configurações do navegador e recarregue a página.",
+  "voiceMicrophoneBlockedDismiss": "Entendi"
 }

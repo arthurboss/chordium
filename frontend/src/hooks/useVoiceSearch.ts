@@ -9,9 +9,11 @@ import {
 } from '@/services/speech/get-recognizer';
 import {
   forgetMicrophoneGrant,
-  isMicrophoneGranted,
+  getMicrophonePermission,
+  getMicrophoneResetPlatform,
   releaseMicrophone,
   requestMicrophone,
+  type MicrophoneResetPlatform,
 } from '@/services/speech/microphone-permission';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
 import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/speech/types';
@@ -21,6 +23,7 @@ import { MicrophoneUnavailableError, type RecognitionSession } from '@/services/
  * - "unsupported": this browser cannot hear one at all.
  * - "needs-setup": it could, once the fallback model has been downloaded.
  * - "needs-permission": it could, once the reader has allowed the microphone.
+ * - "blocked": the microphone was refused, and only browser settings can undo it.
  * - "idle": ready, waiting to be asked.
  * - "listening": the microphone is open.
  * - "working": listening has stopped and the words are being made out.
@@ -29,9 +32,23 @@ export type VoiceSearchState =
   | 'unsupported'
   | 'needs-setup'
   | 'needs-permission'
+  | 'blocked'
   | 'idle'
   | 'listening'
   | 'working';
+
+/**
+ * Where each platform hides the setting. Spelled out rather than assembled from the
+ * platform name so that every key can be found by searching for it.
+ */
+const RESET_HINTS: Record<MicrophoneResetPlatform, string> = {
+  ios: 'notifications:voiceMicrophoneBlockedIos',
+  safari: 'notifications:voiceMicrophoneBlockedSafari',
+  android: 'notifications:voiceMicrophoneBlockedAndroid',
+  chrome: 'notifications:voiceMicrophoneBlockedChrome',
+  firefox: 'notifications:voiceMicrophoneBlockedFirefox',
+  generic: 'notifications:voiceMicrophoneBlockedGeneric',
+};
 
 interface UseVoiceSearchOptions {
   /** Called with the transcript, once there is one worth acting on. */
@@ -79,9 +96,16 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     // Only the browser's own recogniser needs asking ahead of the press. The model
     // opens the microphone itself and waits for the grant before it records, so it
     // has nothing to race.
-    if (resolveRecognizerKind() === 'native' && !(await isMicrophoneGranted())) {
-      setState('needs-permission');
-      return;
+    if (resolveRecognizerKind() === 'native') {
+      const permission = await getMicrophonePermission();
+      if (permission === 'denied') {
+        setState('blocked');
+        return;
+      }
+      if (permission === 'prompt') {
+        setState('needs-permission');
+        return;
+      }
     }
     setState('idle');
   }, []);
@@ -153,13 +177,14 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
           .catch((cause: unknown) => {
             sessionRef.current = null;
             releaseHeldMicrophone();
-            const refused = cause instanceof MicrophoneUnavailableError;
+            const unavailable = cause instanceof MicrophoneUnavailableError;
             // A grant withdrawn in browser settings after the fact leaves a remembered
             // one that is no longer true, so it is dropped and asked for again rather
             // than kept and retried against a microphone that will keep refusing.
-            if (refused) forgetMicrophoneGrant();
-            setState(refused ? 'needs-permission' : 'idle');
-            setError(refused ? 'microphone' : 'failed');
+            if (unavailable) forgetMicrophoneGrant();
+            const refused = unavailable && cause.denied;
+            setState(refused ? 'blocked' : unavailable ? 'needs-permission' : 'idle');
+            setError(refused ? 'blocked' : unavailable ? 'microphone' : 'failed');
             console.error('Voice search failed:', cause);
           });
 
@@ -187,6 +212,14 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       return;
     }
 
+    // Asking again would be refused without so much as a prompt, so the steps out of
+    // it are repeated instead. Said on a press rather than on sight, since that is when
+    // the reader has just asked to be heard and is looking for why they were not.
+    if (state === 'blocked') {
+      setError('blocked');
+      return;
+    }
+
     // Permission is the one thing here that has to be waited for, so it is asked for
     // on its own and listening follows it directly. The reader presses once: the
     // prompt answers, and what they say next is already being heard.
@@ -205,7 +238,9 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
           if (!beginListening(true)) releaseHeldMicrophone();
         })
         .catch((cause: unknown) => {
-          setError('microphone');
+          const refused = cause instanceof MicrophoneUnavailableError && cause.denied;
+          if (refused) setState('blocked');
+          setError(refused ? 'blocked' : 'microphone');
           console.error('The microphone was not allowed:', cause);
         })
         .finally(() => {
@@ -241,7 +276,18 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
    */
   useEffect(() => {
     if (!error) return;
-    if (error === 'microphone') {
+    if (error === 'blocked') {
+      // Kept until dismissed: steps that fade before they are read are no steps at
+      // all, and there is nothing to retry in the meantime.
+      const shown = toast.error(i18n.t('notifications:voiceMicrophoneBlocked'), {
+        description: i18n.t(RESET_HINTS[getMicrophoneResetPlatform()]),
+        duration: Infinity,
+        action: {
+          label: i18n.t('notifications:voiceMicrophoneBlockedDismiss'),
+          onClick: () => toast.dismiss(shown),
+        },
+      });
+    } else if (error === 'microphone') {
       toast.error(i18n.t('notifications:voiceMicrophoneDenied'), {
         description: i18n.t('notifications:voiceMicrophoneDeniedDesc'),
       });

@@ -246,6 +246,7 @@
     "stop": "Aufnahme beenden",
     "working": "Das Gesagte wird ausgewertet",
     "setUp": "Sprachsuche einrichten",
-    "allowMicrophone": "Mikrofon erlauben"
+    "allowMicrophone": "Mikrofon erlauben",
+    "blocked": "Mikrofon blockiert"
   }
 }

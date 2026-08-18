@@ -5,12 +5,13 @@ const canListen = vi.hoisted(() => vi.fn());
 const requiresDownloadConsent = vi.hoisted(() => vi.fn());
 const resolveRecognizerKind = vi.hoisted(() => vi.fn());
 const createRecognizer = vi.hoisted(() => vi.fn());
-const isMicrophoneGranted = vi.hoisted(() => vi.fn());
+const getMicrophonePermission = vi.hoisted(() => vi.fn());
+const getMicrophoneResetPlatform = vi.hoisted(() => vi.fn(() => 'chrome'));
 const forgetMicrophoneGrant = vi.hoisted(() => vi.fn());
 const requestMicrophone = vi.hoisted(() => vi.fn());
 const releaseMicrophone = vi.hoisted(() => vi.fn());
 
-vi.mock('sonner', () => ({ toast: { error: toastError } }));
+vi.mock('sonner', () => ({ toast: { error: toastError, dismiss: vi.fn() } }));
 
 // Keys stand in for the copy, so a message only needs to be distinguishable.
 vi.mock('react-i18next', () => ({
@@ -27,7 +28,8 @@ vi.mock('@/services/speech/get-recognizer', () => ({
 }));
 
 vi.mock('@/services/speech/microphone-permission', () => ({
-  isMicrophoneGranted,
+  getMicrophonePermission,
+  getMicrophoneResetPlatform,
   forgetMicrophoneGrant,
   requestMicrophone,
   releaseMicrophone,
@@ -48,7 +50,7 @@ describe('useVoiceSearch failures are shown to the reader', () => {
     canListen.mockReturnValue(true);
     requiresDownloadConsent.mockResolvedValue(false);
     resolveRecognizerKind.mockReturnValue('native');
-    isMicrophoneGranted.mockResolvedValue(true);
+    getMicrophonePermission.mockResolvedValue('granted');
   });
 
   /**
@@ -72,8 +74,8 @@ describe('useVoiceSearch failures are shown to the reader', () => {
     return hook;
   }
 
-  it('says the microphone was refused, which the reader can act on', async () => {
-    listenWith(() => Promise.reject(new MicrophoneUnavailableError('refused')));
+  it('says the microphone is missing, which is not something settings will fix', async () => {
+    listenWith(() => Promise.reject(new MicrophoneUnavailableError('no device', false)));
 
     await startedHook();
 
@@ -84,8 +86,8 @@ describe('useVoiceSearch failures are shown to the reader', () => {
     );
   });
 
-  it('asks for the microphone again once it has been refused', async () => {
-    listenWith(() => Promise.reject(new MicrophoneUnavailableError('refused')));
+  it('asks for the microphone again where it went missing rather than being refused', async () => {
+    listenWith(() => Promise.reject(new MicrophoneUnavailableError('no device', false)));
 
     const { result } = await startedHook();
 
@@ -148,7 +150,7 @@ describe('useVoiceSearch listens as soon as the microphone is allowed', () => {
     requiresDownloadConsent.mockResolvedValue(false);
     resolveRecognizerKind.mockReturnValue('native');
     // Not yet allowed, so the first press is the one that asks.
-    isMicrophoneGranted.mockResolvedValue(false);
+    getMicrophonePermission.mockResolvedValue('prompt');
     requestMicrophone.mockResolvedValue(stream);
     createRecognizer.mockReturnValue({
       id: 'native',
@@ -200,5 +202,70 @@ describe('useVoiceSearch listens as soon as the microphone is allowed', () => {
     await waitFor(() => expect(result.current.state).toBe('idle'));
     expect(toastError).not.toHaveBeenCalled();
     expect(releaseMicrophone).toHaveBeenCalled();
+  });
+});
+
+/**
+ * A refused microphone cannot be asked for again: the browser answers no without so
+ * much as a prompt. Only browser settings undo it, and an average reader does not know
+ * where those are, so the way back has to be spelled out or voice search is over for
+ * them for good.
+ */
+describe('useVoiceSearch explains a refused microphone', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    canListen.mockReturnValue(true);
+    requiresDownloadConsent.mockResolvedValue(false);
+    resolveRecognizerKind.mockReturnValue('native');
+    getMicrophoneResetPlatform.mockReturnValue('ios');
+  });
+
+  it('says so on the button, rather than inviting a press that does nothing', async () => {
+    getMicrophonePermission.mockResolvedValue('denied');
+
+    const { result } = renderHook(() => useVoiceSearch({ onTranscript: vi.fn() }));
+
+    await waitFor(() => expect(result.current.state).toBe('blocked'));
+  });
+
+  it('gives the steps for this browser, and keeps them until dismissed', async () => {
+    getMicrophonePermission.mockResolvedValue('denied');
+    const { result } = renderHook(() => useVoiceSearch({ onTranscript: vi.fn() }));
+    await waitFor(() => expect(result.current.state).toBe('blocked'));
+
+    await act(async () => {
+      result.current.start();
+    });
+
+    await waitFor(() =>
+      expect(toastError).toHaveBeenCalledWith(
+        'notifications:voiceMicrophoneBlocked',
+        expect.objectContaining({
+          description: 'notifications:voiceMicrophoneBlockedIos',
+          duration: Infinity,
+        })
+      )
+    );
+  });
+
+  /**
+   * Refused at the prompt rather than beforehand, which is the mistaken tap this is
+   * really for: the reader meant to allow it and hit the wrong button.
+   */
+  it('explains itself when the prompt itself is refused', async () => {
+    getMicrophonePermission.mockResolvedValue('prompt');
+    requestMicrophone.mockRejectedValue(new MicrophoneUnavailableError('refused', true));
+    const { result } = renderHook(() => useVoiceSearch({ onTranscript: vi.fn() }));
+    await waitFor(() => expect(result.current.state).toBe('needs-permission'));
+
+    await act(async () => {
+      result.current.start();
+    });
+
+    await waitFor(() => expect(result.current.state).toBe('blocked'));
+    expect(toastError).toHaveBeenCalledWith(
+      'notifications:voiceMicrophoneBlocked',
+      expect.objectContaining({ description: 'notifications:voiceMicrophoneBlockedIos' })
+    );
   });
 });

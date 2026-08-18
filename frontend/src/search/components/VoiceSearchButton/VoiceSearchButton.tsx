@@ -30,6 +30,7 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
   const working = state === "working";
   const needsSetup = state === "needs-setup";
   const needsPermission = state === "needs-permission";
+  const blocked = state === "blocked";
 
   /**
    * Pulsed once the microphone has just been allowed, because the press that allowed
@@ -59,6 +60,7 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
   const label = (() => {
     if (needsSetup) return t("voiceSearch.setUp");
     if (needsPermission) return t("voiceSearch.allowMicrophone");
+    if (blocked) return t("voiceSearch.blocked");
     if (listening) return t("voiceSearch.stop");
     if (working) return t("voiceSearch.working");
     return t("voiceSearch.start");
@@ -78,7 +80,7 @@ const VoiceSearchButton = ({ state, onStart, onStop, disabled }: VoiceSearchButt
         "form-field-shell__trailing relative flex w-10 shrink-0 items-center justify-center border-l bg-background hover:bg-accent disabled:pointer-events-none disabled:opacity-50",
         listening
           ? "text-destructive"
-          : needsSetup || needsPermission
+          : needsSetup || needsPermission || blocked
             ? "text-muted-foreground"
             : "text-foreground"
       )}

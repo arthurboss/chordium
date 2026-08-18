@@ -38,23 +38,31 @@ function remembered(): boolean {
   }
 }
 
+/** What the browser will say about the microphone before anything is asked of it. */
+export type MicrophonePermission = 'granted' | 'denied' | 'prompt';
+
 /**
- * Whether the microphone is already granted, so a press can start listening at
- * once rather than asking first.
+ * Where the microphone stands, so that a press can start listening at once, ask, or
+ * explain itself, rather than all three looking the same.
  *
- * "Denied" and "not yet asked" are both false: neither can hear anything without
- * the reader being asked, which is the same next step either way.
+ * Refused is worth telling apart from not yet asked: a press cannot undo a refusal,
+ * and asking again would silently do nothing, so the reader has to be told where to
+ * undo it instead.
+ *
+ * Safari will not answer, and asking getUserMedia to find out would show the very
+ * prompt being asked about. A remembered grant stands in there, and a refusal cannot
+ * be known ahead of a press at all: it surfaces when one is refused.
  */
-export async function isMicrophoneGranted(): Promise<boolean> {
+export async function getMicrophonePermission(): Promise<MicrophonePermission> {
   try {
     const status = await navigator.permissions.query({
       name: 'microphone' as PermissionName,
     });
-    const granted = status.state === 'granted';
-    remember(granted);
-    return granted;
+    const state = status.state as MicrophonePermission;
+    remember(state === 'granted');
+    return state;
   } catch {
-    return remembered();
+    return remembered() ? 'granted' : 'prompt';
   }
 }
 
@@ -76,8 +84,41 @@ export async function requestMicrophone(): Promise<MediaStream> {
     return stream;
   } catch (cause) {
     remember(false);
-    throw new MicrophoneUnavailableError(String(cause));
+    throw new MicrophoneUnavailableError(String(cause), isRefusal(cause));
   }
+}
+
+/**
+ * Whether the browser refused rather than failed. A refusal is the reader's, and can
+ * only be undone in browser settings; anything else is the device's, and telling them
+ * to change a setting would send them after something that is not there.
+ */
+function isRefusal(cause: unknown): boolean {
+  if (!(cause instanceof Error)) return false;
+  return cause.name === 'NotAllowedError' || cause.name === 'SecurityError';
+}
+
+/** Which browser's route back to a refused microphone should be described. */
+export type MicrophoneResetPlatform = 'ios' | 'safari' | 'android' | 'chrome' | 'firefox' | 'generic';
+
+/**
+ * Which set of steps will get the reader back to a working microphone.
+ *
+ * By platform rather than by browser, because that is what decides where the setting
+ * lives: every browser on iOS is the same WebKit underneath and shares one place to
+ * change it, whoever wrapped it.
+ */
+export function getMicrophoneResetPlatform(): MicrophoneResetPlatform {
+  const nav = typeof navigator === 'undefined' ? undefined : navigator;
+  const ua = nav?.userAgent ?? '';
+  // An iPad says Macintosh, and gives itself away by having a touchscreen.
+  const isIos = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (nav?.maxTouchPoints ?? 0) > 1);
+  if (isIos) return 'ios';
+  if (/Firefox\/|FxiOS/.test(ua)) return 'firefox';
+  if (/Android/.test(ua)) return 'android';
+  if (/Chrome|Chromium|Edg|OPR/.test(ua)) return 'chrome';
+  if (/Safari\//.test(ua)) return 'safari';
+  return 'generic';
 }
 
 /** Lets go of a stream from `requestMicrophone`, closing the device with it. */

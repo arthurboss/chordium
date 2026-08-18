@@ -62,8 +62,16 @@ export class RecognizerUnavailableError extends Error {
  * fall back to and the reader has to be told.
  */
 export class MicrophoneUnavailableError extends Error {
-  constructor(message: string) {
+  /**
+   * Whether the reader refused it, as opposed to the device having none. A refusal
+   * is the one case they can undo, and only in browser settings, so it is the one
+   * case worth telling them how to undo.
+   */
+  readonly denied: boolean;
+
+  constructor(message: string, denied = false) {
     super(message);
     this.name = 'MicrophoneUnavailableError';
+    this.denied = denied;
   }
 }

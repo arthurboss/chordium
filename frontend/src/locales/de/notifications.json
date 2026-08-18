@@ -39,5 +39,13 @@
   "voiceMicrophoneDenied": "Mikrofon nicht erlaubt",
   "voiceMicrophoneDeniedDesc": "Erlaube den Zugriff auf das Mikrofon in den Browsereinstellungen, um per Sprache zu suchen.",
   "voiceSearchFailed": "Sprachsuche fehlgeschlagen",
-  "voiceSearchFailedDesc": "Beim Zuhören ist etwas schiefgegangen. Bitte versuche es erneut."
+  "voiceSearchFailedDesc": "Beim Zuhören ist etwas schiefgegangen. Bitte versuche es erneut.",
+  "voiceMicrophoneBlocked": "Mikrofon blockiert",
+  "voiceMicrophoneBlockedIos": "Tippe auf aA in der Adressleiste, wähle Website-Einstellungen, setze Mikrofon auf Erlauben und lade die Seite neu.",
+  "voiceMicrophoneBlockedSafari": "Öffne Safari, wähle Einstellungen für diese Website, setze Mikrofon auf Erlauben und lade die Seite neu.",
+  "voiceMicrophoneBlockedAndroid": "Tippe auf das Schloss in der Adressleiste, öffne Berechtigungen, setze Mikrofon auf Erlauben und lade die Seite neu.",
+  "voiceMicrophoneBlockedChrome": "Klicke auf das Schloss in der Adressleiste, setze Mikrofon auf Erlauben und lade die Seite neu.",
+  "voiceMicrophoneBlockedFirefox": "Klicke auf das Schloss in der Adressleiste, hebe die Mikrofon-Blockierung auf und lade die Seite neu.",
+  "voiceMicrophoneBlockedGeneric": "Erlaube das Mikrofon für diese Seite in den Browsereinstellungen und lade die Seite neu.",
+  "voiceMicrophoneBlockedDismiss": "Verstanden"
 }

@@ -246,6 +246,7 @@
     "stop": "Parar de ouvir",
     "working": "Interpretando o que você disse",
     "setUp": "Ativar a pesquisa por voz",
-    "allowMicrophone": "Permitir o microfone"
+    "allowMicrophone": "Permitir o microfone",
+    "blocked": "Microfone bloqueado"
   }
 }
