@@ -59,21 +59,30 @@ export async function isMicrophoneGranted(): Promise<boolean> {
 }
 
 /**
- * Asks for the microphone and lets it go again immediately.
+ * Asks for the microphone and hands back the open stream.
  *
- * The stream itself is not wanted: the recogniser opens its own. All this leaves
- * behind is the grant, so that the press after this one can start listening with
- * the microphone already open.
+ * The stream is not what was wanted, since the recogniser opens its own, but it is
+ * worth holding rather than dropping: releasing it the moment the grant arrives
+ * takes the device down again, and listening that starts straight afterwards can
+ * open against a microphone still being torn down and hear nothing. Held until
+ * listening has its own hold, the device never goes down in between.
+ *
+ * The caller owns it, and must release it with `releaseMicrophone`.
  */
-export async function requestMicrophone(): Promise<void> {
+export async function requestMicrophone(): Promise<MediaStream> {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach((track) => track.stop());
     remember(true);
+    return stream;
   } catch (cause) {
     remember(false);
     throw new MicrophoneUnavailableError(String(cause));
   }
+}
+
+/** Lets go of a stream from `requestMicrophone`, closing the device with it. */
+export function releaseMicrophone(stream: MediaStream): void {
+  stream.getTracks().forEach((track) => track.stop());
 }
 
 /**

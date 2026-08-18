@@ -10,6 +10,7 @@ import {
 import {
   forgetMicrophoneGrant,
   isMicrophoneGranted,
+  releaseMicrophone,
   requestMicrophone,
 } from '@/services/speech/microphone-permission';
 import { onSpeechModelChanged, openVoiceSetup } from '@/services/speech/speech-manager';
@@ -55,6 +56,9 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   // Guards against a second press asking for the microphone while the first prompt is
   // still up, which the state cannot express without misdescribing itself.
   const requestingRef = useRef(false);
+  // Held from the moment permission is granted until listening has its own hold on the
+  // device, so that it is never taken down and brought back up in between.
+  const heldStreamRef = useRef<MediaStream | null>(null);
 
   // Kept in a ref so a transcript arriving late calls the current handler rather than
   // the one that happened to be in scope when listening started.
@@ -98,6 +102,75 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     sessionRef.current.stop();
   }, []);
 
+  const releaseHeldMicrophone = useCallback(() => {
+    if (!heldStreamRef.current) return;
+    releaseMicrophone(heldStreamRef.current);
+    heldStreamRef.current = null;
+  }, []);
+
+  /**
+   * Opens the microphone and hands back what was heard.
+   *
+   * Reports nothing when asked to stay quiet, which is how it is called straight after
+   * a grant: a browser that wants the press itself will refuse that start, and saying
+   * so would be reporting our own attempt as the reader's failure. The button is left
+   * pulsing to invite the press instead.
+   *
+   * Returns whether listening began.
+   */
+  const beginListening = useCallback(
+    (quietly = false) => {
+      let retryCount = 0;
+      const MAX_RETRIES = 1;
+
+      const attempt = (): boolean => {
+        let session: RecognitionSession;
+        try {
+          session = createRecognizer(resolveRecognizerKind()).listen(language);
+        } catch (cause) {
+          setState('idle');
+          if (!quietly) setError('failed');
+          releaseHeldMicrophone();
+          console.error('Voice search could not start:', cause);
+          return false;
+        }
+
+        sessionRef.current = session;
+        setState('listening');
+
+        session.transcript
+          .then((transcript) => {
+            sessionRef.current = null;
+            setState('idle');
+            if (!transcript && retryCount < MAX_RETRIES) {
+              retryCount++;
+              attempt();
+              return;
+            }
+            releaseHeldMicrophone();
+            if (transcript) onTranscriptRef.current(transcript);
+          })
+          .catch((cause: unknown) => {
+            sessionRef.current = null;
+            releaseHeldMicrophone();
+            const refused = cause instanceof MicrophoneUnavailableError;
+            // A grant withdrawn in browser settings after the fact leaves a remembered
+            // one that is no longer true, so it is dropped and asked for again rather
+            // than kept and retried against a microphone that will keep refusing.
+            if (refused) forgetMicrophoneGrant();
+            setState(refused ? 'needs-permission' : 'idle');
+            setError(refused ? 'microphone' : 'failed');
+            console.error('Voice search failed:', cause);
+          });
+
+        return true;
+      };
+
+      return attempt();
+    },
+    [language, releaseHeldMicrophone]
+  );
+
   /**
    * Deliberately not an async function. Safari only allows a recognition that begins
    * in the click that asked for it, and an await anywhere before listening starts
@@ -114,18 +187,23 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
       return;
     }
 
-    // Asking is its own press, because it is the one thing here that has to be waited
-    // for. A recognition started in this press would run while the prompt is still up
-    // and hear nothing, which is the whole bug this avoids. The press after this one
-    // starts listening with the microphone already open.
+    // Permission is the one thing here that has to be waited for, so it is asked for
+    // on its own and listening follows it directly. The reader presses once: the
+    // prompt answers, and what they say next is already being heard.
     if (state === 'needs-permission') {
-      // The state is left alone while the prompt is up: "working" would say the words
-      // are being made out, which is not what is happening. A second press would only
-      // ask twice, so it is dropped instead.
+      // A second press while the prompt is up would only ask twice, so it is dropped.
+      // The state is left alone meanwhile: "working" would say the words are being
+      // made out, which is not what is happening.
       if (requestingRef.current) return;
       requestingRef.current = true;
       void requestMicrophone()
-        .then(() => setState('idle'))
+        .then((stream) => {
+          heldStreamRef.current = stream;
+          // Quietly, because a browser that insists on the press itself will refuse
+          // this and that is not a failure worth reporting: it leaves the button idle
+          // and pulsing, which asks for the press it wants.
+          if (!beginListening(true)) releaseHeldMicrophone();
+        })
         .catch((cause: unknown) => {
           setError('microphone');
           console.error('The microphone was not allowed:', cause);
@@ -138,49 +216,8 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
 
     if (state !== 'idle') return;
 
-    let retryCount = 0;
-    const MAX_RETRIES = 1;
-
-    const attempt = () => {
-      let session: RecognitionSession;
-      try {
-        session = createRecognizer(resolveRecognizerKind()).listen(language);
-      } catch (cause) {
-        setState('idle');
-        setError('failed');
-        console.error('Voice search could not start:', cause);
-        return;
-      }
-
-      sessionRef.current = session;
-      setState('listening');
-
-      session.transcript
-        .then((transcript) => {
-          sessionRef.current = null;
-          setState('idle');
-          if (!transcript && retryCount < MAX_RETRIES) {
-            retryCount++;
-            attempt();
-            return;
-          }
-          if (transcript) onTranscriptRef.current(transcript);
-        })
-        .catch((cause: unknown) => {
-          sessionRef.current = null;
-          const refused = cause instanceof MicrophoneUnavailableError;
-          // A grant withdrawn in browser settings after the fact leaves a remembered
-          // one that is no longer true, so it is dropped and asked for again rather
-          // than kept and retried against a microphone that will keep refusing.
-          if (refused) forgetMicrophoneGrant();
-          setState(refused ? 'needs-permission' : 'idle');
-          setError(refused ? 'microphone' : 'failed');
-          console.error('Voice search failed:', cause);
-        });
-    };
-
-    attempt();
-  }, [language, state]);
+    beginListening();
+  }, [beginListening, releaseHeldMicrophone, state]);
 
   // A microphone left open when the page moves on would keep recording, so any session
   // still running is abandoned on the way out.
@@ -188,6 +225,8 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
     () => () => {
       sessionRef.current?.abort();
       sessionRef.current = null;
+      if (heldStreamRef.current) releaseMicrophone(heldStreamRef.current);
+      heldStreamRef.current = null;
     },
     []
   );

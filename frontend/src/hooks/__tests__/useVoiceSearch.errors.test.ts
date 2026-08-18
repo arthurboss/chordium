@@ -7,6 +7,8 @@ const resolveRecognizerKind = vi.hoisted(() => vi.fn());
 const createRecognizer = vi.hoisted(() => vi.fn());
 const isMicrophoneGranted = vi.hoisted(() => vi.fn());
 const forgetMicrophoneGrant = vi.hoisted(() => vi.fn());
+const requestMicrophone = vi.hoisted(() => vi.fn());
+const releaseMicrophone = vi.hoisted(() => vi.fn());
 
 vi.mock('sonner', () => ({ toast: { error: toastError } }));
 
@@ -27,7 +29,8 @@ vi.mock('@/services/speech/get-recognizer', () => ({
 vi.mock('@/services/speech/microphone-permission', () => ({
   isMicrophoneGranted,
   forgetMicrophoneGrant,
-  requestMicrophone: vi.fn(),
+  requestMicrophone,
+  releaseMicrophone,
 }));
 
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -127,5 +130,75 @@ describe('useVoiceSearch failures are shown to the reader', () => {
     await startedHook();
 
     await waitFor(() => expect(toastError).not.toHaveBeenCalled());
+  });
+});
+
+/**
+ * The reader presses once: the prompt answers, and what they say next is already
+ * being heard. Asking and then waiting to be asked again was a press that earned
+ * nothing.
+ */
+describe('useVoiceSearch listens as soon as the microphone is allowed', () => {
+  const stop = vi.fn();
+  const stream = { getTracks: () => [{ stop }] };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    canListen.mockReturnValue(true);
+    requiresDownloadConsent.mockResolvedValue(false);
+    resolveRecognizerKind.mockReturnValue('native');
+    // Not yet allowed, so the first press is the one that asks.
+    isMicrophoneGranted.mockResolvedValue(false);
+    requestMicrophone.mockResolvedValue(stream);
+    createRecognizer.mockReturnValue({
+      id: 'native',
+      listen: () => ({ stop: vi.fn(), abort: vi.fn(), transcript: new Promise<string>(() => {}) }),
+    });
+  });
+
+  async function pressOnce() {
+    const hook = renderHook(() => useVoiceSearch({ onTranscript: vi.fn() }));
+    await waitFor(() => expect(hook.result.current.state).toBe('needs-permission'));
+    await act(async () => {
+      hook.result.current.start();
+    });
+    return hook;
+  }
+
+  it('begins listening on the same press that asked', async () => {
+    const { result } = await pressOnce();
+
+    await waitFor(() => expect(result.current.state).toBe('listening'));
+  });
+
+  /**
+   * Released only once listening holds the device itself, so it never goes down and
+   * comes back up in between, which is what left the first recording silent.
+   */
+  it('keeps the microphone open across the handover', async () => {
+    await pressOnce();
+
+    await waitFor(() => expect(createRecognizer).toHaveBeenCalled());
+    expect(releaseMicrophone).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Some browsers insist the press itself begins the recognition, and refuse one
+   * started after an await. That is our attempt failing, not the reader's, so it is
+   * left ready to be pressed rather than reported.
+   */
+  it('waits to be pressed again where the browser refuses to start itself', async () => {
+    createRecognizer.mockReturnValue({
+      id: 'native',
+      listen: () => {
+        throw new Error('not allowed without a gesture');
+      },
+    });
+
+    const { result } = await pressOnce();
+
+    await waitFor(() => expect(result.current.state).toBe('idle'));
+    expect(toastError).not.toHaveBeenCalled();
+    expect(releaseMicrophone).toHaveBeenCalled();
   });
 });

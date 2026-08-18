@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   forgetMicrophoneGrant,
   isMicrophoneGranted,
+  releaseMicrophone,
   requestMicrophone,
 } from '../microphone-permission';
 import { MicrophoneUnavailableError } from '../types';
@@ -86,17 +87,22 @@ describe('requestMicrophone', () => {
     localStorage.clear();
   });
 
-  it('lets the microphone go again, since only the grant was wanted', async () => {
+  /**
+   * Releasing it here would take the device down again, and listening that starts
+   * straight afterwards would open against a microphone still being torn down and
+   * hear nothing. That is the whole reason the caller is given it to hold.
+   */
+  it('hands the stream back still open, for listening to take over', async () => {
     const stop = vi.fn();
+    const stream = { getTracks: () => [{ stop }] };
     vi.stubGlobal('navigator', {
-      mediaDevices: {
-        getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [{ stop }] }),
-      },
+      mediaDevices: { getUserMedia: vi.fn().mockResolvedValue(stream) },
     });
 
-    await requestMicrophone();
+    const granted = await requestMicrophone();
 
-    expect(stop).toHaveBeenCalledTimes(1);
+    expect(granted).toBe(stream);
+    expect(stop).not.toHaveBeenCalled();
   });
 
   it('reports a refusal as a microphone failure, which the reader can act on', async () => {
@@ -116,6 +122,16 @@ describe('requestMicrophone', () => {
 
     await expect(requestMicrophone()).rejects.toBeInstanceOf(MicrophoneUnavailableError);
     expect(await isMicrophoneGranted()).toBe(false);
+  });
+});
+
+describe('releaseMicrophone', () => {
+  it('closes the device, once listening has its own hold on it', () => {
+    const stop = vi.fn();
+
+    releaseMicrophone({ getTracks: () => [{ stop }] } as unknown as MediaStream);
+
+    expect(stop).toHaveBeenCalledTimes(1);
   });
 });
 
