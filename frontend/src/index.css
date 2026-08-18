@@ -154,14 +154,15 @@
     box-shadow: 0 0 0 1px hsl(var(--ring));
   }
 
+  /*
+   * Kept neutral whatever the field is doing. These dividers only separate the
+   * buttons from the text, and following the focus colour lit up two lines inside a
+   * field that was already outlined and glowing, which read as three things being
+   * highlighted rather than one.
+   */
   .form-field-shell__trailing {
-    border-left-color: var(--field-border);
-    transition: border-color 150ms ease-out, background-color 150ms ease-out;
-  }
-
-  /* Disabled means the button can't act on the focus, so its divider stays neutral. */
-  .form-field-shell__trailing:disabled {
     border-left-color: hsl(var(--input));
+    transition: background-color 150ms ease-out;
   }
 
   .form-field-shell__clear {
