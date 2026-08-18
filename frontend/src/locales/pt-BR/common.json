@@ -235,7 +235,6 @@
     "heading": "Pesquisar por voz",
     "hint": "Baixe uma vez ({{size}} MB) para pesquisar falando, no seu dispositivo.",
     "hintReady": "Exclua para liberar {{size}} MB. A pesquisa por voz para de funcionar até você baixar novamente.",
-    "hintNative": "Seu navegador reconhece voz por conta própria, então nada precisa ser baixado.",
     "download": "Baixar pesquisa por voz",
     "cancel": "Cancelar download ({{percent}}%)",
     "delete": "Excluir pesquisa por voz",

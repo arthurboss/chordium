@@ -235,7 +235,6 @@
     "heading": "Per Sprache suchen",
     "hint": "Einmal herunterladen ({{size}} MB), um per Sprache auf deinem Gerät zu suchen.",
     "hintReady": "Löschen, um {{size}} MB freizugeben. Die Sprachsuche funktioniert erst wieder nach einem erneuten Download.",
-    "hintNative": "Dein Browser erkennt Sprache selbst, es muss nichts heruntergeladen werden.",
     "download": "Sprachsuche herunterladen",
     "cancel": "Download abbrechen ({{percent}}%)",
     "delete": "Sprachsuche löschen",
