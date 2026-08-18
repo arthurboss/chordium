@@ -17,6 +17,14 @@
     "search": "Pesquisar",
     "clearAriaLabel": "Limpar pesquisa"
   },
+  "searchHistory": {
+    "heading": "Buscas recentes",
+    "clear": "Limpar",
+    "clearTitle": "Limpar as buscas recentes?",
+    "clearBody": "As buscas recentes e os resultados salvos com elas serão removidos, então buscá-las de novo vai precisar de conexão. Isso não pode ser desfeito.",
+    "clearConfirm": "Limpar",
+    "cancel": "Cancelar"
+  },
   "searchResults": {
     "noResults": "Nenhum resultado encontrado.",
     "artists": "Artistas",
