@@ -49,5 +49,7 @@
   "voiceMicrophoneBlockedGeneric": "Erlaube das Mikrofon für diese Seite in den Browsereinstellungen und lade die Seite neu.",
   "voiceMicrophoneBlockedDismiss": "Verstanden",
   "voiceMicrophoneReady": "Mikrofon bereit",
-  "voiceMicrophoneReadyDesc": "Tippe auf das Mikrofon, um zu sprechen."
+  "voiceMicrophoneReadyDesc": "Tippe auf das Mikrofon, um zu sprechen.",
+  "voiceMicrophoneLingers": "Safari lässt die Mikrofonanzeige an",
+  "voiceMicrophoneLingersDesc": "Es wird nichts aufgenommen. Das ist ein Safari-Fehler, und die Anzeige verschwindet, wenn du neu lädst oder den Tab schließt."
 }

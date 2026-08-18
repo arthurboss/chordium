@@ -49,5 +49,7 @@
   "voiceMicrophoneBlockedGeneric": "Permita o microfone para este site nas configurações do navegador e recarregue a página.",
   "voiceMicrophoneBlockedDismiss": "Entendi",
   "voiceMicrophoneReady": "Microfone pronto",
-  "voiceMicrophoneReadyDesc": "Toque no microfone para falar."
+  "voiceMicrophoneReadyDesc": "Toque no microfone para falar.",
+  "voiceMicrophoneLingers": "O Safari deixa o indicador do microfone aceso",
+  "voiceMicrophoneLingersDesc": "Nada está sendo gravado. É um bug do Safari, e o indicador desaparece ao recarregar ou fechar a aba."
 }

@@ -49,5 +49,7 @@
   "voiceMicrophoneBlockedGeneric": "Allow the microphone for this site in your browser settings, then reload the page.",
   "voiceMicrophoneBlockedDismiss": "Got it",
   "voiceMicrophoneReady": "Microphone ready",
-  "voiceMicrophoneReadyDesc": "Tap the microphone to speak."
+  "voiceMicrophoneReadyDesc": "Tap the microphone to speak.",
+  "voiceMicrophoneLingers": "Safari leaves the microphone indicator on",
+  "voiceMicrophoneLingersDesc": "Nothing is being recorded. It is a Safari bug, and the indicator clears when you reload or close the tab."
 }

@@ -95,11 +95,22 @@ export function createNativeRecognizer(): Recognizer {
       /**
        * Lets go of the microphone, once and for all.
        *
-       * Safari holds it after a recognition has ended, so the reader was still shown
-       * as being listened to long after their search had come back, with nothing on the
-       * page that would stop it. Chrome lets go by itself. Aborting makes both let go,
-       * and the handlers come off first so that aborting cannot arrive back through
-       * them.
+       * Chrome releases the device by itself once a recognition ends. Aborting makes
+       * that deterministic rather than left to it, and settles a session that was
+       * abandoned instead of leaving whoever awaited the transcript waiting for good.
+       * The handlers come off first, so that aborting cannot arrive back through them.
+       *
+       * It does not help Safari, and nothing here can. WebKit gives speech recognition
+       * its own capture manager, separate from the one behind getUserMedia, and it
+       * fails to unset the audio session once capture finishes: macOS and iOS go on
+       * showing the microphone as in use until the tab is reloaded or closed. That is
+       * https://bugs.webkit.org/show_bug.cgi?id=219671, filed in 2020 and still open on
+       * current Safari as of August 2026.
+       *
+       * stop(), abort(), detaching the handlers, and releasing our own stream were each
+       * confirmed on a real Safari to run without error and change nothing, so they are
+       * not worth trying again. A reader on WebKit is told in words instead, from
+       * useVoiceSearch.
        */
       let releasing = false;
       const release = () => {

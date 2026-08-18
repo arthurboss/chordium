@@ -305,3 +305,89 @@ describe('useVoiceSearch explains a refused microphone', () => {
     );
   });
 });
+
+/**
+ * WebKit never unsets its audio session after speech recognition finishes, so macOS and
+ * iOS keep showing the microphone as in use until the tab is reloaded. Nothing is being
+ * recorded, but an app that looks like it is still listening reads as one that is, so it
+ * is worth a sentence. See bugs.webkit.org/show_bug.cgi?id=219671.
+ */
+describe('useVoiceSearch explains the lingering microphone indicator', () => {
+  let freshHook: typeof useVoiceSearch;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    // The notice is said once a session, and a session is module state, so each of
+    // these takes its own copy of the module or the first would silence the rest.
+    vi.resetModules();
+    ({ useVoiceSearch: freshHook } = await import('../useVoiceSearch'));
+    canListen.mockReturnValue(true);
+    requiresDownloadConsent.mockResolvedValue(false);
+    resolveRecognizerKind.mockReturnValue('native');
+    getMicrophonePermission.mockResolvedValue('granted');
+    createRecognizer.mockReturnValue({
+      id: 'native',
+      listen: () => ({ stop: vi.fn(), abort: vi.fn(), transcript: Promise.resolve('rihanna') }),
+    });
+  });
+
+  async function searchOnce() {
+    const hook = renderHook(() => freshHook({ onTranscript: vi.fn() }));
+    await waitFor(() => expect(hook.result.current.state).toBe('idle'));
+    await act(async () => {
+      hook.result.current.start();
+    });
+    return hook;
+  }
+
+  it('says so on WebKit, where the indicator will still be lit', async () => {
+    getMicrophoneResetPlatform.mockReturnValue('safari');
+
+    await searchOnce();
+
+    await waitFor(() =>
+      expect(toastInfo).toHaveBeenCalledWith('notifications:voiceMicrophoneLingers', {
+        description: 'notifications:voiceMicrophoneLingersDesc',
+      })
+    );
+  });
+
+  /** Every browser on iOS is WebKit underneath, so it is not Safari's alone. */
+  it('says so on iOS too, whichever browser is wrapping WebKit', async () => {
+    getMicrophoneResetPlatform.mockReturnValue('ios');
+
+    await searchOnce();
+
+    await waitFor(() => expect(toastInfo).toHaveBeenCalled());
+  });
+
+  /** Reminding them after every search would be nagging about something unchanging. */
+  it('says it once a session, not once a search', async () => {
+    getMicrophoneResetPlatform.mockReturnValue('safari');
+
+    await searchOnce();
+    await waitFor(() => expect(toastInfo).toHaveBeenCalledTimes(1));
+    await searchOnce();
+
+    expect(toastInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it('stays quiet where the browser closes the microphone properly', async () => {
+    getMicrophoneResetPlatform.mockReturnValue('chrome');
+
+    await searchOnce();
+
+    await waitFor(() => expect(createRecognizer).toHaveBeenCalled());
+    expect(toastInfo).not.toHaveBeenCalled();
+  });
+
+  it('stays quiet where the model is doing the listening, since it closes the device', async () => {
+    getMicrophoneResetPlatform.mockReturnValue('safari');
+    resolveRecognizerKind.mockReturnValue('local-model');
+
+    await searchOnce();
+
+    await waitFor(() => expect(createRecognizer).toHaveBeenCalled());
+    expect(toastInfo).not.toHaveBeenCalled();
+  });
+});

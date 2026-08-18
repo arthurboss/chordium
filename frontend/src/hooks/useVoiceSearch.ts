@@ -45,6 +45,14 @@ export type VoiceSearchState =
 const BLOCKED_TOAST_ID = 'voice-microphone-blocked';
 
 /**
+ * Said once a session, and not once per search, which would be nagging: the reader only
+ * needs telling why the indicator is lit, not reminding of it every time they speak.
+ * Module-level so that it survives moving between pages, and resets on a reload, which
+ * is also what clears the indicator.
+ */
+let lingeringIndicatorExplained = false;
+
+/**
  * Where each platform hides the setting. Spelled out rather than assembled from the
  * platform name so that every key can be found by searching for it.
  */
@@ -131,6 +139,29 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
   }, []);
 
   /**
+   * Says why the microphone indicator is still lit, where it will be.
+   *
+   * WebKit never unsets its audio session after speech recognition finishes, so macOS
+   * and iOS keep showing the microphone as in use until the tab is reloaded or closed:
+   * https://bugs.webkit.org/show_bug.cgi?id=219671, open since 2020. Nothing is being
+   * recorded, but a reader has no way of knowing that, and an app that looks like it is
+   * listening after it was asked to stop is worth a sentence rather than a shrug.
+   *
+   * Every browser on iOS is WebKit, so this is not Safari's alone. The model backend
+   * closes the device properly and says nothing.
+   */
+  const explainLingeringIndicator = useCallback(() => {
+    if (lingeringIndicatorExplained) return;
+    if (resolveRecognizerKind() !== 'native') return;
+    const platform = getMicrophoneResetPlatform();
+    if (platform !== 'ios' && platform !== 'safari') return;
+    lingeringIndicatorExplained = true;
+    toast.info(i18n.t('notifications:voiceMicrophoneLingers'), {
+      description: i18n.t('notifications:voiceMicrophoneLingersDesc'),
+    });
+  }, [i18n]);
+
+  /**
    * Opens the microphone and hands back what was heard.
    *
    * Reports nothing when asked to stay quiet, which is how it is called straight after
@@ -168,6 +199,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
               attempt();
               return;
             }
+            explainLingeringIndicator();
             if (transcript) onTranscriptRef.current(transcript);
           })
           .catch((cause: unknown) => {
@@ -188,7 +220,7 @@ export function useVoiceSearch({ onTranscript }: UseVoiceSearchOptions) {
 
       return attempt();
     },
-    [language]
+    [language, explainLingeringIndicator]
   );
 
   /**
