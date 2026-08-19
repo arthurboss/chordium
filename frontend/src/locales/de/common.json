@@ -5,7 +5,8 @@
     "upload": "Hochladen"
   },
   "header": {
-    "homeAriaLabel": "Chordium Startseite"
+    "homeAriaLabel": "Chordium Startseite",
+    "tunerAriaLabel": "Stimmgerät"
   },
   "devBanner": {
     "note": "Hinweis:",
@@ -255,5 +256,21 @@
     "setUp": "Sprachsuche einrichten",
     "allowMicrophone": "Mikrofon erlauben",
     "blocked": "Mikrofon blockiert"
+  },
+  "tuner": {
+    "heading": "Chromatisches Stimmgerät",
+    "subtitle": "Spiele eine Saite und stimme sie auf die nächste Note",
+    "start": "Stimmgerät starten",
+    "stop": "Stopp",
+    "listening": "Höre zu…",
+    "requesting": "Warte auf Mikrofonberechtigung…",
+    "inTune": "Sauber gestimmt",
+    "sharp": "+{{cents}}¢ zu hoch",
+    "flat": "{{cents}}¢ zu tief",
+    "octave": "Oktave {{octave}}",
+    "standardTuning": "Standardstimmung",
+    "string": "Saite {{number}}",
+    "blocked": "Mikrofon blockiert",
+    "error": "Mikrofon konnte nicht geöffnet werden. Bitte versuche es erneut."
   }
 }

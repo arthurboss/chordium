@@ -33,6 +33,7 @@ const lazyWithChunkRetry = <T extends ComponentType<unknown>>(factory: () => Pro
 // Lazy load pages instead of direct imports
 const Home = lazyWithChunkRetry(() => import("./pages/Home"));
 const ChordViewer = lazyWithChunkRetry(() => import("./pages/chord-viewer"));
+const TunerPage = lazyWithChunkRetry(() => import("./features/tuner/TunerPage"));
 // Temporarily removed SmartRouteHandler to fix rendering issues
 // const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
@@ -98,6 +99,18 @@ const router = createBrowserRouter([
             <AsyncErrorBoundary>
               <Suspense fallback={<Loading />}>
                 <Home />
+              </Suspense>
+            </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
+      },
+      {
+        path: "tuner",
+        element: (
+          <RouteErrorBoundary>
+            <AsyncErrorBoundary>
+              <Suspense fallback={<Loading />}>
+                <TunerPage />
               </Suspense>
             </AsyncErrorBoundary>
           </RouteErrorBoundary>
