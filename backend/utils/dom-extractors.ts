@@ -515,9 +515,10 @@ export function extractChordSheet(): ChordSheet {
     return result.join("\n");
   }
 
-  // Ensures exactly one blank line before and after every header line (never
-  // zero, never more), except at the very start/end of the content where
-  // there's nothing to separate it from.
+  // Ensures exactly one blank line before every header line (never zero,
+  // never more), except at the very start of the content where there's
+  // nothing to separate it from. No blank line is added after — the
+  // divider rendered under the header already provides that separation.
   function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
     const lines = text.split("\n");
     const result: string[] = [];
@@ -532,7 +533,6 @@ export function extractChordSheet(): ChordSheet {
         result.push(line);
         let k = i + 1;
         while (k < lines.length && lines[k].trim() === "") k++;
-        if (k < lines.length) result.push("");
         i = k;
         continue;
       }

@@ -48,9 +48,10 @@ function wrapChords(line: string): string {
   return line.replace(CHORD_REGEX, '<b>$1</b>');
 }
 
-// Ensures exactly one blank line before and after every header line (never
-// zero, never more), except at the very start/end of the content where
-// there's nothing to separate it from.
+// Ensures exactly one blank line before every header line (never zero,
+// never more), except at the very start of the content where there's
+// nothing to separate it from. No blank line is added after — the divider
+// rendered under the header already provides that separation.
 function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
   const lines = text.split('\n');
   const result: string[] = [];
@@ -65,7 +66,6 @@ function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) =>
       result.push(line);
       let k = i + 1;
       while (k < lines.length && lines[k].trim() === '') k++;
-      if (k < lines.length) result.push('');
       i = k;
       continue;
     }
@@ -101,14 +101,22 @@ export function songChordsToRawHtml(songChords: string): string {
       continue;
     }
 
-    // Tab block: collect consecutive tab lines (all 6 strings together)
+    // Tab block: collect consecutive tab lines (all 6 strings together).
+    // A block can hold several string-groups separated by a blank line each
+    // (e.g. "Parte 3 de 5" repeating the pattern) — kept as a single blank,
+    // not dropped, or the groups render mashed together and unreadable.
     if (isTabLine(line)) {
       const tabLines: string[] = [];
       while (i < lines.length && (isTabLine(lines[i]) || (tabLines.length > 0 && lines[i].trim() === ''))) {
         if (isTabLine(lines[i])) {
           tabLines.push(lines[i]);
+        } else if (tabLines[tabLines.length - 1]?.trim() !== '') {
+          tabLines.push('');
         }
         i++;
+      }
+      while (tabLines.length > 0 && tabLines[tabLines.length - 1].trim() === '') {
+        tabLines.pop();
       }
       if (tabLines.length > 0) {
         result.push('<span class="tablatura"><span class="cnt">' + tabLines.join('\n') + '</span></span>');

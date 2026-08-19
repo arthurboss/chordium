@@ -51,9 +51,10 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     return result.join("\n");
   }
 
-  // Ensures exactly one blank line before and after every header line (never
-  // zero, never more), except at the very start/end of the content where
-  // there's nothing to separate it from.
+  // Ensures exactly one blank line before every header line (never zero,
+  // never more), except at the very start of the content where there's
+  // nothing to separate it from. No blank line is added after — the
+  // divider rendered under the header already provides that separation.
   function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
     const lines = text.split("\n");
     const result: string[] = [];
@@ -68,7 +69,6 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
         result.push(line);
         let k = i + 1;
         while (k < lines.length && lines[k].trim() === "") k++;
-        if (k < lines.length) result.push("");
         i = k;
         continue;
       }
@@ -142,13 +142,24 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
       let idx = 0;
       while (idx < rawLines.length) {
         if (tabLineRegex.test(rawLines[idx])) {
+          // A "Parte N de M" section can hold several dash-drawn string
+          // groups back to back, each meant to stay visually separated by
+          // exactly one blank line — collapse any run of several into one,
+          // but keep it (dropping it entirely is what merged them together).
           const block: string[] = [];
           while (
             idx < rawLines.length &&
             (tabLineRegex.test(rawLines[idx]) || (block.length > 0 && rawLines[idx].trim() === ""))
           ) {
-            if (tabLineRegex.test(rawLines[idx])) block.push(rawLines[idx]);
+            if (tabLineRegex.test(rawLines[idx])) {
+              block.push(rawLines[idx]);
+            } else if (block[block.length - 1]?.trim() !== "") {
+              block.push("");
+            }
             idx++;
+          }
+          while (block.length > 0 && block[block.length - 1].trim() === "") {
+            block.pop();
           }
           wrapped.push('<span class="tablatura"><span class="cnt">' + block.join("\n") + "</span></span>");
         } else {
