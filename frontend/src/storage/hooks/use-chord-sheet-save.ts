@@ -1,3 +1,4 @@
+import type { ChordSheet } from "@chordium/types";
 import type { ChordSheetData } from "@/pages/chord-viewer/chord-viewer.types";
 import storeChordSheet from "@/storage/stores/chord-sheets/operations/store-chord-sheet";
 import { showSaveSuccessNotification, showSaveErrorNotification } from "@/pages/chord-viewer/utils/notifications";
@@ -23,10 +24,14 @@ export function useChordSheetSave(
     
     try {
       // Store chord sheet with saved: true (creates new or updates existing to saved: true)
-      const { title, artist, songKey, guitarTuning, guitarCapo, songChords } = chordSheetData.chordSheet;
+      const { title, artist, songKey, guitarTuning, guitarCapo, songChords, rawHtml } = chordSheetData.chordSheet;
+      const content: ChordSheet = { songChords };
+      if (rawHtml) {
+        content.rawHtml = rawHtml;
+      }
       await storeChordSheet(
         { title, artist, songKey, guitarTuning, guitarCapo },
-        { songChords },
+        content,
         true,
         chordSheetData.path
       );

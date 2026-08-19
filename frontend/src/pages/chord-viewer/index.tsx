@@ -3,6 +3,7 @@ import { useParams, useLocation, useSearchParams } from 'react-router-dom';
 import SongViewer, { type UpdatedSongData } from '@/components/SongViewer';
 import { useChordSheetWithFallback } from '@/hooks/useChordSheetWithFallback';
 import type { RouteParams } from './chord-viewer.types';
+import type { ChordSheet } from '@chordium/types';
 
 import { resolveChordSheetPath } from './utils/path-resolver';
 import { type JamPayload, decodeChordSheet, JAM_QR_PREFIX } from '@/utils/chordSheetQR';
@@ -162,20 +163,27 @@ const ChordViewer = () => {
       // way displayContent does below - editedData first - since
       // chordSheetResult.content is only populated once on mount and would
       // otherwise clobber a simplified edit just saved earlier this session.
-      await storeFullChordSheet({ songChords: data.songChords }, path);
-      await storeChordSheet(
-        metadata,
-        { songChords: resolveSimplifiedContentForFullEdit(editedData?.songChords, chordSheetResult.content?.songChords) },
-        isSaved,
-        path
-      );
+      const fullContent: ChordSheet = { songChords: data.songChords };
+      if (chordSheetResult.fullContent?.rawHtml) {
+        fullContent.rawHtml = chordSheetResult.fullContent.rawHtml;
+      }
+      await storeFullChordSheet(fullContent, path);
+      const simplifiedContent: ChordSheet = { songChords: resolveSimplifiedContentForFullEdit(editedData?.songChords, chordSheetResult.content?.songChords) };
+      if (chordSheetResult.content?.rawHtml) {
+        simplifiedContent.rawHtml = chordSheetResult.content.rawHtml;
+      }
+      await storeChordSheet(metadata, simplifiedContent, isSaved, path);
       setFullEdited(data.songChords);
     } else {
       // Editing the simplified (default) arrangement.
-      await storeChordSheet(metadata, { songChords: data.songChords }, isSaved, path);
+      const content: ChordSheet = { songChords: data.songChords };
+      if (chordSheetResult.content?.rawHtml) {
+        content.rawHtml = chordSheetResult.content.rawHtml;
+      }
+      await storeChordSheet(metadata, content, isSaved, path);
       setEditedData(data);
     }
-  }, [isSaved, path, showFull, editedData, chordSheetResult.content]);
+  }, [isSaved, path, showFull, editedData, chordSheetResult.content, chordSheetResult.fullContent]);
 
   if (jamPayload && !chordSheetResult.metadata) {
     const jamChordSheet = {

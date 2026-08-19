@@ -1,6 +1,6 @@
 {
   "name": "chordium-backend",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "main": "dist/backend/server.js",
   "license": "MIT",
   "type": "module",

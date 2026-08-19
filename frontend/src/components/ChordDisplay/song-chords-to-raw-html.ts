@@ -48,10 +48,46 @@ function wrapChords(line: string): string {
   return line.replace(CHORD_REGEX, '<b>$1</b>');
 }
 
+// Ensures exactly one blank line before every header line (never zero,
+// never more), except at the very start of the content where there's
+// nothing to separate it from. No blank line is added after — the divider
+// rendered under the header already provides that separation.
+function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
+  const lines = text.split('\n');
+  const result: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (isHeaderLine(line.trim())) {
+      while (result.length > 0 && result[result.length - 1].trim() === '') {
+        result.pop();
+      }
+      if (result.length > 0) result.push('');
+      result.push(line);
+      let k = i + 1;
+      while (k < lines.length && lines[k].trim() === '') k++;
+      i = k;
+      continue;
+    }
+    result.push(line);
+    i++;
+  }
+  return result.join('\n');
+}
+
+const TAB_PART_LABEL_REGEX = /^\s*Parte \d+ [Dd]e \d+\s*$/;
+
 export function songChordsToRawHtml(songChords: string): string {
   const lines = songChords.split('\n');
   const result: string[] = [];
   let i = 0;
+  // Some sections mix chord-only content and a tab block under a single
+  // title with no separate "Tab - <title>" counterpart. Without that second
+  // header, the "hide tabs" toggle has nothing tab-named to strip and leaves
+  // the tab block behind. Track the section currently in scope so a
+  // "Tab - <title>" header can be inserted right before its tab run starts.
+  let currentTitle: string | null = null;
+  let insertedTabHeaderForSection = false;
 
   while (i < lines.length) {
     const line = lines[i];
@@ -63,6 +99,8 @@ export function songChordsToRawHtml(songChords: string): string {
     // chord-line check below.
     const sectionMatch = trimmed.match(/^\[([^\]]+)\]\s*(.*)$/);
     if (sectionMatch) {
+      currentTitle = sectionMatch[1];
+      insertedTabHeaderForSection = false;
       const translatedTitle = translateSectionTitle(sectionMatch[1]);
       result.push('<span class="section-title">' + translatedTitle + '</span>');
       const rest = sectionMatch[2];
@@ -74,14 +112,34 @@ export function songChordsToRawHtml(songChords: string): string {
       continue;
     }
 
-    // Tab block: collect consecutive tab lines (all 6 strings together)
+    if (
+      !insertedTabHeaderForSection &&
+      currentTitle &&
+      !/^(tab|dedilhado)\b/i.test(currentTitle.trim()) &&
+      (isTabLine(line) || TAB_PART_LABEL_REGEX.test(line))
+    ) {
+      result.push('<span class="section-title">Tab - ' + translateSectionTitle(currentTitle) + '</span>');
+      insertedTabHeaderForSection = true;
+    }
+
+    // Tab block: collect consecutive tab lines (all 6 strings together), plus
+    // any fret-hand direction rows (e.g. "↓  ↑ ↓") annotating them. A block
+    // can hold several string-groups separated by a blank line each (e.g.
+    // "Parte 3 de 5" repeating the pattern) — kept as a single blank, not
+    // dropped, or the groups render mashed together and unreadable.
     if (isTabLine(line)) {
       const tabLines: string[] = [];
-      while (i < lines.length && (isTabLine(lines[i]) || (tabLines.length > 0 && lines[i].trim() === ''))) {
-        if (isTabLine(lines[i])) {
+      const continuesBlock = (l: string) => isTabLine(l) || /^[ \t]*[↓↑][ \t↓↑]*$/.test(l);
+      while (i < lines.length && (continuesBlock(lines[i]) || (tabLines.length > 0 && lines[i].trim() === ''))) {
+        if (continuesBlock(lines[i])) {
           tabLines.push(lines[i]);
+        } else if (tabLines[tabLines.length - 1]?.trim() !== '') {
+          tabLines.push('');
         }
         i++;
+      }
+      while (tabLines.length > 0 && tabLines[tabLines.length - 1].trim() === '') {
+        tabLines.pop();
       }
       if (tabLines.length > 0) {
         result.push('<span class="tablatura"><span class="cnt">' + tabLines.join('\n') + '</span></span>');
@@ -101,9 +159,8 @@ export function songChordsToRawHtml(songChords: string): string {
     i++;
   }
 
-  // Normalize spacing around section titles
-  return result.join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
-    .replace(/(<\/span>)\n\n+/g, '$1\n');
+  return normalizeHeaderBlankLines(
+    result.join('\n').replace(/\n{3,}/g, '\n\n'),
+    (line) => /^<span class="section-title">.*<\/span>$/.test(line)
+  );
 }
