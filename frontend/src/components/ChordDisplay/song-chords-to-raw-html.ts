@@ -115,7 +115,7 @@ export function songChordsToRawHtml(songChords: string): string {
     if (
       !insertedTabHeaderForSection &&
       currentTitle &&
-      !/^tab\b/i.test(currentTitle.trim()) &&
+      !/^(tab|dedilhado)\b/i.test(currentTitle.trim()) &&
       (isTabLine(line) || TAB_PART_LABEL_REGEX.test(line))
     ) {
       result.push('<span class="section-title">Tab - ' + translateSectionTitle(currentTitle) + '</span>');

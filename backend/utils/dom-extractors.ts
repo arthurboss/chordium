@@ -494,23 +494,48 @@ export function extractChordSheet(): ChordSheet {
   if (!preElement) return { songChords: "" };
 
   // Drops a bare section-title line when it's immediately followed (skipping
-  // blank lines) by another one — the source sometimes repeats a section's
-  // title right before its "Tab - <title>" counterpart with nothing of
-  // substance in between, which reads as a useless duplicate header. Only
-  // touches lines when a genuine duplicate is found — otherwise every line,
-  // including any surrounding blank ones, is left exactly as it was.
-  function dedupeAdjacentHeaders(text: string, isHeaderLine: (line: string) => boolean): string {
+  // blank lines) by another one, but ONLY when that's actually safe: if the
+  // second header is "Tab -"/"Dedilhado -" prefixed, its tab run is skipped
+  // ahead first, and the drop only happens if nothing but another header (or
+  // the end) follows. Some sections share one header for both a tab run and
+  // the real chords/lyrics that resume right after it (e.g. a bare "[X]"
+  // immediately followed by "[Tab - X]", with the section's actual lyrics
+  // appearing only after the tab content ends) — collapsing the pair there
+  // would leave that trailing content with no header of its own. Sections
+  // that really are just a duplicate ("[X]" then "[Tab - X]" with nothing
+  // else in the section) still collapse to the more specific one as before.
+  function dedupeAdjacentHeaders(
+    text: string,
+    isHeaderLine: (line: string) => boolean,
+    extractTitle: (line: string) => string | null,
+    isTabContinuation: (lines: string[], i: number) => boolean
+  ): string {
     const lines = text.split("\n");
     const result: string[] = [];
-    for (const line of lines) {
-      if (isHeaderLine(line.trim())) {
-        let j = result.length - 1;
-        while (j >= 0 && result[j].trim() === "") j--;
-        if (j >= 0 && isHeaderLine(result[j].trim())) {
-          result.length = j;
+    let i = 0;
+    while (i < lines.length) {
+      if (isHeaderLine(lines[i].trim())) {
+        let j = i + 1;
+        while (j < lines.length && lines[j].trim() === "") j++;
+        if (j < lines.length && isHeaderLine(lines[j].trim())) {
+          const nextTitle = extractTitle(lines[j].trim());
+          const nextIsTabPrefixed = !!nextTitle && /^(tab|dedilhado)\b/i.test(nextTitle.trim());
+          if (nextIsTabPrefixed) {
+            let k = j + 1;
+            while (k < lines.length && isTabContinuation(lines, k)) k++;
+            const safeToCollapse = k >= lines.length || isHeaderLine(lines[k].trim());
+            if (safeToCollapse) {
+              i = j;
+              continue;
+            }
+          } else {
+            i = j;
+            continue;
+          }
         }
       }
-      result.push(line);
+      result.push(lines[i]);
+      i++;
     }
     return result.join("\n");
   }
@@ -567,7 +592,7 @@ export function extractChordSheet(): ChordSheet {
         result.push(line);
         continue;
       }
-      if (!insertedForSection && currentTitle && !/^tab\b/i.test(currentTitle.trim()) && isTabRunStart(line)) {
+      if (!insertedForSection && currentTitle && !/^(tab|dedilhado)\b/i.test(currentTitle.trim()) && isTabRunStart(line)) {
         result.push(makeHeaderLine("Tab - " + currentTitle));
         insertedForSection = true;
       }
@@ -595,6 +620,33 @@ export function extractChordSheet(): ChordSheet {
   // it so it doesn't leak into the chord sheet body as a lyric line.
   const leadingTuningLineRegex = /^Afinação:\s*(?:[A-G][#b]?\s*){6}\s*\n+/i;
   songChords = songChords.replace(leadingTuningLineRegex, "");
+  // Recognizes a chord-only line (e.g. "   Am               C   ") the same
+  // way isChordLine elsewhere in the app does: strip every chord token and
+  // check that nothing but whitespace/decoration is left.
+  const CHORD_TOKEN_SOURCE =
+    "[A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7M|9M|11M|13M|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|4|2)?(?:\\/[A-G][#b]?)?";
+  function isPlainChordOnlyLine(line: string): boolean {
+    if (!/[A-G]/.test(line)) return false;
+    const stripped = line.replace(new RegExp(CHORD_TOKEN_SOURCE, "g"), "");
+    return /^[\s()[\]{}xX0-9.,:-]*$/.test(stripped);
+  }
+  function isPlainTabContinuation(lines: string[], i: number): boolean {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (trimmed === "") return true;
+    if (/^[EBGDAe]\|[-\d]/.test(trimmed)) return true;
+    if (/^\s*Parte \d+ [Dd]e \d+\s*$/.test(line)) return true;
+    if (/^[ \t]*[↓↑][ \t↓↑]*$/.test(line)) return true;
+    if (isPlainChordOnlyLine(trimmed)) {
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === "") j++;
+      if (j >= lines.length) return false;
+      const next = lines[j];
+      return /^[EBGDAe]\|[-\d]/.test(next.trim()) || /^\s*Parte \d+ [Dd]e \d+\s*$/.test(next);
+    }
+    return false;
+  }
+
   const isBareBracketHeader = (line: string) => /^\[[^\]]+\]$/.test(line);
   const isTabRunStartPlain = (line: string) => /^[EBGDAe]\|[-\d]/.test(line) || /^\s*Parte \d+ [Dd]e \d+\s*$/.test(line);
   songChords = insertMissingTabHeaders(
@@ -604,7 +656,12 @@ export function extractChordSheet(): ChordSheet {
     (title) => "[" + title + "]",
     isTabRunStartPlain
   );
-  songChords = dedupeAdjacentHeaders(songChords, isBareBracketHeader);
+  songChords = dedupeAdjacentHeaders(
+    songChords,
+    isBareBracketHeader,
+    (line) => line.match(/^\[([^\]]+)\]/)?.[1] ?? null,
+    isPlainTabContinuation
+  );
   songChords = normalizeHeaderBlankLines(songChords, isBareBracketHeader);
 
   function sanitizeNode(node: Node): string {
@@ -678,16 +735,57 @@ export function extractChordSheet(): ChordSheet {
       });
   })();
 
-  const isSectionTitleLine = (line: string) => /^<span class="section-title">.*<\/span>$/.test(line);
+  // Native markup wraps each tab sub-block in its own <span class="tablatura">,
+  // sometimes with a "[Section]" bracket right on the same line as its
+  // opening tag (e.g. "<span class="tablatura">[Dedilhado - Intro]") — so a
+  // header line and a tab-continuation line can each start with that tag.
+  const isSectionTitleLine = (line: string) =>
+    /^(?:<span class="tablatura">)?<span class="section-title">.*<\/span>$/.test(line);
+  function isHtmlTabContinuation(lines: string[], i: number): boolean {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (trimmed === "") return true;
+    if (
+      line.includes('<span class="tablatura">') ||
+      line.includes('<span class="cnt">') ||
+      line.includes("</span></span>")
+    ) {
+      return true;
+    }
+    if (/Parte \d+ [Dd]e \d+/.test(line)) return true;
+    if (/^[EBGDAe]\|[-\d]/.test(trimmed)) return true;
+    if (/^[ \t]*[↓↑][ \t↓↑]*$/.test(line)) return true;
+    if (/^(?:<b>[^<]*<\/b>\s*)+$/.test(trimmed)) {
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === "") j++;
+      if (j >= lines.length) return false;
+      const next = lines[j];
+      return (
+        next.includes('<span class="tablatura">') ||
+        next.includes('<span class="cnt">') ||
+        /Parte \d+ [Dd]e \d+/.test(next) ||
+        /^[EBGDAe]\|[-\d]/.test(next.trim())
+      );
+    }
+    return false;
+  }
   const isTabRunStartHtml = (line: string) => /^<span class="tablatura">/.test(line) || /^\s*Parte \d+ [Dd]e \d+\s*$/.test(line);
+  const extractTitleHtml = (line: string) =>
+    line.match(/^(?:<span class="tablatura">)?<span class="section-title">([^<]*)<\/span>/)?.[1] ?? null;
   const rawHtmlWithTabHeaders = insertMissingTabHeaders(
     rawHtml,
-    (line) => /^<span class="section-title">/.test(line),
-    (line) => line.match(/^<span class="section-title">([^<]*)<\/span>/)?.[1] ?? null,
+    (line) => /^(?:<span class="tablatura">)?<span class="section-title">/.test(line),
+    extractTitleHtml,
     (title) => '<span class="section-title">' + title + "</span>",
     isTabRunStartHtml
   );
-  return { songChords, rawHtml: normalizeHeaderBlankLines(dedupeAdjacentHeaders(rawHtmlWithTabHeaders, isSectionTitleLine), isSectionTitleLine) };
+  return {
+    songChords,
+    rawHtml: normalizeHeaderBlankLines(
+      dedupeAdjacentHeaders(rawHtmlWithTabHeaders, isSectionTitleLine, extractTitleHtml, isHtmlTabContinuation),
+      isSectionTitleLine
+    ),
+  };
 }
 
 /**
