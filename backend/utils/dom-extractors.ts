@@ -460,6 +460,18 @@ export function extractSongMetadata(): SongMetadata {
     if (notes.length === 6) {
       guitarTuning = notes as unknown as GuitarTuning;
     }
+  } else {
+    // Some pages render non-standard tuning as a plain "Afinação: <notes>"
+    // line at the very start of the pre block instead of a cifra_afi anchor.
+    const preElement = document.querySelector("pre");
+    const preText = preElement?.textContent || "";
+    const leadingTuningMatch = preText.match(/^Afinação:\s*([A-G][#b]?(?:\s+[A-G][#b]?){5})\s*\n+/i);
+    if (leadingTuningMatch) {
+      const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
+      if (notes.length === 6) {
+        guitarTuning = notes as unknown as GuitarTuning;
+      }
+    }
   }
 
   return {
@@ -495,6 +507,11 @@ export function extractChordSheet(): ChordSheet {
     }
   });
 
+  // Some pages render non-standard tuning as a plain "Afinação: <notes>" line
+  // at the very start of the pre block instead of a cifra_afi anchor. Strip
+  // it so it doesn't leak into the chord sheet body as a lyric line.
+  const leadingTuningLineRegex = /^Afinação:\s*(?:[A-G][#b]?\s*){6}\s*\n+/i;
+  songChords = songChords.replace(leadingTuningLineRegex, "");
 
   function sanitizeNode(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
@@ -510,7 +527,10 @@ export function extractChordSheet(): ChordSheet {
     return `${openTag}${inner}</${tag}>`;
   }
 
-  const rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+  let rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+  // Same leading line as above, verbatim (it's a plain text node, not
+  // wrapped in <b>/<span>, so it appears unchanged in the sanitized HTML).
+  rawHtmlRaw = rawHtmlRaw.replace(leadingTuningLineRegex, "");
   // Wrap [Section Title] patterns in a span for styling
   // Wrap section titles and dedent continuation lines
   const rawHtml = (() => {

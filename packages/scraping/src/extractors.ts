@@ -19,6 +19,12 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   const preElement = document.querySelector("pre");
   let songChords = "";
   let rawHtml: string | undefined;
+  // Non-standard tunings are usually a `span#cifra_afi a` anchor, but some
+  // pages instead render a plain "Afinação: <notes>" line as the very first
+  // line of the pre block, with no anchor at all. Detected below and used
+  // both to strip it from the extracted content and as a tuning fallback.
+  const leadingTuningLineRegex = /^Afinação:\s*([A-G][#b]?(?:\s+[A-G][#b]?){5})\s*\n+/i;
+  let leadingTuningMatch: RegExpMatchArray | null = null;
 
   if (preElement) {
     // Plain-text content (tab blocks wrapped in [TAB] markers).
@@ -34,6 +40,11 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
         }
       }
     });
+
+    leadingTuningMatch = songChords.match(leadingTuningLineRegex);
+    if (leadingTuningMatch) {
+      songChords = songChords.slice(leadingTuningMatch[0].length);
+    }
 
     // rawHtml: keep only text, <b> (chords) and <span> (styling), stripping all
     // attributes except class on span. Preserves the source's chord markup.
@@ -54,6 +65,9 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     }
 
     let rawHtmlRaw = Array.from(preElement.childNodes).map(sanitizeNode).join("");
+    // Same leading line as above, verbatim (it's a plain text node, not
+    // wrapped in <b>/<span>, so it appears unchanged in the sanitized HTML).
+    rawHtmlRaw = rawHtmlRaw.replace(leadingTuningLineRegex, "");
     // Some tab blocks close the tablatura span before the last string, leaving
     // the 6th string (e.g. "E|----|") as a bare line after </span></span>.
     // Absorb those trailing tab-string lines back inside the cnt span so the
@@ -190,6 +204,11 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
       .trim()
       .split(/\s+/)
       .filter(Boolean);
+    if (notes.length === 6) {
+      guitarTuning = notes as unknown as GuitarTuning;
+    }
+  } else if (leadingTuningMatch) {
+    const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
     if (notes.length === 6) {
       guitarTuning = notes as unknown as GuitarTuning;
     }
