@@ -1,9 +1,16 @@
 export function removeTabsFromHtml(html: string): string {
-  let result = html.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
-  result = result.replace(/(​|&ZeroWidthSpace;)/g, '');
+  // Remove each "Tab - <title>" section wholesale: header, chord annotations,
+  // "Parte N de M" labels, dash lines, fret-hand arrows — everything up to
+  // the next header or the end of the content. Stripping only the specific
+  // tab artifacts (below) left chord-annotation lines behind with no header,
+  // which reads as broken content rather than a hidden section.
+  let result = html.replace(/<span class="section-title">\s*[Tt]ab\b[^<]*<\/span>[\s\S]*?(?=<span class="section-title">|$)/g, '');
 
-  // Remove tab-only section titles (e.g. "Tab - Solo Final") — they only label
-  // a tab block, which is now gone.
+  // Fallback for content scraped before every tab run was guaranteed a
+  // "Tab -" header: strip the tab artifacts piecemeal wherever they still
+  // appear outside of one.
+  result = result.replace(/<span class="tablatura"[^>]*>[\s\S]*?<\/span>\s*<\/span>/g, '');
+  result = result.replace(/(​|&ZeroWidthSpace;)/g, '');
   result = result.replace(/<span class="section-title">\s*[Tt]ab\b[^<]*<\/span>\n*/g, '');
 
   // Remove standalone tab-part labels ("Parte 1 de 3") left over from tab blocks.
