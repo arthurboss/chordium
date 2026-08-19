@@ -493,17 +493,38 @@ export function extractChordSheet(): ChordSheet {
   const preElement = document.querySelector("pre");
   if (!preElement) return { songChords: "" };
 
+  // Drops a bare section-title line when it's immediately followed (skipping
+  // blank lines) by another one — the source sometimes repeats a section's
+  // title right before its "Tab - <title>" counterpart with nothing of
+  // substance in between, which reads as a useless duplicate header.
+  function dedupeAdjacentHeaders(text: string, isHeaderLine: (line: string) => boolean): string {
+    const lines = text.split("\n");
+    const result: string[] = [];
+    for (const line of lines) {
+      if (isHeaderLine(line.trim())) {
+        while (result.length > 0 && result[result.length - 1].trim() === "") {
+          result.pop();
+        }
+        if (result.length > 0 && isHeaderLine(result[result.length - 1].trim())) {
+          result.pop();
+        }
+      }
+      result.push(line);
+    }
+    return result.join("\n");
+  }
+
   let songChords = "";
+  // Tab blocks are plain text too (their dash-drawn strings, e.g.
+  // "E|----7-10-...|", are already self-identifying), so no wrapper markers
+  // are needed — bracket-style markers would collide with the "[Section]"
+  // convention used elsewhere and render as bogus section headers when
+  // rawHtml is unavailable.
   preElement.childNodes.forEach(function(node) {
     if (node.nodeType === Node.TEXT_NODE) {
       songChords += node.textContent || "";
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const el = node as Element;
-      if (el.classList.contains("tablatura")) {
-        songChords += "[TAB]\n" + (el.textContent || "") + "\n[/TAB]\n";
-      } else {
-        songChords += el.textContent || "";
-      }
+      songChords += (node as Element).textContent || "";
     }
   });
 
@@ -512,6 +533,7 @@ export function extractChordSheet(): ChordSheet {
   // it so it doesn't leak into the chord sheet body as a lyric line.
   const leadingTuningLineRegex = /^Afinação:\s*(?:[A-G][#b]?\s*){6}\s*\n+/i;
   songChords = songChords.replace(leadingTuningLineRegex, "");
+  songChords = dedupeAdjacentHeaders(songChords, (line) => /^\[[^\]]+\]$/.test(line));
 
   function sanitizeNode(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
@@ -575,7 +597,7 @@ export function extractChordSheet(): ChordSheet {
       });
   })();
 
-  return { songChords, rawHtml };
+  return { songChords, rawHtml: dedupeAdjacentHeaders(rawHtml, (line) => /^<span class="section-title">.*<\/span>$/.test(line)) };
 }
 
 /**

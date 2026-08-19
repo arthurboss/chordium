@@ -100,7 +100,7 @@ async function runCascade(
     logger?.(`cascade: trying ${route.variant} → ${route.url}`);
     const data = await tryLoadVariant(page, route.url, route.timeout, logger);
     if (data) {
-      const hasTabs = data.songChords.includes("[TAB]");
+      const hasTabs = /^[EBGDAe]\|[-\d]/m.test(data.songChords);
       logger?.(`cascade hit: ${route.variant} (hasTabs=${hasTabs})`);
       return { data, variant: route.variant, hasTabs };
     }

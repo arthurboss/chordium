@@ -141,7 +141,7 @@ const SongViewer = ({
 
   const hasTabs = useMemo(() => {
     if (chordSheetToDisplay.rawHtml?.includes("tablatura")) return true;
-    return (chordContentToDisplay || "").includes("[TAB]");
+    return /^[EBGDAe]\|[-\d]/m.test(chordContentToDisplay || "");
   }, [chordSheetToDisplay.rawHtml, chordContentToDisplay]);
 
   const {

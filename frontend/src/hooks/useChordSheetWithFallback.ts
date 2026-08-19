@@ -96,7 +96,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
   // full arrangement is stored yet. This covers both the fresh-scrape case
   // (variant === 'simplified') and re-opening a cached song.
   const primarySongChords = localContent?.songChords ?? apiData?.songChords ?? null;
-  const primaryHasTabs = !!primarySongChords && (primarySongChords.includes('[TAB]') || (localContent?.rawHtml?.includes('tablatura') ?? false));
+  const primaryHasTabs = !!primarySongChords && (/^[EBGDAe]\|[-\d]/m.test(primarySongChords) || (localContent?.rawHtml?.includes('tablatura') ?? false));
   useEffect(() => {
     if (!path) return;
     if (fullContent) return;              // already have it
