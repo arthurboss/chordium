@@ -32,20 +32,48 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
   // Drops a bare section-title line when it's immediately followed (skipping
   // blank lines) by another one — the source sometimes repeats a section's
   // title right before its "Tab - <title>" counterpart with nothing of
-  // substance in between, which reads as a useless duplicate header.
+  // substance in between, which reads as a useless duplicate header. Only
+  // touches lines when a genuine duplicate is found — otherwise every line,
+  // including any surrounding blank ones, is left exactly as it was.
   function dedupeAdjacentHeaders(text: string, isHeaderLine: (line: string) => boolean): string {
     const lines = text.split("\n");
     const result: string[] = [];
     for (const line of lines) {
       if (isHeaderLine(line.trim())) {
-        while (result.length > 0 && result[result.length - 1].trim() === "") {
-          result.pop();
-        }
-        if (result.length > 0 && isHeaderLine(result[result.length - 1].trim())) {
-          result.pop();
+        let j = result.length - 1;
+        while (j >= 0 && result[j].trim() === "") j--;
+        if (j >= 0 && isHeaderLine(result[j].trim())) {
+          result.length = j;
         }
       }
       result.push(line);
+    }
+    return result.join("\n");
+  }
+
+  // Ensures exactly one blank line before and after every header line (never
+  // zero, never more), except at the very start/end of the content where
+  // there's nothing to separate it from.
+  function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
+    const lines = text.split("\n");
+    const result: string[] = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (isHeaderLine(line.trim())) {
+        while (result.length > 0 && result[result.length - 1].trim() === "") {
+          result.pop();
+        }
+        if (result.length > 0) result.push("");
+        result.push(line);
+        let k = i + 1;
+        while (k < lines.length && lines[k].trim() === "") k++;
+        if (k < lines.length) result.push("");
+        i = k;
+        continue;
+      }
+      result.push(line);
+      i++;
     }
     return result.join("\n");
   }
@@ -71,7 +99,9 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     if (leadingTuningMatch) {
       songChords = songChords.slice(leadingTuningMatch[0].length);
     }
-    songChords = dedupeAdjacentHeaders(songChords, (line) => /^\[[^\]]+\]$/.test(line));
+    const isBareBracketHeader = (line: string) => /^\[[^\]]+\]$/.test(line);
+    songChords = dedupeAdjacentHeaders(songChords, isBareBracketHeader);
+    songChords = normalizeHeaderBlankLines(songChords, isBareBracketHeader);
 
     // rawHtml: keep only text, <b> (chords) and <span> (styling), stripping all
     // attributes except class on span. Preserves the source's chord markup.
@@ -97,6 +127,37 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     // Same leading line as above, verbatim (it's a plain text node, not
     // wrapped in <b>/<span>, so it appears unchanged in the sanitized HTML).
     rawHtmlRaw = rawHtmlRaw.replace(leadingTuningLineRegex, "");
+    // Print pages render tab blocks as bare text with no <span class="tablatura">
+    // wrapper at all (unlike regular pages, whose native markup is preserved
+    // above by sanitizeNode) — their dash-drawn strings (e.g. "E|----7-10-...|")
+    // then inherit whatever font the reader picked instead of staying
+    // monospace, breaking the ASCII alignment. Detect and wrap them the same
+    // way the source's own regular pages do, so the existing .tablatura/.cnt
+    // CSS can force the alignment. Skipped when tablatura markup is already
+    // present (the regular-page fallback route) to avoid double-wrapping.
+    if (!/<span class="tablatura">/.test(rawHtmlRaw)) {
+      const tabLineRegex = /^[EBGDAe]\|[-\d]/;
+      const rawLines = rawHtmlRaw.split("\n");
+      const wrapped: string[] = [];
+      let idx = 0;
+      while (idx < rawLines.length) {
+        if (tabLineRegex.test(rawLines[idx])) {
+          const block: string[] = [];
+          while (
+            idx < rawLines.length &&
+            (tabLineRegex.test(rawLines[idx]) || (block.length > 0 && rawLines[idx].trim() === ""))
+          ) {
+            if (tabLineRegex.test(rawLines[idx])) block.push(rawLines[idx]);
+            idx++;
+          }
+          wrapped.push('<span class="tablatura"><span class="cnt">' + block.join("\n") + "</span></span>");
+        } else {
+          wrapped.push(rawLines[idx]);
+          idx++;
+        }
+      }
+      rawHtmlRaw = wrapped.join("\n");
+    }
     // Some tab blocks close the tablatura span before the last string, leaving
     // the 6th string (e.g. "E|----|") as a bare line after </span></span>.
     // Absorb those trailing tab-string lines back inside the cnt span so the
@@ -122,32 +183,31 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
         result.push(lines[i]);
       }
     }
-    rawHtml = dedupeAdjacentHeaders(
-      result
-        .join("\n")
-        .replace(/\n{2,}(<span class="section-title">)/g, "\n\n$1")
-        .replace(/(<\/span>)\n\n+/g, "$1\n")
-        .replace(
-          /(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g,
-          (_m: string, open: string, content: string, cnt: string) => {
-            const contentLines = content.split("\n");
-            const tabInfoLines: string[] = [];
-            const chordAnnotationLines: string[] = [];
-            for (const line of contentLines) {
-              if (line.includes("<b>") && !line.includes('<span class="section-title">')) {
-                chordAnnotationLines.push(line);
-              } else if (line.trim() && !line.includes('<span class="section-title">')) {
-                tabInfoLines.push('<span class="tab-info">' + line + "</span>");
-              } else {
-                tabInfoLines.push(line);
-              }
+    const isSectionTitleLine = (line: string) => /^<span class="section-title">.*<\/span>$/.test(line);
+    const rawHtmlBuilt = result
+      .join("\n")
+      .replace(/\n{2,}(<span class="section-title">)/g, "\n\n$1")
+      .replace(/(<\/span>)\n\n+/g, "$1\n")
+      .replace(
+        /(<span class="tablatura">)((?:(?!<span class="cnt">)[\s\S])*?)(<span class="cnt">)/g,
+        (_m: string, open: string, content: string, cnt: string) => {
+          const contentLines = content.split("\n");
+          const tabInfoLines: string[] = [];
+          const chordAnnotationLines: string[] = [];
+          for (const line of contentLines) {
+            if (line.includes("<b>") && !line.includes('<span class="section-title">')) {
+              chordAnnotationLines.push(line);
+            } else if (line.trim() && !line.includes('<span class="section-title">')) {
+              tabInfoLines.push('<span class="tab-info">' + line + "</span>");
+            } else {
+              tabInfoLines.push(line);
             }
-            const prefix = chordAnnotationLines.length > 0 ? chordAnnotationLines.join("\n") + "\n" : "";
-            return open + tabInfoLines.join("\n") + cnt + prefix;
           }
-        ),
-      (line) => /^<span class="section-title">.*<\/span>$/.test(line)
-    );
+          const prefix = chordAnnotationLines.length > 0 ? chordAnnotationLines.join("\n") + "\n" : "";
+          return open + tabInfoLines.join("\n") + cnt + prefix;
+        }
+      );
+    rawHtml = normalizeHeaderBlankLines(dedupeAdjacentHeaders(rawHtmlBuilt, isSectionTitleLine), isSectionTitleLine);
   }
 
   let title = "";

@@ -496,20 +496,48 @@ export function extractChordSheet(): ChordSheet {
   // Drops a bare section-title line when it's immediately followed (skipping
   // blank lines) by another one — the source sometimes repeats a section's
   // title right before its "Tab - <title>" counterpart with nothing of
-  // substance in between, which reads as a useless duplicate header.
+  // substance in between, which reads as a useless duplicate header. Only
+  // touches lines when a genuine duplicate is found — otherwise every line,
+  // including any surrounding blank ones, is left exactly as it was.
   function dedupeAdjacentHeaders(text: string, isHeaderLine: (line: string) => boolean): string {
     const lines = text.split("\n");
     const result: string[] = [];
     for (const line of lines) {
       if (isHeaderLine(line.trim())) {
-        while (result.length > 0 && result[result.length - 1].trim() === "") {
-          result.pop();
-        }
-        if (result.length > 0 && isHeaderLine(result[result.length - 1].trim())) {
-          result.pop();
+        let j = result.length - 1;
+        while (j >= 0 && result[j].trim() === "") j--;
+        if (j >= 0 && isHeaderLine(result[j].trim())) {
+          result.length = j;
         }
       }
       result.push(line);
+    }
+    return result.join("\n");
+  }
+
+  // Ensures exactly one blank line before and after every header line (never
+  // zero, never more), except at the very start/end of the content where
+  // there's nothing to separate it from.
+  function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
+    const lines = text.split("\n");
+    const result: string[] = [];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (isHeaderLine(line.trim())) {
+        while (result.length > 0 && result[result.length - 1].trim() === "") {
+          result.pop();
+        }
+        if (result.length > 0) result.push("");
+        result.push(line);
+        let k = i + 1;
+        while (k < lines.length && lines[k].trim() === "") k++;
+        if (k < lines.length) result.push("");
+        i = k;
+        continue;
+      }
+      result.push(line);
+      i++;
     }
     return result.join("\n");
   }
@@ -533,7 +561,9 @@ export function extractChordSheet(): ChordSheet {
   // it so it doesn't leak into the chord sheet body as a lyric line.
   const leadingTuningLineRegex = /^Afinação:\s*(?:[A-G][#b]?\s*){6}\s*\n+/i;
   songChords = songChords.replace(leadingTuningLineRegex, "");
-  songChords = dedupeAdjacentHeaders(songChords, (line) => /^\[[^\]]+\]$/.test(line));
+  const isBareBracketHeader = (line: string) => /^\[[^\]]+\]$/.test(line);
+  songChords = dedupeAdjacentHeaders(songChords, isBareBracketHeader);
+  songChords = normalizeHeaderBlankLines(songChords, isBareBracketHeader);
 
   function sanitizeNode(node: Node): string {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
@@ -597,7 +627,8 @@ export function extractChordSheet(): ChordSheet {
       });
   })();
 
-  return { songChords, rawHtml: dedupeAdjacentHeaders(rawHtml, (line) => /^<span class="section-title">.*<\/span>$/.test(line)) };
+  const isSectionTitleLine = (line: string) => /^<span class="section-title">.*<\/span>$/.test(line);
+  return { songChords, rawHtml: normalizeHeaderBlankLines(dedupeAdjacentHeaders(rawHtml, isSectionTitleLine), isSectionTitleLine) };
 }
 
 /**

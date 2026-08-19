@@ -48,6 +48,33 @@ function wrapChords(line: string): string {
   return line.replace(CHORD_REGEX, '<b>$1</b>');
 }
 
+// Ensures exactly one blank line before and after every header line (never
+// zero, never more), except at the very start/end of the content where
+// there's nothing to separate it from.
+function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) => boolean): string {
+  const lines = text.split('\n');
+  const result: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (isHeaderLine(line.trim())) {
+      while (result.length > 0 && result[result.length - 1].trim() === '') {
+        result.pop();
+      }
+      if (result.length > 0) result.push('');
+      result.push(line);
+      let k = i + 1;
+      while (k < lines.length && lines[k].trim() === '') k++;
+      if (k < lines.length) result.push('');
+      i = k;
+      continue;
+    }
+    result.push(line);
+    i++;
+  }
+  return result.join('\n');
+}
+
 export function songChordsToRawHtml(songChords: string): string {
   const lines = songChords.split('\n');
   const result: string[] = [];
@@ -101,9 +128,8 @@ export function songChordsToRawHtml(songChords: string): string {
     i++;
   }
 
-  // Normalize spacing around section titles
-  return result.join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/\n{2,}(<span class="section-title">)/g, '\n\n$1')
-    .replace(/(<\/span>)\n\n+/g, '$1\n');
+  return normalizeHeaderBlankLines(
+    result.join('\n').replace(/\n{3,}/g, '\n\n'),
+    (line) => /^<span class="section-title">.*<\/span>$/.test(line)
+  );
 }

@@ -39,14 +39,27 @@
   font-weight: 500;
 }
 
+/* Matches the search results section header style (SearchResultsSection.tsx):
+   same weight/tracking/size, and always the color it only shows on hover
+   there, since a chord sheet header has no separate "closed" state to dim
+   for. The gradient line below is the same divider search result headers
+   render under themselves. */
 #chord-sheet-viewer pre .section-title {
   display: block;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
-  border-left: 4px solid hsl(var(--primary));
-  padding-left: 0.5rem;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
   white-space: normal;
   word-break: break-word;
+}
+
+#chord-sheet-viewer pre .section-title::after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 0.5rem;
+  background: linear-gradient(to right, hsl(var(--border) / 0.6) 25%, transparent);
 }
 
 #chord-sheet-viewer pre .tablatura {
