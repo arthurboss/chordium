@@ -542,6 +542,40 @@ export function extractChordSheet(): ChordSheet {
     return result.join("\n");
   }
 
+  // Some sections mix chord-only content and a tab block under a single
+  // header with no separate "Tab - <title>" counterpart (the source doesn't
+  // always split them the way it does for e.g. "[Intro]" + "[Tab - Intro]").
+  // Without that second header, the "hide tabs" toggle has nothing tab-named
+  // to strip and leaves the tab block's "Parte N de M" labels and dash lines
+  // behind. Detect where a tab run starts inside a section whose header
+  // isn't already "Tab"-prefixed, and insert one right before it.
+  function insertMissingTabHeaders(
+    text: string,
+    isHeaderLine: (line: string) => boolean,
+    extractTitle: (line: string) => string | null,
+    makeHeaderLine: (title: string) => string,
+    isTabRunStart: (line: string) => boolean
+  ): string {
+    const lines = text.split("\n");
+    const result: string[] = [];
+    let currentTitle: string | null = null;
+    let insertedForSection = false;
+    for (const line of lines) {
+      if (isHeaderLine(line.trim())) {
+        currentTitle = extractTitle(line.trim());
+        insertedForSection = false;
+        result.push(line);
+        continue;
+      }
+      if (!insertedForSection && currentTitle && !/^tab\b/i.test(currentTitle.trim()) && isTabRunStart(line)) {
+        result.push(makeHeaderLine("Tab - " + currentTitle));
+        insertedForSection = true;
+      }
+      result.push(line);
+    }
+    return result.join("\n");
+  }
+
   let songChords = "";
   // Tab blocks are plain text too (their dash-drawn strings, e.g.
   // "E|----7-10-...|", are already self-identifying), so no wrapper markers
@@ -562,6 +596,14 @@ export function extractChordSheet(): ChordSheet {
   const leadingTuningLineRegex = /^Afinação:\s*(?:[A-G][#b]?\s*){6}\s*\n+/i;
   songChords = songChords.replace(leadingTuningLineRegex, "");
   const isBareBracketHeader = (line: string) => /^\[[^\]]+\]$/.test(line);
+  const isTabRunStartPlain = (line: string) => /^[EBGDAe]\|[-\d]/.test(line) || /^\s*Parte \d+ [Dd]e \d+\s*$/.test(line);
+  songChords = insertMissingTabHeaders(
+    songChords,
+    (line) => /^\[[^\]]+\]/.test(line),
+    (line) => line.match(/^\[([^\]]+)\]/)?.[1] ?? null,
+    (title) => "[" + title + "]",
+    isTabRunStartPlain
+  );
   songChords = dedupeAdjacentHeaders(songChords, isBareBracketHeader);
   songChords = normalizeHeaderBlankLines(songChords, isBareBracketHeader);
 
@@ -583,6 +625,15 @@ export function extractChordSheet(): ChordSheet {
   // Same leading line as above, verbatim (it's a plain text node, not
   // wrapped in <b>/<span>, so it appears unchanged in the sanitized HTML).
   rawHtmlRaw = rawHtmlRaw.replace(leadingTuningLineRegex, "");
+  // Some tab blocks close the tablatura span before the last string, leaving
+  // the 6th string (e.g. "E|----|") as a bare line after </span></span> — or
+  // before a fret-hand direction row (e.g. "↓  ↑ ↓") that annotates the tab
+  // just above it. Absorb both back inside the cnt span so the whole tab
+  // block renders (and gets removed together when tabs are hidden) as one.
+  rawHtmlRaw = rawHtmlRaw.replace(
+    /(<\/span>)(<\/span>)((?:\n(?:[ \t]*[EADGBe]\|[-\d][^\n]*|[ \t]*[↓↑][ \t↓↑]*))+)/g,
+    (_m, closeCnt, closeTab, orphanLines) => orphanLines + closeCnt + closeTab
+  );
   // Wrap [Section Title] patterns in a span for styling
   // Wrap section titles and dedent continuation lines
   const rawHtml = (() => {
@@ -628,7 +679,15 @@ export function extractChordSheet(): ChordSheet {
   })();
 
   const isSectionTitleLine = (line: string) => /^<span class="section-title">.*<\/span>$/.test(line);
-  return { songChords, rawHtml: normalizeHeaderBlankLines(dedupeAdjacentHeaders(rawHtml, isSectionTitleLine), isSectionTitleLine) };
+  const isTabRunStartHtml = (line: string) => /^<span class="tablatura">/.test(line) || /^\s*Parte \d+ [Dd]e \d+\s*$/.test(line);
+  const rawHtmlWithTabHeaders = insertMissingTabHeaders(
+    rawHtml,
+    (line) => /^<span class="section-title">/.test(line),
+    (line) => line.match(/^<span class="section-title">([^<]*)<\/span>/)?.[1] ?? null,
+    (title) => '<span class="section-title">' + title + "</span>",
+    isTabRunStartHtml
+  );
+  return { songChords, rawHtml: normalizeHeaderBlankLines(dedupeAdjacentHeaders(rawHtmlWithTabHeaders, isSectionTitleLine), isSectionTitleLine) };
 }
 
 /**
