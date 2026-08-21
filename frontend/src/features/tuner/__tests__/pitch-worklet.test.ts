@@ -127,6 +127,51 @@ describe('pitch worklet', () => {
     expect(centsApart(196.0 + spread, 196.0)).toBeLessThan(1);
   });
 
+  it('hears a note too quiet for a fixed gate to have passed', () => {
+    // RMS ~0.0085, under the 0.01 threshold this used to gate on outright, which
+    // is the softly fingerpicked note the old gate simply refused to read.
+    const reported = lastReported(run(sine(196.0, 0.012)));
+    expect(reported).not.toBeNull();
+    expect(centsApart(reported!, 196.0)).toBeLessThan(2);
+  });
+
+  it('hears a quiet note over the quiet room it is played in', () => {
+    // Room tone first, so the floor settles on it, then a soft note on top. Both
+    // are well under the old fixed threshold.
+    let seed = 999;
+    const room = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return (seed / 0x7fffffff - 0.5) * 0.002;
+    };
+    const noteStart = SAMPLE_RATE * 2;
+    const note = sine(146.83, 0.01);
+    const reported = lastReported(run((i) => (i < noteStart ? room() : note(i) + room()), 900));
+    expect(reported).not.toBeNull();
+    expect(centsApart(reported!, 146.83)).toBeLessThan(3);
+  });
+
+  it('does not gate off partway through a held note', () => {
+    // What the frozen floor exists to prevent: were the estimate to keep learning
+    // while the gate was open, it would climb into the note and shut on it.
+    const readings = run(sine(110.0, 0.05), 900);
+    const settled = readings.slice(Math.floor(readings.length / 4));
+    expect(settled.every((f) => f !== null)).toBe(true);
+  });
+
+  it('holds the gate shut against a room too loud for the note', () => {
+    // Noise at ~25x the level of the note buried in it. The floor learns the room
+    // during the opening silence, and the margin above it is what keeps this from
+    // reading as a string.
+    let seed = 4242;
+    const room = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return (seed / 0x7fffffff - 0.5) * 0.004;
+    };
+    const reported = run((i) => room() + 0.0002 * Math.sin((2 * Math.PI * 196 * i) / SAMPLE_RATE), 900);
+    const detected = reported.filter((f) => f !== null).length;
+    expect(detected).toBeLessThan(reported.length * 0.1);
+  });
+
   it('follows a peg being turned rather than lagging behind it', () => {
     // A string wound up ~80 cents and then held. Swept by accumulating phase
     // rather than by switching frequency outright: a peg turn slides the pitch

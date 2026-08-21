@@ -36,8 +36,48 @@ const WINDOW_SIZE = BUFFER_SIZE / 2;
 const HOP_SIZE = 1024;
 const MIN_FREQ = 60;
 const MAX_FREQ = 1400;
-/** Below this RMS, treat the input as silence rather than guessing a pitch. */
-const RMS_SILENCE_THRESHOLD = 0.01;
+/**
+ * The noise gate is relative to the room rather than to a fixed level.
+ *
+ * One hardcoded threshold is wrong in both directions at once: high enough to
+ * ignore a fan is high enough to ignore a softly fingerpicked note, and low
+ * enough to hear that note is low enough to open on the fan. So the quiet is
+ * measured instead, and the gate sits a multiple above whatever it turns out to
+ * be.
+ *
+ * Levels below are RMS of the DC-blocked input. They are not the values a
+ * reference implementation measuring further down its own chain would use: a
+ * gain stage or a band-pass ahead of the measurement moves all of them.
+ */
+/** Weight of each frame in the running estimate of the quiet. ~1.5s to settle at
+ *  this hop, slow enough that a note cannot drag the floor up behind it. */
+const NOISE_FLOOR_ALPHA = 0.015;
+/** Above this, a frame is too loud to be the room and is not learned from. The
+ *  estimate would otherwise climb into whatever is being played and shut the
+ *  gate on it. */
+const NOISE_FLOOR_LEARN_CEILING = 0.005;
+const NOISE_FLOOR_MIN = 0.00017;
+const NOISE_FLOOR_MAX = 0.017;
+/**
+ * How far above the floor the gate opens, and how far it falls back before
+ * closing. Two thresholds rather than one, because a signal sitting exactly on a
+ * single threshold chatters the gate open and shut frame after frame.
+ *
+ * Bass strings need a wider margin: room noise is mostly low, so down there the
+ * floor is closer to the signal it has to be told apart from.
+ */
+const LOW_STRING_HZ = 180;
+const RATIO_OPEN_LOW = 5.0;
+const RATIO_CLOSE_LOW = 3.0;
+const RATIO_OPEN_HIGH = 3.5;
+const RATIO_CLOSE_HIGH = 2.0;
+/** Floors under the relative thresholds, so a silent room cannot learn its way
+ *  down to opening the gate on nothing at all. */
+const GATE_ABSOLUTE_OPEN = 0.0013;
+const GATE_ABSOLUTE_CLOSE = 0.00067;
+/** Frames below the closing threshold before the gate shuts. ~930ms: long enough
+ *  that a note dipping mid-decay does not shut it and immediately reopen. */
+const GATE_CLOSE_FRAMES = 40;
 /**
  * YIN's absolute threshold. The first lag whose normalized difference dips below
  * this is taken as the period, rather than the deepest dip anywhere - which is
@@ -103,13 +143,11 @@ const GATE_RELEASE_FRAMES = 8;
  * Returns null rather than a low-confidence guess when nothing clears the
  * threshold - the silence and noise between notes has no pitch to report, and
  * inventing one for it is what makes a tuner feel twitchy.
+ *
+ * Expects the caller to have decided there is a signal worth analyzing at all
+ * (see PitchProcessor.gateIsOpen).
  */
 function detectPitch(buffer: Float32Array, sampleRateHz: number): number | null {
-  let rms = 0;
-  for (let i = 0; i < WINDOW_SIZE; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / WINDOW_SIZE);
-  if (rms < RMS_SILENCE_THRESHOLD) return null;
-
   const minLag = Math.max(2, Math.floor(sampleRateHz / MAX_FREQ));
   // Capped at the slack left over past the comparison window, so the furthest
   // lag still reads real samples instead of off the end of the buffer.
@@ -167,6 +205,12 @@ function detectPitch(buffer: Float32Array, sampleRateHz: number): number | null 
   return frequency;
 }
 
+function rootMeanSquare(buffer: Float32Array, length: number): number {
+  let sum = 0;
+  for (let i = 0; i < length; i++) sum += buffer[i] * buffer[i];
+  return Math.sqrt(sum / length);
+}
+
 function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   return sorted[Math.floor(sorted.length / 2)];
@@ -211,6 +255,12 @@ class PitchProcessor extends AudioWorkletProcessor {
   /** Consecutive frames with nothing detected, counted towards the gate release. */
   private silentFrames: number;
 
+  /** Running estimate of the room, and the gate standing on top of it. */
+  private noiseFloor: number;
+  private gateOpen: boolean;
+  /** Consecutive frames under the closing threshold, counted towards shutting. */
+  private belowCloseFrames: number;
+
   constructor() {
     super();
     this.ring = new Float32Array(BUFFER_SIZE);
@@ -223,6 +273,12 @@ class PitchProcessor extends AudioWorkletProcessor {
     this.history = [];
     this.smoothed = null;
     this.silentFrames = 0;
+    // Seeded at the absolute opening threshold rather than at zero: until some
+    // quiet has actually been heard, erring high keeps the gate from flying open
+    // on the first frame of whatever noise the microphone starts in.
+    this.noiseFloor = GATE_ABSOLUTE_OPEN;
+    this.gateOpen = false;
+    this.belowCloseFrames = 0;
   }
 
   /**
@@ -254,6 +310,58 @@ class PitchProcessor extends AudioWorkletProcessor {
 
     this.smoothed *= Math.pow(2, (alpha * deviationCents) / 1200);
     return this.smoothed;
+  }
+
+  /**
+   * Whether this frame is loud enough to be worth analyzing, and folds it into the
+   * estimate of the room if it is not.
+   *
+   * The estimate only learns while the gate is shut and the frame is quiet enough
+   * to plausibly be the room: a note sounding would otherwise be averaged into
+   * the very floor it has to stand above, walking the threshold up underneath it
+   * until the gate closed on a string that was still ringing. Frozen while the
+   * gate is open, for the same reason.
+   */
+  private gateIsOpen(rms: number): boolean {
+    if (!this.gateOpen && rms < NOISE_FLOOR_LEARN_CEILING) {
+      this.noiseFloor = this.noiseFloor * (1 - NOISE_FLOOR_ALPHA) + rms * NOISE_FLOOR_ALPHA;
+      this.noiseFloor = Math.min(NOISE_FLOOR_MAX, Math.max(NOISE_FLOOR_MIN, this.noiseFloor));
+    }
+
+    // Which margin applies depends on the register, which is only known from the
+    // last reading - the pitch of this frame is what the gate is deciding whether
+    // to go and measure. With nothing played yet, the narrower treble margin is
+    // the forgiving choice, and the next frame corrects it.
+    const isLowString = this.smoothed !== null && this.smoothed < LOW_STRING_HZ;
+    const openAt = Math.max(
+      GATE_ABSOLUTE_OPEN,
+      this.noiseFloor * (isLowString ? RATIO_OPEN_LOW : RATIO_OPEN_HIGH)
+    );
+    const closeAt = Math.max(
+      GATE_ABSOLUTE_CLOSE,
+      this.noiseFloor * (isLowString ? RATIO_CLOSE_LOW : RATIO_CLOSE_HIGH)
+    );
+
+    if (this.gateOpen) {
+      if (rms >= closeAt) {
+        this.belowCloseFrames = 0;
+        return true;
+      }
+      if (++this.belowCloseFrames >= GATE_CLOSE_FRAMES) {
+        this.gateOpen = false;
+        this.belowCloseFrames = 0;
+      }
+      // Still analyzed on the way down: a decaying string is worth reading for as
+      // long as anything can be made of it.
+      return this.gateOpen;
+    }
+
+    if (rms >= openAt) {
+      this.gateOpen = true;
+      this.belowCloseFrames = 0;
+      return true;
+    }
+    return false;
   }
 
   /** Drops the smoothing anchor and median history, so the next note is read on
@@ -290,7 +398,8 @@ class PitchProcessor extends AudioWorkletProcessor {
       this.ordered[i] = this.ring[(this.writeIndex + i) % BUFFER_SIZE];
     }
 
-    const detected = detectPitch(this.ordered, sampleRate);
+    const rms = rootMeanSquare(this.ordered, WINDOW_SIZE);
+    const detected = this.gateIsOpen(rms) ? detectPitch(this.ordered, sampleRate) : null;
     if (detected === null) {
       this.silentFrames++;
       // Hold the last reading briefly, so a decaying string dipping under the
