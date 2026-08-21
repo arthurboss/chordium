@@ -62,9 +62,10 @@ export function frequencyToNoteInfo(freq: number): Omit<PitchResult, 'frequency'
  * Listens to the microphone and reports the detected pitch, note and tuning
  * offset in real time.
  *
- * Pitch detection itself runs off the main thread in an AudioWorklet (see
- * pitch-worklet.ts / pitch-handler.ts) so UI jank cannot degrade tuning
- * accuracy. Microphone access goes through the same permission module the
+ * Pitch detection and the smoothing over it both run off the main thread in an
+ * AudioWorklet (see pitch-worklet.ts / pitch-handler.ts), so UI jank cannot
+ * degrade tuning accuracy and what arrives here is already stable enough to
+ * render as it comes. Microphone access goes through the same permission module the
  * voice-search feature uses (services/speech/microphone-permission.ts) - it is
  * audio-source-agnostic despite the folder name, and already handles Safari's
  * user-gesture timing, Android's one-mic-at-a-time sharing, and telling a
@@ -132,7 +133,7 @@ export function usePitchDetector() {
         return;
       }
 
-      const stream = await requestMicrophone(deviceId);
+      const stream = await requestMicrophone(deviceId, { rawAudio: true });
       streamRef.current = stream;
       // The id actually in use, which is what the picker should show as
       // selected even on the very first, device-agnostic start.
