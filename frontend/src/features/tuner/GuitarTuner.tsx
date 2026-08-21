@@ -64,7 +64,7 @@ const GuitarTuner = ({ trigger: triggerOverride, open: openProp, onOpenChange }:
     <div className={cn("space-y-4 px-4 py-6", className)}>
       <div
         className={cn(
-          "flex flex-col items-center gap-4 rounded-md border-2 bg-background p-6 text-foreground transition-colors duration-300",
+          "flex flex-col items-center gap-4 rounded-md border-2 bg-background/80 p-6 text-foreground transition-colors duration-300 dark:bg-card",
           inTune
             ? "border-green-500 bg-green-50 dark:bg-green-950"
             : isListening
