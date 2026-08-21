@@ -47,9 +47,21 @@ const TunerNeedle = ({ cents, isInTune }: TunerNeedleProps) => {
           );
         })}
         {/* Needle */}
+        {/*
+          Rotated through the CSS transform property with an explicit origin,
+          rather than the SVG transform attribute's rotate(deg, cx, cy). The
+          attribute form expands into translate-rotate-translate, which a
+          transition interpolates as a matrix: the pivot does not survive the
+          intermediate frames exactly, and the needle's base visibly wanders off
+          centre while it is swinging. An angle is all that moves here.
+        */}
         <g
-          transform={`rotate(${rotation}, 120, 120)`}
-          style={{ transition: active ? "transform 0.08s ease-out" : "none" }}
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transformBox: "view-box",
+            transformOrigin: "120px 120px",
+            transition: active ? "transform 0.08s ease-out" : "none",
+          }}
         >
           <line
             x1="120" y1="120"
