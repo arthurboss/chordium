@@ -78,9 +78,11 @@ export async function getMicrophonePermission(): Promise<MicrophonePermission> {
  *
  * The caller owns it, and must release it with `releaseMicrophone`.
  */
-export async function requestMicrophone(): Promise<MediaStream> {
+export async function requestMicrophone(deviceId?: string): Promise<MediaStream> {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+    });
     remember(true);
     return stream;
   } catch (cause) {

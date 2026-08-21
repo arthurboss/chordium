@@ -74,12 +74,33 @@ export function usePitchDetector() {
   const [status, setStatus] = useState<TunerStatus>('idle');
   const [pitch, setPitch] = useState<PitchResult>(EMPTY_PITCH);
 
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const disconnectRef = useRef<(() => void) | null>(null);
   // Guards against overlapping start() calls (e.g. a second press while the
   // permission prompt from the first is still up).
   const startingRef = useRef(false);
+
+  // Device labels are blank until a stream has been granted at least once, so
+  // this only turns up anything real once listening has started - refreshed
+  // again on devicechange for a mic plugged in mid-session.
+  const refreshDevices = useCallback(async () => {
+    try {
+      const all = await navigator.mediaDevices.enumerateDevices();
+      setDevices(all.filter((d) => d.kind === 'audioinput'));
+    } catch {
+      // Enumeration failing just leaves the picker empty; the browser default
+      // device still works.
+    }
+  }, []);
+
+  useEffect(() => {
+    navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
+    return () => navigator.mediaDevices.removeEventListener('devicechange', refreshDevices);
+  }, [refreshDevices]);
 
   const stop = useCallback(() => {
     disconnectRef.current?.();
@@ -99,7 +120,7 @@ export function usePitchDetector() {
     setPitch(EMPTY_PITCH);
   }, []);
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (deviceId?: string) => {
     if (startingRef.current) return;
     startingRef.current = true;
     setStatus('requesting');
@@ -111,8 +132,12 @@ export function usePitchDetector() {
         return;
       }
 
-      const stream = await requestMicrophone();
+      const stream = await requestMicrophone(deviceId);
       streamRef.current = stream;
+      // The id actually in use, which is what the picker should show as
+      // selected even on the very first, device-agnostic start.
+      setSelectedDeviceId(stream.getAudioTracks()[0]?.getSettings().deviceId ?? deviceId ?? null);
+      void refreshDevices();
 
       const ctx = new AudioContext();
       audioContextRef.current = ctx;
@@ -146,11 +171,19 @@ export function usePitchDetector() {
     } finally {
       startingRef.current = false;
     }
-  }, []);
+  }, [refreshDevices]);
 
   // A microphone left open when the page moves on would keep recording, so
   // anything still running is torn down on the way out.
   useEffect(() => () => stop(), [stop]);
 
-  return { status, pitch, start, stop };
+  const selectDevice = useCallback(
+    (deviceId: string) => {
+      stop();
+      void start(deviceId);
+    },
+    [start, stop]
+  );
+
+  return { status, pitch, start, stop, devices, selectedDeviceId, selectDevice };
 }

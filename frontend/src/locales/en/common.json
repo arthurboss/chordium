@@ -258,19 +258,15 @@
     "blocked": "Microphone blocked"
   },
   "tuner": {
-    "heading": "Chromatic Tuner",
     "subtitle": "Play a string and tune to the nearest note",
     "start": "Start Tuner",
     "stop": "Stop",
     "listening": "Listening…",
     "requesting": "Waiting for microphone permission…",
-    "inTune": "In tune",
-    "sharp": "+{{cents}}¢ sharp",
-    "flat": "{{cents}}¢ flat",
     "octave": "oct {{octave}}",
-    "standardTuning": "Standard Tuning",
-    "string": "str {{number}}",
     "blocked": "Microphone blocked",
-    "error": "Could not open the microphone. Please try again."
+    "error": "Could not open the microphone. Please try again.",
+    "selectMicrophone": "Select microphone",
+    "microphoneFallbackLabel": "Microphone {{number}}"
   }
 }
