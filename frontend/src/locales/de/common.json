@@ -6,7 +6,11 @@
   },
   "header": {
     "homeAriaLabel": "Chordium Startseite",
-    "tunerAriaLabel": "Stimmgerät"
+    "tunerAriaLabel": "Stimmgerät",
+    "menuAriaLabel": "Menü",
+    "menu": {
+      "theme": "Design"
+    }
   },
   "devBanner": {
     "note": "Hinweis:",

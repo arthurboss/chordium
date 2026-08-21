@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Guitar } from "lucide-react";
-import { ShareSession } from "@/features/jam-session";
-import ThemeToggle from "@/components/ThemeToggle";
+import HeaderMenu from "@/components/HeaderMenu";
 import OfflineIndicator from "@/components/OfflineIndicator";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/utils/theme-utils";
 
 const Header = () => {
@@ -39,20 +35,8 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="h-10 w-10 rounded-full"
-          >
-            <Link to="/tuner" aria-label={t("header.tunerAriaLabel")} title={t("header.tunerAriaLabel")}>
-              <Guitar className="h-4 w-4" />
-            </Link>
-          </Button>
-          <ShareSession />
           <OfflineIndicator />
-          <LanguageSwitcher />
-          <ThemeToggle />
+          <HeaderMenu />
         </div>
       </div>
     </header>

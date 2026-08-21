@@ -6,7 +6,11 @@
   },
   "header": {
     "homeAriaLabel": "Chordium home",
-    "tunerAriaLabel": "Tuner"
+    "tunerAriaLabel": "Tuner",
+    "menuAriaLabel": "Menu",
+    "menu": {
+      "theme": "Theme"
+    }
   },
   "devBanner": {
     "note": "Note:",

@@ -6,7 +6,11 @@
   },
   "header": {
     "homeAriaLabel": "Inicio de Chordium",
-    "tunerAriaLabel": "Afinador"
+    "tunerAriaLabel": "Afinador",
+    "menuAriaLabel": "Menú",
+    "menu": {
+      "theme": "Tema"
+    }
   },
   "devBanner": {
     "note": "Nota:",
