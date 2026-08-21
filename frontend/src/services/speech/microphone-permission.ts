@@ -66,6 +66,24 @@ export async function getMicrophonePermission(): Promise<MicrophonePermission> {
   }
 }
 
+/** How the stream will be listened to, where that changes what to ask for. */
+export interface MicrophoneOptions {
+  /**
+   * Whether to ask the browser to leave the signal alone.
+   *
+   * Off by default, because speech recognition wants the browser's processing:
+   * it is tuned for exactly that, and words come through a suppressed, levelled
+   * signal more clearly than a raw one.
+   *
+   * Pitch detection wants the opposite. Noise suppression and echo cancellation
+   * are voice-shaped - they reshape a sustained, harmonically simple note as
+   * something to be attenuated, and gain control moves the level under a
+   * measurement taken from it. All three distort the waveform the pitch is being
+   * read out of, so a tuner is more accurate without them than with them.
+   */
+  rawAudio?: boolean;
+}
+
 /**
  * Asks for the microphone and hands back the open stream.
  *
@@ -78,9 +96,28 @@ export async function getMicrophonePermission(): Promise<MicrophonePermission> {
  *
  * The caller owns it, and must release it with `releaseMicrophone`.
  */
-export async function requestMicrophone(): Promise<MediaStream> {
+export async function requestMicrophone(
+  deviceId?: string,
+  options?: MicrophoneOptions
+): Promise<MediaStream> {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const constraints: MediaTrackConstraints = {};
+    if (deviceId) constraints.deviceId = { exact: deviceId };
+    if (options?.rawAudio) {
+      constraints.echoCancellation = false;
+      constraints.noiseSuppression = false;
+      constraints.autoGainControl = false;
+      // One channel, so a stereo or array microphone cannot hand back a mix of
+      // two positions - which sums into comb filtering that moves a measured
+      // frequency around.
+      constraints.channelCount = 1;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      // A bare `true` rather than an empty object, so a plain request stays
+      // byte-identical to what it asked for before there were options.
+      audio: Object.keys(constraints).length > 0 ? constraints : true,
+    });
     remember(true);
     return stream;
   } catch (cause) {

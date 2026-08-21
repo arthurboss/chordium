@@ -5,7 +5,12 @@
     "upload": "Importar"
   },
   "header": {
-    "homeAriaLabel": "Início do Chordium"
+    "homeAriaLabel": "Início do Chordium",
+    "tunerAriaLabel": "Afinador",
+    "menuAriaLabel": "Menu",
+    "menu": {
+      "theme": "Tema"
+    }
   },
   "devBanner": {
     "note": "Nota:",
@@ -255,5 +260,17 @@
     "setUp": "Ativar a pesquisa por voz",
     "allowMicrophone": "Permitir o microfone",
     "blocked": "Microfone bloqueado"
+  },
+  "tuner": {
+    "subtitle": "Toque uma corda e afine para a nota mais próxima",
+    "start": "Iniciar afinador",
+    "stop": "Parar",
+    "listening": "Ouvindo…",
+    "requesting": "Aguardando permissão do microfone…",
+    "octave": "oitava {{octave}}",
+    "blocked": "Microfone bloqueado",
+    "error": "Não foi possível abrir o microfone. Tente novamente.",
+    "selectMicrophone": "Selecionar microfone",
+    "microphoneFallbackLabel": "Microfone {{number}}"
   }
 }

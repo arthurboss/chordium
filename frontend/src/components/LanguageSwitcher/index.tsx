@@ -28,7 +28,12 @@ import LanguageList, { FLAGS } from "./LanguageList";
  * before lyrics can be translated. Both live together because choosing a
  * language is when the reader finds out lyrics can follow it.
  */
-const LanguageSwitcher: React.FC = () => {
+interface LanguageSwitcherProps {
+  /** Renders the trigger around the current-language flag icon, e.g. as a full menu row instead of a standalone button. */
+  trigger?: (icon: React.ReactNode) => React.ReactNode;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ trigger: renderTrigger }) => {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
   const {
@@ -245,7 +250,8 @@ const LanguageSwitcher: React.FC = () => {
     </div>
   );
 
-  const trigger = (
+  const icon = CurrentFlag ? <CurrentFlag className="h-4 w-4" /> : <Globe className="h-4 w-4" />;
+  const defaultTrigger = (
     <Button
       variant="outline"
       size="icon"
@@ -255,6 +261,7 @@ const LanguageSwitcher: React.FC = () => {
       {CurrentFlag ? <CurrentFlag className="!h-9 !w-9" /> : <Globe className="h-4 w-4" />}
     </Button>
   );
+  const trigger = renderTrigger ? renderTrigger(icon) : defaultTrigger;
 
   // Only the browser's own translator has something to fetch per language. Where
   // one model covers them all, that is said once in the section below instead.

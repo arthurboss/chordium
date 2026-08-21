@@ -12,7 +12,12 @@ import { JamManualInput } from './JamManualInput';
 import { JamShareQR } from './JamShareQR';
 import { useActiveChordSheet } from '../useActiveChordSheet';
 
-export function ShareSession() {
+interface ShareSessionProps {
+  /** Renders the trigger around the dynamic share/join icon, e.g. as a full menu row instead of a standalone button. */
+  trigger?: (icon: ReactNode) => ReactNode;
+}
+
+export function ShareSession({ trigger: renderTrigger }: ShareSessionProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [scanMode, setScanMode] = useState(false);
   const navigate = useNavigate();
@@ -48,16 +53,18 @@ export function ShareSession() {
     ? t('jamSession.pointAtQrCode')
     : t(canShare ? 'jamSession.shareOrJoinDescription' : 'jamSession.joinDescription');
 
-  const trigger = (
+  const icon = <TriggerIcon className="h-4 w-4" />;
+  const defaultTrigger = (
     <Button
       variant="outline"
       className="h-10 w-10 rounded-full"
       title={triggerLabel}
       aria-label={triggerLabel}
     >
-      <TriggerIcon className="h-4 w-4" />
+      {icon}
     </Button>
   );
+  const trigger = renderTrigger ? renderTrigger(icon) : defaultTrigger;
 
   const body: ReactNode = scanMode ? (
     <>

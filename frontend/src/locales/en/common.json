@@ -5,7 +5,12 @@
     "upload": "Upload"
   },
   "header": {
-    "homeAriaLabel": "Chordium home"
+    "homeAriaLabel": "Chordium home",
+    "tunerAriaLabel": "Tuner",
+    "menuAriaLabel": "Menu",
+    "menu": {
+      "theme": "Theme"
+    }
   },
   "devBanner": {
     "note": "Note:",
@@ -255,5 +260,17 @@
     "setUp": "Set up voice search",
     "allowMicrophone": "Allow the microphone",
     "blocked": "Microphone blocked"
+  },
+  "tuner": {
+    "subtitle": "Play a string and tune to the nearest note",
+    "start": "Start Tuner",
+    "stop": "Stop",
+    "listening": "Listening…",
+    "requesting": "Waiting for microphone permission…",
+    "octave": "oct {{octave}}",
+    "blocked": "Microphone blocked",
+    "error": "Could not open the microphone. Please try again.",
+    "selectMicrophone": "Select microphone",
+    "microphoneFallbackLabel": "Microphone {{number}}"
   }
 }
