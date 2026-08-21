@@ -60,11 +60,11 @@ const GuitarTuner = ({ trigger: triggerOverride, open: openProp, onOpenChange }:
     else stop();
   }, [open, start, stop]);
 
-  const panel = (
-    <div className="space-y-4 px-4 py-6">
+  const panel = (className?: string) => (
+    <div className={cn("space-y-4 px-4 py-6", className)}>
       <div
         className={cn(
-          "flex flex-col items-center gap-4 rounded-2xl border-2 bg-background p-6 text-foreground transition-colors duration-300",
+          "flex flex-col items-center gap-4 rounded-md border-2 bg-background p-6 text-foreground transition-colors duration-300",
           inTune
             ? "border-green-500 bg-green-50 dark:bg-green-950"
             : isListening
@@ -127,7 +127,7 @@ const GuitarTuner = ({ trigger: triggerOverride, open: openProp, onOpenChange }:
         {devices.length > 1 && (
           <Select value={selectedDeviceId ?? undefined} onValueChange={selectDevice}>
             <SelectTrigger
-              className="h-10 w-auto max-w-[14rem] gap-2 rounded-full"
+              className="h-10 w-auto max-w-[14rem] gap-2 rounded-md ring-inset focus:ring-offset-0"
               aria-label={t("tuner.selectMicrophone")}
             >
               <SelectValue placeholder={t("tuner.selectMicrophone")} />
@@ -170,7 +170,7 @@ const GuitarTuner = ({ trigger: triggerOverride, open: openProp, onOpenChange }:
             <SheetTitle>{t("header.tunerAriaLabel")}</SheetTitle>
             <SheetDescription className="sr-only">{t("tuner.subtitle")}</SheetDescription>
           </SheetHeader>
-          <div className="min-h-0 overflow-y-auto overscroll-contain">{panel}</div>
+          <div className="min-h-0 overflow-y-auto overscroll-contain">{panel()}</div>
         </SheetContent>
       </Sheet>
     );
@@ -184,7 +184,7 @@ const GuitarTuner = ({ trigger: triggerOverride, open: openProp, onOpenChange }:
           <DialogTitle>{t("header.tunerAriaLabel")}</DialogTitle>
           <DialogDescription>{t("tuner.subtitle")}</DialogDescription>
         </DialogHeader>
-        {panel}
+        {panel("pt-11")}
       </DialogContent>
     </Dialog>
   );
