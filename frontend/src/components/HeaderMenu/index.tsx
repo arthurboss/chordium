@@ -84,7 +84,11 @@ const HeaderMenu = () => {
       size="icon"
       aria-label={t("header.menuAriaLabel")}
       title={t("header.menuAriaLabel")}
-      className="h-10 w-10 rounded-full bg-card"
+      // card and background swap places between the themes: card is the lighter
+      // of the two in light mode and the darker in dark mode. The header takes
+      // whichever one this does not, so the button sits above it either way -
+      // sharing a token with the header would leave it a border and nothing else.
+      className="h-10 w-10 rounded-full bg-card dark:bg-background"
       {...cyAttr("header-menu-button")}
     >
       <Menu className="h-4 w-4" />
