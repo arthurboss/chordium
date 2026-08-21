@@ -92,6 +92,23 @@ npm run dev
 
 See [Getting Started](./docs/getting-started.md) for full setup and commands.
 
+## 🏷️ Versioning & Releases
+
+This project follows semantic versioning ([semver](https://semver.org/)):
+- **MAJOR** - Breaking changes
+- **MINOR** - New features (backwards compatible)
+- **PATCH** - Bug fixes (backwards compatible)
+
+Each version bump is tagged in git as `v<major>.<minor>.<patch>` (e.g., `v0.5.0`) and published as a GitHub Release. See [Releases](../../releases) for the full changelog.
+
+**For developers:** When you merge a version bump PR, create a corresponding git tag:
+```bash
+git tag v<major>.<minor>.<patch> <commit-hash>
+git push origin v<major>.<minor>.<patch>
+```
+
+Then add release notes on GitHub describing what changed in that version.
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
