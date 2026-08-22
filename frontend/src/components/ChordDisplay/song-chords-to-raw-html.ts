@@ -1,4 +1,4 @@
-import { CHORD_REGEX } from '@/utils/chord-sheet-utils';
+import { CHORD_REGEX, normalizeChordAccidentals } from '@/utils/chord-sheet-utils';
 import i18next from 'i18next';
 
 const TAB_LINE_REGEX = /^[EBGDAe][\|][-\d]/;
@@ -78,7 +78,7 @@ function normalizeHeaderBlankLines(text: string, isHeaderLine: (line: string) =>
 const TAB_PART_LABEL_REGEX = /^\s*Parte \d+ [Dd]e \d+\s*$/;
 
 export function songChordsToRawHtml(songChords: string): string {
-  const lines = songChords.split('\n');
+  const lines = normalizeChordAccidentals(songChords).split('\n');
   const result: string[] = [];
   let i = 0;
   // Some sections mix chord-only content and a tab block under a single

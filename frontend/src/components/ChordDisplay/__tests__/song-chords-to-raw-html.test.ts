@@ -105,4 +105,70 @@ describe("songChordsToRawHtml", () => {
     expect(result).toContain("( <b>Am</b>  <b>C</b>  <b>Am</b> )");
     expect(result).toContain("Aleluia, alelu____ia");
   });
+
+  it("wraps a half-diminished m7b5 chord", () => {
+    const result = songChordsToRawHtml("Bm7b5  E7");
+
+    expect(result).toBe("<b>Bm7b5</b>  <b>E7</b>");
+  });
+
+  it("wraps a six-nine chord without splitting off the /9 as a separate token", () => {
+    const result = songChordsToRawHtml("C6/9  G");
+
+    expect(result).toBe("<b>C6/9</b>  <b>G</b>");
+  });
+
+  it("wraps bare sus2 and sus4 chords", () => {
+    const result = songChordsToRawHtml("Dsus2  Gsus4");
+
+    expect(result).toBe("<b>Dsus2</b>  <b>Gsus4</b>");
+  });
+
+  it("wraps add9, add11, add13, add2 and add4 chords", () => {
+    const result = songChordsToRawHtml("Cadd9  Fadd11  Badd13  Aadd2  Eadd4");
+
+    expect(result).toBe("<b>Cadd9</b>  <b>Fadd11</b>  <b>Badd13</b>  <b>Aadd2</b>  <b>Eadd4</b>");
+  });
+
+  it("normalizes unicode sharp/flat symbols before wrapping chords", () => {
+    const result = songChordsToRawHtml("F♯m  B♭7");
+
+    expect(result).toBe("<b>F#m</b>  <b>Bb7</b>");
+  });
+
+  it("wraps a Brazilian cipher chord with a parenthesized extension as one token, e.g. F#m7(5-)", () => {
+    const result = songChordsToRawHtml("F#m7(5-)  B7(9-)");
+
+    expect(result).toBe("<b>F#m7(5-)</b>  <b>B7(9-)</b>");
+  });
+
+  it("wraps a bare root with only a parenthesized extension, e.g. Bb(9)", () => {
+    const result = songChordsToRawHtml("Bb(9)  G");
+
+    expect(result).toBe("<b>Bb(9)</b>  <b>G</b>");
+  });
+
+  it("wraps a parenthesized extension combined with a slash bass, e.g. D7M(9)/F#", () => {
+    const result = songChordsToRawHtml("D7M(9)/F#  E7(9)");
+
+    expect(result).toBe("<b>D7M(9)/F#</b>  <b>E7(9)</b>");
+  });
+
+  it("wraps bare power chords, e.g. D5", () => {
+    const result = songChordsToRawHtml("D5   D#5");
+
+    expect(result).toBe("<b>D5</b>   <b>D#5</b>");
+  });
+
+  it("wraps a minor power chord written with an m, e.g. Em5", () => {
+    const result = songChordsToRawHtml("Em5   F#5 G5");
+
+    expect(result).toBe("<b>Em5</b>   <b>F#5</b> <b>G5</b>");
+  });
+
+  it("wraps a bare-number slash suffix as one token, e.g. D7/4", () => {
+    const result = songChordsToRawHtml("C9                D7/4");
+
+    expect(result).toBe("<b>C9</b>                <b>D7/4</b>");
+  });
 });

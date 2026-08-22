@@ -228,3 +228,124 @@ describe('processContent – chord vs lyric classification', () => {
     expect(lyricLines).toContain('If you only knew');
   });
 });
+
+// ─── expanded chord shape recognition ────────────────────────────────────────
+
+describe('processContent – expanded chord shape recognition', () => {
+  it('recognizes a half-diminished m7b5 chord line as chord type', () => {
+    const sections = processContent('[Verse]\nBm7b5  E7  Am');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('recognizes a six-nine chord (6/9) without splitting off the /9', () => {
+    const sections = processContent('[Verse]\nC6/9  G');
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('C6/9  G');
+  });
+
+  it('recognizes bare sus2 and sus4 chord lines as chord type', () => {
+    const sections = processContent('[Verse]\nDsus2  Gsus4');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('recognizes add9, add11, add13, add2 and add4 chord lines as chord type', () => {
+    const sections = processContent('[Verse]\nCadd9  Fadd11  Badd13  Aadd2  Eadd4');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('transposes m7b5, 6/9, sus2 and add9 chords while preserving their quality suffix', () => {
+    const sections = processContent('[Verse]\nBm7b5  C6/9  Dsus2  Eadd9', 2);
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('C#m7b5  D6/9  Esus2  F#add9');
+  });
+});
+
+// ─── unicode accidental normalization ────────────────────────────────────────
+
+describe('processContent – unicode accidental normalization', () => {
+  it('recognizes chords written with unicode sharp/flat symbols as chord type', () => {
+    const sections = processContent('[Verse]\nF♯m  B♭7');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('transposes a unicode-accidental chord using its normalized ASCII form', () => {
+    const sections = processContent('[Verse]\nF♯m', 1);
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('Gm');
+  });
+});
+
+// ─── Brazilian cipher parenthesized extensions ───────────────────────────────
+// Real-world tokens confirmed on scraped bossa nova sheets (Tom Jobim, João
+// Gilberto): F#m7(5-) is a half-diminished chord, D7M(9)/F# a major-seventh
+// with a ninth and a slash bass, Bb(9) a bare root with just the extension.
+
+describe('processContent – Brazilian cipher parenthesized extensions', () => {
+  it('recognizes chord lines using parenthesized extensions as chord type', () => {
+    const sections = processContent('[Verse]\nF#m7(5-)  B7(9-)');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('recognizes a bare root with only a parenthesized extension as chord type', () => {
+    const sections = processContent('[Verse]\nBb(9)  G');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('recognizes a parenthesized extension combined with a slash bass', () => {
+    const sections = processContent('[Verse]\nD7M(9)/F#  E7(9)');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('transposes chords with parenthesized extensions while preserving the extension', () => {
+    const sections = processContent('[Verse]\nF#m7(5-)  B7(9-)', 1);
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('Gm7(5-)  C7(9-)');
+  });
+});
+
+// ─── power chords ─────────────────────────────────────────────────────────────
+// Found undetected on real rock chord sheets (Cazuza "O Tempo Não Para",
+// Legião Urbana "Música Urbana 2") — bare "5" (root + fifth, no third) is a
+// distinct chord, not the "b5"/"#5" alterations already covered elsewhere.
+
+describe('processContent – power chords', () => {
+  it('recognizes bare power chord lines as chord type', () => {
+    const sections = processContent('[Verse]\nD5   D#5');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('recognizes power chords with a sharp root as chord type', () => {
+    const sections = processContent('[Verse]\nEm5   F#5 G5');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('transposes power chords while preserving the "5"', () => {
+    const sections = processContent('[Verse]\nD5   F#5', 1);
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('D#5   G5');
+  });
+});
+
+// ─── bare-number slash suffix ────────────────────────────────────────────────
+// Found on a real chord sheet (Toque no Altar "Olha Pra Mim") where CifraClub's
+// own authored markup wraps "D7/4" as one chord — the same song also uses bare
+// "D4" (add4), so "/4" here means an added scale-degree, not a bass note.
+
+describe('processContent – bare-number slash suffix', () => {
+  it('recognizes a chord line using a bare-number slash suffix as chord type', () => {
+    const sections = processContent('[Verse]\nC9                D7/4');
+    expect(lineTypes(sections, 'Verse')).toContain('chord');
+  });
+
+  it('transposes the root while leaving the numeric suffix untouched', () => {
+    const sections = processContent('[Verse]\nD7/4', 1);
+    const lines = sections.find(s => s.title === 'Verse')?.lines ?? [];
+    const chordLine = lines.find(l => l.type === 'chord');
+    expect(chordLine?.content.trim()).toBe('D#7/4');
+  });
+});
