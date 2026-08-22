@@ -60,7 +60,28 @@ npm run clean        # Remove all node_modules and build artifacts
 - NEVER push directly to main/master — always use a feature branch and let the user merge via PR
 - No Co-Authored-By or Claude attribution in commits
 
+## Versioning & Tagging
+
+- **Semantic versioning:** PATCH for fixes, MINOR for features, MAJOR for breaking changes
+- **Version bump commits** must be in their own commit with message format `chore: bump to <version>` and touch all three `package.json` files
+- **After merging a version bump PR:** create a git tag `v<major>.<minor>.<patch>` pointing to that commit and push it to enable GitHub Releases
+  ```bash
+  git tag v0.5.0 <commit-hash>
+  git push origin v0.5.0
+  ```
+
+
 ## Local Development Notes
 
 - **Search requires both frontend and backend running.** The frontend alone is not enough — search, artist songs, and chord sheet fetching all proxy through the Express backend on port 3001. Always run `npm run dev` (or `npm run dev:fe` + `npm run dev:be` in separate terminals) when working on search-related features.
 - Frontend runs on port 8080 (falls back to 8081 if taken), backend on port 3001.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
