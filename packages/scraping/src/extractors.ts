@@ -4,8 +4,12 @@ import type { ChordSheet, SongMetadata, GuitarTuning } from "@chordium/types";
  * Extracts a full chord sheet (content + metadata) from a CifraClub page.
  *
  * IMPORTANT: this function body is serialized and executed inside the browser
- * via `page.evaluate`, so it may only reference the DOM and its own locals — no
- * imports, closures, or Node APIs. Types are erased at compile time.
+ * via `page.evaluate`, so it may only reference the DOM and its own locals —
+ * no imports or closures over outside variables. It's fine to accept
+ * parameters, though: `page.evaluate(fn, ...args)` serializes those args and
+ * passes them in for real, unlike a closure. `chordTokenPattern` arrives this
+ * way — see `chord-token-pattern.ts` for why it can't just be imported here,
+ * and `cascade.ts` for the call site that supplies it.
  *
  * Returns both plain-text `songChords` and `rawHtml` that preserves the
  * source's own `<b>` chord markup. The frontend renders `rawHtml` directly, so
@@ -18,7 +22,7 @@ import type { ChordSheet, SongMetadata, GuitarTuning } from "@chordium/types";
  * per printed page) — every `<pre>` on the page is read and concatenated, since
  * reading only the first silently drops the rest of the song.
  */
-export function extractFullChordSheet(): ChordSheet & SongMetadata {
+export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & SongMetadata {
   const preElements = Array.from(document.querySelectorAll("pre"));
   let songChords = "";
   let rawHtml: string | undefined;
@@ -167,35 +171,11 @@ export function extractFullChordSheet(): ChordSheet & SongMetadata {
     songChords = songChords.replace(/♭/g, "b").replace(/♯/g, "#");
     // Recognizes a chord-only line (e.g. "   Am               C   ") the same
     // way isChordLine elsewhere in the app does: strip every chord token and
-    // check that nothing but whitespace/decoration is left.
-    //
-    // Keep this alternation in sync with CHORD_REGEX in
-    // frontend/src/utils/chord-sheet-utils.ts. "6/9" must stay listed before
-    // the bare "6" alternative: "6" alone is a valid match too (its optional
-    // slash-bass group just fails to consume "/9" since "9" isn't a note
-    // letter), so if "6" matched first the leftover "/9" — specifically the
-    // "/" — isn't in the decoration character class below and the line would
-    // wrongly fail the chord-only check entirely.
-    //
-    // The trailing (?:\(\d{1,2}[+-]?\))? covers the Brazilian cipher
-    // convention of a parenthesized extension after the quality — e.g.
-    // "F#m7(5-)", "D7M(9)", "F7(11+)" — confirmed on real bossa nova chord
-    // sheets (Tom Jobim, João Gilberto). Also matches a bare extension
-    // straight off the root, e.g. "Bb(9)".
-    //
-    // Bare "5" (power chord, e.g. "D5", "F#5") and "m5" (same, written with
-    // an "m" despite the third being absent, e.g. "Em5") were added after
-    // finding them undetected on real rock chord sheets (Cazuza, Legião
-    // Urbana).
-    //
-    // The trailing slash group accepts a real bass-note letter OR a bare
-    // 1-2 digit number (e.g. "D7/4") — confirmed on real chord sheets as
-    // shorthand for an added scale-degree, not a bass note.
-    const CHORD_TOKEN_SOURCE =
-      "[A-G][#b]?(?:m|maj|min|aug|dim|sus|sus2|sus4|add|add9|add11|add13|add2|add4|maj7|m7|m7b5|7M|9M|11M|13M|7|9|11|13|6\\/9|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|m5|5|4|2)?(?:\\(\\d{1,2}[+-]?\\))?(?:\\/(?:[A-G][#b]?|\\d{1,2}))?";
+    // check that nothing but whitespace/decoration is left. See
+    // chord-token-pattern.ts for what chordTokenPattern actually matches.
     function isPlainChordOnlyLine(line: string): boolean {
       if (!/[A-G]/.test(line)) return false;
-      const stripped = line.replace(new RegExp(CHORD_TOKEN_SOURCE, "g"), "");
+      const stripped = line.replace(new RegExp(chordTokenPattern, "g"), "");
       return /^[\s()[\]{}xX0-9.,:-]*$/.test(stripped);
     }
     function isPlainTabContinuation(lines: string[], i: number): boolean {

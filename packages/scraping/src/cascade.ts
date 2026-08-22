@@ -1,5 +1,6 @@
 import type { ChordSheet, SongMetadata } from "@chordium/types";
 import { extractFullChordSheet } from "./extractors";
+import { CHORD_TOKEN_PATTERN } from "./chord-token-pattern";
 
 export type ArrangementVariant = "simplified" | "full" | "regular";
 
@@ -17,7 +18,7 @@ export interface CascadeResult {
 export interface PageLike {
   goto(url: string, opts?: { waitUntil?: string; timeout?: number }): Promise<unknown>;
   url(): string;
-  evaluate<T>(fn: () => T): Promise<T>;
+  evaluate<T, A extends unknown[]>(fn: (...args: A) => T, ...args: A): Promise<T>;
   setDefaultNavigationTimeout?(timeout: number): void;
   /**
    * Disabled before navigating: the source's print pages ship a script that
@@ -79,7 +80,7 @@ async function tryLoadVariant(
       return null;
     }
 
-    const data = await page.evaluate(extractFullChordSheet);
+    const data = await page.evaluate(extractFullChordSheet, CHORD_TOKEN_PATTERN);
     if (!data?.songChords?.trim()) {
       logger?.(`${url} yielded no chord content`);
       return null;

@@ -1,4 +1,5 @@
 import { transposeChord } from './chordUtils';
+import { CHORD_TOKEN_PATTERN } from '@chordium/scraping';
 
 // Type definitions for chord sheet processing
 export interface ChordLine {
@@ -13,42 +14,12 @@ export interface ChordSection {
   isTabSection?: boolean;
 }
 
-// Enhanced chord regex pattern for better recognition
-// Trailing (?![A-Za-z0-9#]) instead of \b so sharp chords ending in '#'
-// (e.g. F#, C#, D/F#) are fully matched — a \b after '#' fails before a space,
-// which previously dropped the '#' and broke chord-line detection.
-//
-// Keep this alternation in sync with CHORD_TOKEN_SOURCE in
-// packages/scraping/src/extractors.ts — that copy runs inside page.evaluate
-// (serialized into the browser, no imports allowed) so it can't share this
-// constant directly. "6/9" must stay listed before the bare "6" alternative:
-// unlike the other additions here, its trailing '/' passes the negative
-// lookahead on its own, so if "6" were tried first it would match and the
-// engine would stop before ever trying "6/9" (no lookahead failure to force
-// backtracking into the longer alternative).
-//
-// The trailing (?:\(\d{1,2}[+-]?\))? covers the Brazilian cipher convention
-// of appending a parenthesized extension after the quality — e.g. "F#m7(5-)"
-// (half-diminished), "D7M(9)", "F7(11+)" — found by testing real bossa nova
-// chord sheets (Tom Jobim, João Gilberto). It's independent of the quality
-// group so it also matches a bare extension straight off the root, e.g.
-// "Bb(9)".
-//
-// Bare "5" (power chord, e.g. "D5", "F#5") and "m5" (the same, written with
-// an "m" despite the third being absent — seen in the wild, e.g. "Em5") were
-// added after finding them undetected on real rock chord sheets (Cazuza,
-// Legião Urbana). Distinct from the "b5"/"#5" alterations already covered
-// elsewhere in this alternation.
-//
-// The trailing slash group accepts either a real bass-note letter (the
-// existing, standard slash chord, e.g. "G/B") or a bare 1-2 digit number
-// (e.g. "D7/4"). The latter isn't a bass note — CifraClub's own authored
-// markup confirms real transcribers use "/N" as shorthand for an added
-// scale-degree alongside the same song's bare "D4" (add4) chord. Digits
-// there are intentionally never transposed by transposeChord() — a scale
-// degree relative to the root doesn't change when the root does, unlike an
-// actual bass note.
-export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|sus2|sus4|add|add9|add11|add13|add2|add4|maj7|m7|m7b5|7M|9M|11M|13M|7|9|11|13|6\/9|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|m5|5|4|2)?(?:\(\d{1,2}[+-]?\))?(?:\/(?:[A-G][#b]?|\d{1,2}))?)(?![A-Za-z0-9#])/g;
+// Wraps the shared CHORD_TOKEN_PATTERN (see packages/scraping/src/chord-token-pattern.ts
+// for what it matches and why it lives there) in a capture group plus a
+// trailing (?![A-Za-z0-9#]) instead of \b, so sharp chords ending in '#'
+// (e.g. F#, C#, D/F#) are fully matched — a \b after '#' fails before a
+// space, which previously dropped the '#' and broke chord-line detection.
+export const CHORD_REGEX = new RegExp(`\\b(${CHORD_TOKEN_PATTERN})(?![A-Za-z0-9#])`, 'g');
 
 /**
  * Normalizes unicode accidentals (♭, ♯) to the ASCII 'b'/'#' the chord regex
