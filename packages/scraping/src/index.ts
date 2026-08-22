@@ -1,4 +1,5 @@
 export { extractFullChordSheet } from "./extractors";
+export { CHORD_TOKEN_PATTERN } from "./chord-token-pattern";
 export {
   fetchPreferredChordSheet,
   fetchFullChordSheet,

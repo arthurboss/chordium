@@ -8,6 +8,7 @@ import {
   removeChordsForLyricsOnly,
 } from '@/utils/chord-html';
 import { transposeChord } from '@/utils/chordUtils';
+import { normalizeChordAccidentals } from '@/utils/chord-sheet-utils';
 
 /** Maps fontStyle setting values to CSS font-family strings. */
 export const FONT_FAMILY: Record<string, string> = {
@@ -19,7 +20,7 @@ export const FONT_FAMILY: Record<string, string> = {
 function transposeHtmlChords(html: string, halfSteps: number): string {
   if (halfSteps === 0) return html;
   return html.replace(/<b([^>]*)>([^<]+)<\/b>/g, (_, attrs, chordName) => {
-    return `<b${attrs}>${transposeChord(chordName.trim(), halfSteps)}</b>`;
+    return `<b${attrs}>${transposeChord(normalizeChordAccidentals(chordName.trim()), halfSteps)}</b>`;
   });
 }
 

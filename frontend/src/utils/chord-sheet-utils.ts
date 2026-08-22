@@ -1,4 +1,5 @@
 import { transposeChord } from './chordUtils';
+import { CHORD_TOKEN_PATTERN } from '@chordium/scraping';
 
 // Type definitions for chord sheet processing
 export interface ChordLine {
@@ -13,11 +14,22 @@ export interface ChordSection {
   isTabSection?: boolean;
 }
 
-// Enhanced chord regex pattern for better recognition
-// Trailing (?![A-Za-z0-9#]) instead of \b so sharp chords ending in '#'
-// (e.g. F#, C#, D/F#) are fully matched — a \b after '#' fails before a space,
-// which previously dropped the '#' and broke chord-line detection.
-export const CHORD_REGEX = /\b([A-G][#b]?(?:m|maj|min|aug|dim|sus|add|maj7|m7|7M|9M|11M|13M|7|9|11|13|6|m6|m9|m11|m13|7sus4|7sus2|7b5|7b9|7#9|7#11|7#5|aug7|dim7|4|2)?(?:\/[A-G][#b]?)?)(?![A-Za-z0-9#])/g;
+// Wraps the shared CHORD_TOKEN_PATTERN (see packages/scraping/src/chord-token-pattern.ts
+// for what it matches and why it lives there) in a capture group plus a
+// trailing (?![A-Za-z0-9#]) instead of \b, so sharp chords ending in '#'
+// (e.g. F#, C#, D/F#) are fully matched — a \b after '#' fails before a
+// space, which previously dropped the '#' and broke chord-line detection.
+export const CHORD_REGEX = new RegExp(`\\b(${CHORD_TOKEN_PATTERN})(?![A-Za-z0-9#])`, 'g');
+
+/**
+ * Normalizes unicode accidentals (♭, ♯) to the ASCII 'b'/'#' the chord regex
+ * and transposeChord() actually recognize. Sheets pasted in from sources that
+ * use the musical symbols instead of plain characters would otherwise fail
+ * chord detection and transposition entirely.
+ */
+export function normalizeChordAccidentals(text: string): string {
+  return text.replace(/♭/g, 'b').replace(/♯/g, '#');
+}
 
 function isChordLine(line: string): boolean {
   CHORD_REGEX.lastIndex = 0;
@@ -48,7 +60,7 @@ export function processContent(rawContent: string, transpose: number = 0): Chord
     return [{ type: "section", title: "", lines: [], isTabSection: false }];
   }
 
-  const rawLines = rawContent.split('\n');
+  const rawLines = normalizeChordAccidentals(rawContent).split('\n');
   const sections: ChordSection[] = [];
   let currentSection: ChordSection = { type: 'section', title: '', lines: [] };
   let insideTabBlock = false;
