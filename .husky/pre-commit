@@ -1,16 +1,4 @@
 #!/bin/sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-# Check if there are any changes to packages/types in this commit
-if git diff --cached --name-only | grep -q "^packages/types/"; then
-    echo "🔄 Types package changed - converting to npm versions for commit..."
-    
-    # Force conversion to npm versions (always for commits)
-    USE_NPM=true node scripts/toggle-workspace-deps.js
-    
-    # Stage the updated package.json files
-    git add frontend/package.json backend/package.json
-    
-    echo "✅ Dependencies converted to npm versions for commit"
-else
-    echo "ℹ️  No changes to types package - skipping dependency sync"
-fi
+npx tsc --noEmit --incremental
