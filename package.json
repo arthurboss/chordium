@@ -13,6 +13,7 @@
     "packages/e2e-tests"
   ],
   "scripts": {
+    "prepare": "husky",
     "use-workspace": "node scripts/toggle-workspace-deps.js",
     "use-npm": "USE_NPM=true node scripts/toggle-workspace-deps.js",
     "dev": "turbo run dev",
