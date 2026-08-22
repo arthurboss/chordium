@@ -1,10 +1,11 @@
 #!/bin/sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Auto-tags a version bump that just landed via merge/pull on main, so a
-# release never depends on remembering a manual `git tag` step. Compares
-# package.json's version before and after this merge; if it changed and
-# isn't already tagged, tags HEAD and pushes it.
+# Auto-tags a version bump that just landed via merge/pull on main, and opens
+# a draft GitHub Release for it, so a release never depends on remembering
+# either step. Compares package.json's version before and after this merge;
+# if it changed and isn't already tagged, tags HEAD, pushes it, and opens
+# the draft release (see below for why it's a draft, not published).
 #
 # Only runs on main: merging main into a feature branch (to pick up latest)
 # would otherwise falsely tag that branch's own merge commit for a version
@@ -29,5 +30,21 @@ if [ -n "$NEW_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
     echo "post-merge: version bumped to $NEW_VERSION — tagging $TAG"
     git tag "$TAG" HEAD
     git push origin "$TAG"
+
+    # Also opens a draft GitHub Release for the tag, so it never depends on
+    # remembering that step either. Left as a draft (not published) because
+    # --generate-notes writes a generic PR-list title/body — this repo's
+    # existing releases use a hand-picked one-line theme (e.g. "v0.6.0 -
+    # Guitar tuner") and product-facing bullets, which a script can't judge.
+    # Drafts aren't publicly visible, so nothing half-finished goes live.
+    if command -v gh >/dev/null 2>&1; then
+      if gh release view "$TAG" >/dev/null 2>&1; then
+        echo "post-merge: release $TAG already exists, skipping"
+      else
+        echo "post-merge: opening draft release for $TAG"
+        gh release create "$TAG" --draft --generate-notes --verify-tag || \
+          echo "post-merge: draft release creation failed — create it manually"
+      fi
+    fi
   fi
 fi
