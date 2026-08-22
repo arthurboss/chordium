@@ -1,0 +1,33 @@
+#!/bin/sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Auto-tags a version bump that just landed via merge/pull on main, so a
+# release never depends on remembering a manual `git tag` step. Compares
+# package.json's version before and after this merge; if it changed and
+# isn't already tagged, tags HEAD and pushes it.
+#
+# Only runs on main: merging main into a feature branch (to pick up latest)
+# would otherwise falsely tag that branch's own merge commit for a version
+# that hasn't actually landed on main yet.
+
+if [ "$(git branch --show-current)" != "main" ]; then
+  exit 0
+fi
+
+extract_version() {
+  grep -m1 '"version"' | sed -E 's/.*"version": *"([^"]+)".*/\1/'
+}
+
+OLD_VERSION=$(git show ORIG_HEAD:package.json 2>/dev/null | extract_version)
+NEW_VERSION=$(extract_version < package.json)
+
+if [ -n "$NEW_VERSION" ] && [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+  TAG="v$NEW_VERSION"
+  if git rev-parse "$TAG" >/dev/null 2>&1; then
+    echo "post-merge: $TAG already exists, skipping"
+  else
+    echo "post-merge: version bumped to $NEW_VERSION — tagging $TAG"
+    git tag "$TAG" HEAD
+    git push origin "$TAG"
+  fi
+fi
