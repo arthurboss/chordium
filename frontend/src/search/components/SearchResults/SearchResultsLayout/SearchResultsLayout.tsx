@@ -14,13 +14,7 @@ import { isSlugDerivedName } from "@/utils/url-slug-utils";
 import { filterSearchHitsByText } from "@/search/utils/filtering/filterSearchHitsByText";
 import { ResultCard } from "../../ResultCard";
 import { cyAttr } from "@/utils/test-utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SortSelect from "@/components/ui/SortSelect";
 
 type SortOption = "default" | "az" | "za";
 
@@ -218,16 +212,16 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // The offset that would otherwise ring the control from a short distance
   // away is dropped, so the highlight sits right on the border it's for.
   const sortControl = (
-    <Select value={sort} onValueChange={(v) => setSort(v as SortOption)} disabled={loading}>
-      <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="default">{t("sort.default")}</SelectItem>
-        <SelectItem value="az">{t("sort.az")}</SelectItem>
-        <SelectItem value="za">{t("sort.za")}</SelectItem>
-      </SelectContent>
-    </Select>
+    <SortSelect
+      value={sort}
+      onValueChange={setSort}
+      disabled={loading}
+      options={[
+        { value: "default", label: t("sort.default") },
+        { value: "az", label: t("sort.az") },
+        { value: "za", label: t("sort.za") },
+      ]}
+    />
   );
 
   // The divider and filter/sort row a selected section or an active artist's

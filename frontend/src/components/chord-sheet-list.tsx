@@ -3,13 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SortSelect from "@/components/ui/SortSelect";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -81,17 +75,16 @@ const ChordSheetList = ({
       {chordSheets.length > 0 ? (
         <>
           <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6 pr-[13px]">
-            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">{t("sort.recent")}</SelectItem>
-                <SelectItem value="most-played">{t("sort.mostPlayed")}</SelectItem>
-                <SelectItem value="az">{t("sort.az")}</SelectItem>
-                <SelectItem value="za">{t("sort.za")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <SortSelect
+              value={sort}
+              onValueChange={setSort}
+              options={[
+                { value: "recent", label: t("sort.recent") },
+                { value: "most-played", label: t("sort.mostPlayed") },
+                { value: "az", label: t("sort.az") },
+                { value: "za", label: t("sort.za") },
+              ]}
+            />
             <div className="flex shrink-0 items-center gap-2">
               <label
                 htmlFor="select-all-chord-sheets"
