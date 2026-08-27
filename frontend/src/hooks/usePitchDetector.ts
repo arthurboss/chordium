@@ -99,6 +99,7 @@ export function usePitchDetector() {
   }, []);
 
   useEffect(() => {
+    if (!navigator.mediaDevices) return;
     navigator.mediaDevices.addEventListener('devicechange', refreshDevices);
     return () => navigator.mediaDevices.removeEventListener('devicechange', refreshDevices);
   }, [refreshDevices]);

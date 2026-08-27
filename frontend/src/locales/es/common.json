@@ -122,6 +122,7 @@
     "saveAriaLabel": "Guardar en Mis Acordes"
   },
   "chordSheetList": {
+    "selectAll": "Seleccionar todo",
     "empty": "No has guardado ningún acorde aún.",
     "uploadAriaLabel": "Importar un acorde",
     "uploadButton": "Importar un acorde"

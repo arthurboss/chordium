@@ -122,6 +122,7 @@
     "saveAriaLabel": "In meinen Akkordblättern speichern"
   },
   "chordSheetList": {
+    "selectAll": "Alle auswählen",
     "empty": "Du hast noch keine Akkordblätter gespeichert.",
     "uploadAriaLabel": "Akkordblatt hochladen",
     "uploadButton": "Akkordblatt hochladen"
