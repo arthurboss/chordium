@@ -171,15 +171,12 @@ export function extractArtistSongs(): Song[] {
  * Extracts song key from CifraClub page DOM
  */
 export function extractSongKey(): string {
-  // Extract song key from span#cifra_tom a element (CifraClub specific)
-  const keyAnchor = document.querySelector("span#cifra_tom a");
-  if (keyAnchor) {
-    return keyAnchor.textContent?.trim() || "";
-  }
-  // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-  const keySpan = document.querySelector("span#cifra_tom");
-  if (keySpan) {
-    return (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+  // Extract song key from the chord-tone anchor button (CifraClub specific).
+  // Its text can carry a capo-relative shape suffix, e.g. "F#m (com forma de Em)".
+  const keyElement = document.querySelector('[data-anchor="--chord-tone"]');
+  if (keyElement) {
+    const text = keyElement.textContent?.trim() || "";
+    return text.split(/\s+/)[0] || "";
   }
 
   return "";
@@ -189,11 +186,11 @@ export function extractSongKey(): string {
  * Extracts guitar capo position from CifraClub page DOM
  */
 export function extractGuitarCapo(): number {
-  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
-  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  // Extract capo position from the capo card's value paragraph (CifraClub specific).
+  const capoElement = document.querySelector('#capo span p');
   if (capoElement) {
     const capoText = capoElement.textContent?.trim() || "";
-    // Extract number from text like "1ª casa", "2ª casa", etc.
+    // Extract number from text like "1ª casa", "2ª casa", etc. ("Sem capotraste" has none.)
     const capoMatch = capoText.match(/(\d+)/);
     if (capoMatch) {
       return parseInt(capoMatch[1], 10);
@@ -281,54 +278,115 @@ export function extractSongMetadata(): SongMetadata {
   }
 
   // Extract key, tuning, and capo information
-  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  // Extract song key from the chord-tone anchor button (CifraClub specific).
+  // Its text can carry a capo-relative shape suffix, e.g. "F#m (com forma de Em)".
   let songKey = "";
-  const keyAnchor = document.querySelector("span#cifra_tom a");
-  if (keyAnchor) {
-    songKey = keyAnchor.textContent?.trim() || "";
-  } else {
-    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-    const keySpan = document.querySelector("span#cifra_tom");
-    if (keySpan) {
-      songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
-    }
+  const keyElement = document.querySelector('[data-anchor="--chord-tone"]');
+  if (keyElement) {
+    const text = keyElement.textContent?.trim() || "";
+    songKey = text.split(/\s+/)[0] || "";
   }
 
-  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  // Extract capo position from the capo card's value paragraph (CifraClub specific).
   let guitarCapo = 0;
-  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  const capoElement = document.querySelector('#capo span p');
   if (capoElement) {
     const capoText = capoElement.textContent?.trim() || "";
-    // Extract number from text like "1ª casa", "2ª casa", etc.
+    // Extract number from text like "1ª casa", "2ª casa", etc. ("Sem capotraste" has none.)
     const capoMatch = capoText.match(/(\d+)/);
     if (capoMatch) {
       guitarCapo = parseInt(capoMatch[1], 10);
     }
   }
 
-  // Extract tuning from span#cifra_afi a element (CifraClub specific).
-  // The element is only present when the tuning is non-standard; when it is
-  // absent we fall back to standard tuning.
+  // Some well-known alternate tunings, keyed by both their English and
+  // Portuguese names (lowercase). The source's tuning info card only ever
+  // reports "Padrão" (standard) or a semitone shift like "1/2 tom abaixo" —
+  // it mislabels real alternate tunings (DADGAD, drop tunings) as standard —
+  // so a name can only come from an explicit "Afinação: <name>" content line
+  // (or a pasted/uploaded chord sheet that names its tuning instead of
+  // spelling out all 6 notes).
+  const NAMED_TUNINGS: Record<string, GuitarTuning> = {
+    "drop d": ["D", "A", "D", "G", "B", "E"],
+    "drop c": ["C", "G", "C", "F", "A", "D"],
+    "double drop d": ["D", "A", "D", "G", "B", "D"],
+    "open g": ["D", "G", "D", "G", "B", "D"],
+    "sol aberta": ["D", "G", "D", "G", "B", "D"],
+    "open d": ["D", "A", "D", "F#", "A", "D"],
+    "ré aberta": ["D", "A", "D", "F#", "A", "D"],
+    "re aberta": ["D", "A", "D", "F#", "A", "D"],
+    "open a": ["E", "A", "E", "A", "C#", "E"],
+    "lá aberta": ["E", "A", "E", "A", "C#", "E"],
+    "la aberta": ["E", "A", "E", "A", "C#", "E"],
+    "open e": ["E", "B", "E", "G#", "B", "E"],
+    "mi aberta": ["E", "B", "E", "G#", "B", "E"],
+    "open c": ["C", "G", "C", "G", "C", "E"],
+    "dó aberta": ["C", "G", "C", "G", "C", "E"],
+    "do aberta": ["C", "G", "C", "G", "C", "E"],
+    "dadgad": ["D", "A", "D", "G", "A", "D"],
+  };
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const namedTuningPattern = Object.keys(NAMED_TUNINGS)
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join("|");
+
+  // Tuning: prefer an explicit "Afinação: <notes or name>" line at the start
+  // of the pre block (some wrapped in parentheses; this is exact, as printed
+  // for this song). Otherwise read the tuning info card: a known name is
+  // mapped directly, "Padrão" means standard, and a shift phrase like
+  // "1/2 tom abaixo" (half step down) or "1 tom acima" (whole step up) is
+  // transposed from standard tuning.
   let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
-  const tuningElement = document.querySelector("span#cifra_afi a");
-  if (tuningElement) {
-    const notes = (tuningElement.textContent || "")
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    if (notes.length === 6) {
-      guitarTuning = notes as unknown as GuitarTuning;
-    }
-  } else {
-    // Some pages render non-standard tuning as a plain "Afinação: <notes>"
-    // line at the very start of the pre block instead of a cifra_afi anchor.
-    const preElement = document.querySelector("pre");
-    const preText = preElement?.textContent || "";
-    const leadingTuningMatch = preText.match(/^Afinação:\s*([A-G][#b]?(?:\s+[A-G][#b]?){5})\s*\n+/i);
-    if (leadingTuningMatch) {
+  const preElement = document.querySelector("pre");
+  const preText = preElement?.textContent || "";
+  // A song can carry more than one such line (seen on
+  // oficina-g3/incondicional: a standard-tuning line followed by the real
+  // one) - the last occurrence wins, since it's the one that was corrected.
+  const tuningLineMatches = Array.from(
+    preText.matchAll(
+      new RegExp(`^\\(?Afinação:\\s*(?:([A-G][#b]?(?:\\s+[A-G][#b]?){5})|(${namedTuningPattern}))\\s*\\)?\\s*\\n+`, "gim")
+    )
+  );
+  const leadingTuningMatch = tuningLineMatches[tuningLineMatches.length - 1] ?? null;
+  if (leadingTuningMatch) {
+    if (leadingTuningMatch[1]) {
       const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
       if (notes.length === 6) {
         guitarTuning = notes as unknown as GuitarTuning;
+      }
+    } else if (leadingTuningMatch[2]) {
+      const named = NAMED_TUNINGS[leadingTuningMatch[2].toLowerCase()];
+      if (named) {
+        guitarTuning = named;
+      }
+    }
+  } else {
+    const tuningCardText = document.querySelector('#tuning span p')?.textContent?.trim() || "";
+    const namedCardTuning = NAMED_TUNINGS[tuningCardText.toLowerCase()];
+    const shiftMatch = tuningCardText.match(/^(meio|\d+(?:\/\d+)?)\s*to(?:m|ns)\s*(abaixo|acima)$/i);
+    if (namedCardTuning) {
+      guitarTuning = namedCardTuning;
+    } else if (shiftMatch) {
+      const [, amountText, direction] = shiftMatch;
+      const amount = amountText.toLowerCase() === "meio"
+        ? 0.5
+        : amountText.includes("/")
+          ? Number(amountText.split("/")[0]) / Number(amountText.split("/")[1])
+          : Number(amountText);
+      const semitones = Math.round(amount * 2) * (direction.toLowerCase() === "abaixo" ? -1 : 1);
+      if (semitones !== 0) {
+        const NOTE_INDEX: Record<string, number> = {
+          C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, F: 5,
+          "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11,
+        };
+        const FLATS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+        const SHARPS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const table = semitones < 0 ? FLATS : SHARPS;
+        guitarTuning = guitarTuning.map((note) => {
+          const idx = ((NOTE_INDEX[note] + semitones) % 12 + 12) % 12;
+          return table[idx];
+        }) as unknown as GuitarTuning;
       }
     }
   }

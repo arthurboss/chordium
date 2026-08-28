@@ -22,5 +22,11 @@ export interface StoredSongMetadata extends SongMetadata, StoredRecord {
     accessCount: number;
     /** Whether content is available for this song */
     contentAvailable: boolean;
+    /**
+     * Which arrangement the user last viewed, set when toggling in the
+     * reader. Drives which arrangement's own key/capo/tuning the "My chord
+     * sheets" card shows, since the two can differ.
+     */
+    lastViewedVariant?: "simplified" | "full";
   };
 }

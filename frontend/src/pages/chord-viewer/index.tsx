@@ -15,7 +15,7 @@ import { persistFullArrangementOnSave } from './utils/persist-full-arrangement';
 import { useNavigation } from '@/hooks/navigation';
 import { useChordSheetSave, useChordSheetDelete } from '@/storage/hooks';
 import storeChordSheet from '@/storage/stores/chord-sheets/operations/store-chord-sheet';
-import { storeFullChordSheet } from '@/storage/stores/chord-sheets/operations';
+import { storeFullChordSheet, storeChordSheetMetadata } from '@/storage/stores/chord-sheets/operations';
 import { fetchFullSongFromAPI } from '@/services/api/fetch-song';
 
 import { ChordViewerLoading } from './components/chord-viewer-loading';
@@ -62,6 +62,22 @@ const ChordViewer = () => {
   const handleViewModeChange = useCallback((viewMode: string) => {
     setActiveViewMode(viewMode);
   }, []);
+
+  // Remembers which arrangement the user chose, so the "My chord sheets" card
+  // shows that arrangement's own key/capo/tuning instead of always the
+  // simplified one's.
+  const handleToggleArrangement = useCallback((nextShowFull: boolean) => {
+    setShowFull(nextShowFull);
+    const metadata = chordSheetResult.metadata;
+    if (!metadata) return;
+    storeChordSheetMetadata({
+      ...metadata,
+      storage: {
+        ...metadata.storage,
+        lastViewedVariant: nextShowFull ? 'full' : 'simplified',
+      },
+    }).catch(() => {});
+  }, [chordSheetResult.metadata]);
 
   const chordSheetData = chordSheetResult.metadata
     ? createChordSheetData(
@@ -235,8 +251,10 @@ const ChordViewer = () => {
 
   const fullSheet = chordSheetResult.fullContent;
 
-  // Choose which arrangement to display. Full arrangement uses its own content
-  // and rawHtml; simplified uses the primary content (with edit override).
+  // Choose which arrangement to display. Full arrangement uses its own
+  // content, rawHtml, and (when available) its own key/capo/tuning - a full
+  // arrangement can be transcribed differently than the simplified one.
+  // Simplified uses the primary content and metadata (with edit override).
   let displayContent: string;
   let displayChordSheet: typeof chordSheetData.chordSheet;
   if (showFull && fullSheet) {
@@ -247,6 +265,9 @@ const ChordViewer = () => {
       // When the full arrangement was edited in plain text, drop the scraped
       // rawHtml so the edited text renders; otherwise keep it for tab rendering.
       rawHtml: fullEdited != null ? undefined : fullSheet.rawHtml,
+      ...(fullSheet.songKey ? { songKey: fullSheet.songKey } : {}),
+      ...(fullSheet.guitarCapo !== undefined ? { guitarCapo: fullSheet.guitarCapo } : {}),
+      ...(fullSheet.guitarTuning ? { guitarTuning: fullSheet.guitarTuning } : {}),
     };
   } else {
     displayContent = editedData?.songChords ?? (chordSheetResult.content?.songChords ?? '');
@@ -290,7 +311,7 @@ const ChordViewer = () => {
       initialViewMode={activeViewMode}
       hasFullArrangement={chordSheetResult.hasFullArrangement}
       showFull={showFull}
-      onToggleArrangement={setShowFull}
+      onToggleArrangement={handleToggleArrangement}
       showLyrics={showLyrics}
       onLyricsToggle={setShowLyrics}
       // Only meaningful while the full arrangement is displayed: it is the
