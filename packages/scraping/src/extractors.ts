@@ -434,20 +434,18 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
     }
   }
 
-  // Song key: regular pages use an anchor; print pages render bare "tom: Bm".
+  // Song key: the chord-tone anchor button. Its text can carry a
+  // capo-relative shape suffix, e.g. "F#m (com forma de Em)".
   let songKey = "";
-  const keyAnchor = document.querySelector("span#cifra_tom a");
-  if (keyAnchor) {
-    songKey = keyAnchor.textContent?.trim() || "";
-  } else {
-    const keySpan = document.querySelector("span#cifra_tom");
-    if (keySpan) {
-      songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
-    }
+  const keyElement = document.querySelector('[data-anchor="--chord-tone"]');
+  if (keyElement) {
+    const text = keyElement.textContent?.trim() || "";
+    songKey = text.split(/\s+/)[0] || "";
   }
 
+  // Capo: the capo info card's value paragraph ("Sem capotraste" has no digits).
   let guitarCapo = 0;
-  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  const capoElement = document.querySelector('#capo span p');
   if (capoElement) {
     const capoText = capoElement.textContent?.trim() || "";
     const capoMatch = capoText.match(/(\d+)/);
@@ -456,21 +454,40 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
     }
   }
 
-  // Tuning: `span#cifra_afi a` is only present when non-standard; absent = standard.
+  // Tuning: prefer an explicit "Afinação: <notes>" line in the content (exact,
+  // as printed for this song). Otherwise read the tuning info card: "Padrão"
+  // means standard, and a shift phrase like "1/2 tom abaixo" (half step down)
+  // or "1 tom acima" (whole step up) is transposed from standard tuning.
   let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
-  const tuningElement = document.querySelector("span#cifra_afi a");
-  if (tuningElement) {
-    const notes = (tuningElement.textContent || "")
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-    if (notes.length === 6) {
-      guitarTuning = notes as unknown as GuitarTuning;
-    }
-  } else if (leadingTuningMatch) {
+  if (leadingTuningMatch) {
     const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
     if (notes.length === 6) {
       guitarTuning = notes as unknown as GuitarTuning;
+    }
+  } else {
+    const tuningCardText = document.querySelector('#tuning span p')?.textContent?.trim() || "";
+    const shiftMatch = tuningCardText.match(/^(meio|\d+(?:\/\d+)?)\s*to(?:m|ns)\s*(abaixo|acima)$/i);
+    if (shiftMatch) {
+      const [, amountText, direction] = shiftMatch;
+      const amount = amountText.toLowerCase() === "meio"
+        ? 0.5
+        : amountText.includes("/")
+          ? Number(amountText.split("/")[0]) / Number(amountText.split("/")[1])
+          : Number(amountText);
+      const semitones = Math.round(amount * 2) * (direction.toLowerCase() === "abaixo" ? -1 : 1);
+      if (semitones !== 0) {
+        const NOTE_INDEX: Record<string, number> = {
+          C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, F: 5,
+          "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11,
+        };
+        const FLATS = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+        const SHARPS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const table = semitones < 0 ? FLATS : SHARPS;
+        guitarTuning = guitarTuning.map((note) => {
+          const idx = ((NOTE_INDEX[note] + semitones) % 12 + 12) % 12;
+          return table[idx];
+        }) as unknown as GuitarTuning;
+      }
     }
   }
 
