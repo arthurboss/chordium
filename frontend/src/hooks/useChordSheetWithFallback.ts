@@ -114,9 +114,12 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
         path,
         songChords: full.songChords,
         ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}),
+        ...(full.songKey ? { songKey: full.songKey } : {}),
+        ...(full.guitarCapo !== undefined ? { guitarCapo: full.guitarCapo } : {}),
+        ...(full.guitarTuning ? { guitarTuning: full.guitarTuning } : {}),
       };
       setFullContent(stored);
-      storeFullChordSheet({ songChords: full.songChords, ...(full.rawHtml ? { rawHtml: full.rawHtml } : {}) }, path).catch(() => {});
+      storeFullChordSheet(stored, path).catch(() => {});
     })();
     return () => { cancelled = true; };
   }, [path, fullContent, primarySongChords, primaryHasTabs, isFromAPI, variant]);
