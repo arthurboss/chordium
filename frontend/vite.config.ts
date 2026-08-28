@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     server: {
-      host: "::",
+      host: "0.0.0.0",
       port: 8080,
       https: isHttps ? {
         key: path.resolve(__dirname, '../backend/localhost+2-key.pem'),
@@ -207,7 +207,7 @@ export default defineConfig(({ mode }) => {
     ] as any,
     preview: {
       port: 4173,
-      host: "::",
+      host: "0.0.0.0",
       // Enable proxy in preview mode for local testing
       proxy: {
         '/api': {
