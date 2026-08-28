@@ -9,13 +9,10 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
     onView(chordSheet);
   };
 
-  const tuningNotes = chordSheet.guitarTuning ? chordSheet.guitarTuning.join(" ") : null;
-  const capoText = chordSheet.guitarCapo ? `Capo ${chordSheet.guitarCapo}` : null;
-  const keyText = chordSheet.songKey ?? null;
-
-  const leftMetadata: string[] = [];
-  if (keyText) leftMetadata.push(keyText);
-  if (capoText) leftMetadata.push(capoText);
+  const metadataParts: { text: string; mono?: boolean }[] = [];
+  if (chordSheet.songKey) metadataParts.push({ text: chordSheet.songKey });
+  if (chordSheet.guitarCapo) metadataParts.push({ text: `Capo ${chordSheet.guitarCapo}` });
+  if (chordSheet.guitarTuning) metadataParts.push({ text: chordSheet.guitarTuning.join(" "), mono: true });
 
   return (
     <Card
@@ -42,24 +39,19 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
           >
             {chordSheet.artist}
           </p>
-          <div className="h-px bg-linear-to-r from-border/60 from-25% to-transparent my-1.5" />
-          <div className="flex items-center justify-between gap-2">
-            {leftMetadata.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
-                {leftMetadata.map((item, idx) => (
-                  <span key={idx} className="truncate">
-                    {idx > 0 && <span className="mr-1">•</span>}
-                    {item}
+          {metadataParts.length > 0 && (
+            <>
+              <div className="h-px bg-linear-to-r from-border/60 from-25% to-transparent my-1.5" />
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
+                {metadataParts.map((part, idx) => (
+                  <span key={idx} className={part.mono ? "font-mono truncate" : "truncate"}>
+                    {idx > 0 && <span className="mr-1.5">•</span>}
+                    {part.text}
                   </span>
                 ))}
               </div>
-            )}
-            {tuningNotes && (
-              <span className="text-xs text-muted-foreground shrink-0 font-mono">
-                {tuningNotes}
-              </span>
-            )}
-          </div>
+            </>
+          )}
         </div>
         <RoundTrashButton
           onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
