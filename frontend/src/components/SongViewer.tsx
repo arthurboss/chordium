@@ -14,6 +14,9 @@ import type { ChordSheet, SongMetadata } from "@/types/chordSheet";
 import { useLazyChordSheet } from "@/storage/hooks/use-lazy-chord-sheet";
 import { useChordDisplaySettings } from "@/hooks/use-chord-display-settings";
 import { useCapoTranspose } from "@/hooks/useCapoTranspose";
+import { useVoiceAgent } from "@/hooks/useVoiceAgent";
+import { VoiceAgentUI } from "@/components/VoiceAgent/VoiceAgentUI";
+import { parseCommand } from "@/services/voice-commands/parse-command";
 import { useChordEditor } from "@/hooks/use-chord-editor";
 import { useLyricsVersion } from "@/hooks/useLyricsVersion";
 import { extractLyricsFromChordSheet } from "@/utils/extract-lyrics";
@@ -288,6 +291,23 @@ const SongViewer = ({
     void storeArtistDisplayName(artistSlug, artist);
     navigate(`/${artistSlug}`);
   }, [artist, navigate, songObj.path]);
+  const handleVoiceCommand = useCallback(async (command: ReturnType<typeof parseCommand>) => {
+    switch (command.type) {
+      case 'transpose':
+        handleTransposeChange(command.semitones);
+        break;
+      case 'key':
+        break;
+      case 'capo':
+        handleCapoChange(command.fret);
+        break;
+      case 'search':
+        navigate("/search", { state: { query: command.query } });
+        break;
+    }
+  }, [handleTransposeChange, handleCapoChange, navigate]);
+
+  const voiceAgent = useVoiceAgent({ onCommand: handleVoiceCommand });
 
   return (
     <main
@@ -392,6 +412,12 @@ const SongViewer = ({
         editContent={editContent}
         setEditContent={setEditContent}
         handleSaveEdits={saveEdits}
+      />
+      <VoiceAgentUI
+        isActive={voiceAgent.isActive}
+        isListening={voiceAgent.isListening}
+        state={voiceAgent.state}
+        error={voiceAgent.error}
       />
     </main>
   );
