@@ -26,11 +26,47 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
   const preElements = Array.from(document.querySelectorAll("pre"));
   let songChords = "";
   let rawHtml: string | undefined;
+  // Some well-known alternate tunings, keyed by both their English and
+  // Portuguese names (lowercase). The source's tuning info card only ever
+  // reports "Padrão" (standard) or a semitone shift like "1/2 tom abaixo" —
+  // it mislabels real alternate tunings (DADGAD, drop tunings) as standard —
+  // so a name can only come from an explicit "Afinação: <name>" content line
+  // (or a pasted/uploaded chord sheet that names its tuning instead of
+  // spelling out all 6 notes).
+  const NAMED_TUNINGS: Record<string, GuitarTuning> = {
+    "drop d": ["D", "A", "D", "G", "B", "E"],
+    "drop c": ["C", "G", "C", "F", "A", "D"],
+    "double drop d": ["D", "A", "D", "G", "B", "D"],
+    "open g": ["D", "G", "D", "G", "B", "D"],
+    "sol aberta": ["D", "G", "D", "G", "B", "D"],
+    "open d": ["D", "A", "D", "F#", "A", "D"],
+    "ré aberta": ["D", "A", "D", "F#", "A", "D"],
+    "re aberta": ["D", "A", "D", "F#", "A", "D"],
+    "open a": ["E", "A", "E", "A", "C#", "E"],
+    "lá aberta": ["E", "A", "E", "A", "C#", "E"],
+    "la aberta": ["E", "A", "E", "A", "C#", "E"],
+    "open e": ["E", "B", "E", "G#", "B", "E"],
+    "mi aberta": ["E", "B", "E", "G#", "B", "E"],
+    "open c": ["C", "G", "C", "G", "C", "E"],
+    "dó aberta": ["C", "G", "C", "G", "C", "E"],
+    "do aberta": ["C", "G", "C", "G", "C", "E"],
+    "dadgad": ["D", "A", "D", "G", "A", "D"],
+  };
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const namedTuningPattern = Object.keys(NAMED_TUNINGS)
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join("|");
+
   // Non-standard tunings are usually a `span#cifra_afi a` anchor, but some
-  // pages instead render a plain "Afinação: <notes>" line as the very first
-  // line of the pre block, with no anchor at all. Detected below and used
-  // both to strip it from the extracted content and as a tuning fallback.
-  const leadingTuningLineRegex = /^Afinação:\s*([A-G][#b]?(?:\s+[A-G][#b]?){5})\s*\n+/i;
+  // pages instead render a plain "Afinação: <notes or name>" line as the very
+  // first line of the pre block (some wrapped in parentheses), with no anchor
+  // at all. Detected below and used both to strip it from the extracted
+  // content and as a tuning fallback.
+  const leadingTuningLineRegex = new RegExp(
+    `^\\(?Afinação:\\s*(?:([A-G][#b]?(?:\\s+[A-G][#b]?){5})|(${namedTuningPattern}))\\s*\\)?\\s*\\n+`,
+    "i"
+  );
   let leadingTuningMatch: RegExpMatchArray | null = null;
 
   // Drops a bare section-title line when it's immediately followed (skipping
@@ -454,20 +490,31 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
     }
   }
 
-  // Tuning: prefer an explicit "Afinação: <notes>" line in the content (exact,
-  // as printed for this song). Otherwise read the tuning info card: "Padrão"
-  // means standard, and a shift phrase like "1/2 tom abaixo" (half step down)
-  // or "1 tom acima" (whole step up) is transposed from standard tuning.
+  // Tuning: prefer an explicit "Afinação: <notes or name>" line in the
+  // content (exact, as printed for this song). Otherwise read the tuning info
+  // card: a known name is mapped directly, "Padrão" means standard, and a
+  // shift phrase like "1/2 tom abaixo" (half step down) or "1 tom acima"
+  // (whole step up) is transposed from standard tuning.
   let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
   if (leadingTuningMatch) {
-    const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
-    if (notes.length === 6) {
-      guitarTuning = notes as unknown as GuitarTuning;
+    if (leadingTuningMatch[1]) {
+      const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
+      if (notes.length === 6) {
+        guitarTuning = notes as unknown as GuitarTuning;
+      }
+    } else if (leadingTuningMatch[2]) {
+      const named = NAMED_TUNINGS[leadingTuningMatch[2].toLowerCase()];
+      if (named) {
+        guitarTuning = named;
+      }
     }
   } else {
     const tuningCardText = document.querySelector('#tuning span p')?.textContent?.trim() || "";
+    const namedCardTuning = NAMED_TUNINGS[tuningCardText.toLowerCase()];
     const shiftMatch = tuningCardText.match(/^(meio|\d+(?:\/\d+)?)\s*to(?:m|ns)\s*(abaixo|acima)$/i);
-    if (shiftMatch) {
+    if (namedCardTuning) {
+      guitarTuning = namedCardTuning;
+    } else if (shiftMatch) {
       const [, amountText, direction] = shiftMatch;
       const amount = amountText.toLowerCase() === "meio"
         ? 0.5
