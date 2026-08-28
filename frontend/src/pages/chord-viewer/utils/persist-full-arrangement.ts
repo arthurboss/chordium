@@ -1,8 +1,10 @@
-import type { ChordSheet, Song } from "@chordium/types";
+import type { ChordSheet, Song, SongMetadata } from "@chordium/types";
+
+type FullArrangementContent = ChordSheet & Partial<Pick<SongMetadata, "songKey" | "guitarCapo" | "guitarTuning">>;
 
 interface PersistFullArrangementDeps {
-  storeFullChordSheet: (content: ChordSheet, path: Song["path"]) => Promise<void>;
-  fetchFullSongFromAPI: (path: string) => Promise<ChordSheet | null>;
+  storeFullChordSheet: (content: FullArrangementContent, path: Song["path"]) => Promise<void>;
+  fetchFullSongFromAPI: (path: string) => Promise<FullArrangementContent | null>;
 }
 
 /**
@@ -18,7 +20,7 @@ interface PersistFullArrangementDeps {
 export function persistFullArrangementOnSave(
   path: Song["path"],
   hasFullArrangement: boolean,
-  fullContent: ChordSheet | null,
+  fullContent: FullArrangementContent | null,
   deps: PersistFullArrangementDeps
 ): void {
   const { storeFullChordSheet, fetchFullSongFromAPI } = deps;
