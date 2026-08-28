@@ -171,15 +171,12 @@ export function extractArtistSongs(): Song[] {
  * Extracts song key from CifraClub page DOM
  */
 export function extractSongKey(): string {
-  // Extract song key from span#cifra_tom a element (CifraClub specific)
-  const keyAnchor = document.querySelector("span#cifra_tom a");
-  if (keyAnchor) {
-    return keyAnchor.textContent?.trim() || "";
-  }
-  // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-  const keySpan = document.querySelector("span#cifra_tom");
-  if (keySpan) {
-    return (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
+  // Extract song key from the chord-tone anchor button (CifraClub specific).
+  // Its text can carry a capo-relative shape suffix, e.g. "F#m (com forma de Em)".
+  const keyElement = document.querySelector('[data-anchor="--chord-tone"]');
+  if (keyElement) {
+    const text = keyElement.textContent?.trim() || "";
+    return text.split(/\s+/)[0] || "";
   }
 
   return "";
@@ -189,11 +186,11 @@ export function extractSongKey(): string {
  * Extracts guitar capo position from CifraClub page DOM
  */
 export function extractGuitarCapo(): number {
-  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
-  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  // Extract capo position from the capo card's value paragraph (CifraClub specific).
+  const capoElement = document.querySelector('#capo span p');
   if (capoElement) {
     const capoText = capoElement.textContent?.trim() || "";
-    // Extract number from text like "1ª casa", "2ª casa", etc.
+    // Extract number from text like "1ª casa", "2ª casa", etc. ("Sem capotraste" has none.)
     const capoMatch = capoText.match(/(\d+)/);
     if (capoMatch) {
       return parseInt(capoMatch[1], 10);
@@ -281,25 +278,21 @@ export function extractSongMetadata(): SongMetadata {
   }
 
   // Extract key, tuning, and capo information
-  // Extract song key from span#cifra_tom a element (CifraClub specific)
+  // Extract song key from the chord-tone anchor button (CifraClub specific).
+  // Its text can carry a capo-relative shape suffix, e.g. "F#m (com forma de Em)".
   let songKey = "";
-  const keyAnchor = document.querySelector("span#cifra_tom a");
-  if (keyAnchor) {
-    songKey = keyAnchor.textContent?.trim() || "";
-  } else {
-    // Print pages render the key as bare text (e.g. "tom: Bm") with no anchor.
-    const keySpan = document.querySelector("span#cifra_tom");
-    if (keySpan) {
-      songKey = (keySpan.textContent || "").replace(/tom\s*:/i, "").trim();
-    }
+  const keyElement = document.querySelector('[data-anchor="--chord-tone"]');
+  if (keyElement) {
+    const text = keyElement.textContent?.trim() || "";
+    songKey = text.split(/\s+/)[0] || "";
   }
 
-  // Extract capo position from span[data-cy="song-capo"] a element (CifraClub specific)
+  // Extract capo position from the capo card's value paragraph (CifraClub specific).
   let guitarCapo = 0;
-  const capoElement = document.querySelector('span[data-cy="song-capo"] a');
+  const capoElement = document.querySelector('#capo span p');
   if (capoElement) {
     const capoText = capoElement.textContent?.trim() || "";
-    // Extract number from text like "1ª casa", "2ª casa", etc.
+    // Extract number from text like "1ª casa", "2ª casa", etc. ("Sem capotraste" has none.)
     const capoMatch = capoText.match(/(\d+)/);
     if (capoMatch) {
       guitarCapo = parseInt(capoMatch[1], 10);

@@ -4,19 +4,19 @@ import { mockDocument, cleanupDOM } from './shared-setup.js';
 
 /**
  * Tests for extractGuitarCapo function
- * Validates extraction of guitar capo position from DOM span[data-cy="song-capo"] a element
+ * Validates extraction of guitar capo position from DOM #capo span p element
  */
 
 describe('extractGuitarCapo', () => {
   cleanupDOM();
 
-  it('should extract capo position from span[data-cy="song-capo"] a element', () => {
+  it('should extract capo position from #capo span p element', () => {
     const mockCapoElement = {
       textContent: '1ª casa'
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span[data-cy="song-capo"] a') {
+      if (selector === '#capo span p') {
         return mockCapoElement;
       }
       return null;
@@ -42,7 +42,7 @@ describe('extractGuitarCapo', () => {
       };
 
       mockDocument((selector: string) => {
-        if (selector === 'span[data-cy="song-capo"] a') {
+        if (selector === '#capo span p') {
           return mockCapoElement;
         }
         return null;
@@ -60,7 +60,7 @@ describe('extractGuitarCapo', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span[data-cy="song-capo"] a') {
+      if (selector === '#capo span p') {
         return mockCapoElement;
       }
       return null;
@@ -85,7 +85,7 @@ describe('extractGuitarCapo', () => {
       };
 
       mockDocument((selector: string) => {
-        if (selector === 'span[data-cy="song-capo"] a') {
+        if (selector === '#capo span p') {
           return mockCapoElement;
         }
         return null;
@@ -97,7 +97,7 @@ describe('extractGuitarCapo', () => {
     });
   });
 
-  it('should return 0 when span[data-cy="song-capo"] a element is not found', () => {
+  it('should return 0 when #capo span p element is not found', () => {
     mockDocument(() => null); // Element not found
 
     const result: number = extractGuitarCapo();
@@ -111,7 +111,7 @@ describe('extractGuitarCapo', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span[data-cy="song-capo"] a') {
+      if (selector === '#capo span p') {
         return mockCapoElement;
       }
       return null;
@@ -128,7 +128,7 @@ describe('extractGuitarCapo', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span[data-cy="song-capo"] a') {
+      if (selector === '#capo span p') {
         return mockCapoElement;
       }
       return null;
@@ -146,7 +146,8 @@ describe('extractGuitarCapo', () => {
       'standard',
       'casa',
       'ª',
-      'text without numbers'
+      'text without numbers',
+      'Sem capotraste'
     ];
 
     testCases.forEach((text) => {
@@ -155,7 +156,7 @@ describe('extractGuitarCapo', () => {
       };
 
       mockDocument((selector: string) => {
-        if (selector === 'span[data-cy="song-capo"] a') {
+        if (selector === '#capo span p') {
           return mockCapoElement;
         }
         return null;
@@ -173,7 +174,7 @@ describe('extractGuitarCapo', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span[data-cy="song-capo"] a') {
+      if (selector === '#capo span p') {
         return mockCapoElement;
       }
       return null;

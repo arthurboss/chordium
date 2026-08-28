@@ -4,19 +4,19 @@ import { mockDocument, cleanupDOM } from './shared-setup.js';
 
 /**
  * Tests for extractSongKey function
- * Validates extraction of song key from DOM span#cifra_tom a element
+ * Validates extraction of song key from the [data-anchor="--chord-tone"] element
  */
 
 describe('extractSongKey', () => {
   cleanupDOM();
 
-  it('should extract song key from span#cifra_tom a element', () => {
+  it('should extract song key from the chord-tone anchor element', () => {
     const mockKeyElement = {
       textContent: 'C'
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
@@ -33,7 +33,7 @@ describe('extractSongKey', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
@@ -50,7 +50,7 @@ describe('extractSongKey', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
@@ -67,7 +67,7 @@ describe('extractSongKey', () => {
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
@@ -78,7 +78,24 @@ describe('extractSongKey', () => {
     expect(result).toBe('Am');
   });
 
-  it('should return empty string when span#cifra_tom a element is not found', () => {
+  it('should strip a capo-relative shape suffix from the key text', () => {
+    const mockKeyElement = {
+      textContent: 'F#m (com forma de Em)'
+    };
+
+    mockDocument((selector: string) => {
+      if (selector === '[data-anchor="--chord-tone"]') {
+        return mockKeyElement;
+      }
+      return null;
+    });
+
+    const result: string = extractSongKey();
+
+    expect(result).toBe('F#m');
+  });
+
+  it('should return empty string when the chord-tone anchor element is not found', () => {
     mockDocument(() => null); // Element not found
 
     const result: string = extractSongKey();
@@ -86,13 +103,13 @@ describe('extractSongKey', () => {
     expect(result).toBe('');
   });
 
-  it('should return empty string when anchor element exists but has no text', () => {
+  it('should return empty string when the element exists but has no text', () => {
     const mockKeyElement = {
       textContent: ''
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
@@ -103,13 +120,13 @@ describe('extractSongKey', () => {
     expect(result).toBe('');
   });
 
-  it('should return empty string when anchor element textContent is null', () => {
+  it('should return empty string when the element textContent is null', () => {
     const mockKeyElement = {
       textContent: null
     };
 
     mockDocument((selector: string) => {
-      if (selector === 'span#cifra_tom a') {
+      if (selector === '[data-anchor="--chord-tone"]') {
         return mockKeyElement;
       }
       return null;
