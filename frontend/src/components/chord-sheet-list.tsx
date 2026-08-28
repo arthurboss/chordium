@@ -62,10 +62,10 @@ const ChordSheetList = ({
             </Select>
           </div>
           <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-              {sorted.map((storedChordSheet, index) => (
+            <div className="flex flex-col gap-2">
+              {sorted.map((storedChordSheet) => (
                 <ChordSheetCard
-                  key={`${storedChordSheet.path}-${index}`}
+                  key={storedChordSheet.path}
                   chordSheet={storedChordSheet}
                   onView={onChordSheetSelect}
                   onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
