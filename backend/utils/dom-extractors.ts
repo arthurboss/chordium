@@ -340,9 +340,15 @@ export function extractSongMetadata(): SongMetadata {
   let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
   const preElement = document.querySelector("pre");
   const preText = preElement?.textContent || "";
-  const leadingTuningMatch = preText.match(
-    new RegExp(`^\\(?Afinação:\\s*(?:([A-G][#b]?(?:\\s+[A-G][#b]?){5})|(${namedTuningPattern}))\\s*\\)?\\s*\\n+`, "i")
+  // A song can carry more than one such line (seen on
+  // oficina-g3/incondicional: a standard-tuning line followed by the real
+  // one) - the last occurrence wins, since it's the one that was corrected.
+  const tuningLineMatches = Array.from(
+    preText.matchAll(
+      new RegExp(`^\\(?Afinação:\\s*(?:([A-G][#b]?(?:\\s+[A-G][#b]?){5})|(${namedTuningPattern}))\\s*\\)?\\s*\\n+`, "gim")
+    )
   );
+  const leadingTuningMatch = tuningLineMatches[tuningLineMatches.length - 1] ?? null;
   if (leadingTuningMatch) {
     if (leadingTuningMatch[1]) {
       const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);

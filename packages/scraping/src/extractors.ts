@@ -59,15 +59,18 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
     .join("|");
 
   // Non-standard tunings are usually a `span#cifra_afi a` anchor, but some
-  // pages instead render a plain "Afinação: <notes or name>" line as the very
-  // first line of the pre block (some wrapped in parentheses), with no anchor
-  // at all. Detected below and used both to strip it from the extracted
-  // content and as a tuning fallback.
-  const leadingTuningLineRegex = new RegExp(
+  // pages instead render a plain "Afinação: <notes or name>" line (some
+  // wrapped in parentheses) at the start of a pre block, with no anchor at
+  // all. Print pages paginate across multiple pre elements, and some songs
+  // carry this line on more than one page with different values (seen on
+  // oficina-g3/incondicional: a standard-tuning line followed by the real
+  // one) - the last occurrence wins, since it's the one that was actually
+  // corrected. Every occurrence is stripped from the extracted content.
+  const tuningLineRegex = new RegExp(
     `^\\(?Afinação:\\s*(?:([A-G][#b]?(?:\\s+[A-G][#b]?){5})|(${namedTuningPattern}))\\s*\\)?\\s*\\n+`,
-    "i"
+    "gim"
   );
-  let leadingTuningMatch: RegExpMatchArray | null = null;
+  let tuningLineMatch: RegExpMatchArray | null = null;
 
   // Drops a bare section-title line when it's immediately followed (skipping
   // blank lines) by another one, but ONLY when that's actually safe: if the
@@ -194,10 +197,9 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
       songChords += "\n";
     });
 
-    leadingTuningMatch = songChords.match(leadingTuningLineRegex);
-    if (leadingTuningMatch) {
-      songChords = songChords.slice(leadingTuningMatch[0].length);
-    }
+    const tuningLineMatches = Array.from(songChords.matchAll(tuningLineRegex));
+    tuningLineMatch = tuningLineMatches[tuningLineMatches.length - 1] ?? null;
+    songChords = songChords.replace(tuningLineRegex, "");
     // Normalizes unicode accidentals (♭, ♯) to the ASCII 'b'/'#' below and the
     // frontend's transposeChord() both recognize, so sheets that use the
     // musical symbols still get detected and transpose correctly. Mirrors
@@ -271,7 +273,7 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
       .join("");
     // Same leading line as above, verbatim (it's a plain text node, not
     // wrapped in <b>/<span>, so it appears unchanged in the sanitized HTML).
-    rawHtmlRaw = rawHtmlRaw.replace(leadingTuningLineRegex, "");
+    rawHtmlRaw = rawHtmlRaw.replace(tuningLineRegex, "");
     // Print pages render tab blocks as bare text with no <span class="tablatura">
     // wrapper at all (unlike regular pages, whose native markup is preserved
     // above by sanitizeNode) — their dash-drawn strings (e.g. "E|----7-10-...|")
@@ -496,14 +498,16 @@ export function extractFullChordSheet(chordTokenPattern: string): ChordSheet & S
   // shift phrase like "1/2 tom abaixo" (half step down) or "1 tom acima"
   // (whole step up) is transposed from standard tuning.
   let guitarTuning: GuitarTuning = ["E", "A", "D", "G", "B", "E"];
-  if (leadingTuningMatch) {
-    if (leadingTuningMatch[1]) {
-      const notes = leadingTuningMatch[1].trim().split(/\s+/).filter(Boolean);
+  if (tuningLineMatch) {
+    const notesText = tuningLineMatch[1];
+    const nameText = tuningLineMatch[2];
+    if (notesText) {
+      const notes = notesText.trim().split(/\s+/).filter(Boolean);
       if (notes.length === 6) {
         guitarTuning = notes as unknown as GuitarTuning;
       }
-    } else if (leadingTuningMatch[2]) {
-      const named = NAMED_TUNINGS[leadingTuningMatch[2].toLowerCase()];
+    } else if (nameText) {
+      const named = NAMED_TUNINGS[nameText.toLowerCase()];
       if (named) {
         guitarTuning = named;
       }
