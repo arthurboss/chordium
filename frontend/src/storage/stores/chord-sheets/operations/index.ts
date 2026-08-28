@@ -13,3 +13,4 @@ export { default as storeFullChordSheet } from './store-full-chord-sheet';
 export { getFullChordSheetContent } from './get-full-chord-sheet';
 export { default as deleteChordSheet } from './delete-chord-sheet';
 export { default as deleteAllChordSheets } from './delete-all';
+export { default as storeChordSheetMetadata } from './store-chord-sheet-metadata';
