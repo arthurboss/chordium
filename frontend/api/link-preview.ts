@@ -1,16 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { decodeSharedChordSheet } from './_lib/decodeSharedChordSheet';
 import { buildPreviewHtml } from './_lib/buildPreviewHtml';
 
 export const config = {
   maxDuration: 10,
 };
-
-// Read once per cold start rather than per request; the built shell doesn't
-// change until the next deploy.
-const template = readFileSync(path.join(process.cwd(), 'dist', 'index.html'), 'utf8');
 
 /**
  * Serves the SPA shell for a shared chord-sheet link, with `og:*`/`twitter:*`
@@ -21,11 +15,20 @@ const template = readFileSync(path.join(process.cwd(), 'dist', 'index.html'), 'u
  * `src/utils/chordSheetQR.ts`); everything else keeps going straight to the
  * static `index.html` as before, so this never runs on the app's regular
  * traffic.
+ *
+ * The shell is fetched from this deployment's own `/index.html` rather than
+ * read off disk: a Serverless Function's bundle doesn't reliably contain
+ * build output living outside `api/`, and `includeFiles` path resolution
+ * silently fails cold-start-wide instead of erroring per request. Fetching
+ * the real static asset has no such assumption to get wrong.
  */
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   const d = typeof req.query.d === 'string' ? req.query.d : undefined;
   const payload = d ? decodeSharedChordSheet(d) : null;
   const canonicalUrl = `https://${req.headers.host}${req.url ?? ''}`;
+
+  const shellResponse = await fetch(`https://${req.headers.host}/index.html`);
+  const template = await shellResponse.text();
 
   const html = buildPreviewHtml(template, payload, canonicalUrl);
 

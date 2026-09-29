@@ -12,8 +12,7 @@
       "maxDuration": 60
     },
     "api/link-preview.ts": {
-      "maxDuration": 10,
-      "includeFiles": "dist/index.html"
+      "maxDuration": 10
     }
   },
   "rewrites": [
