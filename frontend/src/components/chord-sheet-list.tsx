@@ -80,10 +80,10 @@ const ChordSheetList = ({
           />
           <div className="flex justify-end mb-4 sm:mb-6">
             <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
+              <SelectTrigger className="h-7 w-26 md:w-30 gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left [&>span]:line-clamp-none [&>span]:truncate">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] [&_svg]:hidden [&_[role=option]]:pl-2">
                 <SelectItem value="recent">{t("sort.recent")}</SelectItem>
                 <SelectItem value="most-played">{t("sort.mostPlayed")}</SelectItem>
                 <SelectItem value="az">{t("sort.az")}</SelectItem>
