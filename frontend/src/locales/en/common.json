@@ -126,6 +126,22 @@
     "uploadAriaLabel": "Upload a chord sheet",
     "uploadButton": "Upload a chord sheet"
   },
+  "lists": {
+    "all": "All",
+    "newList": "New list",
+    "newListTitle": "Create a new list",
+    "namePlaceholder": "List name",
+    "create": "Create",
+    "cancel": "Cancel",
+    "renameListTitle": "Rename list",
+    "save": "Save",
+    "renameListAriaLabel": "Rename list {{name}}",
+    "deleteListAriaLabel": "Delete list {{name}}",
+    "addToList": "Add to list",
+    "addToListAriaLabel": "Add {{title}} to a list",
+    "noLists": "No lists yet",
+    "createListInline": "+ New list"
+  },
   "offlineIndicator": {
     "ariaLabel": "Show offline status",
     "title": "You're offline - Click for details",

@@ -38,4 +38,10 @@ export const INDEXES = {
     dataSource: "search.dataSource",
     expiresAt: "storage.expiresAt",
   },
+
+  /** List item membership rows: looked up by owning list and by chord sheet path */
+  listItems: {
+    listId: "listId",
+    path: "path",
+  },
 } as const;

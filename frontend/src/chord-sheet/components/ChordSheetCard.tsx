@@ -1,10 +1,19 @@
 import React from "react";
 import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
+import AddToListMenu from "@/components/lists/AddToListMenu";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
 import { cyAttr } from "@/utils/test-utils";
 
-const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
+const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
+  chordSheet,
+  onView,
+  onDelete,
+  lists,
+  listIdsForPath,
+  onToggleList,
+  onCreateList,
+}) => {
   const handleClick = () => {
     onView(chordSheet);
   };
@@ -53,6 +62,14 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
             </>
           )}
         </div>
+        <AddToListMenu
+          id={chordSheet.path}
+          title={chordSheet.title}
+          lists={lists}
+          selectedListIds={listIdsForPath}
+          onToggleList={onToggleList}
+          onCreateList={onCreateList}
+        />
         <RoundTrashButton
           onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
           aria-label={`Delete chord sheet ${chordSheet.title}`}

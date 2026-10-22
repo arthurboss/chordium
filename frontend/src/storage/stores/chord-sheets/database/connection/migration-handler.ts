@@ -131,6 +131,13 @@ export function handleIndexedDBMigrations(
         clearSearchCache(transaction);
         break;
       }
+      case 13: {
+        // Migration to v13: add the lists and listItems stores backing custom
+        // favorite lists. Both are brand new, so there is nothing to migrate,
+        // schema creation alone is enough.
+        createSchema(db, 13);
+        break;
+      }
       // Add future migrations here
       default:
         break;
