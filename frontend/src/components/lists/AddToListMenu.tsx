@@ -50,12 +50,12 @@ export default function AddToListMenu({
           type="button"
           variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full"
+          className="h-8 w-8 rounded-full border-primary/40"
           aria-label={t("lists.addToListAriaLabel", { title })}
           onClick={(e) => e.stopPropagation()}
           {...cyAttr(`add-to-list-btn-${id}`)}
         >
-          <ListPlus className="h-4 w-4" />
+          <ListPlus className="h-4 w-4 pl-[3px]" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

@@ -29,7 +29,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
       {...cyAttr(`chordsheet-card-${chordSheet.path}`)}
     >
       <CardContent
-        className="p-3 flex items-center gap-3 w-full"
+        className="p-3 flex items-start gap-3 w-full"
         onClick={handleClick}
         {...cyAttr(`chordsheet-card-content-${chordSheet.path}`)}
       >
@@ -62,20 +62,23 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
             </>
           )}
         </div>
-        <AddToListMenu
-          id={chordSheet.path}
-          title={chordSheet.title}
-          lists={lists}
-          selectedListIds={listIdsForPath}
-          onToggleList={onToggleList}
-          onCreateList={onCreateList}
-        />
-        <RoundTrashButton
-          onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
-          aria-label={`Delete chord sheet ${chordSheet.title}`}
-          tabIndex={0}
-          {...cyAttr(`delete-btn-${chordSheet.path}`)}
-        />
+        <div className="flex items-center gap-1 shrink-0">
+          <AddToListMenu
+            id={chordSheet.path}
+            title={chordSheet.title}
+            lists={lists}
+            selectedListIds={listIdsForPath}
+            onToggleList={onToggleList}
+            onCreateList={onCreateList}
+          />
+          <RoundTrashButton
+            className="h-8 w-8 rounded-full border-destructive/40"
+            onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
+            aria-label={`Delete chord sheet ${chordSheet.title}`}
+            tabIndex={0}
+            {...cyAttr(`delete-btn-${chordSheet.path}`)}
+          />
+        </div>
       </CardContent>
     </Card>
   );
