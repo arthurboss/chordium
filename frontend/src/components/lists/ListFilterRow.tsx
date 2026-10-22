@@ -1,7 +1,27 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pencil, Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import NewListDialog from "./NewListDialog";
 import { cyAttr } from "@/utils/test-utils";
 import type { StoredList } from "@/storage/stores/lists";
@@ -28,12 +48,16 @@ export default function ListFilterRow({
   onDeleteList,
 }: ListFilterRowProps) {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingList, setEditingList] = useState<StoredList | null>(null);
+  const [deletingList, setDeletingList] = useState<StoredList | null>(null);
 
-  const handleDelete = async (list: StoredList) => {
-    if (activeListId === list.id) onSelectList(null);
-    await onDeleteList(list.id);
+  const handleConfirmDelete = async () => {
+    if (!deletingList) return;
+    if (activeListId === deletingList.id) onSelectList(null);
+    await onDeleteList(deletingList.id);
+    setDeletingList(null);
   };
 
   return (
@@ -81,7 +105,7 @@ export default function ListFilterRow({
             size="icon"
             className="h-6 w-6 text-muted-foreground hover:text-destructive"
             aria-label={t("lists.deleteListAriaLabel", { name: list.name })}
-            onClick={() => void handleDelete(list)}
+            onClick={() => setDeletingList(list)}
             {...cyAttr(`list-delete-${list.id}`)}
           >
             <X className="h-3 w-3" />
@@ -124,6 +148,60 @@ export default function ListFilterRow({
           if (editingList) await onRenameList(editingList.id, name);
         }}
       />
+
+      {/* Deleting a list only drops its membership rows - the chord sheets in it
+          stay saved - so the confirmation body says exactly that rather than
+          implying a destructive bulk delete. Sheet on mobile, dialog on desktop,
+          matching the search-history clear confirmation. */}
+      {isMobile ? (
+        <Sheet
+          open={deletingList !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeletingList(null);
+          }}
+        >
+          <SheetContent
+            side="bottom"
+            className="gap-0 rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+          >
+            <SheetHeader className="text-left">
+              <SheetTitle>{t("lists.deleteListTitle")}</SheetTitle>
+              <SheetDescription>{t("lists.deleteListBody")}</SheetDescription>
+            </SheetHeader>
+            <SheetFooter className="mt-4 flex-col gap-2 sm:flex-col sm:space-x-0">
+              <Button variant="outline" onClick={() => setDeletingList(null)}>
+                {t("lists.cancel")}
+              </Button>
+              <Button variant="destructive" onClick={() => void handleConfirmDelete()}>
+                {t("lists.deleteListConfirm")}
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <AlertDialog
+          open={deletingList !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeletingList(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("lists.deleteListTitle")}</AlertDialogTitle>
+              <AlertDialogDescription>{t("lists.deleteListBody")}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("lists.cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => void handleConfirmDelete()}
+                className={cn(buttonVariants({ variant: "destructive" }))}
+              >
+                {t("lists.deleteListConfirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
