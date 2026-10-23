@@ -132,6 +132,7 @@
     "newList": "Nueva lista",
     "newListTitle": "Crear una nueva lista",
     "namePlaceholder": "Nombre de la lista",
+    "duplicateName": "Ya existe una lista con ese nombre",
     "create": "Crear",
     "cancel": "Cancelar",
     "renameListTitle": "Renombrar lista",
