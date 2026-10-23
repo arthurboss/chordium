@@ -60,6 +60,7 @@ export default function AddToListMenu({
       </PopoverTrigger>
       <PopoverContent
         align="end"
+        sideOffset={0}
         className="w-56 p-2"
         onClick={(e) => e.stopPropagation()}
         {...cyAttr("add-to-list-popover")}

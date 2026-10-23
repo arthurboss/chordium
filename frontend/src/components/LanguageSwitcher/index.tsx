@@ -302,7 +302,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ trigger: renderTrig
       ) : (
         <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent align="end" className="w-80 overflow-hidden p-0">
+          <PopoverContent align="end" sideOffset={0} className="w-80 overflow-hidden p-0">
             <p className="px-4 pt-4 text-sm font-medium">{t("language.appLanguage")}</p>
             {perLanguageHint}
             {list}

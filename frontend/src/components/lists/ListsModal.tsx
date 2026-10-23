@@ -27,10 +27,11 @@ import { cn } from "@/lib/utils";
 import { cyAttr } from "@/utils/test-utils";
 import type { StoredList } from "@/storage/stores/lists";
 
-const ROW_CLASS = "flex-1 truncate px-4 py-3 text-left text-sm hover:bg-accent";
-/** Same round chip as ClearInputButton (the search field's clear button), minus its absolute positioning. */
+const ROW_CLASS =
+  "flex-1 truncate py-1.5 pl-2 pr-2 text-left text-sm outline-hidden hover:bg-accent focus:bg-accent focus:text-accent-foreground";
+/** Same trailing segment the search field's voice/submit buttons use: full-height, divided by a border-l, not a floating chip. */
 const ICON_BUTTON_CLASS =
-  "text-muted-foreground hover:text-foreground focus:outline-hidden bg-muted/60 hover:bg-muted px-0.5 py-0.5 rounded-full border shadow-xs focus:border-ring focus:ring-1 focus:ring-ring";
+  "flex w-8 shrink-0 items-center justify-center border-l text-muted-foreground outline-hidden hover:bg-accent hover:text-foreground focus:bg-accent";
 
 type Step = "list" | "create" | "rename";
 
@@ -124,8 +125,8 @@ export default function ListsModal({
       className="h-7 w-26 md:w-30 justify-between gap-1 rounded-md bg-background px-2 text-xs font-normal"
       {...cyAttr("lists-modal-trigger")}
     >
-      <List className="h-3.5 w-3.5 shrink-0" />
       <span className="truncate">{activeList ? activeList.name : t("lists.manageLists")}</span>
+      <List className="h-3.5 w-3.5 shrink-0" />
     </Button>
   );
 
@@ -135,7 +136,7 @@ export default function ListsModal({
     : t("lists.manageLists");
 
   const listView = (
-    <div className="flex flex-col divide-y">
+    <div className="flex flex-col divide-y overflow-hidden rounded-xs border">
       <button
         type="button"
         onClick={() => selectList(null)}
@@ -146,7 +147,7 @@ export default function ListsModal({
       </button>
 
       {lists.map((list) => (
-        <div key={list.id} className="flex items-center gap-1.5 pr-3">
+        <div key={list.id} className="flex items-stretch">
           <button
             type="button"
             onClick={() => selectList(list.id)}
@@ -179,11 +180,11 @@ export default function ListsModal({
       <button
         type="button"
         onClick={startCreate}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-accent"
+        className="flex w-full items-center justify-between py-1.5 pl-2 pr-2 text-left text-sm outline-hidden hover:bg-accent focus:bg-accent focus:text-accent-foreground"
         {...cyAttr("list-new-trigger")}
       >
-        <Plus className="h-4 w-4" />
         {t("lists.newList")}
+        <Plus className="h-4 w-4" />
       </button>
     </div>
   );
@@ -241,10 +242,7 @@ export default function ListsModal({
       ) : (
         <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent
-            align="start"
-            className="w-max overflow-hidden p-0 data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100 data-[side=bottom]:slide-in-from-top-0 data-[side=left]:slide-in-from-right-0 data-[side=right]:slide-in-from-left-0 data-[side=top]:slide-in-from-bottom-0"
-          >
+          <PopoverContent align="start" sideOffset={0} className="w-max min-w-[8rem] overflow-hidden p-0">
             {content}
           </PopoverContent>
         </Popover>
