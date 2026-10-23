@@ -128,6 +128,7 @@
   },
   "lists": {
     "all": "Todas",
+    "manageLists": "Listas",
     "newList": "Nova lista",
     "newListTitle": "Criar uma nova lista",
     "namePlaceholder": "Nome da lista",

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import ListFilterRow from "@/components/lists/ListFilterRow";
+import ListsModal from "@/components/lists/ListsModal";
 import { useLists } from "@/storage/hooks/use-lists";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
@@ -70,15 +70,16 @@ const ChordSheetList = ({
     <div>
       {chordSheets.length > 0 ? (
         <>
-          <ListFilterRow
-            lists={lists}
-            activeListId={activeListId}
-            onSelectList={setActiveListId}
-            onCreateList={createList}
-            onRenameList={renameList}
-            onDeleteList={deleteList}
-          />
-          <div className="flex justify-end mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <ListsModal
+              lists={lists}
+              activeListId={activeListId}
+              onSelectList={setActiveListId}
+              onCreateList={createList}
+              onRenameList={renameList}
+              onDeleteList={deleteList}
+            />
+
             <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
               <SelectTrigger className="h-7 w-26 md:w-30 gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left [&>span]:line-clamp-none [&>span]:truncate">
                 <SelectValue />
@@ -91,6 +92,7 @@ const ChordSheetList = ({
               </SelectContent>
             </Select>
           </div>
+
           <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col gap-2">
               {filtered.map((storedChordSheet) => (
