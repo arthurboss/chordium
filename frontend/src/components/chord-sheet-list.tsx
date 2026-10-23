@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ListsModal from "@/components/lists/ListsModal";
+import { useLists } from "@/storage/hooks/use-lists";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
 
@@ -38,22 +40,51 @@ const ChordSheetList = ({
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const [sort, setSort] = useState<SortOption>("recent");
+  const [activeListId, setActiveListId] = useState<string | null>(null);
+
+  const {
+    lists,
+    getPathsForList,
+    getListIdsForPath,
+    createList,
+    renameList,
+    deleteList,
+    toggleListItem,
+  } = useLists();
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
 
   const sorted = sortChordSheets(chordSheets, sort);
 
+  const filtered = useMemo(() => {
+    if (!activeListId) return sorted;
+    const paths = getPathsForList(activeListId);
+    return sorted.filter((item) => paths.has(item.path));
+    // sorted is derived fresh every render from chordSheets/sort, so it is
+    // intentionally left out: including it would re-run this on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeListId, getPathsForList, chordSheets, sort]);
+
   return (
     <div>
       {chordSheets.length > 0 ? (
         <>
-          <div className="flex justify-end mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <ListsModal
+              lists={lists}
+              activeListId={activeListId}
+              onSelectList={setActiveListId}
+              onCreateList={createList}
+              onRenameList={renameList}
+              onDeleteList={deleteList}
+            />
+
             <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
+              <SelectTrigger className="h-7 w-26 md:w-30 gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left [&>span]:line-clamp-none [&>span]:truncate">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] [&_svg]:hidden [&_[role=option]]:pl-2">
                 <SelectItem value="recent">{t("sort.recent")}</SelectItem>
                 <SelectItem value="most-played">{t("sort.mostPlayed")}</SelectItem>
                 <SelectItem value="az">{t("sort.az")}</SelectItem>
@@ -61,14 +92,19 @@ const ChordSheetList = ({
               </SelectContent>
             </Select>
           </div>
+
           <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col gap-2">
-              {sorted.map((storedChordSheet) => (
+              {filtered.map((storedChordSheet) => (
                 <ChordSheetCard
                   key={storedChordSheet.path}
                   chordSheet={storedChordSheet}
                   onView={onChordSheetSelect}
                   onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
+                  lists={lists}
+                  listIdsForPath={getListIdsForPath(storedChordSheet.path)}
+                  onToggleList={(listId) => toggleListItem(listId, storedChordSheet.path)}
+                  onCreateList={createList}
                 />
               ))}
             </div>

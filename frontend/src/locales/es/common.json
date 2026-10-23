@@ -126,6 +126,27 @@
     "uploadAriaLabel": "Importar un acorde",
     "uploadButton": "Importar un acorde"
   },
+  "lists": {
+    "all": "Todas",
+    "manageLists": "Listas",
+    "newList": "Nueva lista",
+    "newListTitle": "Crear una nueva lista",
+    "namePlaceholder": "Nombre de la lista",
+    "duplicateName": "Ya existe una lista con ese nombre",
+    "create": "Crear",
+    "cancel": "Cancelar",
+    "renameListTitle": "Renombrar lista",
+    "save": "Guardar",
+    "renameListAriaLabel": "Renombrar lista {{name}}",
+    "deleteListAriaLabel": "Eliminar lista {{name}}",
+    "deleteListTitle": "¿Eliminar lista?",
+    "deleteListBody": "Esto solo elimina la lista. Sus acordes seguirán guardados.",
+    "deleteListConfirm": "Eliminar lista",
+    "addToList": "Añadir a una lista",
+    "addToListAriaLabel": "Añadir {{title}} a una lista",
+    "noLists": "Aún no hay listas",
+    "createListInline": "+ Nueva lista"
+  },
   "offlineIndicator": {
     "ariaLabel": "Mostrar estado de conexión",
     "title": "Estás sin conexión - Haz clic para más detalles",

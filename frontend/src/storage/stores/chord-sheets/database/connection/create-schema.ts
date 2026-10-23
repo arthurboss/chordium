@@ -59,4 +59,19 @@ export default function createSchema(db: IDBDatabase, version: number): void {
       db.createObjectStore(STORES.SONG_LYRICS, { keyPath: 'path' });
     }
   }
+
+  // v13: Add stores for custom favorite lists, grouping already-saved
+  // chord sheets by name. Lists only reference existing songsMetadata rows
+  // by path, they never duplicate chord sheet content.
+  if (version === 13) {
+    if (!db.objectStoreNames.contains(STORES.LISTS)) {
+      db.createObjectStore(STORES.LISTS, { keyPath: 'id' });
+    }
+    if (!db.objectStoreNames.contains(STORES.LIST_ITEMS)) {
+      const listItemsStore = db.createObjectStore(STORES.LIST_ITEMS, { keyPath: 'id' });
+      const listItemsIndexes = INDEXES.listItems;
+      listItemsStore.createIndex('listId', listItemsIndexes.listId, { unique: false });
+      listItemsStore.createIndex('path', listItemsIndexes.path, { unique: false });
+    }
+  }
 }

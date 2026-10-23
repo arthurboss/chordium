@@ -124,7 +124,7 @@ export function ShareSession({ trigger: renderTrigger }: ShareSessionProps = {})
         <SheetTrigger asChild>{trigger}</SheetTrigger>
         <SheetContent
           side="bottom"
-          className="flex max-h-[92dvh] flex-col gap-0 rounded-t-xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
+          className="flex max-h-[92dvh] flex-col gap-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
         >
           <SheetHeader className="shrink-0 text-left">
             <SheetTitle>{title}</SheetTitle>

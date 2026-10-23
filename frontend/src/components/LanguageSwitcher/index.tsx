@@ -285,7 +285,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ trigger: renderTrig
           <SheetTrigger asChild>{trigger}</SheetTrigger>
           <SheetContent
             side="bottom"
-            className="flex max-h-[92dvh] flex-col gap-0 rounded-t-xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
+            className="flex max-h-[92dvh] flex-col gap-0 px-0 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
           >
             <SheetHeader className="shrink-0 px-4 text-left">
               <SheetTitle>{t("language.appLanguage")}</SheetTitle>
@@ -302,7 +302,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ trigger: renderTrig
       ) : (
         <Popover open={open} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent align="end" className="w-80 overflow-hidden p-0">
+          <PopoverContent align="end" sideOffset={0} className="w-80 overflow-hidden p-0">
             <p className="px-4 pt-4 text-sm font-medium">{t("language.appLanguage")}</p>
             {perLanguageHint}
             {list}
