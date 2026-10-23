@@ -16,18 +16,18 @@ describe("renameList", () => {
     vi.clearAllMocks();
   });
 
-  it("stores the trimmed new name on the existing list", async () => {
-    const existing = { id: "1", name: "Old name", source: "manual" as const, order: 0, createdAt: 1 };
+  it("stores the trimmed new name as title case on the existing list", async () => {
+    const existing = { id: "1", name: "Old Name", source: "manual" as const, order: 0, createdAt: 1 };
     mockedRead.mockImplementation(async (storeName, operation) =>
       operation({ get: () => existing })
     );
     const put = vi.fn();
     mockedWrite.mockImplementation(async (_storeName, operation) => operation({ put }));
 
-    await renameList("1", "  New name  ");
+    await renameList("1", "  new name  ");
 
     expect(mockedRead).toHaveBeenCalledWith(STORES.LISTS, expect.any(Function));
-    expect(put).toHaveBeenCalledWith({ ...existing, name: "New name" });
+    expect(put).toHaveBeenCalledWith({ ...existing, name: "New Name" });
   });
 
   it("is a no-op when the list no longer exists", async () => {

@@ -29,7 +29,7 @@ describe("createList", () => {
 
     expect(list).toMatchObject({
       id: "test-uuid",
-      name: "Worship songs",
+      name: "Worship Songs",
       source: "manual",
       order: 2,
     });

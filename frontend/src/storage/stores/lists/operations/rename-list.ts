@@ -4,6 +4,7 @@
 import type { StoredList } from "../../../types/stored-list";
 import { executeReadTransaction, executeWriteTransaction } from "../../../core/transactions";
 import { STORES } from "../../../core/config/stores";
+import toTitleCase from "./to-title-case";
 
 /**
  * @param id - List id to rename
@@ -21,5 +22,7 @@ export default async function renameList(id: string, name: string): Promise<void
   );
   if (!list) return;
 
-  await executeWriteTransaction(STORES.LISTS, (store) => store.put({ ...list, name: trimmed }));
+  await executeWriteTransaction(STORES.LISTS, (store) =>
+    store.put({ ...list, name: toTitleCase(trimmed) })
+  );
 }

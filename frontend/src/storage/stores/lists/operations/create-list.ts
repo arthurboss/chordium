@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { StoredList } from "../../../types/stored-list";
 import { executeReadTransaction, executeWriteTransaction } from "../../../core/transactions";
 import { STORES } from "../../../core/config/stores";
+import toTitleCase from "./to-title-case";
 
 /**
  * @param name - Display name for the new list
@@ -23,7 +24,7 @@ export default async function createList(name: string): Promise<StoredList> {
 
   const list: StoredList = {
     id: uuidv4(),
-    name: trimmed,
+    name: toTitleCase(trimmed),
     source: "manual",
     order: existing.length,
     createdAt: Date.now(),
