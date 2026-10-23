@@ -76,7 +76,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({ history, onSelect, onClea
         <Sheet open={confirming} onOpenChange={setConfirming}>
           <SheetContent
             side="bottom"
-            className="gap-0 rounded-t-xl pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className="gap-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
           >
             <SheetHeader className="text-left">
               <SheetTitle>{title}</SheetTitle>
