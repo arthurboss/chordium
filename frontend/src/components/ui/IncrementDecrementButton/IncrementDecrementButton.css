@@ -18,12 +18,12 @@ button.border-none:not(:disabled):hover {
 
 /* Reset button icon styling */
 button.border-none:not(:disabled) .text-destructive {
-  color: oklch(0.55 0.20 25);
+  color: oklch(0.50 0.20 355);
   transition: color 0.2s ease;
 }
 
 button.border-none:not(:disabled):hover .text-destructive {
-  color: oklch(0.70 0.26 25);
+  color: oklch(0.60 0.26 355);
 }
 
 button.border-none:disabled .text-destructive {
@@ -36,7 +36,7 @@ button.border-none:disabled .text-destructive {
 }
 
 .dark button.border-none:not(:disabled):hover .text-destructive {
-  color: oklch(0.62 0.24 10);
+  color: oklch(0.56 0.24 355);
 }
 
 /* Disabled buttons */

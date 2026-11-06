@@ -1,18 +1,13 @@
-import React from 'react';
-import { Guitar, Music, Music2, Music3 } from 'lucide-react';
+import React from "react";
+import { Guitar, Music, Music2, Music3 } from "lucide-react";
 
 interface LoadingStateProps {
   message?: string;
 }
-/**
- * LoadingState component to display a loading animation with optional message.
- * @param {LoadingStateProps} props - Component properties.
- * @param {string} [props.message] - Optional message to display during loading.
- * @returns {JSX.Element} The rendered component.
- */
+
 const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
   <div className="p-8 text-center">
-    <div className="flex items-center justify-center gap-2 opacity-70">
+    <div className="flex items-center justify-center gap-2">
       {[
         { Icon: Guitar, size: 32 },
         { Icon: Music3, size: 24 },
@@ -26,13 +21,13 @@ const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
         >
           <Icon
             size={size}
-            className="text-primary/80 opacity-80"
+            className="text-primary/80"
           />
         </div>
       ))}
     </div>
     <p className="text-sm text-muted-foreground mt-4">
-      {message || 'Loading...'}
+      {message || "Loading..."}
     </p>
   </div>
 );

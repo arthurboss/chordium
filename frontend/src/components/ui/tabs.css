@@ -1,23 +1,41 @@
-/* Active tab: gradient border (uses --gradient-border-* variables for light/dark) */
-[role="tab"][data-state="active"] {
-  background-color: transparent;
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-normal);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
-  border-image: none;
+/* Active tab indicator matches card level */
+[data-tabs-list] > span[aria-hidden] {
+  background-color: var(--background);
 }
 
-[role="tab"][data-state="active"]:hover {
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-hover);
+/* Active tab: gray border, primary-hover hover */
+[role="tablist"] [aria-selected="true"] {
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+[role="tablist"] [aria-selected="true"]:disabled {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+[role="tablist"] [aria-selected="true"]:hover {
+  border: 1px solid var(--primary-hover);
+  background-color: var(--card);
+  color: var(--primary);
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
 }
 
-.dark [role="tab"][data-state="active"] {
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-normal);
+.dark [role="tablist"] [aria-selected="true"] {
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.dark [role="tab"][data-state="active"]:hover {
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-hover);
+.dark [role="tablist"] [aria-selected="true"]:disabled {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+.dark [role="tablist"] [aria-selected="true"]:hover {
+  border: 1px solid var(--primary-hover);
+  background-color: var(--card);
+  color: var(--primary);
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
 }

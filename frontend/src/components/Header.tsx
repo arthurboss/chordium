@@ -12,11 +12,11 @@ const Header = () => {
   const { isDark } = useTheme();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xs dark:bg-card">
+    <header className="sticky top-0 z-50 border-b bg-card backdrop-blur-xs">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
         <Link
           to="/"
-          className="flex items-center rounded-md px-2 py-1 opacity-80 hover:opacity-100 transition-all duration-200 "
+          className="flex items-center rounded-md px-2 py-1 transition-all duration-200"
           tabIndex={0}
           aria-label={t("header.homeAriaLabel")}
         >
@@ -26,7 +26,7 @@ const Header = () => {
             aria-hidden="true"
             width={32}
             height={32}
-            className="transition-all duration-200 hover:drop-shadow-[0_0_1px_var(--primary)]"
+            className="logo-icon transition-all duration-200"
           />
           <h1 className="text-2xl font-semibold logo-text" aria-hidden="true">hordium</h1>
         </Link>

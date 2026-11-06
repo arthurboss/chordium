@@ -1,50 +1,37 @@
-/* Logo text: darker gradient at rest, even darker on hover */
+/* Logo icon: regular brightness default, primary saturation on hover */
+.logo-icon {
+  transition: filter 0.2s ease;
+}
+
+a:hover .logo-icon {
+  filter: brightness(1.1) saturate(1.2);
+}
+
+/* Logo text: lighter pink gradient default, brighter primary on hover */
 .logo-text {
-  background: linear-gradient(
-    135deg,
-    oklch(0.68 0.18 275) 0%,
-    oklch(0.60 0.18 275) 75%,
-    oklch(0.68 0.18 275) 50%,
-    oklch(0.52 0.18 275) 100%
-  );
+  background: linear-gradient(135deg, oklch(0.68 0.15 355) 0%, oklch(0.76 0.18 355 / 0.75) 75%, oklch(0.68 0.15 355) 50%, oklch(0.66 0.12 355) 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  transition: opacity 0.2s ease;
+  transition: background 0.2s ease;
 }
 
-:not(.dark) .logo-text:hover {
-  background: linear-gradient(
-    135deg,
-    oklch(0.75 0.18 275) 0%,
-    oklch(0.68 0.18 275) 75%,
-    oklch(0.75 0.18 275) 50%,
-    oklch(0.60 0.18 275) 100%
-  );
+a:hover .logo-text {
+  background: linear-gradient(135deg, oklch(0.55 0.20 355) 0%, oklch(0.68 0.22 355 / 0.75) 75%, oklch(0.55 0.20 355) 50%, oklch(0.88 0.05 358.83));
   background-clip: text;
   -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .dark .logo-text {
-  background: linear-gradient(
-    135deg,
-    oklch(0.68 0.18 275) 0%,
-    oklch(0.60 0.18 275) 75%,
-    oklch(0.68 0.18 275) 50%,
-    oklch(0.52 0.18 275) 100%
-  );
+  background: linear-gradient(135deg, oklch(0.68 0.15 355) 0%, oklch(0.76 0.18 355 / 0.75) 75%, oklch(0.68 0.15 355) 50%, oklch(0.66 0.12 355) 100%);
   background-clip: text;
   -webkit-background-clip: text;
 }
 
-.dark .logo-text:hover {
-  background: linear-gradient(
-    135deg,
-    oklch(0.75 0.18 275) 0%,
-    oklch(0.68 0.18 275) 75%,
-    oklch(0.75 0.18 275) 50%,
-    oklch(0.60 0.18 275) 100%
-  );
+.dark a:hover .logo-text {
+  background: linear-gradient(135deg, oklch(0.55 0.20 355) 0%, oklch(0.68 0.22 355 / 0.75) 75%, oklch(0.55 0.20 355) 50%, oklch(0.88 0.05 358.83));
   background-clip: text;
   -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

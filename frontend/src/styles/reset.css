@@ -80,12 +80,12 @@
     overflow-wrap: break-word;
   }
 
-  /* Trash icon reset button color */
+  /* Trash icon reset button color — crimson hue 22 */
   .trash-icon-reset {
-    color: oklch(0.45 0.15 25);
+    color: oklch(0.45 0.18 355);
   }
 
   .dark .trash-icon-reset {
-    color: oklch(0.45 0.15 25);
+    color: oklch(0.45 0.18 355);
   }
 }

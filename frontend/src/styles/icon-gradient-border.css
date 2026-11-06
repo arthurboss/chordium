@@ -1,15 +1,7 @@
-/* Global icon-gradient-border utility for circular gradient-bordered icons */
+/* Global icon-gradient-border utility for circular bordered icons */
 .icon-gradient-border {
   background-color: transparent;
-  background-image:
-    linear-gradient(var(--background), var(--background)),
-    radial-gradient(var(--vignette-shape),
-      var(--border-glow-hi-light) 0%,
-      var(--border) 100%
-    );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-image: none;
   border-radius: 9999px;
   color: inherit;
@@ -25,7 +17,6 @@
   transition: color var(--transition-ui);
 }
 
-/* Opacity states */
 .icon-gradient-border.icon-empty {
   opacity: 0.5;
 }
@@ -34,12 +25,6 @@
   opacity: 1;
 }
 
-/* Dark mode variant */
 .dark .icon-gradient-border {
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      var(--border-glow-hi) 0%,
-      var(--border-glow-lo) 100%
-    );
+  border: 1px solid var(--border);
 }

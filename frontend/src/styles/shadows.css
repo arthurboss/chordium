@@ -1,8 +1,7 @@
-/* ── SHADOWS + GRADIENT BORDERS ──────────────────────────────────────────────
-   Light source cast at screen centre.
-   .shadow-*      → vignette fill + gradient border (cards, panels)
-   .gradient-border → gradient border only, no vignette (chord sheet viewer)
-   header/footer  → plain depth shadow, no border effect
+/* ── SHADOWS ─────────────────────────────────────────────────────────────────
+   header/footer  → plain depth shadow
+   .shadow-*      → card bg + solid border + drop shadow
+   .gradient-border → card bg + solid border, no drop shadow
 */
 
 header,
@@ -15,7 +14,6 @@ footer {
   box-shadow: 0 1px 10px oklch(0 0 0 / 0.35);
 }
 
-/* Light mode: vignette fill + gradient border (desaturated purple) */
 .shadow-xs,
 .shadow-sm,
 .shadow,
@@ -23,15 +21,11 @@ footer {
 .shadow-lg,
 .shadow-xl,
 .shadow-2xl {
-  background-color: transparent;
-  background-image: linear-gradient(var(--card), var(--card)), radial-gradient(var(--vignette-shape), oklch(0.80 0.02 275) 0%, oklch(0.90 0.01 275) 100%);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--card);
+  border: 1px solid var(--border);
   box-shadow: 0 1px 3px 0px oklch(0 0 0 / 0.10);
 }
 
-/* Dark mode: vignette fill + gradient border */
 .dark .shadow-xs,
 .dark .shadow-sm,
 .dark .shadow,
@@ -39,39 +33,26 @@ footer {
 .dark .shadow-lg,
 .dark .shadow-xl,
 .dark .shadow-2xl {
-  background-color: transparent;
-  background-image:
-    radial-gradient(ellipse 70% 400% at 50% 50%,
-      oklch(0.26 0.010 275) 0%,
-      oklch(0.195 0.010 275) 100%
-    ),
-    var(--gradient-border-radial-normal);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--card);
+  border: 1px solid var(--border);
   box-shadow: 0 1px 3px 0px oklch(0 0 0 / 0.10);
 }
 
-/* Gradient border only — no vignette (light mode: desaturated purple) */
 .gradient-border {
-  background-color: transparent;
-  background-image: linear-gradient(var(--card), var(--card)), radial-gradient(var(--vignette-shape), oklch(0.80 0.02 275) 0%, oklch(0.90 0.01 275) 100%);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
-  border-image: none;
+  background-color: var(--card);
+  border: 1px solid var(--border);
 }
 
 .dark .gradient-border {
-  background-color: transparent;
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      var(--border-glow-hi) 0%,
-      var(--border-glow-lo) 100%
-    );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
-  border-image: none;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+}
+
+/* ── SUNKEN SURFACE ──────────────────────────────────────────────────────────
+   depth effect for interactive input containers
+*/
+.sunken-surface {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  box-shadow: inset 0 1px 4px oklch(0 0 0 / 0.08);
 }

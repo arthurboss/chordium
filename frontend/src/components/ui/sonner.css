@@ -1,6 +1,6 @@
 /* Sonner toast — apply only color classes from Card component */
-[data-sonner-toaster][data-theme='light'],
-[data-sonner-toaster][data-theme='dark'] {
+[data-sonner-toaster][data-theme=light],
+[data-sonner-toaster][data-theme=dark] {
   --normal-bg: var(--card);
   --normal-bg-hover: var(--secondary);
   --normal-border: transparent;
@@ -8,73 +8,64 @@
 }
 
 /* Hide checkmark icon */
-[data-sonner-toast][data-type='success'] [data-icon] {
+[data-sonner-toast][data-type=success] [data-icon] {
   display: none;
 }
 
-/* Reorder success toast elements: icon left of title, close on right */
-[data-sonner-toast][data-type='success'] [data-content] {
+[data-sonner-toast][data-type=success] [data-content] {
   order: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-[data-sonner-toast][data-type='success'] [data-close-button] {
+[data-sonner-toast][data-type=success] [data-close-button] {
   order: 2;
 }
 
-/* Apply gradient-border styles (light: cyan, dark: purple) */
 [data-sonner-toast] {
-  background-color: transparent;
   color: var(--card-foreground);
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-normal);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--card);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 8px -2px oklch(0 0 0 / 0.10);
-  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 [data-sonner-toast]:hover {
-  background-image: linear-gradient(var(--card), var(--card)), var(--gradient-border-radial-hover);
+  border: 1px solid var(--primary-hover);
   box-shadow:
     inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent),
     0 4px 14px oklch(0 0 0 / 0.10);
 }
 
+[data-sonner-toast]:disabled {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
 .dark [data-sonner-toast] {
-  background-color: transparent;
-  background-image:
-    radial-gradient(ellipse 70% 400% at 50% 50%,
-      oklch(0.225 0.010 275) 0%,
-      oklch(0.195 0.010 275) 100%
-    ),
-    var(--gradient-border-radial-normal);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--card);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 4px 4px oklch(0 0 0 / 0.1);
 }
 
 .dark [data-sonner-toast]:hover {
-  background-image:
-    radial-gradient(ellipse 70% 400% at 50% 50%,
-      oklch(0.26 0.010 275) 0%,
-      oklch(0.195 0.010 275) 100%
-    ),
-    var(--gradient-border-radial-hover);
+  border: 1px solid var(--primary-hover);
   box-shadow:
     inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent),
     0 4px 14px oklch(0 0 0 / 0.10);
 }
 
-/* Dark mode: title should be white */
+.dark [data-sonner-toast]:disabled {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
 .dark [data-sonner-toast] [data-title] {
   color: oklch(1 0 0);
 }
 
-/* Close button - apply rounded-full button styles */
+/* Close button — beni hue 355 */
 [data-sonner-toast] [data-close-button] {
   border-radius: 9999px !important;
   width: 24px !important;
@@ -83,46 +74,42 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background-color: transparent !important;
-  background-image: linear-gradient(var(--background), var(--background)), radial-gradient(var(--vignette-shape), var(--destructive) 0%, var(--border) 100%) !important;
-  background-origin: padding-box, border-box !important;
-  background-clip: padding-box, border-box !important;
-  border: 1px solid transparent !important;
+  background-color: var(--background) !important;
+  border: 1px solid oklch(0.56 0.18 355) !important;
   border-image: none !important;
   outline: none !important;
 }
 
-/* Close button icon - red destructive colors */
+[data-sonner-toast] [data-close-button]:hover {
+  background-color: var(--background) !important;
+  border: 1px solid var(--destructive) !important;
+  box-shadow: inset 0 0 0 9999px oklch(0.48 0.24 355 / 0.10) !important;
+}
+
+.dark [data-sonner-toast] [data-close-button] {
+  background-color: var(--card) !important;
+  border: 1px solid oklch(0.45 0.18 355) !important;
+}
+
+.dark [data-sonner-toast] [data-close-button]:hover {
+  background-color: var(--card) !important;
+  border: 1px solid var(--destructive) !important;
+  box-shadow: inset 0 0 0 9999px oklch(0.52 0.24 355 / 0.10) !important;
+}
+
 [data-sonner-toast] [data-close-button] svg {
-  color: var(--destructive);
+  color: oklch(0.56 0.18 355);
   transition: color 0.2s ease;
 }
 
-[data-sonner-toast] [data-close-button]:hover {
-  background-image: linear-gradient(var(--background), var(--background)), radial-gradient(var(--vignette-shape), oklch(0.62 0.24 10) 0%, var(--border) 100%) !important;
-}
-
 [data-sonner-toast] [data-close-button]:hover svg {
-  color: oklch(0.62 0.24 10);
+  color: var(--destructive);
 }
 
-[data-sonner-toast] [data-close-button]:disabled {
-  background-image: linear-gradient(var(--background), var(--background)), radial-gradient(var(--vignette-shape), var(--muted-foreground) 0%, var(--border) 100%) !important;
+.dark [data-sonner-toast] [data-close-button] svg {
+  color: oklch(0.45 0.18 355);
 }
 
-[data-sonner-toast] [data-close-button]:disabled svg {
-  color: var(--muted-foreground);
-}
-
-/* Error: destructive colors */
-[data-sonner-toaster] [data-sonner-toast][data-type='error'] {
-  background: var(--destructive);
-  border-image: none;
-  border-color: color-mix(in oklch, var(--destructive) 40%, transparent);
-  color: var(--destructive-foreground);
-}
-
-[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-close-button] {
-  background: var(--destructive) !important;
-  border-color: color-mix(in oklch, var(--destructive-foreground) 30%, transparent) !important;
+.dark [data-sonner-toast] [data-close-button]:hover svg {
+  color: var(--destructive);
 }

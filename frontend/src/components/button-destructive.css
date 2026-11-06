@@ -1,126 +1,95 @@
 /* ── ROUND BUTTONS: destructive variant ─────────────────────────────────────
-   Covers: RoundTrashButton, DeleteButton, clear-X in FormField/SearchBar.
-   Selector matches via text-destructive or border-destructive class.
-
-   Light mode: lighter red border, visible but not heavy on white card.
-   Dark mode:  original dim dark-red border — var(--card) handles fill.
+   Crimson red — clearly differentiated from pink primary.
 */
 
-/* ── Light: normal ── */
+/* Light mode: regular state — crimson */
 button.rounded-full:not(:disabled)[class*="destructive"],
 button.rounded-full:not(:disabled)[class*="border-destructive"] {
-  background-color: transparent;
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.65 0.18 25) 0%,
-      oklch(0.50 0.15 25) 100%
-    );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--card);
+  border: 1px solid oklch(0.5 0.3 30);
   border-image: none;
   outline: none;
+  box-shadow: inset 0 0 0 9999px oklch(0.5 0.3 30 / 0.05);
 }
 
-/* ── Light: hover ── */
+/* Light mode: hover state — increased contrast */
 button.rounded-full:not(:disabled)[class*="destructive"]:hover,
 button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.75 0.20 25) 0%,
-      oklch(0.60 0.18 25) 100%
-    );
-  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--destructive) 8%, transparent);
+  border: 1px solid oklch(0.5 0.36 30);
+  box-shadow: inset 0 0 0 9999px oklch(0.5 0.36 30 / 0.10);
 }
 
-/* ── Focus-visible ── */
+/* Focus-visible */
 button.rounded-full:not(:disabled)[class*="destructive"]:focus-visible,
 button.rounded-full:not(:disabled)[class*="border-destructive"]:focus-visible {
-  outline: 1.5px solid color-mix(in oklch, var(--destructive) 80%, transparent);
+  outline: 1.5px solid oklch(0.5 0.3 30 / 0.80);
   outline-offset: -1px;
 }
 
-/* ── Light: disabled ── */
+/* Light and dark: disabled state */
 button.rounded-full:disabled[class*="destructive"],
 button.rounded-full:disabled[class*="border-destructive"] {
-  background-color: transparent;
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.65 0.18 25 / 0.4) 0%,
-      oklch(0.50 0.15 25 / 0.4) 100%
-    );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: oklch(0.992 0.005 50 / 0.95);
+  border: 1px solid oklch(0.5 0.3 30 / 0.4);
   border-image: none;
   opacity: 0.9;
 }
 
-/* ── Dark: normal ── */
-.dark button.rounded-full:not(:disabled)[class*="destructive"],
-.dark button.rounded-full:not(:disabled)[class*="border-destructive"] {
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.30 0.15 25) 0%,
-      oklch(0.10 0.15 25) 100%
-    );
-}
-
-/* ── Dark: hover ── */
-.dark button.rounded-full:not(:disabled)[class*="destructive"]:hover,
-.dark button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.50 0.15 25) 0%,
-      oklch(0.30 0.15 25) 100%
-    );
-}
-
-/* ── Dark: disabled ── */
-.dark button.rounded-full:disabled[class*="destructive"],
-.dark button.rounded-full:disabled[class*="border-destructive"] {
-  background-image:
-    linear-gradient(var(--card), var(--card)),
-    radial-gradient(var(--vignette-shape),
-      oklch(0.30 0.15 25 / 0.75) 0%,
-      oklch(0.10 0.15 25 / 0.75) 100%
-    );
-}
-
-/* ── Icon color — light mode: hue 25 matches border gradient ── */
+/* Icon color — regular state: crimson */
 button.rounded-full:not(:disabled)[class*="destructive"] [class*="lucide"],
 button.rounded-full:not(:disabled)[class*="border-destructive"] [class*="lucide"] {
-  color: oklch(0.55 0.20 25);
+  color: oklch(0.5 0.3 30);
   transition: color 0.2s ease;
 }
 
+/* Icon color — hover state: increased contrast */
 button.rounded-full:not(:disabled)[class*="destructive"]:hover [class*="lucide"],
 button.rounded-full:not(:disabled)[class*="border-destructive"]:hover [class*="lucide"] {
-  color: oklch(0.65 0.22 25);
+  color: oklch(0.5 0.36 30);
 }
 
+/* Icon color — disabled state */
 button.rounded-full:disabled[class*="destructive"] [class*="lucide"],
 button.rounded-full:disabled[class*="border-destructive"] [class*="lucide"] {
-  color: oklch(0.55 0.20 25 / 0.4);
+  color: oklch(0.5 0.3 30 / 0.4);
 }
 
-/* ── Icon color — dark mode: restore original hue 8/10 ── */
+/* Dark mode: regular state */
+.dark button.rounded-full:not(:disabled)[class*="destructive"],
+.dark button.rounded-full:not(:disabled)[class*="border-destructive"] {
+  background-color: var(--card);
+  border: 1px solid oklch(0.5 0.3 30);
+  box-shadow: inset 0 0 0 9999px oklch(0.5 0.3 30 / 0.05);
+}
+
+/* Dark mode: hover state */
+.dark button.rounded-full:not(:disabled)[class*="destructive"]:hover,
+.dark button.rounded-full:not(:disabled)[class*="border-destructive"]:hover {
+  border: 1px solid oklch(0.5 0.36 30);
+  box-shadow: inset 0 0 0 9999px oklch(0.5 0.36 30 / 0.10);
+}
+
+/* Dark mode: disabled state */
+.dark button.rounded-full:disabled[class*="destructive"],
+.dark button.rounded-full:disabled[class*="border-destructive"] {
+  background-color: oklch(0.172 0.012 30 / 0.95);
+  border: 1px solid oklch(0.5 0.3 30 / 0.4);
+}
+
+/* Dark mode: icon — regular */
 .dark button.rounded-full:not(:disabled)[class*="destructive"] [class*="lucide"],
 .dark button.rounded-full:not(:disabled)[class*="border-destructive"] [class*="lucide"] {
-  color: var(--destructive);
+  color: oklch(0.5 0.3 30);
 }
 
+/* Dark mode: icon — hover */
 .dark button.rounded-full:not(:disabled)[class*="destructive"]:hover [class*="lucide"],
 .dark button.rounded-full:not(:disabled)[class*="border-destructive"]:hover [class*="lucide"] {
-  color: oklch(0.62 0.24 10);
+  color: oklch(0.5 0.36 30);
 }
 
+/* Dark mode: icon — disabled */
 .dark button.rounded-full:disabled[class*="destructive"] [class*="lucide"],
 .dark button.rounded-full:disabled[class*="border-destructive"] [class*="lucide"] {
-  color: oklch(0.62 0.24 10 / 0.4);
+  color: oklch(0.5 0.3 30 / 0.4);
 }

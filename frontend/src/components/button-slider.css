@@ -1,15 +1,14 @@
 /* ── SLIDER TRACK GLOW ───────────────────────────────────────────────────────
-   Gradient border + inset tint on the track when hovering the slider container.
+   Gray regular, primary-hover on hover.
 */
 
 .slider-track-glow:hover .relative.h-2.w-full {
-  background-image:
-    linear-gradient(var(--background), var(--background)),
-    radial-gradient(var(--vignette-shape),
-      color-mix(in oklch, var(--primary) 70%, var(--border)) 0%,
-      color-mix(in oklch, var(--primary) 20%, var(--border)) 100%
-    );
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
+  background-color: var(--background);
+  border: 1px solid var(--primary-hover);
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+.dark .slider-track-glow:hover .relative.h-2.w-full {
+  background-color: var(--card);
+  border: 1px solid var(--primary-hover);
 }

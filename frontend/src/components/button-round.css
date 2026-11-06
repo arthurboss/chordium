@@ -1,7 +1,6 @@
 /* ── ROUND BUTTONS: normal variant ──────────────────────────────────────────
-   Gradient border via background-clip — preserves border-radius.
+   Gray borders (--border), primary-hover on hover.
    Excluded: destructive, slider thumb.
-   Uses --gradient-border-* variables for light/dark modes.
 */
 
 button.rounded-full {
@@ -9,25 +8,44 @@ button.rounded-full {
 }
 
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
-  background-color: transparent;
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-normal);
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  border: 1px solid transparent;
+  background-color: var(--background);
+  border: 1px solid var(--border);
   border-image: none;
   outline: none;
 }
 
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover {
-  background-image: linear-gradient(var(--background), var(--background)), var(--gradient-border-radial-hover);
+  border: 1px solid var(--primary-hover);
   box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
-}
-
-button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover [class*="lucide"] {
-  color: color-mix(in oklch, var(--primary) 70%, var(--border));
 }
 
 button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):focus-visible {
   outline: 1.5px solid color-mix(in oklch, var(--ring) 70%, transparent);
   outline-offset: -1px;
+}
+
+button.rounded-full:disabled:not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+.dark button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+}
+
+.dark button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover {
+  border: 1px solid var(--primary-hover);
+  background-color: var(--card);
+  box-shadow: inset 0 0 0 9999px color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+.dark button.rounded-full:disabled:not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]) {
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+/* Icon glow on hover */
+button.rounded-full:not(:disabled):not([class*="destructive"]):not([class*="border-destructive"]):not([role="slider"]):hover [class*="lucide"] {
+  filter: drop-shadow(0 0 4px color-mix(in oklch, var(--primary) 20%, transparent));
 }

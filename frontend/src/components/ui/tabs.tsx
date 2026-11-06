@@ -104,7 +104,7 @@ const TabsList = React.forwardRef<
         }
       }}
       className={cn(
-        "relative inline-flex h-12 items-center justify-center content-center rounded-lg p-1.5 text-muted-foreground border bg-card",
+        "relative inline-flex h-12 items-center justify-center content-center rounded-lg p-1.5 text-muted-foreground border sunken-surface",
         className
       )}
       data-tabs-list=""
@@ -112,7 +112,7 @@ const TabsList = React.forwardRef<
     >
       <span
         aria-hidden="true"
-        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-background transition-all duration-200 ease-in-out"
+        className="absolute top-[0.375rem] bottom-[0.375rem] rounded-sm bg-card transition-all duration-200 ease-in-out"
         style={indicatorStyle}
       />
       {children}
