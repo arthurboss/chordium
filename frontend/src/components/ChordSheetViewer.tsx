@@ -34,6 +34,9 @@ interface ChordSheetViewerProps {
   editContent?: string;
   setEditContent?: (v: string) => void;
   handleSaveEdits?: () => void;
+  // Voice command props
+  isListening?: boolean;
+  onToggleListening?: () => void;
 }
 
 const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
@@ -53,6 +56,8 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
   editContent: externalEditContent,
   setEditContent: externalSetEditContent,
   handleSaveEdits: externalHandleSaveEdits,
+  isListening = false,
+  onToggleListening,
 }, ref) => {
 
   const {
@@ -143,6 +148,8 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           canInterleave={canInterleave}
           isInterleaved={isInterleaved}
           onToggleInterleave={() => setInterleaveRequested((s) => !s)}
+          isListening={isListening}
+          onToggleListening={onToggleListening}
         />
       )}
     </div>
