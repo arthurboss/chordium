@@ -412,6 +412,8 @@ const SongViewer = ({
         editContent={editContent}
         setEditContent={setEditContent}
         handleSaveEdits={saveEdits}
+        isListening={voiceAgent.isListening}
+        onToggleListening={voiceAgent.toggleListening}
       />
       <VoiceAgentUI
         isActive={voiceAgent.isActive}

@@ -46,11 +46,22 @@ export function useVoiceAgent({ onCommand }: UseVoiceAgentOptions) {
 
   const isActive = state !== 'idle';
 
+  const toggleListening = useCallback(() => {
+    if (voice.state === 'listening') {
+      voice.stop();
+    } else if (voice.state === 'idle') {
+      voice.start();
+    }
+  }, [voice]);
+
   return {
     state,
     error,
     isActive,
     isListening: voice.state === 'listening',
     voiceState: voice.state,
+    start: voice.start,
+    stop: voice.stop,
+    toggleListening,
   };
 }
