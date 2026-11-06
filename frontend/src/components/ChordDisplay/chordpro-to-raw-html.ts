@@ -18,28 +18,61 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * Renders a `ChordProLine` of type 'lyrics' as one or two HTML lines: a
- * chord-position line (chords wrapped in `<b>`, placed above the syllable
- * they annotate) followed by the plain lyric line -- the classic aligned
- * look every other part of the render pipeline (`trimPureChordLineIndent`,
- * `removeChordsForLyricsOnly`, tab-splitting) already expects. A line with
- * no chords at all renders as just the lyric text, unchanged.
+ * Renders a chord-only line (e.g. "[Em7] [G] [D4]") as plain baseline chord
+ * spans, space-separated. There's no lyric to anchor to, so chords render as
+ * visible text, not positioned markup.
+ */
+function renderChordOnlyLine(line: Extract<ChordProLine, { type: 'lyrics' }>): string {
+  const { chords } = toPlainLyricAndChordColumns(line);
+  const chordLineText = renderChordLineText(chords);
+  return escapeHtml(chordLineText).replace(/\S+/g, (chord) => `<b>${chord}</b>`);
+}
+
+/**
+ * Renders a `ChordProLine` of type 'lyrics' using ghost-text positioning:
+ * an invisible duplicate of the lyric text with each chord positioned inline
+ * at its exact character index, so the browser's own text layout keeps chords
+ * pixel-aligned above the lyric regardless of font. This avoids padding the
+ * text content with spaces (which bloat the HTML and become visible in
+ * monospace), and works correctly for proportional fonts too.
+ *
+ * A line with no chords renders as plain lyric text. A chord-only line
+ * (no lyric) renders as visible chord spans.
  */
 function renderLyricsLine(line: Extract<ChordProLine, { type: 'lyrics' }>): string {
   const { lyric, chords } = toPlainLyricAndChordColumns(line);
-  const escapedLyric = escapeHtml(lyric);
+  let escapedLyric = escapeHtml(lyric);
   if (chords.length === 0) return escapedLyric;
+  if (lyric.trim() === '') return renderChordOnlyLine(line);
 
-  const chordLineText = renderChordLineText(chords);
-  const chordLineHtml = escapeHtml(chordLineText).replace(
-    /\S+/g,
-    (chord) => `<b>${chord}</b>`
-  );
-  // A chord-only line (e.g. "[G]  [G/B]  [C9]") has no real lyric text --
-  // just the whitespace that separated the chord brackets. Emitting that as
-  // a second line renders a blank row with nothing on it.
-  if (lyric.trim() === '') return chordLineHtml;
-  return chordLineHtml + '\n' + escapedLyric;
+  const ghostParts: string[] = [];
+  let pendingChords: string[] = [];
+
+  const flushPendingChords = () => {
+    if (pendingChords.length === 0) return;
+    ghostParts.push(
+      '<span class="chord-anchor">' +
+        pendingChords.map((chord) => `<b>${escapeHtml(chord)}</b>`).join(' ') +
+        '</span>'
+    );
+    pendingChords = [];
+  };
+
+  for (const segment of line.segments) {
+    if (segment.chord !== undefined) pendingChords.push(segment.chord);
+    if (segment.lyric !== '') {
+      flushPendingChords();
+      ghostParts.push('<span class="chord-ghost">' + escapeHtml(segment.lyric) + '</span>');
+    }
+  }
+  flushPendingChords();
+
+  // Strip leading whitespace from the final lyric output so indentation
+  // from the original format doesn't appear in the rendered HTML.
+  escapedLyric = escapedLyric.replace(/^\s+/, '');
+
+  const chordRow = '<span class="chord-row">' + ghostParts.join('') + '</span>';
+  return chordRow + escapedLyric;
 }
 
 /**

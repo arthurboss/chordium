@@ -1,6 +1,36 @@
 /* Plain CSS — not a CSS module. Class names are injected as raw strings
    by song-chords-to-raw-html.ts and the scraper, so they must not be mangled. */
 
+/* Ghost-row positioning: .chord-row contains invisible ghost text with chords
+   positioned inline, so the browser layout keeps them pixel-aligned above the
+   real lyric line below, regardless of font. */
+.chord-row {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  visibility: hidden;
+}
+
+.chord-ghost {
+  visibility: hidden;
+}
+
+.chord-anchor {
+  position: relative;
+  display: inline-block;
+  width: 0;
+}
+
+.chord-anchor b {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  white-space: nowrap;
+  visibility: visible;
+  color: hsl(var(--primary));
+  font-weight: 500;
+}
+
 /* .chord / .chord-line / .lyrics-line / .section-header style the live
    ChordProPreview shown while editing -- tuned to match the read-only
    display's spacing and typography (#chord-sheet-viewer pre b /
@@ -65,6 +95,7 @@
   padding-left: 0.5rem;
   white-space: normal;
   word-break: break-word;
+  font-family: system-ui, sans-serif;
 }
 
 #chord-sheet-viewer pre .tablatura {
