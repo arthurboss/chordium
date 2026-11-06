@@ -1,9 +1,6 @@
 /* Sunken surface input field */
 input.gradient-input-border {
   border: 1px solid var(--border);
-  background-color: var(--muted);
-  color: var(--muted-foreground);
-  box-shadow: inset 0 1px 4px oklch(0 0 0 / 0.08);
 }
 
 input.gradient-input-border:disabled {

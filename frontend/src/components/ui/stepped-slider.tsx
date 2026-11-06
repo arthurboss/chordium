@@ -30,7 +30,7 @@ const SteppedSlider = React.forwardRef<
 
   const thumbPct = ((currentValue - minNum) / (maxNum - minNum)) * 100;
 
-  return (
+  return (`a`
     <SliderPrimitive.Root
       ref={ref}
       className={cn(
@@ -44,7 +44,7 @@ const SteppedSlider = React.forwardRef<
       onValueChange={handleValueChange}
       {...props}
     >
-      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-foreground/10 dark:bg-card dark:border dark:border-primary/30 hover:border-primary">
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full sunken-surface dark:bg-card dark:border dark:border-primary/30 hover:border-primary">
         <SliderPrimitive.Range className="absolute h-full bg-primary/50" />
       </SliderPrimitive.Track>
       {showStepIndicators && stepCount > 1 && (
