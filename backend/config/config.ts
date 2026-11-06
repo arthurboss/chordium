@@ -19,7 +19,7 @@ if (process.env.NODE_ENV !== 'test') {
   const envPath = possibleEnvPaths.find(fs.existsSync) || possibleEnvPaths[1];
   
   // Load environment variables, but allow them to be overridden by process.env (for tests)
-  dotenv.config({ path: envPath, override: false });
+  dotenv.config({ path: envPath, override: false, quiet: true });
 }
 
 function createConfig(): Config {

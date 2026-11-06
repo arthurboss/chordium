@@ -122,6 +122,7 @@
     "saveAriaLabel": "Salvar em Minhas Cifras"
   },
   "chordSheetList": {
+    "selectAll": "Selecionar todas",
     "empty": "Você ainda não salvou nenhuma cifra.",
     "uploadAriaLabel": "Importar uma cifra",
     "uploadButton": "Importar uma cifra"

@@ -4,4 +4,6 @@ export interface ChordSheetCardProps {
   chordSheet: ChordSheetListItem;
   onView: (chordSheet: ChordSheetListItem) => void;
   onDelete: (chordSheet: ChordSheetListItem) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }

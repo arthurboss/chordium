@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import type { StoredSongMetadata, StoredChordSheet } from "../types";
 import type { ChordSheet } from "@chordium/types";
-import { getChordSheetMetadata, getChordSheetContent } from "../stores/chord-sheets/operations";
+import { getChordSheetMetadata, getChordSheetContent, storeChordSheetMetadata } from "../stores/chord-sheets/operations";
+import { updateAccess } from "../stores/chord-sheets/utils/access-tracking";
 
 // Enhanced result interface for lazy loading
 interface UseLazyChordSheetResult {
@@ -16,7 +17,7 @@ interface UseLazyChordSheetResult {
 
 /**
  * Hook that fetches chord sheets with true lazy loading support.
- * 
+ *
  * For cached records: Loads ONLY metadata initially, content loaded separately on demand
  * For API fetches: Loads full chord sheet (existing behavior)
  *
@@ -59,15 +60,17 @@ export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheet
       try {
         // 1. Check IndexedDB cache for metadata first
         const metadataResult = await getChordSheetMetadata(path);
-        
+
         if (metadataResult) {
           // CACHED: Load metadata immediately, then content naturally
+          const accessedMetadata = updateAccess(metadataResult);
+          storeChordSheetMetadata(accessedMetadata).catch(() => {});
           if (!cancelled) {
             setIsFromCache(true);
-            setMetadata(metadataResult);
+            setMetadata(accessedMetadata);
             setError(null);
             setIsLoading(false);
-            
+
             // Load content naturally (async, non-blocking)
             // This happens after metadata renders, no artificial delay needed
             loadContent();
@@ -75,17 +78,17 @@ export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheet
         } else {
           // NOT CACHED: Use progressive loading (metadata first, then content)
           try {
-            const { fetchSongFromAPI } = await import('@/services/api/fetch-song');
+            const { fetchSongFromAPI } = await import("@/services/api/fetch-song");
             const songData = await fetchSongFromAPI(path);
             const apiMetadata = songData ? (({ songChords: _, ...m }) => m)(songData) : null;
-            
+
             if (apiMetadata && !cancelled) {
               // Convert API metadata to stored format
               const storedMetadata: StoredSongMetadata = {
-                title: apiMetadata.title || '',
-                artist: apiMetadata.artist || '',
-                songKey: apiMetadata.songKey || '',
-                guitarTuning: apiMetadata.guitarTuning || ['E', 'A', 'D', 'G', 'B', 'E'],
+                title: apiMetadata.title || "",
+                artist: apiMetadata.artist || "",
+                songKey: apiMetadata.songKey || "",
+                guitarTuning: apiMetadata.guitarTuning || ["E", "A", "D", "G", "B", "E"],
                 guitarCapo: apiMetadata.guitarCapo || 0,
                 path,
                 storage: {
@@ -98,12 +101,12 @@ export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheet
                   contentAvailable: false, // Content not loaded yet
                 },
               };
-              
+
               setMetadata(storedMetadata);
               setIsFromCache(false);
               setError(null);
               setIsLoading(false);
-              
+
               // Load content after metadata
               loadContent();
             }
