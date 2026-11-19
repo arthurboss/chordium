@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import './ChordDisplay/chord-display.css';
 import type { ChordSheet, SongMetadata } from '@/types/chordSheet';
 import { toast } from 'sonner';
@@ -64,6 +64,24 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(CHORD_SHEET_VIEWER_ID);
   const [interleaveRequested, setInterleaveRequested] = useState(false);
+
+  // Exiting fullscreen hands scrolling back to the window, so stop auto-scroll before
+  // the exit starts. Escape and the browser's own exit never reach the button, so the
+  // effect below covers those too.
+  const handleToggleFullscreen = async () => {
+    if (isFullscreen) {
+      toggleAutoScroll(false);
+    }
+    await toggleFullscreen();
+  };
+
+  const wasFullscreenRef = useRef(isFullscreen);
+  useEffect(() => {
+    if (wasFullscreenRef.current && !isFullscreen) {
+      toggleAutoScroll(false);
+    }
+    wasFullscreenRef.current = isFullscreen;
+  }, [isFullscreen, toggleAutoScroll]);
 
   const canInterleave = isFullscreen && !!lyricsSplit;
   const isInterleaved = canInterleave && interleaveRequested;
@@ -139,7 +157,7 @@ const ChordSheetViewer = forwardRef<HTMLDivElement, ChordSheetViewerProps>(({
           setScrollSpeed={setScrollSpeed}
           handleDownload={handleDownload}
           isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
           canInterleave={canInterleave}
           isInterleaved={isInterleaved}
           onToggleInterleave={() => setInterleaveRequested((s) => !s)}
