@@ -6,6 +6,7 @@ import { useAtBottom } from "@/hooks/useAtBottom";
 import { getScrollContainer, scrollContainerTo } from "@/utils/scroll-container";
 import SpeedControl from "./SpeedControl";
 import PlayButton from "./PlayButton";
+import { VoiceCommandButton } from "./VoiceCommandButton";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, Languages, Maximize2, Minimize2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
@@ -21,7 +22,12 @@ function useAtTop(container: HTMLElement | null, offset = 10): boolean {
   );
 }
 
-const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
+interface StickyControlsBarProps extends ChordSheetControlsProps {
+  isListening?: boolean;
+  onToggleListening?: () => void;
+}
+
+const StickyControlsBar: React.FC<StickyControlsBarProps> = ({
   autoScroll,
   setAutoScroll,
   scrollSpeed,
@@ -31,6 +37,8 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
   canInterleave = false,
   isInterleaved = false,
   onToggleInterleave,
+  isListening = false,
+  onToggleListening,
 }) => {
   // Fullscreen makes the viewer its own scrolling box, so the controls have to read
   // and drive that element instead of the window.
@@ -58,6 +66,13 @@ const StickyControlsBar: React.FC<ChordSheetControlsProps> = ({
           size={20}
           className={`h-10 w-10 rounded-full ${autoScroll ? "bg-primary/10 text-primary hover:bg-primary/20" : ""}`}
         />
+        {onToggleListening && (
+          <VoiceCommandButton
+            isListening={isListening}
+            onToggle={onToggleListening}
+            size={20}
+          />
+        )}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
             speedVisible ? "max-w-xs opacity-100" : "max-w-0 opacity-0"
