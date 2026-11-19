@@ -122,6 +122,7 @@
     "saveAriaLabel": "Save to My Chord Sheets"
   },
   "chordSheetList": {
+    "selectAll": "Select all",
     "empty": "You haven't saved any chord sheets yet.",
     "uploadAriaLabel": "Upload a chord sheet",
     "uploadButton": "Upload a chord sheet"

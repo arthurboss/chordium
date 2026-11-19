@@ -3,6 +3,7 @@ import type { SongMetadata, ChordSheet } from '@chordium/types';
 import type { StoredSongMetadata, StoredChordSheet } from '@/storage/types';
 import { fetchSongFromAPI, fetchFullSongFromAPI, type ArrangementVariant } from '@/services/api/fetch-song';
 import { storeChordSheet, storeFullChordSheet, getFullChordSheetContent } from '@/storage/stores/chord-sheets/operations';
+import { updateAccess } from '@/storage/stores/chord-sheets/utils/access-tracking';
 
 export interface ChordSheetWithFallbackState {
   metadata: StoredSongMetadata | null;
@@ -45,13 +46,19 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
     const checkLocalData = async () => {
       if (!path) { setIsCheckingLocal(false); return; }
       try {
-        const { getChordSheetMetadata, getChordSheetContent } = await import('@/storage/stores/chord-sheets/operations');
+        const { getChordSheetMetadata, getChordSheetContent, storeChordSheetMetadata } = await import('@/storage/stores/chord-sheets/operations');
         const [metadata, content, full] = await Promise.all([
           getChordSheetMetadata(path),
           getChordSheetContent(path),
           getFullChordSheetContent(path),
         ]);
-        setLocalMetadata(metadata);
+        if (metadata) {
+          const accessedMetadata = updateAccess(metadata);
+          storeChordSheetMetadata(accessedMetadata).catch(() => {});
+          setLocalMetadata(accessedMetadata);
+        } else {
+          setLocalMetadata(metadata);
+        }
         setLocalContent(content);
         setFullContent(full);
         setLocalError(null);
