@@ -10,9 +10,17 @@
     },
     "api/cifraclub-song-full.ts": {
       "maxDuration": 60
+    },
+    "api/link-preview.ts": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
+    {
+      "source": "/:artist/:song",
+      "has": [{ "type": "query", "key": "d" }],
+      "destination": "/api/link-preview"
+    },
     {
       "source": "/((?!api/|robots\\.txt|.*\\.css|.*\\.js|.*\\.br|.*\\.gz|sw\\.js|registerSW\\.js|workbox-.*\\.js|stats\\.html).*)",
       "destination": "/index.html"

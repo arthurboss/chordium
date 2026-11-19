@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Copy, Check } from 'lucide-react';
+import { Loader2, Copy, Check, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ChordSheet, SongMetadata } from '@chordium/types';
 import { encodeChordSheet, buildJamUrl, buildPlainSongUrl } from '@/utils/chordSheetQR';
@@ -20,6 +20,10 @@ interface JamShareQRProps {
   /** Route of the song, for the link-only fallback. */
   songPath: string;
 }
+
+// Not available on desktop Safari/Firefox or older browsers; the Copy button
+// covers those cases, so this only renders where it works.
+const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
 async function copyToClipboard(text: string): Promise<boolean> {
   // Modern Clipboard API (HTTPS / localhost only)
@@ -114,6 +118,25 @@ export function JamShareQR({ chordSheet, simplifiedChordSheet, songPath }: JamSh
     }
   };
 
+  const handleShare = async () => {
+    if (!jamUrl) return;
+    try {
+      // Puts the title/text directly in the recipient's message body (e.g.
+      // WhatsApp, SMS), independent of whichever link-preview card the
+      // receiving app fetches for the URL itself.
+      await navigator.share({
+        title: `${chordSheet.title} — ${chordSheet.artist}`,
+        text: t('jamSession.shareText', { title: chordSheet.title, artist: chordSheet.artist }),
+        url: jamUrl,
+      });
+    } catch (err) {
+      // AbortError just means the user closed the share sheet.
+      if ((err as Error)?.name !== 'AbortError') {
+        toast.error(t('jamSession.shareFailed'));
+      }
+    }
+  };
+
   const handleInputClick = () => {
     inputRef.current?.select();
     inputRef.current?.setSelectionRange(0, jamUrl?.length ?? 0);
@@ -141,6 +164,13 @@ export function JamShareQR({ chordSheet, simplifiedChordSheet, songPath }: JamSh
       </div>
 
       <p className="text-sm text-center text-muted-foreground px-2">{captions[mode]}</p>
+
+      {canNativeShare && (
+        <Button className="w-full" onClick={handleShare} title={t('jamSession.share')}>
+          <Share2 className="h-4 w-4" />
+          {t('jamSession.share')}
+        </Button>
+      )}
 
       <div className="flex gap-2 w-full">
         <input
