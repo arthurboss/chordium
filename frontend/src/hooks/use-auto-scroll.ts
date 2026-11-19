@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   DEFAULT_SCROLL_SPEED, 
   AutoScrollRefs, 
@@ -41,9 +41,9 @@ export const useAutoScroll = () => {
   }, [autoScroll, scrollSpeed]);
 
   // Enhanced auto-scroll toggle handler
-  const toggleAutoScroll = (enable?: boolean) => {
+  const toggleAutoScroll = useCallback((enable?: boolean) => {
     handleAutoScrollToggle(enable, autoScroll, setAutoScroll);
-  };
+  }, [autoScroll]);
 
   return {
     autoScroll,
