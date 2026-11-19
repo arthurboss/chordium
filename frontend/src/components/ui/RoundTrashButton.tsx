@@ -1,6 +1,7 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface RoundTrashButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
  label?: string;
@@ -23,11 +24,16 @@ const RoundTrashButton: React.FC<RoundTrashButtonProps> = ({ label = "Delete", c
    tabIndex={disabled ? -1 : 0}
    disabled={disabled}
    variant="outline"
-   className={`flex justify-center items-center h-10 w-10 rounded-full transition-colors duration-300 border-border ${disabled ? disabledClass : enabledClass} ${className}`}
+   size="icon"
+   className={cn(
+    "flex justify-center items-center h-10 w-10 rounded-full transition-colors duration-300 border-border",
+    disabled ? disabledClass : enabledClass,
+    className
+   )}
    onClick={disabled ? undefined : onClick}
    {...props}
   >
-   <Trash2 className="h-4 center" />
+   <Trash2 className="h-4 w-4" />
    <span className="sr-only">{label}</span>
   </Button>
  );

@@ -219,10 +219,10 @@ const SearchResultsLayout: React.FC<SearchResultsLayoutProps> = ({
   // away is dropped, so the highlight sits right on the border it's for.
   const sortControl = (
     <Select value={sort} onValueChange={(v) => setSort(v as SortOption)} disabled={loading}>
-      <SelectTrigger className="h-7 w-auto gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left">
+      <SelectTrigger className="h-7 w-26 md:w-30 gap-1 bg-background px-2 text-xs focus:ring-1 focus:ring-offset-0 [&>span]:text-left [&>span]:line-clamp-none [&>span]:truncate">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] [&_svg]:hidden [&_[role=option]]:pl-2">
         <SelectItem value="default">{t("sort.default")}</SelectItem>
         <SelectItem value="az">{t("sort.az")}</SelectItem>
         <SelectItem value="za">{t("sort.za")}</SelectItem>

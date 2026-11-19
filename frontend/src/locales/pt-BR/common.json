@@ -126,6 +126,27 @@
     "uploadAriaLabel": "Importar uma cifra",
     "uploadButton": "Importar uma cifra"
   },
+  "lists": {
+    "all": "Todas",
+    "manageLists": "Listas",
+    "newList": "Nova lista",
+    "newListTitle": "Criar uma nova lista",
+    "namePlaceholder": "Nome da lista",
+    "duplicateName": "Já existe uma lista com esse nome",
+    "create": "Criar",
+    "cancel": "Cancelar",
+    "renameListTitle": "Renomear lista",
+    "save": "Salvar",
+    "renameListAriaLabel": "Renomear lista {{name}}",
+    "deleteListAriaLabel": "Excluir lista {{name}}",
+    "deleteListTitle": "Excluir lista?",
+    "deleteListBody": "Isso só remove a lista. As cifras dela continuam salvas.",
+    "deleteListConfirm": "Excluir lista",
+    "addToList": "Adicionar a uma lista",
+    "addToListAriaLabel": "Adicionar {{title}} a uma lista",
+    "noLists": "Ainda não há listas",
+    "createListInline": "+ Nova lista"
+  },
   "offlineIndicator": {
     "ariaLabel": "Mostrar status offline",
     "title": "Você está offline - Clique para mais detalhes",

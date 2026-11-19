@@ -30,8 +30,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 /**
  * How the dialog animates in and out.
  *
- * `slide` (default) drops in from above-left; `fade` appears in place, which
- * suits dialogs heavy enough that sliding reads as flying in from the corner.
+ * `fade` (default) appears in place; `slide` drops in from above-left, for
+ * dialogs heavy enough that appearing in place reads as a jump cut.
  */
 const dialogAnimations = {
   slide:
@@ -46,7 +46,7 @@ type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, animation = "slide", ...props }, ref) => (
+>(({ className, children, animation = "fade", ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content

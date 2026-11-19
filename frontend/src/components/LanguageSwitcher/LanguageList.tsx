@@ -70,7 +70,7 @@ const LanguageList: React.FC<LanguageListProps> = ({
                 onSelect(language);
               }}
               className={cn(
-                "relative flex cursor-pointer items-center gap-3 px-4 py-2.5 outline-none",
+                "relative flex cursor-pointer items-center gap-3 px-4 py-1.5 outline-none",
                 "hover:bg-accent focus-visible:bg-accent",
                 isSelected && "bg-accent"
               )}

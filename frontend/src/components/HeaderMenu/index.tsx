@@ -12,7 +12,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import GuitarTuner from "@/features/tuner/GuitarTuner";
 import { cyAttr } from "@/utils/test-utils";
 
-const ROW_CLASS = "flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-accent";
+const ROW_CLASS = "flex w-full items-center gap-3 px-4 py-1.5 text-left text-sm hover:bg-accent";
 
 const THEMES = ["light", "dark", "system"] as const;
 
@@ -103,7 +103,7 @@ const HeaderMenu = () => {
           <SheetTrigger asChild>{trigger}</SheetTrigger>
           <SheetContent
             side="bottom"
-            className="flex max-h-[92dvh] flex-col gap-0 rounded-t-xl px-0 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
+            className="flex max-h-[92dvh] flex-col gap-0 px-0 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
           >
             <SheetHeader className="shrink-0 px-4 text-left">
               <SheetTitle>{t("header.menuAriaLabel")}</SheetTitle>
@@ -115,7 +115,7 @@ const HeaderMenu = () => {
       ) : (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent align="end" className="w-max overflow-hidden p-0">
+          <PopoverContent align="end" sideOffset={0} className="w-max overflow-hidden p-0">
             {rows}
           </PopoverContent>
         </Popover>

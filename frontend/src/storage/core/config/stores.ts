@@ -23,4 +23,10 @@ export const STORES = {
 
   /** Song lyrics storage (original + translated versions) */
   SONG_LYRICS: "songLyrics",
+
+  /** Custom lists grouping saved chord sheets */
+  LISTS: "lists",
+
+  /** Membership rows linking a list to a saved chord sheet's path */
+  LIST_ITEMS: "listItems",
 } as const;

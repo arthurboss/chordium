@@ -197,3 +197,24 @@ describe('handleIndexedDBMigrations — v6 cached-content reset', () => {
     expect(content.delete).toHaveBeenCalledWith('a/cached');
   });
 });
+
+describe('handleIndexedDBMigrations — v13 custom lists', () => {
+  it('creates the lists and listItems stores', () => {
+    const db = createDb([STORES.SONGS_METADATA, STORES.CHORD_SHEETS]);
+
+    handleIndexedDBMigrations(db, 12, 13, null);
+
+    expect(db.objectStoreNames.contains(STORES.LISTS)).toBe(true);
+    expect(db.objectStoreNames.contains(STORES.LIST_ITEMS)).toBe(true);
+  });
+
+  it('is a no-op for the already-existing chord sheet stores', () => {
+    const db = createDb([STORES.SONGS_METADATA, STORES.CHORD_SHEETS, STORES.FULL_CHORD_SHEETS]);
+
+    handleIndexedDBMigrations(db, 12, 13, null);
+
+    expect(db.objectStoreNames.contains(STORES.SONGS_METADATA)).toBe(true);
+    expect(db.objectStoreNames.contains(STORES.CHORD_SHEETS)).toBe(true);
+    expect(db.objectStoreNames.contains(STORES.FULL_CHORD_SHEETS)).toBe(true);
+  });
+});
