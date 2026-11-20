@@ -9,6 +9,7 @@ import { createQueryClientWithErrorHandling } from "@/utils/query-error-handling
 import OfflineToast from "@/components/OfflineToast";
 import OfflineRouteHandler from "@/components/OfflineRouteHandler";
 import SmallScreenWarning, { useIsTooSmall } from "@/components/SmallScreenWarning";
+import { Capacitor } from "@capacitor/core";
 import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 
 // Reload once on chunk load failures (stale cache after Vercel redeploy)
@@ -178,12 +179,23 @@ const router = createBrowserRouter([
   }
 ]);
 
+// The web build registers a service worker; the native shell serves bundled
+// assets and must not keep a stale cached shell.
+const ServiceWorkerUpdater = () => {
+  useServiceWorkerUpdate();
+  return null;
+};
+
 // Component to handle app initialization
 const AppInitializer = ({ children }: { children: React.ReactNode }) => {
-  useServiceWorkerUpdate();
   const tooSmall = useIsTooSmall();
   if (tooSmall) return <SmallScreenWarning />;
-  return <>{children}</>;
+  return (
+    <>
+      {!Capacitor.isNativePlatform() && <ServiceWorkerUpdater />}
+      {children}
+    </>
+  );
 };
 
 const App = () => (
