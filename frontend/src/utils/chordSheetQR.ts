@@ -120,6 +120,15 @@ export async function decodeChordSheet(
   }
 }
 
+const NATIVE_FALLBACK_URL = "https://chordium.vercel.app";
+
+function isNativeShell(): boolean {
+  const capacitor = (window as unknown as {
+    Capacitor?: { isNativePlatform?: () => boolean };
+  }).Capacitor;
+  return Boolean(capacitor?.isNativePlatform?.());
+}
+
 /**
  * Resolves the origin a shared jam link should point at.
  *
@@ -133,6 +142,11 @@ export async function decodeChordSheet(
  */
 function resolveJamOrigin(): string {
   const canonical = import.meta.env.VITE_APP_URL;
+
+  // The native shell serves the app from https://localhost, which no other
+  // device can open. Shared codes always need the public host there.
+  if (isNativeShell()) return canonical || NATIVE_FALLBACK_URL;
+
   if (canonical && process.env.VERCEL_ENV === "production") return canonical;
   return window.location.origin;
 }

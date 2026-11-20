@@ -50,7 +50,7 @@
     "start": "turbo run build && turbo run start --filter=chordium-backend & turbo run preview --filter=chordium-frontend",
     "start:fe": "turbo run preview --filter=chordium-frontend",
     "start:be": "turbo run start --filter=chordium-backend",
-    "android:sync": "VITE_NATIVE_BUILD=true VITE_API_URL=https://chordium.vercel.app npx turbo run build --filter=chordium-frontend... && npx cap copy android",
+    "android:sync": "VITE_NATIVE_BUILD=true VITE_API_URL=https://chordium.vercel.app VITE_APP_URL=https://chordium.vercel.app npx turbo run build --filter=chordium-frontend... && npx cap copy android",
     "android:apk": "npm run android:sync && ./scripts/build-android-apk.sh"
   },
   "devDependencies": {

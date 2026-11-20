@@ -22,8 +22,15 @@ async function buildUrl() {
 describe('buildJamUrl — which host a shared code targets', () => {
   const realEnv = process.env.VERCEL_ENV;
 
+  function stubWindow(nativeShell = false) {
+    vi.stubGlobal('window', {
+      location: { origin: ORIGIN },
+      ...(nativeShell ? { Capacitor: { isNativePlatform: () => true } } : {}),
+    });
+  }
+
   beforeEach(() => {
-    vi.stubGlobal('window', { location: { origin: ORIGIN } });
+    stubWindow();
   });
 
   afterEach(() => {
@@ -59,6 +66,24 @@ describe('buildJamUrl — which host a shared code targets', () => {
     process.env.VERCEL_ENV = 'production';
 
     expect(new URL(await buildUrl()).origin).toBe(ORIGIN);
+  });
+
+  it('uses the canonical host in the native shell', async () => {
+    stubWindow(true);
+    vi.stubEnv('VITE_APP_URL', CANONICAL);
+    process.env.VERCEL_ENV = '';
+
+    expect(new URL(await buildUrl()).origin).toBe(CANONICAL);
+  });
+
+  it('never shares a localhost code from the native shell', async () => {
+    stubWindow(true);
+    vi.stubEnv('VITE_APP_URL', '');
+    process.env.VERCEL_ENV = '';
+
+    const origin = new URL(await buildUrl()).origin;
+    expect(origin).toBe(CANONICAL);
+    expect(origin).not.toBe(ORIGIN);
   });
 
   it('keeps the song path and payload regardless of host', async () => {
