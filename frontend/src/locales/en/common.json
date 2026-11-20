@@ -126,6 +126,11 @@
     "uploadAriaLabel": "Upload a chord sheet",
     "uploadButton": "Upload a chord sheet"
   },
+  "backup": {
+    "exportButton": "Export",
+    "importButton": "Import",
+    "importAriaLabel": "Import a Chordium backup"
+  },
   "offlineIndicator": {
     "ariaLabel": "Show offline status",
     "title": "You're offline - Click for details",

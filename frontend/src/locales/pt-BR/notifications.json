@@ -51,5 +51,15 @@
   "voiceMicrophoneReady": "Microfone pronto",
   "voiceMicrophoneReadyDesc": "Toque no microfone para falar.",
   "voiceMicrophoneLingers": "O Safari deixa o indicador do microfone aceso",
-  "voiceMicrophoneLingersDesc": "Nada está sendo gravado. É um bug do Safari, e o indicador desaparece ao recarregar ou fechar a aba."
+  "voiceMicrophoneLingersDesc": "Nada está sendo gravado. É um bug do Safari, e o indicador desaparece ao recarregar ou fechar a aba.",
+  "backup": {
+    "exported": "Backup criado",
+    "exportedDesc": "{{count}} cifras exportadas.",
+    "exportFailed": "Falha ao exportar",
+    "exportFailedDesc": "Não foi possível criar o backup.",
+    "imported": "Backup restaurado",
+    "importedDesc": "{{count}} cifras importadas.",
+    "importFailed": "Falha ao importar",
+    "importFailedDesc": "Este arquivo não é um backup válido do Chordium."
+  }
 }

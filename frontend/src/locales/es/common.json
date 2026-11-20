@@ -126,6 +126,11 @@
     "uploadAriaLabel": "Importar un acorde",
     "uploadButton": "Importar un acorde"
   },
+  "backup": {
+    "exportButton": "Exportar",
+    "importButton": "Importar",
+    "importAriaLabel": "Importar una copia de seguridad de Chordium"
+  },
   "offlineIndicator": {
     "ariaLabel": "Mostrar estado de conexión",
     "title": "Estás sin conexión - Haz clic para más detalles",

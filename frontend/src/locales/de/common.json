@@ -126,6 +126,11 @@
     "uploadAriaLabel": "Akkordblatt hochladen",
     "uploadButton": "Akkordblatt hochladen"
   },
+  "backup": {
+    "exportButton": "Exportieren",
+    "importButton": "Importieren",
+    "importAriaLabel": "Chordium-Sicherung importieren"
+  },
   "offlineIndicator": {
     "ariaLabel": "Offline-Status anzeigen",
     "title": "Du bist offline - für Details klicken",

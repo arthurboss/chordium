@@ -51,5 +51,15 @@
   "voiceMicrophoneReady": "Mikrofon bereit",
   "voiceMicrophoneReadyDesc": "Tippe auf das Mikrofon, um zu sprechen.",
   "voiceMicrophoneLingers": "Safari lässt die Mikrofonanzeige an",
-  "voiceMicrophoneLingersDesc": "Es wird nichts aufgenommen. Das ist ein Safari-Fehler, und die Anzeige verschwindet, wenn du neu lädst oder den Tab schließt."
+  "voiceMicrophoneLingersDesc": "Es wird nichts aufgenommen. Das ist ein Safari-Fehler, und die Anzeige verschwindet, wenn du neu lädst oder den Tab schließt.",
+  "backup": {
+    "exported": "Sicherung erstellt",
+    "exportedDesc": "{{count}} Akkordblätter exportiert.",
+    "exportFailed": "Export fehlgeschlagen",
+    "exportFailedDesc": "Die Sicherung konnte nicht erstellt werden.",
+    "imported": "Sicherung wiederhergestellt",
+    "importedDesc": "{{count}} Akkordblätter importiert.",
+    "importFailed": "Import fehlgeschlagen",
+    "importFailedDesc": "Diese Datei ist keine gültige Chordium-Sicherung."
+  }
 }
