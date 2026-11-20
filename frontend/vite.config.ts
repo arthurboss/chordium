@@ -14,6 +14,9 @@ const pkgVersion = JSON.parse(readFileSync(path.resolve(__dirname, "package.json
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isHttps = process.env.VITE_HTTPS_ENABLED === 'true';
+  // The Capacitor shell serves the build locally, so a service worker would
+  // only cache the shell against itself.
+  const isNativeBuild = process.env.VITE_NATIVE_BUILD === 'true';
   
   return {
     server: {
@@ -62,6 +65,7 @@ export default defineConfig(({ mode }) => {
       // }),
       VitePWA({
         registerType: 'prompt',
+        injectRegister: isNativeBuild ? false : 'auto',
         manifest: {
           name: 'Chordium',
           short_name: 'Chordium',
