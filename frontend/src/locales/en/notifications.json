@@ -51,5 +51,15 @@
   "voiceMicrophoneReady": "Microphone ready",
   "voiceMicrophoneReadyDesc": "Tap the microphone to speak.",
   "voiceMicrophoneLingers": "Safari leaves the microphone indicator on",
-  "voiceMicrophoneLingersDesc": "Nothing is being recorded. It is a Safari bug, and the indicator clears when you reload or close the tab."
+  "voiceMicrophoneLingersDesc": "Nothing is being recorded. It is a Safari bug, and the indicator clears when you reload or close the tab.",
+  "backup": {
+    "exported": "Backup created",
+    "exportedDesc": "{{count}} chord sheets exported.",
+    "exportFailed": "Export failed",
+    "exportFailedDesc": "The backup could not be created.",
+    "imported": "Backup restored",
+    "importedDesc": "{{count}} chord sheets imported.",
+    "importFailed": "Import failed",
+    "importFailedDesc": "This file is not a valid Chordium backup."
+  }
 }

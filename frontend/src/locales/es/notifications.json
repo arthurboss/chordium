@@ -51,5 +51,15 @@
   "voiceMicrophoneReady": "Micrófono listo",
   "voiceMicrophoneReadyDesc": "Toca el micrófono para hablar.",
   "voiceMicrophoneLingers": "Safari deja encendido el indicador del micrófono",
-  "voiceMicrophoneLingersDesc": "No se está grabando nada. Es un error de Safari, y el indicador desaparece al recargar o cerrar la pestaña."
+  "voiceMicrophoneLingersDesc": "No se está grabando nada. Es un error de Safari, y el indicador desaparece al recargar o cerrar la pestaña.",
+  "backup": {
+    "exported": "Copia de seguridad creada",
+    "exportedDesc": "{{count}} acordes exportados.",
+    "exportFailed": "Error al exportar",
+    "exportFailedDesc": "No se pudo crear la copia de seguridad.",
+    "imported": "Copia de seguridad restaurada",
+    "importedDesc": "{{count}} acordes importados.",
+    "importFailed": "Error al importar",
+    "importFailedDesc": "Este archivo no es una copia de seguridad válida de Chordium."
+  }
 }

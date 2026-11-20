@@ -126,6 +126,11 @@
     "uploadAriaLabel": "Importar uma cifra",
     "uploadButton": "Importar uma cifra"
   },
+  "backup": {
+    "exportButton": "Exportar",
+    "importButton": "Importar",
+    "importAriaLabel": "Importar um backup do Chordium"
+  },
   "offlineIndicator": {
     "ariaLabel": "Mostrar status offline",
     "title": "Você está offline - Clique para mais detalhes",

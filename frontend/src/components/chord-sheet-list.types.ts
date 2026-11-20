@@ -7,6 +7,7 @@ export interface ChordSheetListProps {
   onChordSheetSelect: (metadata: ChordSheetListItem) => void;
   onDeleteChordSheet: (chordSheetPath: string) => void;
   onUploadClick: () => void;
+  onImportComplete?: () => Promise<void> | void;
   tabState?: { scroll: number };
   setTabState?: (state: { scroll: number }) => void;
 }

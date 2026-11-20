@@ -239,6 +239,7 @@ const TabContainer = ({
             onChordSheetSelect={handleSongSelect}
             onDeleteChordSheet={handleChordSheetDelete}
             onUploadClick={() => handleTabChange("upload")}
+            onImportComplete={setMySongs}
           />
         </div>
       </div>
