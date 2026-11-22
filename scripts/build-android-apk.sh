@@ -5,6 +5,7 @@ set -euo pipefail
 # amd64 container on arm64 hosts. The SDK, Gradle cache and debug keystore are
 # mounted so rebuilds keep the same signature and do not re-download.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TASK="${1:-assembleDebug}"
 SDK_DIR="${ANDROID_HOME:-$HOME/android-sdk}"
 
 podman run --rm --platform linux/amd64 \
@@ -15,4 +16,4 @@ podman run --rm --platform linux/amd64 \
   -w /workspace/android \
   -e ANDROID_HOME=/opt/android-sdk \
   -e ANDROID_SDK_ROOT=/opt/android-sdk \
-  eclipse-temurin:21-jdk ./gradlew --no-daemon assembleDebug
+  eclipse-temurin:21-jdk ./gradlew --no-daemon "$TASK"

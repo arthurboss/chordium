@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Guitar, Menu } from "lucide-react";
+import { Guitar, Menu, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -66,6 +66,11 @@ const HeaderMenu = () => {
         {getIconByTheme(activeTheme, 16)}
         {t("header.menu.theme")}
       </button>
+
+      <a href="/privacy.html" className={ROW_CLASS}>
+        <Shield className="h-4 w-4" />
+        {t("header.menu.privacy")}
+      </a>
 
       <LanguageSwitcher
         trigger={(icon) => (

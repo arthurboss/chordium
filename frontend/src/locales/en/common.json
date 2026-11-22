@@ -9,7 +9,8 @@
     "tunerAriaLabel": "Tuner",
     "menuAriaLabel": "Menu",
     "menu": {
-      "theme": "Theme"
+      "theme": "Theme",
+      "privacy": "Privacy policy"
     }
   },
   "devBanner": {

@@ -9,7 +9,8 @@
     "tunerAriaLabel": "Afinador",
     "menuAriaLabel": "Menú",
     "menu": {
-      "theme": "Tema"
+      "theme": "Tema",
+      "privacy": "Política de privacidad"
     }
   },
   "devBanner": {

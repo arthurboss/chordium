@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# The Capacitor bridge is called from JavaScript by name and through
+# @JavascriptInterface methods, which R8 cannot see.
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keep class app.chordium.MainActivity { *; }

@@ -9,7 +9,8 @@
     "tunerAriaLabel": "Stimmgerät",
     "menuAriaLabel": "Menü",
     "menu": {
-      "theme": "Design"
+      "theme": "Design",
+      "privacy": "Datenschutzerklärung"
     }
   },
   "devBanner": {

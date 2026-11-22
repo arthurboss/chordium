@@ -43,6 +43,7 @@ npm run test:be      # Backend tests only
 npm run test:e2e     # Cypress e2e tests
 npm run android:sync # Build the frontend for the Capacitor shell and copy it into android/
 npm run android:apk  # Build the debug APK (runs Gradle in an amd64 podman container)
+npm run android:bundle # Build the release AAB, signed when android/keystore.properties exists
 npm run android:e2e  # Import fixture and verify the app on a running emulator (clears app data)
 npm run lint         # Lint all
 npm run lint:fix     # Auto-fix lint issues
@@ -68,6 +69,7 @@ npm run clean        # Remove all node_modules and build artifacts
 - **Semantic versioning:** PATCH for fixes, MINOR for features, MAJOR for breaking changes
 - **Version bump commits** must be in their own commit with message format `chore: bump to <version>` and touch all three `package.json` files
 - **After merging a version bump PR:** create a git tag `v<major>.<minor>.<patch>` pointing to that commit and push it to enable GitHub Releases
+- **Android:** the same `package.json` version sets `versionName`; `versionCode` is `major * 1000000 + minor * 1000 + patch`. Release checklist: `docs/android-release.md`
   ```bash
   git tag v0.5.0 <commit-hash>
   git push origin v0.5.0
