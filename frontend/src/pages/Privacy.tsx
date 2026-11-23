@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PageHeader from "@/components/PageHeader";
@@ -6,6 +7,7 @@ import { Card } from "@/components/ui/card";
 const Privacy = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const isNative = Capacitor.isNativePlatform();
 
   return (
     <main
@@ -19,18 +21,20 @@ const Privacy = () => {
           <p className="text-muted-foreground">{t("privacy.effectiveDate")}</p>
 
           <p>
-            Chordium is a guitar chord sheet viewer. It is developed by Arthur
-            Boss. This policy describes what the app does with data on your
-            device and what leaves it.
+            Chordium is a guitar chord sheet viewer. It runs as a website and,
+            on Android, as an installed app. It is developed by Arthur Boss.
+            This policy describes what Chordium does with data on your device
+            and what leaves it.
           </p>
 
           <section className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold">Data kept on your device</h2>
             <p>
               Saved chord sheets, preferences, and import or export files stay
-              in the app's local storage. They are not uploaded to a Chordium
-              account. You can remove them by deleting songs in the app or
-              clearing the app's storage in Android settings.
+              in local storage on your device. They are not uploaded to a
+              Chordium account. You can remove them by deleting songs in
+              Chordium or by clearing its site or app data in your device
+              settings.
             </p>
           </section>
 
@@ -60,10 +64,9 @@ const Privacy = () => {
           <section className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold">Backups</h2>
             <p>
-              If Android backup is enabled on your device, Android may copy app
-              data to your Google account so it can be restored after
-              reinstalling the app. That backup is controlled by Android and
-              your Google account settings.
+              {isNative
+                ? "If Android backup is enabled on your device, Android may copy app data to your Google account so it can be restored after reinstalling the app. That backup is controlled by Android and your Google account settings."
+                : "Your browser stores saved songs on this device. Chordium does not back them up to a server, so export any chord sheets you want to keep before clearing site data or switching devices."}
             </p>
           </section>
 
@@ -71,8 +74,8 @@ const Privacy = () => {
             <h2 className="text-lg font-semibold">Sharing</h2>
             <p>
               When you share a song or jam link, the link is created on your
-              device and passed to the app you choose. Chordium does not
-              receive a copy of what you share.
+              device and passed to the app or browser you choose. Chordium does
+              not receive a copy of what you share.
             </p>
           </section>
 
