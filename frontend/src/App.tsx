@@ -34,6 +34,7 @@ const lazyWithChunkRetry = <T extends ComponentType<unknown>>(factory: () => Pro
 // Lazy load pages instead of direct imports
 const Home = lazyWithChunkRetry(() => import("./pages/Home"));
 const ChordViewer = lazyWithChunkRetry(() => import("./pages/chord-viewer"));
+const Privacy = lazyWithChunkRetry(() => import("./pages/Privacy"));
 // Temporarily removed SmartRouteHandler to fix rendering issues
 // const SmartRouteHandler = lazy(() => import("./components/SmartRouteHandler"));
 
@@ -101,6 +102,16 @@ const router = createBrowserRouter([
                 <Home />
               </Suspense>
             </AsyncErrorBoundary>
+          </RouteErrorBoundary>
+        )
+      },
+      {
+        path: "privacy",
+        element: (
+          <RouteErrorBoundary>
+            <Suspense fallback={<Loading />}>
+              <Privacy />
+            </Suspense>
           </RouteErrorBoundary>
         )
       },

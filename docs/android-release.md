@@ -16,7 +16,7 @@ is a working checklist, not a promise to publish.
 | `versionCode` / `versionName` | Done | Both come from the root `package.json` version. `0.9.0` becomes `versionCode` 9000. |
 | 16 KB page size support | Done | The app contains no native libraries. `unzip -l` of both APK and AAB shows no `lib/` entries, so the February 1, 2027 requirement is already met. |
 | Data safety form | Drafted | Answers drafted below. The form can only be completed in Play Console. |
-| Privacy policy URL | Drafted | `frontend/public/privacy.html` is linked from the header menu. Deploy it on merge and have the legal text reviewed. |
+| Privacy policy URL | Drafted | The `/privacy` route is linked from the header menu. Deploy it on merge and have the legal text reviewed. |
 | Content rating | Not done | Questionnaire in Play Console. |
 | Target audience | Not done | State that the app is not directed at children. |
 | Ads declaration | Not done | No ads, no ad SDKs. |
@@ -47,8 +47,8 @@ is a working checklist, not a promise to publish.
 - The native build no longer emits or copies a service worker, Workbox files,
   source-map reports (`stats.html`), or Brotli copies. This drops dead weight
   from the APK and avoids a stale cached shell inside the WebView.
-- A privacy policy page is served at `/privacy.html` and linked from the header
-  menu, so the policy is reachable inside the app.
+- A privacy policy page is served at `/privacy` inside the normal app layout and
+  linked from the header menu, so the policy is reachable inside the app.
 - Android App Links claim `https://chordium.vercel.app/<artist>/<song>` with
   `autoVerify`. `frontend/public/.well-known/assetlinks.json` lists the debug
   certificate, which lets debug and locally signed builds verify. The Play app
@@ -114,6 +114,20 @@ Upload the AAB and the R8 mapping file
 deobfuscated. The mapping is also embedded in the bundle metadata, but Play asks
 for it separately.
 
+## Tablet deployment in DeX
+
+The SM-X916B test tablet runs DeX on an external display. Deploy there, not to
+the internal screen, and keep the app in the right half of the split screen:
+
+```bash
+adb -s <serial> install -r android/app/build/outputs/apk/release/app-release-tablet.apk
+adb -s <serial> shell am start -n app.chordium/.MainActivity --display 6 --windowingMode 5
+adb -s <serial> shell am stack resize <taskId> 1726 0 3440 1440
+```
+
+The window manager usually restores the previous bounds. If it does not, resize
+the task to the right half after launch.
+
 ## Data safety draft
 
 The app has no account and no analytics SDK. Current behaviour:
@@ -135,9 +149,8 @@ the privacy policy should still describe voice search accurately.
 ## Privacy policy
 
 Play requires the policy to be public, non-editable, non-geofenced, and linked
-both from the listing and from inside the app. `frontend/public/privacy.html`
-ships with the web build, is reachable at
-`https://chordium.vercel.app/privacy.html`, and is linked from the header menu.
+both from the listing and from inside the app. The `/privacy` route ships with the web build, is reachable at
+`https://chordium.vercel.app/privacy`, and is linked from the header menu.
 It names the developer, gives a contact, and covers camera, microphone, search,
 local storage, backup, sharing, providers, retention, and children. Review the
 legal text before uploading to Play.

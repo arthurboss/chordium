@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Guitar, Menu, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,10 +68,10 @@ const HeaderMenu = () => {
         {t("header.menu.theme")}
       </button>
 
-      <a href="/privacy.html" className={ROW_CLASS}>
+      <Link to="/privacy" className={ROW_CLASS} onClick={() => setOpen(false)}>
         <Shield className="h-4 w-4" />
         {t("header.menu.privacy")}
-      </a>
+      </Link>
 
       <LanguageSwitcher
         trigger={(icon) => (

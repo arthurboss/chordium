@@ -278,5 +278,9 @@
     "error": "Could not open the microphone. Please try again.",
     "selectMicrophone": "Select microphone",
     "microphoneFallbackLabel": "Microphone {{number}}"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "effectiveDate": "Effective 21 November 2026"
   }
 }
