@@ -76,7 +76,8 @@ show a thin dev banner above the header. They also claim
 `chordium-dev.vercel.app` for App Links instead of the production host, so they
 never compete with the release app for real song links. The dev build carries a `-dev` version name;
 its `versionCode` can stay identical because the packages are versioned
-independently.
+independently. Release builds show "In development: some features may not work
+as expected" in the same place.
 
 Release builds keep `app.chordium`. Only `npm run android:bundle` or an
 `assembleRelease` APK produces the stable package.

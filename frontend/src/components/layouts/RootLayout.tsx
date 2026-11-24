@@ -10,6 +10,12 @@ import { applyPageMetadata } from "@/seo/page-metadata";
 
 const RootLayout = () => {
   const location = useLocation();
+  const devBuild = process.env.VITE_DEV_BUILD === "true";
+  const bannerLabel = devBuild
+    ? "Dev Mode"
+    : process.env.NODE_ENV === "production"
+      ? "In development: some features may not work as expected"
+      : null;
 
   useEffect(() => {
     applyPageMetadata(location.pathname);
@@ -22,9 +28,13 @@ const RootLayout = () => {
         <JamSessionProvider>
           <ActiveChordSheetProvider>
             <div id="app-layout" className="flex flex-col min-h-dvh">
-              {process.env.VITE_DEV_BUILD === 'true' && (
-                <div className="w-full bg-primary/30 py-1 text-center text-xs font-medium">
-                  Dev Mode
+              {bannerLabel && (
+                <div
+                  className={`w-full py-1 text-center text-xs font-medium ${
+                    devBuild ? "bg-destructive text-destructive-foreground" : "bg-primary/30"
+                  }`}
+                >
+                  {bannerLabel}
                 </div>
               )}
               <Header />
