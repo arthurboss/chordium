@@ -122,7 +122,7 @@ the internal screen, and keep the app in the right half of the split screen:
 ```bash
 adb -s <serial> install -r android/app/build/outputs/apk/release/app-release-tablet.apk
 adb -s <serial> shell am start -n app.chordium/.MainActivity --display 6 --windowingMode 5
-adb -s <serial> shell am stack resize <taskId> 1726 0 3440 1440
+adb -s <serial> shell cmd activity task resize <taskId> 1726 0 3440 1440
 ```
 
 The window manager usually restores the previous bounds. If it does not, resize
