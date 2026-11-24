@@ -294,6 +294,7 @@ export default defineConfig(({ mode }) => {
       // Ensure environment variables are available at build time
       '__APP_VERSION__': JSON.stringify(pkgVersion),
       'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
+      'process.env.VITE_DEV_BUILD': JSON.stringify(process.env.VITE_DEV_BUILD),
       'process.env.VERCEL': JSON.stringify(process.env.VERCEL),
       // Distinguishes the production deployment from branch previews, so shared
       // jam links only get rewritten to the canonical host in production.

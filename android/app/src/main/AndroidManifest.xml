@@ -51,7 +51,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="chordium.vercel.app"
+                    android:host="${appLinkHost}"
                     android:pathPattern="/.*/.*" />
             </intent-filter>
         </activity>

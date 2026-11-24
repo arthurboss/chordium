@@ -13,10 +13,6 @@
       "privacy": "Política de privacidade"
     }
   },
-  "devBanner": {
-    "note": "Nota:",
-    "message": "Este aplicativo está em desenvolvimento. Alguns recursos podem não funcionar como esperado."
-  },
   "searchBar": {
     "placeholder": "Pesquisar artista ou música",
     "back": "Voltar",
