@@ -58,6 +58,27 @@ is a working checklist, not a promise to publish.
   release AAB. Both run Gradle in an amd64 podman container because the
   Android build tools are x86_64-only.
 
+## Local development builds
+
+Debug builds use `applicationIdSuffix ".dev"`, so they install as
+`app.chordium.dev` with the launcher name "Chordium Dev" next to the release
+app `app.chordium`. Android treats them as separate apps: each has its own
+WebView IndexedDB, preferences, and Auto Backup data, so testing a dev build
+never touches the stable app or its saved songs.
+
+```bash
+npm run android:apk
+adb -s <serial> install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Debug builds also claim `chordium-dev.vercel.app` for App Links instead of the
+production host, so they never compete with the release app for real song
+links. The dev build carries a `-dev` version name; its `versionCode` can stay
+identical because the packages are versioned independently.
+
+Release builds keep `app.chordium`. Only `npm run android:bundle` or an
+`assembleRelease` APK produces the stable package.
+
 ## Versioning
 
 The root `package.json` version is the single source of truth. The Android

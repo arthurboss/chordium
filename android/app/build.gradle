@@ -28,6 +28,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
         versionName appVersionName
+        manifestPlaceholders = [appLinkHost: "chordium.vercel.app"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -46,6 +47,14 @@ android {
         }
     }
     buildTypes {
+        debug {
+            // Installed alongside the release app as app.chordium.dev, with its
+            // own data directory, so testing never touches saved songs.
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            // Never claim the production App Link host from a dev build.
+            manifestPlaceholders = [appLinkHost: "chordium-dev.vercel.app"]
+        }
         release {
             if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release

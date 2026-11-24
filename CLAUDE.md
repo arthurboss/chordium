@@ -42,9 +42,9 @@ npm run test:fe      # Frontend tests only
 npm run test:be      # Backend tests only
 npm run test:e2e     # Cypress e2e tests
 npm run android:sync # Build the frontend for the Capacitor shell and copy it into android/
-npm run android:apk  # Build the debug APK (runs Gradle in an amd64 podman container)
+npm run android:apk  # Build the dev APK, application id app.chordium.dev (runs Gradle in an amd64 podman container)
 npm run android:bundle # Build the release AAB, signed when android/keystore.properties exists
-npm run android:e2e  # Import fixture and verify the app on a running emulator (clears app data)
+npm run android:e2e  # Import fixture and verify the dev app on a running emulator (clears app data)
 npm run lint         # Lint all
 npm run lint:fix     # Auto-fix lint issues
 npm run clean        # Remove all node_modules and build artifacts

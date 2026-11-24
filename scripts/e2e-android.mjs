@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixtureFile = path.join(here, "fixtures", "android-e2e-backup.json");
 const fixture = JSON.parse(fs.readFileSync(fixtureFile, "utf8"));
-const packageName = "app.chordium";
+const packageName = "app.chordium.dev";
 const cdpPort = 9333;
 
 const serialFlag = process.argv.indexOf("--serial");
