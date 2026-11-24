@@ -9,7 +9,7 @@
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
 </p>
 
-The distraction-free way to find, read, and play guitar chords, right in your browser.
+The distraction-free way to find, read, and play guitar chords in your browser, as a PWA, or on Android.
 
 ## 🎬 Demo
 
@@ -17,26 +17,30 @@ The distraction-free way to find, read, and play guitar chords, right in your br
 
 🎵 **[Try it live](https://chordium.vercel.app)**
 
+Android APK: **[Releases](https://github.com/arthurboss/chordium/releases/latest)**
+
 ## 🎯 Features
 
 Chordium is designed with simplicity in mind, helping new guitar players and casual enthusiasts learn songs without visual clutter:
 
-- **Install-less App (PWA)** - Works offline and installs like a native app
-- **Clean Interface** - Distraction-free chord viewing experience
-- **Smart Search** - Search by artist, song title, or lyrics. Voice-enabled for hands-free searching
-- **Transpose & Capo** - Shift chords to any key or capo position on the fly
-- **Auto-scrolling** - Practice at your own pace with speed controls
-- **Dark Mode** - Light, dark, and system theme options
-- **Mobile-friendly** - Learn on-the-go with responsive design
-- **File Upload** - Import your own chord sheets with metadata extraction
-- **Works Offline** - Install as a native app, fully functional without internet
-- **Transpose & Capo** - Shift chords to any key or capo position on the fly
-- **Fullscreen Mode** - Distraction-free fullscreen reading with translated lyrics side-by-side
-- **Auto-scrolling** - Practice at your own pace with speed controls
+- **Web, PWA, and Android** - Use it in the browser, install it as a PWA, or sideload the Android app
+- **Offline library** - Saved chord sheets work without a connection
+- **Smart search** - Search by artist, song title, or lyrics, including voice search
+- **Transpose and capo** - Shift chords to any key or capo position
+- **Auto-scroll** - Practice at your own pace with speed controls
+- **Dark mode** - Light, dark, and system theme options
+- **Import and backup** - Upload chord sheets or restore a gzipped backup
+- **Fullscreen mode** - Distraction-free reading with translated lyrics
 
 ## 🎸 Jam Sessions
 
-Scan a QR code or tap a link to instantly share the exact chord sheet you're viewing — no account, no server round-trip, ready to play the moment it opens.
+Scan a QR code or tap a link to instantly share the exact chord sheet you're viewing. No account, no server round-trip. On Android, shared song links open in the app.
+
+## Android
+
+The Android app packages the same frontend with its assets on the device, so saved chord sheets work offline. Download the signed APK from [Releases](https://github.com/arthurboss/chordium/releases). Requires Android 7.0 or newer.
+
+Sideloaded builds do not update automatically. Earlier debug-signed builds must be uninstalled before installing the release-signed APK, which clears saved chord sheets.
 
 ## 💻 Tech Stack
 
@@ -53,6 +57,11 @@ Scan a QR code or tap a link to instantly share the exact chord sheet you're vie
 - **Vercel Serverless Functions** - API endpoints in `frontend/api/`
 - **Neon** - PostgreSQL database (via Vercel Postgres)
 - **@sparticuz/chromium** + **Puppeteer** - Headless scraping for chord sheets
+
+### Android
+
+- **Capacitor** - Native shell around the web app
+- **Gradle** - APK and AAB builds in `android/`
 
 ### Development
 
@@ -78,6 +87,7 @@ Scan a QR code or tap a link to instantly share the exact chord sheet you're vie
 | [Cache Architecture](./docs/cache-architecture.md)          | Frontend caching system design and implementation  |
 | [Build Optimizations](./docs/build-optimizations.md)        | Performance optimizations and bundle configuration |
 | [PWA Development](./docs/getting-started.md#pwa-development) | PWA setup, development workflow, and features      |
+| [Android Release](./docs/android-release.md)                 | Android builds, signing, and release checklist     |
 | [Technical Decisions](./docs/technical-decisions/README.md) | Key architectural decisions and rationale          |
 | [Offline Translation](./docs/offline-functionality.md#song-lyrics-and-translation) | Translation without internet connection |
 
@@ -100,6 +110,8 @@ This project follows semantic versioning ([semver](https://semver.org/)):
 - **PATCH** - Bug fixes (backwards compatible)
 
 Each version bump is tagged in git as `v<major>.<minor>.<patch>` (e.g., `v0.5.0`) and published as a GitHub Release. See [Releases](../../releases) for the full changelog.
+
+Android uses the same version. `versionName` is the package version and `versionCode` is `major * 1000000 + minor * 1000 + patch`.
 
 **For developers:** When you merge a version bump PR, create a corresponding git tag:
 ```bash
