@@ -38,9 +38,7 @@ Scan a QR code or tap a link to instantly share the exact chord sheet you're vie
 
 ## <img src="https://cdn.simpleicons.org/android/3DDC84" alt="Android" width="22" height="22" /> Android
 
-The Android app packages the same frontend with its assets on the device, so saved chord sheets work offline. Download the signed APK from [Releases](https://github.com/arthurboss/chordium/releases). Requires Android 7.0 or newer.
-
-Sideloaded builds do not update automatically. Download new APKs from [Releases](https://github.com/arthurboss/chordium/releases).
+The Android app packages the same frontend with its assets on the device, so saved chord sheets work offline. Download the signed APK from [Releases](https://github.com/arthurboss/chordium/releases). Requires Android 7.0 or newer. Sideloaded builds do not update automatically.
 
 ## 💻 Tech Stack
 
