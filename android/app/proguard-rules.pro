@@ -26,3 +26,11 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 -keep class app.chordium.MainActivity { *; }
+
+# WebView decides fullscreen support by reflecting for both overrides. R8
+# drops onHideCustomView() (body only calls super), so requestFullscreen is
+# rejected as unsupported in release builds.
+-keepclassmembers class * extends android.webkit.WebChromeClient {
+    public void onShowCustomView(android.view.View, android.webkit.WebChromeClient$CustomViewCallback);
+    public void onHideCustomView();
+}
