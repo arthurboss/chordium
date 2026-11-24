@@ -32,7 +32,8 @@
         "NEON_PROJECT_ID",
         "NEON_AUTH_BASE_URL",
         "VITE_NEON_AUTH_URL",
-        "VITE_RENDER_URL"
+        "VITE_RENDER_URL",
+        "VITE_NATIVE_BUILD"
       ]
     },
     "test": {

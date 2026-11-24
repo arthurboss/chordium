@@ -9,7 +9,8 @@
     "tunerAriaLabel": "Afinador",
     "menuAriaLabel": "Menú",
     "menu": {
-      "theme": "Tema"
+      "theme": "Tema",
+      "privacy": "Política de privacidad"
     }
   },
   "devBanner": {
@@ -277,5 +278,9 @@
     "error": "No se pudo abrir el micrófono. Inténtalo de nuevo.",
     "selectMicrophone": "Seleccionar micrófono",
     "microphoneFallbackLabel": "Micrófono {{number}}"
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "effectiveDate": "Vigente desde el 21 de noviembre de 2026"
   }
 }

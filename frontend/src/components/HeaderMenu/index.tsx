@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Guitar, Menu } from "lucide-react";
+import { Guitar, Menu, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -66,6 +67,11 @@ const HeaderMenu = () => {
         {getIconByTheme(activeTheme, 16)}
         {t("header.menu.theme")}
       </button>
+
+      <Link to="/privacy" className={ROW_CLASS} onClick={() => setOpen(false)}>
+        <Shield className="h-4 w-4" />
+        {t("header.menu.privacy")}
+      </Link>
 
       <LanguageSwitcher
         trigger={(icon) => (

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.chordium",
+      "sha256_cert_fingerprints": [
+        "92:DA:C8:95:B8:42:9E:84:ED:D5:8B:E3:FF:58:EC:00:81:D9:F0:13:1B:71:E8:31:8C:AA:38:E6:B6:85:1F:19"
+      ]
+    }
+  }
+]

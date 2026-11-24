@@ -1,0 +1,62 @@
+{
+  "format": "chordium-backup",
+  "version": 1,
+  "exportedAt": "2026-11-20T00:00:00.000Z",
+  "songs": [
+    {
+      "metadata": {
+        "path": "oasis/wonderwall",
+        "title": "Wonderwall",
+        "artist": "Oasis",
+        "songKey": "Em",
+        "guitarTuning": ["E", "A", "D", "G", "B", "E"],
+        "guitarCapo": 0,
+        "storage": {
+          "timestamp": 1760000000000,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1760000000000,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "oasis/wonderwall",
+        "songChords": "[Intro] Em7  G\n\n[Verse]\nToday is gonna be the day"
+      },
+      "fullChordSheet": {
+        "path": "oasis/wonderwall",
+        "songChords": "[Intro] Em7  G  D4  A7(4)"
+      },
+      "lyrics": {
+        "path": "oasis/wonderwall",
+        "translations": { "de": "Heute wird der Tag sein" },
+        "timestamp": 1760000000000
+      }
+    },
+    {
+      "metadata": {
+        "path": "radiohead/creep",
+        "title": "Creep",
+        "artist": "Radiohead",
+        "songKey": "G",
+        "guitarTuning": ["E", "A", "D", "G", "B", "E"],
+        "guitarCapo": 0,
+        "storage": {
+          "timestamp": 1760000000000,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1760000000000,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "radiohead/creep",
+        "songChords": "[Intro] G  B  C  Cm"
+      }
+    }
+  ]
+}

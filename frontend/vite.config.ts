@@ -14,6 +14,9 @@ const pkgVersion = JSON.parse(readFileSync(path.resolve(__dirname, "package.json
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isHttps = process.env.VITE_HTTPS_ENABLED === 'true';
+  // The Capacitor shell serves the build locally, so a service worker would
+  // only cache the shell against itself.
+  const isNativeBuild = process.env.VITE_NATIVE_BUILD === 'true';
   
   return {
     server: {
@@ -37,14 +40,14 @@ export default defineConfig(({ mode }) => {
       react(),
       // Only strip data-testid attributes in production mode
       ...(isProduction ? [stripTestAttributes()] : []),
-      ...(isProduction ? [visualizer({
+      ...(isProduction && !isNativeBuild ? [visualizer({
         open: true,
         gzipSize: true,
         brotliSize: true,
         filename: 'dist/stats.html', // Output file
         template: 'treemap', // or 'sunburst', 'network'
       })] : []),
-      ...(isProduction ? [viteCompression({
+      ...(isProduction && !isNativeBuild ? [viteCompression({
         verbose: true,
         disable: false,
         threshold: 10240, // Only compress files larger than 10kb
@@ -61,7 +64,11 @@ export default defineConfig(({ mode }) => {
       //   ext: '.gz',
       // }),
       VitePWA({
+        // The Capacitor shell serves the bundle from the APK; a service worker
+        // there would only cache the shell against itself.
+        disable: isNativeBuild,
         registerType: 'prompt',
+        injectRegister: isNativeBuild ? false : 'auto',
         manifest: {
           name: 'Chordium',
           short_name: 'Chordium',

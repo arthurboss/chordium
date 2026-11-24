@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Download, Upload } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 import { toast } from "sonner";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
@@ -67,6 +68,7 @@ const ChordSheetList = ({
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
 
   const sorted = sortChordSheets(chordSheets, sort);
+  const canExport = !Capacitor.isNativePlatform();
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -122,15 +124,17 @@ const ChordSheetList = ({
     <div>
       <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            onClick={handleExport}
-            disabled={chordSheets.length === 0 || isExporting}
-            variant="outline"
-            size="sm"
-          >
-            <Download className="h-4 w-4" aria-hidden="true" />
-            {t("backup.exportButton")}
-          </Button>
+          {canExport && (
+            <Button
+              onClick={handleExport}
+              disabled={chordSheets.length === 0 || isExporting}
+              variant="outline"
+              size="sm"
+            >
+              <Download className="h-4 w-4" aria-hidden="true" />
+              {t("backup.exportButton")}
+            </Button>
+          )}
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}

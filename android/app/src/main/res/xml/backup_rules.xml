@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup rules for Android 11 and lower. The saved song library lives
+     in WebView IndexedDB, so that directory has to be included explicitly.
+     Only the listed paths are backed up, which keeps caches out. -->
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <include domain="database" path="." />
+    <include domain="file" path="." />
+    <include domain="root" path="app_webview/Default/IndexedDB/" />
+    <include domain="root" path="app_webview/Default/Local Storage/" />
+    <include domain="root" path="app_webview/Default/Session Storage/" />
+</full-backup-content>
