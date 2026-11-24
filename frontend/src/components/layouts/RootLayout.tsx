@@ -22,6 +22,11 @@ const RootLayout = () => {
         <JamSessionProvider>
           <ActiveChordSheetProvider>
             <div id="app-layout" className="flex flex-col min-h-dvh">
+              {process.env.VITE_DEV_BUILD === 'true' && (
+                <div className="w-full bg-primary/30 py-1 text-center text-xs font-medium">
+                  Dev Mode
+                </div>
+              )}
               <Header />
               <Outlet />
               <Footer />

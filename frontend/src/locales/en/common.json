@@ -13,10 +13,6 @@
       "privacy": "Privacy policy"
     }
   },
-  "devBanner": {
-    "note": "Note:",
-    "message": "This app is in development. Some features may not work as expected."
-  },
   "searchBar": {
     "placeholder": "Search for an artist or song",
     "back": "Back",

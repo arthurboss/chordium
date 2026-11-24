@@ -71,10 +71,12 @@ npm run android:apk
 adb -s <serial> install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Debug builds also claim `chordium-dev.vercel.app` for App Links instead of the
-production host, so they never compete with the release app for real song
-links. The dev build carries a `-dev` version name; its `versionCode` can stay
-identical because the packages are versioned independently.
+Debug builds use the app's primary purple as the launcher icon background and
+show a thin dev banner above the header. They also claim
+`chordium-dev.vercel.app` for App Links instead of the production host, so they
+never compete with the release app for real song links. The dev build carries a `-dev` version name;
+its `versionCode` can stay identical because the packages are versioned
+independently.
 
 Release builds keep `app.chordium`. Only `npm run android:bundle` or an
 `assembleRelease` APK produces the stable package.

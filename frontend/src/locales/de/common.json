@@ -13,10 +13,6 @@
       "privacy": "Datenschutzerklärung"
     }
   },
-  "devBanner": {
-    "note": "Hinweis:",
-    "message": "Diese App befindet sich in Entwicklung. Einige Funktionen arbeiten möglicherweise nicht wie erwartet."
-  },
   "searchBar": {
     "placeholder": "Nach Künstler oder Lied suchen",
     "back": "Zurück",
