@@ -36,11 +36,11 @@ Chordium is designed with simplicity in mind, helping new guitar players and cas
 
 Scan a QR code or tap a link to instantly share the exact chord sheet you're viewing. No account, no server round-trip. On Android, shared song links open in the app.
 
-## Android
+## <img src="https://cdn.simpleicons.org/android/3DDC84" alt="Android" width="22" height="22" /> Android
 
 The Android app packages the same frontend with its assets on the device, so saved chord sheets work offline. Download the signed APK from [Releases](https://github.com/arthurboss/chordium/releases). Requires Android 7.0 or newer.
 
-Sideloaded builds do not update automatically. Earlier debug-signed builds must be uninstalled before installing the release-signed APK, which clears saved chord sheets.
+Sideloaded builds do not update automatically. Download new APKs from [Releases](https://github.com/arthurboss/chordium/releases).
 
 ## 💻 Tech Stack
 
