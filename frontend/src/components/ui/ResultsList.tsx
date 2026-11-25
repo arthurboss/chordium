@@ -1,11 +1,11 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import VirtualizedList from '@/components/ui/VirtualizedList';
 import { ResultsListProps } from './ResultsList.types';
 import { CARD_HEIGHTS } from "@/constants/ui-constants";
 import { cyAttr } from "@/utils/test-utils";
+import { useFitListHeight } from "@/hooks/useFitListHeight";
 
 const VIRTUALIZE_THRESHOLD = 30;
-const MIN_LIST_HEIGHT = 160;
 
 /**
  * Generic results list wrapper.
@@ -20,31 +20,10 @@ export function ResultsList<T>({
   renderItem,
 }: Readonly<ResultsListProps<T>>) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [listHeight, setListHeight] = useState<number | null>(null);
 
   const itemCount = items?.length ?? 0;
   const isVirtualized = itemCount >= VIRTUALIZE_THRESHOLD;
-
-  useLayoutEffect(() => {
-    if (itemCount === 0) return;
-
-    const measure = () => {
-      const list = scrollRef.current;
-      if (!list) return;
-
-      const rect = list.getBoundingClientRect();
-      const top = rect.top + window.scrollY;
-      const below = document.documentElement.scrollHeight - (rect.bottom + window.scrollY);
-      const available = window.innerHeight - top - below;
-      const cap = window.innerHeight * 0.6;
-
-      setListHeight(Math.max(MIN_LIST_HEIGHT, Math.floor(Math.min(cap, available))));
-    };
-
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [itemCount, isVirtualized]);
+  const listHeight = useFitListHeight(scrollRef, itemCount);
 
   if (itemCount === 0) return null;
 

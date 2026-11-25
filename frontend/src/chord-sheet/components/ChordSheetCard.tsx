@@ -16,7 +16,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
 
   return (
     <Card
-      className="w-full overflow-hidden cursor-pointer transition-colors duration-300 border bg-card border-border hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary"
+      className="w-full overflow-hidden cursor-pointer transition-colors duration-300 border bg-background border-border hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary"
       {...cyAttr(`chordsheet-card-${chordSheet.path}`)}
     >
       <CardContent
@@ -57,6 +57,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
           onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
           aria-label={`Delete chord sheet ${chordSheet.title}`}
           tabIndex={0}
+          className="bg-card"
           {...cyAttr(`delete-btn-${chordSheet.path}`)}
         />
       </CardContent>

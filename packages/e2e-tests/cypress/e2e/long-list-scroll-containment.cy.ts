@@ -24,9 +24,13 @@ describe('Long chord sheet list scroll containment', () => {
       const list = win.document.querySelector('[data-cy="chord-sheet-scroll"]') as HTMLElement;
       // The page may be a couple of pixels taller than a short test viewport,
       // but the list's hidden rows must not add their full height to it.
-      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 50);
+      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 1);
       expect(win.document.documentElement.scrollHeight).to.be.lessThan(list.scrollHeight);
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
+
+      const card = list.closest('.bg-card') as HTMLElement;
+      const footer = win.document.querySelector('footer') as HTMLElement;
+      expect(footer.getBoundingClientRect().top - card.getBoundingClientRect().bottom).to.be.lessThan(40);
     });
   });
 
@@ -77,6 +81,10 @@ describe('Long chord sheet list scroll containment', () => {
       const list = win.document.querySelector('[data-cy="results-scroll"]') as HTMLElement;
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
       expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 2);
+
+      const card = list.closest('.bg-card') as HTMLElement;
+      const footer = win.document.querySelector('footer') as HTMLElement;
+      expect(footer.getBoundingClientRect().top - card.getBoundingClientRect().bottom).to.be.lessThan(40);
     });
   });
 });
