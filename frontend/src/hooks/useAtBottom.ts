@@ -1,4 +1,5 @@
-import { useSyncExternalStore, RefObject } from "react";
+import type { RefObject } from "react";
+import { useScrollState } from "./useScrollState";
 
 /**
  * useAtBottom
@@ -18,63 +19,5 @@ export function useAtBottom(options?: {
   getTotalSize?: () => number;
   offset?: number;
 }): boolean {
-  const { ref, element, getTotalSize, offset = 50 } = options || {};
-
-  function resolveContainer(): HTMLElement | null {
-    return element ?? ref?.current ?? null;
-  }
-
-  // --- Store subscription logic ---
-  function subscribe(callback: () => void) {
-    let frame: number | null = null;
-    const handler = () => {
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(callback);
-    };
-    const container = resolveContainer();
-    if (container) {
-      container.addEventListener("scroll", handler, { passive: true });
-      return () => {
-        container.removeEventListener("scroll", handler);
-        if (frame !== null) cancelAnimationFrame(frame);
-      };
-    } else {
-      window.addEventListener("scroll", handler, { passive: true });
-      window.addEventListener("resize", handler, { passive: true });
-      return () => {
-        window.removeEventListener("scroll", handler);
-        window.removeEventListener("resize", handler);
-        if (frame !== null) cancelAnimationFrame(frame);
-      };
-    }
-  }
-
-  // --- Get current snapshot logic ---
-  function getSnapshot() {
-    const container = resolveContainer();
-    if (container) {
-      const scrollOffset = container.scrollTop || 0;
-      const clientHeight = container.clientHeight || 0;
-      const totalSize = getTotalSize ? getTotalSize() : container.scrollHeight || 0;
-      const isScrollable = totalSize > clientHeight + 1;
-      return (
-        isScrollable && scrollOffset >= totalSize - clientHeight - offset
-      );
-    } else {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const isScrollable = documentHeight > windowHeight + 1;
-      const scrollPosition = window.scrollY;
-      return (
-        isScrollable && windowHeight + scrollPosition >= documentHeight - offset
-      );
-    }
-  }
-
-  // --- Get server snapshot (always false) ---
-  function getServerSnapshot() {
-    return false;
-  }
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useScrollState(options).isAtBottom;
 }

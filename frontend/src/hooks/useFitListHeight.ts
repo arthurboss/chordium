@@ -63,6 +63,8 @@ export function useFitListHeight(
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(list);
+    const card = list.closest(".bg-card");
+    if (card) observer.observe(card);
     window.addEventListener("resize", measure);
     return () => {
       observer.disconnect();

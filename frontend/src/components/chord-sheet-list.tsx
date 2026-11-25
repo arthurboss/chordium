@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
 import FormContainer from "@/components/ui/FormContainer";
+import ScrollAffordance from "@/components/ui/ScrollAffordance";
 import { cyAttr } from "@/utils/test-utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -192,6 +193,10 @@ const ChordSheetList = ({
               ))}
             </div>
           </div>
+          <ScrollAffordance
+            parentRef={listRef}
+            getTotalSize={() => listRef.current?.scrollHeight ?? 0}
+          />
         </FormContainer>
       ) : (
         <div className="text-center py-8">

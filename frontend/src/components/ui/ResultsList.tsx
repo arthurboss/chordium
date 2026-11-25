@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import VirtualizedList from '@/components/ui/VirtualizedList';
+import ScrollAffordance from '@/components/ui/ScrollAffordance';
 import { ResultsListProps } from './ResultsList.types';
 import { CARD_HEIGHTS } from "@/constants/ui-constants";
 import { cyAttr } from "@/utils/test-utils";
@@ -42,16 +43,22 @@ export function ResultsList<T>({
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className="relative max-h-[60vh] w-full overflow-y-auto overscroll-contain"
-      style={listHeight === null ? undefined : { maxHeight: listHeight }}
-      {...cyAttr("results-scroll")}
-    >
-      <div className="grid grid-cols-1 gap-y-2">
-        {items.map((item, index) => renderItem({ item, index }))}
+    <>
+      <div
+        ref={scrollRef}
+        className="relative max-h-[60vh] w-full overflow-y-auto overscroll-contain"
+        style={listHeight === null ? undefined : { maxHeight: listHeight }}
+        {...cyAttr("results-scroll")}
+      >
+        <div className="grid grid-cols-1 gap-y-2">
+          {items.map((item, index) => renderItem({ item, index }))}
+        </div>
       </div>
-    </div>
+      <ScrollAffordance
+        parentRef={scrollRef}
+        getTotalSize={() => scrollRef.current?.scrollHeight ?? 0}
+      />
+    </>
   );
 }
 

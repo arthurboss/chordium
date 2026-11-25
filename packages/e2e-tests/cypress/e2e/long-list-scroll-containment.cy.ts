@@ -20,7 +20,15 @@ describe('Long chord sheet list scroll containment', () => {
       expect(list.scrollHeight).to.be.greaterThan(list.clientHeight);
     });
 
-    cy.window().then((win) => {
+    cy.get('[data-cy="scroll-affordance"]').should('exist');
+    cy.get('[data-cy="scroll-affordance"] button[aria-label="Scroll down"]').should('exist');
+    cy.get('[data-cy="scroll-fade"]').should('exist');
+
+    cy.get('[data-cy="chord-sheet-scroll"]').scrollTo('bottom');
+    cy.get('[data-cy="scroll-fade"]').should('not.exist');
+    cy.get('[data-cy="scroll-affordance"] button[aria-label="Scroll to top"]').should('exist');
+
+    cy.window().should((win) => {
       const list = win.document.querySelector('[data-cy="chord-sheet-scroll"]') as HTMLElement;
       // The page may be a couple of pixels taller than a short test viewport,
       // but the list's hidden rows must not add their full height to it.
@@ -50,7 +58,7 @@ describe('Long chord sheet list scroll containment', () => {
     cy.wait('@shortSearch');
     cy.contains('Fixture Song 0').should('be.visible');
 
-    cy.window().then((win) => {
+    cy.window().should((win) => {
       const scrollable = win.document.querySelector('[data-cy="results-scroll"]');
       expect(Boolean(scrollable)).to.equal(true);
 
@@ -58,6 +66,7 @@ describe('Long chord sheet list scroll containment', () => {
       expect(list.scrollHeight).to.be.greaterThan(list.clientHeight);
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
       expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 2);
+      expect(Boolean(win.document.querySelector('[data-cy="scroll-affordance"]'))).to.equal(true);
     });
   });
 
@@ -77,14 +86,33 @@ describe('Long chord sheet list scroll containment', () => {
     cy.wait('@longSearch');
     cy.get('[data-index]').should('have.length.greaterThan', 0);
 
-    cy.window().then((win) => {
+    cy.window().should((win) => {
       const list = win.document.querySelector('[data-cy="results-scroll"]') as HTMLElement;
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
       expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 2);
+      expect(Boolean(win.document.querySelector('[data-cy="scroll-affordance"]'))).to.equal(true);
 
       const card = list.closest('.bg-card') as HTMLElement;
       const footer = win.document.querySelector('footer') as HTMLElement;
       expect(footer.getBoundingClientRect().top - card.getBoundingClientRect().bottom).to.be.lessThan(40);
     });
+  });
+
+  it('hides the affordance when the section fits', () => {
+    cy.intercept('GET', '/api/search*', {
+      statusCode: 200,
+      body: Array.from({ length: 2 }, (_, i) => ({
+        type: 'song',
+        path: `fixture-artist/fixture-song-${i}`,
+        title: `Fixture Song ${i}`,
+        artist: 'Fixture Artist',
+        match: 'title',
+      })),
+    }).as('tinySearch');
+
+    cy.visit('/search?q=fixture&section=songs');
+    cy.wait('@tinySearch');
+    cy.contains('Fixture Song 0').should('be.visible');
+    cy.get('[data-cy="scroll-affordance"]').should('not.exist');
   });
 });
