@@ -29,4 +29,33 @@ describe('Long chord sheet list scroll containment', () => {
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
     });
   });
+
+  it('caps a short results section at the same 60vh scroller', () => {
+    cy.intercept('GET', '/api/search*', {
+      statusCode: 200,
+      body: Array.from({ length: 12 }, (_, i) => ({
+        type: 'song',
+        path: `fixture-artist/fixture-song-${i}`,
+        title: `Fixture Song ${i}`,
+        artist: 'Fixture Artist',
+        match: 'title',
+      })),
+    }).as('shortSearch');
+
+    cy.visit('/search?q=fixture&section=songs');
+    cy.wait('@shortSearch');
+    cy.contains('Fixture Song 0').should('be.visible');
+
+    cy.window().then((win) => {
+      const scrollable = win.document.querySelector('[data-cy="results-scroll"]');
+      expect(Boolean(scrollable)).to.equal(true);
+
+      const list = scrollable as HTMLElement;
+      expect(list.scrollHeight).to.be.greaterThan(list.clientHeight);
+      expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
+      // The search page's own chrome can exceed a short test viewport; the
+      // point is that the section's rows do not add their full height to it.
+      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 200);
+    });
+  });
 });
