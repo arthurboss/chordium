@@ -120,6 +120,8 @@
   },
   "chordSheetList": {
     "empty": "Você ainda não salvou nenhuma cifra.",
+    "plays": "{{count}} reprodução",
+    "plays_other": "{{count}} reproduções",
     "uploadAriaLabel": "Importar uma cifra",
     "uploadButton": "Importar uma cifra"
   },

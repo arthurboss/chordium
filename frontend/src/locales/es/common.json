@@ -120,6 +120,8 @@
   },
   "chordSheetList": {
     "empty": "No has guardado ningún acorde aún.",
+    "plays": "{{count}} reproducción",
+    "plays_other": "{{count}} reproducciones",
     "uploadAriaLabel": "Importar un acorde",
     "uploadButton": "Importar un acorde"
   },

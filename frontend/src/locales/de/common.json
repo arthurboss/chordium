@@ -120,6 +120,8 @@
   },
   "chordSheetList": {
     "empty": "Du hast noch keine Akkordblätter gespeichert.",
+    "plays": "{{count}} Wiedergabe",
+    "plays_other": "{{count}} Wiedergaben",
     "uploadAriaLabel": "Akkordblatt hochladen",
     "uploadButton": "Akkordblatt hochladen"
   },
