@@ -1,0 +1,1207 @@
+{
+  "format": "chordium-backup",
+  "version": 1,
+  "exportedAt": "2026-11-25T00:00:00.000Z",
+  "songs": [
+    {
+      "metadata": {
+        "title": "Fixture Song 00",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-00",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-00",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 01",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-01",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-01",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 02",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-02",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-02",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 03",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-03",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-03",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 04",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-04",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-04",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 05",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-05",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-05",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 06",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-06",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-06",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 07",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-07",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-07",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 08",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-08",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-08",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 09",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-09",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-09",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 10",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-10",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-10",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 11",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-11",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-11",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 12",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-12",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-12",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 13",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-13",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-13",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 14",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-14",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-14",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 15",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-15",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-15",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 16",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-16",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-16",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 17",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-17",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-17",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 18",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-18",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-18",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 19",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-19",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-19",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 20",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-20",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-20",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 21",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-21",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-21",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 22",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-22",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-22",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 23",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-23",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-23",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 24",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-24",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-24",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 25",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-25",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-25",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 26",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-26",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-26",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 27",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-27",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-27",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 28",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-28",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-28",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 29",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-29",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-29",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 30",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-30",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-30",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 31",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-31",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-31",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 32",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-32",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-32",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 33",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-33",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-33",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 34",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-34",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-34",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 35",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-35",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-35",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 36",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-36",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-36",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 37",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-37",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-37",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 38",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-38",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-38",
+        "songChords": "C G Am F"
+      }
+    },
+    {
+      "metadata": {
+        "title": "Fixture Song 39",
+        "artist": "Fixture Artist",
+        "songKey": "C",
+        "guitarTuning": [
+          "E",
+          "A",
+          "D",
+          "G",
+          "B",
+          "E"
+        ],
+        "guitarCapo": 0,
+        "path": "fixture-artist/fixture-song-39",
+        "storage": {
+          "timestamp": 1795601831586,
+          "version": 1,
+          "expiresAt": null,
+          "saved": true,
+          "lastAccessed": 1795601831586,
+          "accessCount": 1,
+          "contentAvailable": true
+        }
+      },
+      "chordSheet": {
+        "path": "fixture-artist/fixture-song-39",
+        "songChords": "C G Am F"
+      }
+    }
+  ]
+}

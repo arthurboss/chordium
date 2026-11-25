@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ScrollArrow } from '@/components/ui/ScrollArrow';
 import { useAtBottom } from '@/hooks/useAtBottom';
+import { cyAttr } from '@/utils/test-utils';
 
 interface VirtualizedListProps<T> {
   readonly items: T[];
@@ -9,6 +10,7 @@ interface VirtualizedListProps<T> {
   readonly renderItem: (props: { item: T; index: number; style: React.CSSProperties }) => React.ReactNode;
   readonly className?: string;
   readonly height?: number | string;
+  readonly containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -32,8 +34,10 @@ function VirtualizedList<T>({
   renderItem,
   className = '',
   height = '60vh',
+  containerRef,
 }: VirtualizedListProps<T>) {
-  const parentRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
+  const parentRef = containerRef ?? internalRef;
 
   const gap = 8; // px, matches gap-y-2
   const rowVirtualizer = useVirtualizer({
@@ -50,7 +54,8 @@ function VirtualizedList<T>({
     <>
       <div
         ref={parentRef}
-        className={`relative w-full ${className}`}
+        className={`relative w-full overscroll-contain ${className}`}
+        {...cyAttr('results-scroll')}
         style={{ height, overflow: 'auto', scrollbarWidth: 'none' }}
       >
         <div
