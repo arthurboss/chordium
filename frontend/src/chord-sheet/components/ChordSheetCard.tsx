@@ -1,10 +1,15 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
 import { cyAttr } from "@/utils/test-utils";
 
 const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
+  const { t } = useTranslation();
+  // Saving stores accessCount 1; later opens are what read as plays.
+  const plays = Math.max((chordSheet.storage?.accessCount ?? 0) - 1, 0);
+
   const handleClick = () => {
     onView(chordSheet);
   };
@@ -53,13 +58,18 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
             </>
           )}
         </div>
-        <RoundTrashButton
-          onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
-          aria-label={`Delete chord sheet ${chordSheet.title}`}
-          tabIndex={0}
-          className="bg-card"
-          {...cyAttr(`delete-btn-${chordSheet.path}`)}
-        />
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {t("chordSheetList.plays", { count: plays })}
+          </span>
+          <RoundTrashButton
+            onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
+            aria-label={`Delete chord sheet ${chordSheet.title}`}
+            tabIndex={0}
+            className="bg-card"
+            {...cyAttr(`delete-btn-${chordSheet.path}`)}
+          />
+        </div>
       </CardContent>
     </Card>
   );

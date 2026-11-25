@@ -120,6 +120,8 @@
   },
   "chordSheetList": {
     "empty": "You haven't saved any chord sheets yet.",
+    "plays": "{{count}} play",
+    "plays_other": "{{count}} plays",
     "uploadAriaLabel": "Upload a chord sheet",
     "uploadButton": "Upload a chord sheet"
   },
