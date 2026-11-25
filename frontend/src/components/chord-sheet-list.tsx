@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { toast } from "sonner";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
+import { cyAttr } from "@/utils/test-utils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -169,7 +170,7 @@ const ChordSheetList = ({
       </div>
 
       {chordSheets.length > 0 ? (
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
+        <div ref={listRef} className="relative max-h-[60vh] overflow-y-auto overscroll-contain" {...cyAttr("chord-sheet-scroll")}>
           <div className="flex flex-col gap-2">
             {sorted.map((storedChordSheet) => (
               <ChordSheetCard

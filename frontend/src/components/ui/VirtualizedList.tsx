@@ -50,7 +50,7 @@ function VirtualizedList<T>({
     <>
       <div
         ref={parentRef}
-        className={`relative w-full ${className}`}
+        className={`relative w-full overscroll-contain ${className}`}
         style={{ height, overflow: 'auto', scrollbarWidth: 'none' }}
       >
         <div
