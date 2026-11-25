@@ -53,9 +53,30 @@ describe('Long chord sheet list scroll containment', () => {
       const list = scrollable as HTMLElement;
       expect(list.scrollHeight).to.be.greaterThan(list.clientHeight);
       expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
-      // The search page's own chrome can exceed a short test viewport; the
-      // point is that the section's rows do not add their full height to it.
-      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 200);
+      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 2);
+    });
+  });
+
+  it('fits a virtualized results section inside the viewport', () => {
+    cy.intercept('GET', '/api/search*', {
+      statusCode: 200,
+      body: Array.from({ length: 40 }, (_, i) => ({
+        type: 'song',
+        path: `fixture-artist/fixture-song-${i}`,
+        title: `Fixture Song ${i}`,
+        artist: 'Fixture Artist',
+        match: 'title',
+      })),
+    }).as('longSearch');
+
+    cy.visit('/search?q=fixture&section=songs');
+    cy.wait('@longSearch');
+    cy.get('[data-index]').should('have.length.greaterThan', 0);
+
+    cy.window().then((win) => {
+      const list = win.document.querySelector('[data-cy="results-scroll"]') as HTMLElement;
+      expect(win.getComputedStyle(list).overscrollBehaviorY).to.equal('contain');
+      expect(win.document.documentElement.scrollHeight).to.be.at.most(win.innerHeight + 2);
     });
   });
 });
