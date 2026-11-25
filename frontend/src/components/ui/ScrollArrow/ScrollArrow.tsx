@@ -2,7 +2,7 @@ import React from 'react';
 import BlinkingArrow from '../BlinkingArrow';
 import { getJumpingAnimation } from './getJumpingAnimation';
 import { ScrollArrowProps } from './ScrollArrow.types';
-import { useAtBottom } from '@/hooks/useAtBottom';
+import { useScrollState } from '@/hooks/useScrollState';
 
 /**
  * ScrollArrow
@@ -25,7 +25,7 @@ const ScrollArrow: React.FC<ScrollArrowProps> = ({
   className = '',
   style = {},
 }) => {
-  const isAtBottom = useAtBottom({ ref: parentRef, getTotalSize });
+  const { isScrollable, isAtBottom } = useScrollState({ ref: parentRef, getTotalSize });
   const direction = isAtBottom ? 'up' : 'down';
   const label = isAtBottom ? 'Scroll to top' : 'Scroll down';
 
@@ -39,6 +39,8 @@ const ScrollArrow: React.FC<ScrollArrowProps> = ({
       }
     }
   }, [isAtBottom, parentRef]);
+
+  if (!isScrollable) return null;
 
   return (
     <>

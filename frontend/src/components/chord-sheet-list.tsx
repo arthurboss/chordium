@@ -5,6 +5,8 @@ import { Capacitor } from "@capacitor/core";
 import { toast } from "sonner";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
+import FormContainer from "@/components/ui/FormContainer";
+import ScrollAffordance from "@/components/ui/ScrollAffordance";
 import { cyAttr } from "@/utils/test-utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
+import { useFitListHeight } from "@/hooks/useFitListHeight";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
 import {
   createBackup,
@@ -67,6 +70,8 @@ const ChordSheetList = ({
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
+
+  const listHeight = useFitListHeight(listRef, chordSheets.length, true, 1);
 
   const sorted = sortChordSheets(chordSheets, sort);
   const canExport = !Capacitor.isNativePlatform();
@@ -131,6 +136,7 @@ const ChordSheetList = ({
               disabled={chordSheets.length === 0 || isExporting}
               variant="outline"
               size="sm"
+              className="h-10 bg-card"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               {t("backup.exportButton")}
@@ -141,6 +147,7 @@ const ChordSheetList = ({
             disabled={isImporting}
             variant="outline"
             size="sm"
+            className="h-10 bg-card"
           >
             <Upload className="h-4 w-4" aria-hidden="true" />
             {t("backup.importButton")}
@@ -170,18 +177,29 @@ const ChordSheetList = ({
       </div>
 
       {chordSheets.length > 0 ? (
-        <div ref={listRef} className="relative max-h-[60vh] overflow-y-auto overscroll-contain" {...cyAttr("chord-sheet-scroll")}>
-          <div className="flex flex-col gap-2">
-            {sorted.map((storedChordSheet) => (
-              <ChordSheetCard
-                key={storedChordSheet.path}
-                chordSheet={storedChordSheet}
-                onView={onChordSheetSelect}
-                onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
-              />
-            ))}
+        <FormContainer contentClassName="pb-2">
+          <div
+            ref={listRef}
+            className="relative max-h-[60vh] overflow-y-auto overscroll-contain"
+            style={listHeight === null ? undefined : { maxHeight: listHeight }}
+            {...cyAttr("chord-sheet-scroll")}
+          >
+            <div className="flex flex-col gap-2">
+              {sorted.map((storedChordSheet) => (
+                <ChordSheetCard
+                  key={storedChordSheet.path}
+                  chordSheet={storedChordSheet}
+                  onView={onChordSheetSelect}
+                  onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+          <ScrollAffordance
+            parentRef={listRef}
+            getTotalSize={() => listRef.current?.scrollHeight ?? 0}
+          />
+        </FormContainer>
       ) : (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">{t("chordSheetList.empty")}</p>
