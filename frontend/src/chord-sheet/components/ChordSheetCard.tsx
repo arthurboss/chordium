@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Eye } from "lucide-react";
 import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
@@ -59,8 +60,12 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {t("chordSheetList.plays", { count: plays })}
+          <span
+            className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums"
+            aria-label={t("chordSheetList.plays", { count: plays })}
+          >
+            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+            {plays}
           </span>
           <RoundTrashButton
             onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
