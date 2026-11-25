@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import type { StoredSongMetadata, StoredChordSheet } from "../types";
 import type { ChordSheet } from "@chordium/types";
-import { getChordSheetMetadata, getChordSheetContent } from "../stores/chord-sheets/operations";
+import { getChordSheetMetadata, getChordSheetContent, storeChordSheetMetadata } from "../stores/chord-sheets/operations";
+import { updateAccess } from "../stores/chord-sheets/utils/access-tracking";
 
 // Enhanced result interface for lazy loading
 interface UseLazyChordSheetResult {
@@ -62,9 +63,11 @@ export function useLazyChordSheet({ path }: { path: string }): UseLazyChordSheet
         
         if (metadataResult) {
           // CACHED: Load metadata immediately, then content naturally
+          const accessedMetadata = updateAccess(metadataResult);
+          storeChordSheetMetadata(accessedMetadata).catch(() => {});
           if (!cancelled) {
             setIsFromCache(true);
-            setMetadata(metadataResult);
+            setMetadata(accessedMetadata);
             setError(null);
             setIsLoading(false);
             
