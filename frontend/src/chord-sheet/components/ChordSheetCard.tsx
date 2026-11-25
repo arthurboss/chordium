@@ -59,7 +59,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
             </>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-col items-end justify-between self-stretch">
           <span
             className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums"
             aria-label={t("chordSheetList.plays", { count: plays })}
