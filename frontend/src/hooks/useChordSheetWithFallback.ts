@@ -3,6 +3,7 @@ import type { SongMetadata, ChordSheet } from '@chordium/types';
 import type { StoredSongMetadata, StoredChordSheet } from '@/storage/types';
 import { fetchSongFromAPI, fetchFullSongFromAPI, type ArrangementVariant } from '@/services/api/fetch-song';
 import { storeChordSheet, storeFullChordSheet, getFullChordSheetContent } from '@/storage/stores/chord-sheets/operations';
+import { recordAccess } from '@/storage/stores/chord-sheets/utils/access-tracking';
 
 export interface ChordSheetWithFallbackState {
   metadata: StoredSongMetadata | null;
@@ -51,7 +52,7 @@ export function useChordSheetWithFallback(path: string): ChordSheetWithFallbackS
           getChordSheetContent(path),
           getFullChordSheetContent(path),
         ]);
-        setLocalMetadata(metadata);
+        setLocalMetadata(metadata ? recordAccess(metadata) : metadata);
         setLocalContent(content);
         setFullContent(full);
         setLocalError(null);
