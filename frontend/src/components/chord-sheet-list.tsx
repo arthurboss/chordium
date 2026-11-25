@@ -136,6 +136,7 @@ const ChordSheetList = ({
               disabled={chordSheets.length === 0 || isExporting}
               variant="outline"
               size="sm"
+              className="h-10 bg-card"
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               {t("backup.exportButton")}
@@ -146,6 +147,7 @@ const ChordSheetList = ({
             disabled={isImporting}
             variant="outline"
             size="sm"
+            className="h-10 bg-card"
           >
             <Upload className="h-4 w-4" aria-hidden="true" />
             {t("backup.importButton")}
