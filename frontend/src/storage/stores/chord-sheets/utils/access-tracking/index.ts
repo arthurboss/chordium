@@ -5,3 +5,4 @@
  */
 
 export { updateAccess } from "./update-access";
+export { recordAccess } from "./record-access";
