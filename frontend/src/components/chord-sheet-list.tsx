@@ -66,7 +66,6 @@ function downloadBackup(blob: Blob, fileName: string): void {
 const ChordSheetList = ({
   chordSheets,
   onChordSheetSelect,
-  onDeleteChordSheet,
   onDeleteChordSheets,
   onUploadClick,
   onImportComplete,
@@ -300,7 +299,6 @@ const ChordSheetList = ({
                   key={storedChordSheet.path}
                   chordSheet={storedChordSheet}
                   onView={onChordSheetSelect}
-                  onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
                   isSelected={selectedPaths.has(storedChordSheet.path)}
                   onToggleSelect={() => toggleSelection(storedChordSheet.path)}
                 />

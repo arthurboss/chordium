@@ -164,34 +164,6 @@ const TabContainer = ({
     }
   };
 
-  const handleChordSheetDelete = async (songPath: string) => {
-    const songToDelete = myChordSheets.find(song => song.path === songPath);
-
-    if (!songToDelete) {
-      if (import.meta.env.DEV) {
-        console.error("Song not found for deletion:", songPath);
-      }
-      return;
-    }
-
-    try {
-      await deleteChordSheet(songPath);
-
-      toast.success(i18n.t("notifications:uploadRemoved"), { description: i18n.t("notifications:uploadRemovedDesc", { title: songToDelete.title }) });
-
-      await setMySongs();
-
-      if (selectedSong?.path === songPath) {
-        setSelectedSong(null);
-      }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Failed to remove chord sheet:", error);
-      }
-      toast.error(i18n.t("notifications:uploadRemoveFailed"), { description: i18n.t("notifications:uploadRemoveFailedDesc", { title: songToDelete.title }) });
-    }
-  };
-
   const handleChordSheetsDelete = async (songPaths: string[]) => {
     if (songPaths.length === 0) return;
 
@@ -317,7 +289,6 @@ const TabContainer = ({
           <ChordSheetList
             chordSheets={myChordSheets}
             onChordSheetSelect={handleSongSelect}
-            onDeleteChordSheet={handleChordSheetDelete}
             onDeleteChordSheets={handleChordSheetsDelete}
             onUploadClick={() => handleTabChange("upload")}
             onImportComplete={setMySongs}

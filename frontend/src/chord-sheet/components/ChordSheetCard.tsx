@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Eye } from "lucide-react";
-import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
@@ -10,7 +9,6 @@ import { cyAttr } from "@/utils/test-utils";
 const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
   chordSheet,
   onView,
-  onDelete,
   isSelected = false,
   onToggleSelect,
 }) => {
@@ -70,7 +68,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
             </>
           )}
         </div>
-        <div className="flex shrink-0 flex-col items-end justify-between self-stretch">
+        <div className="flex shrink-0 flex-col items-center justify-between self-stretch">
           <Checkbox
             checked={isSelected}
             onCheckedChange={onToggleSelect}
@@ -79,22 +77,13 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
             className="bg-background"
             {...cyAttr(`select-card-${chordSheet.path}`)}
           />
-          <div className="flex items-center gap-2">
-            <span
-              className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums"
-              aria-label={t("chordSheetList.plays", { count: plays })}
-            >
-              <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-              {plays}
-            </span>
-            <RoundTrashButton
-              onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
-              aria-label={`Delete chord sheet ${chordSheet.title}`}
-              tabIndex={0}
-              className="bg-card"
-              {...cyAttr(`delete-btn-${chordSheet.path}`)}
-            />
-          </div>
+          <span
+            className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums"
+            aria-label={t("chordSheetList.plays", { count: plays })}
+          >
+            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+            {plays}
+          </span>
         </div>
       </CardContent>
     </Card>
