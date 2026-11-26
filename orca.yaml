@@ -1,0 +1,11 @@
+scripts:
+  setup: |
+    npm ci
+
+setupAgentStartupPolicy: wait-for-setup
+
+defaultTabs:
+  - title: Agent
+  - title: Tests
+    command: npm run test
+  - title: Dev
