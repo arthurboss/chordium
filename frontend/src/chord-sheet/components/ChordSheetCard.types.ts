@@ -3,5 +3,6 @@ import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operation
 export interface ChordSheetCardProps {
   chordSheet: ChordSheetListItem;
   onView: (chordSheet: ChordSheetListItem) => void;
-  onDelete: (chordSheet: ChordSheetListItem) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }

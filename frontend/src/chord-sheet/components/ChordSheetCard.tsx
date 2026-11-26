@@ -1,12 +1,17 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Eye } from "lucide-react";
-import RoundTrashButton from "@/components/ui/RoundTrashButton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ChordSheetCardProps } from "./ChordSheetCard.types";
 import { cyAttr } from "@/utils/test-utils";
 
-const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onDelete }) => {
+const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
+  chordSheet,
+  onView,
+  isSelected = false,
+  onToggleSelect,
+}) => {
   const { t } = useTranslation();
   // Saving stores accessCount 1; later opens are what read as plays.
   const plays = Math.max((chordSheet.storage?.accessCount ?? 0) - 1, 0);
@@ -22,7 +27,11 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
 
   return (
     <Card
-      className="w-full overflow-hidden cursor-pointer transition-colors duration-300 border bg-background border-border hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary"
+      className={`w-full overflow-hidden cursor-pointer transition-colors duration-300 border ${
+        isSelected
+          ? "border-primary bg-primary/5"
+          : "bg-background border-border hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary"
+      }`}
       {...cyAttr(`chordsheet-card-${chordSheet.path}`)}
     >
       <CardContent
@@ -59,7 +68,15 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
             </>
           )}
         </div>
-        <div className="flex shrink-0 flex-col items-center justify-between self-stretch">
+        <div className="flex w-10 shrink-0 flex-col items-center justify-between self-stretch">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onToggleSelect}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={t("chordSheetList.selectCard", { title: chordSheet.title })}
+            className="bg-background"
+            {...cyAttr(`select-card-${chordSheet.path}`)}
+          />
           <span
             className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums"
             aria-label={t("chordSheetList.plays", { count: plays })}
@@ -67,13 +84,6 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({ chordSheet, onView, onD
             <Eye className="h-3.5 w-3.5" aria-hidden="true" />
             {plays}
           </span>
-          <RoundTrashButton
-            onClick={(e) => { e.stopPropagation(); onDelete(chordSheet); }}
-            aria-label={`Delete chord sheet ${chordSheet.title}`}
-            tabIndex={0}
-            className="bg-card"
-            {...cyAttr(`delete-btn-${chordSheet.path}`)}
-          />
         </div>
       </CardContent>
     </Card>

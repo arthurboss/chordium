@@ -60,11 +60,9 @@ describe('Keyboard Navigation and Accessibility Tests', () => {
         .should('have.css', 'cursor', 'pointer');
     });
     
-    // Check "Delete" buttons for tabindex
-    cy.get('[data-cy^="delete-btn-"]').each(($btn) => {
-      cy.wrap($btn)
-        .should('have.attr', 'tabindex', '0')
-        .should('have.attr', 'aria-label');
+    // Check the per-card selection checkboxes are labelled
+    cy.get('[data-cy^="select-card-"]').each(($box) => {
+      cy.wrap($box).should('have.attr', 'aria-label');
     });
   });
 
