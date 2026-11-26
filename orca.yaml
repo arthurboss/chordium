@@ -6,6 +6,6 @@ setupAgentStartupPolicy: wait-for-setup
 
 defaultTabs:
   - title: Agent
-  - title: Ports
-    command: lsof -nP -iTCP -sTCP:LISTEN | grep -E "808[0-9]|300[0-9]" || true
+  - title: Tests
+    command: npm run test
   - title: Dev
