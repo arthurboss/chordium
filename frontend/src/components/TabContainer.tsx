@@ -10,7 +10,20 @@ import ChordSheetList from "./chord-sheet-list";
 import { SearchTab } from "@/search";
 import UploadTab from "./tabs/UploadTab";
 import { scrollToElement } from "../utils/scroll-utils";
-import { deleteChordSheet, storeChordSheet } from "@/storage/stores/chord-sheets/operations";
+import {
+  deleteChordSheet,
+  getChordSheetContent,
+  getFullChordSheetContent,
+  storeChordSheet,
+} from "@/storage/stores/chord-sheets/operations";
+import { getStoredLyrics } from "@/storage/services/lyrics-storage";
+import {
+  BACKUP_FORMAT,
+  BACKUP_VERSION,
+  importBackup,
+  type BackupSong,
+  type ChordiumBackup,
+} from "@/storage/services/backup";
 import { toast } from "sonner";
 import { cyAttr } from "@/utils/test-utils";
 import { toSlug } from "@/utils/url-slug-utils";
@@ -179,6 +192,73 @@ const TabContainer = ({
     }
   };
 
+  const handleChordSheetsDelete = async (songPaths: string[]) => {
+    if (songPaths.length === 0) return;
+
+    try {
+      const songs: BackupSong[] = [];
+      for (const songPath of songPaths) {
+        const metadata = myChordSheets.find((song) => song.path === songPath);
+        if (!metadata) continue;
+        const [chordSheet, fullChordSheet, lyrics] = await Promise.all([
+          getChordSheetContent(songPath),
+          getFullChordSheetContent(songPath),
+          getStoredLyrics(songPath),
+        ]);
+        songs.push({
+          metadata,
+          ...(chordSheet ? { chordSheet } : {}),
+          ...(fullChordSheet ? { fullChordSheet } : {}),
+          ...(lyrics ? { lyrics } : {}),
+        });
+      }
+
+      const backup: ChordiumBackup = {
+        format: BACKUP_FORMAT,
+        version: BACKUP_VERSION,
+        exportedAt: new Date().toISOString(),
+        songs,
+      };
+
+      for (const songPath of songPaths) {
+        await deleteChordSheet(songPath);
+      }
+
+      toast.success(i18n.t("notifications:bulkRemoved", { count: songPaths.length }), {
+        duration: 12000,
+        action: {
+          label: i18n.t("notifications:undo"),
+          onClick: async () => {
+            try {
+              await importBackup(backup);
+              await setMySongs();
+              toast.success(i18n.t("notifications:bulkRestored", { count: songs.length }));
+            } catch (error) {
+              if (import.meta.env.DEV) {
+                console.error("Failed to restore chord sheets:", error);
+              }
+              toast.error(i18n.t("notifications:bulkRestoreFailed"), {
+                description: i18n.t("notifications:bulkRestoreFailedDesc"),
+              });
+            }
+          },
+        },
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Failed to remove chord sheets:", error);
+      }
+      toast.error(i18n.t("notifications:bulkRemoveFailed"), {
+        description: i18n.t("notifications:bulkRemoveFailedDesc"),
+      });
+    } finally {
+      await setMySongs();
+      if (selectedSong && songPaths.includes(selectedSong.path)) {
+        setSelectedSong(null);
+      }
+    }
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent, value: string) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -238,6 +318,7 @@ const TabContainer = ({
             chordSheets={myChordSheets}
             onChordSheetSelect={handleSongSelect}
             onDeleteChordSheet={handleChordSheetDelete}
+            onDeleteChordSheets={handleChordSheetsDelete}
             onUploadClick={() => handleTabChange("upload")}
             onImportComplete={setMySongs}
           />

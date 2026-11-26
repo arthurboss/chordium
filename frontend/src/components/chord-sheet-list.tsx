@@ -1,14 +1,25 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Download, Upload } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { toast } from "sonner";
 import type { ChordSheetListProps, SortOption } from "./chord-sheet-list.types";
 import ChordSheetCard from "@/chord-sheet/components/ChordSheetCard";
 import FormContainer from "@/components/ui/FormContainer";
 import ScrollAffordance from "@/components/ui/ScrollAffordance";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cyAttr } from "@/utils/test-utils";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -56,6 +67,7 @@ const ChordSheetList = ({
   chordSheets,
   onChordSheetSelect,
   onDeleteChordSheet,
+  onDeleteChordSheets,
   onUploadClick,
   onImportComplete,
   tabState,
@@ -67,6 +79,8 @@ const ChordSheetList = ({
   const [sort, setSort] = useState<SortOption>("recent");
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
@@ -75,6 +89,46 @@ const ChordSheetList = ({
 
   const sorted = sortChordSheets(chordSheets, sort);
   const canExport = !Capacitor.isNativePlatform();
+
+  useEffect(() => {
+    setSelectedPaths((prev) => {
+      if (prev.size === 0) return prev;
+      const available = new Set(chordSheets.map((sheet) => sheet.path));
+      const next = new Set([...prev].filter((path) => available.has(path)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [chordSheets]);
+
+  const selectedCount = selectedPaths.size;
+  const allSelected = sorted.length > 0 && sorted.every((sheet) => selectedPaths.has(sheet.path));
+  const selectAllState = allSelected ? true : selectedCount > 0 ? "indeterminate" : false;
+
+  const toggleSelection = (path: string) => {
+    setSelectedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (checked: boolean | "indeterminate") => {
+    if (checked === true) {
+      setSelectedPaths(new Set(sorted.map((sheet) => sheet.path)));
+    } else {
+      setSelectedPaths(new Set());
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const paths = [...selectedPaths];
+    if (paths.length === 0) return;
+    setSelectedPaths(new Set());
+    await onDeleteChordSheets(paths);
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -162,22 +216,78 @@ const ChordSheetList = ({
           />
         </div>
         {chordSheets.length > 0 && (
-          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="w-40 bg-card [&>span]:text-left">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">{t("sort.recent")}</SelectItem>
-              <SelectItem value="most-played">{t("sort.mostPlayed")}</SelectItem>
-              <SelectItem value="az">{t("sort.az")}</SelectItem>
-              <SelectItem value="za">{t("sort.za")}</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="select-all-chord-sheets"
+                checked={selectAllState}
+                onCheckedChange={toggleSelectAll}
+                className="bg-card"
+                {...cyAttr("select-all-chord-sheets")}
+              />
+              <label
+                htmlFor="select-all-chord-sheets"
+                className="cursor-pointer text-xs text-foreground sm:text-sm"
+              >
+                {t("chordSheetList.selectAll")}
+              </label>
+            </div>
+            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+              <SelectTrigger className="w-40 bg-card [&>span]:text-left">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">{t("sort.recent")}</SelectItem>
+                <SelectItem value="most-played">{t("sort.mostPlayed")}</SelectItem>
+                <SelectItem value="az">{t("sort.az")}</SelectItem>
+                <SelectItem value="za">{t("sort.za")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         )}
       </div>
 
       {chordSheets.length > 0 ? (
         <FormContainer contentClassName="pb-2">
+          {selectedCount > 0 && (
+            <div
+              className="mb-2 flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1.5"
+              {...cyAttr("bulk-actions")}
+            >
+              <span className="text-sm font-medium text-foreground">
+                {t("chordSheetList.selected", { count: selectedCount })}
+              </span>
+              <Button
+                onClick={() => setConfirmOpen(true)}
+                variant="destructive"
+                size="sm"
+                {...cyAttr("bulk-delete")}
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                {t("chordSheetList.deleteSelected")}
+              </Button>
+            </div>
+          )}
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("chordSheetList.deleteConfirmTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("chordSheetList.deleteConfirmDesc", { count: selectedCount })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel {...cyAttr("cancel-bulk-delete")}>{t("chordSheetList.cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  className={buttonVariants({ variant: "destructive" })}
+                  onClick={() => { void handleBulkDelete(); }}
+                  {...cyAttr("confirm-bulk-delete")}
+                >
+                  {t("chordSheetList.deleteSelected")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <div
             ref={listRef}
             className="relative max-h-[60vh] overflow-y-auto overscroll-contain"
@@ -191,6 +301,8 @@ const ChordSheetList = ({
                   chordSheet={storedChordSheet}
                   onView={onChordSheetSelect}
                   onDelete={() => onDeleteChordSheet(storedChordSheet.path)}
+                  isSelected={selectedPaths.has(storedChordSheet.path)}
+                  onToggleSelect={() => toggleSelection(storedChordSheet.path)}
                 />
               ))}
             </div>

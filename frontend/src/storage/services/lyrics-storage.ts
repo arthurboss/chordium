@@ -113,6 +113,12 @@ export async function getTranslatedLanguages(songPath: string): Promise<Translat
   }
 }
 
+export async function getStoredLyrics(
+  songPath: string
+): Promise<StoredLyrics | undefined> {
+  return withStore("readonly", (store) => readEntry(store, songPath), undefined);
+}
+
 export async function deleteLyrics(songPath: string): Promise<void> {
   try {
     await withStore(
