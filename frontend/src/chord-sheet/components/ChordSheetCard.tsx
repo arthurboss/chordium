@@ -68,7 +68,7 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
             </>
           )}
         </div>
-        <div className="flex shrink-0 flex-col items-center justify-between self-stretch">
+        <div className="flex w-10 shrink-0 flex-col items-center justify-between self-stretch">
           <Checkbox
             checked={isSelected}
             onCheckedChange={onToggleSelect}

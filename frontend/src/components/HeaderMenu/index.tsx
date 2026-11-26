@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Guitar, Menu, Shield } from "lucide-react";
+import { Download, Guitar, Menu, Shield, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -12,10 +12,31 @@ import { ShareSession } from "@/features/jam-session";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import GuitarTuner from "@/features/tuner/GuitarTuner";
 import { cyAttr } from "@/utils/test-utils";
+import { Capacitor } from "@capacitor/core";
+import { toast } from "sonner";
+import {
+  createBackup,
+  createBackupDownload,
+  importBackup,
+  readBackupFile,
+} from "@/storage/services/backup";
+import { CHORD_SHEETS_CHANGED_EVENT } from "@/storage/events";
+import i18n from "@/i18n/config";
 
 const ROW_CLASS = "flex w-full items-center gap-3 px-4 py-3 text-left text-sm hover:bg-accent";
 
 const THEMES = ["light", "dark", "system"] as const;
+
+function downloadBackup(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 /**
  * Everything the header used to spread across separate icon buttons, now
@@ -36,6 +57,60 @@ const HeaderMenu = () => {
   const { activeTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [tunerOpen, setTunerOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const canExport = !Capacitor.isNativePlatform();
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const backup = await createBackup();
+      const download = await createBackupDownload(backup);
+      downloadBackup(download.blob, download.fileName);
+      toast.success(i18n.t("notifications:backup.exported"), {
+        description: i18n.t("notifications:backup.exportedDesc", {
+          count: backup.songs.length,
+        }),
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Failed to export chord sheets:", error);
+      }
+      toast.error(i18n.t("notifications:backup.exportFailed"), {
+        description: i18n.t("notifications:backup.exportFailedDesc"),
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const parsed = await readBackupFile(file);
+      const result = await importBackup(parsed);
+      toast.success(i18n.t("notifications:backup.imported"), {
+        description: i18n.t("notifications:backup.importedDesc", {
+          count: result.songsImported,
+        }),
+      });
+      window.dispatchEvent(new Event(CHORD_SHEETS_CHANGED_EVENT));
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("Failed to import chord sheets:", error);
+      }
+      toast.error(i18n.t("notifications:backup.importFailed"), {
+        description: i18n.t("notifications:backup.importFailedDesc"),
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const cycleTheme = () => {
     const nextTheme = THEMES[(THEMES.indexOf(activeTheme) + 1) % THEMES.length];
@@ -62,6 +137,34 @@ const HeaderMenu = () => {
           </button>
         )}
       />
+
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(false);
+          fileInputRef.current?.click();
+        }}
+        disabled={isImporting}
+        className={`${ROW_CLASS} disabled:opacity-50`}
+      >
+        <Download className="h-4 w-4" />
+        {t("backup.importButton")}
+      </button>
+
+      {canExport && (
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            void handleExport();
+          }}
+          disabled={isExporting}
+          className={`${ROW_CLASS} disabled:opacity-50`}
+        >
+          <Upload className="h-4 w-4" />
+          {t("backup.exportButton")}
+        </button>
+      )}
 
       <button type="button" onClick={cycleTheme} className={ROW_CLASS}>
         {getIconByTheme(activeTheme, 16)}
@@ -103,6 +206,14 @@ const HeaderMenu = () => {
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json,application/gzip,.json,.json.gz,.gz"
+        className="hidden"
+        onChange={handleImportFile}
+        aria-label={t("backup.importAriaLabel")}
+      />
       <GuitarTuner open={tunerOpen} onOpenChange={setTunerOpen} />
       {isMobile ? (
         <Sheet open={open} onOpenChange={setOpen}>
