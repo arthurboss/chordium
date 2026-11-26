@@ -93,5 +93,29 @@ describe('Songbook bulk selection', () => {
     });
 
     cy.get('[data-cy="bulk-actions"]').should('contain.text', '2 selected');
+
+    // Dragging over an already-selected card unselects it again.
+    cy.window().then((win) => {
+      const scroll = win.document.querySelector('[data-cy="chord-sheet-scroll"]') as HTMLElement;
+      const contents = scroll.querySelectorAll('[data-cy^="chordsheet-card-content-"]');
+      const start = contents[0].getBoundingClientRect();
+      const target = contents[1].getBoundingClientRect();
+      const startX = start.x + 10;
+      const startY = start.y + 10;
+      const targetX = target.x + 10;
+      const targetY = target.y + 10;
+
+      contents[0].dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, pointerId: 2, pointerType: 'mouse', button: 0, buttons: 1, clientX: startX, clientY: startY,
+      }));
+      scroll.dispatchEvent(new win.PointerEvent('pointermove', {
+        bubbles: true, pointerId: 2, pointerType: 'mouse', buttons: 1, clientX: targetX, clientY: targetY,
+      }));
+      scroll.dispatchEvent(new win.PointerEvent('pointerup', {
+        bubbles: true, pointerId: 2, pointerType: 'mouse', clientX: targetX, clientY: targetY,
+      }));
+    });
+
+    cy.get('[data-cy="bulk-actions"]').should('contain.text', '1 selected');
   });
 });

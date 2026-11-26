@@ -51,7 +51,15 @@ const ChordSheetList = ({
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDragSelecting, setIsDragSelecting] = useState(false);
-  const dragRef = useRef<{ pointerId: number; startX: number; startY: number; active: boolean } | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    lastX: number;
+    lastY: number;
+    lastPath: string;
+    active: boolean;
+  } | null>(null);
   const suppressClickRef = useRef(false);
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
@@ -103,6 +111,9 @@ const ChordSheetList = ({
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      lastPath: path,
       active: false,
     };
     try {
@@ -123,16 +134,45 @@ const ChordSheetList = ({
       setIsDragSelecting(true);
     }
 
-    const card = document
-      .elementFromPoint(event.clientX, event.clientY)
-      ?.closest("[data-chord-sheet-path]") as HTMLElement | null;
-    const path = card?.getAttribute("data-chord-sheet-path");
-    if (!path) return;
+    const dx = event.clientX - drag.lastX;
+    const dy = event.clientY - drag.lastY;
+    const distance = Math.hypot(dx, dy);
+    const steps = Math.max(1, Math.min(40, Math.ceil(distance / 16)));
+    const toToggle = new Set<string>();
+    let lastPath = drag.lastPath;
+
+    for (let step = 1; step <= steps; step += 1) {
+      const x = drag.lastX + (dx * step) / steps;
+      const y = drag.lastY + (dy * step) / steps;
+      const card = document
+        .elementFromPoint(x, y)
+        ?.closest("[data-chord-sheet-path]") as HTMLElement | null;
+      const path = card?.getAttribute("data-chord-sheet-path");
+      if (!path || path === lastPath) continue;
+
+      lastPath = path;
+      if (toToggle.has(path)) {
+        toToggle.delete(path);
+      } else {
+        toToggle.add(path);
+      }
+    }
+
+    drag.lastX = event.clientX;
+    drag.lastY = event.clientY;
+    drag.lastPath = lastPath;
+
+    if (toToggle.size === 0) return;
 
     setSelectedPaths((prev) => {
-      if (prev.has(path)) return prev;
       const next = new Set(prev);
-      next.add(path);
+      toToggle.forEach((path) => {
+        if (next.has(path)) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+      });
       return next;
     });
   };
