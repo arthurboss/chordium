@@ -132,7 +132,7 @@ const ChordSheetList = ({
 
       {selectedCount > 0 && (
         <div
-          className="mb-2 flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1.5"
+          className="mb-2 flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-2"
           {...cyAttr("bulk-actions")}
         >
           <span className="text-sm font-medium text-foreground">
@@ -187,7 +187,7 @@ const ChordSheetList = ({
                 <ChordSheetCard
                   key={storedChordSheet.path}
                   chordSheet={storedChordSheet}
-                  onView={onChordSheetSelect}
+                  onView={selectedCount > 0 ? (sheet) => toggleSelection(sheet.path) : onChordSheetSelect}
                   isSelected={selectedPaths.has(storedChordSheet.path)}
                   onToggleSelect={() => toggleSelection(storedChordSheet.path)}
                 />

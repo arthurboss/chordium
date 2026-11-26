@@ -57,4 +57,13 @@ describe('Songbook bulk selection', () => {
       cy.get('[data-cy^="chordsheet-title-"]').should('have.length', initial);
     });
   });
+
+  it('toggles selection when clicking a card while a selection is active', () => {
+    cy.get('[data-cy^="select-card-"]').eq(0).click();
+    cy.get('[data-cy="bulk-actions"]').should('contain.text', '1 selected');
+
+    cy.get('[data-cy^="chordsheet-card-content-"]').eq(1).click();
+    cy.get('[data-cy="bulk-actions"]').should('contain.text', '2 selected');
+    cy.get('[data-cy="chord-sheet-scroll"]').should('exist');
+  });
 });
