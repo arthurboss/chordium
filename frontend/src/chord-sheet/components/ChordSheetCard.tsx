@@ -29,10 +29,11 @@ const ChordSheetCard: React.FC<ChordSheetCardProps> = ({
     <Card
       className={`w-full overflow-hidden cursor-pointer transition-colors duration-300 border ${
         isSelected
-          ? "border-primary bg-primary/5"
+          ? "touch-none border-primary bg-primary/5"
           : "bg-background border-border hover:bg-primary/5 dark:hover:bg-primary/5 hover:border-primary hover:text-primary"
       }`}
       {...cyAttr(`chordsheet-card-${chordSheet.path}`)}
+      data-chord-sheet-path={chordSheet.path}
     >
       <CardContent
         className="p-3 flex items-center gap-3 w-full"
