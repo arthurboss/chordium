@@ -50,6 +50,17 @@ const ChordSheetList = ({
   const [sort, setSort] = useState<SortOption>("recent");
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isDragSelecting, setIsDragSelecting] = useState(false);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    lastX: number;
+    lastY: number;
+    lastPath: string;
+    active: boolean;
+  } | null>(null);
+  const suppressClickRef = useRef(false);
 
   useRestoreScrollPosition(listRef, tabState?.scroll);
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
@@ -89,6 +100,105 @@ const ChordSheetList = ({
     } else {
       setSelectedPaths(new Set());
     }
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (selectedCount === 0 || event.button !== 0) return;
+    const card = (event.target as HTMLElement).closest("[data-chord-sheet-path]") as HTMLElement | null;
+    const path = card?.getAttribute("data-chord-sheet-path");
+    if (!path || !selectedPaths.has(path)) return;
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      lastPath: path,
+      active: false,
+    };
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Synthetic pointers (tests) are not capturable.
+    }
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+
+    if (!drag.active) {
+      const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+      if (distance < 6) return;
+      drag.active = true;
+      setIsDragSelecting(true);
+    }
+
+    const dx = event.clientX - drag.lastX;
+    const dy = event.clientY - drag.lastY;
+    const distance = Math.hypot(dx, dy);
+    const steps = Math.max(1, Math.min(40, Math.ceil(distance / 16)));
+    const toToggle = new Set<string>();
+    let lastPath = drag.lastPath;
+
+    for (let step = 1; step <= steps; step += 1) {
+      const x = drag.lastX + (dx * step) / steps;
+      const y = drag.lastY + (dy * step) / steps;
+      const card = document
+        .elementFromPoint(x, y)
+        ?.closest("[data-chord-sheet-path]") as HTMLElement | null;
+      const path = card?.getAttribute("data-chord-sheet-path");
+      if (!path || path === lastPath) continue;
+
+      lastPath = path;
+      if (toToggle.has(path)) {
+        toToggle.delete(path);
+      } else {
+        toToggle.add(path);
+      }
+    }
+
+    drag.lastX = event.clientX;
+    drag.lastY = event.clientY;
+    drag.lastPath = lastPath;
+
+    if (toToggle.size === 0) return;
+
+    setSelectedPaths((prev) => {
+      const next = new Set(prev);
+      toToggle.forEach((path) => {
+        if (next.has(path)) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+      });
+      return next;
+    });
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    if (drag.active) {
+      suppressClickRef.current = true;
+      setIsDragSelecting(false);
+    }
+    dragRef.current = null;
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // Nothing to release when the pointer was never captured.
+    }
+  };
+
+  const handleClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!suppressClickRef.current) return;
+    suppressClickRef.current = false;
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   const handleBulkDelete = async () => {
@@ -132,7 +242,7 @@ const ChordSheetList = ({
 
       {selectedCount > 0 && (
         <div
-          className="mb-2 flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1.5"
+          className="mb-2 flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-2"
           {...cyAttr("bulk-actions")}
         >
           <span className="text-sm font-medium text-foreground">
@@ -175,11 +285,18 @@ const ChordSheetList = ({
         <>
           <div
             ref={listRef}
-            className="relative max-h-[60vh] overflow-y-auto overscroll-contain"
+            className={`relative max-h-[60vh] overflow-y-auto overscroll-contain${
+              isDragSelecting ? " select-none" : ""
+            }`}
             style={{
               maxHeight: listHeight ?? undefined,
               scrollbarWidth: "none",
             }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
+            onClickCapture={handleClickCapture}
             {...cyAttr("chord-sheet-scroll")}
           >
             <div className="flex flex-col gap-2">
@@ -187,7 +304,7 @@ const ChordSheetList = ({
                 <ChordSheetCard
                   key={storedChordSheet.path}
                   chordSheet={storedChordSheet}
-                  onView={onChordSheetSelect}
+                  onView={selectedCount > 0 ? (sheet) => toggleSelection(sheet.path) : onChordSheetSelect}
                   isSelected={selectedPaths.has(storedChordSheet.path)}
                   onToggleSelect={() => toggleSelection(storedChordSheet.path)}
                 />
