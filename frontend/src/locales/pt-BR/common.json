@@ -119,6 +119,7 @@
     "saveAriaLabel": "Salvar em Minhas Cifras"
   },
   "chordSheetList": {
+    "filterPlaceholder": "Filtrar cifras...",
     "empty": "Você ainda não salvou nenhuma cifra.",
     "selectAll": "Selecionar tudo",
     "selectCard": "Selecionar {{title}}",

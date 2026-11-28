@@ -119,6 +119,7 @@
     "saveAriaLabel": "Save to My Chord Sheets"
   },
   "chordSheetList": {
+    "filterPlaceholder": "Filter chord sheets...",
     "empty": "You haven't saved any chord sheets yet.",
     "selectAll": "Select all",
     "selectCard": "Select {{title}}",

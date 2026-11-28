@@ -119,6 +119,7 @@
     "saveAriaLabel": "Guardar en Mis Acordes"
   },
   "chordSheetList": {
+    "filterPlaceholder": "Filtrar acordes...",
     "empty": "No has guardado ningún acorde aún.",
     "selectAll": "Seleccionar todo",
     "selectCard": "Seleccionar {{title}}",

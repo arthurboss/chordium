@@ -19,9 +19,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import SortSelect from "@/components/ui/SortSelect";
+import { Input } from "@/components/ui/input";
 import { useRestoreScrollPosition, usePersistScrollPosition } from "@/hooks/useScrollPosition";
 import { useFitListHeight } from "@/hooks/useFitListHeight";
+import { normalizeForSearch } from "@/search/utils";
 import type { ChordSheetListItem } from "@/storage/stores/chord-sheets/operations/get-all-saved";
+
+function filterChordSheets(items: ChordSheetListItem[], filter: string): ChordSheetListItem[] {
+  const normalizedFilter = normalizeForSearch(filter);
+  if (!normalizedFilter) return items;
+  return items.filter(
+    (item) =>
+      normalizeForSearch(item.title).includes(normalizedFilter) ||
+      normalizeForSearch(item.artist).includes(normalizedFilter)
+  );
+}
 
 function sortChordSheets(items: ChordSheetListItem[], sort: SortOption): ChordSheetListItem[] {
   const arr = [...items];
@@ -48,6 +60,7 @@ const ChordSheetList = ({
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const [sort, setSort] = useState<SortOption>("recent");
+  const [filter, setFilter] = useState("");
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDragSelecting, setIsDragSelecting] = useState(false);
@@ -65,9 +78,10 @@ const ChordSheetList = ({
   useRestoreScrollPosition(listRef, tabState?.scroll);
   usePersistScrollPosition(listRef, setTabState ? (scroll) => setTabState({ scroll }) : undefined);
 
-  const listHeight = useFitListHeight(listRef, chordSheets.length, true, 1);
-
   const sorted = sortChordSheets(chordSheets, sort);
+  const visible = filterChordSheets(sorted, filter);
+
+  const listHeight = useFitListHeight(listRef, visible.length, true, 1);
 
   useEffect(() => {
     setSelectedPaths((prev) => {
@@ -79,8 +93,9 @@ const ChordSheetList = ({
   }, [chordSheets]);
 
   const selectedCount = selectedPaths.size;
-  const allSelected = sorted.length > 0 && sorted.every((sheet) => selectedPaths.has(sheet.path));
-  const selectAllState = allSelected ? true : selectedCount > 0 ? "indeterminate" : false;
+  const allSelected = visible.length > 0 && visible.every((sheet) => selectedPaths.has(sheet.path));
+  const someSelected = visible.some((sheet) => selectedPaths.has(sheet.path));
+  const selectAllState = allSelected ? true : someSelected ? "indeterminate" : false;
 
   const toggleSelection = (path: string) => {
     setSelectedPaths((prev) => {
@@ -95,11 +110,17 @@ const ChordSheetList = ({
   };
 
   const toggleSelectAll = (checked: boolean | "indeterminate") => {
-    if (checked === true) {
-      setSelectedPaths(new Set(sorted.map((sheet) => sheet.path)));
-    } else {
-      setSelectedPaths(new Set());
-    }
+    setSelectedPaths((prev) => {
+      const next = new Set(prev);
+      visible.forEach((sheet) => {
+        if (checked === true) {
+          next.add(sheet.path);
+        } else {
+          next.delete(sheet.path);
+        }
+      });
+      return next;
+    });
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -211,7 +232,15 @@ const ChordSheetList = ({
   return (
     <FormContainer contentClassName="pb-2">
       {chordSheets.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder={t("chordSheetList.filterPlaceholder")}
+            aria-label={t("chordSheetList.filterPlaceholder")}
+            className="h-7 min-w-0 flex-1 bg-background text-xs"
+            {...cyAttr("chord-sheet-filter-input")}
+          />
           <SortSelect
             value={sort}
             onValueChange={setSort}
@@ -282,40 +311,49 @@ const ChordSheetList = ({
       </AlertDialog>
 
       {chordSheets.length > 0 ? (
-        <>
-          <div
-            ref={listRef}
-            className={`relative max-h-[60vh] overflow-y-auto overscroll-contain${
-              isDragSelecting ? " select-none" : ""
-            }`}
-            style={{
-              maxHeight: listHeight ?? undefined,
-              scrollbarWidth: "none",
-            }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerEnd}
-            onPointerCancel={handlePointerEnd}
-            onClickCapture={handleClickCapture}
-            {...cyAttr("chord-sheet-scroll")}
-          >
-            <div className="flex flex-col gap-2">
-              {sorted.map((storedChordSheet) => (
-                <ChordSheetCard
-                  key={storedChordSheet.path}
-                  chordSheet={storedChordSheet}
-                  onView={selectedCount > 0 ? (sheet) => toggleSelection(sheet.path) : onChordSheetSelect}
-                  isSelected={selectedPaths.has(storedChordSheet.path)}
-                  onToggleSelect={() => toggleSelection(storedChordSheet.path)}
-                />
-              ))}
+        visible.length > 0 ? (
+          <>
+            <div
+              ref={listRef}
+              className={`relative max-h-[60vh] overflow-y-auto overscroll-contain${
+                isDragSelecting ? " select-none" : ""
+              }`}
+              style={{
+                maxHeight: listHeight ?? undefined,
+                scrollbarWidth: "none",
+              }}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              onClickCapture={handleClickCapture}
+              {...cyAttr("chord-sheet-scroll")}
+            >
+              <div className="flex flex-col gap-2">
+                {visible.map((storedChordSheet) => (
+                  <ChordSheetCard
+                    key={storedChordSheet.path}
+                    chordSheet={storedChordSheet}
+                    onView={selectedCount > 0 ? (sheet) => toggleSelection(sheet.path) : onChordSheetSelect}
+                    isSelected={selectedPaths.has(storedChordSheet.path)}
+                    onToggleSelect={() => toggleSelection(storedChordSheet.path)}
+                  />
+                ))}
+              </div>
             </div>
+            <ScrollAffordance
+              parentRef={listRef}
+              getTotalSize={() => listRef.current?.scrollHeight ?? 0}
+            />
+          </>
+        ) : (
+          <div
+            className="py-8 text-center text-muted-foreground"
+            {...cyAttr("chord-sheet-filter-no-results")}
+          >
+            {t("searchResults.noResults")}
           </div>
-          <ScrollAffordance
-            parentRef={listRef}
-            getTotalSize={() => listRef.current?.scrollHeight ?? 0}
-          />
-        </>
+        )
       ) : (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-3">{t("chordSheetList.empty")}</p>

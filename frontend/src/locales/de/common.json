@@ -119,6 +119,7 @@
     "saveAriaLabel": "In meinen Akkordblättern speichern"
   },
   "chordSheetList": {
+    "filterPlaceholder": "Akkordblätter filtern...",
     "empty": "Du hast noch keine Akkordblätter gespeichert.",
     "selectAll": "Alle auswählen",
     "selectCard": "{{title}} auswählen",
