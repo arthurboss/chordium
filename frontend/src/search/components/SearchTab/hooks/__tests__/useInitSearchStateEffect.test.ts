@@ -233,6 +233,9 @@ describe("useInitSearchStateEffect", () => {
 
     expect(mockOptionsWithArtistPage.setActiveArtist).not.toHaveBeenCalled();
     expect(mockOptionsWithArtistPage.setInput).not.toHaveBeenCalled();
+    // e.g. an artist picked from the recent-searches list, where no search has
+    // been submitted yet - the songs still need somewhere to render.
+    expect(mockOptionsWithArtistPage.setHasSearched).toHaveBeenCalledWith(true);
   });
 
   it('re-derives activeArtist from the URL when landing on a different artist than the one already active', () => {

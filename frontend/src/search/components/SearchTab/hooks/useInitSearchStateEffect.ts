@@ -84,6 +84,10 @@ export function useInitSearchStateEffect(options: InitSearchStateOptions) {
       // for no visible benefit. Only a genuine fresh load of this URL - a
       // refresh, or a direct link - reaches this with no activeArtist yet.
       if (activeArtist?.path === artistPath) {
+        // A click from the recent-searches list reaches here with no search
+        // behind it yet; without this the history stays on screen and the
+        // artist's songs never replace it, even though the URL did change.
+        setHasSearched(true);
         isInitialized.current = true;
         return;
       }
